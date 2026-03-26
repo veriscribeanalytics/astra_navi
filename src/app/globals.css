@@ -1,0 +1,122 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #faf7f2;
+  --foreground: #2a1a4a;
+  --surface: #f0e8f8;
+  --surface-variant: #ede0ff;
+  --primary: #2a1a4a;
+  --secondary: #c8880a;
+  --on-primary: #ffffff;
+  --on-surface: #2a1a4a;
+  --on-surface-variant: #4a3b6a;
+  --outline-variant: #d1c4e9;
+  --glow-color: rgba(210, 180, 255, 0.3);
+  --pattern-opacity: 0.15;
+  --grain-opacity: 0.03;
+}
+
+:root.dark {
+  /* Flipped theme logic - Gold glows remain, textures are nil */
+
+  --background: #0b071a;
+  --foreground: #faf7f2;
+
+  --surface: #1a1233;
+  --surface-variant: #231942;
+
+  --primary: #faf7f2;
+  --secondary: #c8880a;
+
+  --on-primary: #0b071a;
+  --on-surface: #faf7f2;
+  --on-surface-variant: #b9a8d9;
+
+  --outline-variant: #3d2a63;
+  --glow-color: rgba(200, 136, 10, 0.18);
+  --pattern-opacity: 0;   /* Completely nill ivory pattern */
+  --grain-opacity: 0;     /* Completely nill grain in dark */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-variant: var(--surface-variant);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-on-primary: var(--on-primary);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline-variant: var(--outline-variant);
+
+  --font-headline: var(--font-playfair), serif;
+  --font-body: var(--font-dm-sans), sans-serif;
+  --font-label: var(--font-dm-sans), sans-serif;
+  --font-sans: var(--font-dm-sans), sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0b071a;
+    --foreground: #faf7f2;
+    --surface: #1a1233;
+    --surface-variant: #231942;
+    --primary: #faf7f2;
+    --secondary: #c8880a;
+    --on-primary: #0b071a;
+    --on-surface: #faf7f2;
+    --on-surface-variant: #b9a8d9;
+    --outline-variant: #3d2a63;
+    --glow-color: rgba(200, 136, 10, 0.18);
+    --pattern-opacity: 0;
+    --grain-opacity: 0;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* Gold calendar/time picker icons in both modes */
+::-webkit-calendar-picker-indicator {
+  filter: invert(52%) sepia(85%) saturate(718%) hue-rotate(5deg) brightness(97%) contrast(93%);
+  cursor: pointer;
+}
+
+@utility ivory-pattern {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--secondary) var(--pattern-opacity), transparent) 1px,
+    transparent 1px
+  );
+  background-size: 32px 32px;
+}
+
+@utility grain-overlay {
+  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAAm4ELg4brMsVYIjecul1ANdBSs_-GegKzs5RIsrcttuoxrE6oMRBZM7wOiSHuWn7Q25-yKhHFkMq0g5vtazQHpJyhkH7nw8ryRw5W4jtQPRHy1nPGL7TS87R6q5LBEYHPSiXC4Ytpm9eGSbpprXI1Dlmi-QgB6l2NtTs5jG1zvuDL4G8lMyXEF88sPOF-Txd0GyArRdyGmUH5ip0YyKfYkzVneLZN60NPJCu4WiFSyAyVEGWfQ-WgeJhuMkAYrENj8GKJi-DE2lx2");
+  opacity: var(--grain-opacity);
+  pointer-events: none;
+}
+
+@utility gold-gradient {
+  background: linear-gradient(135deg, #c8880a 0%, #e6b05e 50%, #c8880a 100%);
+}
+
+@utility cosmic-glow {
+  box-shadow:
+    0 0 20px var(--glow-color),
+    0 0 40px color-mix(in srgb, var(--glow-color) 30%, transparent);
+}
+
+@utility dark-glass {
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+  backdrop-blur: 20px;
+  border: 1px solid rgba(200, 136, 10, 0.15);
+}
