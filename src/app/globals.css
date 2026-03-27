@@ -18,7 +18,7 @@ html {
   --outline-variant: #d1c4e9;
   --glow-color: rgba(210, 180, 255, 0.3);
   --pattern-opacity: 0.3;
-  --grain-opacity: 0.98;
+  --grain-opacity: 0.08;
 }
 
 :root.dark {
@@ -405,8 +405,59 @@ body:has(.dashboard-shell)>main {
   overflow: hidden;
 }
 
-/* When dashboard-shell exists, hide the Footer from root layout */
-body:has(.dashboard-shell)>footer,
-body:has(.dashboard-shell)>main+footer {
-  display: none !important;
+/* ============================================================
+   CELESTIAL ANIMATIONS
+   ============================================================ */
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(40px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(40px) rotate(-360deg); }
+}
+
+@keyframes orbit-reverse {
+  from { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+  to   { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+}
+
+@keyframes pulse-celestial {
+  0%, 100% { opacity: 0.3; transform: scale(1); filter: blur(20px); }
+  50% { opacity: 0.6; transform: scale(1.2); filter: blur(30px); }
+}
+
+@keyframes shimmer-fast {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-orbit {
+  animation: orbit 4s linear infinite;
+}
+
+.animate-orbit-reverse {
+  animation: orbit-reverse 3s linear infinite;
+}
+
+.animate-celestial-pulse {
+  animation: pulse-celestial 4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(200, 136, 10, 0.1),
+    transparent
+  );
+  animation: shimmer-fast 1.5s infinite;
 }

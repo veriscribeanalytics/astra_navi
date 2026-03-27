@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
 
 interface INavbarProps{}
 
@@ -20,7 +21,7 @@ const navItems = [
     label: "About Us",
     href: "/about",
   },
-    {
+  {
     id: "chat",
     label: "Chat with AI",
     href: "/chat",
@@ -34,10 +35,21 @@ const navItems = [
 
 const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     const pathname = usePathname();
+    const router = useRouter();
+    const { isLoggedIn, logout, showLoading } = useAuth();
+    
+    const handleLogout = () => {
+        showLoading("Returning to the stars...", 1500);
+        setTimeout(() => {
+            logout();
+            router.push('/login');
+        }, 1500);
+    };
+    
     const isActive = (path:string) => pathname == path;
 
     return(
-        <nav className="fixed top-0 w-full z-[110] bg-background/80 backdrop-blur-3xl border-b border-secondary/10">
+        <nav className="fixed top-0 w-full z-[110] bg-background/80 backdrop-blur-md border-b border-secondary/10">
             <div className="flex justify-between items-center px-4 sm:px-8 lg:px-12 py-4 w-full mx-auto">
                 <Link
                     href="/"
@@ -54,7 +66,9 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                     Astra Navi
                 </Link>
                 <div className="hidden md:flex items-center space-x-8 font-body font-medium tracking-wide text-sm">
-                    {navItems.map((eachItem) => (
+                    {navItems
+                        .filter(item => item.id !== 'chat' || isLoggedIn)
+                        .map((eachItem) => (
                         <Link
                             key={eachItem.id}
                             href={eachItem.href}
@@ -78,13 +92,25 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                     >
                         Shop
                     </Button>
-                    <Button
-                        variant="primary"
-                        size="md"
-                        className="hidden sm:inline-flex"
-                    >
-                        Login
-                    </Button>
+                    {!isLoggedIn ? (
+                        <Button
+                            href="/login"
+                            variant="primary"
+                            size="md"
+                            className="hidden sm:inline-flex"
+                        >
+                            Login
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={handleLogout}
+                            variant="primary"
+                            size="md"
+                            className="hidden sm:inline-flex bg-red-900 border-red-500/50 hover:bg-red-800"
+                        >
+                            Logout
+                        </Button>
+                    )}
                 </div>
             </div>
         </nav>

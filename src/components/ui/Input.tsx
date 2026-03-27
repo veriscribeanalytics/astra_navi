@@ -23,7 +23,7 @@ const Input: React.FC<InputProps> = ({ icon, label, className = '', ...props }) 
                     {...props}
                     className={`
                         w-full bg-background/50 dark:bg-surface/30 border border-secondary/10 
-                        rounded-xl font-body backdrop-blur-sm transition-all outline-none
+                        rounded-xl font-body transition-all outline-none
                         text-primary placeholder:text-primary/40 
                         focus:ring-2 focus:ring-secondary/30 focus:border-secondary
                         ${icon ? 'pl-12 pr-4' : 'px-4'} 

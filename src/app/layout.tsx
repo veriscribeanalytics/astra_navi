@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import Particles from "@/components/ui/Particles";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -52,28 +53,30 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden ivory-pattern min-h-full flex flex-col relative">
-        <div className="fixed inset-0 grain-overlay z-0 pointer-events-none"></div>
-        {/* Particle effect for Dark Mode */}
-        <div className="fixed inset-0 z-[1] pointer-events-none hidden dark:block">
-          <Particles
-            particleColors={["#c8880a", "#f5a623", "#faf7f2"]}
-            particleCount={400}
-            particleSpread={15}
-            speed={0.2}
-            particleBaseSize={140}
-            moveParticlesOnHover={true}
-            alphaParticles={false}
-            disableRotation={false}
-          />
-        </div>
-        {/* Ambient background glows - Toned down to remove reddish tint */}
-        <div className="fixed top-[-10%] right-[-10%] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[var(--glow-color)] blur-[80px] sm:blur-[120px] rounded-full z-0 pointer-events-none opacity-30 dark:opacity-20"></div>
-        <div className="fixed bottom-[-10%] left-[-10%] w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-secondary/10 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none opacity-20 dark:opacity-10"></div>
-        <Navbar />
-        <main className="flex-grow relative z-10 dark:bg-transparent">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <div className="fixed inset-0 grain-overlay z-0 pointer-events-none"></div>
+          {/* Particle effect for Dark Mode */}
+          <div className="fixed inset-0 z-[1] pointer-events-none hidden dark:block">
+            <Particles
+              particleColors={["#c8880a", "#f5a623", "#faf7f2"]}
+              particleCount={400}
+              particleSpread={15}
+              speed={0.2}
+              particleBaseSize={140}
+              moveParticlesOnHover={true}
+              alphaParticles={false}
+              disableRotation={false}
+            />
+          </div>
+          {/* Ambient background glows - Toned down to remove reddish tint */}
+          <div className="fixed top-[-10%] right-[-10%] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[var(--glow-color)] blur-[80px] sm:blur-[120px] rounded-full z-0 pointer-events-none opacity-30 dark:opacity-20"></div>
+          <div className="fixed bottom-[-10%] left-[-10%] w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-secondary/10 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none opacity-20 dark:opacity-10"></div>
+          <Navbar />
+          <main className="flex-grow relative z-10 dark:bg-transparent">
+            {children}
+          </main>
+          <ConditionalFooter />
+        </AuthProvider>
       </body>
     </html>
   );
