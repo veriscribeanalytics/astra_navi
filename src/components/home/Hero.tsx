@@ -1,6 +1,6 @@
-import React from 'react';
-import Button from '../ui/Button';
+import Input from '../ui/Input';
 import Card from '../ui/Card';
+import Button from '../ui/Button';
 
 const Hero = () => {
     return (
@@ -48,50 +48,32 @@ const Hero = () => {
                     
                     <form className="space-y-6">
                         <div className="grid grid-cols-1 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body">Full Name</label>
-                                <input 
-                                    className="w-full bg-background/50 border border-secondary/10 rounded-xl px-4 py-4 text-primary placeholder:text-primary/40 focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body backdrop-blur-sm" 
-                                    placeholder="Enter your full name" 
-                                    type="text"
-                                />
-                            </div>
+                            <Input 
+                                label="Full Name"
+                                placeholder="Enter your full name" 
+                                type="text"
+                            />
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body">Date of Birth</label>
-                                <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary">calendar_month</span>
-                                    <input 
-                                        className="w-full bg-background/50 border border-secondary/10 rounded-xl pl-12 pr-4 py-4 text-primary focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body backdrop-blur-sm" 
-                                        type="date"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body">Time of Birth</label>
-                                <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary">schedule</span>
-                                    <input 
-                                        className="w-full bg-background/50 border border-secondary/10 rounded-xl pl-12 pr-4 py-4 text-primary focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body backdrop-blur-sm" 
-                                        type="time"
-                                    />
-                                </div>
-                            </div>
+                            <Input 
+                                label="Date of Birth"
+                                type="date"
+                                icon="calendar_month"
+                            />
+                            <Input 
+                                label="Time of Birth"
+                                type="time"
+                                icon="schedule"
+                            />
                         </div>
                         
-                        <div className="space-y-2">
-                            <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body">Place of Birth</label>
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary">location_on</span>
-                                <input 
-                                    className="w-full bg-background/50 border border-secondary/10 rounded-xl pl-12 pr-4 py-4 text-primary placeholder:text-primary/40 focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body backdrop-blur-sm" 
-                                    placeholder="City, Country" 
-                                    type="text"
-                                />
-                            </div>
-                        </div>
+                        <Input 
+                            label="Place of Birth"
+                            placeholder="City, Country" 
+                            type="text"
+                            icon="location_on"
+                        />
                         
                         <Button 
                             type="button"

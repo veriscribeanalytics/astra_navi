@@ -102,32 +102,45 @@ interface ParticlesProps {
 }
 
 const Particles: React.FC<ParticlesProps> = ({
-  particleCount = 200,
+  particleCount = 150, // Reduced default count for performance
   particleSpread = 10,
   speed = 0.001,
   particleColors,
   moveParticlesOnHover = false,
   particleHoverFactor = 1,
   alphaParticles = false,
-  particleBaseSize = 100,
+  particleBaseSize = 80, // Slightly smaller base size for sharper look
   sizeRandomness = 1,
   cameraDistance = 20,
   disableRotation = false,
-  pixelRatio = 1,
+  pixelRatio = 1, // Forced to 1 for production performance
   className = ''
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const isVisibleRef = useRef(true); // Track if visible on screen
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    // --- Optimization 1: Visibility Observer ---
+    // This stops the animation entirely when the user scrolls away
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+
     const renderer = new Renderer({
-      dpr: pixelRatio,
+      dpr: 1, // Forced to 1: Massive performance gain on 4K/Retina displays
       depth: false,
-      alpha: true
+      alpha: true,
+      powerPreference: 'low-power' // Hints the browser to use integrated GPU
     });
+    
     const gl = renderer.gl;
     container.appendChild(gl.canvas);
     gl.clearColor(0, 0, 0, 0);
@@ -194,7 +207,7 @@ const Particles: React.FC<ParticlesProps> = ({
       uniforms: {
         uTime: { value: 0 },
         uSpread: { value: particleSpread },
-        uBaseSize: { value: particleBaseSize * pixelRatio },
+        uBaseSize: { value: particleBaseSize },
         uSizeRandomness: { value: sizeRandomness },
         uAlphaParticles: { value: alphaParticles ? 1 : 0 }
       },
@@ -210,6 +223,10 @@ const Particles: React.FC<ParticlesProps> = ({
 
     const update = (t: number) => {
       animationFrameId = requestAnimationFrame(update);
+      
+      // --- Optimization 2: Yield if not visible ---
+      if (!isVisibleRef.current) return;
+
       const delta = t - lastTime;
       lastTime = t;
       elapsed += delta * speed;
@@ -219,9 +236,6 @@ const Particles: React.FC<ParticlesProps> = ({
       if (moveParticlesOnHover) {
         particles.position.x = -mouseRef.current.x * particleHoverFactor;
         particles.position.y = -mouseRef.current.y * particleHoverFactor;
-      } else {
-        particles.position.x = 0;
-        particles.position.y = 0;
       }
 
       if (!disableRotation) {
@@ -238,6 +252,7 @@ const Particles: React.FC<ParticlesProps> = ({
     return () => {
       window.removeEventListener('resize', resize);
       resizeObserver.disconnect();
+      observer.disconnect(); // Clean up observer
       if (moveParticlesOnHover) {
         container.removeEventListener('mousemove', handleMouseMove);
       }

@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --background: #faf7f2;
   --foreground: #2a1a4a;
@@ -13,8 +17,8 @@
   --on-surface-variant: #4a3b6a;
   --outline-variant: #d1c4e9;
   --glow-color: rgba(210, 180, 255, 0.3);
-  --pattern-opacity: 0.15;
-  --grain-opacity: 0.03;
+  --pattern-opacity: 0.3;
+  --grain-opacity: 0.98;
 }
 
 :root.dark {
@@ -35,8 +39,10 @@
 
   --outline-variant: #3d2a63;
   --glow-color: rgba(200, 136, 10, 0.18);
-  --pattern-opacity: 0;   /* Completely nill ivory pattern */
-  --grain-opacity: 0;     /* Completely nill grain in dark */
+  --pattern-opacity: 0;
+  /* Completely nill ivory pattern */
+  --grain-opacity: 0;
+  /* Completely nill grain in dark */
 }
 
 @theme inline {
@@ -92,10 +98,8 @@ body {
 }
 
 @utility ivory-pattern {
-  background-image: radial-gradient(
-    color-mix(in srgb, var(--secondary) var(--pattern-opacity), transparent) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(color-mix(in srgb, var(--secondary) var(--pattern-opacity), transparent) 1px,
+      transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -119,4 +123,290 @@ body {
   background: color-mix(in srgb, var(--surface) 40%, transparent);
   backdrop-blur: 20px;
   border: 1px solid rgba(200, 136, 10, 0.15);
+}
+
+/* ============================================================
+   CHAT PAGE STYLES
+   All colors use existing CSS variables for auto light/dark.
+   ============================================================ */
+
+/* --- 3-Column Grid Layout --- */
+.chat-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 280px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+  /* fills the dashboard-shell which is viewport-locked */
+}
+
+/* --- Left Sidebar --- */
+.chat-left-sidebar {
+  background: var(--surface);
+  /* Solid background blocks particles */
+  border-right: 1px solid var(--outline-variant);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* child elements handle scroll */
+  min-height: 0;
+  /* allow shrinking so scroll kicks in */
+}
+
+/* --- Right Sidebar --- */
+.chat-right-sidebar {
+  background: var(--surface);
+  /* Solid background blocks particles */
+  border-left: 1px solid var(--outline-variant);
+  overflow: hidden;
+  /* no scroll */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 16px 14px;
+}
+
+/* --- Section Labels --- */
+.chat-section-label {
+  font-size: 10px;
+  color: var(--on-surface-variant);
+  opacity: 0.5;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.chat-section-label-gold {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--secondary);
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* --- Chat Main Area --- */
+.chat-main-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  /* critical: prevents flex child from overflowing grid cell */
+  background: transparent;
+  /* Allows global grain and particles to show through */
+}
+
+/* --- Chat Header --- */
+.chat-main-header {
+  background: color-mix(in srgb, var(--surface) 60%, var(--background));
+  border-bottom: 1px solid var(--outline-variant);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.chat-header-btn {
+  font-size: 11px;
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  border: 1px solid var(--outline-variant);
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+.chat-header-btn:hover {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--outline-variant) 60%, var(--secondary));
+}
+
+.chat-header-btn-gold {
+  font-size: 11px;
+  color: var(--secondary);
+  background: color-mix(in srgb, var(--secondary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--secondary) 20%, transparent);
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+.chat-header-btn-gold:hover {
+  background: color-mix(in srgb, var(--secondary) 15%, transparent);
+}
+
+/* --- Message Bubbles --- */
+.chat-ai-bubble {
+  background: color-mix(in srgb, var(--surface) 80%, #f3e8ff);
+  /* subtle lavender tint in light mode */
+  border: 1px solid var(--outline-variant);
+  border-radius: 4px 20px 20px 20px;
+  padding: 14px 18px;
+}
+
+.chat-user-bubble {
+  background: color-mix(in srgb, var(--secondary) 8%, var(--surface));
+  /* ivory/cream tint */
+  border: 1px solid var(--outline-variant);
+  border-radius: 20px 20px 4px 20px;
+  padding: 12px 20px;
+  color: var(--on-surface);
+}
+
+/* --- Chat Input --- */
+.chat-input-container {
+  background: color-mix(in srgb, var(--surface) 70%, var(--background));
+  border: 1px solid var(--outline-variant);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input-container:focus-within {
+  border-color: color-mix(in srgb, var(--secondary) 40%, var(--outline-variant));
+}
+
+.chat-input-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-variant) 40%, transparent);
+  border: none;
+  color: var(--on-surface-variant);
+  opacity: 0.5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.chat-input-icon-btn:hover {
+  opacity: 1;
+  background: var(--surface-variant);
+}
+
+.chat-send-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--secondary);
+  border: none;
+  color: var(--on-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.chat-send-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- Custom Scrollbars (Local Only) --- */
+.chat-messages-scroll::-webkit-scrollbar,
+.chat-left-sidebar::-webkit-scrollbar,
+.chat-right-sidebar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.chat-messages-scroll::-webkit-scrollbar-track,
+.chat-left-sidebar::-webkit-scrollbar-track,
+.chat-right-sidebar::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages-scroll::-webkit-scrollbar-thumb,
+.chat-left-sidebar::-webkit-scrollbar-thumb,
+.chat-right-sidebar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--secondary) 25%, var(--outline-variant));
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.chat-messages-scroll::-webkit-scrollbar-thumb:hover,
+.chat-left-sidebar::-webkit-scrollbar-thumb:hover,
+.chat-right-sidebar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .chat-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-left-sidebar,
+  .chat-right-sidebar {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .chat-layout {
+    grid-template-columns: 220px 1fr 240px;
+  }
+}
+
+/* ============================================================
+   DASHBOARD SHELL
+   Hides Footer, locks page to exact viewport height.
+   ============================================================ */
+
+/* Lock body & html to viewport — zero page-level scroll */
+html:has(.dashboard-shell),
+html:has(.dashboard-shell) body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The <main> wrapping dashboard content must pass height down */
+body:has(.dashboard-shell)>main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboard-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* When dashboard-shell exists, hide the Footer from root layout */
+body:has(.dashboard-shell)>footer,
+body:has(.dashboard-shell)>main+footer {
+  display: none !important;
 }

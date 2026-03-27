@@ -6,7 +6,7 @@ const LiveAstrologers = () => {
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-24">
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-                
+
                 {/* Left: Live Astrologers */}
                 <div className="lg:w-2/3 space-y-12">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
@@ -19,13 +19,13 @@ const LiveAstrologers = () => {
                             <span className="text-xs font-bold uppercase tracking-widest text-primary/60">AI Experts Online</span>
                         </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Expert Card 1 */}
                         <Card className="group cosmic-glow border-secondary/5">
                             <div className="flex gap-6 mb-6">
                                 <div className="relative">
-                                    <img alt="Pandit Ramesh" className="w-24 h-24 rounded-2xl object-cover grayscale-0 group-hover:scale-105 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBffjRi1gTxrhuVoPTWj13LQVUS12CzHUL31aSTFOJnMOXkHC1J1qIoDwtRYxFcGp_w5Pd0pIkqNnOBVMg9-h5zg8P0US___t28LjcUwLvie6kFe4tedRQuJfMTmuMNxWdW1-MRwv_NCbYS7mJkEAmSh5Yq8I_XbLh2TiX7UqbNvVXgTQqYTnwrBp9p5zYJGCFEHkZMq1bsgd879gcXBAbmGvi1fl6MOi56GqI5bBVnbddX0QsW_VpkU5gVw4eNvMhCoOqBVPz2vDGM"/>
+                                    <img alt="Pandit Ramesh" className="w-24 h-24 rounded-2xl object-cover grayscale-0 group-hover:scale-105 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBffjRi1gTxrhuVoPTWj13LQVUS12CzHUL31aSTFOJnMOXkHC1J1qIoDwtRYxFcGp_w5Pd0pIkqNnOBVMg9-h5zg8P0US___t28LjcUwLvie6kFe4tedRQuJfMTmuMNxWdW1-MRwv_NCbYS7mJkEAmSh5Yq8I_XbLh2TiX7UqbNvVXgTQqYTnwrBp9p5zYJGCFEHkZMq1bsgd879gcXBAbmGvi1fl6MOi56GqI5bBVnbddX0QsW_VpkU5gVw4eNvMhCoOqBVPz2vDGM" />
                                     <div className="absolute -bottom-2 -right-2 bg-primary px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow-lg">EXP 15YRS</div>
                                 </div>
                                 <div className="flex-1">
@@ -54,7 +54,7 @@ const LiveAstrologers = () => {
                         <Card className="group cosmic-glow border-secondary/5">
                             <div className="flex gap-6 mb-6">
                                 <div className="relative">
-                                    <img alt="Sadhvi Ananya" className="w-24 h-24 rounded-2xl object-cover grayscale-0 group-hover:scale-105 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCs0k6_TJsZn5qjuMooZKe1GyBFUK_SAIfq_a5wWLv9WkebJuoU8fIBR5vk9-V9yYxEnkiQsBxAiP8KYp4D0jq0qgodo32GeYlJsMfxygAc-LVPzrYMus_-04CY6-gvqyh6_btzDO8FzPNHnoEfLV3aGzaO_6EbpDznKyxzDQ5EbD9kuxdBs9djGF-3b73tJDis5nPOlKPbZBkrkByTJqEVAVHW1Mxf_LmrDAt85cRZej96Ej6C_PVf5oDSLvihJ61veQ-G_ACALtvj"/>
+                                    <img alt="Sadhvi Ananya" className="w-24 h-24 rounded-2xl object-cover grayscale-0 group-hover:scale-105 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCs0k6_TJsZn5qjuMooZKe1GyBFUK_SAIfq_a5wWLv9WkebJuoU8fIBR5vk9-V9yYxEnkiQsBxAiP8KYp4D0jq0qgodo32GeYlJsMfxygAc-LVPzrYMus_-04CY6-gvqyh6_btzDO8FzPNHnoEfLV3aGzaO_6EbpDznKyxzDQ5EbD9kuxdBs9djGF-3b73tJDis5nPOlKPbZBkrkByTJqEVAVHW1Mxf_LmrDAt85cRZej96Ej6C_PVf5oDSLvihJ61veQ-G_ACALtvj" />
                                     <div className="absolute -bottom-2 -right-2 bg-primary px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow-lg">EXP 8YRS</div>
                                 </div>
                                 <div className="flex-1">
@@ -82,10 +82,10 @@ const LiveAstrologers = () => {
 
                     {/* Vedic Remedies Section */}
                     <Card
-                      variant="default"
-                      padding="lg"
-                      className="bg-surface border border-secondary/10 shadow-sm cosmic-glow"
-                      hoverable={false}
+                        variant="default"
+                        padding="lg"
+                        className="bg-surface border border-secondary/10 shadow-sm cosmic-glow"
+                    /*hoverable={false}*/
                     >
                         <div className="flex items-center gap-4 mb-8">
                             <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
@@ -97,18 +97,18 @@ const LiveAstrologers = () => {
                             </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                            <div className="p-6 rounded-2xl bg-surface border-l-4 border-secondary shadow-sm hover:shadow-md transition-shadow">
+                            <Card padding="md" className="bg-surface border-l-4 border-secondary shadow-sm hover:shadow-md transition-shadow" hoverable={false}>
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">Monday: Moon</div>
                                 <p className="text-sm text-on-surface font-medium leading-relaxed">Offer milk and water to Lord Shiva for emotional stability and mental peace.</p>
-                            </div>
-                            <div className="p-6 rounded-2xl bg-surface/40 border-l-4 border-primary/20 opacity-70">
+                            </Card>
+                            <Card padding="md" className="bg-surface/40 border-l-4 border-primary/20 opacity-70" hoverable={false}>
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface/40 mb-2">Tuesday: Mars</div>
                                 <p className="text-sm text-on-surface leading-relaxed">Recite Hanuman Chalisa to channel energy and overcome obstacles.</p>
-                            </div>
-                            <div className="p-6 rounded-2xl bg-surface/40 border-l-4 border-primary/20 opacity-70">
+                            </Card>
+                            <Card padding="md" className="bg-surface/40 border-l-4 border-primary/20 opacity-70" hoverable={false}>
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-on-surface/40 mb-2">Wednesday: Mercury</div>
                                 <p className="text-sm text-on-surface leading-relaxed">Offer green grass to cows to enhance communication and intellectual growth.</p>
-                            </div>
+                            </Card>
                         </div>
                     </Card>
                 </div>
@@ -117,9 +117,9 @@ const LiveAstrologers = () => {
                 <aside className="lg:w-1/3 space-y-8">
                     {/* Today's Reading Card */}
                     <Card
-                      variant="default"
-                      padding="md"
-                      className="bg-surface-variant/40"
+                        variant="default"
+                        padding="md"
+                        className="bg-surface-variant/40"
                     >
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-headline font-bold text-primary">Vrishchika Today</h3>
@@ -140,7 +140,7 @@ const LiveAstrologers = () => {
                                 </Card>
                             </div>
                         </div>
-                        <hr className="border-secondary/10 mb-8"/>
+                        <hr className="border-secondary/10 mb-8" />
                         <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-4">Planetary Transits</h4>
                         <ul className="space-y-4">
                             <li className="flex items-center justify-between">
@@ -160,9 +160,8 @@ const LiveAstrologers = () => {
 
                     {/* Daily Panchang */}
                     <Card
-                      padding="md"
-                      className="bg-surface text-on-surface shadow-xl shadow-surface/20 space-y-6 cosmic-glow"
-                      hoverable={false}
+                        padding="md"
+                        className="bg-surface text-on-surface shadow-xl shadow-surface/20 space-y-6 cosmic-glow"
                     >
                         <div className="flex items-center gap-3">
                             <span className="material-symbols-outlined text-secondary">brightness_5</span>

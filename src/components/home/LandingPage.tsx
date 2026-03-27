@@ -1,4 +1,5 @@
 import Hero from "./Hero";
+import Services from "./Services";
 import LiveAstrologers from "./LiveAstrologers";
 import Pricing from "./Pricing";
 import ZodiacStrip from "./ZodiacStrip";
@@ -8,6 +9,7 @@ const LandingPage = () => {
         <div className="flex flex-col gap-16 md:gap-24 pb-20">
             <Hero />
             <ZodiacStrip />
+            <Services />
             <LiveAstrologers />
             <Pricing/>
             {/* Future home sections (Features, Testimonials, etc.) can be added here */}

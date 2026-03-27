@@ -20,10 +20,15 @@ const navItems = [
     label: "About Us",
     href: "/about",
   },
-  {
+    {
     id: "chat",
     label: "Chat with AI",
     href: "/chat",
+  },
+  {
+    id: "plans",
+    label: "Plans",
+    href: "/plans",
   },
 ];
 

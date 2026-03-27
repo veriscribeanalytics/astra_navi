@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Input from '../ui/Input';
 
 const Footer = () => {
     return (
@@ -43,10 +44,14 @@ const Footer = () => {
                 <div>
                     <h5 className="font-bold text-primary mb-6 uppercase tracking-widest text-xs">Stay Connected</h5>
                     <p className="text-sm text-primary/60 font-medium mb-4">Get cosmic updates in your inbox.</p>
-                    <div className="flex bg-white rounded-xl p-1 border border-secondary/10 shadow-sm">
-                        <input className="bg-transparent border-none text-xs flex-1 focus:ring-0 text-primary font-medium" placeholder="Email address" type="email"/>
-                        <button className="bg-primary flex items-center justify-center text-white h-8 w-8 rounded-lg hover:bg-secondary transition-colors">
-                            <span className="material-symbols-outlined">chevron_right</span>
+                    <div className="mt-4 relative flex items-center">
+                        <Input 
+                            placeholder="Email address" 
+                            type="email"
+                            className="!py-3 !rounded-lg !pr-10" 
+                        />
+                        <button className="bg-primary flex items-center justify-center text-white h-8 w-8 rounded-lg hover:bg-secondary transition-colors shrink-0 absolute right-1">
+                            <span className="material-symbols-outlined text-sm">chevron_right</span>
                         </button>
                     </div>
                 </div>
