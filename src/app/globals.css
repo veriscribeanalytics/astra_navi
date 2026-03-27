@@ -18,7 +18,7 @@ html {
   --outline-variant: #d1c4e9;
   --glow-color: rgba(210, 180, 255, 0.3);
   --pattern-opacity: 0.3;
-  --grain-opacity: 0.98;
+  --grain-opacity: 0.08;
 }
 
 :root.dark {
