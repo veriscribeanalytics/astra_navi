@@ -31,10 +31,10 @@ const ThemeToggle = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-surface-variant transition-colors border border-secondary/10 group active:scale-95"
+            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg bg-surface hover:bg-surface-variant transition-colors border border-secondary/10 group active:scale-95"
             aria-label="Toggle Dark Mode"
         >
-            <span className={`material-symbols-outlined text-xl transition-all duration-500 ${isDark ? 'text-secondary rotate-[360deg]' : 'text-primary'}`}>
+            <span className={`material-symbols-outlined text-lg transition-all duration-500 ${isDark ? 'text-secondary rotate-[360deg]' : 'text-primary'}`}>
                 {isDark ? 'light_mode' : 'dark_mode'}
             </span>
         </button>

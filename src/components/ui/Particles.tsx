@@ -104,7 +104,7 @@ interface ParticlesProps {
 const Particles: React.FC<ParticlesProps> = ({
   particleCount = 150, // Reduced default count for performance
   particleSpread = 10,
-  speed = 0.001,
+  speed = 0.1,
   particleColors,
   moveParticlesOnHover = false,
   particleHoverFactor = 1,
@@ -140,7 +140,7 @@ const Particles: React.FC<ParticlesProps> = ({
       alpha: true,
       powerPreference: 'low-power' // Hints the browser to use integrated GPU
     });
-    
+
     const gl = renderer.gl;
     container.appendChild(gl.canvas);
     gl.clearColor(0, 0, 0, 0);
@@ -223,7 +223,7 @@ const Particles: React.FC<ParticlesProps> = ({
 
     const update = (t: number) => {
       animationFrameId = requestAnimationFrame(update);
-      
+
       // --- Optimization 2: Yield if not visible ---
       if (!isVisibleRef.current) return;
 
