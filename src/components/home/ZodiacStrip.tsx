@@ -10,7 +10,7 @@ const rashiItems = [
     { id: 'leo', name: 'Simha', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDB8kI-VCwnsgWmWFnTyqyddH7HskqWGbs9ZdDapH6KQ_OTiggklDxnMnftF0OO22ybck1x-qDsxu6UZ9cvb1jOVSR9ABiISQGmyBRTieAwXI9obnsYhfisY3wkqcRT-1hbIE5k2t8VDIP7nTlxzueKaHt_vFdpDsA_l9uq9YkK709QbSFn9AJYwphzI8p-12UiAcuNMG3T6VY9c7zrZLhlQ-KqmStDknwkusJtmFEIBWfY5iqTDbKmAE0sFbW8-wx-MMPNv5h3RbY8' },
     { id: 'virgo', name: 'Kanya', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_o_AJmgC2oG3VXWmf0ErlWqZuF6DHrxYfv5cA2clSXBM1ONrxAwOVcT-8G0VU8PICqnHuCLkV5eS_yRrxxC2LyjHC47MiiJ7p3xUkqqyA7vSJzSv_fuI0Ras_6u9-RTcEi6uXQ2NCQz1tOj4PPVmdXXijDPY3JVMm-HzHzhBbzguy_BbJegnvX9JPjhX49hkqCWiZUXtKaxu40xO-iphhLSgHpOGKT2ZJT04B5na1WafxtrFuLswq7bc6lQfjg4ZH2A5MUt8C-CJd' },
     { id: 'libra', name: 'Tula', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_N78nWmeyk5WI5UyusRoVNbaSVWtH9MogrQTR9egfe7m4CAOfuvkEbkhvscOTCt2exZKnRwcs1zvLjjKh7fnBIIwh6p6z1rXKSozeGqXrOaKGhD4oXER1WErCFg0zmJiLCViMVFu4GdnVzPYHDsn3yaH6sjet9VK_wrYMfhDq-1n7t9_B8nc2s5SA13717YXpa8QMJaMK8re-r53UEPzvskmbf8YY02aNSY6Ksae3YmZsXFv_YmYF5lvWi_FWNIVPfhibiWFg_mLC' },
-    { id: 'scorpio', name: 'Vrishchik', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsI-VUTM_vzm7KraBGTXgNw4TcjhpxAU-rMRdGaiSi1nObba18figyOZ9J2FBCBeUCqf-kAr5lQ_vqfSY9fw9t9mnuUAs1Qbm75HIMRLPMSN_9M0taoOJ89RbUSKvubW84kM8AaJiZBDNqoaS_YjxJ30Sxlw6CyfhOMlSNp5eIUWF6jjjEmYPRIn6RYGyKVAMvl8Aw-1oUM8olwPD98ifuxCDbbU8Ey0wQKFkrKk3r01xmnJz7EZcy-cjXUWyYfCMAN_Y8y8o9VPB1', featured: true },
+    { id: 'scorpio', name: 'Vrishchik', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsI-VUTM_vzm7KraBGTXgNw4TcjhpxAU-rMRdGaiSi1nObba18figyOZ9J2FBCBeUCqf-kAr5lQ_vqfSY9fw9t9mnuUAs1Qbm75HIMRLPMSN_9M0taoOJ89RbUSKvubW84kM8AaJiZBDNqoaS_YjxJ30Sxlw6CyfhOMlSNp5eIUWF6jjjEmYPRIn6RYGyKVAMvl8Aw-1oUM8olwPD98ifuxCDbbU8Ey0wQKFkrKk3r01xmnJz7EZcy-cjXUWyYfCMAN_Y8y8o9VPB1' },
     { id: 'sagittarius', name: 'Dhanu', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEbrvUCsGBlij8EsNbRaWCkiWYAP_ZjqsYYzmpxUEWp2g8iBxrNA-iOpHSaAA68gfuTbCv9BVUrd-HtX5BPVyhAGCBaS5EHskNYxNLKTZoo91VJ2dV8qG-b7BoSZz43fy0nM6t4zJZ47IVAXMu9K3JT7W3L8pBfyBYrZVouLVVi-rt8z4Y_tqUi95ThGMIHhmxY3Uu2-447etI7P2oIdqEhIkj69Ms8iIQMypvPWIkbgyz4Hr9E0G5uA4A4r1Zwif_yA1nVdUsbuj7' },
     { id: 'capricorn', name: 'Makar', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCn_hnk72AOw4sHV9_AyjLd0OT5d77TdoEXnL0d0PUBKvP5dX1-mw9mbIB8NfhLheck8Tu4dvQs9PYM6oUddjGkXzREjBhB6sE5mTb3wVqZX2bXzOU7Lyiv-9gV3Ah0TWHvDcp_77OfQvOpG-smUtQTFirp79Tajdctb72r9_oiqLDJh9lz3qGl3jDovIdeHYfHCBNRiYySB9QR1W1BJ-UzQty6vvVj2YifiNgJQZRhs8WcEyxemCIk2DGchkZGGHdopNUvwfjev8fx' },
     { id: 'aquarius', name: 'Kumbh', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDbhwbhVm1fkSRsXHEI2JUtwxgnLvnn2VlLFls_Lnz5GKkiPSz6rN5Vc1Ye6QNonovaMChsz6FIRqi9gNbucfEtv3Bw61mmXDsyGTUkljauIjX2y8s3882KNC-lg-GtwWnjI5ZoYRNrsrduvbeDeh6_CwZ5JWBrbLh15KAV7C7mmdmA-21Xxmmbjr9k2dDNzolzzxoY5nuuQJJItIClpfrgb44dkZ_7-9zY1t6fwcDM0xsvbPJ-AQCyw7-yNW7FJraUVXFVF-SjrhqQ' },
@@ -19,46 +19,25 @@ const rashiItems = [
 
 const ZodiacStrip = () => {
     return (
-        <section className="bg-background dark:bg-transparent py-16 relative overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 sm:mb-12">
-                    <div>
-                        <h2 className="text-3xl font-headline font-bold text-primary mb-2">Pick Your Rashi Today</h2>
-                        <p className="text-on-surface-variant font-medium">Daily guidance based on your moon sign</p>
+        <section className="bg-transparent border border-secondary/20 backdrop-blur-sm relative overflow-hidden h-[44px] sm:h-[52px] flex items-center mx-3 sm:mx-8 lg:mx-12 rounded-[12px] sm:rounded-[16px] mt-6 sm:mt-8 mb-3 sm:mb-4">
+            <div className="w-full flex space-x-6 sm:space-x-10 px-4 sm:px-6 overflow-x-auto custom-scrollbar whitespace-nowrap items-center h-full hide-scrollbar">
+                {rashiItems.map((rashi) => (
+                    <div 
+                        key={rashi.id}
+                        className="flex items-center gap-1.5 sm:gap-2 group cursor-pointer transition-colors text-foreground/60 hover:text-foreground font-medium"
+                    >
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shrink-0">
+                            <img 
+                                alt={`${rashi.name} Icon`} 
+                                className="w-full h-full object-contain transition-all opacity-40 group-hover:opacity-100 grayscale group-hover:grayscale-0" 
+                                src={rashi.icon}
+                            />
+                        </div>
+                        <span className="text-[9px] sm:text-[11px] uppercase tracking-widest shrink-0">
+                            {rashi.name}
+                        </span>
                     </div>
-                    <Button variant="ghost" className="text-secondary hover:text-primary transition-colors text-sm font-bold tracking-widest uppercase flex items-center gap-2 px-0">
-                        View All Signs <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                    </Button>
-                </div>
-                
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-3 sm:gap-4">
-                    {rashiItems.map((rashi) => (
-                        <Card 
-                            key={rashi.id}
-                            padding="sm" 
-                            className={`group cursor-pointer flex flex-col items-center transition-all duration-500 rounded-2xl ${
-                                rashi.featured 
-                                    ? 'bg-surface border-2 border-secondary shadow-md cosmic-glow' 
-                                    : 'bg-surface/60 dark:bg-surface/40 hover:bg-surface border-secondary/5 hover:border-secondary/30 shadow-sm'
-                            }`}
-                        >
-                            <div className="w-12 h-12 flex items-center justify-center mb-3">
-                                <img 
-                                    alt={`${rashi.name} Icon`} 
-                                    className={`w-full h-full object-contain transition-all ${
-                                        !rashi.featured ? 'brightness-50 contrast-125 group-hover:brightness-100' : ''
-                                    }`} 
-                                    src={rashi.icon}
-                                />
-                            </div>
-                            <span className={`text-[10px] uppercase font-bold tracking-tighter ${
-                                rashi.featured ? 'text-secondary' : 'text-primary/60 group-hover:text-primary'
-                            }`}>
-                                {rashi.name}
-                            </span>
-                        </Card>
-                    ))}
-                </div>
+                ))}
             </div>
         </section>
     );

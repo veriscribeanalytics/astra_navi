@@ -7,6 +7,7 @@ interface CardProps {
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   hoverable?: boolean;
   allowOverflow?: boolean;
+  colorScheme?: 'default' | 'ivory' | 'lavender' | 'midnight' | 'galaxy';
 }
 
 const Card: React.FC<CardProps> = ({
@@ -16,13 +17,42 @@ const Card: React.FC<CardProps> = ({
   padding = 'md',
   hoverable = true,
   allowOverflow = false,
+  colorScheme = 'default',
 }) => {
-  const baseStyles = `transition-all duration-300 rounded-[1.5rem] sm:rounded-[2.5rem] ${allowOverflow ? '' : 'overflow-hidden'}`;
+  const baseStyles = `transition-all duration-300 rounded-3xl ${allowOverflow ? '' : 'overflow-hidden'}`;
   
+  const colorSchemes = {
+    default: {
+      default: 'bg-surface/50 dark:bg-surface/70 border-secondary/10',
+      elevated: 'bg-surface/50 dark:bg-surface/70 shadow-secondary/5 border-secondary/5',
+      bordered: 'bg-surface/50 dark:bg-surface/70 border-secondary/20',
+    },
+    ivory: {
+      default: 'bg-background border-outline-variant/30',
+      elevated: 'bg-background shadow-lg shadow-outline-variant/20 border-outline-variant/20',
+      bordered: 'bg-background/85 border-outline-variant/40',
+    },
+    lavender: {
+      default: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/30',
+      elevated: 'bg-surface/50 dark:bg-surface/70 shadow-lg shadow-outline-variant/20 border-outline-variant/20',
+      bordered: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/40',
+    },
+    midnight: {
+      default: 'bg-surface-variant/95 border-secondary/15',
+      elevated: 'bg-surface-variant shadow-lg shadow-secondary/5 border-secondary/10',
+      bordered: 'bg-surface-variant/85 border-secondary/25',
+    },
+    galaxy: {
+      default: 'bg-surface/95 border-outline-variant/40',
+      elevated: 'bg-surface shadow-lg shadow-outline-variant/10 border-outline-variant/30',
+      bordered: 'bg-surface/85 border-outline-variant/60',
+    }
+  };
+
   const variants = {
-    default: 'bg-surface/80 backdrop-blur-2xl border border-secondary/10',
-    elevated: 'bg-surface shadow-xl shadow-secondary/5 border border-secondary/5',
-    bordered: 'bg-transparent border-2 border-secondary/20',
+    default: `${colorSchemes[colorScheme].default} backdrop-blur-md border`,
+    elevated: `${colorSchemes[colorScheme].elevated} backdrop-blur-md shadow-xl border`,
+    bordered: `${colorSchemes[colorScheme].bordered} backdrop-blur-sm border-[1.5px]`,
   };
 
   const paddings = {
@@ -34,7 +64,7 @@ const Card: React.FC<CardProps> = ({
   };
 
   const hoverStyles = hoverable 
-    ? 'hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10' 
+    ? `hover:border-secondary/40 hover:shadow-2xl hover:shadow-secondary/20 transition-all duration-300`
     : '';
 
   const combinedClasses = `

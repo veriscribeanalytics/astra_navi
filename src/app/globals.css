@@ -6,43 +6,45 @@ html {
 }
 
 :root {
+  /* PRIMARY THEME: IVORY (LIGHT) */
   --background: #faf7f2;
   --foreground: #2a1a4a;
-  --surface: #f0e8f8;
-  --surface-variant: #ede0ff;
+  --surface: #EDE0E8;
+  --surface-variant: #E6D8E0;
   --primary: #2a1a4a;
   --secondary: #c8880a;
+  --accent: #d1b8c6;
   --on-primary: #ffffff;
   --on-surface: #2a1a4a;
   --on-surface-variant: #4a3b6a;
-  --outline-variant: #d1c4e9;
-  --glow-color: rgba(210, 180, 255, 0.3);
+  --outline-variant: #d1b8c6;
+  --glow-color: rgba(200, 136, 10, 0.15);
+  --flare-gold: #d4a017;
+  --flare-lavender: #a78bd2;
+  --flare-ivory: #fff8e6;
   --pattern-opacity: 0.3;
   --grain-opacity: 0.08;
 }
 
 :root.dark {
-  /* Flipped theme logic - Gold glows remain, textures are nil */
-
+  /* SECONDARY THEME: MIDNIGHT (DARK) */
   --background: #0b071a;
   --foreground: #faf7f2;
-
   --surface: #1a1233;
   --surface-variant: #231942;
-
   --primary: #faf7f2;
   --secondary: #c8880a;
-
+  --accent: #a87db5;
   --on-primary: #0b071a;
   --on-surface: #faf7f2;
   --on-surface-variant: #b9a8d9;
-
   --outline-variant: #3d2a63;
   --glow-color: rgba(200, 136, 10, 0.18);
+  --flare-gold: #d4a017;
+  --flare-lavender: #a78bd2;
+  --flare-ivory: #fff8e6;
   --pattern-opacity: 0;
-  /* Completely nill ivory pattern */
   --grain-opacity: 0;
-  /* Completely nill grain in dark */
 }
 
 @theme inline {
@@ -55,6 +57,7 @@ html {
   --color-on-surface: var(--on-surface);
   --color-on-surface-variant: var(--on-surface-variant);
   --color-outline-variant: var(--outline-variant);
+  --color-accent: var(--accent);
 
   --font-headline: var(--font-playfair), serif;
   --font-body: var(--font-dm-sans), sans-serif;
@@ -64,19 +67,8 @@ html {
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --background: #0b071a;
-    --foreground: #faf7f2;
-    --surface: #1a1233;
-    --surface-variant: #231942;
-    --primary: #faf7f2;
-    --secondary: #c8880a;
-    --on-primary: #0b071a;
-    --on-surface: #faf7f2;
-    --on-surface-variant: #b9a8d9;
-    --outline-variant: #3d2a63;
-    --glow-color: rgba(200, 136, 10, 0.18);
-    --pattern-opacity: 0;
-    --grain-opacity: 0;
+    /* If user wants system dark, we still favor Light unless explicitly set */
+    /* Keeping this block simple - it can be removed if we want to FORCE light always */
   }
 }
 
@@ -97,16 +89,25 @@ body {
   cursor: pointer;
 }
 
-@utility ivory-pattern {
-  background-image: radial-gradient(color-mix(in srgb, var(--secondary) var(--pattern-opacity), transparent) 1px,
-      transparent 1px);
-  background-size: 32px 32px;
+@utility celestial-silk {
+  background-image: 
+    /* Subtle geometric grid */
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--secondary) 15%, transparent) 1px, transparent 0),
+    /* Soft mesh glows - Powered by --pattern-opacity */
+    radial-gradient(at 0% 0%, color-mix(in srgb, #EDE0E8 calc(var(--pattern-opacity) * 100%), transparent) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, color-mix(in srgb, #E6D8E0 calc(var(--pattern-opacity) * 100%), transparent) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, color-mix(in srgb, #EDE0E8 calc(var(--pattern-opacity) * 50%), transparent) 0px, transparent 80%);
+  background-size: 40px 40px, 100% 100%, 100% 100%, 100% 100%;
 }
 
-@utility grain-overlay {
-  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAAm4ELg4brMsVYIjecul1ANdBSs_-GegKzs5RIsrcttuoxrE6oMRBZM7wOiSHuWn7Q25-yKhHFkMq0g5vtazQHpJyhkH7nw8ryRw5W4jtQPRHy1nPGL7TS87R6q5LBEYHPSiXC4Ytpm9eGSbpprXI1Dlmi-QgB6l2NtTs5jG1zvuDL4G8lMyXEF88sPOF-Txd0GyArRdyGmUH5ip0YyKfYkzVneLZN60NPJCu4WiFSyAyVEGWfQ-WgeJhuMkAYrENj8GKJi-DE2lx2");
-  opacity: var(--grain-opacity);
-  pointer-events: none;
+/* Global cursor fix for interactive elements */
+button,
+[type='button'],
+[type='reset'],
+[type='submit'],
+[role='button'],
+a {
+  cursor: pointer;
 }
 
 @utility gold-gradient {
@@ -130,7 +131,7 @@ body {
    All colors use existing CSS variables for auto light/dark.
    ============================================================ */
 
-/* --- 3-Column Grid Layout --- */
+/* --- Responsive Grid Layout --- */
 .chat-layout {
   display: grid;
   grid-template-columns: 260px 1fr 280px;
@@ -138,34 +139,102 @@ body {
   overflow: hidden;
   min-height: 0;
   height: 100%;
-  /* fills the dashboard-shell which is viewport-locked */
+  position: relative;
+}
+
+@media (max-width: 1200px) {
+  .chat-layout {
+    grid-template-columns: 240px 1fr 0px;
+  }
+  .chat-right-sidebar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .chat-layout {
+    grid-template-columns: 0px 1fr 0px;
+  }
 }
 
 /* --- Left Sidebar --- */
 .chat-left-sidebar {
   background: var(--surface);
-  /* Solid background blocks particles */
   border-right: 1px solid var(--outline-variant);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* child elements handle scroll */
   min-height: 0;
-  /* allow shrinking so scroll kicks in */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s ease;
+  z-index: 30;
+}
+
+@media (max-width: 1024px) {
+  .chat-left-sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: calc(var(--navbar-height, 64px) + 56px) !important; /* Starts below Navbar + ChatHeader */
+    bottom: 0 !important;
+    width: 280px !important;
+    transform: none !important;
+    box-shadow: 20px 0 50px rgba(0,0,0,0.2) !important;
+    z-index: 999 !important;
+    background: var(--surface) !important; /* Theme-aware background */
+    border-top-right-radius: 20px;
+    border-top: 1px solid var(--outline-variant);
+  }
+  
+  .chat-left-sidebar.mobile-open {
+    left: 0 !important;
+    display: flex !important;
+  }
 }
 
 /* --- Right Sidebar --- */
 .chat-right-sidebar {
   background: var(--surface);
-  /* Solid background blocks particles */
   border-left: 1px solid var(--outline-variant);
-  overflow: hidden;
-  /* no scroll */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   min-height: 0;
   padding: 16px 14px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 30;
+}
+
+@media (max-width: 1200px) {
+  .chat-right-sidebar {
+    position: fixed !important;
+    right: -300px !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 300px !important;
+    transform: none !important;
+    box-shadow: -20px 0 50px rgba(0,0,0,0.3) !important;
+    display: flex !important;
+    z-index: 999 !important;
+  }
+  .chat-right-sidebar.mobile-open {
+    right: 0 !important;
+  }
+}
+
+/* Overlay for mobile menus */
+.sidebar-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 888 !important; /* Below sidebar, above everything else */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 /* --- Section Labels --- */
@@ -250,8 +319,8 @@ body {
 
 /* --- Message Bubbles --- */
 .chat-ai-bubble {
-  background: color-mix(in srgb, var(--surface) 80%, #f3e8ff);
-  /* subtle lavender tint in light mode */
+  background: color-mix(in srgb, var(--surface) 80%, #fff3d6);
+  /* subtle warm cream tint in light mode */
   border: 1px solid var(--outline-variant);
   border-radius: 4px 20px 20px 20px;
   padding: 14px 18px;
@@ -280,6 +349,12 @@ body {
 
 .chat-input-container:focus-within {
   border-color: color-mix(in srgb, var(--secondary) 40%, var(--outline-variant));
+}
+
+@media (max-width: 640px) {
+  .chat-input-container {
+    padding: 8px 10px;
+  }
 }
 
 .chat-input-icon-btn {
@@ -395,14 +470,110 @@ body:has(.dashboard-shell)>main {
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  height: 100%;
 }
 
+/* Position-fixed approach: bulletproof, no padding-vs-height conflicts */
 .dashboard-shell {
-  flex: 1;
+  position: fixed;
+  top: var(--navbar-height, 85px);
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0;
   overflow: hidden;
+  z-index: 10;
+}
+
+/* ============================================================
+   RATING METER
+   Gold-themed star rating below AI messages
+   ============================================================ */
+
+.rating-meter-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rating-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1px;
+  line-height: 1;
+  transition: all 0.15s ease;
+  color: var(--primary);
+  opacity: 0.3;
+}
+
+.rating-star:hover {
+  transform: scale(1.2);
+}
+
+.rating-star-filled {
+  color: var(--secondary);
+  opacity: 1;
+  text-shadow: 0 0 6px rgba(200, 136, 10, 0.3);
+}
+
+.rating-star-active {
+  color: var(--secondary);
+  opacity: 1;
+}
+
+.rating-star-empty {
+  color: var(--primary);
+  opacity: 0.35;
+}
+
+.rating-star-empty:hover {
+  color: var(--secondary);
+  opacity: 0.7;
+}
+
+.rating-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.rating-label-prompt {
+  color: var(--primary);
+  opacity: 0.5;
+  font-weight: 500;
+}
+
+/* ============================================================
+   TYPING INDICATOR
+   Bouncing dots for AI thinking state
+   ============================================================ */
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--secondary);
+  animation: typing-bounce 1.2s infinite;
+  display: inline-block;
 }
 
 @keyframes spin-around {
@@ -420,8 +591,8 @@ body:has(.dashboard-shell)>main {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 36px;
+  height: 36px;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -434,8 +605,7 @@ body:has(.dashboard-shell)>main {
 /* The Glowing Comet Dot */
 .profile-comet-dot {
   position: absolute;
-  inset: -3px;
-  /* Slightly outside the boundary */
+  inset: -2px;
   border-radius: 50%;
   z-index: 12;
   pointer-events: none;
@@ -448,8 +618,8 @@ body:has(.dashboard-shell)>main {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: var(--secondary);
   border-radius: 50%;
   box-shadow:
@@ -467,6 +637,60 @@ body:has(.dashboard-shell)>main {
   border-radius: 50%;
   border: 1.5px solid color-mix(in srgb, var(--secondary) 25%, transparent);
   z-index: 5;
+}
+
+/* ============================================================
+   CELESTIAL ANIMATIONS (For Loading Overlay)
+   ============================================================ */
+
+@keyframes celestial-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(1.6); opacity: 0.25; }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(48px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(48px) rotate(-360deg); }
+}
+
+@keyframes orbit-reverse {
+  from { transform: rotate(360deg) translateX(38px) rotate(-360deg); }
+  to { transform: rotate(0deg) translateX(38px) rotate(0deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-top {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@utility animate-celestial-pulse {
+  animation: celestial-pulse 4s ease-in-out infinite;
+}
+
+@utility animate-orbit {
+  animation: orbit 3s linear infinite;
+}
+
+@utility animate-orbit-reverse {
+  animation: orbit-reverse 5s linear infinite;
+}
+
+@utility animate-in {
+  animation-duration: 400ms;
+  animation-fill-mode: both;
+}
+
+@utility fade-in {
+  animation-name: fade-in;
+}
+
+@utility slide-in-from-top-2 {
+  animation-name: slide-in-top;
 }
 
 .profile-avatar-content {

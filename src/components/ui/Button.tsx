@@ -18,7 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base styles
-  const baseStyles = 'inline-flex items-center justify-center font-bold font-body transition-all duration-300 rounded-xl active:scale-95';
+  const baseStyles = 'inline-flex items-center justify-center font-bold font-body transition-all duration-300 rounded-xl active:scale-95 cursor-pointer';
   
   // Variant styles
   const variants = {

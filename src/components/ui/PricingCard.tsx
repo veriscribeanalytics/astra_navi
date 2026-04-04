@@ -30,15 +30,15 @@ const PricingCard: React.FC<PricingCardProps> = ({
       padding="lg" 
       allowOverflow={isRecommended}
       className={`
-        flex flex-col items-center 
+        flex flex-col items-center h-full
         ${isRecommended 
-          ? 'border-2 border-secondary relative shadow-xl shadow-secondary/5 md:scale-105 z-20 transition-transform duration-300' 
-          : 'transition-transform duration-200 hover:scale-[1.01]'
+          ? 'border-2 border-secondary relative shadow-2xl shadow-secondary/10 md:scale-105 z-20' 
+          : 'border border-secondary/10'
         }
       `}
     >
       {isRecommended && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-secondary text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2 rounded-full shadow-lg">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-secondary text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-1.5 rounded-full shadow-md z-30">
           Recommended
         </div>
       )}
@@ -60,10 +60,13 @@ const PricingCard: React.FC<PricingCardProps> = ({
         ))}
       </ul>
       
+      {/* Spacer to push button to bottom if heights differ */}
+      <div className="flex-grow" />
+
       <Button 
-        variant={variant} 
+        variant={isRecommended ? 'primary' : 'secondary'} 
         fullWidth 
-        className={`mt-auto py-4 rounded-xl ${variant === 'secondary' ? 'border-2' : 'hover:scale-[1.02]'}`}
+        className={`mt-8 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] ${!isRecommended ? 'border-secondary/40' : ''}`}
         onClick={onSubscribe}
       >
         {buttonText}

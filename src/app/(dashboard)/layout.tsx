@@ -21,7 +21,7 @@ export default function DashboardLayout({
   if (!isLoggedIn) return null; // Avoid flicker
 
   return (
-    <div className="dashboard-shell pt-[65px]">
+    <div className="dashboard-shell">
       {children}
     </div>
   );

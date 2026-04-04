@@ -12,14 +12,23 @@ export default function DashboardHome() {
     const { user } = useAuth();
     const router = useRouter();
     const [quickQuery, setQuickQuery] = useState("");
+    const [customQuestion, setCustomQuestion] = useState("");
 
     const userName = user?.email ? user.email.split('@')[0] : "Seeker";
 
     const handleQuickQuery = (e: React.FormEvent) => {
         e.preventDefault();
         if (quickQuery.trim()) {
-            router.push('/chat');
+            localStorage.setItem('astranavi_pending_message', quickQuery.trim());
         }
+        router.push('/chat');
+    };
+
+    const handleQuickAsk = (question: string) => {
+        if (question.trim()) {
+            localStorage.setItem('astranavi_pending_message', question.trim());
+        }
+        router.push('/chat');
     };
 
     return (
@@ -39,12 +48,16 @@ export default function DashboardHome() {
                             AstraNavi Intelligence
                         </div>
                         
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-headline mb-8 text-foreground tracking-tight leading-[1.1]">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-headline mb-4 text-foreground tracking-tight leading-[1.1]">
                             Welcome back, <br className="hidden lg:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-amber-500 capitalize">
-                                {userName}
+                                {user?.name || user?.email || "Seeker"}
                             </span>.
                         </h1>
+
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg3)] border border-indigo-500/20 text-[10px] text-indigo-400 font-medium mb-8 uppercase tracking-widest shadow-sm">
+                            <span className="text-sm">🪐</span> Saturn Mahadasha • Mercury Antardasha • Mar–Dec 2026
+                        </div>
 
                         <form onSubmit={handleQuickQuery} className="w-full max-w-xl group">
                             <Card padding="none" hoverable className="rounded-2xl md:rounded-full !bg-surface p-2.5 flex flex-col sm:flex-row gap-3 items-center relative z-20">
@@ -79,10 +92,44 @@ export default function DashboardHome() {
                 </div>
             </section>
 
-            {/* SEAMLESS DIVIDER */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="h-px bg-gradient-to-r from-transparent via-secondary/10 to-transparent my-10" />
+            {/* TODAY BAND - 8 items */}
+            <div className="w-full bg-surface/50 border-y border-[var(--border2)] overflow-x-auto custom-scrollbar relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between min-w-[800px] gap-2">
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Energy</div>
+                        <div className="text-xs font-bold text-emerald-400">Positive</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Tithi</div>
+                        <div className="text-xs font-bold text-foreground">Chaturdashi</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Nakshatra</div>
+                        <div className="text-xs font-bold text-foreground">U. Bhadra</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Rahu Kaal</div>
+                        <div className="text-xs font-bold text-red-400">06:14–07:48</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Lucky No.</div>
+                        <div className="text-xs font-bold text-secondary">8</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Lucky Colour</div>
+                        <div className="text-xs font-bold text-secondary">Blue</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Sunrise</div>
+                        <div className="text-xs font-bold text-foreground">06:28</div>
+                    </div>
+                    <div className="flex-1 text-center px-2 py-1 border-r border-[var(--border)] last:border-0 border-opacity-50">
+                        <div className="text-[9px] text-foreground/50 tracking-widest uppercase mb-1">Shubh Time</div>
+                        <div className="text-xs font-bold text-emerald-400">09:30–11:00</div>
+                    </div>
+                </div>
             </div>
+            <div className="h-8 relative z-10 w-full"></div>
 
             {/* SECTION 1.5: THE ASTRAL ARCHIVES */}
             <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
@@ -90,7 +137,7 @@ export default function DashboardHome() {
                     <h3 className="text-xl lg:text-2xl font-headline font-bold text-foreground flex items-center gap-2">
                         <Clock className="w-6 h-6 text-secondary" /> The Astral Archives
                     </h3>
-                    <Link href="/birth-chart" className="text-xs font-bold text-secondary hover:text-amber-400 transition-colors flex items-center gap-1 uppercase tracking-widest bg-secondary/5 px-3 py-1.5 rounded-full border border-secondary/20 hover:border-secondary/40">
+                    <Link href="/chat" className="text-xs font-bold text-secondary hover:text-amber-400 transition-colors flex items-center gap-1 uppercase tracking-widest bg-secondary/5 px-3 py-1.5 rounded-full border border-secondary/20 hover:border-secondary/40">
                         View All <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
@@ -123,7 +170,7 @@ export default function DashboardHome() {
                     </Card>
                     
                     {/* Add New */}
-                    <Link href="/birth-chart" className="block focus:outline-none">
+                    <Link href="/chat" className="block focus:outline-none">
                         <Card variant="bordered" padding="md" className="h-full flex flex-col items-center justify-center text-center group cursor-pointer border-dashed border-secondary/30 hover:!border-secondary/60 hover:bg-secondary/5 !rounded-[24px] min-h-[160px]">
                             <div className="w-12 h-12 rounded-2xl bg-surface border border-secondary/20 group-hover:border-secondary/40 flex items-center justify-center mb-4 transition-colors">
                                 <Plus className="w-5 h-5 text-foreground/50 group-hover:text-secondary" />
@@ -147,75 +194,92 @@ export default function DashboardHome() {
                     {/* LEFT COLUMN: Astrologers & Remedies */}
                     <div className="flex-1 flex flex-col gap-8">
                         
-                        {/* Live Now Header */}
+                        {/* TODAY HOROSCOPE */}
+                        <Card variant="elevated" padding="md" className="!rounded-[32px] relative group border-indigo-500/10 hover:border-indigo-500/30">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 relative z-10">
+                                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                    <span className="text-2xl opacity-80">♏</span> Vrishchika • Today's Reading
+                                </h3>
+                                <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1.5 rounded-full border border-indigo-500/20 font-bold uppercase tracking-widest whitespace-nowrap">AI-Personalised</span>
+                            </div>
+                            <p className="text-sm text-foreground/70 leading-relaxed mb-6 relative z-10">
+                                Mars aspects your 10th house — strong career momentum today. A conversation at work may open an unexpected door. Avoid conflict after 6pm as Moon enters Rahu axis.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 relative z-10">
+                                <div className="flex items-center gap-3">
+                                    <span className="w-14 text-[9px] text-foreground/50 uppercase font-bold tracking-widest">Career</span>
+                                    <div className="flex-1 h-1.5 bg-[var(--bg)] border border-[var(--border2)] rounded-full overflow-hidden">
+                                        <div className="h-full bg-secondary w-[82%] rounded-full"></div>
+                                    </div>
+                                    <span className="w-6 text-right text-[10px] text-secondary font-bold">82</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="w-14 text-[9px] text-foreground/50 uppercase font-bold tracking-widest">Love</span>
+                                    <div className="flex-1 h-1.5 bg-[var(--bg)] border border-[var(--border2)] rounded-full overflow-hidden">
+                                        <div className="h-full bg-purple-400 w-[65%] rounded-full"></div>
+                                    </div>
+                                    <span className="w-6 text-right text-[10px] text-purple-400 font-bold">65</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="w-14 text-[9px] text-foreground/50 uppercase font-bold tracking-widest">Finance</span>
+                                    <div className="flex-1 h-1.5 bg-[var(--bg)] border border-[var(--border2)] rounded-full overflow-hidden">
+                                        <div className="h-full bg-secondary w-[74%] rounded-full"></div>
+                                    </div>
+                                    <span className="w-6 text-right text-[10px] text-secondary font-bold">74</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="w-14 text-[9px] text-foreground/50 uppercase font-bold tracking-widest">Health</span>
+                                    <div className="flex-1 h-1.5 bg-[var(--bg)] border border-[var(--border2)] rounded-full overflow-hidden">
+                                        <div className="h-full bg-emerald-400 w-[58%] rounded-full"></div>
+                                    </div>
+                                    <span className="w-6 text-right text-[10px] text-emerald-400 font-bold">58</span>
+                                </div>
+                            </div>
+                        </Card>
+                        
+                        {/* SECTION: NAVI IS LIVE (Replaces Top Astrologers) */}
                         <div className="flex items-center justify-between">
-                            <h2 className="text-2xl lg:text-3xl font-headline font-bold text-foreground">Live Now - Top Astrologers</h2>
-                            <div className="flex items-center gap-2 bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/20">
-                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">AI Experts Online</span>
+                            <h2 className="text-2xl lg:text-3xl font-headline font-bold text-foreground">AI Intelligence</h2>
+                            <div className="flex items-center gap-2 bg-secondary/10 px-3 py-1.5 rounded-full border border-secondary/20">
+                                <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
+                                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Navi is Live</span>
                             </div>
                         </div>
 
-                        {/* Astrologer Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Pandit Ramesh */}
-                            <Card variant="elevated" padding="md" className="group !rounded-[32px]">
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="w-20 h-20 rounded-[20px] overflow-hidden bg-surface shrink-0 relative flex flex-col items-center justify-end border border-secondary/10">
-                                        <div className="w-full h-full bg-orange-500/10 absolute inset-0 mix-blend-screen"></div>
-                                        <div className="text-4xl mb-2 z-10">👳🏽‍♂️</div>
-                                        <div className="absolute -bottom-2.5 text-[9px] font-bold bg-[#110f22] text-secondary px-2 py-0.5 rounded-md z-20 whitespace-nowrap border border-secondary/20 tracking-wider shadow-md">EXP 15YRS</div>
-                                    </div>
-                                    <div className="flex-1 pt-1">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-headline font-bold text-lg text-foreground leading-tight">Pandit<br/>Ramesh Sharma</h3>
-                                            <div className="flex items-center text-xs font-bold text-[#facc15] bg-[#facc15]/10 px-2 py-0.5 rounded-md">
-                                                <Sparkles className="w-3 h-3 mr-1" /> 4.9
-                                            </div>
+                        <Card variant="elevated" padding="none" className="!rounded-[40px] overflow-hidden group border-secondary/20 relative min-h-[300px] flex flex-col justify-center">
+                            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-amber-500/5 group-hover:opacity-100 opacity-60 transition-opacity duration-700 pointer-events-none" />
+                            <div className="flex flex-col lg:flex-row items-center p-8 sm:p-10 gap-8 relative z-10">
+                                <div className="shrink-0 relative">
+                                     <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-[32px] bg-surface/50 backdrop-blur-sm border-2 border-secondary/20 flex items-center justify-center text-5xl sm:text-6xl shadow-2xl shadow-secondary/10 group-hover:scale-105 transition-all duration-700">
+                                        🤖
+                                     </div>
+                                     <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shadow-lg border-[3px] border-[var(--bg3)]">
+                                        <Sparkles className="w-5 h-5 text-on-primary" />
+                                     </div>
+                                </div>
+                                <div className="flex-1 text-center lg:text-left">
+                                    <h3 className="text-2xl sm:text-3xl font-headline font-bold text-foreground mb-3 leading-tight tracking-tight">
+                                        Navi is ready to <br className="hidden sm:block"/>guide your path
+                                    </h3>
+                                    <p className="text-foreground/60 text-sm sm:text-base max-w-xl mb-6 leading-relaxed">
+                                        Connect with 5,000+ years of Vedic wisdom synthesized by cutting-edge AI. Your personal guide is waiting.
+                                    </p>
+                                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                                        <Button 
+                                            variant="primary" 
+                                            size="md" 
+                                            onClick={() => router.push('/chat')}
+                                            className="px-10 py-5 rounded-2xl text-black font-bold shadow-xl shadow-secondary/20 bg-gradient-to-r from-secondary to-amber-500 border-none hover:scale-105 active:scale-95 transition-transform"
+                                        >
+                                            Consult Navi Now
+                                        </Button>
+                                        <div className="text-[9px] uppercase font-bold tracking-[0.2em] text-foreground/30">
+                                            Instant • Private • 24/7
                                         </div>
-                                        <p className="text-[10px] text-foreground/50 mt-2 font-mono uppercase tracking-widest">Vedic, Vastu, Palmistry</p>
-                                        <p className="font-bold text-secondary mt-2 text-lg">₹35 <span className="text-[9px] text-foreground/40 font-bold uppercase tracking-widest">/ Min</span></p>
                                     </div>
                                 </div>
-                                <div className="flex gap-3">
-                                    <Button variant="secondary" className="flex-1 bg-surface border-transparent text-foreground/80 hover:bg-secondary/5 py-2.5 rounded-2xl text-sm font-bold shadow-none">
-                                        <Phone className="w-4 h-4 mr-2 opacity-70" /> Call
-                                    </Button>
-                                    <Button variant="primary" className="flex-1 py-2.5 rounded-2xl text-sm font-bold bg-gradient-to-br from-secondary to-amber-600 border-none text-black shadow-lg shadow-amber-500/10">
-                                        <MessageSquare className="w-4 h-4 mr-2" /> Chat Now
-                                    </Button>
-                                </div>
-                            </Card>
-
-                            {/* Sadhvi Ananya */}
-                            <Card variant="elevated" padding="md" className="group !rounded-[32px]">
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="w-20 h-20 rounded-[20px] overflow-hidden bg-surface shrink-0 relative flex flex-col items-center justify-end border border-secondary/10">
-                                        <div className="w-full h-full bg-green-500/10 absolute inset-0 mix-blend-screen"></div>
-                                        <div className="text-4xl mb-2 z-10">🧘‍♀️</div>
-                                        <div className="absolute -bottom-2.5 text-[9px] font-bold bg-[#110f22] text-secondary px-2 py-0.5 rounded-md z-20 whitespace-nowrap border border-secondary/20 tracking-wider shadow-md">EXP 8YRS</div>
-                                    </div>
-                                    <div className="flex-1 pt-1">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-headline font-bold text-lg text-foreground leading-tight">Sadhvi<br/>Ananya Devi</h3>
-                                            <div className="flex items-center text-xs font-bold text-[#facc15] bg-[#facc15]/10 px-2 py-0.5 rounded-md">
-                                                <Sparkles className="w-3 h-3 mr-1" /> 5.0
-                                            </div>
-                                        </div>
-                                        <p className="text-[10px] text-foreground/50 mt-2 font-mono uppercase tracking-widest line-clamp-1">KP System, Nadi, Face</p>
-                                        <p className="font-bold text-secondary mt-2 text-lg">₹45 <span className="text-[9px] text-foreground/40 font-bold uppercase tracking-widest">/ Min</span></p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-3">
-                                    <Button variant="secondary" className="flex-1 bg-surface border-transparent text-foreground/80 hover:bg-secondary/5 py-2.5 rounded-2xl text-sm font-bold shadow-none">
-                                        <Phone className="w-4 h-4 mr-2 opacity-70" /> Call
-                                    </Button>
-                                    <Button variant="primary" className="flex-1 py-2.5 rounded-2xl text-sm font-bold bg-gradient-to-br from-secondary to-amber-600 border-none text-black shadow-lg shadow-amber-500/10">
-                                        <MessageSquare className="w-4 h-4 mr-2" /> Chat Now
-                                    </Button>
-                                </div>
-                            </Card>
-                        </div>
+                            </div>
+                        </Card>
 
                         {/* Weekly Planetary Remedies */}
                         <Card variant="elevated" padding="lg" allowOverflow className="!rounded-[32px] mt-2 relative">
@@ -331,6 +395,29 @@ export default function DashboardHome() {
                                     <span className="text-foreground/60">Yoga</span>
                                     <span className="text-secondary font-bold text-base">Saubhagya</span>
                                 </div>
+                            </div>
+                        </Card>
+
+                        {/* Quick Ask Navi */}
+                        <Card variant="elevated" padding="md" className="!rounded-[40px] relative bg-indigo-500/5 border border-indigo-500/10">
+                            <h4 className="text-sm font-bold text-indigo-400 mb-4 flex items-center gap-2">
+                                🤖 Quick Ask Navi
+                            </h4>
+                            <div className="flex flex-col gap-2 mb-4">
+                                <button onClick={() => handleQuickAsk("When will I see a breakthrough in my career or financial growth?")} className="text-left text-xs font-medium text-indigo-300 bg-background/50 border border-indigo-500/10 px-4 py-2.5 rounded-[14px] hover:border-indigo-400/40 hover:bg-background transition-all hover:-translate-y-0.5 duration-300">When will I see a breakthrough in my career or financial growth?</button>
+                                <button onClick={() => handleQuickAsk("What does my birth chart reveal about my future life partner?")} className="text-left text-xs font-medium text-indigo-300 bg-background/50 border border-indigo-500/10 px-4 py-2.5 rounded-[14px] hover:border-indigo-400/40 hover:bg-background transition-all hover:-translate-y-0.5 duration-300">What does my birth chart reveal about my future life partner?</button>
+                                <button onClick={() => handleQuickAsk("Which planetary Mahadasha am I currently in and what are its effects?")} className="text-left text-xs font-medium text-indigo-300 bg-background/50 border border-indigo-500/10 px-4 py-2.5 rounded-[14px] hover:border-indigo-400/40 hover:bg-background transition-all hover:-translate-y-0.5 duration-300">Which planetary Mahadasha am I currently in and what are its effects?</button>
+                            </div>
+                            <div className="flex gap-2 items-center bg-background border border-indigo-500/15 p-2 rounded-[16px]">
+                                <input 
+                                    type="text" 
+                                    placeholder="Your own question..." 
+                                    value={customQuestion}
+                                    onChange={(e) => setCustomQuestion(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleQuickAsk(customQuestion)}
+                                    className="flex-1 w-[120px] bg-transparent border-none text-xs px-2 text-foreground focus:outline-none" 
+                                />
+                                <button onClick={() => handleQuickAsk(customQuestion)} className="bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors shrink-0">Ask ✦</button>
                             </div>
                         </Card>
 

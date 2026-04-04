@@ -8,9 +8,9 @@ const ThemeToggle = () => {
     useEffect(() => {
         // Check initial theme
         const root = window.document.documentElement;
-        const initialColorValue = root.classList.contains('dark') || 
-                                (window.matchMedia('(prefers-color-scheme: dark)').matches && !root.classList.contains('light'));
-        setIsDark(initialColorValue);
+        const storageTheme = localStorage.getItem('theme');
+        const isCurrentlyDark = root.classList.contains('dark') || storageTheme === 'dark';
+        setIsDark(isCurrentlyDark);
     }, []);
 
     const toggleTheme = () => {
@@ -31,7 +31,7 @@ const ThemeToggle = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg bg-surface hover:bg-surface-variant transition-colors border border-secondary/10 group active:scale-95"
+            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg bg-surface hover:bg-surface-variant transition-colors border border-secondary/10 group active:scale-95 cursor-pointer"
             aria-label="Toggle Dark Mode"
         >
             <span className={`material-symbols-outlined text-lg transition-all duration-500 ${isDark ? 'text-secondary rotate-[360deg]' : 'text-primary'}`}>

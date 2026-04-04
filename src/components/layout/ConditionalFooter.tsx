@@ -8,7 +8,7 @@ const ConditionalFooter = () => {
     const pathname = usePathname();
     
     // List of routes where we DON'T want the footer
-    const noFooterRoutes = ['/chat', '/login'];
+    const noFooterRoutes = ['/chat', '/login', '/profile'];
     
     // Check if the current path starts with any of the restricted routes
     const isDashboard = noFooterRoutes.some(route => pathname.startsWith(route));

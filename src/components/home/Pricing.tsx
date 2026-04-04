@@ -8,51 +8,64 @@ const Pricing = () => {
             price: '₹0',
             period: '/forever',
             features: [
+                'Free Kundli Generation',
                 'Daily Horoscope',
-                'Basic Kundli Report',
-                'Public Chat Access'
+                'Basic AI Chat (5 min/day)',
+                'Zodiac Insights'
             ],
-            buttonText: 'Get Started'
+            buttonText: 'Start Free'
         },
         {
             title: 'Pro',
             price: '₹299',
             period: '/mo',
             features: [
-                'Advanced Kundli PDF',
-                'Priority Support Chat',
-                '1 Free Question/mo',
-                'Personalized Ritual Advice'
+                'Unlimited AI Chat',
+                'Advanced Kundli Reports (PDF)',
+                'Personalized Predictions',
+                'Gemstone Recommendations',
+                'Priority Support'
             ],
             isRecommended: true,
-            variant: 'primary' as const
+            variant: 'primary' as const,
+            badge: 'Most Popular'
         },
         {
             title: 'Annual',
-            price: '₹1999',
+            price: '₹2,999',
             period: '/year',
             features: [
                 'Everything in Pro',
-                '20% Off Consultations',
-                'Lifetime Report Storage'
+                'Save 17% vs Monthly',
+                'Lifetime Report Storage',
+                'Early Access to Features',
+                'Kundli Matching Tool'
             ],
-            buttonText: 'Go Annual'
+            buttonText: 'Best Value',
+            badge: 'Save 17%'
         }
     ];
 
     return (
-        <section className="py-12 sm:py-16 lg:py-24 bg-background dark:bg-transparent relative overflow-hidden">
+        <section className="py-8 sm:py-16 lg:py-24 bg-transparent relative overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10 text-center">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-bold text-primary mb-6">Choose Your Astrology Path</h2>
-                <p className="text-primary/60 font-medium mb-10 sm:mb-16 max-w-2xl mx-auto">Get deeper insights and priority access to world-renowned astrologers with our premium plans.</p>
+                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-headline font-bold text-primary mb-3 sm:mb-6">Choose Your Astrology Path</h2>
+                <p className="text-sm sm:text-base text-primary/60 font-medium mb-8 sm:mb-16 max-w-2xl mx-auto">Get deeper insights and priority access to world-renowned astrologers with our premium plans.</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8 max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto items-stretch">
                     {plans.map((plan) => (
-                        <PricingCard 
-                            key={plan.title}
-                            {...plan}
-                        />
+                        <div key={plan.title} className="h-full">
+                            <PricingCard 
+                                {...plan}
+                            />
+                        </div>
                     ))}
+                </div>
+
+                <div className="mt-8 sm:mt-12 text-center">
+                    <span className="text-xs sm:text-sm font-semibold text-secondary hover:underline cursor-pointer opacity-70">
+                        View Detailed Comparison &rarr;
+                    </span>
                 </div>
             </div>
         </section>

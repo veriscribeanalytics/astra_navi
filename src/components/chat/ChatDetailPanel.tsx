@@ -5,15 +5,9 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import TopicPill from '@/components/ui/TopicPill';
-
-const luckyGrid = [
-  { label: 'Lucky colour', value: 'Blue', color: '#3b82f6' },
-  { label: 'Lucky number', value: '8', color: undefined },
-  { label: 'Energy', value: 'Positive', color: '#22c55e' },
-  { label: 'Moon in', value: 'U. Bhadra', color: undefined },
-  { label: 'Rahu Kaal', value: '06:14–07:48', color: '#ef4444' },
-  { label: 'Shubh time', value: '09:30–11:00', color: '#22c55e' },
-];
+import { useAuth } from '@/context/AuthContext';
+import { useChat } from '@/context/ChatContext';
+import { X } from 'lucide-react';
 
 const topicPills = [
   { icon: '💼', label: 'Career & Finance' },
@@ -26,61 +20,107 @@ const topicPills = [
   { icon: '🪐', label: 'Current Transits' },
 ];
 
-const ChatDetailPanel: React.FC = () => {
+/* ---------- Chart Rating Display ---------- */
+const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
+  if (rating == null) return null;
+
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating - fullStars >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+
   return (
-    <aside className="chat-right-sidebar display-flex">
-      {/* My Birth Chart Mini Card */}
-      <div className="mb-5">
-        <SidebarSectionLabel variant="gold">MY BIRTH CHART</SidebarSectionLabel>
+    <div className="flex items-center gap-1.5">
+      <div className="flex gap-px text-secondary text-xs">
+        {Array(fullStars).fill(0).map((_, i) => <span key={`f${i}`}>★</span>)}
+        {hasHalf && <span>★</span>}
+        {Array(emptyStars).fill(0).map((_, i) => <span key={`e${i}`} className="opacity-25">★</span>)}
+      </div>
+      <span className="text-[10px] text-on-surface-variant/60 font-semibold">{rating.toFixed(1)}/5</span>
+    </div>
+  );
+};
+
+const ChatDetailPanel: React.FC = () => {
+  const { user } = useAuth();
+  const { activeChat, inputText, setInputText, setIsRightPanelOpen } = useChat();
+
+  // Profile fields from DB — show "—" if missing
+  const profileFields: [string, string][] = [
+    ['Name', user?.name || '—'],
+    ['Date of Birth', user?.dob || '—'],
+    ['Time of Birth', user?.tob || '—'],
+    ['Place of Birth', user?.pob || '—'],
+    ['Lagna', '—'],
+    ['Moon Sign', '—'],
+    ['Sun Sign', '—'],
+    ['Nakshatra', '—'],
+    ['Dasha', '—'],
+  ];
+
+  return (
+    <>
+      {/* My Birth Chart Panel — Data from DB */}
+      <div className="mb-1">
+        <div className="flex items-center justify-between mb-2">
+          <SidebarSectionLabel variant="gold">MY BIRTH CHART</SidebarSectionLabel>
+          <button 
+            onClick={() => setIsRightPanelOpen(false)}
+            className="xl:hidden p-1.5 text-on-surface-variant/50 hover:text-on-surface transition-colors -mt-2"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[11px] font-bold text-on-surface">Priya Sharma</p>
+            <p className="text-[11px] font-bold text-on-surface">
+              {user?.name || user?.email || '—'}
+            </p>
             <span className="text-[10px] text-secondary cursor-pointer hover:underline">Edit</span>
           </div>
-          {[
-            ['Lagna', 'Vrishchika ♏'],
-            ['Moon sign', 'Mesha ♈'],
-            ['Sun sign', 'Kanya ♍'],
-            ['Nakshatra', 'Ashwini'],
-            ['Dasha', 'Saturn · 2024–43'],
-          ].map(([label, value]) => (
+          {profileFields.map(([label, value]) => (
             <div key={label} className="flex justify-between py-0.5 border-b border-outline-variant/10 last:border-b-0">
               <span className="text-[10px] text-on-surface-variant/60">{label}</span>
-              <span className="text-[10px] text-on-surface-variant font-semibold">{value}</span>
+              <span className={`text-[10px] font-semibold ${value === '—' ? 'text-on-surface-variant/25' : 'text-on-surface-variant'}`}>
+                {value}
+              </span>
             </div>
           ))}
         </Card>
       </div>
 
-      {/* Today For You */}
-      <div className="mb-5">
-        <SidebarSectionLabel variant="gold">TODAY FOR YOU</SidebarSectionLabel>
-        <div className="grid grid-cols-2 gap-1.5">
-          {luckyGrid.map((item) => (
-            <Card key={item.label} variant="bordered" padding="sm" className="!bg-surface/40 !rounded-lg !px-2.5 !py-2 !border-outline-variant/5" hoverable={false}>
-              <p className="text-[9px] text-on-surface-variant/40 mb-0.5">{item.label}</p>
-              <p
-                className="text-xs font-bold text-on-surface-variant"
-                style={item.color ? { color: item.color } : undefined}
-              >
-                {item.value}
+      {/* Chat Rating Summary */}
+      {activeChat && (
+        <div className="mb-1">
+          <SidebarSectionLabel variant="gold">CHAT RATING</SidebarSectionLabel>
+          <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3">
+            {activeChat.averageRating != null ? (
+              <div className="flex flex-col items-center gap-1.5 py-1">
+                <ChatRatingDisplay rating={activeChat.averageRating} />
+                <p className="text-[10px] text-on-surface-variant/40">
+                  Average across {activeChat.messages.filter(m => m.type === 'ai' && m.rating != null).length} rated responses
+                </p>
+              </div>
+            ) : (
+              <p className="text-[10px] text-on-surface-variant/30 text-center py-2">
+                Rate AI responses to see average here
               </p>
-            </Card>
-          ))}
+            )}
+          </Card>
         </div>
-      </div>
+      )}
 
-      {/* Fixed Footer Content Wrapper */}
-      <div className="shrink-0 pb-4 pt-2 border-t border-outline-variant/10">
-        {/* Topic Pills */}
-        <div className="px-3.5 pt-2">
+      {/* Topic Pills */}
+      <div className="shrink-0 pt-1 border-t border-outline-variant/10">
+        <div className="px-0 pt-2">
           <SidebarSectionLabel>ASK ABOUT</SidebarSectionLabel>
           <div className="grid grid-cols-2 gap-1 gap-x-2">
             {topicPills.map((topic) => (
-              <TopicPill 
+              <TopicPill
                 key={topic.label}
                 icon={topic.icon}
                 label={topic.label}
+                active={inputText === topic.label}
+                onClick={() => setInputText(topic.label)}
               />
             ))}
           </div>
@@ -96,7 +136,7 @@ const ChatDetailPanel: React.FC = () => {
           Check Kundli Match ✦
         </Button>
       </Card>
-    </aside>
+    </>
   );
 };
 
