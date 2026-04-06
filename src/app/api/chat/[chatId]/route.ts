@@ -47,9 +47,15 @@ export async function DELETE(
     const db = client.db('astra-navi-database');
     const chats = db.collection('chats');
 
-    await chats.deleteOne({ _id: new ObjectId(chatId) });
+    const result = await chats.deleteOne({ _id: new ObjectId(chatId) });
 
-    return NextResponse.json({ message: 'Chat deleted' });
+    console.log(`Deletion requested for chat ${chatId}. Deleted count: ${result.deletedCount}`);
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: 'Chat not found in database' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Celestial record successfully cleared', deletedCount: result.deletedCount });
   } catch (error) {
     console.error('Delete chat error:', error);
     return NextResponse.json({ error: 'Failed to delete chat' }, { status: 500 });

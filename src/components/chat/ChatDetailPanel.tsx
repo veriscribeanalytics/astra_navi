@@ -42,7 +42,7 @@ const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
 
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
-  const { activeChat, inputText, setInputText, setIsRightPanelOpen } = useChat();
+  const { activeChat, activeChatId, inputText, setInputText, setIsRightPanelOpen, createNewChat, sendMessage } = useChat();
 
   // Profile fields from DB — show "—" if missing
   const profileFields: [string, string][] = [
@@ -56,6 +56,17 @@ const ChatDetailPanel: React.FC = () => {
     ['Nakshatra', '—'],
     ['Dasha', '—'],
   ];
+
+  const handleTopicClick = async (topicLabel: string) => {
+    // Set the input text
+    setInputText(topicLabel);
+    
+    // If no active chat, create a new one with this topic as the first message
+    if (!activeChatId || activeChatId.startsWith('temp-')) {
+      await createNewChat(topicLabel);
+    }
+    // If there's an active chat, just set the input (user can send manually)
+  };
 
   return (
     <>
@@ -120,22 +131,12 @@ const ChatDetailPanel: React.FC = () => {
                 icon={topic.icon}
                 label={topic.label}
                 active={inputText === topic.label}
-                onClick={() => setInputText(topic.label)}
+                onClick={() => handleTopicClick(topic.label)}
               />
             ))}
           </div>
         </div>
       </div>
-
-      {/* Compatibility Teaser */}
-      <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-secondary/12 !bg-secondary/5 !p-2.5">
-        <p className="text-[11px] text-on-surface-variant/60 mb-2 leading-relaxed">
-          Check your Kundli compatibility with a partner — 36-gun Milan + Dosha analysis
-        </p>
-        <Button size="sm" fullWidth className="!text-[10px] !py-1.5">
-          Check Kundli Match ✦
-        </Button>
-      </Card>
     </>
   );
 };

@@ -1,0 +1,31 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const backendUrl = process.env.AI_BACKEND_URL;
+    
+    if (!backendUrl) {
+      return NextResponse.json({ 
+        error: 'AI Backend Configuration Missing', 
+        message: 'AI_BACKEND_URL environment variable is not set. Please configure it in .env.local'
+      }, { status: 500 });
+    }
+
+    const response = await fetch(`${backendUrl}/api/chart`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status });
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Chart proxy error:', error);
+    return NextResponse.json({ error: 'Failed to fetch chart data' }, { status: 500 });
+  }
+}

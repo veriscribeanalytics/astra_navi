@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
+import { generateUUID } from '@/lib/uuid';
 
 /* ---------- Types ---------- */
 export interface ChatMessage {
@@ -39,14 +40,16 @@ interface ChatContextType {
   isLoadingChats: boolean;
   isLoadingMessages: boolean;
   isSending: boolean;
+  hasMoreChats: boolean;
   loadChats: () => Promise<void>;
+  loadMoreChats: () => Promise<void>;
   selectChat: (chatId: string) => Promise<void>;
   createNewChat: (initialMessage?: string) => Promise<string | null>;
   sendMessage: (text: string, overrideChatId?: string) => Promise<void>;
   rateMessage: (messageId: string, rating: number) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
   inputText: string;
-  setInputText: (text: string) => void;
+  setInputText: React.Dispatch<React.SetStateAction<string>>;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   isRightPanelOpen: boolean;
@@ -66,21 +69,45 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [inputText, setInputText] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+  const [hasMoreChats, setHasMoreChats] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const initialLoadDone = useRef(false);
 
   const loadChats = useCallback(async () => {
     if (!user?.email) return;
     setIsLoadingChats(true);
     try {
-      const res = await fetch(`/api/chat?email=${encodeURIComponent(user.email)}`);
+      const res = await fetch(`/api/chat?email=${encodeURIComponent(user.email)}&limit=20`);
       const data = await res.json();
-      if (data.chats) setChats(data.chats);
+      if (data.chats) {
+        setChats(data.chats);
+        setHasMoreChats(data.hasMore || false);
+        setNextCursor(data.nextCursor || null);
+      }
     } catch (err) {
       console.error('Failed to load chats:', err);
     } finally {
       setIsLoadingChats(false);
     }
   }, [user?.email]);
+
+  const loadMoreChats = useCallback(async () => {
+    if (!user?.email || !hasMoreChats || !nextCursor || isLoadingChats) return;
+    setIsLoadingChats(true);
+    try {
+      const res = await fetch(`/api/chat?email=${encodeURIComponent(user.email)}&limit=20&cursor=${nextCursor}`);
+      const data = await res.json();
+      if (data.chats) {
+        setChats(prev => [...prev, ...data.chats]);
+        setHasMoreChats(data.hasMore || false);
+        setNextCursor(data.nextCursor || null);
+      }
+    } catch (err) {
+      console.error('Failed to load more chats:', err);
+    } finally {
+      setIsLoadingChats(false);
+    }
+  }, [user?.email, hasMoreChats, nextCursor, isLoadingChats]);
 
   const selectChat = useCallback(async (chatId: string) => {
     setActiveChatId(chatId);
@@ -99,24 +126,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendMessage = useCallback(async (text: string, overrideChatId?: string) => {
     let targetId = overrideChatId || activeChatId;
     if (!targetId || !text.trim() || !user?.email) return;
+    
+    // Request deduplication: prevent duplicate sends
+    if (isSending) return;
+    
     setIsSending(true);
-    const optimisticId = `user-temp-${Date.now()}`;
-    const optimisticMsg: ChatMessage = {
-      id: optimisticId,
+    
+    const now = new Date().toISOString();
+    const userMsgId = generateUUID();
+    const aiMsgId = generateUUID();
+    
+    const userMessage: ChatMessage = {
+      id: userMsgId,
       type: 'user',
-      text,
-      createdAt: new Date().toISOString()
+      text: text.trim(),
+      createdAt: now
+    };
+
+    const aiPlaceholder: ChatMessage = {
+      id: aiMsgId,
+      type: 'ai',
+      text: '',
+      createdAt: now
     };
 
     setActiveChat(prev => {
       if (!prev) return prev;
-      return { ...prev, messages: [...prev.messages, optimisticMsg] };
+      return { ...prev, messages: [...prev.messages, userMessage, aiPlaceholder] };
     });
 
     try {
-      const startTime = Date.now();
-      let responseData;
-
       if (targetId.startsWith('temp-')) {
         const createRes = await fetch('/api/chat', {
           method: 'POST',
@@ -125,50 +164,73 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         const createData = await createRes.json();
         if (createData.chat) {
-          const finalId = createData.chat._id;
-          setActiveChatId(finalId);
-          const res = await fetch(`/api/chat/${finalId}/message`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text }),
-          });
-          responseData = await res.json();
-          targetId = finalId;
+          targetId = createData.chat._id;
+          setActiveChatId(targetId);
         } else {
           throw new Error('Failed to instantiate temp chat in DB');
         }
-      } else {
-        const res = await fetch(`/api/chat/${targetId}/message`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
-        });
-        responseData = await res.json();
       }
 
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 2000 - elapsed);
-      if (remaining > 0) {
-          await new Promise(resolve => setTimeout(resolve, remaining));
+      const res = await fetch(`/api/chat/${targetId}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to send message');
       }
 
-      if (responseData.userMessage && responseData.aiResponse) {
-        setActiveChat(prev => {
-          if (!prev) return prev;
-          const filteredMessages = prev.messages.filter(m => m.id !== optimisticId);
-          return {
-            ...prev,
-            messages: [...filteredMessages, responseData.userMessage, responseData.aiResponse],
-          };
-        });
-        loadChats();
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          fullText += chunk;
+
+          setActiveChat(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              messages: prev.messages.map(m => 
+                m.id === aiMsgId ? { ...m, text: fullText } : m
+              )
+            };
+          });
+        }
       }
-    } catch (err) {
+
+      loadChats();
+    } catch (err: any) {
       console.error('Failed to send message:', err);
+      
+      let errorMsg = `I apologize, but I've encountered a celestial disturbance: ${err.message || 'Unknown error'}. Please try again.`;
+      
+      if (err.message?.includes('Birth Profile')) {
+        errorMsg = "Namaste! To give you an accurate reading, I need your birth date, time, and place. Please update your [Celestial Profile](/profile) first so I can align with your stars.";
+      }
+      
+      setActiveChat(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          messages: prev.messages.map(m => 
+            m.id === aiMsgId ? { ...m, text: errorMsg } : m
+          )
+        };
+      });
     } finally {
+
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user]);
+  }, [activeChatId, loadChats, user, isSending]);
+
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (!user?.email) return null;
@@ -176,13 +238,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
     const systemMessage: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       type: 'system',
       text: `Session started · Reading your chart${user?.dob ? ` · DOB: ${user.dob}` : ''}`,
       createdAt: now,
     };
     const welcomeMessage: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       type: 'ai',
       text: `Namaste${user?.name ? ` ${user.name}` : ''} ✦ I'm Navi, your AI Vedic astrologer. Ask me anything about your chart, transits, career, relationships, or timing of events.`,
       createdAt: now,
@@ -260,8 +322,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <ChatContext.Provider value={{
-      chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending,
-      loadChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat,
+      chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, hasMoreChats,
+      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat,
       inputText, setInputText, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen
     }}>
       {children}

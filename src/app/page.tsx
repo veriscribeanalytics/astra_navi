@@ -10,7 +10,7 @@ export default function Home() {
   if (isLoading) return null; // Prevent hydration flash
 
   return (
-    <main className="pt-24 flex-grow">
+    <main className="flex-grow">
        {isLoggedIn ? <DashboardHome /> : <LandingPage />}
     </main>
   );

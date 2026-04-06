@@ -1,6 +1,6 @@
-import React from 'react';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
+'use client';
+
+import React, { useRef, useEffect } from 'react';
 
 const rashiItems = [
     { id: 'aries', name: 'Mesh', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD8ckpFhxKrbaPuYEdxXzCk6mWJqeg-mFXapKG1VNsC9N5ktqs4Teixo6kWlK5CatPxDA-ZUzJluZdxEKP1m2hpJaU5BwE6DhXs-6wTQKkgC2Wm1dPahL4ItJRKV7Oy3GZPBwaby8lghtRgO2MNv2G1LGlgLvnBeCA8gbFPYUMIEWQ0x1SWMQEF8erY-582i2eT0jeboEE-qAQslnq1PeZ28e9NxHL_eH17HqM37zIGiYF4cXRju5pi5eDhU274G9Du3usPuhLWhbMz' },
@@ -17,28 +17,97 @@ const rashiItems = [
     { id: 'pisces', name: 'Meen', icon: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB8Q6hdfIyws-P56S0b1MiF8zkStFewla-Lm7VqKjFPA29JiVlD6s8kL-YTF7tgUJSWbHh5EEuaqllyYvJfRQEuCJQB8cSBLEEjwCQwg0djTCDtOHkfGMcU8hhpEt99cu5uzRIpFp-p3qrOcj7FoY9FWeaVtqsNjVYfBlLQitnlUg0WJFeqc3uus7DGGT_L56IGSVr7B8ly_sX8ToidFs4YuX8eSRpZeX15iYlqtzJn1qj8AZSOiP7pKpVhwqIpGt0SLeyG_UxhGdQJ' },
 ];
 
+/**
+ * ZodiacStrip: Exact 12 Sequential Rashi Strip
+ * Reverted the infinite circular logic and simplified to exactly 12 sequential zodiac signs.
+ * Retains the premium custom scrollbar for better UX.
+ */
 const ZodiacStrip = () => {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    
+    // Drag state stored in Ref for performance
+    const dragData = useRef({
+        isDragging: false,
+        startX: 0,
+        scrollLeft: 0
+    });
+
+    useEffect(() => {
+        const scroller = scrollRef.current;
+        if (!scroller) return;
+
+        // Custom Drag Handling
+        const handleMouseDown = (e: MouseEvent) => {
+            dragData.current.isDragging = true;
+            dragData.current.startX = e.pageX - scroller.offsetLeft;
+            dragData.current.scrollLeft = scroller.scrollLeft;
+            scroller.classList.add('cursor-grabbing');
+            scroller.classList.remove('cursor-grab');
+            scroller.style.scrollBehavior = 'auto'; 
+        };
+
+        const handleMouseUp = () => {
+            dragData.current.isDragging = false;
+            scroller.classList.remove('cursor-grabbing');
+            scroller.classList.add('cursor-grab');
+            scroller.style.scrollBehavior = 'smooth';
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!dragData.current.isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - scroller.offsetLeft;
+            const walk = (x - dragData.current.startX) * 1.5;
+            scroller.scrollLeft = dragData.current.scrollLeft - walk;
+        };
+
+        scroller.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            scroller.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, []);
+
     return (
-        <section className="bg-transparent border border-secondary/20 backdrop-blur-sm relative overflow-hidden h-[44px] sm:h-[52px] flex items-center mx-3 sm:mx-8 lg:mx-12 rounded-[12px] sm:rounded-[16px] mt-6 sm:mt-8 mb-3 sm:mb-4">
-            <div className="w-full flex space-x-6 sm:space-x-10 px-4 sm:px-6 overflow-x-auto custom-scrollbar whitespace-nowrap items-center h-full hide-scrollbar">
-                {rashiItems.map((rashi) => (
-                    <div 
-                        key={rashi.id}
-                        className="flex items-center gap-1.5 sm:gap-2 group cursor-pointer transition-colors text-foreground/60 hover:text-foreground font-medium"
-                    >
-                        <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shrink-0">
-                            <img 
-                                alt={`${rashi.name} Icon`} 
-                                className="w-full h-full object-contain transition-all opacity-40 group-hover:opacity-100 grayscale group-hover:grayscale-0" 
-                                src={rashi.icon}
-                            />
+        <section className="bg-surface/30 border-y border-secondary/10 backdrop-blur-md relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full">
+            
+            <div 
+                ref={scrollRef}
+                className="flex overflow-x-auto whitespace-nowrap items-center h-full custom-scrollbar select-none cursor-grab scroll-smooth py-1 w-full"
+                style={{ 
+                    WebkitOverflowScrolling: 'touch',
+                    willChange: 'scroll-position'
+                }}
+            >
+                <div className="flex items-center mx-auto px-4 sm:px-8">
+                    {rashiItems.map((rashi) => (
+                        <div 
+                            key={rashi.id}
+                            className="flex items-center gap-2 sm:gap-4 px-5 sm:px-8 group/item cursor-pointer transform hover:scale-110 shrink-0 transition-all duration-300"
+                            style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+                        >
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0">
+                                <img 
+                                    alt={`${rashi.name} Icon`} 
+                                    className="w-full h-full object-contain opacity-40 group-hover/item:opacity-100 grayscale hover:grayscale-0 transition-all filter group-hover/item:drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]" 
+                                    src={rashi.icon}
+                                    draggable={false}
+                                />
+                            </div>
+                            <span className="text-[10px] sm:text-[12px] uppercase tracking-[0.2em] font-headline font-bold text-foreground/30 group-hover/item:text-secondary mb-[1px] transition-colors">
+                                {rashi.name}
+                            </span>
                         </div>
-                        <span className="text-[9px] sm:text-[11px] uppercase tracking-widest shrink-0">
-                            {rashi.name}
-                        </span>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
+            
+            <div className="absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
         </section>
     );
 };

@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
+import { authRateLimiter } from '@/middleware/rateLimit';
 
 export async function POST(req: Request) {
     try {
-        const { email, password, name, dob, tob, pob } = await req.json();
+        const { email, password, name, dob, tob, pob, phoneNumber } = await req.json();
 
         if (!email || !password) {
             return NextResponse.json({ error: "Email and password are required celestial inputs." }, { status: 400 });
+        }
+
+        // Rate limiting: 5 attempts per 15 minutes per IP
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+        const rateLimitResult = authRateLimiter(`register:${ip}`);
+        
+        if (!rateLimitResult.allowed) {
+            const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
+            return NextResponse.json({ 
+                error: `Too many registration attempts. Please try again in ${resetInMinutes} minutes.` 
+            }, { status: 429 });
         }
 
         const client = await clientPromise;
@@ -31,6 +43,7 @@ export async function POST(req: Request) {
             dob: dob || undefined,
             tob: tob || undefined,
             pob: pob || undefined,
+            phoneNumber: phoneNumber || undefined,
             createdAt: new Date(),
             preferences: {
                 horoscope: true,
@@ -48,7 +61,8 @@ export async function POST(req: Request) {
                 name: newUser.name,
                 dob: newUser.dob,
                 tob: newUser.tob,
-                pob: newUser.pob
+                pob: newUser.pob,
+                phoneNumber: newUser.phoneNumber
             }
         }, { status: 201 });
 

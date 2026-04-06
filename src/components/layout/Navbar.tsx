@@ -26,7 +26,8 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     const { setIsMobileMenuOpen } = useChat();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const desktopDropdownRef = useRef<HTMLDivElement>(null);
+    const mobileDropdownRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLElement>(null);
 
     const isChatPage = pathname?.startsWith('/chat');
@@ -45,7 +46,11 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            const isOutsideDesktop = !desktopDropdownRef.current || !desktopDropdownRef.current.contains(target);
+            const isOutsideMobile = !mobileDropdownRef.current || !mobileDropdownRef.current.contains(target);
+            
+            if (isOutsideDesktop && isOutsideMobile) {
                 setIsDropdownOpen(false);
             }
         };
@@ -105,7 +110,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                     {!isLoggedIn ? (
                         <Button href="/login" variant="primary" size="md" className="!px-6 shadow-md shadow-secondary/10">Login</Button>
                     ) : (
-                        <div className="relative z-50" ref={dropdownRef}>
+                        <div className="relative z-50" ref={desktopDropdownRef}>
                             <div className="profile-ring-glow cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                                 <div className="profile-comet-dot"></div>
                                 <div className="profile-avatar-content !text-sm">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
@@ -132,9 +137,9 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
             </div>
 
             {/* ===== MOBILE NAVBAR (<md) ===== */}
-            <div className="flex md:hidden items-center justify-between px-5 py-3.5 w-full relative h-[64px]">
-                {/* Left Section: Single Hamburger */}
-                <div className="flex-1 flex justify-start">
+            <div className="flex md:hidden items-center px-4 py-3 w-full relative h-[64px]">
+                {/* Left Section (33%) */}
+                <div className="flex-[1] flex justify-start">
                     <button 
                         onClick={() => setIsMenuOpen(!isMenuOpen)} 
                         className="p-2.5 -ml-2 text-primary/80 hover:text-primary transition-all rounded-xl hover:bg-primary/5 active:scale-90"
@@ -143,23 +148,26 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                     </button>
                 </div>
 
-                {/* Center: Logo */}
-                <div className="flex-1 flex justify-center">
+                {/* Center Section (Absolute Centering for perfect alignment) */}
+                <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
                     <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tighter text-primary font-headline">
                         <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={28} width={28} className="object-contain rounded-md" priority />
                         <span className="whitespace-nowrap">Astra Navi</span>
                     </Link>
                 </div>
 
-                {/* Right: Actions */}
-                <div className="flex-1 flex justify-end items-center gap-3">
+                {/* Right Section (33%) */}
+                <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
                     <ThemeToggle />
                     {!isLoggedIn ? (
-                        <Link href="/login" className="w-9 h-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary"><User className="w-4.5 h-4.5" /></Link>
+                        <Link href="/login" className="w-9 h-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
+                            <User className="w-4.5 h-4.5" />
+                        </Link>
                     ) : (
-                        <div className="relative z-50" ref={dropdownRef}>
+                        <div className="relative z-50" ref={mobileDropdownRef}>
                             <div className="profile-ring-glow !w-9 !h-9 cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-                                <div className="profile-avatar-content !text-xs">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
+                                <div className="profile-comet-dot"></div>
+                                <div className="profile-avatar-content !text-xs font-bold">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </div>
                             {isDropdownOpen && (
                                 <div className="absolute top-[56px] right-0 w-60 bg-background/98 backdrop-blur-2xl border border-secondary/20 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">

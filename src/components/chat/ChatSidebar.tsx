@@ -23,7 +23,7 @@ function formatChatDate(dateStr: string): string {
 }
 
 const ChatSidebar: React.FC = () => {
-  const { chats, activeChatId, isLoadingChats, selectChat, createNewChat, deleteChat, setIsMobileMenuOpen } = useChat();
+  const { chats, activeChatId, isLoadingChats, hasMoreChats, selectChat, createNewChat, deleteChat, loadMoreChats, setIsMobileMenuOpen } = useChat();
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [deleteModalChat, setDeleteModalChat] = useState<ChatSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -78,7 +78,10 @@ const ChatSidebar: React.FC = () => {
     <>
       {/* Sidebar Close Button (Top right of side area) */}
       <button 
-        onClick={() => setIsMobileMenuOpen(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsMobileMenuOpen(false);
+        }}
         className="lg:hidden absolute top-4 right-4 p-2 text-on-surface-variant/40 hover:text-secondary hover:bg-secondary/10 rounded-full transition-all z-[1001]"
         aria-label="Close sidebar"
       >
@@ -107,7 +110,7 @@ const ChatSidebar: React.FC = () => {
           <SidebarSectionLabel>RECENT CHATS</SidebarSectionLabel>
         </div>
         <div className="flex-1 overflow-y-auto px-3.5 pb-2 custom-scrollbar">
-          {isLoadingChats ? (
+          {isLoadingChats && chats.length === 0 ? (
             <div className="flex flex-col gap-2 animate-pulse">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="h-10 rounded-lg bg-surface-variant/30" />
@@ -124,58 +127,96 @@ const ChatSidebar: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-0.5">
-              {chats.map((chat) => {
-                const isActive = chat._id === activeChatId;
-                return (
-                  <div
-                    key={chat._id}
-                    onClick={() => {
-                        selectChat(chat._id);
-                        setIsMobileMenuOpen(false);
-                    }}
-                    className={`group relative px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 pr-8 ${
-                      isActive
-                        ? 'bg-secondary/8 border border-secondary/20 shadow-sm shadow-secondary/5'
-                        : 'hover:bg-surface-variant/30 border border-transparent'
-                    }`}
-                  >
-                    <p className={`text-[13px] truncate mb-0.5 ${
-                      isActive ? 'text-secondary font-bold' : 'text-on-surface-variant font-medium'
-                    }`}>
-                      {chat.title}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] text-on-surface-variant/40">
-                        {formatChatDate(chat.updatedAt || chat.createdAt)}
-                      </p>
-                      {chat.averageRating != null && (
-                        <span className="text-[9px] text-secondary/70 flex items-center gap-0.5">
-                          ★ {chat.averageRating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* ... (3-dot menu) ... */}
-                    <div 
-                      className={`absolute right-2 top-2 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
+            <>
+              <div className="flex flex-col gap-0.5">
+                {chats.map((chat) => {
+                  const isActive = chat._id === activeChatId;
+                  return (
+                    <div
+                      key={chat._id}
+                      onClick={() => {
+                          selectChat(chat._id);
+                          setIsMobileMenuOpen(false);
+                      }}
+                      className={`group relative px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 pr-8 ${
+                        isActive
+                          ? 'bg-secondary/8 border border-secondary/20 shadow-sm shadow-secondary/5'
+                          : 'hover:bg-surface-variant/30 border border-transparent'
+                      }`}
                     >
-                        <button 
-                            onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            setMenuOpenId(prev => prev === chat._id ? null : chat._id);
-                            }}
-                            className="chat-menu-btn text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-variant/50 p-1 rounded transition-colors cursor-pointer"
-                        >
-                            <MoreVertical size={14} />
-                        </button>
-                        {/* Dropdown would be here as before */}
+                      <p className={`text-[13px] truncate mb-0.5 ${
+                        isActive ? 'text-secondary font-bold' : 'text-on-surface-variant font-medium'
+                      }`}>
+                        {chat.title}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] text-on-surface-variant/40">
+                          {formatChatDate(chat.updatedAt || chat.createdAt)}
+                        </p>
+                        {chat.averageRating != null && (
+                          <span className="text-[9px] text-secondary/70 flex items-center gap-0.5">
+                            ★ {chat.averageRating.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* ... (3-dot menu) ... */}
+                      <div 
+                        className={`absolute right-2 top-2 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
+                      >
+                          <button 
+                              onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              setMenuOpenId(prev => prev === chat._id ? null : chat._id);
+                              }}
+                              className="chat-menu-btn text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-variant/50 p-1 rounded transition-colors cursor-pointer"
+                          >
+                              <MoreVertical size={14} />
+                          </button>
+                          
+                          {menuOpenId === chat._id && (
+                            <div className="chat-menu-dropdown absolute top-full right-0 mt-1 w-32 bg-background border border-outline-variant/20 rounded-xl shadow-xl z-50 py-1.5 animate-in fade-in zoom-in-95 duration-100">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMenuOpenId(null);
+                                  handleDownload(chat._id, chat.title);
+                                }}
+                                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-on-surface-variant hover:bg-surface-variant/40 flex items-center gap-2 transition-colors cursor-pointer"
+                              >
+                                <Download size={13} /> Download
+                              </button>
+                              <div className="h-px bg-outline-variant/10 my-1 mx-2" />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMenuOpenId(null);
+                                  setDeleteModalChat(chat);
+                                }}
+                                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-red-400 hover:bg-red-400/10 flex items-center gap-2 transition-colors cursor-pointer"
+                              >
+                                <Trash2 size={13} /> Delete
+                              </button>
+                            </div>
+                          )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+              
+              {/* Load More Button */}
+              {hasMoreChats && (
+                <button
+                  onClick={loadMoreChats}
+                  disabled={isLoadingChats}
+                  className="w-full mt-2 py-2 text-xs font-bold text-secondary hover:bg-secondary/5 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {isLoadingChats ? 'Loading...' : 'Load More Chats'}
+                </button>
+              )}
+            </>
           )}
         </div>
 

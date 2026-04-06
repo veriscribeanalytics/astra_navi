@@ -9,6 +9,7 @@ interface User {
     dob?: string;
     tob?: string;
     pob?: string;
+    phoneNumber?: string;
 }
 
 interface AuthContextType {
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 dob: localStorage.getItem('astranavi_user_dob') || undefined,
                 tob: localStorage.getItem('astranavi_user_tob') || undefined,
                 pob: localStorage.getItem('astranavi_user_pob') || undefined,
+                phoneNumber: localStorage.getItem('astranavi_user_phone') || undefined,
             });
         }
     }, []);
@@ -59,6 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (profile?.dob) localStorage.setItem('astranavi_user_dob', profile.dob);
         if (profile?.tob) localStorage.setItem('astranavi_user_tob', profile.tob);
         if (profile?.pob) localStorage.setItem('astranavi_user_pob', profile.pob);
+        if (profile?.phoneNumber) localStorage.setItem('astranavi_user_phone', profile.phoneNumber);
     };
 
     const logout = () => {
@@ -70,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('astranavi_user_dob');
         localStorage.removeItem('astranavi_user_tob');
         localStorage.removeItem('astranavi_user_pob');
+        localStorage.removeItem('astranavi_user_phone');
     };
 
     const showLoading = (message?: string, duration: number = 2000) => {

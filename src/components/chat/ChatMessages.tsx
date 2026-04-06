@@ -77,19 +77,23 @@ const ChatMessages: React.FC = () => {
   const { activeChat, isLoadingMessages, isSending, createNewChat, rateMessage } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages or isSending change
+  // Auto-scroll to bottom when messages or isSending change (debounced for performance)
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
+    const timeoutId = setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [activeChat?.messages?.length, isSending]);
 
   // No active chat
   if (!activeChat && !isLoadingMessages) {
-    return <EmptyState onNewChat={createNewChat} />;
+    return <EmptyState onNewChat={() => createNewChat()} />;
   }
 
   // Loading
@@ -109,15 +113,37 @@ const ChatMessages: React.FC = () => {
 
         const isAi = msg.type === 'ai';
 
+        const handleSpeak = (text: string) => {
+          // Remove HTML tags if present (though dangerouslySetInnerHTML is used)
+          const cleanText = text.replace(/<[^>]*>/g, '');
+          const utterance = new SpeechSynthesisUtterance(cleanText);
+          
+          // Detect language (simplified: default to English but could be enhanced)
+          // Web Speech API will use system default voice
+          window.speechSynthesis.cancel(); // Stop any current speech
+          window.speechSynthesis.speak(utterance);
+        };
+
         const copyAction = isAi ? (
-          <button
-            onClick={() => navigator.clipboard.writeText(msg.text)}
-            className="group/copy flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
-            title="Copy Message"
-          >
-            <span className="material-symbols-outlined text-[16px] group-active/copy:scale-90 transition-transform">content_copy</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => handleSpeak(msg.text)}
+              className="group/speak flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
+              title="Speak Message"
+            >
+              <span className="material-symbols-outlined text-[16px] group-active/speak:scale-90 transition-transform">volume_up</span>
+            </button>
+            <button
+              onClick={() => navigator.clipboard.writeText(msg.text.replace(/<[^>]*>/g, ''))}
+              className="group/copy flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
+              title="Copy Message"
+            >
+              <span className="material-symbols-outlined text-[16px] group-active/copy:scale-90 transition-transform">content_copy</span>
+            </button>
+          </div>
         ) : null;
+
+        if (isAi && !msg.text && isSending) return null;
 
         return (
           <div key={msg.id || i}>

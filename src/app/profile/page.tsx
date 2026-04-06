@@ -81,8 +81,8 @@ export default function ProfileSettingsPage() {
     };
 
     return (
-        <main className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/5 blur-[100px] rounded-full z-0 pointer-events-none"></div>
+        <main className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center relative overflow-x-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
             <div className="w-full max-w-xl relative z-10">
                 <div className="text-center mb-10">
@@ -104,7 +104,7 @@ export default function ProfileSettingsPage() {
                     )}
                 </div>
 
-                <Card padding="lg" className="cosmic-glow border-secondary/20" hoverable={false}>
+                <Card padding="md" className="cosmic-glow border-secondary/20" hoverable={false}>
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="grid grid-cols-1 gap-6">
                             <Input 

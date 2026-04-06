@@ -29,9 +29,11 @@ const ChatPageClient: React.FC = () => {
       {/* Mobile Overlays */}
       <div 
         className={`sidebar-overlay ${(isMobileMenuOpen || isRightPanelOpen) ? 'active' : ''}`} 
-        onClick={() => {
-          setIsMobileMenuOpen(false);
-          setIsRightPanelOpen(false);
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setIsMobileMenuOpen(false);
+            setIsRightPanelOpen(false);
+          }
         }}
       />
 

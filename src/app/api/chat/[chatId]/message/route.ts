@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { generateUUID } from '@/lib/uuid';
 
-// POST /api/chat/[chatId]/message — Send a message and get a placeholder AI response
+// POST /api/chat/[chatId]/message — Send a message and get AI response from the model
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ chatId: string }> }
@@ -21,50 +22,179 @@ export async function POST(
     const client = await clientPromise;
     const db = client.db('astra-navi-database');
     const chats = db.collection('chats');
+    const users = db.collection('users');
 
-    const now = new Date();
-
-    const userMessage = {
-      id: crypto.randomUUID(),
-      type: 'user',
-      text: text.trim(),
-      createdAt: now,
-    };
-
-    // Placeholder AI response since bot isn't connected yet
-    const aiResponse = {
-      id: crypto.randomUUID(),
-      type: 'ai',
-      text: `Thank you for asking about "<strong>${text.trim().substring(0, 80)}</strong>". I'm currently being connected to the Vedic astrology engine. Once fully connected, I'll provide detailed insights based on your birth chart, planetary transits, and dasha periods.<br/><br/>In the meantime, feel free to continue asking questions — they'll all be saved in your chat history. ✦`,
-      rating: null,
-      createdAt: now,
-    };
-
-    // Auto-title from first user message
     const chat = await chats.findOne({ _id: new ObjectId(chatId) });
-    const hasUserMessage = chat?.messages?.some((m: { type: string }) => m.type === 'user');
-
-    const updateOps: Record<string, unknown> = {
-      $push: { messages: { $each: [userMessage, aiResponse] } } as unknown,
-      $set: { updatedAt: now } as unknown,
-    };
-
-    if (!hasUserMessage) {
-      (updateOps.$set as Record<string, unknown>).title = text.trim().substring(0, 60);
+    if (!chat) {
+      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
     }
 
-    await chats.updateOne(
-      { _id: new ObjectId(chatId) },
-      updateOps
-    );
+    const userEmail = chat.userEmail;
+    const userProfile = await users.findOne({ email: userEmail });
 
-    // Simulated DB/AI processing delay (3.5 seconds)
-    // Ensures the frontend 3-step animation ('Reading', 'Analyzing', 'Typing') completes smoothly.
-    await new Promise((resolve) => setTimeout(resolve, 3500));
+    if (!userProfile?.dob || !userProfile?.tob || !userProfile?.pob) {
+      return NextResponse.json({ 
+        error: 'Incomplete Birth Profile', 
+        message: 'Namaste! To give you an accurate reading, I need your birth date, time, and place. Please update your profile first.',
+        requiresProfile: true
+      }, { status: 400 });
+    }
 
-    return NextResponse.json({ userMessage, aiResponse });
+    const backendUrl = process.env.AI_BACKEND_URL;
+    if (!backendUrl) {
+      return NextResponse.json({ 
+        error: 'AI Backend Configuration Missing', 
+        message: 'AI_BACKEND_URL environment variable is not set. Please configure it in .env.local'
+      }, { status: 500 });
+    }
+
+    // 1. Ensure chart context exists
+    let chartContext = userProfile.chartContext;
+    if (!chartContext) {
+      console.log(`Generating chart context for ${userProfile.email}...`);
+      const chartRes = await fetch(`${backendUrl}/api/chart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userProfile.name || 'Friend',
+          dob: userProfile.dob,
+          tob: userProfile.tob,
+          place: userProfile.pob
+        }),
+      });
+
+      if (chartRes.ok) {
+        const chartData = await chartRes.json();
+        chartContext = chartData.chart_context;
+        // Save back to user profile for future use
+        await users.updateOne(
+          { email: userEmail },
+          { $set: { chartContext, updatedAt: new Date() } }
+        );
+      } else {
+        throw new Error('Failed to compute birth chart context from backend.');
+      }
+    }
+
+    // 2. Prepare the streaming request to /api/ask
+    const askRes = await fetch(`${backendUrl}/api/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: text,
+        chart_context: chartContext,
+        name: userProfile.name || 'Friend',
+        lang: userProfile.preferredLanguage || 'english',
+        dob: userProfile.dob
+      }),
+    });
+
+    if (!askRes.ok) {
+      const errorData = await askRes.json();
+      return NextResponse.json({ error: errorData.error || 'AI Backend Error' }, { status: askRes.status });
+    }
+
+    // 3. Setup Response Stream
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    
+    let fullAiResponse = "";
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = askRes.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const dataStr = line.slice(6).trim();
+                if (dataStr === '[DONE]') continue;
+                
+                try {
+                  const data = JSON.parse(dataStr);
+                  if (data.token) {
+                    fullAiResponse += data.token;
+                    controller.enqueue(encoder.encode(data.token));
+                  } else if (data.error) {
+                    controller.enqueue(encoder.encode(`[ERROR: ${data.error}]` ));
+                  }
+                } catch (e) {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+
+          // After stream completes, save to DB
+          try {
+            const now = new Date();
+            const userMessage = {
+              id: generateUUID(),
+              type: 'user',
+              text: text.trim(),
+              createdAt: now,
+            };
+            const aiResponse = {
+              id: generateUUID(),
+              type: 'ai',
+              text: fullAiResponse,
+              rating: null,
+              createdAt: new Date(),
+            };
+
+            const hasUserMessage = chat.messages?.some((m: any) => m.type === 'user');
+            
+            const updateOps: any = {
+              $push: { messages: { $each: [userMessage, aiResponse] } },
+              $set: { updatedAt: now },
+            };
+
+            // Set title if this is the first user message
+            if (!hasUserMessage) {
+              updateOps.$set.title = text.trim().substring(0, 70);
+            }
+
+            const result = await chats.updateOne(
+              { _id: new ObjectId(chatId) },
+              updateOps
+            );
+
+            console.log(`Saved messages to chat ${chatId}. Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}`);
+          } catch (dbError) {
+            console.error("Database save error after stream:", dbError);
+          }
+          
+        } catch (error) {
+          console.error("Streaming error:", error);
+          controller.error(error);
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+      },
+    });
+
   } catch (error) {
     console.error('Send message error:', error);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }
+

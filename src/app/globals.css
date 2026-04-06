@@ -90,7 +90,7 @@ body {
 }
 
 @utility celestial-silk {
-  background-image: 
+  background-image:
     /* Subtle geometric grid */
     radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--secondary) 15%, transparent) 1px, transparent 0),
     /* Soft mesh glows - Powered by --pattern-opacity */
@@ -146,6 +146,7 @@ a {
   .chat-layout {
     grid-template-columns: 240px 1fr 0px;
   }
+
   .chat-right-sidebar {
     display: none !important;
   }
@@ -173,17 +174,19 @@ a {
   .chat-left-sidebar {
     position: fixed !important;
     left: -280px !important;
-    top: calc(var(--navbar-height, 64px) + 56px) !important; /* Starts below Navbar + ChatHeader */
+    top: calc(var(--navbar-height, 64px) + 56px) !important;
+    /* Starts below Navbar + ChatHeader */
     bottom: 0 !important;
     width: 280px !important;
     transform: none !important;
-    box-shadow: 20px 0 50px rgba(0,0,0,0.2) !important;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.2) !important;
     z-index: 999 !important;
-    background: var(--surface) !important; /* Theme-aware background */
+    background: var(--surface) !important;
+    /* Theme-aware background */
     border-top-right-radius: 20px;
     border-top: 1px solid var(--outline-variant);
   }
-  
+
   .chat-left-sidebar.mobile-open {
     left: 0 !important;
     display: flex !important;
@@ -212,10 +215,11 @@ a {
     bottom: 0 !important;
     width: 300px !important;
     transform: none !important;
-    box-shadow: -20px 0 50px rgba(0,0,0,0.3) !important;
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.3) !important;
     display: flex !important;
     z-index: 999 !important;
   }
+
   .chat-right-sidebar.mobile-open {
     right: 0 !important;
   }
@@ -225,13 +229,15 @@ a {
 .sidebar-overlay {
   position: fixed !important;
   inset: 0 !important;
-  background: rgba(0,0,0,0.6) !important;
+  background: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(8px) !important;
-  z-index: 888 !important; /* Below sidebar, above everything else */
+  z-index: 888 !important;
+  /* Below sidebar, above everything else */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
+
 .sidebar-overlay.active {
   opacity: 1 !important;
   pointer-events: auto !important;
@@ -557,10 +563,14 @@ body:has(.dashboard-shell)>main {
    ============================================================ */
 
 @keyframes typing-bounce {
-  0%, 60%, 100% {
+
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
     opacity: 0.3;
   }
+
   30% {
     transform: translateY(-4px);
     opacity: 1;
@@ -635,7 +645,7 @@ body:has(.dashboard-shell)>main {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--secondary) 25%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--secondary) 50%, transparent);
   z-index: 5;
 }
 
@@ -644,28 +654,59 @@ body:has(.dashboard-shell)>main {
    ============================================================ */
 
 @keyframes celestial-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.1; }
-  50% { transform: scale(1.6); opacity: 0.25; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+
+  50% {
+    transform: scale(1.6);
+    opacity: 0.25;
+  }
 }
 
 @keyframes orbit {
-  from { transform: rotate(0deg) translateX(48px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(48px) rotate(-360deg); }
+  from {
+    transform: rotate(0deg) translateX(48px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(48px) rotate(-360deg);
+  }
 }
 
 @keyframes orbit-reverse {
-  from { transform: rotate(360deg) translateX(38px) rotate(-360deg); }
-  to { transform: rotate(0deg) translateX(38px) rotate(0deg); }
+  from {
+    transform: rotate(360deg) translateX(38px) rotate(-360deg);
+  }
+
+  to {
+    transform: rotate(0deg) translateX(38px) rotate(0deg);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-top {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @utility animate-celestial-pulse {
@@ -693,11 +734,34 @@ body:has(.dashboard-shell)>main {
   animation-name: slide-in-top;
 }
 
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.3333%); }
+}
+
+@utility animate-marquee {
+  animation: marquee 40s linear infinite;
+  will-change: transform;
+}
+
+@utility pause {
+  animation-play-state: paused;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .profile-avatar-content {
   position: relative;
   z-index: 15;
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;

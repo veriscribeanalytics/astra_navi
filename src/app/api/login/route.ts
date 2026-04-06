@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
+import { authRateLimiter } from '@/middleware/rateLimit';
 
 export async function POST(req: Request) {
     try {
@@ -8,6 +9,17 @@ export async function POST(req: Request) {
 
         if (!email || !password) {
             return NextResponse.json({ error: "Email and password are required credentials." }, { status: 400 });
+        }
+
+        // Rate limiting: 5 attempts per 15 minutes per IP
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+        const rateLimitResult = authRateLimiter(`login:${ip}`);
+        
+        if (!rateLimitResult.allowed) {
+            const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
+            return NextResponse.json({ 
+                error: `Too many login attempts. Please try again in ${resetInMinutes} minutes.` 
+            }, { status: 429 });
         }
 
         const client = await clientPromise;
@@ -38,7 +50,8 @@ export async function POST(req: Request) {
                 name: user.name,
                 dob: user.dob,
                 tob: user.tob,
-                pob: user.pob
+                pob: user.pob,
+                phoneNumber: user.phoneNumber
             }
         }, { status: 200 });
 

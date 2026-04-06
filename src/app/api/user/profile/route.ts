@@ -6,9 +6,6 @@ export async function PUT(req: Request) {
         const body = await req.json();
         const { email, name, dob, tob, pob } = body;
 
-        console.log('--- PROFILE API DEBUG ---');
-        console.log('Request Body:', body);
-
         if (!email) {
             return NextResponse.json({ error: "Email is required to identify your celestial path." }, { status: 400 });
         }
@@ -26,19 +23,13 @@ export async function PUT(req: Request) {
                     dob, 
                     tob, 
                     pob,
+                    chartContext: null, // Reset to force recomputation on next message
                     updatedAt: new Date() 
                 } 
             }
         );
 
-        console.log('Update Result:', {
-            matched: result.matchedCount,
-            modified: result.modifiedCount,
-            upserted: result.upsertedId
-        });
-
         if (result.matchedCount === 0) {
-            console.log('NO RECORD FOUND for email:', email);
             return NextResponse.json({ error: "No celestial identity found with this email." }, { status: 404 });
         }
 

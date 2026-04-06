@@ -1,3 +1,6 @@
+'use client';
+
+import React from 'react';
 import { useChat } from '@/context/ChatContext';
 import { Menu, Info, History } from 'lucide-react';
 
@@ -13,7 +16,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = () => {
         <button 
           onClick={(e) => {
             e.stopPropagation();
-            console.log("NAVIGATING TO HISTORY...");
             setIsMobileMenuOpen(true);
           }}
           className="lg:hidden p-2 -ml-2 text-primary/60 hover:text-secondary transition-all active:scale-95"
@@ -37,6 +39,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = () => {
       </div>
 
       <div className="flex gap-1.5 sm:gap-2 items-center">
+        {/* TODO: Uncomment these features when ready to implement */}
+        {/* Share, Export PDF, and View Kundli buttons - Will be needed later */}
+        {/*
         <div className="hidden sm:flex gap-1.5 sm:gap-2">
           <button className="chat-header-btn">
             <span className="material-symbols-outlined text-sm">share</span>
@@ -52,6 +57,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = () => {
           <span className="hidden sm:inline">View full Kundli ✦</span>
           <span className="sm:hidden">Kundli ✦</span>
         </button>
+        */}
 
         {/* Info Toggle for Right Sidebar - HIDDEN ON MOBILE AS REQUESTED */}
         <button 

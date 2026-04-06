@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useChat } from "@/context/ChatContext";
 import { Sparkles, Moon, Sun, ArrowRight, Clock, Map, Phone, MessageSquare, Compass, PlayCircle, Plus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -10,9 +11,22 @@ import { useRouter } from "next/navigation";
 
 export default function DashboardHome() {
     const { user } = useAuth();
+    const { chats } = useChat();
     const router = useRouter();
     const [quickQuery, setQuickQuery] = useState("");
     const [customQuestion, setCustomQuestion] = useState("");
+
+    // Date formatting helper for archives
+    const formatArchiveDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - date.getTime()) / (86400000));
+        
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return date.toLocaleDateString('en-US', { weekday: 'short' });
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
 
     const userName = user?.email ? user.email.split('@')[0] : "Seeker";
 
@@ -143,31 +157,58 @@ export default function DashboardHome() {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Chart Item */}
-                    <Card variant="elevated" padding="md" className="group cursor-pointer !rounded-[24px]">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-[100px] pointer-events-none transition-colors group-hover:bg-secondary/10 z-0" />
-                        <div className="flex justify-between items-start mb-6 relative z-10">
-                            <div className="w-12 h-12 rounded-2xl bg-surface border border-secondary/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                <Map className="w-6 h-6 text-indigo-400" />
-                            </div>
-                            <div className="text-[10px] font-mono font-bold text-foreground/40 bg-foreground/5 px-2.5 py-1 rounded-md uppercase tracking-wider border border-secondary/10">Yesterday</div>
-                        </div>
-                        <h4 className="text-lg font-bold text-foreground/90 mb-1 group-hover:text-indigo-400 transition-colors relative z-10">Personal Kundli</h4>
-                        <p className="text-sm text-foreground/50 relative z-10">Vedic Chart • Aries Ascendant</p>
-                    </Card>
-
-                    {/* Chat Item */}
-                    <Card variant="elevated" padding="md" className="group cursor-pointer !rounded-[24px]">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-[100px] pointer-events-none transition-colors group-hover:bg-secondary/10 z-0" />
-                        <div className="flex justify-between items-start mb-6 relative z-10">
-                            <div className="w-12 h-12 rounded-2xl bg-surface border border-secondary/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                <Sparkles className="w-6 h-6 text-secondary" />
-                            </div>
-                            <div className="text-[10px] font-mono font-bold text-foreground/40 bg-foreground/5 px-2.5 py-1 rounded-md uppercase tracking-wider border border-secondary/10">Mar 22</div>
-                        </div>
-                        <h4 className="text-lg font-bold text-foreground/90 mb-1 group-hover:text-secondary transition-colors relative z-10">Career Trajectory 2026</h4>
-                        <p className="text-sm text-foreground/50 relative z-10">AI Consultation • 14 messages</p>
-                    </Card>
+                    {/* Render Real Archives if they exist, otherwise show high-fidelity placeholders */}
+                    {chats.length > 0 ? (
+                        chats.slice(0, 2).map((chat, idx) => (
+                            <Link key={chat._id} href={`/chat?id=${chat._id}`} className="block focus:outline-none">
+                                <Card variant="elevated" padding="md" className="group cursor-pointer !rounded-[24px] h-full relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-[100px] pointer-events-none transition-colors group-hover:bg-secondary/10 z-0" />
+                                    <div className="flex justify-between items-start mb-6 relative z-10">
+                                        <div className="w-12 h-12 rounded-2xl bg-surface border border-secondary/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                            {idx === 0 ? <Map className="w-6 h-6 text-indigo-400" /> : <Sparkles className="w-6 h-6 text-secondary" />}
+                                        </div>
+                                        <div className="text-[10px] font-mono font-bold text-foreground/40 bg-foreground/5 px-2.5 py-1 rounded-md uppercase tracking-wider border border-secondary/10">
+                                            {formatArchiveDate(chat.updatedAt)}
+                                        </div>
+                                    </div>
+                                    <h4 className="text-lg font-bold text-foreground/90 mb-1 group-hover:text-secondary transition-colors relative z-10 truncate">{chat.title}</h4>
+                                    <p className="text-sm text-foreground/50 relative z-10">
+                                        {idx === 0 ? 'Synthesis Analysis' : 'AI Consultation'} • {chat.averageRating ? `${chat.averageRating}★ rating` : 'Archived Path'}
+                                    </p>
+                                </Card>
+                            </Link>
+                        ))
+                    ) : (
+                        <>
+                            {/* Discovery / Action Cards for New Users */}
+                            <button onClick={() => handleQuickAsk("Analyze my Career and Wealth potential based on my birth chart.")} className="block w-full text-left focus:outline-none">
+                                <Card variant="elevated" padding="md" className="group cursor-pointer !rounded-[24px] h-full relative overflow-hidden border-indigo-500/20 hover:border-indigo-500/40 bg-indigo-500/5">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-[100px] pointer-events-none z-0" />
+                                    <div className="flex justify-between items-start mb-6 relative z-10">
+                                        <div className="w-12 h-12 rounded-2xl bg-surface border border-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Map className="w-6 h-6 text-indigo-400" />
+                                        </div>
+                                        <div className="text-[10px] font-mono font-bold text-indigo-400/60 bg-indigo-500/10 px-2.5 py-1 rounded-md uppercase tracking-wider">Start Here</div>
+                                    </div>
+                                    <h4 className="text-lg font-bold text-foreground/90 mb-1 group-hover:text-indigo-400 transition-colors relative z-10">Wealth Synthesis</h4>
+                                    <p className="text-xs text-foreground/50 relative z-10 font-medium">Analyze your Artha (wealth) house & career path.</p>
+                                </Card>
+                            </button>
+                            <button onClick={() => handleQuickAsk("What does my Kundli say about my Love life and future partner?")} className="block w-full text-left focus:outline-none">
+                                <Card variant="elevated" padding="md" className="group cursor-pointer !rounded-[24px] h-full relative overflow-hidden border-purple-500/20 hover:border-purple-500/40 bg-purple-500/5">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-[100px] pointer-events-none z-0" />
+                                    <div className="flex justify-between items-start mb-6 relative z-10">
+                                        <div className="w-12 h-12 rounded-2xl bg-surface border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Sparkles className="w-6 h-6 text-purple-400" />
+                                        </div>
+                                        <div className="text-[10px] font-mono font-bold text-purple-400/60 bg-purple-500/10 px-2.5 py-1 rounded-md uppercase tracking-wider">Discover</div>
+                                    </div>
+                                    <h4 className="text-lg font-bold text-foreground/90 mb-1 group-hover:text-purple-400 transition-colors relative z-10">Relationship Path</h4>
+                                    <p className="text-xs text-foreground/50 relative z-10 font-medium">Understand your 7th house and Venus alignment.</p>
+                                </Card>
+                            </button>
+                        </>
+                    )}
                     
                     {/* Add New */}
                     <Link href="/chat" className="block focus:outline-none">

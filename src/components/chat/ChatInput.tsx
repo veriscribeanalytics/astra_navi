@@ -7,12 +7,16 @@ const ChatInput: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendMessage, isSending, activeChat, inputText, setInputText } = useChat();
 
-  // Auto-resize textarea
+  // Auto-resize textarea (debounced for performance)
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
-    }
+    const timeoutId = setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
+      }
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, [inputText]);
 
   const handleSend = async () => {
@@ -26,6 +30,55 @@ const ChatInput: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Initialize Web Speech API
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInputText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        if (event.error === 'not-allowed') {
+          alert('Microphone permission denied. Please enable microphone access in your browser settings to use voice input.');
+        } else if (event.error === 'no-speech') {
+          // User didn't speak, just close gracefully
+        } else {
+          alert(`Voice input error: ${event.error}. Please try again.`);
+        }
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [setInputText]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+        alert('Voice input is not supported in your browser.');
+        return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      setIsListening(true);
+      recognitionRef.current.start();
     }
   };
 
@@ -52,12 +105,19 @@ const ChatInput: React.FC = () => {
             <button className="chat-input-icon-btn" title="Attach chart">
               <span className="material-symbols-outlined text-base">attach_file</span>
             </button>
-            <button className="chat-input-icon-btn" title="Voice input">
-              <span className="material-symbols-outlined text-base">mic</span>
+            <button 
+                className={`chat-input-icon-btn relative transition-colors ${isListening ? 'text-red-500 bg-red-500/10' : ''}`} 
+                onClick={toggleListening}
+                title={isListening ? "Stop listening" : "Voice input"}
+            >
+              {isListening && (
+                <span className="absolute inset-0 bg-red-500/20 rounded-full animate-ping" />
+              )}
+              <span className="material-symbols-outlined text-base relative z-10">{isListening ? 'mic_off' : 'mic'}</span>
             </button>
             <button
               className="chat-send-btn"
-              disabled={!inputText.trim() || isSending}
+              disabled={(!inputText.trim() && !isListening) || isSending}
               onClick={handleSend}
             >
               <span className="material-symbols-outlined text-lg">arrow_upward</span>
