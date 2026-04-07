@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { generateUUID } from '@/lib/uuid';
+import { ObjectId } from 'mongodb';
 
 // GET /api/chat?email=user@example.com&limit=20&cursor=lastChatId — List chats for a user with pagination
 export async function GET(req: NextRequest) {

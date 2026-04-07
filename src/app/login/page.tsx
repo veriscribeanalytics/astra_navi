@@ -112,24 +112,26 @@ export default function LoginPage() {
         }
     };
 
-    const handlePhoneLogin = () => {
-        setShowPhoneLogin(true);
-        setError('');
-    };
-
-    const handlePhoneSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        
-        // For now, just show a message that OTP will be sent
-        // Later you'll integrate Twilio/MSG91 here
-        showLoading("Sending OTP to your phone...", 2000);
-        
-        setTimeout(() => {
-            setError("Phone OTP feature coming soon! Please use email/password or Google for now.");
-            showLoading("", 0);
-        }, 2000);
-    };
+    /* 
+115:     const handlePhoneLogin = () => {
+116:         setShowPhoneLogin(true);
+117:         setError('');
+118:     };
+119: 
+120:     const handlePhoneSubmit = async (e: React.FormEvent) => {
+121:         e.preventDefault();
+122:         setError('');
+123:         
+124:         // For now, just show a message that OTP will be sent
+125:         // Later you'll integrate Twilio/MSG91 here
+126:         showLoading("Sending OTP to your phone...", 2000);
+127:         
+128:         setTimeout(() => {
+129:             setError("Phone OTP feature coming soon! Please use email/password or Google for now.");
+130:             showLoading("", 0);
+131:         }, 2000);
+132:     };
+    */
 
     return (
         <main className="min-h-screen pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 flex flex-col items-center justify-center relative overflow-x-hidden">
@@ -166,54 +168,10 @@ export default function LoginPage() {
                 </div>
 
                 <Card padding="lg" className="cosmic-glow border-secondary/10 !p-5 sm:!p-8" hoverable={false}>
-                    {showPhoneLogin ? (
-                        /* Phone Login Form */
-                        <form onSubmit={handlePhoneSubmit} className="space-y-4 sm:space-y-6">
-                            <div className="text-center mb-4">
-                                <h3 className="text-lg font-headline font-bold text-primary">Login with Phone</h3>
-                                <p className="text-xs text-on-surface-variant mt-1">We'll send you an OTP to verify</p>
-                            </div>
-
-                            <Input 
-                                label="Phone Number" 
-                                type="tel" 
-                                icon="phone" 
-                                placeholder="+91 98765 43210" 
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                required 
-                            />
-
-                            <Button 
-                                type="submit" 
-                                fullWidth 
-                                size="lg" 
-                                className="mt-3 sm:mt-4 shadow-lg shadow-secondary/20"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                                        Sending OTP...
-                                    </span>
-                                ) : (
-                                    "Send OTP"
-                                )}
-                            </Button>
-
-                            <button
-                                type="button"
-                                onClick={() => setShowPhoneLogin(false)}
-                                className="w-full text-xs text-on-surface-variant hover:text-primary transition-colors mt-4"
-                            >
-                                ← Back to other options
-                            </button>
-                        </form>
-                    ) : (
-                        /* Email/Password Form */
-                        <>
-                            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                                {isRegister && (
+                    {/* Email/Password Form */}
+                    <>
+                        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                                {/* isRegister && (
                                     <Input 
                                         label="Phone Number (Optional)" 
                                         type="tel" 
@@ -222,7 +180,7 @@ export default function LoginPage() {
                                         value={phoneNumber}
                                         onChange={(e) => setPhoneNumber(e.target.value)}
                                     />
-                                )}
+                                ) */}
                                 
                                 <Input 
                                     label="Email Address" 
@@ -311,7 +269,7 @@ export default function LoginPage() {
                             Continue with Google
                         </button>
 
-                        {/* Phone Login Button */}
+                        {/* Phone Login Button 
                         <button
                             type="button"
                             onClick={handlePhoneLogin}
@@ -321,9 +279,9 @@ export default function LoginPage() {
                             <span className="material-symbols-outlined text-secondary text-xl">phone_iphone</span>
                             Continue with Phone
                         </button>
+                        */}
                     </div>
                     </>
-                    )}
 
                     <div className="mt-6 sm:mt-8 text-center text-xs font-body text-on-surface-variant">
                         {isRegister ? "Already have an account?" : "Don't have an account?"}{' '}

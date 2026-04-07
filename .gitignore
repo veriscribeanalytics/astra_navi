@@ -41,4 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # internal documentation
-DEVELOPER_GUIDE.md
+*.md
+!README.md
