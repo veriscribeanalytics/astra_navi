@@ -50,11 +50,8 @@ const ChatDetailPanel: React.FC = () => {
     ['Date of Birth', user?.dob || '—'],
     ['Time of Birth', user?.tob || '—'],
     ['Place of Birth', user?.pob || '—'],
-    ['Lagna', '—'],
-    ['Moon Sign', '—'],
-    ['Sun Sign', '—'],
-    ['Nakshatra', '—'],
-    ['Dasha', '—'],
+    ['Moon Sign', user?.moonSign || '—'],
+    ['Sun Sign', user?.sunSign || '—'],
   ];
 
   const handleTopicClick = async (topicLabel: string) => {

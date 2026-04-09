@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
+import { getCurrentDateTime } from '@/lib/datetime';
 import { authRateLimiter } from '@/middleware/rateLimit';
 
 export async function POST(req: Request) {
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
             tob: tob || undefined,
             pob: pob || undefined,
             phoneNumber: phoneNumber || undefined,
-            createdAt: new Date(),
+            createdAt: getCurrentDateTime(),
             preferences: {
                 horoscope: true,
                 notifications: false

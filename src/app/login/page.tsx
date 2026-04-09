@@ -7,17 +7,18 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/useToast';
 import Image from 'next/image';
 
 export default function LoginPage() {
     const { login, showLoading, isLoading, isLoggedIn, user } = useAuth();
+    const { showToast, ToastContainer, success, error } = useToast();
     const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [showPhoneLogin, setShowPhoneLogin] = useState(false);
-    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
 
     // Redirect if already logged in
@@ -35,10 +36,14 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
         
         if (isRegister && password !== confirmPassword) {
-            setError("Celestial bodies are out of alignment! Passwords don't match.");
+            error("Celestial bodies are out of alignment! Passwords don't match.");
+            return;
+        }
+
+        if (password.length < 6) {
+            error("Password must be at least 6 characters long");
             return;
         }
 
@@ -67,7 +72,7 @@ export default function LoginPage() {
                 body: JSON.stringify({ 
                     email, 
                     password,
-                    ...(isRegister ? { ...profileData, phoneNumber } : {}) // Send profile details + phone ONLY when registering
+                    ...(isRegister ? profileData : {}) // Send profile details ONLY when registering
                 }),
             });
 
@@ -85,6 +90,8 @@ export default function LoginPage() {
                 // data.user now contains name, dob, tob, pob from the DB record!
                 login(email, data.user);
                 
+                success(isRegister ? 'Account created successfully!' : 'Welcome back!');
+                
                 // Smart redirect logic:
                 // If user has name and dob, they've completed profile → go to home
                 // If user is missing profile details → go to profile completion
@@ -96,7 +103,7 @@ export default function LoginPage() {
             }, 500);
 
         } catch (err: any) {
-            setError(err.message);
+            error(err.message);
             // Hide loading if error occurs
             showLoading("", 0);
         }
@@ -107,34 +114,14 @@ export default function LoginPage() {
         try {
             await signIn('google', { callbackUrl: '/' });
         } catch (err: any) {
-            setError("Google sign-in failed. Please try again.");
+            error("Google sign-in failed. Please try again.");
             showLoading("", 0);
         }
     };
 
-    /* 
-115:     const handlePhoneLogin = () => {
-116:         setShowPhoneLogin(true);
-117:         setError('');
-118:     };
-119: 
-120:     const handlePhoneSubmit = async (e: React.FormEvent) => {
-121:         e.preventDefault();
-122:         setError('');
-123:         
-124:         // For now, just show a message that OTP will be sent
-125:         // Later you'll integrate Twilio/MSG91 here
-126:         showLoading("Sending OTP to your phone...", 2000);
-127:         
-128:         setTimeout(() => {
-129:             setError("Phone OTP feature coming soon! Please use email/password or Google for now.");
-130:             showLoading("", 0);
-131:         }, 2000);
-132:     };
-    */
-
     return (
         <main className="min-h-screen pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 flex flex-col items-center justify-center relative overflow-x-hidden">
+            <ToastContainer />
             {/* Additional ambient glow specifically for login */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-secondary/10 blur-[60px] sm:blur-[80px] rounded-full z-0 pointer-events-none"></div>
             
@@ -159,49 +146,44 @@ export default function LoginPage() {
                           : "Enter your celestial credentials to access your personalized Jyotish readings."
                         }
                     </p>
-                    
-                    {error && (
-                        <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-2">
-                             &times; {error}
-                        </div>
-                    )}
                 </div>
 
                 <Card padding="lg" className="cosmic-glow border-secondary/10 !p-5 sm:!p-8" hoverable={false}>
-                    {/* Email/Password Form */}
-                    <>
-                        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                                {/* isRegister && (
-                                    <Input 
-                                        label="Phone Number (Optional)" 
-                                        type="tel" 
-                                        icon="phone" 
-                                        placeholder="+91 98765 43210" 
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
-                                    />
-                                ) */}
-                                
+                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                        <Input 
+                            label="Email Address" 
+                            type="email" 
+                            icon="mail" 
+                            placeholder="seeker@cosmos.com" 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            helperText="We'll never share your email"
+                            required 
+                        />
+                
+                        <div className="space-y-2">
+                            <div className="relative">
                                 <Input 
-                                    label="Email Address" 
-                                    type="email" 
-                                    icon="mail" 
-                                    placeholder="seeker@cosmos.com" 
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    label="Password" 
+                                    type={showPassword ? "text" : "password"}
+                                    icon="lock" 
+                                    placeholder="••••••••" 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    helperText={isRegister ? "Minimum 6 characters" : undefined}
                                     required 
                                 />
-                        
-                        <div className="space-y-2">
-                            <Input 
-                                label="Password" 
-                                type="password" 
-                                icon="lock" 
-                                placeholder="••••••••" 
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required 
-                            />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-[38px] text-on-surface-variant/60 hover:text-secondary transition-colors"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    <span className="material-symbols-outlined text-xl">
+                                        {showPassword ? 'visibility_off' : 'visibility'}
+                                    </span>
+                                </button>
+                            </div>
                             {!isRegister && (
                                 <div className="flex justify-end">
                                     <span className="text-[10px] text-secondary hover:underline cursor-pointer font-bold tracking-wider uppercase">
@@ -212,15 +194,28 @@ export default function LoginPage() {
                         </div>
 
                         {isRegister && (
-                            <Input 
-                                label="Confirm Password" 
-                                type="password" 
-                                icon="verified_user" 
-                                placeholder="••••••••" 
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required 
-                            />
+                            <div className="relative">
+                                <Input 
+                                    label="Confirm Password" 
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    icon="verified_user" 
+                                    placeholder="••••••••" 
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    error={confirmPassword && password !== confirmPassword ? "Passwords don't match" : ''}
+                                    required 
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-4 top-[38px] text-on-surface-variant/60 hover:text-secondary transition-colors"
+                                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                >
+                                    <span className="material-symbols-outlined text-xl">
+                                        {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                                    </span>
+                                </button>
+                            </div>
                         )}
 
                         <Button 
@@ -229,36 +224,30 @@ export default function LoginPage() {
                             size="lg" 
                             className="mt-3 sm:mt-4 shadow-lg shadow-secondary/20"
                             disabled={isLoading}
+                            loading={isLoading}
                         >
-                            {isLoading ? (
-                                <span className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                                    {isRegister ? "Saving Journey..." : "Aligning Stars..."}
-                                </span>
-                            ) : (
-                                isRegister ? "Create Identity" : "Enter the Ascendant"
-                            )}
+                            {isRegister ? "Create Identity" : "Enter the Ascendant"}
                         </Button>
                     </form>
 
-                    {/* Divider */}
-                    <div className="relative my-6 sm:my-8">
+                    {/* Divider - Temporarily hidden for beta testing */}
+                    {/* <div className="relative my-6 sm:my-8">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-primary/10"></div>
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-surface px-3 text-on-surface-variant/60 font-bold tracking-widest">Or continue with</span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Social Login Buttons */}
-                    <div className="space-y-3">
-                        {/* Google Login Button */}
+                    {/* Temporarily disabled for beta testing */}
+                    {/* <div className="space-y-3">
                         <button
                             type="button"
                             onClick={handleGoogleLogin}
                             disabled={isLoading}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white dark:bg-surface-variant border border-primary/20 rounded-xl font-body font-semibold text-sm text-primary hover:bg-primary/5 hover:border-secondary/30 transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white dark:bg-surface-variant border border-primary/20 rounded-xl font-body font-semibold text-sm text-primary hover:bg-primary/5 hover:border-secondary/30 transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -268,29 +257,23 @@ export default function LoginPage() {
                             </svg>
                             Continue with Google
                         </button>
-
-                        {/* Phone Login Button 
-                        <button
-                            type="button"
-                            onClick={handlePhoneLogin}
-                            disabled={isLoading}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white dark:bg-surface-variant border border-primary/20 rounded-xl font-body font-semibold text-sm text-primary hover:bg-primary/5 hover:border-secondary/30 transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <span className="material-symbols-outlined text-secondary text-xl">phone_iphone</span>
-                            Continue with Phone
-                        </button>
-                        */}
-                    </div>
-                    </>
+                    </div> */}
 
                     <div className="mt-6 sm:mt-8 text-center text-xs font-body text-on-surface-variant">
                         {isRegister ? "Already have an account?" : "Don't have an account?"}{' '}
-                        <span 
-                            onClick={() => setIsRegister(!isRegister)}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsRegister(!isRegister);
+                                setPassword('');
+                                setConfirmPassword('');
+                                setShowPassword(false);
+                                setShowConfirmPassword(false);
+                            }}
                             className="text-primary font-bold hover:text-secondary cursor-pointer transition-colors"
                         >
                             {isRegister ? "Login here" : "Create one"}
-                        </span>
+                        </button>
                     </div>
                 </Card>
             </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { generateUUID } from '@/lib/uuid';
 import { ObjectId } from 'mongodb';
+import { getCurrentDateTime } from '@/lib/datetime';
 
 // GET /api/chat?email=user@example.com&limit=20&cursor=lastChatId — List chats for a user with pagination
 export async function GET(req: NextRequest) {
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
     const users = db.collection('users');
     const user = await users.findOne({ email });
 
-    const now = new Date();
+    const now = getCurrentDateTime();
 
     const systemMessage = {
       id: generateUUID(),

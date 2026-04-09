@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import Particles from "@/components/ui/Particles";
 import SunFlares from "@/components/ui/SunFlares";
+import RashiOrbitBackground from "@/components/ui/RashiOrbitBackground";
 import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -46,9 +47,12 @@ export default function RootLayout({
             __html: `
               (function() {
                 const storageTheme = localStorage.getItem('theme');
+                // Default to light mode if no preference is set
                 if (storageTheme === 'dark') {
                   document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
                 } else {
+                  // Default to light mode
                   document.documentElement.classList.remove('dark');
                   document.documentElement.classList.add('light');
                 }
@@ -61,11 +65,16 @@ export default function RootLayout({
         className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-full flex flex-col relative"
         suppressHydrationWarning
       >
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
         <ErrorBoundary>
           <SessionProvider>
             <AuthProvider>
               <ChatProvider>
                 <SunFlares />
+                {/* Rashi Orbit Background - Subtle zodiac animation */}
+                <RashiOrbitBackground />
                 {/* Particle effect for Dark Mode - Reduced count for GPU balance */}
                 <div className="fixed inset-0 z-[1] pointer-events-none hidden dark:block">
                   <Particles
@@ -79,8 +88,21 @@ export default function RootLayout({
                     disableRotation={false}
                   />
                 </div>
+                {/* Particle effect for Light Mode - Ivory style with soft warm tones */}
+                <div className="fixed inset-0 z-[1] pointer-events-none block dark:hidden">
+                  <Particles
+                    particleColors={["#E6D8E0", "#d1b8c6", "#c8880a"]}
+                    particleCount={120}
+                    particleSpread={14}
+                    speed={0.08}
+                    particleBaseSize={100}
+                    moveParticlesOnHover={true}
+                    alphaParticles={true}
+                    disableRotation={false}
+                  />
+                </div>
                 <Navbar />
-                <main className="flex-grow relative z-10 dark:bg-transparent">
+                <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent">
                   {children}
                 </main>
                 <ConditionalFooter />

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useChat } from '@/context/ChatContext';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import ChatHeader from '@/components/chat/ChatHeader';
@@ -12,17 +13,27 @@ import { useAuth } from '@/context/AuthContext';
 
 const ChatPageClient: React.FC = () => {
   const { user } = useAuth();
-  const { isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, createNewChat, sendMessage } = useChat();
+  const searchParams = useSearchParams();
+  const { isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, createNewChat, selectChat } = useChat();
 
   React.useEffect(() => {
     if (!user?.email) return;
 
+    // Check if there's a chat ID in the URL
+    const chatId = searchParams.get('id');
+    if (chatId) {
+      selectChat(chatId);
+      return;
+    }
+
+    // Check for pending message and auto-create chat only if message exists
     const pendingMsg = localStorage.getItem('astranavi_pending_message');
-    if (pendingMsg) {
+    if (pendingMsg && pendingMsg.trim()) {
       localStorage.removeItem('astranavi_pending_message');
       createNewChat(pendingMsg);
     }
-  }, [user, createNewChat]);
+    // If no chatId and no pending message, just show empty chat page (user can select from sidebar or start new)
+  }, [user, searchParams, createNewChat, selectChat]);
 
   return (
     <div className="chat-layout">

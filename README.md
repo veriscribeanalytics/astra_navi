@@ -50,9 +50,10 @@ src/
 │   ├── dashboard/         # Dashboard components
 │   ├── layout/            # Layout components
 │   └── ui/                # Reusable UI components
-├── context/               # React context (Auth, etc.)
+├── context/               # React context (Auth, Chat, etc.)
 ├── data/                  # Static data (FAQs, etc.)
-├── lib/                   # Utility functions
+├── hooks/                 # Custom React hooks (useRealTime, etc.)
+├── lib/                   # Utility functions (datetime, mongodb, uuid)
 └── types/                 # TypeScript type definitions
 ```
 
@@ -75,7 +76,9 @@ See `DESIGN.md` for detailed design documentation.
 - **Language**: TypeScript
 - **Icons**: Material Symbols + Lucide React
 - **State Management**: React Context
-- **Authentication**: Custom Auth Context
+- **Authentication**: NextAuth.js with MongoDB
+- **Database**: MongoDB
+- **Date/Time**: Centralized utilities (`/src/lib/datetime.ts`) for consistent real-time handling
 
 ## Available Scripts
 
@@ -100,8 +103,19 @@ npm run test         # Run tests (if configured)
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
-# Add other public variables here
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/astra-navi-database
+
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
+
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# AI Backend
+AI_BACKEND_URL=http://localhost:8000
 ```
 
 ## Browser Support
@@ -144,3 +158,34 @@ For issues, questions, or feedback, please contact the development team.
 ---
 
 **AstraNavi** - Decode Your Destiny with AI & Vedic Wisdom
+
+
+## Key Utilities
+
+### Date/Time Handling
+All date/time operations use centralized utilities for consistency:
+
+```typescript
+// In API routes - use for database operations
+import { getCurrentDateTime } from '@/lib/datetime';
+const timestamp = getCurrentDateTime();
+
+// In components - format for display
+import { formatDisplayDate, formatRelativeTime } from '@/lib/datetime';
+const date = formatDisplayDate(user.createdAt);
+const timeAgo = formatRelativeTime(message.createdAt);
+
+// Auto-updating timestamps
+import { useRelativeTime } from '@/hooks/useRealTime';
+const timeAgo = useRelativeTime(message.createdAt); // Updates every minute
+```
+
+See `/src/lib/datetime.ts` for all available functions.
+
+### UUID Generation
+Cross-platform UUID generation (works in both Node.js and browser):
+
+```typescript
+import { generateUUID } from '@/lib/uuid';
+const id = generateUUID();
+```

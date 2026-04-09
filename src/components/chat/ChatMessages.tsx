@@ -5,6 +5,8 @@ import Card from '@/components/ui/Card';
 import ChatBubble from '@/components/ui/ChatBubble';
 import RatingMeter from '@/components/ui/RatingMeter';
 import { useChat } from '@/context/ChatContext';
+import FeedbackModal from './FeedbackModal';
+import { useState } from 'react';
 
 /* ---------- Sub-components ---------- */
 const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
@@ -76,6 +78,23 @@ const ThinkingIndicator: React.FC = () => {
 const ChatMessages: React.FC = () => {
   const { activeChat, isLoadingMessages, isSending, createNewChat, rateMessage } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean; messageId: string; initialRating: number }>({
+    isOpen: false,
+    messageId: '',
+    initialRating: 0
+  });
+
+  const handleRateAction = (messageId: string, rating: number) => {
+    if (rating < 5) {
+      setFeedbackModal({ isOpen: true, messageId, initialRating: rating });
+    } else {
+      rateMessage(messageId, rating);
+    }
+  };
+
+  const handleFeedbackSubmit = (rating: number, tags: string[], comment: string) => {
+    rateMessage(feedbackModal.messageId, rating, tags, comment);
+  };
 
   // Auto-scroll to bottom when messages or isSending change (debounced for performance)
   useEffect(() => {
@@ -212,7 +231,7 @@ const ChatMessages: React.FC = () => {
               <div className="flex items-center justify-between ml-[42px] mt-1 pr-2">
                 <RatingMeter
                   rating={msg.rating}
-                  onRate={(rating) => rateMessage(msg.id, rating)}
+                  onRate={(rating) => handleRateAction(msg.id, rating)}
                   size="md"
                 />
                 {copyAction}
@@ -224,6 +243,15 @@ const ChatMessages: React.FC = () => {
 
       {/* AI Processing sequence */}
       {isSending && <ThinkingIndicator />}
+
+      {/* Global Feedback Modal */}
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
+        messageId={feedbackModal.messageId}
+        initialRating={feedbackModal.initialRating}
+        onSubmit={handleFeedbackSubmit}
+      />
     </div>
   );
 };

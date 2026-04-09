@@ -5,23 +5,23 @@ export interface FAQ {
 
 export const faqs: FAQ[] = [
     {
-        question: "What is the difference between Vedic and Western astrology?",
-        answer: "Vedic astrology (Jyotish) is an ancient Indian science based on the sidereal zodiac, focusing heavily on your Karma, planetary dashas (periods), and precise moon placements. Western astrology uses the tropical zodiac and is more heavily focused on psychological profiling based on the Sun sign."
+        question: "What makes Vedic astrology different from Western astrology?",
+        answer: "Jyotish (Vedic astrology) uses the sidereal zodiac—tracking actual star positions—and focuses on your Moon sign (Rashi), karmic patterns, and planetary periods (Dashas) that predict life timing. Western astrology uses the tropical zodiac and emphasizes Sun sign psychology. Vedic is predictive; Western is descriptive."
     },
     {
-        question: "How accurate is Navi AI compared to a human astrologer?",
-        answer: "Navi AI is trained on thousands of ancient astrological texts, planetary ephemerides, and classical combinations (Yogas). While it provides mathematically flawless chart calculations and vast scriptural interpretations, we recommend using it as a powerful cosmic GPS rather than a replacement for human intuitive reading."
+        question: "How does Navi interpret my chart?",
+        answer: "Navi is trained on classical Jyotish texts—Brihat Parashara Hora Shastra, Phaladeepika, Jataka Parijata—and uses precise astronomical calculations. It identifies planetary yogas, analyzes house lordships, and interprets Dasha periods. Think of it as a scholar who has memorized every major astrological text and can apply them to your unique chart instantly."
     },
     {
-        question: "Is my birth data stored securely?",
-        answer: "Absolutely. Your exact date, time, and location of birth are highly personal. AstraNavi encrypts this data end-to-end. If you are using the application without an account, nothing is stored beyond your current browser session."
+        question: "Is my birth information kept private?",
+        answer: "Your birth chart is sacred data. We encrypt all information end-to-end. Without an account, nothing is stored. With an account, your data is protected and never shared. Your cosmic blueprint belongs to you alone."
     },
     {
-        question: "Does AstraNavi generate a full Kundli report?",
-        answer: "Yes. Once you enter your birth details, AstraNavi generates a complete birth chart (Kundli) covering all 12 houses, planetary degrees, D9 Navamsha chart, and current Mahadasha timeline."
+        question: "What does my Kundli include?",
+        answer: "Your complete Kundli includes: Lagna (Ascendant) chart, Navamsha (D9) chart, all 9 planetary positions, 12 house placements, current Mahadasha and Antardasha periods, planetary yogas, and strength analysis (Shadbala). Everything a traditional Jyotishi would calculate."
     },
     {
-        question: "Can I switch between Vedic and Western charts?",
-        answer: "Yes, AstraNavi gives you the unique ability to toggle between traditional Vedic (North/South Indian style) and Western circular chart representations within your dashboard."
+        question: "Can I see both Vedic and Western chart styles?",
+        answer: "Yes. AstraNavi displays traditional Vedic formats (North Indian, South Indian diamond charts) and Western circular charts. The underlying calculations remain Vedic—sidereal zodiac, Lahiri ayanamsa—but you can choose your preferred visual style."
     }
 ];

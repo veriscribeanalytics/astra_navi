@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   try {
     const { chatId } = await params;
-    const { messageId, rating } = await req.json();
+    const { messageId, rating, feedbackTags, feedbackComment } = await req.json();
 
     if (!ObjectId.isValid(chatId)) {
       return NextResponse.json({ error: 'Invalid chat ID' }, { status: 400 });
@@ -22,10 +22,16 @@ export async function PUT(
     const db = client.db('astra-navi-database');
     const chats = db.collection('chats');
 
-    // Update the specific message's rating
+    // Update the specific message's rating and feedback items
     await chats.updateOne(
       { _id: new ObjectId(chatId), 'messages.id': messageId },
-      { $set: { 'messages.$.rating': rating } }
+      { 
+        $set: { 
+          'messages.$.rating': rating,
+          'messages.$.feedbackTags': feedbackTags || [],
+          'messages.$.feedbackComment': feedbackComment || ""
+        } 
+      }
     );
 
     // Recalculate average rating for the chat

@@ -51,7 +51,9 @@ export async function POST(req: Request) {
                 dob: user.dob,
                 tob: user.tob,
                 pob: user.pob,
-                phoneNumber: user.phoneNumber
+                phoneNumber: user.phoneNumber,
+                moonSign: user.moonSign,
+                sunSign: user.sunSign
             }
         }, { status: 200 });
 

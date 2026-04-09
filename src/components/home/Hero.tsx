@@ -20,41 +20,62 @@ const Hero = () => {
         tob: '',
         pob: ''
     });
+    const [touched, setTouched] = useState({
+        name: false,
+        dob: false,
+        tob: false,
+        pob: false
+    });
+
+    const validateField = (field: keyof typeof formData, value: string) => {
+        let error = '';
+        
+        switch (field) {
+            case 'name':
+                if (value.trim().length < 2) {
+                    error = 'Name must be at least 2 characters';
+                } else if (value.trim().length > 50) {
+                    error = 'Name is too long';
+                } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+                    error = 'Name can only contain letters';
+                }
+                break;
+            case 'dob':
+                if (value) {
+                    const dob = new Date(value);
+                    const today = new Date();
+                    const hundredYearsAgo = new Date();
+                    hundredYearsAgo.setFullYear(today.getFullYear() - 120);
+
+                    if (dob > today) {
+                        error = 'Birth date cannot be in the future';
+                    } else if (dob < hundredYearsAgo) {
+                        error = 'Please enter a valid birth date';
+                    }
+                }
+                break;
+            case 'pob':
+                if (value.trim().length < 2) {
+                    error = 'Please enter a valid place';
+                } else if (value.trim().length > 100) {
+                    error = 'Place name is too long';
+                }
+                break;
+        }
+        
+        return error;
+    };
 
     const validateForm = () => {
-        const newErrors = { name: '', dob: '', tob: '', pob: '' };
-        let isValid = true;
-
-        // Validate name
-        if (formData.name.trim().length < 2) {
-            newErrors.name = 'Name must be at least 2 characters';
-            isValid = false;
-        }
-
-        // Validate date of birth
-        if (formData.dob) {
-            const dob = new Date(formData.dob);
-            const today = new Date();
-            const hundredYearsAgo = new Date();
-            hundredYearsAgo.setFullYear(today.getFullYear() - 120);
-
-            if (dob > today) {
-                newErrors.dob = 'Birth date cannot be in the future';
-                isValid = false;
-            } else if (dob < hundredYearsAgo) {
-                newErrors.dob = 'Please enter a valid birth date';
-                isValid = false;
-            }
-        }
-
-        // Validate place of birth
-        if (formData.pob.trim().length < 2) {
-            newErrors.pob = 'Please enter a valid place';
-            isValid = false;
-        }
+        const newErrors = {
+            name: validateField('name', formData.name),
+            dob: validateField('dob', formData.dob),
+            tob: '',
+            pob: validateField('pob', formData.pob)
+        };
 
         setErrors(newErrors);
-        return isValid;
+        return !Object.values(newErrors).some(error => error !== '');
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -72,153 +93,165 @@ const Hero = () => {
     };
 
     return (
-        <section className="relative min-h-[600px] lg:min-h-[700px] flex items-center px-4 sm:px-8 lg:px-12 pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-20 overflow-hidden">
+        <section className="relative min-h-[550px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 pt-24 sm:pt-28 md:pt-32 lg:pt-40 pb-10 sm:pb-12 md:pb-16 lg:pb-20 overflow-hidden">
             {/* Background glowing orbs */}
-            <div className="absolute top-[-10%] right-[-10%] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[var(--glow-color)] blur-[80px] sm:blur-[120px] rounded-full -z-10 opacity-30 dark:opacity-60"></div>
-            <div className="absolute bottom-[-10%] left-[-10%] w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-secondary/10 blur-[60px] sm:blur-[100px] rounded-full -z-10 opacity-20"></div>
+            <div className="absolute top-[-10%] right-[-10%] w-[250px] sm:w-[400px] md:w-[500px] lg:w-[600px] h-[250px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] sm:blur-[80px] md:blur-[100px] lg:blur-[120px] rounded-full -z-10 opacity-30 dark:opacity-60"></div>
             
-            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-14 lg:gap-20 items-center relative z-10">
-                <div className="space-y-5 sm:space-y-8 text-center lg:text-left">
-                    <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-secondary/10 border border-secondary/30">
+            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20 items-center relative z-10">
+                <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 text-center lg:text-left">
+                    <div className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-3.5 md:px-4 py-1.5 sm:py-1.5 md:py-2 rounded-full bg-secondary/10 border border-secondary/30">
                         <span className="material-symbols-outlined text-secondary text-xs sm:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                        <span className="text-[10px] sm:text-xs uppercase tracking-[0.12em] sm:tracking-[0.15em] font-bold text-secondary font-body">AI-Powered Vedic Astrology</span>
+                        <span className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.12em] sm:tracking-[0.13em] md:tracking-[0.15em] font-bold text-secondary font-body">Jyotish Shastra • Vedic Astrology</span>
                     </div>
                     
-                    <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-headline font-bold leading-[1.1] text-primary">
-                        Your personal <span className="text-secondary italic drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(245,166,35,0.4)]">Jyotish</span> is one tap away
+                    <h1 className="text-[28px] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-headline font-bold text-primary">
+                        The Cosmos Spoke<br/>At Your <span className="text-secondary italic drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(245,166,35,0.4)]">Birth</span>
                     </h1>
                     
-                    <p className="text-base sm:text-lg text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0">
-                        Instant Vedic insights, 24/7 availability, and zero waiting. Get your personalized Kundli and cosmic guidance powered by AI trained on 5,000+ years of Vedic wisdom.
+                    <p className="text-sm sm:text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0">
+                        For 5,000 years, Jyotish has mapped human destiny through planetary positions. Enter your birth details and receive your complete Kundli—revealing your soul's journey, karmic patterns, and the precise timing of life's major events.
                     </p>
                     
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 md:gap-10 py-4 sm:py-6 border-y border-secondary/10">
+                    <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-5 md:gap-8 lg:gap-10 py-3 sm:py-4 md:py-5 lg:py-6">
                         <div>
-                            <div className="text-xl sm:text-2xl font-bold text-secondary font-body">24/7</div>
-                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Always Available</div>
+                            <div className="text-lg sm:text-xl md:text-2xl font-bold text-secondary font-body">Always</div>
+                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Available</div>
                         </div>
                         <div>
-                            <div className="text-xl sm:text-2xl font-bold text-primary font-body">FREE</div>
-                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Kundli & Chat</div>
+                            <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary font-body">Complete</div>
+                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Birth Chart</div>
                         </div>
                         <div>
-                            <div className="text-xl sm:text-2xl font-bold text-primary font-body">Instant</div>
-                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">No Waiting</div>
+                            <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary font-body">Sacred</div>
+                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Privacy</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Kundli Widget / Welcome Back Card */}
                 <Card 
-                  className="shadow-2xl shadow-secondary/10 cosmic-glow border-secondary/30 min-h-[320px] sm:min-h-[400px] flex flex-col justify-center"
+                  className="shadow-2xl shadow-secondary/10 cosmic-glow border-secondary/30 min-h-[300px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[400px] flex flex-col justify-center !bg-surface/80 dark:!bg-surface/90"
                   padding="lg"
                 >
                     {isLoggedIn && user?.name ? (
-                        <div className="text-center space-y-4 sm:space-y-6 py-2 sm:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                             <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-secondary/10 border border-secondary/30 flex items-center justify-center mb-4 sm:mb-6">
-                                <span className="text-2xl sm:text-3xl font-headline font-bold text-secondary">
+                        <div className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 py-2 sm:py-3 md:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                             <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full bg-secondary/10 border border-secondary/30 flex items-center justify-center mb-3 sm:mb-4 md:mb-5 lg:mb-6">
+                                <span className="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-headline font-bold text-secondary">
                                     {(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}
                                 </span>
                              </div>
                              
-                             <div className="space-y-2">
-                                <h3 className="text-xs sm:text-sm font-body font-bold text-secondary tracking-widest uppercase mb-1">Authenticated Seeker</h3>
-                                <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary">Welcome back, {user?.name.split(' ')[0]}</h2>
-                                <p className="text-xs sm:text-sm text-on-surface-variant font-body">The stars have moved 1.2 degrees since your last alignment.</p>
+                             <div className="space-y-1.5 sm:space-y-2">
+                                <h3 className="text-[10px] sm:text-xs md:text-sm font-body font-bold text-secondary tracking-widest uppercase mb-1">Namaste</h3>
+                                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-headline font-bold text-primary">Welcome back, {user?.name.split(' ')[0]}</h2>
+                                <p className="text-xs sm:text-sm text-on-surface-variant font-body">Your Dashas continue to unfold. The planets have shifted since your last visit.</p>
                              </div>
 
-                             <div className="pt-4 sm:pt-6">
+                             <div className="pt-3 sm:pt-4 md:pt-5 lg:pt-6">
                                 <Button 
                                     href="/chat"
                                     fullWidth
                                     size="lg"
                                     className="shadow-lg shadow-secondary/20"
                                 >
-                                    Explore Your Cosmos
+                                    Consult Navi
                                 </Button>
-                                <p className="mt-3 sm:mt-4 text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold font-body">
+                                <p className="mt-2.5 sm:mt-3 md:mt-3.5 lg:mt-4 text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold font-body">
                                     Born: {user?.dob} • {user?.pob}
                                 </p>
                              </div>
                         </div>
                     ) : (
                         <>
-                            <h3 className="text-xl sm:text-2xl font-headline font-bold mb-5 sm:mb-8 flex items-center gap-2 sm:gap-3 text-primary">
-                                <span className="material-symbols-outlined text-secondary text-xl sm:text-2xl">menu_book</span>
-                                Generate Free Kundli
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-headline font-bold mb-4 sm:mb-5 md:mb-6 lg:mb-8 flex items-center gap-2 sm:gap-2.5 md:gap-3 text-primary">
+                                <span className="material-symbols-outlined text-secondary text-lg sm:text-xl md:text-2xl">menu_book</span>
+                                Reveal Your Kundli
                             </h3>
                             
-                            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                                <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                                    <div>
-                                        <Input 
-                                            label="Full Name"
-                                            placeholder="Enter your full name" 
-                                            type="text"
-                                            value={formData.name}
-                                            onChange={(e) => {
-                                                setFormData({...formData, name: e.target.value});
-                                                setErrors({...errors, name: ''});
-                                            }}
-                                            required
-                                        />
-                                        {errors.name && (
-                                            <p className="text-xs text-red-500 mt-1">{errors.name}</p>
-                                        )}
-                                    </div>
+                            <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4 md:space-y-5 lg:space-y-6">
+                                <div className="grid grid-cols-1 gap-3.5 sm:gap-4 md:gap-5 lg:gap-6">
+                                    <Input 
+                                        label="Full Name"
+                                        placeholder="Enter your full name" 
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setFormData({...formData, name: value});
+                                            if (touched.name) {
+                                                setErrors({...errors, name: validateField('name', value)});
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            setTouched({...touched, name: true});
+                                            setErrors({...errors, name: validateField('name', formData.name)});
+                                        }}
+                                        error={touched.name ? errors.name : ''}
+                                        required
+                                    />
                                 </div>
                                 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                                    <div>
-                                        <Input 
-                                            label="Date of Birth"
-                                            type="date"
-                                            icon="calendar_month"
-                                            value={formData.dob}
-                                            onChange={(e) => {
-                                                setFormData({...formData, dob: e.target.value});
-                                                setErrors({...errors, dob: ''});
-                                            }}
-                                            required
-                                        />
-                                        {errors.dob && (
-                                            <p className="text-xs text-red-500 mt-1">{errors.dob}</p>
-                                        )}
-                                    </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 md:gap-5 lg:gap-6">
+                                    <Input 
+                                        label="Date of Birth"
+                                        type="date"
+                                        icon="calendar_month"
+                                        value={formData.dob}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setFormData({...formData, dob: value});
+                                            if (touched.dob) {
+                                                setErrors({...errors, dob: validateField('dob', value)});
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            setTouched({...touched, dob: true});
+                                            setErrors({...errors, dob: validateField('dob', formData.dob)});
+                                        }}
+                                        error={touched.dob ? errors.dob : ''}
+                                        helperText="Your birth date for accurate chart"
+                                        required
+                                    />
                                     <Input 
                                         label="Time of Birth"
                                         type="time"
                                         icon="schedule"
                                         value={formData.tob}
                                         onChange={(e) => setFormData({...formData, tob: e.target.value})}
+                                        helperText="Exact time for precise predictions"
                                         required
                                     />
                                 </div>
                                 
-                                <div>
-                                    <Input 
-                                        label="Place of Birth"
-                                        placeholder="City, Country" 
-                                        type="text"
-                                        icon="location_on"
-                                        value={formData.pob}
-                                        onChange={(e) => {
-                                            setFormData({...formData, pob: e.target.value});
-                                            setErrors({...errors, pob: ''});
-                                        }}
-                                        required
-                                    />
-                                    {errors.pob && (
-                                        <p className="text-xs text-red-500 mt-1">{errors.pob}</p>
-                                    )}
-                                </div>
+                                <Input 
+                                    label="Place of Birth"
+                                    placeholder="City, Country" 
+                                    type="text"
+                                    icon="location_on"
+                                    value={formData.pob}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setFormData({...formData, pob: value});
+                                        if (touched.pob) {
+                                            setErrors({...errors, pob: validateField('pob', value)});
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        setTouched({...touched, pob: true});
+                                        setErrors({...errors, pob: validateField('pob', formData.pob)});
+                                    }}
+                                    error={touched.pob ? errors.pob : ''}
+                                    helperText="City and country of birth"
+                                    required
+                                />
                                 
                                 <Button 
                                     type="submit"
                                     fullWidth
                                     size="lg"
+                                    rightIcon={<span className="material-symbols-outlined">arrow_forward</span>}
                                 >
-                                    Consult Navi
+                                    Calculate My Chart
                                 </Button>
                             </form>
                         </>

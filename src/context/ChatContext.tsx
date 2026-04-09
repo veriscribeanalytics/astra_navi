@@ -10,6 +10,8 @@ export interface ChatMessage {
   type: 'system' | 'ai' | 'user';
   text: string;
   rating?: number | null;
+  feedbackTags?: string[];
+  feedbackComment?: string;
   insights?: { label: string; value: string }[];
   dasha?: { title: string; rows: { planet: string; fill: string; fillColor?: string; dates: string; active?: boolean }[] };
   createdAt: string;
@@ -46,7 +48,7 @@ interface ChatContextType {
   selectChat: (chatId: string) => Promise<void>;
   createNewChat: (initialMessage?: string) => Promise<string | null>;
   sendMessage: (text: string, overrideChatId?: string) => Promise<void>;
-  rateMessage: (messageId: string, rating: number) => Promise<void>;
+  rateMessage: (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
   inputText: string;
   setInputText: React.Dispatch<React.SetStateAction<string>>;
@@ -59,7 +61,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -72,6 +74,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const initialLoadDone = useRef(false);
+  const previousUserEmail = useRef<string | null>(null);
 
   const loadChats = useCallback(async () => {
     if (!user?.email) return;
@@ -185,6 +188,50 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
+      let moonSynced = false;
+      let sunSynced = false;
+
+      // --- Sign detection setup (mirrors server-side logic) ---
+      const VALID_SIGNS = [
+        'aries','taurus','gemini','cancer','leo','virgo',
+        'libra','scorpio','sagittarius','capricorn','aquarius','pisces',
+        'mesh','vrishabh','vrish','mithun','kark','simha','kanya',
+        'tula','vrishchik','dhanu','makar','kumbh','meen',
+      ];
+      
+      function detectSign(text: string, patterns: RegExp[]): string | null {
+        for (const pattern of patterns) {
+          const match = text.match(pattern);
+          if (match) {
+            const candidate = (match[1] || match[2] || '').trim();
+            if (candidate && VALID_SIGNS.includes(candidate.toLowerCase())) {
+              return candidate.charAt(0).toUpperCase() + candidate.slice(1).toLowerCase();
+            }
+          }
+        }
+        return null;
+      }
+      
+      const moonPatterns = [
+        /(?:born\s+under|you\s+have)\s+(\w+)\s+Rashi/i,
+        /(\w+)\s+Rashi\s*\(?Moon/i,
+        /(?:your|the)\s+Rashi\s+(?:is|would be|comes out as)\s+(\w+)/i,
+        /Rashi\s*(?::|is|—|-)\s*(\w+)/i,
+        /Moon\s+(?:is\s+in|sign\s+is|sign:?)\s+(\w+)/i,
+        /Moon\s+in\s+(\w+)/i,
+        /(\w+)\s+(?:Moon\s*sign|Rashi)\s+native/i,
+        /(?:making\s+you\s+(?:a|an))\s+(\w+)\s+(?:Rashi|Moon)/i,
+        /(\w+)\s+is\s+your\s+(?:Moon\s*sign|Rashi)/i,
+      ];
+      
+      const sunPatterns = [
+        /(\w+)\s+Sun\s*sign/i,
+        /Sun\s*sign\s*(?:is|:|-|—)\s*(\w+)/i,
+        /Sun\s+(?:is\s+in|sits\s+in|in)\s+(\w+)/i,
+        /(?:your|the)\s+Sun\s+(?:is|sits|falls|placed)\s+(?:in\s+)?(\w+)/i,
+        /(\w+)\s+is\s+your\s+Sun\s*sign/i,
+        /Sun\s*(?::|—|-)\s*(\w+)/i,
+      ];
 
       if (reader) {
         while (true) {
@@ -193,6 +240,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           const chunk = decoder.decode(value);
           fullText += chunk;
+
+          // Live detection — sync to frontend state as soon as a sign is found
+          if (!moonSynced) {
+            const moon = detectSign(fullText, moonPatterns);
+            if (moon) {
+              refreshUser({ moonSign: moon });
+              moonSynced = true;
+            }
+          }
+          if (!sunSynced) {
+            const sun = detectSign(fullText, sunPatterns);
+            if (sun) {
+              refreshUser({ sunSign: sun });
+              sunSynced = true;
+            }
+          }
 
           setActiveChat(prev => {
             if (!prev) return prev;
@@ -270,14 +333,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return tempId;
   }, [user, sendMessage]);
 
-  const rateMessage = useCallback(async (messageId: string, rating: number) => {
+  const rateMessage = useCallback(async (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => {
     if (!activeChatId || activeChatId.startsWith('temp-')) return;
 
     setActiveChat(prev => {
       if (!prev) return prev;
       return {
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, rating } : m),
+        messages: prev.messages.map(m => 
+          m.id === messageId ? { ...m, rating, feedbackTags, feedbackComment } : m
+        ),
       };
     });
 
@@ -285,7 +350,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch(`/api/chat/${activeChatId}/rate`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageId, rating }),
+        body: JSON.stringify({ messageId, rating, feedbackTags, feedbackComment }),
       });
       const data = await res.json();
       setActiveChat(prev => {
@@ -312,7 +377,26 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeChatId]);
 
-  // Load chats on mount
+  // Clear chat state when user changes (logout/login with different account)
+  useEffect(() => {
+    const currentEmail = user?.email || null;
+    
+    // If user email changed (different user logged in or logged out)
+    if (previousUserEmail.current !== null && previousUserEmail.current !== currentEmail) {
+      // Clear all chat state
+      setChats([]);
+      setActiveChat(null);
+      setActiveChatId(null);
+      setHasMoreChats(false);
+      setNextCursor(null);
+      setInputText('');
+      initialLoadDone.current = false;
+    }
+    
+    previousUserEmail.current = currentEmail;
+  }, [user?.email]);
+
+  // Load chats on mount or when user changes
   useEffect(() => {
     if (!initialLoadDone.current && user?.email) {
       initialLoadDone.current = true;

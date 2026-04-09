@@ -60,7 +60,20 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
 
     useEffect(() => {
         setIsMenuOpen(false);
+        setIsDropdownOpen(false);
     }, [pathname]);
+
+    useEffect(() => {
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setIsMenuOpen(false);
+                setIsDropdownOpen(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleEscape);
+        return () => window.removeEventListener('keydown', handleEscape);
+    }, []);
 
     const handleLogout = () => {
         setIsDropdownOpen(false);
@@ -75,7 +88,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     const isActive = (path:string) => pathname == path;
 
     return(
-        <nav ref={navRef} className="fixed top-0 w-full z-[210] bg-[#faf7f2]/85 dark:bg-[#0b071a]/90 backdrop-blur-xl shadow-sm border-b border-secondary/10 transition-colors duration-500">
+        <nav ref={navRef} className="fixed top-0 w-full z-[210] bg-[#faf7f2] dark:bg-[#0b071a] backdrop-blur-xl shadow-sm border-b border-secondary/10 transition-colors duration-500">
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-3.5 w-full mx-auto max-w-[1600px]">
                 {/* Left: Logo */}

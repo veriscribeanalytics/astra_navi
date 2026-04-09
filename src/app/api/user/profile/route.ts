@@ -1,5 +1,42 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
+import { getCurrentDateTime } from '@/lib/datetime';
+
+export async function GET(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const email = searchParams.get('email');
+
+        if (!email) {
+            return NextResponse.json({ error: "Email is required." }, { status: 400 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db("astra-navi-database");
+        const users = db.collection("users");
+
+        const user = await users.findOne({ email });
+
+        if (!user) {
+            return NextResponse.json({ error: "User not found." }, { status: 404 });
+        }
+
+        return NextResponse.json({
+            user: {
+                email: user.email,
+                name: user.name,
+                dob: user.dob,
+                tob: user.tob,
+                pob: user.pob,
+                moonSign: user.moonSign,
+                sunSign: user.sunSign
+            }
+        });
+    } catch (error) {
+        console.error("Profile fetch error:", error);
+        return NextResponse.json({ error: "Failed to fetch profile." }, { status: 500 });
+    }
+}
 
 export async function PUT(req: Request) {
     try {
@@ -24,7 +61,7 @@ export async function PUT(req: Request) {
                     tob, 
                     pob,
                     chartContext: null, // Reset to force recomputation on next message
-                    updatedAt: new Date() 
+                    updatedAt: getCurrentDateTime() 
                 } 
             }
         );
@@ -43,7 +80,9 @@ export async function PUT(req: Request) {
                 name: updatedUser?.name,
                 dob: updatedUser?.dob,
                 tob: updatedUser?.tob,
-                pob: updatedUser?.pob
+                pob: updatedUser?.pob,
+                moonSign: updatedUser?.moonSign,
+                sunSign: updatedUser?.sunSign
             }
         });
 

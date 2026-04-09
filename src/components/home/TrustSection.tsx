@@ -5,28 +5,28 @@ export default function TrustSection() {
     const trustPoints = [
         {
             icon: <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />,
-            title: "100% Private & Secure",
-            desc: "Your birth data is encrypted end-to-end. We never share your personal information."
+            title: "Absolute Privacy",
+            desc: "Your birth data is encrypted end-to-end. We never share your chart or personal information."
         },
         {
             icon: <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />,
-            title: "Vedic Accuracy",
-            desc: "Trained on authentic Vedic texts and validated against thousands of birth charts."
+            title: "Classical Accuracy",
+            desc: "Trained on authentic Jyotish texts—Brihat Parashara Hora Shastra, Phaladeepika, Jataka Parijata."
         },
         {
             icon: <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />,
-            title: "Instant & Reliable",
-            desc: "Get results in seconds. No waiting, no scheduling, no human bias."
+            title: "Always Available",
+            desc: "Planetary transits don't wait. Consult Navi at any hour—no appointments, no delays."
         }
     ];
 
     return (
-        <section className="py-10 sm:py-16 md:py-20 relative overflow-hidden bg-transparent dark:bg-transparent px-4 sm:px-8 lg:px-12 border-y border-secondary/5">
+        <section className="py-10 sm:py-16 md:py-20 relative overflow-hidden bg-transparent dark:bg-transparent px-4 sm:px-8 lg:px-12">
             <div className="max-w-7xl mx-auto relative z-10">
                 <div className="text-center mb-8 sm:mb-12">
-                    <div className="text-[10px] text-secondary font-bold tracking-[0.12em] uppercase mb-3 sm:mb-4">Our Integrity</div>
+                    <div className="text-[10px] text-secondary font-bold tracking-[0.12em] uppercase mb-3 sm:mb-4">Our Commitment</div>
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline font-bold text-primary">
-                        Safeguarded by Wisdom
+                        Guarded by Tradition
                     </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">

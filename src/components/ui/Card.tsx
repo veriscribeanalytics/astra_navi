@@ -57,10 +57,10 @@ const Card: React.FC<CardProps> = ({
 
   const paddings = {
     none: 'p-0',
-    sm: 'p-4',
-    md: 'p-6 sm:p-8',
-    lg: 'p-8 sm:p-12',
-    xl: 'p-10 sm:p-16',
+    sm: 'p-3 sm:p-4',
+    md: 'p-4 sm:p-5 md:p-6 lg:p-8',
+    lg: 'p-5 sm:p-6 md:p-8 lg:p-10 xl:p-12',
+    xl: 'p-6 sm:p-8 md:p-10 lg:p-12 xl:p-14 2xl:p-16',
   };
 
   const hoverStyles = hoverable 

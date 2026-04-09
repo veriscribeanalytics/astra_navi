@@ -4,16 +4,33 @@ import React, { useEffect, useRef } from 'react';
 
 const SunFlares: React.FC = () => {
     const mouseRef = useRef<HTMLDivElement>(null);
+    const rafId = useRef<number>(0);
 
     useEffect(() => {
+        let pendingX = 0, pendingY = 0;
+        let ticking = false;
+
+        const applyTransform = () => {
+            if (mouseRef.current) {
+                mouseRef.current.style.transform = `translate3d(${pendingX}px, ${pendingY}px, 0)`;
+            }
+            ticking = false;
+        };
+
         const handleMouseMove = (e: MouseEvent) => {
-            if (!mouseRef.current) return;
-            // Immediate, zero-transition update for absolute reactivity
-            mouseRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+            pendingX = e.clientX;
+            pendingY = e.clientY;
+            if (!ticking) {
+                ticking = true;
+                rafId.current = requestAnimationFrame(applyTransform);
+            }
         };
         
         window.addEventListener('mousemove', handleMouseMove, { passive: true });
-        return () => window.removeEventListener('mousemove', handleMouseMove);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            cancelAnimationFrame(rafId.current);
+        };
     }, []);
 
     return (
@@ -48,7 +65,7 @@ const SunFlares: React.FC = () => {
                 {/* MOUSE FOLLOW — Ultra-Lucent tracking */}
                 <div
                     ref={mouseRef}
-                    className="absolute top-0 left-0 w-[550px] h-[550px] -ml-[275px] -mt-[275px] rounded-full will-change-transform pointer-events-none"
+                    className="absolute top-0 left-0 w-[550px] h-[550px] -ml-[275px] -mt-[275px] rounded-full will-change-[transform] pointer-events-none"
                     style={{
                         background: 'radial-gradient(circle, color-mix(in srgb, var(--flare-gold) 35%, transparent) 0%, color-mix(in srgb, var(--flare-gold) 10%, transparent) 45%, transparent 70%)',
                     }}

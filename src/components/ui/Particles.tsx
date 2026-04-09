@@ -102,7 +102,7 @@ interface ParticlesProps {
 }
 
 const Particles: React.FC<ParticlesProps> = ({
-  particleCount = 150, // Reduced default count for performance
+  particleCount = 350,
   particleSpread = 10,
   speed = 0.1,
   particleColors,

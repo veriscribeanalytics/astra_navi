@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { generateUUID } from '@/lib/uuid';
+import { getCurrentDateTime } from '@/lib/datetime';
 
 // POST /api/chat/[chatId]/message — Send a message and get AI response from the model
 export async function POST(
@@ -69,7 +70,7 @@ export async function POST(
         // Save back to user profile for future use
         await users.updateOne(
           { email: userEmail },
-          { $set: { chartContext, updatedAt: new Date() } }
+          { $set: { chartContext, updatedAt: getCurrentDateTime() } }
         );
       } else {
         throw new Error('Failed to compute birth chart context from backend.');
@@ -138,7 +139,68 @@ export async function POST(
 
           // After stream completes, save to DB
           try {
-            const now = new Date();
+            const now = getCurrentDateTime();
+            
+            // --- AUTO-DETECT MOON/SUN SIGNS ---
+            // Valid zodiac sign names (Western + Vedic) for whitelist validation
+            const VALID_SIGNS = [
+              'aries','taurus','gemini','cancer','leo','virgo',
+              'libra','scorpio','sagittarius','capricorn','aquarius','pisces',
+              'mesh','vrishabh','vrish','mithun','kark','simha','kanya',
+              'tula','vrishchik','dhanu','makar','kumbh','meen',
+            ];
+            
+            // Try multiple regex patterns in priority order, return first valid match
+            function detectSign(text: string, patterns: RegExp[]): string | null {
+              for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                  // The sign could be in group 1 or group 2 depending on pattern
+                  const candidate = (match[1] || match[2] || '').trim();
+                  if (candidate && VALID_SIGNS.includes(candidate.toLowerCase())) {
+                    // Capitalize first letter
+                    return candidate.charAt(0).toUpperCase() + candidate.slice(1).toLowerCase();
+                  }
+                }
+              }
+              return null;
+            }
+            
+            // Moon / Rashi patterns — ordered from most specific to most general
+            const moonPatterns = [
+              /(?:born\s+under|you\s+have)\s+(\w+)\s+Rashi/i,                     // "born under Leo Rashi"
+              /(\w+)\s+Rashi\s*\(?Moon/i,                                          // "Leo Rashi (Moon sign)"
+              /(?:your|the)\s+Rashi\s+(?:is|would be|comes out as)\s+(\w+)/i,      // "your Rashi is Gemini"
+              /Rashi\s*(?::|is|—|-)\s*(\w+)/i,                                     // "Rashi: Gemini" / "Rashi is Gemini"
+              /Moon\s+(?:is\s+in|sign\s+is|sign:?)\s+(\w+)/i,                      // "Moon is in Gemini" / "Moon sign is Leo"
+              /Moon\s+in\s+(\w+)/i,                                                // "Moon in Gemini"
+              /(\w+)\s+(?:Moon\s*sign|Rashi)\s+native/i,                           // "Gemini Rashi native"
+              /(?:making\s+you\s+(?:a|an))\s+(\w+)\s+(?:Rashi|Moon)/i,             // "making you a Gemini Rashi"
+              /(\w+)\s+is\s+your\s+(?:Moon\s*sign|Rashi)/i,                        // "Gemini is your Moon sign"
+            ];
+            
+            // Sun sign patterns
+            const sunPatterns = [
+              /(\w+)\s+Sun\s*sign/i,                                               // "Libra Sun sign"
+              /Sun\s*sign\s*(?:is|:|-|—)\s*(\w+)/i,                                // "Sun sign is Libra"
+              /Sun\s+(?:is\s+in|sits\s+in|in)\s+(\w+)/i,                           // "Sun is in Libra" / "Sun sits in Libra"
+              /(?:your|the)\s+Sun\s+(?:is|sits|falls|placed)\s+(?:in\s+)?(\w+)/i,  // "your Sun is Libra"
+              /(\w+)\s+is\s+your\s+Sun\s*sign/i,                                   // "Libra is your Sun sign"
+              /Sun\s*(?::|—|-)\s*(\w+)/i,                                          // "Sun: Libra"
+            ];
+            
+            const detectedMoon = detectSign(fullAiResponse, moonPatterns);
+            const detectedSun = detectSign(fullAiResponse, sunPatterns);
+
+            if (detectedMoon || detectedSun) {
+              const profileUpdate: any = { updatedAt: now };
+              if (detectedMoon) profileUpdate.moonSign = detectedMoon;
+              if (detectedSun) profileUpdate.sunSign = detectedSun;
+              
+              await users.updateOne({ email: userEmail }, { $set: profileUpdate });
+              console.log(`Auto-updated profile signs for ${userEmail}: Moon=${detectedMoon}, Sun=${detectedSun}`);
+            }
+
             const userMessage = {
               id: generateUUID(),
               type: 'user',
@@ -150,7 +212,7 @@ export async function POST(
               type: 'ai',
               text: fullAiResponse,
               rating: null,
-              createdAt: new Date(),
+              createdAt: getCurrentDateTime(),
             };
 
             const hasUserMessage = chat.messages?.some((m: any) => m.type === 'user');
