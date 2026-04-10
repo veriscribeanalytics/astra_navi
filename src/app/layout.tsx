@@ -3,11 +3,10 @@ import { Playfair_Display, DM_Sans } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
-import Particles from "@/components/ui/Particles";
-import SunFlares from "@/components/ui/SunFlares";
-import RashiOrbitBackground from "@/components/ui/RashiOrbitBackground";
+import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
 import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 
@@ -41,19 +40,33 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                const storageTheme = localStorage.getItem('theme');
-                // Default to light mode if no preference is set
-                if (storageTheme === 'dark') {
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.classList.remove('light');
-                } else {
-                  // Default to light mode
-                  document.documentElement.classList.remove('dark');
+                try {
+                  // Read and validate theme from localStorage
+                  const storageTheme = localStorage.getItem('theme');
+                  let theme = 'light'; // Default
+                  
+                  if (storageTheme === 'dark' || storageTheme === 'light') {
+                    theme = storageTheme;
+                  } else if (storageTheme) {
+                    // Clear invalid value
+                    localStorage.removeItem('theme');
+                  }
+                  
+                  // Apply theme class immediately (synchronous, before body renders)
+                  document.documentElement.classList.remove('light', 'dark');
+                  document.documentElement.classList.add(theme);
+                } catch (e) {
+                  // Fallback if localStorage unavailable (private browsing, etc.)
+                  console.warn('Theme initialization failed:', e);
                   document.documentElement.classList.add('light');
                 }
               })();
@@ -72,40 +85,16 @@ export default function RootLayout({
           <SessionProvider>
             <AuthProvider>
               <ChatProvider>
-                <SunFlares />
-                {/* Rashi Orbit Background - Subtle zodiac animation */}
-                <RashiOrbitBackground />
-                {/* Particle effect for Dark Mode - Reduced count for GPU balance */}
-                <div className="fixed inset-0 z-[1] pointer-events-none hidden dark:block">
-                  <Particles
-                    particleColors={["#c8880a", "#f5a623", "#faf7f2"]}
-                    particleCount={150}
-                    particleSpread={12}
-                    speed={0.15}
-                    particleBaseSize={120}
-                    moveParticlesOnHover={true}
-                    alphaParticles={false}
-                    disableRotation={false}
-                  />
-                </div>
-                {/* Particle effect for Light Mode - Ivory style with soft warm tones */}
-                <div className="fixed inset-0 z-[1] pointer-events-none block dark:hidden">
-                  <Particles
-                    particleColors={["#E6D8E0", "#d1b8c6", "#c8880a"]}
-                    particleCount={120}
-                    particleSpread={14}
-                    speed={0.08}
-                    particleBaseSize={100}
-                    moveParticlesOnHover={true}
-                    alphaParticles={true}
-                    disableRotation={false}
-                  />
-                </div>
-                <Navbar />
-                <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent">
-                  {children}
-                </main>
-                <ConditionalFooter />
+                <ThemeProvider>
+                  {/* Optimized backgrounds with adaptive quality */}
+                  <OptimizedBackgrounds />
+                  
+                  <Navbar />
+                  <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent">
+                    {children}
+                  </main>
+                  <ConditionalFooter />
+                </ThemeProvider>
               </ChatProvider>
             </AuthProvider>
           </SessionProvider>

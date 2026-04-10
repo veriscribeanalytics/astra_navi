@@ -86,7 +86,7 @@ interface OrbitItemProps {
 function OrbitItem({ item, index, totalItems, path, itemSize, rotation, progress, fill, initialOffset = 0 }: OrbitItemProps) {
   const itemOffset = fill ? (index / totalItems) * 100 : 0;
 
-  const offsetDistance = useTransform(progress, (p) => {
+  const offsetDistance = useTransform(progress, (p: number) => {
     const offset = (((p + itemOffset + initialOffset) % 100) + 100) % 100;
     return `${offset}%`;
   });
@@ -229,7 +229,7 @@ export default function OrbitImages({
     if (paused || !isVisible) return;
     const controls = animate(progress, direction === 'reverse' ? -100 : 100, {
       duration,
-      ease: easing,
+      ease: easing as any,
       repeat: Infinity,
       repeatType: 'loop',
     });

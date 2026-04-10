@@ -25,6 +25,8 @@
   /* GPU layer promotion for the entire rotating container */
   transform: translateZ(0);
   backface-visibility: hidden;
+  /* Smooth transition for layout changes during mobile scroll */
+  transition: transform 0.15s ease-out;
 }
 
 .orbit-path-svg {
@@ -50,7 +52,11 @@
   opacity: 0.18;
   animation: subtle-glitter 5s ease-in-out infinite;
   /* CSS containment — browser can skip layout/paint outside this box */
-  contain: layout style;
+  contain: layout style paint;
+  /* Smooth transition for position changes during viewport resize */
+  transition: offset-distance 0.15s ease-out;
+  /* Performance optimization */
+  content-visibility: auto;
 }
 
 .orbit-item:nth-child(2n) {

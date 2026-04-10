@@ -6,8 +6,9 @@ import { Sparkles, Sun, ArrowRight, Clock, MessageSquare, Compass, Plus } from "
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { calculateAge, getAgeBracket, getPersonalizedQuestions, getStarterCards } from "@/utils/personalizedQuestions";
 
 export default function DashboardHome() {
     const { user } = useAuth();
@@ -46,6 +47,12 @@ export default function DashboardHome() {
     };
 
     const rashiData = user?.moonSign ? getRashiData(user.moonSign) : null;
+
+    // Calculate age and get personalized content
+    const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
+    const ageBracket = useMemo(() => getAgeBracket(age), [age]);
+    const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
+    const starterCards = useMemo(() => getStarterCards(ageBracket), [ageBracket]);
 
     const handleQuickQuery = (e: React.FormEvent) => {
         e.preventDefault();
@@ -105,16 +112,15 @@ export default function DashboardHome() {
                     </div>
 
                     {/* Right: Rashi Circles */}
-                    <div className="flex flex-row gap-2.5 sm:gap-3 md:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-0 w-full lg:w-auto justify-center items-center overflow-x-auto pb-2 sm:pb-0 px-2 sm:px-0">
+                    <div className="flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-0 w-full lg:w-auto justify-center items-center overflow-x-auto pb-2 sm:pb-0 px-1 sm:px-0 scrollbar-hide">
                         {/* Moon Sign Circle */}
                         <div 
                             onClick={() => !rashiData && handleQuickAsk("Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.")}
-                            className={`shrink-0 flex flex-col items-center justify-center relative group w-[160px] h-[160px] xs:w-[170px] xs:h-[170px] sm:w-[240px] sm:h-[240px] lg:w-[272px] lg:h-[272px] rounded-[32px] sm:rounded-full bg-surface/80 backdrop-blur-3xl border border-secondary/20 shadow-[0_0_40px_rgba(200,136,10,0.06)] transition-all duration-500 hover:shadow-[0_0_60px_rgba(200,136,10,0.12)] hover:border-secondary/40 z-10 ${!rashiData ? 'cursor-pointer active:scale-95' : ''}`}
+                            className={`shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-3xl border border-secondary/20 shadow-[0_0_40px_rgba(200,136,10,0.06)] transition-all duration-500 hover:shadow-[0_0_60px_rgba(200,136,10,0.12)] hover:border-secondary/40 z-10 ${!rashiData ? 'cursor-pointer active:scale-95' : ''}`}
+                            style={{ maxWidth: 'min(272px, 35vw)' }}
                         >
-                            {/* Radial gradient glow removed to prevent strip effect */}
-                            {/* <div className="absolute top-0 inset-x-0 h-1/2 bg-[radial-gradient(circle_at_top,rgba(200,136,10,0.15),transparent_70%)] pointer-events-none transition-opacity group-hover:opacity-100 opacity-60" /> */}
                             
-                            <p className="text-[7px] xs:text-[8px] sm:text-[9px] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-3 sm:mb-4 lg:mb-6 relative z-10 px-3 sm:px-4 lg:px-6 text-center leading-tight">
+                            <p className="text-[clamp(7px,1.5vw,9px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
                                 {rashiData ? 'Your Moon Sign' : 'Identify your Sign'}
                             </p>
                             
@@ -122,13 +128,13 @@ export default function DashboardHome() {
                                 <img 
                                     src={`${rashiData.icon}?v=4`}
                                     alt={rashiData.name}
-                                    className="w-16 h-16 xs:w-[70px] xs:h-[70px] sm:w-28 sm:h-28 object-contain mb-2 xs:mb-3 sm:mb-4 lg:mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(218,165,32,0.5)]"
+                                    className="w-[clamp(48px,12vw,112px)] h-[clamp(48px,12vw,112px)] object-contain mb-[clamp(8px,2vw,24px)] relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(218,165,32,0.5)]"
                                 />
                             ) : (
-                                <span className="text-3xl xs:text-3xl sm:text-5xl filter drop-shadow-[0_0_10px_rgba(200,136,10,0.3)] mb-2 xs:mb-3 sm:mb-4 lg:mb-6">🔍</span>
+                                <span className="text-[clamp(2rem,8vw,3rem)] filter drop-shadow-[0_0_10px_rgba(200,136,10,0.3)] mb-[clamp(8px,2vw,24px)]">🔍</span>
                             )}
                             
-                            <h3 className="text-sm xs:text-base sm:text-xl font-headline font-bold text-secondary tracking-[0.08em] sm:tracking-[0.1em] uppercase relative z-10 group-hover:text-amber-400 transition-colors text-center px-2 xs:px-3 sm:px-4 mb-0.5 xs:mb-1">
+                            <h3 className="text-[clamp(0.875rem,3vw,1.25rem)] font-headline font-bold text-secondary tracking-[0.08em] sm:tracking-[0.1em] uppercase relative z-10 group-hover:text-amber-400 transition-colors text-center px-[clamp(8px,2vw,16px)] mb-[clamp(2px,0.5vw,4px)]">
                                 {rashiData?.name || 'Unknown'}
                             </h3>
                             
@@ -136,7 +142,7 @@ export default function DashboardHome() {
                                 <Button 
                                     size="sm" 
                                     variant="secondary" 
-                                    className="mt-1.5 xs:mt-2 sm:mt-3 lg:mt-4 relative z-10 px-3 xs:px-4 sm:px-6 py-0.5 xs:py-1 rounded-full border-secondary/20 hover:border-secondary text-[8px] xs:text-[9px] sm:text-[10px] font-bold tracking-widest uppercase text-secondary"
+                                    className="mt-[clamp(6px,1.5vw,16px)] relative z-10 px-[clamp(12px,3vw,24px)] py-[clamp(2px,0.5vw,4px)] rounded-full border-secondary/20 hover:border-secondary text-[clamp(8px,1.8vw,10px)] font-bold tracking-widest uppercase text-secondary"
                                 >
                                     Consult ✦
                                 </Button>
@@ -152,26 +158,25 @@ export default function DashboardHome() {
                             const sunSignData = getRashiData(user.sunSign);
                             return sunSignData ? (
                                 <div 
-                                    className="shrink-0 flex flex-col items-center justify-center relative group w-[160px] h-[160px] xs:w-[170px] xs:h-[170px] sm:w-[240px] sm:h-[240px] lg:w-[272px] lg:h-[272px] rounded-[32px] sm:rounded-full bg-surface/80 backdrop-blur-3xl border border-secondary/20 shadow-[0_0_40px_rgba(200,136,10,0.06)] transition-all duration-500 hover:shadow-[0_0_60px_rgba(200,136,10,0.12)] hover:border-secondary/40 z-10"
+                                    className="shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-3xl border border-secondary/20 shadow-[0_0_40px_rgba(200,136,10,0.06)] transition-all duration-500 hover:shadow-[0_0_60px_rgba(200,136,10,0.12)] hover:border-secondary/40 z-10"
+                                    style={{ maxWidth: 'min(272px, 35vw)' }}
                                 >
-                                    {/* Radial gradient glow removed to prevent strip effect */}
-                                    {/* <div className="absolute top-0 inset-x-0 h-1/2 bg-[radial-gradient(circle_at_top,rgba(200,136,10,0.15),transparent_70%)] pointer-events-none transition-opacity group-hover:opacity-100 opacity-60" /> */}
                                     
-                                    <p className="text-[7px] xs:text-[8px] sm:text-[9px] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-3 sm:mb-4 lg:mb-6 relative z-10 px-3 sm:px-4 lg:px-6 text-center leading-tight">
+                                    <p className="text-[clamp(7px,1.5vw,9px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
                                         Your Sun Sign
                                     </p>
                                     
                                     <img 
                                         src={`${sunSignData.icon}?v=4`}
                                         alt={sunSignData.name}
-                                        className="w-16 h-16 xs:w-[70px] xs:h-[70px] sm:w-28 sm:h-28 object-contain mb-2 xs:mb-3 sm:mb-4 lg:mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(218,165,32,0.5)]"
+                                        className="w-[clamp(48px,12vw,112px)] h-[clamp(48px,12vw,112px)] object-contain mb-[clamp(8px,2vw,24px)] relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(218,165,32,0.5)]"
                                     />
                                     
-                                    <h3 className="text-sm xs:text-base sm:text-xl font-headline font-bold text-secondary tracking-[0.08em] sm:tracking-[0.1em] uppercase relative z-10 group-hover:text-amber-400 transition-colors text-center px-2 xs:px-3 sm:px-4 mb-0.5 xs:mb-1">
+                                    <h3 className="text-[clamp(0.875rem,3vw,1.25rem)] font-headline font-bold text-secondary tracking-[0.08em] sm:tracking-[0.1em] uppercase relative z-10 group-hover:text-amber-400 transition-colors text-center px-[clamp(8px,2vw,16px)] mb-[clamp(2px,0.5vw,4px)]">
                                         {sunSignData.name}
                                     </h3>
                                     
-                                    <p className="text-[8px] xs:text-[9px] sm:text-[11px] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
+                                    <p className="text-[clamp(8px,1.8vw,11px)] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
                                         {sunSignData.en}
                                     </p>
                                 </div>
@@ -219,32 +224,21 @@ export default function DashboardHome() {
                         ))
                     ) : (
                         <>
-                            <button onClick={() => handleQuickAsk("Analyze my Career and Wealth potential based on my birth chart.")} className="block w-full text-left focus:outline-none h-full">
-                                <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] h-full relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
-                                    <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none z-0" />
-                                    <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />
+                            {starterCards.map((card, idx) => (
+                                <button key={idx} onClick={() => handleQuickAsk(card.question)} className="block w-full text-left focus:outline-none h-full">
+                                    <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] h-full relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
+                                        <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none z-0" />
+                                        <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
+                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                {idx === 0 ? <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />}
+                                            </div>
+                                            <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">{idx === 0 ? 'Start Here' : 'Discover'}</div>
                                         </div>
-                                        <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">Start Here</div>
-                                    </div>
-                                    <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 group-hover:text-secondary transition-colors relative z-10 leading-snug">Wealth Synthesis</h4>
-                                    <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">Analyze your Artha house & career.</p>
-                                </Card>
-                            </button>
-                            <button onClick={() => handleQuickAsk("What does my Kundli say about my Love life and future partner?")} className="block w-full text-left focus:outline-none h-full">
-                                <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] h-full relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
-                                    <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none z-0" />
-                                    <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />
-                                        </div>
-                                        <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">Discover</div>
-                                    </div>
-                                    <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 group-hover:text-secondary transition-colors relative z-10 leading-snug">Relationship Path</h4>
-                                    <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">Understand your 7th house alignment.</p>
-                                </Card>
-                            </button>
+                                        <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 group-hover:text-secondary transition-colors relative z-10 leading-snug">{card.title}</h4>
+                                        <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">{card.description}</p>
+                                    </Card>
+                                </button>
+                            ))}
                         </>
                     )}
                     
@@ -315,9 +309,15 @@ export default function DashboardHome() {
                                 <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Ask Navi
                             </h4>
                             <div className="flex flex-col gap-2.5 sm:gap-3 mb-5 sm:mb-6 lg:mb-8">
-                                <button onClick={() => handleQuickAsk("When will I see a breakthrough in my career or financial growth?")} className="text-left text-[11px] sm:text-xs font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98">When will I see a breakthrough in my career?</button>
-                                <button onClick={() => handleQuickAsk("What does my birth chart reveal about my future life partner?")} className="text-left text-[11px] sm:text-xs font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98">Who is my future life partner?</button>
-                                <button onClick={() => handleQuickAsk("Which planetary Mahadasha am I currently in and what are its effects?")} className="text-left text-[11px] sm:text-xs font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98">Which Mahadasha am I in?</button>
+                                {personalizedQuestions.map((question, idx) => (
+                                    <button 
+                                        key={idx}
+                                        onClick={() => handleQuickAsk(question)} 
+                                        className="text-left text-[11px] sm:text-xs font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98"
+                                    >
+                                        {question}
+                                    </button>
+                                ))}
                             </div>
                             <div className="flex gap-2 items-center bg-background border border-secondary/20 p-2 sm:p-2.5 rounded-[18px] sm:rounded-[22px] mt-auto">
                                 <input 

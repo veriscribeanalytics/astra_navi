@@ -124,6 +124,11 @@ const Particles: React.FC<ParticlesProps> = ({
     const container = containerRef.current;
     if (!container) return;
 
+    // --- Mobile Detection & Particle Reduction ---
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+      || window.innerWidth < 768;
+    const optimizedParticleCount = isMobile ? 70 : particleCount; // 70 on mobile, full count on desktop
+
     // --- Optimization 1: Visibility Observer ---
     // This stops the animation entirely when the user scrolls away
     const observer = new IntersectionObserver(
@@ -174,7 +179,7 @@ const Particles: React.FC<ParticlesProps> = ({
       container.addEventListener('mousemove', handleMouseMove);
     }
 
-    const count = particleCount;
+    const count = optimizedParticleCount; // Use optimized count
     const positions = new Float32Array(count * 3);
     const randoms = new Float32Array(count * 4);
     const colors = new Float32Array(count * 3);

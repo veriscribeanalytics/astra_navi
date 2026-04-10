@@ -4,6 +4,102 @@
 html {
   scrollbar-gutter: stable;
   scroll-behavior: smooth;
+  /* Fluid typography base */
+  font-size: clamp(14px, 1vw + 0.5rem, 16px);
+}
+
+/* Mobile: Use dynamic viewport units to account for browser UI */
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    html, body {
+      height: 100dvh;
+      min-height: 100dvh;
+    }
+  }
+}
+
+/* Prevent horizontal overflow globally */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Performance optimization: GPU acceleration for theme transitions */
+.particle-container,
+.rashi-orbit-container,
+[class*="orbit"],
+[class*="particle"] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Allow opacity transitions for theme switching */
+  transition: opacity 400ms ease;
+}
+
+/* Optimized will-change usage - only for interactive elements on capable devices */
+:root:not([data-device-tier="low"]) button:hover,
+:root:not([data-device-tier="low"]) [type='button']:hover,
+:root:not([data-device-tier="low"]) [type='reset']:hover,
+:root:not([data-device-tier="low"]) [type='submit']:hover,
+:root:not([data-device-tier="low"]) [role='button']:hover,
+:root:not([data-device-tier="low"]) a:hover,
+:root:not([data-device-tier="low"]) input:focus,
+:root:not([data-device-tier="low"]) textarea:focus {
+  will-change: background-color, color, border-color;
+}
+
+/* Remove will-change after interaction completes */
+:root:not([data-device-tier="low"]) button,
+:root:not([data-device-tier="low"]) [type='button'],
+:root:not([data-device-tier="low"]) [type='reset'],
+:root:not([data-device-tier="low"]) [type='submit'],
+:root:not([data-device-tier="low"]) [role='button'],
+:root:not([data-device-tier="low"]) a,
+:root:not([data-device-tier="low"]) input,
+:root:not([data-device-tier="low"]) textarea {
+  will-change: auto;
+}
+
+/* Disable transitions class for instant theme switching */
+.disable-transitions,
+.disable-transitions *,
+.disable-transitions *::before,
+.disable-transitions *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Staggered theme transition - background instant, decorative elements delayed */
+.theme-transition-stagger {
+  /* Critical UI elements: instant change */
+  & body,
+  & nav,
+  & main,
+  & [role="main"],
+  & button,
+  & input,
+  & textarea,
+  & select {
+    transition: background-color 0ms, color 0ms, border-color 0ms !important;
+  }
+  
+  /* Decorative elements: delayed fade-in (won't block UI) */
+  & .particle-container,
+  & .rashi-orbit-container,
+  & [class*="orbit"],
+  & [class*="particle"],
+  & [class*="flare"],
+  & [class*="glow"] {
+    transition: opacity 400ms ease 100ms !important;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Focus visible for accessibility */
@@ -33,6 +129,10 @@ html {
 }
 
 :root {
+  /* ============================================================
+     THEME VARIABLES (Visual Properties Only - Change on theme switch)
+     ============================================================ */
+  
   /* PRIMARY THEME: IVORY (LIGHT) */
   --background: #faf7f2;
   --foreground: #2a1a4a;
@@ -51,9 +151,68 @@ html {
   --flare-ivory: #fff8e6;
   --pattern-opacity: 0.3;
   --grain-opacity: 0.08;
+  
+  /* ============================================================
+     SEMANTIC VARIABLES (Layout Properties - Never change on theme switch)
+     ============================================================ */
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Border radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+  --border-radius-full: 9999px;
+  
+  /* Transition durations (device-tier specific) */
+  --transition-duration: 200ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Device tier specific transition durations */
+:root[data-device-tier="low"] {
+  --transition-duration: 0ms; /* Instant for low-end devices */
+}
+
+:root[data-device-tier="mid"] {
+  --transition-duration: 150ms; /* Quick for mid-range devices */
+}
+
+:root[data-device-tier="high"] {
+  --transition-duration: 250ms; /* Smooth for high-end devices */
+}
+
+/* Mobile-specific: Force instant theme switching on all mobile devices */
+@media (max-width: 768px) {
+  :root {
+    --transition-duration: 0ms !important;
+  }
+  
+  /* Disable all transitions during theme switch on mobile */
+  body, nav, main, button, input, textarea, select,
+  [role="main"], [role="navigation"], [role="button"] {
+    transition: none !important;
+  }
+  
+  /* Allow only decorative elements to fade in gradually (non-blocking) */
+  .particle-container,
+  .rashi-orbit-container,
+  [class*="orbit"],
+  [class*="particle"] {
+    transition: opacity 300ms ease 50ms !important;
+  }
 }
 
 :root.dark {
+  /* ============================================================
+     THEME VARIABLES (Visual Properties Only - Change on theme switch)
+     ============================================================ */
+  
   /* SECONDARY THEME: MIDNIGHT (DARK) */
   --background: #0b071a;
   --foreground: #faf7f2;
@@ -72,6 +231,8 @@ html {
   --flare-ivory: #fff8e6;
   --pattern-opacity: 0;
   --grain-opacity: 0;
+  
+  /* Semantic variables remain unchanged */
 }
 
 @theme inline {
@@ -104,6 +265,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
+  /* INSTANT background change - no transition delay */
+  transition: none;
 }
 
 .material-symbols-outlined {
@@ -223,6 +386,15 @@ a {
   min-height: 0;
   height: 100%;
   position: relative;
+}
+
+/* Mobile: Use dynamic viewport height to account for browser UI */
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    .chat-layout {
+      height: 100dvh;
+    }
+  }
 }
 
 @media (max-width: 1280px) {
@@ -438,49 +610,60 @@ a {
 
 /* --- Chat Input --- */
 .chat-input-container {
-  background: color-mix(in srgb, var(--surface) 70%, var(--background));
-  border: 1px solid var(--outline-variant);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: 16px;
   padding: 10px 12px;
   display: flex;
   align-items: flex-end;
-  gap: 10px;
-  transition: border-color 0.2s ease;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .chat-input-container:focus-within {
-  border-color: color-mix(in srgb, var(--secondary) 40%, var(--outline-variant));
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--secondary) 10%, transparent),
+              0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 @media (max-width: 640px) {
   .chat-input-container {
     padding: 8px 10px;
+    border-radius: 14px;
+    gap: 6px;
   }
 }
 
 .chat-input-icon-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--surface-variant) 40%, transparent);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
   border: none;
   color: var(--on-surface-variant);
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
-.chat-input-icon-btn:hover {
+.chat-input-icon-btn:hover:not(:disabled) {
   opacity: 1;
-  background: var(--surface-variant);
+  background: color-mix(in srgb, var(--on-surface-variant) 8%, transparent);
+}
+
+.chat-input-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .chat-send-btn {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   background: var(--secondary);
   border: none;
@@ -489,18 +672,56 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
-.chat-send-btn:hover {
-  opacity: 0.9;
-  transform: scale(1.02);
+.chat-send-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--secondary) 90%, #000);
+  transform: scale(1.03);
+}
+
+.chat-send-btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .chat-send-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-optimized padding utility */
+@media (max-width: 640px) {
+  .mobile-tight-padding {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .mobile-tight-spacing {
+    gap: 0.75rem !important;
+  }
+}
+
+/* Prevent zoom on input focus (iOS Safari) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 /* --- Custom Scrollbars (Local Only) --- */
@@ -585,6 +806,16 @@ html:has(.dashboard-shell),
 html:has(.dashboard-shell) body {
   height: 100vh;
   overflow: hidden;
+}
+
+/* Mobile: Use dynamic viewport height */
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    html:has(.dashboard-shell),
+    html:has(.dashboard-shell) body {
+      height: 100dvh;
+    }
+  }
 }
 
 /* The <main> wrapping dashboard content must pass height down */
@@ -908,4 +1139,125 @@ body:has(.dashboard-shell)>main {
   color: var(--primary);
   font-size: 1.6rem;
   text-shadow: 0 0 15px color-mix(in srgb, var(--secondary) 30%, transparent);
+}
+
+
+/* ============================================================
+   FLUID RESPONSIVE UTILITIES
+   ============================================================ */
+
+/* Fluid container with safe padding */
+.fluid-container {
+  width: 100%;
+  max-width: min(1600px, 100vw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(0.75rem, 3vw, 3rem);
+  padding-right: clamp(0.75rem, 3vw, 3rem);
+}
+
+/* Fluid spacing utilities */
+.fluid-gap-sm {
+  gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.fluid-gap-md {
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.fluid-gap-lg {
+  gap: clamp(1rem, 4vw, 2rem);
+}
+
+/* Fluid padding utilities */
+.fluid-p-sm {
+  padding: clamp(0.5rem, 2vw, 1rem);
+}
+
+.fluid-p-md {
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.fluid-p-lg {
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+/* Fluid text sizes */
+.fluid-text-xs {
+  font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+}
+
+.fluid-text-sm {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+}
+
+.fluid-text-base {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.fluid-text-lg {
+  font-size: clamp(1rem, 3vw, 1.125rem);
+}
+
+.fluid-text-xl {
+  font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+}
+
+.fluid-text-2xl {
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+}
+
+.fluid-text-3xl {
+  font-size: clamp(1.5rem, 5vw, 1.875rem);
+}
+
+.fluid-text-4xl {
+  font-size: clamp(1.875rem, 6vw, 2.25rem);
+}
+
+/* Prevent content overflow */
+.safe-area {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Responsive grid that adapts to screen size */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+/* Flexible image/icon sizing */
+.fluid-icon-sm {
+  width: clamp(1rem, 4vw, 1.5rem);
+  height: clamp(1rem, 4vw, 1.5rem);
+}
+
+.fluid-icon-md {
+  width: clamp(1.5rem, 5vw, 2rem);
+  height: clamp(1.5rem, 5vw, 2rem);
+}
+
+.fluid-icon-lg {
+  width: clamp(2rem, 6vw, 3rem);
+  height: clamp(2rem, 6vw, 3rem);
+}
+
+/* Responsive button sizing */
+.fluid-btn {
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 1.5rem);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+/* Safe area for notched devices */
+@supports (padding: max(0px)) {
+  .safe-padding-x {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+  
+  .safe-padding-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import Card from '@/components/ui/Card';
 import ChatBubble from '@/components/ui/ChatBubble';
 import RatingMeter from '@/components/ui/RatingMeter';
 import { useChat } from '@/context/ChatContext';
+import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { useState } from 'react';
+import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
 
 /* ---------- Sub-components ---------- */
 const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
@@ -17,9 +19,9 @@ const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
   </div>
 );
 
-const EmptyState: React.FC<{ onNewChat: () => void }> = ({ onNewChat }) => (
+const EmptyState: React.FC<{ onNewChat: () => void; onQuestionClick: (question: string) => void; suggestedQuestions: string[] }> = ({ onNewChat, onQuestionClick, suggestedQuestions }) => (
   <div className="flex-1 flex items-center justify-center">
-    <div className="text-center max-w-md px-6">
+    <div className="text-center max-w-2xl px-6">
       <div className="text-5xl mb-4 opacity-30">✦</div>
       <h3 className="text-lg font-headline font-bold text-on-surface/80 mb-2">
         Start a Conversation
@@ -27,6 +29,21 @@ const EmptyState: React.FC<{ onNewChat: () => void }> = ({ onNewChat }) => (
       <p className="text-sm text-on-surface-variant/50 mb-6 leading-relaxed">
         Select a recent chat from the sidebar or start a new conversation to get personalized Vedic astrology insights.
       </p>
+      
+      {/* Suggested Questions */}
+      <div className="mb-6 space-y-2">
+        <p className="text-xs font-bold text-secondary uppercase tracking-wider mb-3">Suggested Questions</p>
+        {suggestedQuestions.map((question, idx) => (
+          <button
+            key={idx}
+            onClick={() => onQuestionClick(question)}
+            className="w-full text-left text-sm text-on-surface-variant/70 bg-surface/50 border border-outline-variant/20 px-4 py-3 rounded-xl hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98"
+          >
+            {question}
+          </button>
+        ))}
+      </div>
+
       <button
         onClick={onNewChat}
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-on-primary text-sm font-bold transition-all hover:opacity-90 hover:scale-[1.02] cursor-pointer"
@@ -76,6 +93,7 @@ const ThinkingIndicator: React.FC = () => {
 
 /* ---------- Main Component ---------- */
 const ChatMessages: React.FC = () => {
+  const { user } = useAuth();
   const { activeChat, isLoadingMessages, isSending, createNewChat, rateMessage } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean; messageId: string; initialRating: number }>({
@@ -83,6 +101,15 @@ const ChatMessages: React.FC = () => {
     messageId: '',
     initialRating: 0
   });
+
+  // Calculate age and get personalized questions
+  const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
+  const ageBracket = useMemo(() => getAgeBracket(age), [age]);
+  const suggestedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
+
+  const handleQuestionClick = (question: string) => {
+    createNewChat(question);
+  };
 
   const handleRateAction = (messageId: string, rating: number) => {
     if (rating < 5) {
@@ -112,7 +139,7 @@ const ChatMessages: React.FC = () => {
 
   // No active chat
   if (!activeChat && !isLoadingMessages) {
-    return <EmptyState onNewChat={() => createNewChat()} />;
+    return <EmptyState onNewChat={() => createNewChat()} onQuestionClick={handleQuestionClick} suggestedQuestions={suggestedQuestions} />;
   }
 
   // Loading
@@ -125,7 +152,7 @@ const ChatMessages: React.FC = () => {
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto px-4 sm:px-5 py-5 flex flex-col gap-4 chat-messages-scroll"
+      className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 chat-messages-scroll"
     >
       {messages.map((msg, i) => {
         if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;
