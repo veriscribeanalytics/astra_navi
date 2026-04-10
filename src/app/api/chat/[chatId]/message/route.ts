@@ -77,13 +77,23 @@ export async function POST(
       }
     }
 
-    // 2. Prepare the streaming request to /api/ask
+    // 2. Prepare the history for the LLM
+    const history = (chat.messages || [])
+      .filter((m: any) => m.type === 'user' || m.type === 'ai')
+      .slice(-15) // Keep last 15 messages (7-8 turns)
+      .map((m: any) => ({
+        role: m.type === 'ai' ? 'assistant' : 'user',
+        content: m.text || ''
+      }));
+
+    // 3. Prepare the streaming request to /api/ask
     const askRes = await fetch(`${backendUrl}/api/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question: text,
         chart_context: chartContext,
+        history: history, // Memory injected here!
         name: userProfile.name || 'Friend',
         lang: userProfile.preferredLanguage || 'english',
         dob: userProfile.dob
