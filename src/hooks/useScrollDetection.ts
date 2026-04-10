@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
  */
 export function useScrollDetection(delay: number = 150): boolean {
   const [isScrolling, setIsScrolling] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   useEffect(() => {
     const handleScroll = () => {

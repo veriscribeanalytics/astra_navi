@@ -8,9 +8,9 @@ export function useAnimationFrame(
   callback: (deltaTime: number, elapsedTime: number) => void,
   enabled: boolean = true
 ) {
-  const requestRef = useRef<number>();
-  const previousTimeRef = useRef<number>();
-  const startTimeRef = useRef<number>();
+  const requestRef = useRef<number>(undefined);
+  const previousTimeRef = useRef<number>(undefined);
+  const startTimeRef = useRef<number>(undefined);
 
   useEffect(() => {
     if (!enabled) return;

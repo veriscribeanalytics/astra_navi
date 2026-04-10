@@ -9,7 +9,7 @@ export function useDebounce(
   delay: number,
   dependencies: any[] = []
 ) {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   useEffect(() => {
     // Clear existing timeout

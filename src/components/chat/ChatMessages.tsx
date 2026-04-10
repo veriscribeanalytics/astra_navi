@@ -159,28 +159,42 @@ const ChatMessages: React.FC = () => {
 
         const isAi = msg.type === 'ai';
 
+        // --- NEW: Parsing thinking tags ---
+        let mainText = msg.text;
+        let thinkingText = '';
+        
+        if (isAi && msg.text.includes('<think>')) {
+          const parts = msg.text.split('</think>');
+          if (parts.length > 1) {
+            thinkingText = parts[0].replace('<think>', '').trim();
+            mainText = parts.slice(1).join('</think>').trim();
+          } else {
+            // Still thinking or tag not closed
+            thinkingText = msg.text.replace('<think>', '').trim();
+            mainText = '';
+          }
+        }
+
         const handleSpeak = (text: string) => {
           // Remove HTML tags if present (though dangerouslySetInnerHTML is used)
           const cleanText = text.replace(/<[^>]*>/g, '');
           const utterance = new SpeechSynthesisUtterance(cleanText);
           
-          // Detect language (simplified: default to English but could be enhanced)
-          // Web Speech API will use system default voice
-          window.speechSynthesis.cancel(); // Stop any current speech
+          window.speechSynthesis.cancel(); 
           window.speechSynthesis.speak(utterance);
         };
 
         const copyAction = isAi ? (
           <div className="flex items-center gap-1">
             <button
-              onClick={() => handleSpeak(msg.text)}
+              onClick={() => handleSpeak(mainText)}
               className="group/speak flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
               title="Speak Message"
             >
               <span className="material-symbols-outlined text-[16px] group-active/speak:scale-90 transition-transform">volume_up</span>
             </button>
             <button
-              onClick={() => navigator.clipboard.writeText(msg.text.replace(/<[^>]*>/g, ''))}
+              onClick={() => navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''))}
               className="group/copy flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
               title="Copy Message"
             >
@@ -199,9 +213,22 @@ const ChatMessages: React.FC = () => {
             >
               {isAi ? (
                 <>
+                  {/* Thought Process Dropdown */}
+                  {thinkingText && (
+                    <details className="mb-3 group/think">
+                      <summary className="text-[11px] font-bold text-secondary/60 cursor-pointer list-none flex items-center gap-1.5 hover:text-secondary transition-colors">
+                        <span className="material-symbols-outlined text-[14px] group-open/think:rotate-90 transition-transform">chevron_right</span>
+                        ✦ Thought process
+                      </summary>
+                      <div className="mt-2 pl-3 border-l border-secondary/20 text-[12px] text-on-surface-variant/60 italic leading-relaxed whitespace-pre-wrap">
+                        {thinkingText}
+                      </div>
+                    </details>
+                  )}
+
                   <div
                     className="text-on-surface-variant [&_strong]:text-secondary [&_strong]:font-semibold"
-                    dangerouslySetInnerHTML={{ __html: msg.text }}
+                    dangerouslySetInnerHTML={{ __html: mainText }}
                   />
 
                   {/* Insight Card */}

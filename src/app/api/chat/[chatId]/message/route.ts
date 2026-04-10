@@ -80,10 +80,10 @@ export async function POST(
     // 2. Prepare the history for the LLM
     const history = (chat.messages || [])
       .filter((m: any) => m.type === 'user' || m.type === 'ai')
-      .slice(-15) // Keep last 15 messages (7-8 turns)
+      .slice(-2) // Keep ONLY last 2 messages (1 turn) to brutally save context
       .map((m: any) => ({
         role: m.type === 'ai' ? 'assistant' : 'user',
-        content: m.text || ''
+        content: (m.text || '').slice(0, 150) // Aggressive truncation
       }));
 
     // 3. Prepare the streaming request to /api/ask
@@ -93,7 +93,7 @@ export async function POST(
       body: JSON.stringify({
         question: text,
         chart_context: chartContext,
-        history: history, // Memory injected here!
+        history: history,
         name: userProfile.name || 'Friend',
         lang: userProfile.preferredLanguage || 'english',
         dob: userProfile.dob
@@ -120,12 +120,15 @@ export async function POST(
         }
 
         try {
+          let lineBuf = ''; // Buffer for incomplete lines across chunks
+
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+            lineBuf += decoder.decode(value, { stream: true });
+            const lines = lineBuf.split('\n');
+            lineBuf = lines.pop() || ''; // Keep last incomplete line for next chunk
             
             for (const line of lines) {
               if (line.startsWith('data: ')) {

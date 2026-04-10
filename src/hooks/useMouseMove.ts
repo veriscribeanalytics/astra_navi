@@ -19,7 +19,7 @@ export function useMouseMove(
   options: UseMouseMoveOptions = {}
 ) {
   const { throttle = false, passive = true } = options;
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number>(undefined);
   const pendingPositionRef = useRef<MousePosition | null>(null);
 
   useEffect(() => {
