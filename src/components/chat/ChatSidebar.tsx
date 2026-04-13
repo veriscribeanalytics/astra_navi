@@ -67,32 +67,34 @@ const ChatSidebar: React.FC = () => {
 
   return (
     <>
-      {/* Sidebar Close Button (Top right of side area) */}
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsMobileMenuOpen(false);
-        }}
-        className="lg:hidden absolute top-4 right-4 p-2 text-on-surface-variant/40 hover:text-secondary hover:bg-secondary/10 rounded-full transition-all z-[1001]"
-        aria-label="Close sidebar"
-      >
-        <X className="w-5 h-5" />
-      </button>
-
-      {/* New Chat Button Row */}
-      <div className="px-3.5 pt-4 pb-2 shrink-0 pr-12"> {/* Added padding-right to avoid the X button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          fullWidth
-          className="!border-secondary/25 !text-secondary !font-bold gap-1.5"
-          onClick={() => {
-            createNewChat();
+      {/* Header / New Chat Row */}
+      <div className="flex items-center gap-2 px-3.5 pt-4 pb-2 shrink-0">
+        <div className="flex-1 min-w-0">
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            className="!border-secondary/25 !text-secondary !font-bold gap-1.5"
+            onClick={() => {
+              createNewChat();
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            <span>✦</span> New conversation
+          </Button>
+        </div>
+        
+        {/* Sidebar Close Button */}
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
             setIsMobileMenuOpen(false);
           }}
+          className="lg:hidden p-1.5 text-on-surface-variant/50 hover:text-secondary hover:bg-secondary/10 rounded-full transition-all shrink-0 flex items-center justify-center !min-w-0 !min-h-0"
+          aria-label="Close sidebar"
         >
-          <span>✦</span> New conversation
-        </Button>
+          <X size={20} />
+        </button>
       </div>
 
       {/* Recent Chats (Scrollable Area) */}
@@ -129,14 +131,16 @@ const ChatSidebar: React.FC = () => {
                           selectChat(chat._id);
                           setIsMobileMenuOpen(false);
                       }}
-                      className={`group relative px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 pr-8 ${
+                      className={`group relative px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        menuOpenId === chat._id ? 'z-50' : 'z-0'
+                      } ${
                         isActive
-                          ? 'bg-secondary/8 border border-secondary/20 shadow-sm shadow-secondary/5'
+                          ? 'bg-surface-variant/60 border border-secondary/20 shadow-sm shadow-secondary/5'
                           : 'hover:bg-surface-variant/30 border border-transparent'
                       }`}
                     >
-                      <p className={`text-[13px] truncate mb-0.5 ${
-                        isActive ? 'text-secondary font-bold' : 'text-on-surface-variant font-medium'
+                      <p className={`text-[13px] truncate mb-0.5 transition-all duration-200 ${
+                        isActive ? 'text-secondary font-bold pr-3' : 'text-on-surface-variant font-medium pr-3 md:pr-0 md:group-hover:pr-3'
                       }`}>
                         {chat.title}
                       </p>
@@ -150,10 +154,20 @@ const ChatSidebar: React.FC = () => {
                           </span>
                         )}
                       </div>
+                      {/* Gradient mask to gracefully fade text behind the 3-dot button */}
+                      <div 
+                        className={`absolute right-0 top-0 bottom-0 w-16 pointer-events-none transition-all duration-200 rounded-r-xl z-10 bg-gradient-to-l to-transparent ${
+                          isActive 
+                            ? 'opacity-100 from-[color-mix(in_srgb,var(--surface-variant)_60%,var(--surface))]' 
+                            : 'opacity-100 md:opacity-0 md:group-hover:opacity-100 from-surface group-hover:from-[color-mix(in_srgb,var(--surface-variant)_30%,var(--surface))]'
+                        }`}
+                      />
                       
                       {/* ... (3-dot menu) ... */}
                       <div 
-                        className={`absolute right-2 top-2 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
+                        className={`absolute right-1.5 top-1/2 -translate-y-1/2 z-20 transition-opacity duration-200 ${
+                          isActive ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'
+                        }`}
                       >
                           <button 
                               onClick={(e) => {
@@ -161,7 +175,7 @@ const ChatSidebar: React.FC = () => {
                               e.preventDefault();
                               setMenuOpenId(prev => prev === chat._id ? null : chat._id);
                               }}
-                              className="chat-menu-btn text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-variant/50 p-1 rounded transition-colors cursor-pointer"
+                              className="chat-menu-btn text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-variant/50 w-7 h-7 flex items-center justify-center !min-w-0 !min-h-0 !p-1 rounded transition-colors cursor-pointer"
                           >
                               <MoreVertical size={14} />
                           </button>
@@ -209,28 +223,6 @@ const ChatSidebar: React.FC = () => {
               )}
             </>
           )}
-        </div>
-
-        {/* SITE NAVIGATION (Mobile Only) */}
-        <div className="lg:hidden px-3.5 pt-4 pb-6 border-t border-outline-variant/10 bg-surface/50">
-            <SidebarSectionLabel>SITE NAVIGATION</SidebarSectionLabel>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-                {[
-                    { label: 'Home', href: '/' },
-                    { label: 'About', href: '/about' },
-                    { label: 'Plans', href: '/plans' },
-                    { label: 'Profile', href: '/profile' }
-                ].map((item) => (
-                    <Link
-                        key={item.label}
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-center py-2.5 px-3 rounded-xl bg-background border border-outline-variant/10 text-[11px] font-bold text-primary/70 hover:text-primary transition-all active:scale-95 shadow-sm"
-                    >
-                        {item.label}
-                    </Link>
-                ))}
-            </div>
         </div>
       </div>
 

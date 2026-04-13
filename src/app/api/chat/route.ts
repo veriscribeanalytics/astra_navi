@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const systemMessage = {
       id: generateUUID(),
       type: 'system',
-      text: `Session started · Reading your chart${user?.dob ? ` · DOB: ${user.dob}` : ''}`,
+      text: 'Session started · Reading your chart',
       createdAt: now,
     };
 

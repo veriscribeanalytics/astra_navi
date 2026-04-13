@@ -5,6 +5,7 @@ import { useChat } from "@/context/ChatContext";
 import { Sparkles, Sun, ArrowRight, Clock, MessageSquare, Compass, Plus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -83,8 +84,8 @@ export default function DashboardHome() {
                     <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left relative z-10 w-full max-w-2xl lg:max-w-none">
                         <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-full border border-secondary/20 bg-secondary/5 text-secondary text-[9px] sm:text-[10px] font-bold font-mono tracking-[0.15em] sm:tracking-widest uppercase mb-2.5 sm:mb-3 md:mb-4 lg:mb-6 shadow-sm">
                             <Sparkles className="w-3 h-3" />
-                            <span className="hidden xs:inline">AstraNavi Intelligence</span>
-                            <span className="xs:hidden">AI Intelligence</span>
+                            <span className="hidden sm:inline">AstraNavi Intelligence</span>
+                            <span className="sm:hidden">AI Intelligence</span>
                         </div>
                         
                         <h1 className="text-[26px] leading-[1.15] sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-headline mb-3 sm:mb-4 md:mb-5 lg:mb-6 xl:mb-8 text-foreground tracking-tight">
@@ -186,71 +187,84 @@ export default function DashboardHome() {
                 </div>
             </section>
 
-            {/* SECTION 1.5: THE ASTRAL ARCHIVES */}
+            {/* SECTION 1.5: MAIN CONTENT GRID - Archives Left, Horoscope Right */}
             <section className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mb-8 sm:mb-12 lg:mb-16">
-                <div className="flex justify-between items-center mb-3 sm:mb-4 lg:mb-6">
-                    <h3 className="text-base sm:text-lg lg:text-2xl font-headline font-bold text-foreground flex items-center gap-1.5 sm:gap-2 leading-none">
-                        <Clock className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-secondary" /> 
-                        <span className="hidden xs:inline">The Astral Archives</span>
-                        <span className="xs:hidden">Archives</span>
-                    </h3>
-                    <Link href="/chat" className="text-[9px] sm:text-[10px] lg:text-xs font-bold text-secondary hover:text-amber-500 transition-colors flex items-center gap-0.5 sm:gap-1 uppercase tracking-[0.1em] sm:tracking-widest bg-secondary/5 px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 rounded-full border border-secondary/20 hover:border-secondary/40">
-                        <span className="hidden xs:inline">View All</span>
-                        <span className="xs:hidden">All</span>
-                        <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5" />
-                    </Link>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                    {chats.length > 0 ? (
-                        chats.slice(0, 2).map((chat, idx) => (
-                            <Link key={chat._id} href={`/chat?id=${chat._id}`} className="block focus:outline-none">
-                                <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] h-full relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
-                                    <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none transition-colors group-hover:bg-secondary/10 z-0" />
-                                    <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                            {idx === 0 ? <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />}
-                                        </div>
-                                        <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">
-                                            {formatArchiveDate(chat.updatedAt)}
-                                        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                    
+                    {/* LEFT: THE ASTRAL ARCHIVES */}
+                    <div className="flex flex-col">
+                        <div className="flex justify-between items-center mb-3 sm:mb-4 lg:mb-6">
+                            <h3 className="text-base sm:text-lg lg:text-2xl font-headline font-bold text-foreground flex items-center gap-1.5 sm:gap-2 leading-none">
+                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-secondary" /> 
+                                <span className="hidden xs:inline">The Astral Archives</span>
+                                <span className="xs:hidden">Archives</span>
+                            </h3>
+                            <Link href="/chat" className="text-[9px] sm:text-[10px] lg:text-xs font-bold text-secondary hover:text-amber-500 transition-colors flex items-center gap-0.5 sm:gap-1 uppercase tracking-[0.1em] sm:tracking-widest bg-secondary/5 px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 rounded-full border border-secondary/20 hover:border-secondary/40">
+                                <span className="hidden xs:inline">View All</span>
+                                <span className="xs:hidden">All</span>
+                                <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5" />
+                            </Link>
+                        </div>
+                        
+                        <div className="flex flex-col gap-3 sm:gap-4">
+                            {chats.length > 0 ? (
+                                chats.slice(0, 5).map((chat, idx) => (
+                                    <Link key={chat._id} href={`/chat?id=${chat._id}`} className="block focus:outline-none">
+                                        <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
+                                            <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none transition-colors group-hover:bg-secondary/10 z-0" />
+                                            <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                                    {idx === 0 ? <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />}
+                                                </div>
+                                                <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">
+                                                    {formatArchiveDate(chat.updatedAt)}
+                                                </div>
+                                            </div>
+                                            <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 sm:mb-1 group-hover:text-secondary transition-colors relative z-10 truncate leading-snug">{chat.title}</h4>
+                                            <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">
+                                                {idx === 0 ? 'Analysis' : 'Consultation'} • {chat.averageRating ? `${chat.averageRating}★ rating` : 'Archived'}
+                                            </p>
+                                        </Card>
+                                    </Link>
+                                ))
+                            ) : (
+                                <>
+                                    {starterCards.slice(0, 2).map((card, idx) => (
+                                        <button key={idx} onClick={() => handleQuickAsk(card.question)} className="block w-full text-left focus:outline-none">
+                                            <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
+                                                <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none z-0" />
+                                                <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
+                                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        {idx === 0 ? <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />}
+                                                    </div>
+                                                    <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">{idx === 0 ? 'Start Here' : 'Discover'}</div>
+                                                </div>
+                                                <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 group-hover:text-secondary transition-colors relative z-10 leading-snug">{card.title}</h4>
+                                                <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">{card.description}</p>
+                                            </Card>
+                                        </button>
+                                    ))}
+                                </>
+                            )}
+                            
+                            <Link href="/chat" className="block focus:outline-none">
+                                <Card padding="md" className="min-h-[140px] sm:min-h-[160px] flex flex-col items-center justify-center text-center group cursor-pointer border-dashed border-secondary/30 hover:border-secondary/60 hover:bg-secondary/5 !rounded-[20px] sm:!rounded-[24px] transition-all">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 group-hover:border-secondary/40 flex items-center justify-center mb-3 sm:mb-4 transition-colors">
+                                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-secondary/50 group-hover:text-secondary" />
                                     </div>
-                                    <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 sm:mb-1 group-hover:text-secondary transition-colors relative z-10 truncate leading-snug">{chat.title}</h4>
-                                    <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">
-                                        {idx === 0 ? 'Analysis' : 'Consultation'} • {chat.averageRating ? `${chat.averageRating}★ rating` : 'Archived'}
-                                    </p>
+                                    <h4 className="font-bold text-sm sm:text-base text-foreground/70 group-hover:text-secondary transition-colors leading-none">New Synthesis</h4>
+                                    <p className="text-[9px] sm:text-[10px] font-bold text-foreground/40 mt-1.5 sm:mt-2 uppercase tracking-widest">New chart or path</p>
                                 </Card>
                             </Link>
-                        ))
-                    ) : (
-                        <>
-                            {starterCards.map((card, idx) => (
-                                <button key={idx} onClick={() => handleQuickAsk(card.question)} className="block w-full text-left focus:outline-none h-full">
-                                    <Card padding="md" className="group cursor-pointer !rounded-[20px] sm:!rounded-[24px] h-full relative overflow-hidden border border-secondary/10 hover:border-secondary/30 transition-all duration-300">
-                                        <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-secondary/5 rounded-bl-[80px] sm:rounded-bl-[100px] pointer-events-none z-0" />
-                                        <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
-                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                {idx === 0 ? <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-secondary/70" />}
-                                            </div>
-                                            <div className="text-[9px] sm:text-[10px] font-mono font-bold text-secondary bg-secondary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md uppercase tracking-wider border border-secondary/10">{idx === 0 ? 'Start Here' : 'Discover'}</div>
-                                        </div>
-                                        <h4 className="text-base sm:text-lg font-bold text-foreground mb-1 group-hover:text-secondary transition-colors relative z-10 leading-snug">{card.title}</h4>
-                                        <p className="text-[10px] sm:text-[11px] text-foreground/50 relative z-10 font-bold uppercase tracking-wider">{card.description}</p>
-                                    </Card>
-                                </button>
-                            ))}
-                        </>
+                        </div>
+                    </div>
+
+                    {/* RIGHT: DAILY HOROSCOPE */}
+                    {user?.email && user?.moonSign && (
+                        <div className="flex flex-col">
+                            <DailyHoroscopeCard email={user.email} />
+                        </div>
                     )}
-                    
-                    <Link href="/chat" className="block focus:outline-none h-full">
-                        <Card padding="md" className="min-h-[140px] sm:min-h-[160px] lg:min-h-[180px] flex flex-col items-center justify-center text-center group cursor-pointer border-dashed border-secondary/30 hover:border-secondary/60 hover:bg-secondary/5 !rounded-[20px] sm:!rounded-[24px] transition-all">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-secondary/20 group-hover:border-secondary/40 flex items-center justify-center mb-3 sm:mb-4 transition-colors">
-                                <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-secondary/50 group-hover:text-secondary" />
-                            </div>
-                            <h4 className="font-bold text-sm sm:text-base text-foreground/70 group-hover:text-secondary transition-colors leading-none">New Synthesis</h4>
-                            <p className="text-[9px] sm:text-[10px] font-bold text-foreground/40 mt-1.5 sm:mt-2 uppercase tracking-widest">New chart or path</p>
-                        </Card>
-                    </Link>
                 </div>
             </section>
 

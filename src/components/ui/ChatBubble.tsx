@@ -34,7 +34,10 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               {label}
             </p>
           )}
-          <div className="text-[13px] leading-relaxed">
+          <div 
+            className="text-[12px] sm:text-[13px] leading-relaxed break-words" 
+            style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+          >
             {children}
           </div>
         </div>

@@ -152,7 +152,7 @@ const ChatMessages: React.FC = () => {
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 chat-messages-scroll"
+      className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 chat-messages-scroll min-w-0 w-full"
     >
       {messages.map((msg, i) => {
         if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;
@@ -188,14 +188,14 @@ const ChatMessages: React.FC = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={() => handleSpeak(mainText)}
-              className="group/speak flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
+              className="group/speak flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface-variant rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1"
               title="Speak Message"
             >
               <span className="material-symbols-outlined text-[16px] group-active/speak:scale-90 transition-transform">volume_up</span>
             </button>
             <button
               onClick={() => navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''))}
-              className="group/copy flex items-center gap-1.5 text-on-surface-variant/40 hover:text-on-surface-variant p-1 rounded-md transition-colors cursor-pointer"
+              className="group/copy flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface-variant rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1"
               title="Copy Message"
             >
               <span className="material-symbols-outlined text-[16px] group-active/copy:scale-90 transition-transform">content_copy</span>
@@ -282,13 +282,19 @@ const ChatMessages: React.FC = () => {
 
             {/* Rating meter & Copy below every AI message */}
             {isAi && msg.id && (
-              <div className="flex items-center justify-between ml-[42px] mt-1 pr-2">
-                <RatingMeter
-                  rating={msg.rating}
-                  onRate={(rating) => handleRateAction(msg.id, rating)}
-                  size="md"
-                />
-                {copyAction}
+              <div className="flex items-center justify-between w-full mt-1.5 px-2 mb-2">
+                <span className="text-[10px] font-medium text-on-surface-variant/80 tracking-wide uppercase">
+                  Rate this message
+                </span>
+                <div className="flex items-center gap-2">
+                  <RatingMeter
+                    rating={msg.rating}
+                    onRate={(rating) => handleRateAction(msg.id, rating)}
+                    size="sm"
+                  />
+                  <div className="w-[1px] h-3 bg-outline-variant/40 ml-0.5 mr-0.5" />
+                  {copyAction}
+                </div>
               </div>
             )}
           </div>

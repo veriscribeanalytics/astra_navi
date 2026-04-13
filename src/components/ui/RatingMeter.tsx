@@ -15,9 +15,9 @@ const RatingMeter: React.FC<RatingMeterProps> = ({ rating, onRate, size = 'sm' }
   const starSize = size === 'sm' ? 'text-sm' : 'text-base';
 
   return (
-    <div className="rating-meter-container">
+    <div className="inline-flex items-center gap-1.5 shrink-0">
       <div
-        className="rating-stars"
+        className="flex items-center gap-px"
         onMouseLeave={() => setHoverRating(null)}
       >
         {[1, 2, 3, 4, 5].map((star) => {
@@ -28,7 +28,7 @@ const RatingMeter: React.FC<RatingMeterProps> = ({ rating, onRate, size = 'sm' }
             <button
               key={star}
               type="button"
-              className={`rating-star ${starSize} ${isFilled ? 'rating-star-filled' : 'rating-star-empty'} ${isActive ? 'rating-star-active' : ''}`}
+              className={`rating-star !min-w-0 !min-h-0 !p-1 flex items-center justify-center w-6 h-6 ${starSize} ${isFilled ? 'rating-star-filled' : 'rating-star-empty'} ${isActive ? 'rating-star-active' : ''}`}
               onMouseEnter={() => setHoverRating(star)}
               onClick={() => onRate(star)}
               title={`Rate ${star} star${star > 1 ? 's' : ''}`}
@@ -39,13 +39,13 @@ const RatingMeter: React.FC<RatingMeterProps> = ({ rating, onRate, size = 'sm' }
         })}
       </div>
       {currentRating > 0 && (
-        <span className={`rating-label ${size === 'md' ? 'text-xs' : 'text-[10px]'}`}>
+        <span className={`rating-label font-bold text-secondary ${size === 'md' ? 'text-xs ml-1' : 'text-[10px] ml-0.5'}`}>
           {currentRating.toFixed(1)}/5
         </span>
       )}
-      {!currentRating && !hoverRating && (
-        <span className={`rating-label rating-label-prompt ${size === 'md' ? 'text-xs' : 'text-[10px]'}`}>
-          Rate this response
+      {!currentRating && !hoverRating && size === 'md' && (
+        <span className={`rating-label rating-label-prompt text-xs ml-1`}>
+          Rate this
         </span>
       )}
     </div>

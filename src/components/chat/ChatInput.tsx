@@ -156,11 +156,11 @@ const ChatInput: React.FC = () => {
   const isNearLimit = charCount > MAX_CHARS * 0.9;
 
   return (
-    <div className="shrink-0 bg-background">
+    <div className="shrink-0 bg-background min-w-0 w-full overflow-hidden">
       {/* Suggested Questions - Context-aware */}
       {activeChat && activeChat.messages.length > 0 && !isSending && (
-        <div className="px-3 sm:px-4 md:px-5 pt-2 pb-2">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="px-3 sm:px-4 md:px-5 pt-2 pb-2 min-w-0 w-full">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide min-w-0 w-full">
             {getContextualSuggestions(activeChat.messages).map((suggestion, idx) => (
               <button
                 key={idx}

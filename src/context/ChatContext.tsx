@@ -188,50 +188,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
-      let moonSynced = false;
-      let sunSynced = false;
-
-      // --- Sign detection setup (mirrors server-side logic) ---
-      const VALID_SIGNS = [
-        'aries','taurus','gemini','cancer','leo','virgo',
-        'libra','scorpio','sagittarius','capricorn','aquarius','pisces',
-        'mesh','vrishabh','vrish','mithun','kark','simha','kanya',
-        'tula','vrishchik','dhanu','makar','kumbh','meen',
-      ];
-      
-      function detectSign(text: string, patterns: RegExp[]): string | null {
-        for (const pattern of patterns) {
-          const match = text.match(pattern);
-          if (match) {
-            const candidate = (match[1] || match[2] || '').trim();
-            if (candidate && VALID_SIGNS.includes(candidate.toLowerCase())) {
-              return candidate.charAt(0).toUpperCase() + candidate.slice(1).toLowerCase();
-            }
-          }
-        }
-        return null;
-      }
-      
-      const moonPatterns = [
-        /(?:born\s+under|you\s+have)\s+(\w+)\s+Rashi/i,
-        /(\w+)\s+Rashi\s*\(?Moon/i,
-        /(?:your|the)\s+Rashi\s+(?:is|would be|comes out as)\s+(\w+)/i,
-        /Rashi\s*(?::|is|—|-)\s*(\w+)/i,
-        /Moon\s+(?:is\s+in|sign\s+is|sign:?)\s+(\w+)/i,
-        /Moon\s+in\s+(\w+)/i,
-        /(\w+)\s+(?:Moon\s*sign|Rashi)\s+native/i,
-        /(?:making\s+you\s+(?:a|an))\s+(\w+)\s+(?:Rashi|Moon)/i,
-        /(\w+)\s+is\s+your\s+(?:Moon\s*sign|Rashi)/i,
-      ];
-      
-      const sunPatterns = [
-        /(\w+)\s+Sun\s*sign/i,
-        /Sun\s*sign\s*(?:is|:|-|—)\s*(\w+)/i,
-        /Sun\s+(?:is\s+in|sits\s+in|in)\s+(\w+)/i,
-        /(?:your|the)\s+Sun\s+(?:is|sits|falls|placed)\s+(?:in\s+)?(\w+)/i,
-        /(\w+)\s+is\s+your\s+Sun\s*sign/i,
-        /Sun\s*(?::|—|-)\s*(\w+)/i,
-      ];
 
       if (reader) {
         while (true) {
@@ -240,22 +196,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           const chunk = decoder.decode(value);
           fullText += chunk;
-
-          // Live detection — sync to frontend state as soon as a sign is found
-          if (!moonSynced) {
-            const moon = detectSign(fullText, moonPatterns);
-            if (moon) {
-              refreshUser({ moonSign: moon });
-              moonSynced = true;
-            }
-          }
-          if (!sunSynced) {
-            const sun = detectSign(fullText, sunPatterns);
-            if (sun) {
-              refreshUser({ sunSign: sun });
-              sunSynced = true;
-            }
-          }
 
           setActiveChat(prev => {
             if (!prev) return prev;
@@ -267,6 +207,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
           });
         }
+      }
+
+      // Sync profile if the dashboard 'Identify Sign' button was clicked to show changes immediately
+      const DASHBOARD_RASHI_QUERY = 'Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.';
+
+      if (text === DASHBOARD_RASHI_QUERY && user?.email) {
+        fetch(`/api/user/profile?email=${encodeURIComponent(user.email)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.user) refreshUser(data.user);
+          })
+          .catch(err => console.error('Sign sync error:', err));
       }
 
       loadChats();
@@ -303,7 +255,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const systemMessage: ChatMessage = {
       id: generateUUID(),
       type: 'system',
-      text: `Session started · Reading your chart${user?.dob ? ` · DOB: ${user.dob}` : ''}`,
+      text: 'Session started · Reading your chart only',
       createdAt: now,
     };
     const welcomeMessage: ChatMessage = {

@@ -392,7 +392,7 @@ a {
 @supports (height: 100dvh) {
   @media (max-width: 768px) {
     .chat-layout {
-      height: 100dvh;
+      height: 100%;
     }
   }
 }
@@ -441,8 +441,8 @@ a {
   .chat-left-sidebar {
     position: fixed !important;
     left: -280px !important;
-    top: calc(var(--navbar-height, 64px) + 56px) !important;
-    /* Starts below Navbar + ChatHeader */
+    top: 0 !important;
+    /* Covers full height of the screen */
     bottom: 0 !important;
     width: 280px !important;
     transform: none !important;

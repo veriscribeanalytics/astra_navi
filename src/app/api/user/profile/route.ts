@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { getCurrentDateTime } from '@/lib/datetime';
+import { extractRashiSigns } from '@/utils/chartParser';
 
 export async function GET(req: Request) {
     try {
@@ -19,6 +20,28 @@ export async function GET(req: Request) {
 
         if (!user) {
             return NextResponse.json({ error: "User not found." }, { status: 404 });
+        }
+
+        // ONE-TIME EXTRACTION: If user has chartContext but no sun/moon sign, extract it so it's ready forever
+        const chartContext = user.chartContext || user.preferences?.chartContext;
+        if (chartContext && (!user.moonSign || !user.sunSign)) {
+            const { sunSign, moonSign } = extractRashiSigns(chartContext);
+            const updates: any = {};
+            
+            if (sunSign && !user.sunSign) {
+                user.sunSign = sunSign.charAt(0).toUpperCase() + sunSign.slice(1).toLowerCase();
+                updates.sunSign = user.sunSign;
+            }
+            if (moonSign && !user.moonSign) {
+                user.moonSign = moonSign.charAt(0).toUpperCase() + moonSign.slice(1).toLowerCase();
+                updates.moonSign = user.moonSign;
+            }
+            
+            if (Object.keys(updates).length > 0) {
+                updates.updatedAt = getCurrentDateTime();
+                await users.updateOne({ email }, { $set: updates });
+                console.log(`One-time auto-extracted signs for ${email}: Moon=${user.moonSign}, Sun=${user.sunSign}`);
+            }
         }
 
         return NextResponse.json({

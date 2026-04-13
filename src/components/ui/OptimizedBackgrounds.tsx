@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, lazy, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useDeviceCapability } from '@/hooks/useDeviceCapability';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
 import Particles from './Particles';
@@ -16,6 +17,7 @@ import RashiOrbitBackground from './RashiOrbitBackground';
 export default function OptimizedBackgrounds() {
   const device = useDeviceCapability();
   const isScrolling = useScrollDetection(150);
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -27,16 +29,23 @@ export default function OptimizedBackgrounds() {
     return null;
   }
 
+  const isChatPage = pathname?.startsWith('/chat');
+
   // Pause animations during scroll on mobile/tablet for smoothness
   const shouldPauseOnScroll = device.isMobile || device.isTablet;
-  const isPaused = shouldPauseOnScroll && isScrolling;
+  // Pause if we are on mobile/tablet chat page (to save battery/performance) 
+  // but allow animations on desktop chat as requested.
+  const isPaused = (isChatPage && (device.isMobile || device.isTablet)) || (shouldPauseOnScroll && isScrolling);
 
   // Adjust particle speed based on device
   const particleSpeed = device.isMobile ? 0.1 : device.isTablet ? 0.12 : 0.15;
   const particleSpread = device.isMobile ? 10 : device.isTablet ? 11 : 12;
 
+  // On the chat page, greatly reduce the background opacity so text pops
+  const visualOpacity = isChatPage ? 'opacity-10' : 'opacity-100';
+
   return (
-    <>
+    <div className={`transition-opacity duration-700 ${visualOpacity} pointer-events-none fixed inset-0 z-0`}>
       {/* SunFlares - Always visible, lightweight */}
       <SunFlares />
 
@@ -54,9 +63,9 @@ export default function OptimizedBackgrounds() {
           particleSpread={particleSpread}
           speed={isPaused ? 0 : particleSpeed}
           particleBaseSize={device.particleSize}
-          moveParticlesOnHover={device.enableComplexAnimations}
+          moveParticlesOnHover={(device.isDesktop || !isChatPage) && device.enableComplexAnimations}
           alphaParticles={false}
-          disableRotation={!device.enableComplexAnimations}
+          disableRotation={(isChatPage && !device.isDesktop) || !device.enableComplexAnimations}
         />
       </div>
 
@@ -68,11 +77,11 @@ export default function OptimizedBackgrounds() {
           particleSpread={particleSpread + 2}
           speed={isPaused ? 0 : particleSpeed * 0.8}
           particleBaseSize={device.particleSize - 20}
-          moveParticlesOnHover={device.enableComplexAnimations}
+          moveParticlesOnHover={(device.isDesktop || !isChatPage) && device.enableComplexAnimations}
           alphaParticles={true}
-          disableRotation={!device.enableComplexAnimations}
+          disableRotation={(isChatPage && !device.isDesktop) || !device.enableComplexAnimations}
         />
       </div>
-    </>
+    </div>
   );
 }
