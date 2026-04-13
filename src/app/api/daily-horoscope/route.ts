@@ -31,7 +31,7 @@ export async function GET(req: Request) {
         const today = new Date().toISOString().split('T')[0];
 
         // OPTIMIZED: Check if horoscope exists for this SIGN today (not per user)
-        let horoscope = await horoscopes.findOne({
+        let horoscope: any = await horoscopes.findOne({
             sign: user.moonSign,
             date: today
         });
