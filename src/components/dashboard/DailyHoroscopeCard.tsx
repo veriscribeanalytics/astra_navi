@@ -38,6 +38,21 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
         const fetchHoroscope = async () => {
             try {
                 setLoading(true);
+
+                // Check sessionStorage first to avoid redundant API calls
+                const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                const cacheKey = `astranavi_horoscope_${email}_${todayKey}`;
+                const cached = sessionStorage.getItem(cacheKey);
+
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    setHoroscope(data);
+                    setError(null);
+                    setLoading(false);
+                    return;
+                }
+
+                // No cache — call API (which itself checks DB before external API)
                 const response = await fetch(`/api/daily-horoscope?email=${encodeURIComponent(email)}`);
                 
                 if (!response.ok) {
@@ -47,6 +62,9 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
                 const data = await response.json();
                 setHoroscope(data);
                 setError(null);
+
+                // Cache in sessionStorage for this session
+                sessionStorage.setItem(cacheKey, JSON.stringify(data));
             } catch (err) {
                 console.error('Horoscope fetch error:', err);
                 setError('Unable to load daily horoscope');
@@ -59,6 +77,7 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
             fetchHoroscope();
         }
     }, [email]);
+
 
     useEffect(() => {
         if (!loading && horoscope) {
