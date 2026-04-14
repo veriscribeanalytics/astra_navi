@@ -36,7 +36,11 @@ const ChatPageClient: React.FC = () => {
   }, [user, searchParams, createNewChat, selectChat]);
 
   return (
-    <div className="chat-layout">
+    <div className="chat-layout relative overflow-hidden">
+      {/* Background Glow Elements */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+      
       {/* Mobile Overlays */}
       <div 
         className={`sidebar-overlay ${(isMobileMenuOpen || isRightPanelOpen) ? 'active' : ''}`} 
@@ -54,7 +58,7 @@ const ChatPageClient: React.FC = () => {
       </div>
 
       {/* Center — Chat Area */}
-      <div className="chat-main-area">
+      <div className="chat-main-area relative z-10">
         <ChatHeader />
         <ChatMessages />
         <ChatInput />

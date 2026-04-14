@@ -1,22 +1,109 @@
 'use client';
 
-import { memo } from 'react';
-import OrbitImages from './OrbitImages';
+import { memo, useEffect, useRef, useState, useMemo } from 'react';
 
 const rashiData = [
-  { image: '/icons/rashi/aries.png', radiusX: 800, radiusY: 120, rotation: -8, duration: 220, size: 110, startOffset: 0 },
-  { image: '/icons/rashi/taurus.png', radiusX: 850, radiusY: 130, rotation: 15, duration: 195, size: 110, startOffset: 30 },
-  { image: '/icons/rashi/gemini.png', radiusX: 900, radiusY: 110, rotation: -12, duration: 240, size: 110, startOffset: 60 },
-  { image: '/icons/rashi/cancer.png', radiusX: 820, radiusY: 125, rotation: 5, duration: 210, size: 110, startOffset: 15 },
-  { image: '/icons/rashi/leo.png', radiusX: 880, radiusY: 115, rotation: -20, duration: 255, size: 110, startOffset: 45 },
-  { image: '/icons/rashi/virgo.png', radiusX: 840, radiusY: 122, rotation: 10, duration: 200, size: 110, startOffset: 75 },
-  { image: '/icons/rashi/libra.png', radiusX: 920, radiusY: 128, rotation: -15, duration: 230, size: 110, startOffset: 22 },
-  { image: '/icons/rashi/scorpio.png', radiusX: 860, radiusY: 112, rotation: 8, duration: 215, size: 110, startOffset: 52 },
-  { image: '/icons/rashi/sagittarius.png', radiusX: 890, radiusY: 118, rotation: -10, duration: 250, size: 110, startOffset: 82 },
-  { image: '/icons/rashi/capricorn.png', radiusX: 810, radiusY: 108, rotation: 12, duration: 205, size: 110, startOffset: 37 },
-  { image: '/icons/rashi/aquarius.png', radiusX: 870, radiusY: 124, rotation: -18, duration: 235, size: 110, startOffset: 67 },
-  { image: '/icons/rashi/pisces.png', radiusX: 830, radiusY: 126, rotation: 6, duration: 225, size: 110, startOffset: 8 },
+  { image: '/icons/rashi/aries.png' },
+  { image: '/icons/rashi/taurus.png' },
+  { image: '/icons/rashi/gemini.png' },
+  { image: '/icons/rashi/cancer.png' },
+  { image: '/icons/rashi/leo.png' },
+  { image: '/icons/rashi/virgo.png' },
+  { image: '/icons/rashi/libra.png' },
+  { image: '/icons/rashi/scorpio.png' },
+  { image: '/icons/rashi/sagittarius.png' },
+  { image: '/icons/rashi/capricorn.png' },
+  { image: '/icons/rashi/aquarius.png' },
+  { image: '/icons/rashi/pisces.png' },
 ];
+
+const BouncingIcon = ({ image, id, paused }: { image: string; id: number; paused: boolean }) => {
+  const iconRef = useRef<HTMLDivElement>(null);
+  const startTime = useRef(Math.random() * 10000); // Random start time for sin waves
+  
+  const pos = useRef({ 
+    x: Math.random() * 80 + 10, // %
+    y: Math.random() * 80 + 10, // %
+    // Linear Speed: Extremely slow
+    vx: (Math.random() * 0.006 + 0.003) * (Math.random() > 0.5 ? 1 : -1), 
+    vy: (Math.random() * 0.006 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+    rotation: Math.random() * 360,
+    vr: (Math.random() * 0.015 + 0.005) * (Math.random() > 0.5 ? 1 : -1) 
+  });
+  
+  const size = 110; // px
+  
+  useEffect(() => {
+    let animationId: number;
+    
+    const update = (time: number) => {
+      if (paused) {
+        animationId = requestAnimationFrame(update);
+        return;
+      }
+
+      const icon = iconRef.current;
+      if (!icon) return;
+
+      const t = (time + startTime.current) * 0.0005; // Swerve speed
+
+      // Update position (Linear + Circular Swerve)
+      pos.current.x += pos.current.vx;
+      pos.current.y += pos.current.vy;
+      pos.current.rotation += pos.current.vr;
+
+      // Add a circular "swerve" component (like the particles)
+      const swerveX = Math.sin(t) * 1.5; // Circular radius in %
+      const swerveY = Math.cos(t) * 1.5;
+
+      const displayX = pos.current.x + swerveX;
+      const displayY = pos.current.y + swerveY;
+
+      // Bounce logic with swerve accounted for
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+      const sizeW = (size / winW) * 100;
+      const sizeH = (size / winH) * 100;
+
+      if (pos.current.x <= 2 || pos.current.x >= 98 - sizeW) {
+        pos.current.vx *= -1;
+        pos.current.x = pos.current.x <= 2 ? 2.1 : 97.9 - sizeW;
+      }
+      
+      if (pos.current.y <= 2 || pos.current.y >= 98 - sizeH) {
+        pos.current.vy *= -1;
+        pos.current.y = pos.current.y <= 2 ? 2.1 : 97.9 - sizeH;
+      }
+
+      icon.style.transform = `translate3d(${displayX}vw, ${displayY}vh, 0) rotate(${pos.current.rotation}deg)`;
+      
+      animationId = requestAnimationFrame(update);
+    };
+
+    animationId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(animationId);
+  }, [paused, size]);
+
+  return (
+    <div 
+      ref={iconRef}
+      className="absolute top-0 left-0 transition-opacity duration-1000"
+      style={{ 
+        width: size, 
+        height: size,
+        willChange: 'transform',
+        opacity: 0.75
+      }}
+    >
+      <img 
+        src={image} 
+        alt="Rashi" 
+        className="w-full h-full object-contain filter-rashi"
+        loading="lazy"
+      />
+    </div>
+  );
+};
 
 const RashiOrbitBackground = memo(function RashiOrbitBackground({ 
   iconCount = 12,
@@ -25,84 +112,89 @@ const RashiOrbitBackground = memo(function RashiOrbitBackground({
   iconCount?: number;
   pauseOnScroll?: boolean;
 }) {
-  // Show only the requested number of icons (evenly distributed)
-  const visibleRashiData = rashiData.filter((_, index) => {
-    if (iconCount >= 12) return true;
-    const step = Math.floor(12 / iconCount);
-    return index % step === 0;
-  }).slice(0, iconCount);
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const visibleRashiData = useMemo(() => {
+    return rashiData.filter((_, index) => {
+      if (iconCount >= 12) return true;
+      const step = Math.floor(12 / iconCount);
+      return index % step === 0;
+    }).slice(0, iconCount);
+  }, [iconCount]);
+
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" style={{ height: '100lvh' }}>
-      <div className="absolute inset-0 flex items-center justify-center rashi-orbit-enhanced">
+      <div className="absolute inset-0 rashi-orbit-enhanced">
         {visibleRashiData.map((rashi, index) => (
-          <div key={index} className="absolute inset-0 flex items-center justify-center rashi-symbol-wrapper">
-            <OrbitImages
-              images={[rashi.image]}
-              altPrefix={`Rashi symbol ${index + 1}`}
-              shape="ellipse"
-              radiusX={rashi.radiusX}
-              radiusY={rashi.radiusY}
-              rotation={rashi.rotation}
-              duration={rashi.duration}
-              itemSize={rashi.size}
-              responsive={false}
-              baseWidth={1400}
-              width={1400}
-              height={1400}
-              direction="normal"
-              fill
-              showPath={false}
-              paused={pauseOnScroll}
-              initialOffset={rashi.startOffset}
-            />
-          </div>
+          <BouncingIcon 
+            key={`${index}-${rashi.image}`} 
+            image={rashi.image} 
+            id={index}
+            paused={pauseOnScroll}
+          />
         ))}
       </div>
       
       <style jsx>{`
         .rashi-orbit-enhanced {
-          filter: drop-shadow(0 0 8px rgba(200, 136, 10, 0.3))
-                  drop-shadow(0 0 16px rgba(200, 136, 10, 0.2));
+          background-color: transparent;
         }
-        
-        .rashi-symbol-wrapper :global(img) {
-          filter: brightness(1.2) contrast(1.1);
-          opacity: 0.85;
-          transition: opacity 0.3s ease, filter 0.3s ease;
-          will-change: transform;
-        }
-        
-        /* Enhanced visibility in dark mode */
-        :global(.dark) .rashi-symbol-wrapper :global(img) {
-          filter: brightness(1.4) contrast(1.2) saturate(1.1);
-          opacity: 0.9;
-        }
-        
-        /* Enhanced visibility in light mode */
-        :global(.light) .rashi-symbol-wrapper :global(img) {
-          filter: brightness(1.1) contrast(1.15) saturate(1.05);
-          opacity: 0.8;
-        }
-        
-        /* Performance optimization */
-        .rashi-symbol-wrapper {
-          content-visibility: auto;
-          contain-intrinsic-size: 110px 110px;
-        }
-        
-        /* Subtle glow effect */
-        .rashi-orbit-enhanced::before {
+
+        /* The Premium Deep Void Vignette */
+        .rashi-orbit-enhanced::after {
           content: '';
           position: absolute;
           inset: 0;
           background: radial-gradient(
             circle at center,
-            transparent 40%,
-            rgba(200, 136, 10, 0.05) 70%,
-            transparent 100%
+            transparent 0%,
+            rgba(4, 2, 10, 0.2) 20%,
+            rgba(4, 2, 10, 0.7) 60%,
+            rgba(4, 2, 10, 0.95) 100%
           );
+          z-index: 20;
           pointer-events: none;
+        }
+
+        /* Subtle Purple Wash */
+        .rashi-orbit-enhanced::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(6, 4, 15, 0.4);
+          z-index: 5;
+          pointer-events: none;
+        }
+        
+        :global(.filter-rashi) {
+          filter: brightness(0.5) contrast(1.1) grayscale(0.5) drop-shadow(0 0 2px rgba(200, 136, 10, 0.3));
+          transition: filter 0.5s ease;
+          mix-blend-mode: soft-light;
+        }
+
+        :global(.dark .filter-rashi) {
+          opacity: 0.2;
+          filter: 
+            brightness(0.25) 
+            contrast(1.3) 
+            grayscale(1) 
+            drop-shadow(0 0 1px rgba(255, 215, 0, 0.5)) 
+            drop-shadow(0 0 3px rgba(255, 215, 0, 0.25));
+        }
+
+        :global(.light .filter-rashi) {
+          opacity: 0.15;
+          filter: 
+            brightness(0.4) 
+            contrast(1.1) 
+            grayscale(1) 
+            drop-shadow(0 0 1px rgba(255, 215, 0, 0.3));
         }
       `}</style>
     </div>

@@ -20,11 +20,11 @@ const services = [
   },
   {
     icon: '🌙',
-    title: 'Rashi Predictions',
-    desc: 'Daily & weekly forecasts for your Moon sign',
-    badge: 'Coming Soon',
+    title: 'Daily Horoscope',
+    desc: 'Personalized daily & weekly forecasts for your Moon sign',
+    badge: 'LIVE',
     iconBg: 'bg-secondary/10',
-    available: false,
+    available: true,
   },
   {
     icon: '💑',

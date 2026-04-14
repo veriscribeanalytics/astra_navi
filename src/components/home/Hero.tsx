@@ -130,7 +130,7 @@ const Hero = () => {
 
                 {/* Kundli Widget / Welcome Back Card */}
                 <Card 
-                  className="shadow-2xl shadow-secondary/10 cosmic-glow border-secondary/30 min-h-[300px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[400px] flex flex-col justify-center !bg-surface/80 dark:!bg-surface/90"
+                  className="border-secondary/30 min-h-[300px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[400px] flex flex-col justify-center !bg-surface/80 dark:!bg-surface/90"
                   padding="lg"
                 >
                     {isLoggedIn && user?.name ? (

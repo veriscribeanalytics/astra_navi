@@ -41,8 +41,10 @@ export default function OptimizedBackgrounds() {
   const particleSpeed = device.isMobile ? 0.1 : device.isTablet ? 0.12 : 0.15;
   const particleSpread = device.isMobile ? 10 : device.isTablet ? 11 : 12;
 
-  // On the chat page, greatly reduce the background opacity so text pops
-  const visualOpacity = isChatPage ? 'opacity-10' : 'opacity-100';
+  // On the chat page, reduce the background opacity so text pops, but keep it visible on desktop
+  const visualOpacity = isChatPage 
+    ? (device.isDesktop ? 'opacity-30' : 'opacity-10') 
+    : 'opacity-100';
 
   return (
     <div className={`transition-opacity duration-700 ${visualOpacity} pointer-events-none fixed inset-0 z-0`}>

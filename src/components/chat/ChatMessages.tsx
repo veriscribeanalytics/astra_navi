@@ -55,7 +55,7 @@ const EmptyState: React.FC<{ onNewChat: () => void; onQuestionClick: (question: 
 );
 
 const LoadingSkeleton: React.FC = () => (
-  <div className="flex-1 px-5 py-5 flex flex-col gap-4 animate-pulse">
+  <div className="flex-1 px-5 py-5 flex flex-col gap-4">
     <div className="h-6 w-64 mx-auto rounded-full bg-surface-variant/30" />
     <div className="flex gap-2.5 items-start max-w-[85%]">
       <div className="w-8 h-8 rounded-full bg-surface-variant/40 shrink-0" />
@@ -69,21 +69,21 @@ const LoadingSkeleton: React.FC = () => (
 
 const ThinkingIndicator: React.FC = () => {
   return (
-    <div className="flex gap-2.5 items-start max-w-[85%] animate-in fade-in zoom-in-95 duration-500 mb-2 mt-4">
-      <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant/30 flex items-center justify-center text-secondary text-sm shrink-0 mt-0.5 shadow-sm shadow-secondary/5">
-        <span className="animate-spin" style={{ animationDuration: '3s' }}>✦</span>
+    <div className="flex gap-2.5 items-start max-w-[85%] mb-2 mt-4">
+      <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant/30 flex items-center justify-center text-secondary text-sm shrink-0 mt-0.5">
+        <span>✦</span>
       </div>
       <div className="chat-ai-bubble relative overflow-hidden">
         <p className="text-[10px] text-secondary font-bold tracking-wider mb-2 uppercase flex items-center gap-1.5">
           <span>NAVI · AI ASTROLOGER</span>
           <span className="flex gap-0.5">
-            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
+            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
+            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
           </span>
         </p>
         
-        <div className="flex items-center gap-2 text-[12.5px] text-on-surface-variant/70 font-medium italic animate-pulse">
+        <div className="flex items-center gap-2 text-[12.5px] text-on-surface-variant/70 font-medium italic">
           Navi is typing...
         </div>
       </div>
@@ -129,7 +129,7 @@ const ChatMessages: React.FC = () => {
       if (scrollRef.current) {
         scrollRef.current.scrollTo({
           top: scrollRef.current.scrollHeight,
-          behavior: 'smooth'
+          behavior: 'auto'
         });
       }
     }, 100);

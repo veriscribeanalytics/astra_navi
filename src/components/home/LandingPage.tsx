@@ -7,41 +7,56 @@ import HowItWorks from "./HowItWorks";
 import FAQSection from "./FAQSection";
 import CTABanner from "./CTABanner";
 import TrustSection from "./TrustSection";
+import HoroscopeTeaser from "./HoroscopeTeaser";
 
 const LandingPage = () => {
     return (
-        <div className="flex flex-col w-full overflow-hidden">
-            <div className="py-3 sm:py-4 md:py-5 lg:py-6 bg-transparent">
+        <div className="flex flex-col w-full overflow-x-hidden bg-transparent">
+            {/* HERO SECTION */}
+            <div className="relative">
                 <Hero />
+                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-secondary/15 to-transparent" />
             </div>
             
-            <div className="py-1 sm:py-1.5 md:py-2">
+            {/* ZODIAC STRIP */}
+            <div className="relative z-20 -mt-8">
                 <ZodiacStrip />
             </div>
             
-            <div className="py-6 sm:py-10 md:py-14 lg:py-16 bg-transparent dark:bg-transparent">
+            {/* HOW IT WORKS */}
+            <div className="bg-transparent">
                 <HowItWorks />
             </div>
             
-            <div className="py-6 sm:py-10 md:py-14 lg:py-16">
+            {/* DAILY HOROSCOPE FEATURE */}
+            <div className="py-6 sm:py-10 md:py-12">
+                <HoroscopeTeaser />
+            </div>
+            
+            {/* SERVICES */}
+            <div className="bg-transparent relative">
+                <div className="absolute inset-0 bg-celestial-silk opacity-10 pointer-events-none" />
                 <Services />
             </div>
             
-            <div className="py-6 sm:py-10 md:py-14 lg:py-16 bg-transparent dark:bg-transparent">
+            {/* LIVE ASTROLOGERS */}
+            <div className="bg-transparent">
                 <LiveAstrologers />
             </div>
             
-            <div className="py-6 sm:py-10 md:py-14 lg:py-16">
+            {/* PRICING */}
+            <div className="bg-transparent">
                 <Pricing />
             </div>
             
-            <TrustSection />
-            
-            <div className="py-5 sm:py-6 md:py-7 lg:py-8 bg-transparent dark:bg-transparent">
+            {/* TRUST & FAQ */}
+            <div className="bg-transparent relative z-10">
+                <TrustSection />
                 <FAQSection />
             </div>
             
-            <div className="py-6 sm:py-10 md:py-14 lg:py-16">
+            {/* CTA BANNER */}
+            <div className="bg-transparent">
                 <CTABanner />
             </div>
         </div>

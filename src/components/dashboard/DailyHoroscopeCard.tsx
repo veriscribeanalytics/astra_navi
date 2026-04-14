@@ -26,6 +26,13 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
     const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showContent, setShowContent] = useState(false);
+    const [animatedScore, setAnimatedScore] = useState(0);
+
+    // Get current date and day
+    const today = new Date();
+    const dateString = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
+    const dayName = today.toLocaleDateString('en-IN', { weekday: 'long' });
 
     useEffect(() => {
         const fetchHoroscope = async () => {
@@ -53,9 +60,19 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
         }
     }, [email]);
 
+    useEffect(() => {
+        if (!loading && horoscope) {
+            const timer = setTimeout(() => {
+                setShowContent(true);
+                setAnimatedScore(horoscope.overall_score || 0);
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, horoscope]);
+
     if (loading) {
         return (
-            <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border border-secondary/20 animate-pulse">
+            <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] animate-pulse">
                 <div className="h-64 flex items-center justify-center">
                     <Sparkles className="w-8 h-8 text-secondary animate-spin" />
                 </div>
@@ -73,130 +90,208 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
         return 'text-orange-500';
     };
 
-    return (
-        <Card padding="none" className="!rounded-[28px] sm:!rounded-[40px] overflow-hidden border border-secondary/20 relative">
-            {/* Header with gradient */}
-            <div className="relative bg-gradient-to-br from-secondary/20 via-secondary/10 to-transparent p-6 sm:p-8 border-b border-secondary/10">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="w-5 h-5 text-secondary" />
-                            <h3 className="text-lg sm:text-xl font-headline font-bold text-foreground">
-                                Daily Horoscope
-                            </h3>
-                        </div>
-                        <p className="text-sm text-foreground/60 font-medium">
-                            {horoscope.sign || 'Unknown'} • {horoscope.date ? new Date(horoscope.date).toLocaleDateString('en-US', { 
-                                weekday: 'long', 
-                                month: 'short', 
-                                day: 'numeric' 
-                            }) : 'Today'}
-                        </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                        <div className={`text-3xl font-bold ${getScoreColor(horoscope.overall_score || 50)}`}>
-                            {horoscope.overall_score || 50}
-                        </div>
-                        <div className="text-xs text-foreground/50 font-medium">Overall</div>
-                    </div>
-                </div>
+    // Get lucky color or default to gold
+    const luckyColor = horoscope.lucky_color?.toLowerCase() || 'gold';
+    
+    // Convert color name or description to the closest major family hex
+    const getLuckyColorStyle = () => {
+        const searchColor = luckyColor.toLowerCase();
+        
+        const families = [
+            { id: 'pink', keywords: ['pink', 'rose', 'magenta'], hex: '#f472b6' },
+            { id: 'red', keywords: ['red', 'maroon', 'crimson', 'ruby'], hex: '#dc2626' },
+            { id: 'blue', keywords: ['blue', 'navy', 'indigo', 'cyan', 'azure'], hex: '#2563eb' },
+            { id: 'green', keywords: ['green', 'emerald', 'olive', 'teal'], hex: '#059669' },
+            { id: 'yellow', keywords: ['yellow', 'saffron', 'gold', 'amber'], hex: '#f59e0b' },
+            { id: 'orange', keywords: ['orange', 'peach', 'coral'], hex: '#ea580c' },
+            { id: 'purple', keywords: ['purple', 'violet', 'lavender', 'plum'], hex: '#7c3aed' },
+            { id: 'white', keywords: ['white', 'cream', 'ivory', 'pearl'], hex: '#ffffff' },
+            { id: 'black', keywords: ['black', 'charcoal', 'void'], hex: '#111827' },
+            { id: 'grey', keywords: ['grey', 'gray', 'silver', 'slate'], hex: '#94a3b8' },
+            { id: 'brown', keywords: ['brown', 'khaki', 'chocolate', 'coffee'], hex: '#78350f' },
+        ];
 
-                {/* Mood and Lucky Info */}
-                <div className="flex gap-3 mt-4">
-                    <div className="flex-1 bg-surface/50 backdrop-blur-sm rounded-2xl p-3 border border-secondary/10">
-                        <div className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mb-1">
-                            Mood
+        const family = families.find(f => 
+            f.keywords.some(kw => searchColor.includes(kw)) || searchColor === f.id
+        );
+
+        return family ? family.hex : '#fbbf24'; // Default to Solar Gold
+    };
+
+    const luckyColorHex = getLuckyColorStyle();
+    
+    // Visibility Arrangement: If color is black or too dark, use silver/white for visual elements
+    const isTooDark = luckyColorHex.toLowerCase() === '#111827' || luckyColor.toLowerCase() === 'black';
+    const displayColorHex = isTooDark ? '#e2e8f0' : luckyColorHex;
+
+    // Calculate circle progress for score ring
+    const score = horoscope.overall_score || 50;
+    const circumference = 2 * Math.PI * 32; // radius = 32
+    const progress = circumference - (animatedScore / 100) * circumference;
+
+    return (
+        <Card 
+            padding="none" 
+            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden border-secondary/20"
+        >
+            {/* Header - Compact for mobile */}
+            <div className="p-4 sm:p-6 border-b border-secondary/10 bg-surface/10">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <Sparkles className="w-3 h-3 text-secondary" />
+                            <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.15em]">
+                                Daily Horoscope
+                            </span>
                         </div>
-                        <div className="text-sm font-bold text-secondary">{horoscope.mood || 'Balanced'}</div>
+                        <h3 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight">
+                            {horoscope.sign || 'Unknown'}
+                        </h3>
                     </div>
-                    <div className="flex-1 bg-surface/50 backdrop-blur-sm rounded-2xl p-3 border border-secondary/10">
-                        <div className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mb-1">
-                            Lucky Color
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div 
-                                className="w-4 h-4 rounded-full border-2 border-white/20" 
-                                style={{ backgroundColor: horoscope.lucky_color?.toLowerCase() || '#c8880a' }}
+
+                    {/* Today Date & Day - Added in middle space */}
+                    <div className="hidden sm:flex flex-col items-center px-4 border-l border-r border-secondary/5">
+                        <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.1em] mb-0.5">{dayName}</span>
+                        <span className="text-xs font-headline font-bold text-foreground/60">{dateString}</span>
+                    </div>
+
+                    {/* Mobile Center Date */}
+                    <div className="sm:hidden absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
+                        <span className="text-[8px] font-bold text-secondary uppercase tracking-[0.1em]">{dayName}</span>
+                        <span className="text-[10px] font-headline font-bold text-foreground/50">{dateString}</span>
+                    </div>
+                    {/* Circular Score Ring */}
+                    <div className="relative w-16 h-16 sm:w-18 sm:h-18 flex-shrink-0">
+                        <svg className="w-full h-full -rotate-90" viewBox="0 0 72 72">
+                            {/* Background circle */}
+                            <circle
+                                cx="36"
+                                cy="36"
+                                r="32"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="6"
+                                className="text-surface-variant/20"
                             />
-                            <div className="text-sm font-bold text-foreground">{horoscope.lucky_color || 'Gold'}</div>
+                            {/* Progress circle */}
+                            <circle
+                                cx="36"
+                                cy="36"
+                                r="32"
+                                fill="none"
+                                strokeWidth="6"
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={progress}
+                                className="transition-all duration-[1500ms] cubic-bezier(0.2, 0, 0, 1)"
+                                style={{ stroke: displayColorHex }}
+                            />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className={`text-xl font-bold leading-none ${getScoreColor(score)}`}>
+                                {score}
+                            </span>
+                            <span className="text-[7px] text-foreground/40 font-bold uppercase tracking-wider mt-0.5">
+                                Overall
+                            </span>
                         </div>
-                    </div>
-                    <div className="flex-1 bg-surface/50 backdrop-blur-sm rounded-2xl p-3 border border-secondary/10">
-                        <div className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mb-1">
-                            Lucky #
-                        </div>
-                        <div className="text-sm font-bold text-secondary">{horoscope.lucky_number || 7}</div>
                     </div>
                 </div>
             </div>
 
-            {/* Content sections */}
-            <div className="p-6 sm:p-8 space-y-4">
-                {/* Career */}
-                <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-                        <Briefcase className="w-5 h-5 text-blue-500" />
+            <div className={`transition-all duration-700 ease-out ${showContent ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'}`}>
+                {/* Top Info Row - 3 Columns */}
+                <div className="grid grid-cols-3 border-b border-secondary/10 bg-surface/5">
+                    <div className="flex flex-col items-center justify-center p-3 sm:p-4 border-r border-secondary/10">
+                        <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1">Mood</span>
+                        <span className="text-sm sm:text-base font-headline font-bold text-foreground">
+                            {horoscope.mood || 'Neutral'}
+                        </span>
                     </div>
-                    <div className="flex-1">
-                        <div className="text-xs font-bold text-foreground/70 uppercase tracking-wider mb-1">
-                            Career
+                    <div className="flex flex-col items-center justify-center p-3 sm:p-4 border-r border-secondary/10">
+                        <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky Color</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <div 
+                                className="w-2.5 h-2.5 rounded-full" 
+                                style={{ backgroundColor: luckyColorHex }}
+                            />
+                            <span className="text-sm sm:text-base font-headline font-bold text-foreground">
+                                {horoscope.lucky_color || 'Gold'}
+                            </span>
                         </div>
-                        <p className="text-sm text-foreground/80 leading-relaxed">{horoscope.career || 'Focus on your goals today.'}</p>
+                    </div>
+                    <div className="flex flex-col items-center justify-center p-3 sm:p-4">
+                        <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky #</span>
+                        <span className="text-sm sm:text-base font-headline font-bold text-foreground">
+                            {horoscope.lucky_number || 8}
+                        </span>
                     </div>
                 </div>
 
-                {/* Love */}
-                <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center shrink-0">
-                        <Heart className="w-5 h-5 text-pink-500" />
-                    </div>
-                    <div className="flex-1">
-                        <div className="text-xs font-bold text-foreground/70 uppercase tracking-wider mb-1">
-                            Love
-                        </div>
-                        <p className="text-sm text-foreground/80 leading-relaxed">{horoscope.love || 'Good day for relationships.'}</p>
-                    </div>
-                </div>
-
-                {/* Health */}
-                <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
-                        <Activity className="w-5 h-5 text-green-500" />
-                    </div>
-                    <div className="flex-1">
-                        <div className="text-xs font-bold text-foreground/70 uppercase tracking-wider mb-1">
-                            Health
-                        </div>
-                        <p className="text-sm text-foreground/80 leading-relaxed">{horoscope.health || 'Take care of your wellbeing.'}</p>
-                    </div>
-                </div>
-
-                {/* Finance */}
-                <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                        <DollarSign className="w-5 h-5 text-amber-500" />
-                    </div>
-                    <div className="flex-1">
-                        <div className="text-xs font-bold text-foreground/70 uppercase tracking-wider mb-1">
-                            Finance
-                        </div>
-                        <p className="text-sm text-foreground/80 leading-relaxed">{horoscope.finance || 'Be mindful of expenses.'}</p>
-                    </div>
-                </div>
-
-                {/* Tip of the day */}
-                <div className="mt-6 p-4 bg-secondary/5 rounded-2xl border border-secondary/20">
-                    <div className="flex items-start gap-3">
-                        <Lightbulb className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                        <div>
-                            <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-1">
-                                Tip of the Day
+                {/* Main Content Grid - 2x2 layout */}
+                <div className="grid grid-cols-2">
+                    {/* Career */}
+                    <div className="p-4 sm:p-6 border-b border-r border-secondary/10 hover:bg-surface/10 transition-colors">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                                <Briefcase className="w-4 h-4 text-orange-600" />
                             </div>
-                            <p className="text-sm text-foreground/80 leading-relaxed font-medium">
-                                {horoscope.tip || 'Trust your intuition.'}
-                            </p>
+                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Career</span>
                         </div>
+                        <p className="text-sm sm:text-base font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                            {horoscope.career || 'Keep pushing for your goals today.'}
+                        </p>
                     </div>
+
+                    {/* Love */}
+                    <div className="p-4 sm:p-6 border-b border-secondary/10 hover:bg-surface/10 transition-colors">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                                <Heart className="w-4 h-4 text-pink-600" />
+                            </div>
+                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Love</span>
+                        </div>
+                        <p className="text-sm sm:text-base font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                            {horoscope.love || 'Harmony flows through your relationships.'}
+                        </p>
+                    </div>
+
+                    {/* Health */}
+                    <div className="p-4 sm:p-6 border-r border-secondary/10 hover:bg-surface/10 transition-colors">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-xl bg-green-500/10 flex items-center justify-center">
+                                <Activity className="w-4 h-4 text-green-600" />
+                            </div>
+                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Health</span>
+                        </div>
+                        <p className="text-sm sm:text-base font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                            {horoscope.health || 'Vitality and energy are on your side.'}
+                        </p>
+                    </div>
+
+                    {/* Finance */}
+                    <div className="p-4 sm:p-6 hover:bg-surface/10 transition-colors">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                                <DollarSign className="w-4 h-4 text-yellow-600" />
+                            </div>
+                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Finance</span>
+                        </div>
+                        <p className="text-sm sm:text-base font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                            {horoscope.finance || 'Opportunities for growth are emerging.'}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Tip of the Day - Centered Bottom */}
+                <div className="p-6 sm:p-8 bg-surface/20 border-t border-secondary/10 flex flex-col items-center text-center">
+                    <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center mb-3 border border-secondary/20 group-hover:rotate-12 transition-transform">
+                        <Sparkles className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mb-3">Tip of the Day</div>
+                    <p className="text-base sm:text-lg font-headline font-semibold italic leading-relaxed text-foreground max-w-md">
+                        "{horoscope.tip || 'Follow your heart today.'}"
+                    </p>
                 </div>
             </div>
         </Card>
