@@ -192,28 +192,32 @@ export default function DashboardHome() {
                     
                     {/* LEFT: HOROSCOPE COMING SOON & NAVI IS LIVE */}
                     <div className="flex-1 flex flex-col gap-6 sm:gap-8">
-                        {/* Daily Horoscope Coming Soon */}
+                        {/* Daily Horoscope */}
                         <div className="flex flex-col gap-4">
                             <h2 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground leading-none">Your Daily Cosmic Guide</h2>
-                            <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-outline-variant/30">
-                                <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-6 text-center">
-                                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary/10 flex items-center justify-center mb-6 border border-secondary/20">
-                                        <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-secondary animate-pulse" />
+                            {user?.email ? (
+                                <DailyHoroscopeCard email={user.email} />
+                            ) : (
+                                <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-outline-variant/30">
+                                    <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-6 text-center">
+                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary/10 flex items-center justify-center mb-6 border border-secondary/20">
+                                            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-secondary animate-pulse" />
+                                        </div>
+                                        <h3 className="text-2xl sm:text-3xl font-headline font-bold text-foreground mb-3">
+                                            Personalized Predictions
+                                        </h3>
+                                        <p className="text-sm sm:text-base text-foreground/60 mb-6 max-w-md leading-relaxed">
+                                            Complete your profile to see your personalized cosmic guide and daily horoscope.
+                                        </p>
+                                        <Button 
+                                            href="/profile"
+                                            className="px-8 py-4 rounded-xl gold-gradient text-white font-bold border-none hover:scale-105 transition-all"
+                                        >
+                                            Complete Profile ✦
+                                        </Button>
                                     </div>
-                                    <h3 className="text-2xl sm:text-3xl font-headline font-bold text-foreground mb-3">
-                                        Daily Horoscope Coming Soon
-                                    </h3>
-                                    <p className="text-sm sm:text-base text-foreground/60 mb-6 max-w-md leading-relaxed">
-                                        We're preparing personalized daily predictions based on your complete birth chart. Get ready for cosmic insights tailored just for you.
-                                    </p>
-                                    <Button 
-                                        href="/horoscope"
-                                        className="px-8 py-4 rounded-xl gold-gradient text-white font-bold border-none hover:scale-105 transition-all"
-                                    >
-                                        View Personalized Horoscope ✦
-                                    </Button>
-                                </div>
-                            </Card>
+                                </Card>
+                            )}
                         </div>
 
                         {/* AstraNavi Intelligence */}

@@ -7,8 +7,9 @@ import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
-import { Sparkles, Calendar, Flame, Droplets, Wind, Mountain, Lock, ArrowLeft, Star, Info, ChevronRight } from 'lucide-react';
+import { Sparkles, Calendar, Flame, Droplets, Wind, Mountain, Lock, ArrowLeft, Star, Info, ChevronRight, Activity, Heart, Briefcase, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import DailyHoroscopeCard from '@/components/dashboard/DailyHoroscopeCard';
 
 // Vedic Astrology Rashi Data
 const rashiData = [
@@ -299,7 +300,7 @@ export default function RashisPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] pt-20 pb-12 px-4 relative overflow-hidden flex flex-col items-center">
+        <div className="min-h-screen bg-[var(--bg)] pt-[95px] pb-12 px-4 relative overflow-hidden flex flex-col items-center">
             {/* Immersive Background */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-secondary/5 to-transparent"></div>
@@ -362,168 +363,156 @@ export default function RashisPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.3 }}
-                            className="space-y-4"
+                            className="space-y-2"
                         >
                             {/* Main Card */}
-                            <Card padding="none" className="!rounded-[28px] border border-outline-variant/30 bg-surface/50 backdrop-blur-sm overflow-hidden">
-                                <div className="p-7 sm:p-8">
-                                    {/* Hero Header — Horizontal */}
-                                    <div className="flex flex-col md:flex-row items-center md:items-center gap-6 mb-8 pb-8 border-b border-outline-variant/20">
-                                        <div className="relative group shrink-0">
-                                            <div className="absolute inset-0 bg-secondary/15 blur-[60px] rounded-full opacity-50"></div>
-                                            <Image
-                                                src={selectedRashi.icon}
-                                                alt={selectedRashi.nameEn}
-                                                width={140}
-                                                height={140}
-                                                className="w-28 h-28 lg:w-36 lg:h-36 object-contain relative z-10 transition-transform duration-500 hover:scale-105"
-                                            />
-                                        </div>
-                                        <div className="flex-1 min-w-0 text-center md:text-left">
-                                            <div className="flex flex-wrap items-baseline justify-center md:justify-start gap-3 mb-3">
-                                                <h2 className="text-4xl lg:text-5xl font-headline font-bold text-foreground">
-                                                    {selectedRashi.nameEn}
-                                                </h2>
-                                                <span className="text-xl lg:text-2xl text-secondary font-headline italic">— {selectedRashi.nameHi}</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-4">
-                                                <div className="space-y-0.5">
-                                                    <p className="text-[10px] font-bold text-foreground/45 uppercase tracking-[0.2em]">Sanskrit</p>
-                                                    <p className="text-sm font-bold text-secondary">{selectedRashi.nameSanskrit}</p>
+                            <Card padding="none" className="!rounded-[24px] border border-outline-variant/30 bg-surface/50 backdrop-blur-sm overflow-hidden">
+                                <div className="pt-5 pb-4 px-4 sm:pt-6 sm:pb-5 sm:px-5">
+                                    {/* Strict 50:50 Split - No Wasted Space */}
+                                    <div className={`grid gap-x-6 gap-y-2 ${isLoggedIn ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
+                                        
+                                        {/* Left Column: Identity & Encyclopedia */}
+                                        <div className="space-y-2.5">
+                                            {/* Rashi Identity Header */}
+                                            <div className="flex items-center gap-4 mb-1">
+                                                <div className="relative shrink-0">
+                                                    <div className="absolute inset-0 bg-secondary/15 blur-[20px] rounded-full opacity-30"></div>
+                                                    <Image
+                                                        src={selectedRashi.icon}
+                                                        alt={selectedRashi.nameEn}
+                                                        width={64}
+                                                        height={64}
+                                                        className="w-14 h-14 lg:w-[64px] lg:h-[64px] object-contain relative z-10"
+                                                    />
                                                 </div>
-                                                <div className="space-y-0.5">
-                                                    <p className="text-[10px] font-bold text-foreground/45 uppercase tracking-[0.2em]">Dates</p>
-                                                    <p className="text-sm font-bold text-foreground/80">{selectedRashi.dates}</p>
-                                                </div>
-                                                <div className="space-y-0.5">
-                                                    <p className="text-[10px] font-bold text-foreground/45 uppercase tracking-[0.2em]">Element</p>
-                                                    <p className="text-sm font-bold text-secondary">{selectedRashi.elementIcon} {selectedRashi.element}</p>
-                                                </div>
-                                                <div className="space-y-0.5">
-                                                    <p className="text-[10px] font-bold text-foreground/45 uppercase tracking-[0.2em]">Ruling Lord</p>
-                                                    <p className="text-sm font-bold text-foreground italic">{selectedRashi.rulingPlanet.split(' ')[0]}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Content Grid */}
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        {/* Left Column — stretches to match right */}
-                                        <div className="flex flex-col gap-5">
-                                            <div>
-                                                <h3 className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em] mb-3 flex items-center gap-1.5">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
-                                                    Cosmic Signature
-                                                </h3>
-                                                <p className="text-[15px] text-foreground leading-[1.8] font-light italic border-l-2 border-secondary/20 pl-4">
-                                                    {selectedRashi.description}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em] mb-3 flex items-center gap-1.5">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
-                                                    Core Traits
-                                                </h3>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {selectedRashi.traits.map((trait, idx) => (
-                                                        <span key={idx} className="px-3.5 py-2 rounded-xl bg-secondary/8 border border-outline-variant/30 text-[11px] font-bold text-foreground hover:bg-secondary hover:text-white transition-all cursor-default">
-                                                            {trait}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="p-5 rounded-2xl bg-secondary/5 border border-outline-variant/20">
-                                                <h4 className="text-[10px] font-bold text-secondary uppercase tracking-[0.15em] mb-2">Vocation</h4>
-                                                <p className="text-xs font-bold text-foreground/90 leading-relaxed italic uppercase tracking-wider">
-                                                    {selectedRashi.career}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Right Column */}
-                                        <div className="space-y-4">
-                                            {/* Strengths & Challenges */}
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="p-4 rounded-2xl bg-secondary/5 border border-outline-variant/30 hover:border-secondary/40 transition-all">
-                                                    <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-2">
-                                                        <Sparkles className="w-3.5 h-3.5" />
+                                                <div className="min-w-0">
+                                                    <div className="flex items-baseline gap-2 mb-0.5">
+                                                        <h2 className="text-3xl font-headline font-bold text-foreground tracking-tight">
+                                                            {selectedRashi.nameEn}
+                                                        </h2>
+                                                        <span className="text-lg text-secondary font-headline italic">— {selectedRashi.nameHi}</span>
                                                     </div>
-                                                    <h4 className="text-[11px] font-bold text-foreground mb-1">Strengths</h4>
-                                                    <p className="text-[10px] text-foreground font-medium leading-snug">{selectedRashi.strengths}</p>
-                                                </div>
-                                                <div className="p-4 rounded-2xl bg-secondary/5 border border-outline-variant/30 hover:border-secondary/40 transition-all">
-                                                    <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-2">
-                                                        <Info className="w-3.5 h-3.5" />
-                                                    </div>
-                                                    <h4 className="text-[11px] font-bold text-foreground mb-1">Karmic Hurdles</h4>
-                                                    <p className="text-[10px] text-foreground font-medium leading-snug">{selectedRashi.challenges}</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Technical Attributes */}
-                                            <div className="p-4 rounded-2xl bg-surface/60 border border-outline-variant/20">
-                                                <h4 className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em] mb-3">Technical Attributes</h4>
-                                                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                                                    <div>
-                                                        <p className="text-[9px] text-foreground/50 uppercase tracking-wider font-bold">Planet</p>
-                                                        <p className="text-sm font-bold text-foreground">{selectedRashi.rulingPlanet}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[9px] text-foreground/50 uppercase tracking-wider font-bold">Quality</p>
-                                                        <p className="text-sm font-bold text-foreground">{selectedRashi.quality}</p>
-                                                    </div>
-                                                    {!isLoggedIn ? (
-                                                        <div className="col-span-2 mt-1 p-2.5 rounded-xl bg-secondary/5 border border-secondary/15 flex items-center justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                <Lock className="w-3.5 h-3.5 text-secondary/40" />
-                                                                <p className="text-[9px] text-foreground/40 font-bold uppercase tracking-wider">Login for more</p>
-                                                            </div>
-                                                            <Button size="sm" onClick={() => router.push('/login')} className="!text-[9px] !px-4 !py-1.5 !min-h-0">Login ✦</Button>
+                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] uppercase font-bold tracking-wider text-foreground/40">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span>Lord:</span>
+                                                            <span className="text-secondary">{selectedRashi.rulingPlanet.split(' ')[0]}</span>
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            <div>
-                                                                <p className="text-[9px] text-foreground/50 uppercase tracking-wider font-bold">Symbol</p>
-                                                                <p className="text-sm font-bold text-foreground">{selectedRashi.symbol}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-[9px] text-foreground/50 uppercase tracking-wider font-bold">Affinity</p>
-                                                                <p className="text-[11px] font-bold text-foreground/80 italic">{selectedRashi.compatibility}</p>
-                                                            </div>
-                                                        </>
-                                                    )}
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span>Element:</span>
+                                                            <span className="text-secondary">{selectedRashi.element}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
 
-                                    {/* Integrated Footer: Today's Alignment */}
-                                    <div className="mt-8 pt-6 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center border border-foreground/10">
-                                                <Calendar className="w-5 h-5 text-foreground/70" />
+                                            {/* Celestial Signature */}
+                                            <div className="p-3 rounded-xl bg-surface/40 border border-outline-variant/15">
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <div className="w-1 h-3 rounded-full bg-secondary"></div>
+                                                    <h3 className="text-[11px] font-bold text-foreground/50 uppercase tracking-widest">Celestial Signature</h3>
+                                                </div>
+                                                <p className="text-[13.5px] text-foreground/90 leading-relaxed font-light italic">
+                                                    "{selectedRashi.description}"
+                                                </p>
                                             </div>
-                                            <div>
-                                                <h3 className="text-[13px] font-headline font-bold text-foreground">Today's Alignment</h3>
-                                                <p className="text-[9px] text-foreground/40 tracking-wider uppercase font-bold">Daily insights · {selectedRashi.nameEn}</p>
+
+                                            {/* Attributes Grid */}
+                                            <div className="grid grid-cols-2 gap-2.5">
+                                                {/* Technical Vitals */}
+                                                <div className="p-3 rounded-xl bg-surface/60 border border-outline-variant/15 col-span-2 sm:col-span-1">
+                                                    <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Technical Vitals</h4>
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between items-center border-b border-outline-variant/5 pb-1">
+                                                            <span className="text-[10px] text-foreground/40 font-bold uppercase">Lord</span>
+                                                            <span className="text-[13px] font-bold text-foreground">{selectedRashi.rulingPlanet.split(' ')[0]}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center border-b border-outline-variant/5 pb-1">
+                                                            <span className="text-[10px] text-foreground/40 font-bold uppercase">Quality</span>
+                                                            <span className="text-[13px] font-bold text-foreground">{selectedRashi.quality.split(' ')[0]}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-[10px] text-foreground/40 font-bold uppercase">Symbol</span>
+                                                            <span className="text-[13px] font-bold text-foreground">{selectedRashi.symbol}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Core Traits */}
+                                                <div className="p-3 rounded-xl bg-surface/60 border border-outline-variant/15 col-span-2 sm:col-span-1">
+                                                    <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Core Traits</h4>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {selectedRashi.traits.slice(0, 5).map((trait, idx) => (
+                                                            <span key={idx} className="px-3 py-1 rounded-lg bg-secondary/5 border border-secondary/10 text-[10px] font-bold text-foreground/70">
+                                                                {trait}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Strengths & Challenges */}
+                                                <div className="p-3 rounded-xl bg-secondary/5 border border-outline-variant/15 col-span-2 grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-2 text-secondary">
+                                                            <Sparkles className="w-3.5 h-3.5" />
+                                                            <p className="text-[11px] font-bold uppercase tracking-wider">Strengths</p>
+                                                        </div>
+                                                        <p className="text-[13px] text-foreground/60 leading-relaxed italic line-clamp-3">{selectedRashi.strengths}</p>
+                                                    </div>
+                                                    <div className="border-l border-outline-variant/10 pl-4">
+                                                        <div className="flex items-center gap-2 mb-2 text-secondary">
+                                                            <Info className="w-3.5 h-3.5" />
+                                                            <p className="text-[11px] font-bold uppercase tracking-wider">Challenges</p>
+                                                        </div>
+                                                        <p className="text-[13px] text-foreground/60 leading-relaxed italic line-clamp-3">{selectedRashi.challenges}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Ideal Vocation */}
+                                            <div className="p-2.5 rounded-lg bg-surface/60 border border-outline-variant/10 flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Briefcase className="w-4 h-4 text-secondary/60" />
+                                                    <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/40">Ideal Vocation</span>
+                                                </div>
+                                                <p className="text-[12px] font-bold text-foreground/70 truncate ml-4 uppercase tracking-tighter">{selectedRashi.career}</p>
                                             </div>
                                         </div>
-                                        <Button
-                                            onClick={() => handleViewHoroscope(selectedRashi.id)}
-                                            className="!px-6 !py-2 !rounded-xl !bg-secondary !text-white !font-extrabold !border-none hover:!scale-105 active:!scale-95 !min-h-0 flex items-center gap-2 group/btn w-full sm:w-auto justify-center"
-                                        >
+
+                                        {/* Right Column: Daily Alignment */}
+                                        <div className="flex flex-col h-full">
                                             {isLoggedIn ? (
-                                                <><span className="text-[11px]">View Horoscope</span> <ChevronRight className="w-4 h-4" /></>
+                                                <div className="space-y-2 flex flex-col h-full">
+                                                    <div className="flex items-center justify-between px-1 h-[64px]">
+                                                        <div className="flex flex-col">
+                                                            <div className="flex items-center gap-2 text-secondary">
+                                                                <Calendar className="w-4 h-4" />
+                                                                <h3 className="text-[15px] font-headline font-bold text-foreground tracking-tight uppercase">Cosmic Alignment</h3>
+                                                            </div>
+                                                            <p className="text-[11px] text-foreground/40 font-bold ml-6 uppercase tracking-widest leading-none mt-1">Daily Predictions</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-[15px] font-headline font-bold text-secondary italic leading-none">Today</div>
+                                                            <div className="text-[11px] font-bold text-foreground/30 uppercase tracking-widest mt-1">15 April</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="rounded-[20px] overflow-hidden border border-outline-variant/30 bg-surface/30 flex-grow">
+                                                        <DailyHoroscopeCard sign={selectedRashi.nameEn} isGeneral={true} />
+                                                    </div>
+                                                </div>
                                             ) : (
-                                                <><Lock className="w-3.5 h-3.5" /> <span className="text-[11px]">Unlock</span></>
+                                                <div className="h-full flex flex-col items-center justify-center p-8 rounded-[24px] bg-secondary/5 border border-secondary/10 text-center">
+                                                    <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-4 text-secondary">
+                                                        <Lock className="w-6 h-6" />
+                                                    </div>
+                                                    <h3 className="text-xl font-headline font-bold text-foreground mb-2">Unlock Predictions</h3>
+                                                    <p className="text-sm text-foreground/60 mb-6 max-w-[200px]">Get daily alignment insights for {selectedRashi.nameEn}</p>
+                                                    <Button onClick={() => router.push('/login')} size="md" className="gold-gradient text-white !px-8">Login to View</Button>
+                                                </div>
                                             )}
-                                        </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </Card>
-
-
                         </motion.div>
                     </AnimatePresence>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -20,10 +20,21 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl');
 
     // Redirect if already logged in
     React.useEffect(() => {
         if (isLoggedIn) {
+            // Respect callbackUrl if it exists and isn't an auth page, otherwise default to status-based redirect
+            const decodedUrl = callbackUrl ? decodeURIComponent(callbackUrl) : null;
+            const isAuthPage = decodedUrl?.includes('/login') || decodedUrl?.includes('/register');
+
+            if (decodedUrl && !isAuthPage) {
+                router.push(decodedUrl);
+                return;
+            }
+
             // If user has profile details, go to home
             if (user?.name && user?.dob) {
                 router.push('/');
@@ -32,7 +43,7 @@ export default function LoginPage() {
                 router.push('/profile');
             }
         }
-    }, [isLoggedIn, user, router]);
+    }, [isLoggedIn, user, router, callbackUrl]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -93,9 +104,14 @@ export default function LoginPage() {
                 success(isRegister ? 'Account created successfully!' : 'Welcome back!');
                 
                 // Smart redirect logic:
-                // If user has name and dob, they've completed profile → go to home
-                // If user is missing profile details → go to profile completion
-                if (data.user?.name && data.user?.dob) {
+                // 1. If callbackUrl exists and isn't an auth page, go there
+                // 2. Otherwise, check if profile is complete
+                const decodedUrl = callbackUrl ? decodeURIComponent(callbackUrl) : null;
+                const isAuthPage = decodedUrl?.includes('/login') || decodedUrl?.includes('/register');
+                
+                if (decodedUrl && !isAuthPage) {
+                    router.push(decodedUrl);
+                } else if (data.user?.name && data.user?.dob) {
                     router.push('/');
                 } else {
                     router.push('/profile');

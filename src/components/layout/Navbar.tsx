@@ -392,7 +392,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 <div className="flex items-center justify-end space-x-4 lg:space-x-5">
                     <ThemeToggle />
                     {!isLoggedIn ? (
-                        <Button href="/login" variant="primary" size="md" className="!px-6 shadow-md shadow-secondary/10">Login</Button>
+                        <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="md" className="!px-6 shadow-md shadow-secondary/10">Login</Button>
                     ) : (
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
                             <div className="profile-ring-glow cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
