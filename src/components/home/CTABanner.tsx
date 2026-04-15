@@ -51,9 +51,6 @@ export default function CTABanner() {
                                 </Button>
                             </Link>
                         </div>
-                        <p className="mt-3 sm:mt-4 md:mt-5 lg:mt-6 text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.15em] sm:tracking-[0.18em] md:tracking-[0.2em] text-secondary/60 dark:text-white/40">
-                            Beta Testing Phase • All Features Free
-                        </p>
                     </div>
                 </div>
             </div>

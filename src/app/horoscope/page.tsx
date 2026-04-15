@@ -15,7 +15,7 @@ export default function HoroscopePage() {
     if (!isLoggedIn) {
         return (
             <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-4 py-20">
-                <Card padding="lg" className="!rounded-[32px] max-w-md w-full text-center border-secondary/20">
+                <Card padding="lg" className="!rounded-[32px] max-w-md w-full text-center border-outline-variant/30">
                     <div className="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-6 border border-secondary/20">
                         <Lock className="w-10 h-10 text-secondary" />
                     </div>
@@ -40,7 +40,7 @@ export default function HoroscopePage() {
     if (!user?.moonSign) {
         return (
             <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-4 py-20">
-                <Card padding="lg" className="!rounded-[32px] max-w-md w-full text-center border-secondary/20">
+                <Card padding="lg" className="!rounded-[32px] max-w-md w-full text-center border-outline-variant/30">
                     <div className="w-20 h-20 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-6 border border-orange-500/20">
                         <Sparkles className="w-10 h-10 text-orange-500" />
                     </div>
@@ -104,7 +104,7 @@ export default function HoroscopePage() {
                 <DailyHoroscopeCard email={user.email!} />
 
                 {/* Info Footer */}
-                <Card padding="md" className="!rounded-[24px] mt-8 border-secondary/10 bg-surface/50">
+                <Card padding="md" className="!rounded-[24px] mt-8 border-outline-variant/30 bg-surface/50">
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                             <Sparkles className="w-5 h-5 text-secondary" />

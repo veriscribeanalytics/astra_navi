@@ -95,7 +95,7 @@ export default function DashboardHome() {
                         </h1>
 
                         <form onSubmit={handleQuickQuery} className="w-full group">
-                            <Card padding="none" hoverable className="rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-full !bg-surface p-2 sm:p-2.5 flex flex-col sm:flex-row gap-2 sm:gap-2.5 items-stretch sm:items-center relative z-20 border border-secondary/10">
+                            <Card padding="none" hoverable className="rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-full !bg-surface p-2 sm:p-2.5 flex flex-col sm:flex-row gap-2 sm:gap-2.5 items-stretch sm:items-center relative z-20 border border-outline-variant/30">
                                 <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-secondary ml-3 hidden sm:block opacity-70 flex-shrink-0" />
                                 <input
                                     type="text"
@@ -116,7 +116,7 @@ export default function DashboardHome() {
                         {/* Moon Sign Circle */}
                         <div 
                             onClick={() => !rashiData && handleQuickAsk("Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.")}
-                            className={`shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-3xl border border-secondary/20 transition-all duration-500 hover:border-secondary/60 z-10 ${!rashiData ? 'cursor-pointer active:scale-95' : ''}`}
+                            className={`shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-sm border border-outline-variant/30 transition-all duration-500 hover:border-secondary/60 z-10 ${!rashiData ? 'cursor-pointer active:scale-95' : ''}`}
                             style={{ maxWidth: 'min(272px, 35vw)' }}
                         >
                             
@@ -158,7 +158,7 @@ export default function DashboardHome() {
                             const sunSignData = getRashiData(user.sunSign);
                             return sunSignData ? (
                                 <div 
-                                    className="shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-3xl border border-secondary/20 transition-all duration-500 hover:border-secondary/60 z-10"
+                                    className="shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-sm border border-outline-variant/30 transition-all duration-500 hover:border-secondary/60 z-10"
                                     style={{ maxWidth: 'min(272px, 35vw)' }}
                                 >
                                     
@@ -195,7 +195,7 @@ export default function DashboardHome() {
                         {/* Daily Horoscope Coming Soon */}
                         <div className="flex flex-col gap-4">
                             <h2 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground leading-none">Your Daily Cosmic Guide</h2>
-                            <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-secondary/20">
+                            <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-outline-variant/30">
                                 <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-6 text-center">
                                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary/10 flex items-center justify-center mb-6 border border-secondary/20">
                                         <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-secondary animate-pulse" />
@@ -226,7 +226,7 @@ export default function DashboardHome() {
                                 </div>
                             </div>
     
-                            <Card padding="none" className="!rounded-[28px] sm:!rounded-[40px] overflow-hidden group border-secondary/20 relative min-h-[240px] sm:min-h-[280px] flex flex-col justify-center">
+                            <Card padding="none" className="!rounded-[28px] sm:!rounded-[40px] overflow-hidden group border-outline-variant/30 relative min-h-[240px] sm:min-h-[280px] flex flex-col justify-center">
                                 <div className="flex flex-col sm:flex-row items-center p-6 sm:p-8 lg:p-10 gap-6 sm:gap-8 lg:gap-10 relative z-10">
                                     <div className="shrink-0 relative">
                                          <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-[24px] sm:rounded-[28px] lg:rounded-[32px] bg-background border border-secondary/30 flex items-center justify-center group-hover:scale-105 transition-all duration-700">
@@ -262,7 +262,7 @@ export default function DashboardHome() {
                     {/* RIGHT: ARCHIVES & QUICK ASK - Shifted down on desktop for better alignment */}
                     <div className="w-full lg:w-[380px] xl:w-[400px] flex flex-col gap-5 sm:gap-6 shrink-0 lg:mt-20">
                         {/* Archives */}
-                        <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-secondary/20">
+                        <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-outline-variant/30">
                             <h4 className="text-[10px] sm:text-[11px] font-bold text-secondary mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
                                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Archives
                             </h4>
@@ -294,7 +294,7 @@ export default function DashboardHome() {
                         </Card>
 
                         {/* Quick Ask Navi */}
-                        <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-secondary/20 flex flex-col">
+                        <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-outline-variant/30 flex flex-col">
                             <h4 className="text-[10px] sm:text-[11px] font-bold text-secondary mb-3 sm:mb-4 lg:mb-5 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
                                 <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Ask Navi
                             </h4>

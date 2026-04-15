@@ -8,6 +8,7 @@ import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { useChat } from "@/context/ChatContext";
+import { useToast } from "@/hooks/useToast";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
@@ -92,6 +93,48 @@ const getNavSections = (isLoggedIn: boolean) => {
                         desc: "How can we help your journey?"
                     },
                 ]
+            },
+            {
+                id: "knowledge",
+                label: "Knowledge",
+                items: [
+                    { 
+                        label: "All Topics", 
+                        href: "/blogs", 
+                        icon: <BookOpen className="w-4 h-4" />,
+                        desc: "Browse all astrology knowledge topics."
+                    },
+                    { 
+                        label: "The 12 Rashis", 
+                        href: "/rashis", 
+                        icon: <Sparkles className="w-4 h-4" />,
+                        desc: "Explore all 12 Vedic zodiac signs."
+                    },
+                    { 
+                        label: "Navagraha - Nine Planets", 
+                        href: "/blogs/planets", 
+                        icon: <Compass className="w-4 h-4" />,
+                        desc: "Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu."
+                    },
+                    { 
+                        label: "The 12 Houses (Bhavas)", 
+                        href: "/blogs/houses", 
+                        icon: <Gem className="w-4 h-4" />,
+                        desc: "Learn about houses in your birth chart."
+                    },
+                    { 
+                        label: "The 27 Nakshatras", 
+                        href: "/blogs/nakshatras", 
+                        icon: <Sparkles className="w-4 h-4" />,
+                        desc: "Discover the lunar mansions."
+                    },
+                    { 
+                        label: "Planetary Yogas", 
+                        href: "/blogs/yogas", 
+                        icon: <BookOpen className="w-4 h-4" />,
+                        desc: "Powerful planetary combinations."
+                    },
+                ]
             }
         ];
     }
@@ -120,12 +163,6 @@ const getNavSections = (isLoggedIn: boolean) => {
                     icon: <Users className="w-4 h-4" />,
                     desc: "Connect with verified human experts."
                 },
-                { 
-                    label: "Knowledge Blogs", 
-                    href: "/blogs", 
-                    icon: <BookOpen className="w-4 h-4" />,
-                    desc: "Learn the secrets of the zodiac."
-                },
             ]
         },
         {
@@ -133,22 +170,64 @@ const getNavSections = (isLoggedIn: boolean) => {
             label: "Horoscope",
             items: [
                 { 
+                    label: "The 12 Rashis", 
+                    href: "/rashis", 
+                    icon: <Sparkles className="w-4 h-4" />,
+                    desc: "Explore Vedic zodiac signs and traits."
+                },
+                { 
                     label: "Daily Predictions", 
                     href: "/horoscope", 
                     icon: <Sparkles className="w-4 h-4" />,
                     desc: "Check your luck, health, and finance."
                 },
                 { 
-                    label: "Panchang Timings", 
-                    href: "/horoscope", 
-                    icon: <History className="w-4 h-4" />,
-                    desc: "Auspicious moments for your daily life."
-                },
-                { 
                     label: "Birth Kundli", 
                     href: "/kundli", 
                     icon: <BookOpen className="w-4 h-4" />,
                     desc: "Generate your free Vedic birth chart."
+                },
+            ]
+        },
+        {
+            id: "knowledge",
+            label: "Knowledge",
+            items: [
+                { 
+                    label: "All Topics", 
+                    href: "/blogs", 
+                    icon: <BookOpen className="w-4 h-4" />,
+                    desc: "Browse all astrology knowledge topics."
+                },
+                { 
+                    label: "The 12 Rashis", 
+                    href: "/rashis", 
+                    icon: <Sparkles className="w-4 h-4" />,
+                    desc: "Explore all 12 Vedic zodiac signs."
+                },
+                { 
+                    label: "Navagraha - Nine Planets", 
+                    href: "/blogs/planets", 
+                    icon: <Compass className="w-4 h-4" />,
+                    desc: "Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu."
+                },
+                { 
+                    label: "The 12 Houses (Bhavas)", 
+                    href: "/blogs/houses", 
+                    icon: <Gem className="w-4 h-4" />,
+                    desc: "Learn about houses in your birth chart."
+                },
+                { 
+                    label: "The 27 Nakshatras", 
+                    href: "/blogs/nakshatras", 
+                    icon: <Sparkles className="w-4 h-4" />,
+                    desc: "Discover the lunar mansions."
+                },
+                { 
+                    label: "Planetary Yogas", 
+                    href: "/blogs/yogas", 
+                    icon: <BookOpen className="w-4 h-4" />,
+                    desc: "Powerful planetary combinations."
                 },
             ]
         },
@@ -190,6 +269,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     const router = useRouter();
     const { isLoggedIn, logout, showLoading, user } = useAuth();
     const { setIsMobileMenuOpen } = useChat();
+    const { success, ToastContainer } = useToast();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -235,17 +315,23 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     const handleLogout = () => {
         setIsUserDropdownOpen(false);
         setIsMenuOpen(false);
-        showLoading("Returning to the stars...", 1500);
+        
+        // Logout and redirect immediately to prevent layout redirect
+        logout();
+        router.replace('/');
+        
+        // Show toast after a brief delay to ensure we're on home page
         setTimeout(() => {
-            logout();
-            router.push('/login');
-        }, 1500);
+            success('Successfully logged out');
+        }, 100);
     };
     
     const isActive = (path:string) => pathname == path;
 
     return(
-        <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-[#faf7f2]/90 dark:bg-[#0b071a]/90 backdrop-blur-xl shadow-sm border-b border-secondary/10 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
+        <>
+            <ToastContainer />
+            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-[#faf7f2]/90 dark:bg-[#0b071a]/90 backdrop-blur-xl shadow-sm border-b border-secondary/10 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-3.5 w-full mx-auto max-w-[1600px]">
                 {/* Left: Logo */}
@@ -426,6 +512,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 </div>
             </div>
         </nav>
+        </>
     )
 }    
 

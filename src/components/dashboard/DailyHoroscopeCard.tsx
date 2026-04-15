@@ -152,10 +152,10 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
     return (
         <Card 
             padding="none" 
-            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden border-secondary/20"
+            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden border-outline-variant/30"
         >
             {/* Header - Compact for mobile */}
-            <div className="p-4 sm:p-6 border-b border-secondary/10 bg-surface/10">
+            <div className="p-4 sm:p-6 border-b border-outline-variant/30 bg-surface/10">
                 <div className="flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -221,7 +221,7 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
 
             <div className={`transition-all duration-700 ease-out ${showContent ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'}`}>
                 {/* Top Info Row - 3 Columns */}
-                <div className="grid grid-cols-3 border-b border-secondary/10 bg-surface/5">
+                <div className="grid grid-cols-3 border-b border-outline-variant/30 bg-surface/5">
                     <div className="flex flex-col items-center justify-center p-3 sm:p-4 border-r border-secondary/10">
                         <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1">Mood</span>
                         <span className="text-sm sm:text-base font-headline font-bold text-foreground">
@@ -251,7 +251,7 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
                 {/* Main Content Grid - 2x2 layout */}
                 <div className="grid grid-cols-2">
                     {/* Career */}
-                    <div className="p-4 sm:p-6 border-b border-r border-secondary/10 hover:bg-surface/10 transition-colors">
+                    <div className="p-4 sm:p-6 border-b border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
                         <div className="flex items-center gap-2 mb-3">
                             <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center">
                                 <Briefcase className="w-4 h-4 text-orange-600" />
@@ -264,7 +264,7 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
                     </div>
 
                     {/* Love */}
-                    <div className="p-4 sm:p-6 border-b border-secondary/10 hover:bg-surface/10 transition-colors">
+                    <div className="p-4 sm:p-6 border-b border-outline-variant/30 hover:bg-surface/10 transition-colors">
                         <div className="flex items-center gap-2 mb-3">
                             <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center">
                                 <Heart className="w-4 h-4 text-pink-600" />
@@ -277,7 +277,7 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
                     </div>
 
                     {/* Health */}
-                    <div className="p-4 sm:p-6 border-r border-secondary/10 hover:bg-surface/10 transition-colors">
+                    <div className="p-4 sm:p-6 border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
                         <div className="flex items-center gap-2 mb-3">
                             <div className="w-8 h-8 rounded-xl bg-green-500/10 flex items-center justify-center">
                                 <Activity className="w-4 h-4 text-green-600" />
@@ -304,7 +304,7 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
                 </div>
 
                 {/* Tip of the Day - Centered Bottom */}
-                <div className="p-6 sm:p-8 bg-surface/20 border-t border-secondary/10 flex flex-col items-center text-center">
+                <div className="p-6 sm:p-8 bg-surface/20 border-t border-outline-variant/30 flex flex-col items-center text-center">
                     <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center mb-3 border border-secondary/20 group-hover:rotate-12 transition-transform">
                         <Sparkles className="w-5 h-5 text-secondary" />
                     </div>

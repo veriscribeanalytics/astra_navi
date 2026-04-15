@@ -23,9 +23,9 @@ const Card: React.FC<CardProps> = ({
   
   const colorSchemes = {
     default: {
-      default: 'bg-surface/50 dark:bg-surface/70 border-secondary/10',
-      elevated: 'bg-surface/50 dark:bg-surface/70 border-secondary/15',
-      bordered: 'bg-surface/50 dark:bg-surface/70 border-secondary/20',
+      default: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/30 dark:border-secondary/10',
+      elevated: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/35 dark:border-secondary/15',
+      bordered: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/40 dark:border-secondary/20',
     },
     ivory: {
       default: 'bg-background border-outline-variant/30',
@@ -50,8 +50,8 @@ const Card: React.FC<CardProps> = ({
   };
 
   const variants = {
-    default: `${colorSchemes[colorScheme].default} backdrop-blur-md border`,
-    elevated: `${colorSchemes[colorScheme].elevated} backdrop-blur-md border`,
+    default: `${colorSchemes[colorScheme].default} backdrop-blur-sm dark:backdrop-blur-md border`,
+    elevated: `${colorSchemes[colorScheme].elevated} backdrop-blur-sm dark:backdrop-blur-md border`,
     bordered: `${colorSchemes[colorScheme].bordered} backdrop-blur-sm border-[1.5px]`,
   };
 
