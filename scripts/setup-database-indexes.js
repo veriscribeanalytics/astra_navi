@@ -37,19 +37,50 @@ try {
 }
 
 // ============================================
-// 2. DAILY HOROSCOPES (OPTIMIZED)
+// 2. PERSONALIZED DAILY HOROSCOPES
 // ============================================
+print('\n📝 Creating indexes for personalized_daily_horoscopes collection...');
+
+try {
+    // PRIMARY INDEX: userId + date (UNIQUE to prevent duplicate entries per user per day)
+    db.personalized_daily_horoscopes.createIndex(
+        { userId: 1, date: 1 }, 
+        { unique: true }
+    );
+    print('✅ Created unique compound index on userId + date');
+    
+    // LOOKUP INDEX: userId + createdAt (for user history)
+    db.personalized_daily_horoscopes.createIndex(
+        { userId: 1, createdAt: -1 }
+    );
+    print('✅ Created compound index on userId + createdAt');
+    
+    // TTL index for auto-cleanup (30 days)
+    db.personalized_daily_horoscopes.createIndex(
+        { createdAt: 1 }, 
+        { expireAfterSeconds: 2592000 }
+    );
+    print('✅ Created TTL index (30 days auto-cleanup)');
+    
+} catch (e) {
+    print('⚠️  Personalized horoscopes indexes: ' + e.message);
+}
+
+// ============================================
+// COMMENTED OUT: Old rashi-based daily horoscopes
+// ============================================
+// This was the old system with only 12 horoscopes per day (one per rashi)
+// Now using personalized horoscopes (one per user per day)
+/*
 print('\n📝 Creating indexes for daily_horoscopes_by_sign collection...');
 
 try {
-    // Primary lookup: sign + date (unique)
     db.daily_horoscopes_by_sign.createIndex(
         { sign: 1, date: 1 }, 
         { unique: true }
     );
     print('✅ Created unique compound index on sign + date');
     
-    // TTL index for auto-cleanup (30 days)
     db.daily_horoscopes_by_sign.createIndex(
         { createdAt: 1 }, 
         { expireAfterSeconds: 2592000 }
@@ -59,6 +90,7 @@ try {
 } catch (e) {
     print('⚠️  Horoscopes indexes: ' + e.message);
 }
+*/
 
 // ============================================
 // 3. CHATS COLLECTION
@@ -173,7 +205,13 @@ db.users.getIndexes().forEach(idx => {
 });
 
 print('\nHoroscopes collection indexes:');
-db.daily_horoscopes_by_sign.getIndexes().forEach(idx => {
+// COMMENTED OUT: Old rashi-based horoscopes
+// db.daily_horoscopes_by_sign.getIndexes().forEach(idx => {
+//     print(`  - ${JSON.stringify(idx.key)}`);
+// });
+
+// NEW: Personalized horoscopes
+db.personalized_daily_horoscopes.getIndexes().forEach(idx => {
     print(`  - ${JSON.stringify(idx.key)}`);
 });
 
@@ -192,7 +230,9 @@ db.chat_analytics.getIndexes().forEach(idx => {
 // ============================================
 print('\n📈 Collection Statistics:\n');
 
-const collections = ['users', 'chats', 'chat_analytics', 'daily_horoscopes_by_sign'];
+const collections = ['users', 'chats', 'chat_analytics', 'personalized_daily_horoscopes'];
+// COMMENTED OUT: Old rashi-based collection
+// const collections = ['users', 'chats', 'chat_analytics', 'daily_horoscopes_by_sign'];
 
 collections.forEach(collName => {
     try {

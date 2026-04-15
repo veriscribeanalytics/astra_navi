@@ -70,103 +70,63 @@ export async function GET(req: Request) {
         // ──────────────────────────────────────────────────────
         console.log(`[Horoscope] Cache MISS for ${user.moonSign} on ${today}. Fetching from external API...`);
 
+        if (!process.env.AI_BACKEND_URL) {
+            console.error("[Horoscope] AI_BACKEND_URL not configured");
+            return NextResponse.json({ 
+                error: "Horoscope service is not configured. Please try again later." 
+            }, { status: 503 });
+        }
+
         let externalData = null;
-        if (process.env.AI_BACKEND_URL) {
-            try {
-                const externalApiUrl = `${process.env.AI_BACKEND_URL}/api/daily-horoscope?sign=${encodeURIComponent(user.moonSign)}`;
-                const response = await fetch(externalApiUrl, { 
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    signal: AbortSignal.timeout(8000)
-                });
-                
-                if (response.ok) {
-                    externalData = await response.json();
-                    console.log(`[Horoscope] External API returned data for ${user.moonSign}`);
-                }
-            } catch (error) {
-                console.warn("[Horoscope] External API unavailable:", error);
+        try {
+            const externalApiUrl = `${process.env.AI_BACKEND_URL}/api/daily-horoscope?sign=${encodeURIComponent(user.moonSign)}`;
+            const response = await fetch(externalApiUrl, { 
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000)
+            });
+            
+            if (!response.ok) {
+                console.error(`[Horoscope] External API error: ${response.status} ${response.statusText}`);
+                return NextResponse.json({ 
+                    error: "Horoscope service is temporarily unavailable. Please try again later." 
+                }, { status: 503 });
             }
+
+            externalData = await response.json();
+            console.log(`[Horoscope] External API returned data for ${user.moonSign}`);
+        } catch (error) {
+            console.error("[Horoscope] External API request failed:", error);
+            return NextResponse.json({ 
+                error: "Unable to fetch horoscope at this time. Please try again later." 
+            }, { status: 503 });
         }
 
         // ──────────────────────────────────────────────────────
-        // STEP 3: Build horoscope data (external API data or deterministic fallback)
-        // Using a seed based on sign + date so fallback is CONSISTENT for the day
+        // STEP 3: Validate and store horoscope data from external API
         // ──────────────────────────────────────────────────────
-        const seedHash = (str: string): number => {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash |= 0; // Convert to 32-bit integer
-            }
-            return Math.abs(hash);
-        };
-
-        const seed = seedHash(`${user.moonSign}-${today}`);
-        const pick = <T,>(arr: T[], offset: number = 0): T => arr[(seed + offset) % arr.length];
-
-        const moods = ['Energetic', 'Balanced', 'Reflective', 'Optimistic', 'Focused', 'Calm'];
-        const colors = ['Gold', 'Blue', 'Green', 'Purple', 'Red', 'Silver', 'Orange', 'Pink'];
-        const numbers = [1, 3, 5, 7, 9, 11, 13, 21];
-        
-        const careerMessages = [
-            'Focus on your tasks and stay productive.',
-            'New opportunities may arise today.',
-            'Collaboration brings success.',
-            'Trust your professional instincts.',
-            'A good day for important decisions.'
-        ];
-        
-        const loveMessages = [
-            'Communication is key in relationships today.',
-            'Express your feelings openly.',
-            'Quality time strengthens bonds.',
-            'Listen to your heart.',
-            'Romance is in the air.'
-        ];
-        
-        const healthMessages = [
-            'Maintain a balanced routine.',
-            'Prioritize rest and recovery.',
-            'Physical activity boosts energy.',
-            'Stay hydrated and mindful.',
-            'Listen to your body\'s needs.'
-        ];
-        
-        const financeMessages = [
-            'Be mindful of your spending.',
-            'Good day for financial planning.',
-            'Avoid impulsive purchases.',
-            'Opportunities for growth.',
-            'Review your budget carefully.'
-        ];
-        
-        const tips = [
-            'Trust your intuition.',
-            'Stay positive and focused.',
-            'Embrace new opportunities.',
-            'Balance is the key to success.',
-            'Your patience will be rewarded.',
-            'Follow your inner wisdom.',
-            'Small steps lead to big changes.'
-        ];
+        if (!externalData || !externalData.overall_score) {
+            console.error("[Horoscope] Invalid data received from external API");
+            return NextResponse.json({ 
+                error: "Invalid horoscope data received. Please try again later." 
+            }, { status: 503 });
+        }
 
         const horoscopeData = {
             sign: user.moonSign,
             date: today,
-            overall_score: externalData?.overall_score || (seed % 40) + 50,
-            mood: externalData?.mood || pick(moods, 0),
-            lucky_color: externalData?.lucky_color || pick(colors, 1),
-            lucky_number: externalData?.lucky_number || pick(numbers, 2),
-            career: externalData?.career || pick(careerMessages, 3),
-            love: externalData?.love || pick(loveMessages, 4),
-            health: externalData?.health || pick(healthMessages, 5),
-            finance: externalData?.finance || pick(financeMessages, 6),
-            tip: externalData?.tip || pick(tips, 7),
+            overall_score: externalData.overall_score,
+            mood: externalData.mood,
+            lucky_color: externalData.lucky_color,
+            lucky_number: externalData.lucky_number,
+            career: externalData.career,
+            love: externalData.love,
+            health: externalData.health,
+            finance: externalData.finance,
+            tip: externalData.tip,
             createdAt: new Date(),
             updatedAt: new Date(),
-            source: externalData ? 'external_api' : 'generated'
+            source: 'external_api'
         };
 
         // ──────────────────────────────────────────────────────

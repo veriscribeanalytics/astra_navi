@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Card from '@/components/ui/Card';
-import { Sparkles, Heart, Briefcase, Activity, DollarSign, Lightbulb } from 'lucide-react';
+import { Sparkles, Heart, Briefcase, Activity, DollarSign } from 'lucide-react';
 
 interface HoroscopeData {
     sign?: string;
@@ -39,35 +39,20 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
             try {
                 setLoading(true);
 
-                // Check sessionStorage first to avoid redundant API calls
-                const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-                const cacheKey = `astranavi_horoscope_${email}_${todayKey}`;
-                const cached = sessionStorage.getItem(cacheKey);
-
-                if (cached) {
-                    const data = JSON.parse(cached);
-                    setHoroscope(data);
-                    setError(null);
-                    setLoading(false);
-                    return;
-                }
-
-                // No cache — call API (which itself checks DB before external API)
+                // Call API directly - NO CACHING to ensure fresh data always
                 const response = await fetch(`/api/daily-horoscope?email=${encodeURIComponent(email)}`);
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch horoscope');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Failed to fetch horoscope');
                 }
 
                 const data = await response.json();
                 setHoroscope(data);
                 setError(null);
-
-                // Cache in sessionStorage for this session
-                sessionStorage.setItem(cacheKey, JSON.stringify(data));
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Horoscope fetch error:', err);
-                setError('Unable to load daily horoscope');
+                setError(err.message || 'Unable to load daily horoscope. Please try again later.');
             } finally {
                 setLoading(false);
             }
@@ -100,7 +85,23 @@ export default function DailyHoroscopeCard({ email }: DailyHoroscopeCardProps) {
     }
 
     if (error || !horoscope) {
-        return null;
+        return (
+            <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px]">
+                <div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6">
+                    <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center">
+                        <Sparkles className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-headline font-bold text-foreground mb-2">
+                            Service Temporarily Unavailable
+                        </h3>
+                        <p className="text-sm text-foreground/60">
+                            {error || 'Unable to load your daily horoscope. Please try again later.'}
+                        </p>
+                    </div>
+                </div>
+            </Card>
+        );
     }
 
     const getScoreColor = (score: number) => {
