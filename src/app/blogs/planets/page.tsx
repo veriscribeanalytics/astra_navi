@@ -9,12 +9,16 @@ import {
     Sparkles, Heart, Clock, Eclipse, Star, 
     ChevronRight, Info, Shield, Scale, Activity,
     Lock, CheckCircle2, AlertCircle
-} from 'lucide-center';
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
-// Replace lucide-center with lucide-react (correcting my typo)
-import * as LucideIcons from 'lucide-react';
+const LucideIcons = {
+    Sun, Moon, Flame, Zap, Sparkles, Heart, Clock, Eclipse, Star,
+    ArrowLeft, Info, Activity, Shield, CheckCircle2, AlertCircle,
+    Scale, Lock, ChevronRight
+};
+
 
 const planets = [
     {
