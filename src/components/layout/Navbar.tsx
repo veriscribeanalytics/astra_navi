@@ -327,13 +327,20 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                             onMouseEnter={() => setHoveredSection(section.id)}
                             onMouseLeave={() => setHoveredSection(null)}
                         >
-                            <button className={`flex items-center gap-1 px-3 lg:px-4 py-2 rounded-full transition-all duration-300 font-body font-bold text-[13px] lg:text-sm tracking-wide ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}>
+                            <button 
+                                aria-haspopup="true"
+                                aria-expanded={hoveredSection === section.id}
+                                className={`flex items-center gap-1 px-3 lg:px-4 py-2 rounded-full transition-all duration-300 font-body font-bold text-[13px] lg:text-sm tracking-wide ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}
+                            >
                                 {section.label}
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${hoveredSection === section.id ? 'rotate-180 text-secondary' : 'opacity-40'}`} />
                             </button>
 
                             {/* Mega Dropdown Bridge */}
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`}>
+                            <div 
+                                role="menu"
+                                className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`}
+                            >
                                 <div className="w-72 lg:w-80 p-2 bg-background/95 backdrop-blur-2xl rounded-2xl border border-secondary/20 shadow-2xl">
                                     <div className="space-y-1">
                                         {section.items.map((item, idx) => {
@@ -341,6 +348,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                                                 <Link 
                                                     key={idx} 
                                                     href={item.href}
+                                                    role="menuitem"
                                                     className={`group flex items-start gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-200 ${isActive(item.href) ? 'bg-secondary/10' : 'hover:bg-secondary/5 hover:translate-x-1'}`}
                                                 >
                                                     <div className={`mt-0.5 w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-colors ${isActive(item.href) ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-white'}`}>
@@ -371,10 +379,15 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                         <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="md" className="!px-6 shadow-md shadow-secondary/10">Login</Button>
                     ) : (
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
-                            <div className="profile-ring-glow cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
+                            <button 
+                                aria-haspopup="true"
+                                aria-expanded={isUserDropdownOpen}
+                                className="profile-ring-glow cursor-pointer" 
+                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                            >
                                 <div className="profile-comet-dot"></div>
                                 <div className="profile-avatar-content !text-sm">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
-                            </div>
+                            </button>
                             {isUserDropdownOpen && (
                                 <div className="absolute top-[56px] right-0 w-60 bg-background/98 backdrop-blur-2xl border border-secondary/20 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
@@ -402,6 +415,8 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 <div className="flex-[1] flex justify-start">
                     <button 
                         onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                        aria-expanded={isMenuOpen}
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                         className="p-2.5 -ml-2 text-primary/80 hover:text-primary transition-all rounded-xl hover:bg-primary/5 active:scale-90"
                     >
                         {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

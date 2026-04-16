@@ -6,7 +6,9 @@ import { Sparkles, Sun, ArrowRight, Clock, MessageSquare, Compass, Plus } from "
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { calculateAge, getAgeBracket, getPersonalizedQuestions, getStarterCards } from "@/utils/personalizedQuestions";
@@ -48,6 +50,7 @@ export default function DashboardHome() {
     };
 
     const rashiData = user?.moonSign ? getRashiData(user.moonSign) : null;
+    const sunSignData = user?.sunSign ? getRashiData(user.sunSign) : null;
 
     // Calculate age and get personalized content
     const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
@@ -114,7 +117,15 @@ export default function DashboardHome() {
                     <div className="flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-0 w-full lg:w-auto justify-center items-center overflow-x-auto pb-2 sm:pb-0 px-1 sm:px-0 scrollbar-hide">
                         {/* Moon Sign Circle */}
                         <div 
+                            role="button"
+                            tabIndex={0}
                             onClick={() => !rashiData && handleQuickAsk("Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.")}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    !rashiData && handleQuickAsk("Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.");
+                                }
+                            }}
                             className={`shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-sm border border-outline-variant/30 transition-all duration-500 hover:border-secondary/60 z-10 ${!rashiData ? 'cursor-pointer active:scale-95' : ''}`}
                             style={{ maxWidth: 'min(272px, 35vw)' }}
                         >
@@ -124,9 +135,12 @@ export default function DashboardHome() {
                             </p>
                             
                             {rashiData?.icon ? (
-                                <img 
-                                    src={`${rashiData.icon}?v=4`}
+                                <Image 
+                                    src={rashiData.icon}
                                     alt={rashiData.name}
+                                    width={112}
+                                    height={112}
+                                    sizes="(max-width: 640px) 48px, 112px"
                                     className="w-[clamp(48px,12vw,112px)] h-[clamp(48px,12vw,112px)] object-contain mb-[clamp(8px,2vw,24px)] relative z-10 group-hover:scale-110 transition-transform duration-500"
                                 />
                             ) : (
@@ -157,6 +171,14 @@ export default function DashboardHome() {
                             const sunSignData = getRashiData(user.sunSign);
                             return sunSignData ? (
                                 <div 
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            // No specific action defined for Sun Sign click yet, but adding a11y anyway
+                                        }
+                                    }}
                                     className="shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-sm border border-outline-variant/30 transition-all duration-500 hover:border-secondary/60 z-10"
                                     style={{ maxWidth: 'min(272px, 35vw)' }}
                                 >
@@ -165,9 +187,12 @@ export default function DashboardHome() {
                                         Your Sun Sign
                                     </p>
                                     
-                                    <img 
-                                        src={`${sunSignData.icon}?v=4`}
+                                    <Image 
+                                        src={sunSignData.icon}
                                         alt={sunSignData.name}
+                                        width={112}
+                                        height={112}
+                                        sizes="(max-width: 640px) 48px, 112px"
                                         className="w-[clamp(48px,12vw,112px)] h-[clamp(48px,12vw,112px)] object-contain mb-[clamp(8px,2vw,24px)] relative z-10 group-hover:scale-110 transition-transform duration-500"
                                     />
                                     
@@ -195,7 +220,13 @@ export default function DashboardHome() {
                         <div className="flex flex-col gap-4">
                             <h2 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground leading-none">Your Daily Cosmic Guide</h2>
                             {user?.email ? (
-                                <DailyHoroscopeCard email={user.email} />
+                                <ErrorBoundary fallback={
+                                    <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-outline-variant/30 min-h-[200px] flex items-center justify-center">
+                                        <p className="text-foreground/50 font-bold uppercase tracking-widest text-sm">Unable to load horoscope</p>
+                                    </Card>
+                                }>
+                                    <DailyHoroscopeCard email={user.email} />
+                                </ErrorBoundary>
                             ) : (
                                 <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-outline-variant/30">
                                     <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-6 text-center">
