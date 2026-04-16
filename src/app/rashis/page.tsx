@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
-import { Sparkles, Calendar, Flame, Droplets, Wind, Mountain, Lock, ArrowLeft, Star, Info, ChevronRight, Activity, Heart, Briefcase, DollarSign } from 'lucide-react';
+import { Sparkles, Calendar, Flame, Droplets, Wind, Mountain, Lock, ArrowLeft, Star, Info, ChevronRight, Activity, Heart, Briefcase, DollarSign, Users, Zap, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import DailyHoroscopeCard from '@/components/dashboard/DailyHoroscopeCard';
 
@@ -287,8 +287,8 @@ const elementColors = {
 };
 
 export default function RashisPage() {
-    const [selectedRashi, setSelectedRashi] = useState(rashiData[0]);
-    const { isLoggedIn } = useAuth();
+    const [selectedRashi, setSelectedRashi] = React.useState(rashiData[0]);
+    const { isLoggedIn, user } = useAuth();
     const router = useRouter();
 
     const handleViewHoroscope = (rashiId: string) => {
@@ -299,8 +299,38 @@ export default function RashisPage() {
         }
     };
 
+    const [horoscopeData, setHoroscopeData] = React.useState<any>(null);
+    const [horoscopeLoading, setHoroscopeLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        const fetchHoroscope = async () => {
+            setHoroscopeLoading(true);
+            try {
+                // Determine if we should use general or personalized horoscope
+                const endpoint = isLoggedIn && user?.email ? '/api/daily-horoscope' : '/api/horoscope-general';
+                const queryParams = isLoggedIn && user?.email 
+                    ? `email=${encodeURIComponent(user.email)}&sign=${encodeURIComponent(selectedRashi.nameEn)}`
+                    : `sign=${encodeURIComponent(selectedRashi.nameEn)}`;
+                
+                const res = await fetch(`${endpoint}?${queryParams}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setHoroscopeData(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch horoscope for rashi page:", err);
+            } finally {
+                setHoroscopeLoading(false);
+            }
+        };
+
+        if (selectedRashi) {
+            fetchHoroscope();
+        }
+    }, [selectedRashi.id, isLoggedIn, user?.email]);
+
     return (
-        <div className="min-h-screen bg-[var(--bg)] pt-[95px] pb-12 px-4 relative overflow-hidden flex flex-col items-center">
+        <div className="min-h-screen bg-[var(--bg)] pt-[95px] px-2 sm:px-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
             {/* Immersive Background */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-secondary/5 to-transparent"></div>
@@ -319,20 +349,21 @@ export default function RashisPage() {
                         <div className="mb-4 px-1">
                             <Link href="/blogs" className="inline-flex items-center gap-1.5 text-secondary hover:text-secondary/70 transition-all mb-2 group">
                                 <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Library</span>
+                                <span className="text-[12px] font-bold uppercase tracking-[0.2em]">Library</span>
                             </Link>
-                            <h1 className="text-2xl font-headline font-bold text-foreground leading-tight">
+                            <h1 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight">
                                 The 12 <span className="text-secondary italic">Rashis</span>
                             </h1>
                         </div>
 
-                        {/* Button List - 2 columns with icon + name */}
-                        <div className="grid grid-cols-4 lg:grid-cols-2 gap-1.5 overflow-y-auto scrollbar-hide">
+                        {/* Button List - 6 columns on mobile, 2 columns on sidebar */}
+                        <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
                             {rashiData.map((rashi) => (
-                                <button
+                                <motion.button
                                     key={rashi.id}
                                     onClick={() => setSelectedRashi(rashi)}
-                                    className={`group flex flex-col items-center justify-center p-2.5 rounded-2xl border transition-all duration-200 ${
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`group flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all duration-200 ${
                                         selectedRashi.id === rashi.id
                                             ? 'border-secondary bg-secondary/10 ring-1 ring-secondary/10'
                                             : 'border-outline-variant/20 bg-surface/40 backdrop-blur-sm hover:border-secondary/30 hover:bg-surface/60'
@@ -343,19 +374,19 @@ export default function RashisPage() {
                                         alt={rashi.nameEn}
                                         width={36}
                                         height={36}
-                                        className={`w-9 h-9 object-contain transition-transform duration-300 ${selectedRashi.id === rashi.id ? 'scale-110' : 'group-hover:scale-110'}`}
+                                        className={`w-7 h-7 sm:w-9 sm:h-9 object-contain transition-transform duration-300 ${selectedRashi.id === rashi.id ? 'scale-110' : 'group-hover:scale-110'}`}
                                     />
-                                    <p className={`text-[9px] font-bold mt-1 truncate w-full text-center ${selectedRashi.id === rashi.id ? 'text-secondary' : 'text-foreground/50'}`}>
+                                    <p className={`text-[10px] sm:text-[12px] font-bold mt-1 truncate w-full text-center ${selectedRashi.id === rashi.id ? 'text-secondary' : 'text-foreground/50'}`}>
                                         {rashi.nameEn}
                                     </p>
-                                </button>
+                                </motion.button>
                             ))}
                         </div>
                     </motion.div>
                 </div>
 
                 {/* Detail: Content (Right) */}
-                <div className="flex-grow min-w-0">
+                <div className="flex-grow min-w-0 lg:mt-10">
                     <AnimatePresence mode="wait">
                         <motion.div 
                             key={selectedRashi.id}
@@ -363,160 +394,189 @@ export default function RashisPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.3 }}
-                            className="space-y-2"
+                            className="space-y-4 lg:space-y-6"
                         >
-                            {/* Main Card */}
-                            <Card padding="none" className="!rounded-[24px] border border-outline-variant/30 bg-surface/50 backdrop-blur-sm overflow-hidden">
-                                <div className="pt-5 pb-4 px-4 sm:pt-6 sm:pb-5 sm:px-5">
-                                    {/* Strict 50:50 Split - No Wasted Space */}
-                                    <div className={`grid gap-x-6 gap-y-2 ${isLoggedIn ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
-                                        
-                                        {/* Left Column: Identity & Encyclopedia */}
-                                        <div className="space-y-2.5">
-                                            {/* Rashi Identity Header */}
-                                            <div className="flex items-center gap-4 mb-1">
+                            {/* ─── SYMMETRICAL DUAL-PANE BENTO HUB ─── */}
+                            <Card padding="none" className="glass-panel overflow-hidden border-outline-variant/30">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-outline-variant/20">
+                                    
+                                    {/* LEFT PANE: Rashi Identity */}
+                                    <div className="flex flex-col">
+                                        {/* 1. Header (Aries) */}
+                                        <div className="p-6 sm:p-8 h-[100px] sm:h-[120px] flex items-center border-b border-outline-variant/20 bg-surface/10">
+                                            <div className="flex items-center gap-4">
                                                 <div className="relative shrink-0">
                                                     <div className="absolute inset-0 bg-secondary/15 blur-[20px] rounded-full opacity-30"></div>
-                                                    <Image
-                                                        src={selectedRashi.icon}
-                                                        alt={selectedRashi.nameEn}
-                                                        width={64}
-                                                        height={64}
-                                                        className="w-14 h-14 lg:w-[64px] lg:h-[64px] object-contain relative z-10"
-                                                    />
+                                                    <Image src={selectedRashi.icon} alt={selectedRashi.nameEn} width={64} height={64} className="w-14 h-14 sm:w-16 sm:h-16 object-contain relative z-10" />
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <div className="flex items-baseline gap-2 mb-0.5">
-                                                        <h2 className="text-3xl font-headline font-bold text-foreground tracking-tight">
-                                                            {selectedRashi.nameEn}
-                                                        </h2>
-                                                        <span className="text-lg text-secondary font-headline italic">— {selectedRashi.nameHi}</span>
+                                                <div>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <h2 className="text-2xl sm:text-3xl font-headline font-bold text-foreground tracking-tight">{selectedRashi.nameEn}</h2>
+                                                        <span className="text-base text-secondary font-headline italic">— {selectedRashi.nameHi}</span>
                                                     </div>
-                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] uppercase font-bold tracking-wider text-foreground/40">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span>Lord:</span>
-                                                            <span className="text-secondary">{selectedRashi.rulingPlanet.split(' ')[0]}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span>Element:</span>
-                                                            <span className="text-secondary">{selectedRashi.element}</span>
-                                                        </div>
-                                                    </div>
+                                                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/40">Cosmic Archetype</span>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            {/* Celestial Signature */}
-                                            <div className="p-3 rounded-xl bg-surface/40 border border-outline-variant/15">
-                                                <div className="flex items-center gap-2 mb-1.5">
-                                                    <div className="w-1 h-3 rounded-full bg-secondary"></div>
-                                                    <h3 className="text-[11px] font-bold text-foreground/50 uppercase tracking-widest">Celestial Signature</h3>
+                                        {/* 2. Technical Vitals */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-outline-variant/20 h-[80px] sm:h-[100px]">
+                                            {[
+                                                { label: 'Lord', val: selectedRashi.rulingPlanet.split(' ')[0] },
+                                                { label: 'Element', val: selectedRashi.element },
+                                                { label: 'Quality', val: selectedRashi.quality.split(' ')[0] },
+                                                { label: 'Symbol', val: selectedRashi.symbol }
+                                            ].map((stat, i) => (
+                                                <div key={i} className={`flex flex-col items-center justify-center p-2 ${i < 3 ? 'border-r' : ''} border-outline-variant/10 text-center`}>
+                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.1em] mb-1">{stat.label}</span>
+                                                    <span className="text-[14px] font-headline font-bold text-secondary">{stat.val}</span>
                                                 </div>
-                                                <p className="text-[13.5px] text-foreground/90 leading-relaxed font-light italic">
-                                                    "{selectedRashi.description}"
-                                                </p>
+                                            ))}
+                                        </div>
+
+                                        {/* 3. Celestial Signature */}
+                                        <div className="p-6 sm:p-8 border-b border-outline-variant/20 hover:bg-surface/10 transition-colors flex-grow">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
+                                                    <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-[0.15em]">Celestial Signature</span>
                                             </div>
+                                            <p className="text-[16px] sm:text-[18px] text-foreground/90 leading-relaxed font-light italic">
+                                                "{selectedRashi.description}"
+                                            </p>
+                                        </div>
 
-                                            {/* Attributes Grid */}
-                                            <div className="grid grid-cols-2 gap-2.5">
-                                                {/* Technical Vitals */}
-                                                <div className="p-3 rounded-xl bg-surface/60 border border-outline-variant/15 col-span-2 sm:col-span-1">
-                                                    <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Technical Vitals</h4>
-                                                    <div className="space-y-2">
-                                                        <div className="flex justify-between items-center border-b border-outline-variant/5 pb-1">
-                                                            <span className="text-[10px] text-foreground/40 font-bold uppercase">Lord</span>
-                                                            <span className="text-[13px] font-bold text-foreground">{selectedRashi.rulingPlanet.split(' ')[0]}</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center border-b border-outline-variant/5 pb-1">
-                                                            <span className="text-[10px] text-foreground/40 font-bold uppercase">Quality</span>
-                                                            <span className="text-[13px] font-bold text-foreground">{selectedRashi.quality.split(' ')[0]}</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="text-[10px] text-foreground/40 font-bold uppercase">Symbol</span>
-                                                            <span className="text-[13px] font-bold text-foreground">{selectedRashi.symbol}</span>
-                                                        </div>
-                                                    </div>
+                                        {/* 4. Traits & Spirit */}
+                                        <div className="p-6 sm:p-8 border-b border-outline-variant/20 hover:bg-surface/10 transition-colors">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                    <Users className="w-3.5 h-3.5 text-primary" />
                                                 </div>
+                                                <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-[0.15em]">Spirit & Traits</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedRashi.traits.map((trait, idx) => (
+                                                    <span key={idx} className="px-3 py-1.5 rounded-xl bg-surface/40 border border-outline-variant/20 text-[11px] font-bold text-foreground/70 lowercase">
+                                                        #{trait}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                                {/* Core Traits */}
-                                                <div className="p-3 rounded-xl bg-surface/60 border border-outline-variant/15 col-span-2 sm:col-span-1">
-                                                    <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Core Traits</h4>
-                                                    <div className="flex flex-wrap gap-1.5">
-                                                        {selectedRashi.traits.slice(0, 5).map((trait, idx) => (
-                                                            <span key={idx} className="px-3 py-1 rounded-lg bg-secondary/5 border border-secondary/10 text-[10px] font-bold text-foreground/70">
-                                                                {trait}
-                                                            </span>
-                                                        ))}
-                                                    </div>
+                                        {/* 5. Ideal Vocation */}
+                                        <div className="p-6 sm:p-8 hover:bg-surface/10 transition-colors">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
+                                                    <Briefcase className="w-4 h-4 text-emerald-500" />
                                                 </div>
+                                                <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-[0.15em]">Ideal Vocation</span>
+                                            </div>
+                                            <p className="text-[15px] sm:text-[16px] font-headline font-bold text-foreground leading-snug">
+                                                {selectedRashi.career}
+                                            </p>
+                                        </div>
+                                    </div>
 
-                                                {/* Strengths & Challenges */}
-                                                <div className="p-3 rounded-xl bg-secondary/5 border border-outline-variant/15 col-span-2 grid grid-cols-2 gap-4">
+                                    {/* RIGHT PANE: Daily Guidance */}
+                                    <div className="flex flex-col">
+                                        {/* 1. Header (Horoscope) - Height Matched to Left */}
+                                        <div className="p-6 sm:p-8 h-[100px] sm:h-[120px] flex items-center border-b border-outline-variant/20 bg-surface/5">
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-3">
+                                                    <Sparkles className="w-5 h-5 text-secondary" />
                                                     <div>
-                                                        <div className="flex items-center gap-2 mb-2 text-secondary">
-                                                            <Sparkles className="w-3.5 h-3.5" />
-                                                            <p className="text-[11px] font-bold uppercase tracking-wider">Strengths</p>
-                                                        </div>
-                                                        <p className="text-[13px] text-foreground/60 leading-relaxed italic line-clamp-3">{selectedRashi.strengths}</p>
-                                                    </div>
-                                                    <div className="border-l border-outline-variant/10 pl-4">
-                                                        <div className="flex items-center gap-2 mb-2 text-secondary">
-                                                            <Info className="w-3.5 h-3.5" />
-                                                            <p className="text-[11px] font-bold uppercase tracking-wider">Challenges</p>
-                                                        </div>
-                                                        <p className="text-[13px] text-foreground/60 leading-relaxed italic line-clamp-3">{selectedRashi.challenges}</p>
+                                                        <h2 className="text-xl sm:text-2xl font-headline font-bold text-foreground tracking-tight uppercase">Daily Horoscope</h2>
+                                                        <p className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-[0.2em]">{new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            {/* Ideal Vocation */}
-                                            <div className="p-2.5 rounded-lg bg-surface/60 border border-outline-variant/10 flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <Briefcase className="w-4 h-4 text-secondary/60" />
-                                                    <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/40">Ideal Vocation</span>
-                                                </div>
-                                                <p className="text-[12px] font-bold text-foreground/70 truncate ml-4 uppercase tracking-tighter">{selectedRashi.career}</p>
+                                                {isLoggedIn && (
+                                                    <div className="text-right">
+                                                        <div className="label-sm text-foreground/40 mb-1">Status</div>
+                                                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 text-[10px] font-bold border border-emerald-500/20 uppercase">Personalized</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
-                                        {/* Right Column: Daily Alignment */}
-                                        <div className="flex flex-col h-full">
-                                            {isLoggedIn ? (
-                                                <div className="space-y-2 flex flex-col h-full">
-                                                    <div className="flex items-center justify-between px-1 h-[64px]">
-                                                        <div className="flex flex-col">
-                                                            <div className="flex items-center gap-2 text-secondary">
-                                                                <Calendar className="w-4 h-4" />
-                                                                <h3 className="text-[15px] font-headline font-bold text-foreground tracking-tight uppercase">Cosmic Alignment</h3>
+                                        {isLoggedIn || horoscopeData ? (
+                                            <>
+                                                {/* 2. Horoscope Vitals - Height Matched to Left */}
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-outline-variant/20 h-[80px] sm:h-[100px]">
+                                                    {[
+                                                        { label: 'Mood', val: horoscopeData?.mood || (horoscopeLoading ? '...' : 'Balanced') },
+                                                        { label: 'Lucky Color', val: horoscopeData?.lucky_color || (horoscopeLoading ? '...' : 'Gold') },
+                                                        { label: 'Lucky #', val: horoscopeData?.lucky_number || (horoscopeLoading ? '...' : '7') },
+                                                        { label: 'Dominant', val: horoscopeData?.dominant_planet || (horoscopeLoading ? '...' : 'Sun') }
+                                                    ].map((stat, i) => (
+                                                        <div key={i} className={`flex flex-col items-center justify-center p-2 ${i < 3 ? 'border-r' : ''} border-outline-variant/10 text-center bg-surface/5`}>
+                                                            <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.1em] mb-1">{stat.label}</span>
+                                                            <span className={`text-[14px] font-headline font-bold ${horoscopeLoading ? 'animate-pulse text-foreground/20' : 'text-secondary'}`}>
+                                                                {stat.val}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* 3. Guidance Grid - Content Mapped from API */}
+                                                <div className="grid grid-cols-2 divide-x divide-y divide-outline-variant/10 flex-grow">
+                                                    {[
+                                                        { type: 'Career', icon: <Briefcase className="w-3.5 h-3.5 text-orange-400" />, text: horoscopeData?.career },
+                                                        { type: 'Love', icon: <Heart className="w-3.5 h-3.5 text-rose-400" />, text: horoscopeData?.love },
+                                                        { type: 'Health', icon: <Zap className="w-3.5 h-3.5 text-emerald-400" />, text: horoscopeData?.health },
+                                                        { type: 'Finance', icon: <TrendingUp className="w-3.5 h-3.5 text-amber-400" />, text: horoscopeData?.finance }
+                                                    ].map((item, idx) => (
+                                                        <div key={idx} className={`p-5 sm:p-6 hover:bg-surface/10 transition-colors ${idx === 1 ? 'border-t-0' : ''} ${idx >= 2 ? 'border-l-0' : ''}`}>
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                {item.icon}
+                                                                <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{item.type}</span>
                                                             </div>
-                                                            <p className="text-[11px] text-foreground/40 font-bold ml-6 uppercase tracking-widest leading-none mt-1">Daily Predictions</p>
+                                                            {horoscopeLoading ? (
+                                                                <div className="space-y-2">
+                                                                    <div className="h-3 bg-foreground/10 rounded w-full animate-pulse"></div>
+                                                                    <div className="h-3 bg-foreground/10 rounded w-[80%] animate-pulse"></div>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-[13px] sm:text-[14px] text-foreground/70 leading-relaxed font-medium">
+                                                                    {item.text || 'Insights flowing...'}
+                                                                </p>
+                                                            )}
                                                         </div>
-                                                        <div className="text-right">
-                                                            <div className="text-[15px] font-headline font-bold text-secondary italic leading-none">Today</div>
-                                                            <div className="text-[11px] font-bold text-foreground/30 uppercase tracking-widest mt-1">15 April</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="rounded-[20px] overflow-hidden border border-outline-variant/30 bg-surface/30 flex-grow">
-                                                        <DailyHoroscopeCard sign={selectedRashi.nameEn} isGeneral={true} />
-                                                    </div>
+                                                    ))}
                                                 </div>
-                                            ) : (
-                                                <div className="h-full flex flex-col items-center justify-center p-8 rounded-[24px] bg-secondary/5 border border-secondary/10 text-center">
-                                                    <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-4 text-secondary">
-                                                        <Lock className="w-6 h-6" />
+
+                                                {/* 4. Tip of the Day - Live Feed */}
+                                                <div className="p-8 bg-surface/10 flex flex-col items-center justify-center text-center">
+                                                    <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center mb-3">
+                                                        <Sparkles className="w-4 h-4 text-secondary" />
                                                     </div>
-                                                    <h3 className="text-xl font-headline font-bold text-foreground mb-2">Unlock Predictions</h3>
-                                                    <p className="text-sm text-foreground/60 mb-6 max-w-[200px]">Get daily alignment insights for {selectedRashi.nameEn}</p>
-                                                    <Button onClick={() => router.push('/login')} size="md" className="gold-gradient text-white !px-8">Login to View</Button>
+                                                    {horoscopeLoading ? (
+                                                        <div className="h-4 bg-foreground/10 rounded w-48 animate-pulse"></div>
+                                                    ) : (
+                                                        <p className="text-[14px] sm:text-[16px] font-headline font-bold text-foreground italic max-w-sm">
+                                                            "{horoscopeData?.tip || 'Follow the cosmic flow today.'}"
+                                                        </p>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex-grow flex flex-col items-center justify-center p-12 text-center bg-surface/5">
+                                                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-6 border border-secondary/20">
+                                                    <Sparkles className="w-8 h-8 text-secondary animate-pulse" />
+                                                </div>
+                                                <h3 className="text-xl font-headline font-bold text-foreground mb-3">Unlock Daily Forecast</h3>
+                                                <Button onClick={() => router.push('/login')} variant="secondary" className="px-8 py-3 rounded-xl font-bold border-secondary/20 uppercase tracking-widest text-[11px]">
+                                                    Access Guidance ✦
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
                         </motion.div>
                     </AnimatePresence>
 
-                    <p className="text-center mt-8 text-[9px] text-foreground/15 font-bold tracking-[0.3em] uppercase">
+                    <p className="text-center mt-12 text-[12px] text-foreground/15 font-bold tracking-[0.3em] uppercase">
                         Designed by the Sages of AstraNavi
                     </p>
                 </div>

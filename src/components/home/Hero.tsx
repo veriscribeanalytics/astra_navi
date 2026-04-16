@@ -101,7 +101,7 @@ const Hero = () => {
                 <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 text-center lg:text-left">
                     <div className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-3.5 md:px-4 py-1.5 sm:py-1.5 md:py-2 rounded-full bg-secondary/10 border border-secondary/30">
                         <span className="material-symbols-outlined text-secondary text-xs sm:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                        <span className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.12em] sm:tracking-[0.13em] md:tracking-[0.15em] font-bold text-secondary font-body">Jyotish Shastra • Vedic Astrology</span>
+                        <span className="text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-[0.12em] sm:tracking-[0.13em] md:tracking-[0.15em] font-bold text-secondary font-body">Jyotish Shastra • Vedic Astrology</span>
                     </div>
                     
                     <h1 className="text-[28px] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-headline font-bold text-primary">
@@ -115,15 +115,15 @@ const Hero = () => {
                     <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-5 md:gap-8 lg:gap-10 py-3 sm:py-4 md:py-5 lg:py-6">
                         <div>
                             <div className="text-lg sm:text-xl md:text-2xl font-bold text-secondary font-body">Always</div>
-                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Available</div>
+                            <div className="text-[12px] sm:text-[13px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Available</div>
                         </div>
                         <div>
                             <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary font-body">Complete</div>
-                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Birth Chart</div>
+                            <div className="text-[12px] sm:text-[13px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Birth Chart</div>
                         </div>
                         <div>
                             <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary font-body">Sacred</div>
-                            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Privacy</div>
+                            <div className="text-[12px] sm:text-[13px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Privacy</div>
                         </div>
                     </div>
                 </div>
@@ -142,7 +142,7 @@ const Hero = () => {
                              </div>
                              
                              <div className="space-y-1.5 sm:space-y-2">
-                                <h3 className="text-[10px] sm:text-xs md:text-sm font-body font-bold text-secondary tracking-widest uppercase mb-1">Namaste</h3>
+                                <h3 className="text-[12px] sm:text-[13px] md:text-sm font-body font-bold text-secondary tracking-widest uppercase mb-1">Namaste</h3>
                                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-headline font-bold text-primary">Welcome back, {user?.name.split(' ')[0]}</h2>
                                 <p className="text-xs sm:text-sm text-on-surface-variant font-body">Your Dashas continue to unfold. The planets have shifted since your last visit.</p>
                              </div>
@@ -156,7 +156,7 @@ const Hero = () => {
                                 >
                                     Consult Navi
                                 </Button>
-                                <p className="mt-2.5 sm:mt-3 md:mt-3.5 lg:mt-4 text-[9px] sm:text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold font-body">
+                                <p className="mt-2.5 sm:mt-3 md:mt-3.5 lg:mt-4 text-[12px] sm:text-[13px] uppercase tracking-widest text-on-surface-variant/60 font-bold font-body">
                                     Born: {user?.dob} • {user?.pob}
                                 </p>
                              </div>

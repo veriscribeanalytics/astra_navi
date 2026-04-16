@@ -13,7 +13,7 @@ import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/p
 /* ---------- Sub-components ---------- */
 const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
   <div className="text-center my-1">
-    <span className="inline-block text-[11px] text-on-surface-variant/50 bg-surface/40 px-3.5 py-1 rounded-full">
+    <span className="inline-block text-[14px] text-on-surface-variant/50 bg-surface/40 px-3.5 py-1 rounded-full">
       {text}
     </span>
   </div>
@@ -32,7 +32,7 @@ const EmptyState: React.FC<{ onNewChat: () => void; onQuestionClick: (question: 
       
       {/* Suggested Questions */}
       <div className="mb-6 space-y-2">
-        <p className="text-xs font-bold text-secondary uppercase tracking-wider mb-3">Suggested Questions</p>
+        <p className="text-[14px] font-bold text-secondary uppercase tracking-wider mb-3">Suggested Questions</p>
         {suggestedQuestions.map((question, idx) => (
           <button
             key={idx}
@@ -74,7 +74,7 @@ const ThinkingIndicator: React.FC = () => {
         <span>✦</span>
       </div>
       <div className="chat-ai-bubble relative overflow-hidden">
-        <p className="text-[10px] text-secondary font-bold tracking-wider mb-2 uppercase flex items-center gap-1.5">
+        <p className="text-[13px] text-secondary font-bold tracking-wider mb-2 uppercase flex items-center gap-1.5">
           <span>NAVI · AI ASTROLOGER</span>
           <span className="flex gap-0.5">
             <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
@@ -83,7 +83,7 @@ const ThinkingIndicator: React.FC = () => {
           </span>
         </p>
         
-        <div className="flex items-center gap-2 text-[12.5px] text-on-surface-variant/70 font-medium italic">
+        <div className="flex items-center gap-2 text-[15px] text-on-surface-variant/70 font-medium italic">
           Navi is typing...
         </div>
       </div>
@@ -216,11 +216,11 @@ const ChatMessages: React.FC = () => {
                   {/* Thought Process Dropdown */}
                   {thinkingText && (
                     <details className="mb-3 group/think">
-                      <summary className="text-[11px] font-bold text-secondary/60 cursor-pointer list-none flex items-center gap-1.5 hover:text-secondary transition-colors">
+                      <summary className="text-[14px] font-bold text-secondary/60 cursor-pointer list-none flex items-center gap-1.5 hover:text-secondary transition-colors">
                         <span className="material-symbols-outlined text-[14px] group-open/think:rotate-90 transition-transform">chevron_right</span>
                         ✦ Thought process
                       </summary>
-                      <div className="mt-2 pl-3 border-l border-secondary/20 text-[12px] text-on-surface-variant/60 italic leading-relaxed whitespace-pre-wrap">
+                      <div className="mt-2 pl-3 border-l border-secondary/20 text-[14px] text-on-surface-variant/60 italic leading-relaxed whitespace-pre-wrap">
                         {thinkingText}
                       </div>
                     </details>
@@ -234,14 +234,14 @@ const ChatMessages: React.FC = () => {
                   {/* Insight Card */}
                   {msg.insights && (
                     <Card variant="bordered" padding="none" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3 mt-3">
-                      <p className="text-[11px] font-bold text-secondary flex items-center gap-1.5 mb-2">
+                      <p className="text-[13px] font-bold text-secondary flex items-center gap-1.5 mb-2">
                         ✦ Chart factors for this reading
                       </p>
                       <div className="grid grid-cols-2 gap-1.5">
                         {msg.insights.map((item) => (
                           <div key={item.label} className="bg-surface-variant/30 rounded-md px-2 py-1.5">
-                            <p className="text-[9px] text-on-surface-variant/50 mb-0.5">{item.label}</p>
-                            <p className="text-xs font-semibold text-on-surface-variant">{item.value}</p>
+                            <p className="text-[11px] text-on-surface-variant/50 mb-0.5">{item.label}</p>
+                            <p className="text-[13px] font-semibold text-on-surface-variant">{item.value}</p>
                           </div>
                         ))}
                       </div>
@@ -251,10 +251,10 @@ const ChatMessages: React.FC = () => {
                   {/* Dasha Card */}
                   {msg.dasha && (
                     <Card variant="bordered" padding="none" hoverable={false} className="!rounded-xl !border-secondary/15 !p-3 mt-3">
-                      <p className="text-[11px] font-bold text-secondary mb-2">{msg.dasha.title}</p>
+                      <p className="text-[14px] font-bold text-secondary mb-2">{msg.dasha.title}</p>
                       {msg.dasha.rows.map((row) => (
                         <div key={row.planet} className="flex items-center gap-2 py-1 border-b border-outline-variant/10 last:border-b-0">
-                          <span className="text-xs text-on-surface-variant w-[72px] shrink-0">{row.planet}</span>
+                          <span className="text-[14px] text-on-surface-variant w-[72px] shrink-0">{row.planet}</span>
                           <div className="flex-1 h-1 bg-outline-variant/15 rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full"
@@ -264,10 +264,10 @@ const ChatMessages: React.FC = () => {
                               }}
                             />
                           </div>
-                          <span className="text-[10px] text-on-surface-variant/50 whitespace-nowrap">
+                          <span className="text-[12px] text-on-surface-variant/50 whitespace-nowrap">
                             {row.dates}
                             {row.active && (
-                              <span className="ml-1 text-[9px] bg-secondary text-on-primary px-1.5 py-px rounded font-bold">NOW</span>
+                              <span className="ml-1 text-[11px] bg-secondary text-on-primary px-1.5 py-px rounded font-bold">NOW</span>
                             )}
                           </span>
                         </div>
@@ -283,7 +283,7 @@ const ChatMessages: React.FC = () => {
             {/* Rating meter & Copy below every AI message */}
             {isAi && msg.id && (
               <div className="flex items-center justify-between w-full mt-1.5 px-2 mb-2">
-                <span className="text-[10px] font-medium text-on-surface-variant/80 tracking-wide uppercase">
+                <span className="text-[13px] font-medium text-on-surface-variant/80 tracking-wide uppercase">
                   Rate this message
                 </span>
                 <div className="flex items-center gap-2">

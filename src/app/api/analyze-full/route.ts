@@ -5,7 +5,7 @@ import { getCurrentDateTime } from '@/lib/datetime';
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { email, chart_context } = body;
+        const { email, chart_context, force_refresh = false } = body;
 
         if (!email) {
             return NextResponse.json({ error: "Email is required." }, { status: 400 });
@@ -15,10 +15,27 @@ export async function POST(req: Request) {
         const db = client.db("astra-navi-database");
         const users = db.collection("users");
 
-        // 1. Get user and their chart context
+        // ──────────────────────────────────────────────────────
+        // STEP 1: Check for existing analysis (unless force refreshed)
+        // ──────────────────────────────────────────────────────
         const user = await users.findOne({ email });
         if (!user) {
             return NextResponse.json({ error: "User not found." }, { status: 404 });
+        }
+
+        if (!force_refresh && user.insights && user.houses && user.planets) {
+            console.log(`[AnalyzeFull] Cache HIT for ${email}. Returning existing data.`);
+            return NextResponse.json({
+                success: true,
+                message: "Existing insights retrieved from profile.",
+                data: {
+                    insights: user.insights,
+                    houses: user.houses,
+                    planets: user.planets,
+                    dasha: user.dasha,
+                    lastFullAnalysis: user.lastFullAnalysis
+                }
+            });
         }
 
         const effectiveChartContext = chart_context || user.chartContext || user.preferences?.chartContext;
@@ -29,7 +46,11 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // 2. Call AI Backend for full analysis
+        // ──────────────────────────────────────────────────────
+        // STEP 2: No existing insights — fetch from AI Backend
+        // ──────────────────────────────────────────────────────
+        console.log(`[AnalyzeFull] Cache MISS/Forced for ${email}. Fetching from AI Backend...`);
+
         if (!process.env.AI_BACKEND_URL) {
             console.error("[AnalyzeFull] AI_BACKEND_URL not configured");
             return NextResponse.json({ 
@@ -47,19 +68,19 @@ export async function POST(req: Request) {
                     email: email, 
                     chart_context: effectiveChartContext 
                 }),
-                signal: AbortSignal.timeout(30000) // Analysis can take longer
+                signal: AbortSignal.timeout(45000) // Analysis can take quite a while
             });
             
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(`[AnalyzeFull] AI Backend Error: ${response.status} ${errorText}`);
                 return NextResponse.json({ 
-                    error: "The AI analyst is temporarily unavailable. Please try again later." 
+                    error: "The AI analyst is taking too long to respond. Please try again in a few moments." 
                 }, { status: 503 });
             }
 
             analysisData = await response.json();
-            console.log(`[AnalyzeFull] AI Backend returned analysis for ${email}`);
+            console.log(`[AnalyzeFull] AI Backend successfully returned analysis for ${email}`);
         } catch (error) {
             console.error("[AnalyzeFull] External API request failed:", error);
             return NextResponse.json({ 
@@ -67,44 +88,49 @@ export async function POST(req: Request) {
             }, { status: 503 });
         }
 
-        // 3. Save structured insights to MongoDB profile
-        // Expecting analysisData to contain houses, planets, dasha, etc.
+        // ──────────────────────────────────────────────────────
+        // STEP 3: Validate and prepare DB sync
+        // ──────────────────────────────────────────────────────
+        if (!analysisData) {
+            return NextResponse.json({ error: "No analysis data returned." }, { status: 500 });
+        }
+
         const updateData: any = {
             updatedAt: getCurrentDateTime()
         };
 
-        // If the AI returned specific blocks, merge them into the user profile
-        if (analysisData.insights) {
-            updateData.insights = analysisData.insights;
-        }
-        if (analysisData.houses) {
-            updateData.houses = analysisData.houses;
-        }
-        if (analysisData.planets) {
-            updateData.planets = analysisData.planets;
-        }
-        if (analysisData.dasha) {
-            updateData.dasha = analysisData.dasha;
-        }
-        
-        // Also save the full raw analysis if provided
-        if (analysisData.full_analysis) {
-            updateData.lastFullAnalysis = analysisData.full_analysis;
+        // Efficiently merge whatever blocks the AI returned
+        const fieldsToSync = ['insights', 'houses', 'planets', 'dasha', 'full_analysis'];
+        let syncCount = 0;
+
+        fieldsToSync.forEach(field => {
+            const dataKey = field === 'full_analysis' ? 'lastFullAnalysis' : field;
+            if (analysisData[field]) {
+                updateData[dataKey] = analysisData[field];
+                syncCount++;
+            }
+        });
+
+        if (syncCount === 0) {
+            console.warn(`[AnalyzeFull] AI returned successful response but no syncable fields for ${email}`);
         }
 
+        // ──────────────────────────────────────────────────────
+        // STEP 4: Store in User Profile and Return
+        // ──────────────────────────────────────────────────────
         await users.updateOne({ email }, { $set: updateData });
-        console.log(`[AnalyzeFull] Successfully sync'd analysis for ${email} to DB`);
+        console.log(`[AnalyzeFull] Successfully sync'd ${syncCount} data blocks for ${email} to DB`);
 
         return NextResponse.json({
             success: true,
-            message: "Structured insights generated and saved successfully.",
+            message: "Structured insights generated and saved successfully to profile.",
             data: analysisData
         });
 
     } catch (error) {
         console.error("Analyze full error:", error);
         return NextResponse.json({ 
-            error: "Failed to perform full chart analysis." 
+            error: "An unexpected error occurred during full analysis." 
         }, { status: 500 });
     }
 }

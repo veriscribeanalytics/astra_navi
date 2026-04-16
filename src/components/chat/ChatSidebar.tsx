@@ -114,8 +114,8 @@ const ChatSidebar: React.FC = () => {
               <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                  <span className="material-symbols-outlined text-secondary opacity-40">chat_bubble</span>
               </div>
-              <p className="text-xs font-bold text-on-surface-variant/50 uppercase tracking-widest">No chats yet</p>
-              <p className="text-[10px] text-on-surface-variant/30 mt-2 leading-relaxed">
+              <p className="text-[14px] font-bold text-on-surface-variant/50 uppercase tracking-widest">No chats yet</p>
+              <p className="text-[12px] text-on-surface-variant/30 mt-2 leading-relaxed">
                 Your celestial conversations will appear here. Start a new reading above!
               </p>
             </div>
@@ -139,17 +139,17 @@ const ChatSidebar: React.FC = () => {
                           : 'hover:bg-surface-variant/30 border border-transparent'
                       }`}
                     >
-                      <p className={`text-[13px] truncate mb-0.5 transition-all duration-200 ${
+                      <p className={`text-[15px] truncate mb-0.5 transition-all duration-200 ${
                         isActive ? 'text-secondary font-bold pr-3' : 'text-on-surface-variant font-medium pr-3 md:pr-0 md:group-hover:pr-3'
                       }`}>
                         {chat.title}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] text-on-surface-variant/40">
+                        <p className="text-[12px] text-on-surface-variant/40">
                           {formatChatDate(chat.updatedAt || chat.createdAt)}
                         </p>
                         {chat.averageRating != null && (
-                          <span className="text-[9px] text-secondary/70 flex items-center gap-0.5">
+                          <span className="text-[11px] text-secondary/70 flex items-center gap-0.5">
                             ★ {chat.averageRating.toFixed(1)}
                           </span>
                         )}
@@ -188,7 +188,7 @@ const ChatSidebar: React.FC = () => {
                                   setMenuOpenId(null);
                                   handleDownload(chat._id, chat.title);
                                 }}
-                                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-on-surface-variant hover:bg-surface-variant/40 flex items-center gap-2 transition-colors cursor-pointer"
+                                className="w-full text-left px-3 py-1.5 text-[14px] font-bold text-on-surface-variant hover:bg-surface-variant/40 flex items-center gap-2 transition-colors cursor-pointer"
                               >
                                 <Download size={13} /> Download
                               </button>
@@ -199,7 +199,7 @@ const ChatSidebar: React.FC = () => {
                                   setMenuOpenId(null);
                                   setDeleteModalChat(chat);
                                 }}
-                                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-red-400 hover:bg-red-400/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                className="w-full text-left px-3 py-1.5 text-[14px] font-bold text-red-400 hover:bg-red-400/10 flex items-center gap-2 transition-colors cursor-pointer"
                               >
                                 <Trash2 size={13} /> Delete
                               </button>
@@ -242,17 +242,17 @@ const ChatSidebar: React.FC = () => {
                 <AlertTriangle size={24} />
               </div>
               <h3 className="text-lg font-bold text-on-surface mb-2">Delete Chat Forever?</h3>
-              <p className="text-[13px] text-on-surface-variant/70 leading-relaxed mb-4">
+              <p className="text-[15px] text-on-surface-variant/70 leading-relaxed mb-4">
                 This will permanently delete <strong>&quot;{deleteModalChat.title}&quot;</strong>.<br/>This action cannot be undone.
               </p>
               
               <div className="w-full bg-surface-variant/30 border border-outline-variant/10 rounded-xl p-4 mb-2">
-                <p className="text-[12px] text-on-surface-variant/80 font-medium mb-3">Want to make a backup before deleting?</p>
+                <p className="text-[14px] text-on-surface-variant/80 font-medium mb-3">Want to make a backup before deleting?</p>
                 <Button 
                   variant="secondary" 
                   size="sm" 
                   fullWidth 
-                  className="gap-2 !text-xs"
+                  className="gap-2 text-[13px]"
                   onClick={() => handleDownload(deleteModalChat._id, deleteModalChat.title)}
                   disabled={isDownloading}
                 >

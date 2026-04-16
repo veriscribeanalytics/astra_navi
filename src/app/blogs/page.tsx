@@ -157,7 +157,7 @@ const item = {
 
 export default function BlogsPage() {
     return (
-        <div className="min-h-screen bg-[var(--bg)] pt-24 pb-24 px-4 relative overflow-hidden">
+        <div className="min-h-screen bg-[var(--bg)] pt-24 safe-bottom-buffer px-4 relative overflow-hidden">
             {/* Animated Background Orbs */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] animate-pulse"></div>
@@ -181,7 +181,7 @@ export default function BlogsPage() {
                         </motion.div>
                         The Library of Wisdom
                     </div>
-                    <h1 className="text-5xl sm:text-7xl lg:text-8xl font-headline font-bold text-foreground mb-6 tracking-tight">
+                    <h1 className="text-4xl sm:text-6xl lg:text-8xl font-headline font-bold text-foreground mb-6 tracking-tight break-words">
                         Ancient Science, <br />
                         <span className="text-secondary italic">Modern</span> Insight
                     </h1>
@@ -206,7 +206,7 @@ export default function BlogsPage() {
                             >
                                 <Card 
                                     padding="none" 
-                                    className={`!rounded-[32px] border border-outline-variant/30 bg-surface/30 backdrop-blur-sm transition-all duration-500 h-full overflow-hidden ${
+                                    className={`!rounded-[32px] glass-panel transition-all duration-500 h-full overflow-hidden ${
                                         category.status === 'available' 
                                             ? 'hover:border-secondary/40 hover:shadow-[0_20px_50px_rgba(200,136,10,0.1)] hover:-translate-y-2' 
                                             : ''
@@ -291,20 +291,20 @@ export default function BlogsPage() {
                             <div className="w-20 h-20 rounded-3xl bg-white/5 backdrop-blur-xl flex items-center justify-center mx-auto mb-8 border border-white/10 shadow-2xl">
                                 <Brain className="w-10 h-10 text-secondary" />
                             </div>
-                            <h2 className="text-3xl sm:text-5xl font-headline font-bold text-white mb-6">
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-bold text-white mb-6">
                                 Can't find what you're <br />
                                 <span className="text-secondary italic">looking for?</span>
                             </h2>
                             <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto">
                                 Our Celestial Library is expanding every week. If you have a specific question about your chart, Navi has the answers ready for you now.
                             </p>
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                <Link href="/chat">
-                                    <button className="px-10 py-5 rounded-2xl bg-secondary text-white font-bold hover:bg-secondary/90 transition-all shadow-[0_10px_30px_rgba(200,136,10,0.3)] hover:scale-105 active:scale-95 flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-sm mx-auto sm:max-w-none">
+                                <Link href="/chat" className="w-full sm:w-auto">
+                                    <button className="w-full justify-center px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-secondary text-white font-bold hover:bg-secondary/90 transition-all shadow-[0_10px_30px_rgba(200,136,10,0.3)] hover:scale-105 active:scale-95 flex items-center gap-2">
                                         Ask Navi Anything <Sparkles className="w-5 h-5" />
                                     </button>
                                 </Link>
-                                <button className="px-10 py-5 rounded-2xl bg-white/5 text-white font-bold border border-white/10 hover:bg-white/10 transition-all">
+                                <button className="w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-white/5 text-white font-bold border border-white/10 hover:bg-white/10 transition-all">
                                     Subscribe for Updates
                                 </button>
                             </div>

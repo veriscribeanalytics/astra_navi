@@ -27,7 +27,7 @@ const getNavSections = (isLoggedIn: boolean) => {
                 items: [
                     { 
                         label: "Dashboard", 
-                        href: "/chat", 
+                        href: "/", 
                         icon: <LayoutDashboard className="w-4 h-4" />,
                         desc: "Your cosmic overview and active insights."
                     },

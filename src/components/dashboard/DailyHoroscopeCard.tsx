@@ -166,35 +166,34 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
     return (
         <Card 
             padding="none" 
-            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden border-outline-variant/30"
+            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden glass-panel"
         >
             {/* Header - Compact for mobile */}
             <div className="p-3 sm:p-4 border-b border-outline-variant/30 bg-surface/10">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-1 sm:gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-0.5">
                             <Sparkles className="w-3 h-3 text-secondary" />
-                            <span className="text-[9px] font-bold text-secondary uppercase tracking-[0.15em]">
+                            <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.15em] leading-tight">
                                 Daily Horoscope
                             </span>
                         </div>
                         {!isGeneral && (
-                            <h3 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight">
+                            <h3 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight break-all sm:break-normal">
                                 {horoscope.sign || 'Unknown'}
                             </h3>
                         )}
                     </div>
 
-                    {/* Today Date & Day - Added in middle space */}
                     <div className="hidden sm:flex flex-col items-center px-4 border-l border-r border-secondary/5">
-                        <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.1em] mb-0.5">{dayName}</span>
-                        <span className="text-xs font-headline font-bold text-foreground/60">{dateString}</span>
+                        <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.1em] mb-0.5">{dayName}</span>
+                        <span className="text-sm font-headline font-bold text-foreground/60">{dateString}</span>
                     </div>
 
-                    {/* Mobile Center Date */}
-                    <div className="sm:hidden absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-                        <span className="text-[8px] font-bold text-secondary uppercase tracking-[0.1em]">{dayName}</span>
-                        <span className="text-[10px] font-headline font-bold text-foreground/50">{dateString}</span>
+                    {/* Mobile Center Date - Better Spacing */}
+                    <div className="sm:hidden flex flex-col items-end text-right pr-1">
+                        <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.1em] leading-none mb-1">{dayName}</span>
+                        <span className="text-[11px] font-headline font-bold text-foreground/50 leading-none">{dateString}</span>
                     </div>
                     {/* Circular Score Ring */}
                     <div className="relative w-16 h-16 sm:w-18 sm:h-18 flex-shrink-0">
@@ -227,7 +226,7 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                             <span className={`text-xl font-bold leading-none ${getScoreColor(score)}`}>
                                 {score}
                             </span>
-                            <span className="text-[7px] text-foreground/40 font-bold uppercase tracking-wider mt-0.5">
+                            <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider mt-0.5">
                                 Overall
                             </span>
                         </div>
@@ -236,16 +235,16 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
             </div>
 
             <div className={`transition-all duration-700 ease-out ${showContent ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'}`}>
-                {/* Top Info Row - 3 Columns */}
-                    <div className={`${horoscope.dominant_planet ? 'grid-cols-4' : 'grid-cols-3'} grid border-b border-outline-variant/30 bg-surface/5`}>
-                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 border-r border-secondary/10">
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1">Mood</span>
+                {/* Top Info Row - Dynamic Columns */}
+                    <div className={`grid grid-cols-2 ${horoscope.dominant_planet ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} border-b border-outline-variant/30 bg-surface/5`}>
+                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 border-r border-b sm:border-b-0 border-secondary/10">
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1">Mood</span>
                             <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
                                 {horoscope.mood || 'Neutral'}
                             </span>
                         </div>
-                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 border-r border-secondary/10">
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky Color</span>
+                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 sm:border-r border-b sm:border-b-0 border-secondary/10">
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky Color</span>
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 <div 
                                     className="w-2 h-2 rounded-full" 
@@ -256,15 +255,15 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                                 </span>
                             </div>
                         </div>
-                        <div className={`flex flex-col items-center justify-center p-2 sm:p-3 ${horoscope.dominant_planet ? 'border-r border-secondary/10' : ''}`}>
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky #</span>
+                        <div className={`flex flex-col items-center justify-center p-2 sm:p-3 border-r sm:border-b-0 border-secondary/10 ${!horoscope.dominant_planet ? 'sm:border-r-0' : ''}`}>
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky #</span>
                             <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
                                 {horoscope.lucky_number || 8}
                             </span>
                         </div>
                         {horoscope.dominant_planet && (
                             <div className="flex flex-col items-center justify-center p-2 sm:p-3">
-                                <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Dominant</span>
+                                <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Dominant</span>
                                 <span className="text-xs sm:text-sm font-headline font-bold text-secondary">
                                     {horoscope.dominant_planet}
                                 </span>
@@ -272,17 +271,17 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                         )}
                     </div>
 
-                {/* Main Content Grid - 2x2 layout */}
-                <div className="grid grid-cols-2">
+                {/* Main Content Grid - Stacked on Mobile, 2x2 on Desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2">
                     {/* Career */}
-                    <div className="p-3.5 sm:p-4.5 border-b border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
+                    <div className="p-3.5 sm:p-4.5 border-b sm:border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
                                 <Briefcase className="w-3.5 h-3.5 text-orange-600" />
                             </div>
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Career</span>
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest">Career</span>
                         </div>
-                        <p className="text-[13px] font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                        <p className="text-[15px] font-headline font-medium leading-relaxed text-foreground/90">
                             {horoscope.career || 'Keep pushing for your goals today.'}
                         </p>
                     </div>
@@ -293,22 +292,22 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                             <div className="w-7 h-7 rounded-lg bg-pink-500/10 flex items-center justify-center">
                                 <Heart className="w-3.5 h-3.5 text-pink-600" />
                             </div>
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Love</span>
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest">Love</span>
                         </div>
-                        <p className="text-[13px] font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                        <p className="text-[15px] font-headline font-medium leading-relaxed text-foreground/90">
                             {horoscope.love || 'Harmony flows through your relationships.'}
                         </p>
                     </div>
 
                     {/* Health */}
-                    <div className="p-3.5 sm:p-4.5 border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
+                    <div className="p-3.5 sm:p-4.5 border-b sm:border-b-0 sm:border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
                                 <Activity className="w-3.5 h-3.5 text-green-600" />
                             </div>
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Health</span>
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest">Health</span>
                         </div>
-                        <p className="text-[13px] font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                        <p className="text-[15px] font-headline font-medium leading-relaxed text-foreground/90">
                             {horoscope.health || 'Vitality and energy are on your side.'}
                         </p>
                     </div>
@@ -319,9 +318,9 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                             <div className="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center">
                                 <DollarSign className="w-3.5 h-3.5 text-yellow-600" />
                             </div>
-                            <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Finance</span>
+                            <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest">Finance</span>
                         </div>
-                        <p className="text-[13px] font-headline font-medium leading-relaxed text-foreground/90 line-clamp-3">
+                        <p className="text-[15px] font-headline font-medium leading-relaxed text-foreground/90">
                             {horoscope.finance || 'Opportunities for growth are emerging.'}
                         </p>
                     </div>
@@ -332,7 +331,7 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                     <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center mb-2 border border-secondary/20">
                         <Sparkles className="w-3.5 h-3.5 text-secondary" />
                     </div>
-                    <div className="text-[9px] font-bold text-secondary uppercase tracking-[0.2em] mb-2">Tip of the Day</div>
+                    <div className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em] mb-2">Tip of the Day</div>
                     <p className="text-sm sm:text-base font-headline font-semibold italic leading-relaxed text-foreground max-w-md">
                         "{horoscope.tip || 'Follow your heart today.'}"
                     </p>

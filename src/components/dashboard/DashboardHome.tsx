@@ -81,7 +81,7 @@ export default function DashboardHome() {
                     
                     {/* Left: Welcome & Console */}
                     <div className="flex-1 flex flex-col items-center text-center relative z-10 w-full max-w-2xl lg:max-w-none">
-                        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-full border border-secondary/20 bg-secondary/5 text-secondary text-[9px] sm:text-[10px] font-bold font-mono tracking-[0.15em] sm:tracking-widest uppercase mb-2.5 sm:mb-3 md:mb-4 lg:mb-6">
+                        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-full border border-secondary/20 bg-secondary/5 text-secondary text-[12px] sm:text-[13px] font-bold font-mono tracking-[0.15em] sm:tracking-widest uppercase mb-2.5 sm:mb-3 md:mb-4 lg:mb-6">
                             <Sparkles className="w-3 h-3" />
                             <span className="hidden sm:inline">AstraNavi Intelligence</span>
                             <span className="sm:hidden">AI Intelligence</span>
@@ -120,7 +120,7 @@ export default function DashboardHome() {
                             style={{ maxWidth: 'min(272px, 35vw)' }}
                         >
                             
-                            <p className="text-[clamp(7px,1.5vw,9px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
+                            <p className="text-[clamp(11px,1.5vw,13px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
                                 {rashiData ? 'Your Moon Sign' : 'Identify your Sign'}
                             </p>
                             
@@ -142,12 +142,12 @@ export default function DashboardHome() {
                                 <Button 
                                     size="sm" 
                                     variant="secondary" 
-                                    className="mt-[clamp(6px,1.5vw,16px)] relative z-10 px-[clamp(12px,3vw,24px)] py-[clamp(2px,0.5vw,4px)] rounded-full border-secondary/20 hover:border-secondary text-[clamp(8px,1.8vw,10px)] font-bold tracking-widest uppercase text-secondary"
+                                    className="mt-[clamp(6px,1.5vw,16px)] relative z-10 px-[clamp(12px,3vw,24px)] py-[clamp(2px,0.5vw,4px)] rounded-full border-secondary/20 hover:border-secondary text-[clamp(11px,1.8vw,13px)] font-bold tracking-widest uppercase text-secondary"
                                 >
                                     Consult ✦
                                 </Button>
                             ) : (
-                                <p className="text-[8px] xs:text-[9px] sm:text-[11px] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
+                                <p className="text-[11px] xs:text-[12px] sm:text-[14px] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
                                     {rashiData.en}
                                 </p>
                             )}
@@ -162,7 +162,7 @@ export default function DashboardHome() {
                                     style={{ maxWidth: 'min(272px, 35vw)' }}
                                 >
                                     
-                                    <p className="text-[clamp(7px,1.5vw,9px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
+                                    <p className="text-[clamp(11px,1.5vw,13px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
                                         Your Sun Sign
                                     </p>
                                     
@@ -176,7 +176,7 @@ export default function DashboardHome() {
                                         {sunSignData.name}
                                     </h3>
                                     
-                                    <p className="text-[clamp(8px,1.8vw,11px)] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
+                                    <p className="text-[clamp(11px,1.8vw,14px)] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
                                         {sunSignData.en}
                                     </p>
                                 </div>
@@ -220,13 +220,43 @@ export default function DashboardHome() {
                             )}
                         </div>
 
+                        {/* ─── Explore: Rashi Library & My Kundli ─── */}
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                            <Link href="/rashis" className="group">
+                                <Card padding="none" className="!rounded-[20px] sm:!rounded-[24px] border-outline-variant/30 overflow-hidden hover:border-secondary/40 transition-all h-full">
+                                    <div className="p-4 sm:p-6 flex flex-col items-center text-center gap-3">
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Compass className="w-6 h-6 sm:w-7 sm:h-7 text-secondary" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-[14px] sm:text-[16px] font-headline font-bold text-foreground mb-1">Rashi Library</h3>
+                                            <p className="text-[11px] sm:text-[12px] text-foreground/40 font-bold uppercase tracking-wider">General Signs</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Link>
+                            <Link href="/kundli" className="group">
+                                <Card padding="none" className="!rounded-[20px] sm:!rounded-[24px] border-outline-variant/30 overflow-hidden hover:border-secondary/40 transition-all h-full">
+                                    <div className="p-4 sm:p-6 flex flex-col items-center text-center gap-3">
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Sun className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-[14px] sm:text-[16px] font-headline font-bold text-foreground mb-1">My Kundli</h3>
+                                            <p className="text-[11px] sm:text-[12px] text-foreground/40 font-bold uppercase tracking-wider">Personal Chart</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Link>
+                        </div>
+
                         {/* AstraNavi Intelligence */}
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-0">
                                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground leading-none">AstraNavi Intelligence</h2>
                                 <div className="flex items-center gap-1.5 sm:gap-2 bg-secondary/10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-secondary/20">
                                     <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
-                                    <span className="text-[9px] sm:text-[10px] font-bold text-secondary uppercase tracking-widest">Navi is Live</span>
+                                    <span className="text-[12px] sm:text-[13px] font-bold text-secondary uppercase tracking-widest">Navi is Live</span>
                                 </div>
                             </div>
     
@@ -267,7 +297,7 @@ export default function DashboardHome() {
                     <div className="w-full lg:w-[380px] xl:w-[400px] flex flex-col gap-5 sm:gap-6 shrink-0 lg:mt-20">
                         {/* Archives */}
                         <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-outline-variant/30">
-                            <h4 className="text-[10px] sm:text-[11px] font-bold text-secondary mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
+                            <h4 className="text-[13px] sm:text-[14px] font-bold text-secondary mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
                                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Archives
                             </h4>
                             
@@ -277,20 +307,20 @@ export default function DashboardHome() {
                                         <Link 
                                             key={chat._id}
                                             href={`/chat?id=${chat._id}`}
-                                            className="text-left text-[10px] sm:text-[11px] font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98 truncate"
+                                            className="text-left text-[13px] sm:text-[14px] font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98 truncate"
                                         >
                                             {chat.title}
                                         </Link>
                                     ))
                                 ) : (
-                                    <div className="text-[10px] sm:text-[11px] font-bold text-foreground/40 bg-surface/30 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] text-center">
+                                    <div className="text-[13px] sm:text-[14px] font-bold text-foreground/40 bg-surface/30 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] text-center">
                                         No conversations yet
                                     </div>
                                 )}
                             </div>
                             
                             <Link href="/chat" className="block">
-                                <button className="w-full gold-gradient text-white rounded-[10px] sm:rounded-[12px] px-4 sm:px-5 py-2 sm:py-2.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-all active:scale-95 min-h-[36px] sm:min-h-[40px] flex items-center justify-center gap-2">
+                                <button className="w-full gold-gradient text-white rounded-[10px] sm:rounded-[12px] px-4 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95 min-h-[36px] sm:min-h-[40px] flex items-center justify-center gap-2">
                                     <Plus className="w-3 h-3" />
                                     New Chat
                                 </button>
@@ -299,7 +329,7 @@ export default function DashboardHome() {
 
                         {/* Quick Ask Navi */}
                         <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-outline-variant/30 flex flex-col">
-                            <h4 className="text-[10px] sm:text-[11px] font-bold text-secondary mb-3 sm:mb-4 lg:mb-5 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
+                            <h4 className="text-[13px] sm:text-[14px] font-bold text-secondary mb-3 sm:mb-4 lg:mb-5 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
                                 <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Ask Navi
                             </h4>
                             <div className="flex flex-col gap-2 sm:gap-2.5 mb-4 sm:mb-5 lg:mb-6">
@@ -307,7 +337,7 @@ export default function DashboardHome() {
                                     <button 
                                         key={idx}
                                         onClick={() => handleQuickAsk(question)} 
-                                        className="text-left text-[10px] sm:text-[11px] font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98"
+                                        className="text-left text-[13px] sm:text-[14px] font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98"
                                     >
                                         {question}
                                     </button>
@@ -320,9 +350,9 @@ export default function DashboardHome() {
                                     value={customQuestion}
                                     onChange={(e) => setCustomQuestion(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleQuickAsk(customQuestion)}
-                                    className="flex-1 min-w-0 bg-transparent border-none text-[10px] sm:text-[11px] px-2 text-foreground font-medium placeholder:text-foreground/30 focus:outline-none min-h-[36px] sm:min-h-[40px]" 
+                                    className="flex-1 min-w-0 bg-transparent border-none text-[13px] sm:text-[14px] px-2 text-foreground font-medium placeholder:text-foreground/30 focus:outline-none min-h-[36px] sm:min-h-[40px]" 
                                 />
-                                <button onClick={() => handleQuickAsk(customQuestion)} className="gold-gradient text-white rounded-[10px] sm:rounded-[12px] px-4 sm:px-5 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest transition-all shrink-0 active:scale-95 min-h-[36px] sm:min-h-[40px] flex items-center justify-center">Ask ✦</button>
+                                <button onClick={() => handleQuickAsk(customQuestion)} className="gold-gradient text-white rounded-[10px] sm:rounded-[12px] px-4 sm:px-5 py-2 text-[11px] sm:text-[12px] font-bold uppercase tracking-widest transition-all shrink-0 active:scale-95 min-h-[36px] sm:min-h-[40px] flex items-center justify-center">Ask ✦</button>
                             </div>
                         </Card>
                     </div>
