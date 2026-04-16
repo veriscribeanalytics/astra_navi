@@ -30,7 +30,7 @@ export async function POST(req: Request) {
         const response = await fetch(`${backendUrl}/api/analyze-full`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chart_context: chart_context }),
+            body: JSON.stringify({ chart_context: chartContext }),
         });
 
         if (!response.ok) {

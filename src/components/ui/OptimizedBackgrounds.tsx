@@ -47,7 +47,7 @@ export default function OptimizedBackgrounds() {
     : 'opacity-100';
 
   return (
-    <div className={`transition-opacity duration-700 ${visualOpacity} pointer-events-none fixed inset-0 z-0`}>
+    <div className={`transition-opacity duration-700 ${visualOpacity} pointer-events-none fixed inset-0 z-[-10]`}>
       {/* SunFlares - Always visible, lightweight */}
       <SunFlares />
 
@@ -58,7 +58,7 @@ export default function OptimizedBackgrounds() {
       />
 
       {/* Particles - Dark Mode */}
-      <div className="fixed inset-0 z-[1] pointer-events-none hidden dark:block">
+      <div className="fixed inset-0 z-[-5] pointer-events-none hidden dark:block">
         <Particles
           particleColors={["#c8880a", "#f5a623", "#faf7f2"]}
           particleCount={device.particleCount}
@@ -72,7 +72,7 @@ export default function OptimizedBackgrounds() {
       </div>
 
       {/* Particles - Light Mode */}
-      <div className="fixed inset-0 z-[1] pointer-events-none block dark:hidden">
+      <div className="fixed inset-0 z-[-5] pointer-events-none block dark:hidden">
         <Particles
           particleColors={["#E6D8E0", "#d1b8c6", "#c8880a"]}
           particleCount={device.particleCount}

@@ -158,7 +158,7 @@ const RashiOrbitBackground = memo(function RashiOrbitBackground({
             rgba(4, 2, 10, 0.7) 60%,
             rgba(4, 2, 10, 0.95) 100%
           );
-          z-index: 20;
+          z-index: -1;
           pointer-events: none;
         }
 
@@ -168,7 +168,7 @@ const RashiOrbitBackground = memo(function RashiOrbitBackground({
           position: absolute;
           inset: 0;
           background: rgba(6, 4, 15, 0.4);
-          z-index: 5;
+          z-index: -2;
           pointer-events: none;
         }
         

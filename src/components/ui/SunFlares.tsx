@@ -4,7 +4,7 @@ import React from 'react';
 
 const SunFlares: React.FC = () => {
     return (
-        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 transition-opacity duration-700 dark:opacity-35 opacity-55">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-10] transition-opacity duration-700 dark:opacity-35 opacity-55">
             {/* Ambient glow container with drop-shadow for soft diffusion */}
             <div 
                 className="absolute inset-0"
