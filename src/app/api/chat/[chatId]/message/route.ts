@@ -43,6 +43,7 @@ export async function POST(
     }
 
     const backendUrl = process.env.AI_BACKEND_URL;
+    const backendApiKey = process.env.AI_BACKEND_API_KEY || '';
     if (!backendUrl) {
       return NextResponse.json({ 
         error: 'AI Backend Configuration Missing', 
@@ -56,7 +57,7 @@ export async function POST(
       console.log(`Generating chart context for ${userProfile.email}...`);
       const chartRes = await fetch(`${backendUrl}/api/chart`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': backendApiKey },
         body: JSON.stringify({
           name: userProfile.name || 'Friend',
           dob: userProfile.dob,
@@ -128,16 +129,16 @@ export async function POST(
     // 2. Prepare the history for the LLM
     const history = (chat.messages || [])
       .filter((m: any) => m.type === 'user' || m.type === 'ai')
-      .slice(-2) // Keep ONLY last 2 messages (1 turn) to brutally save context
+      .slice(-12) // Keep last 12 messages (6 turns) for richer context
       .map((m: any) => ({
         role: m.type === 'ai' ? 'assistant' : 'user',
-        content: (m.text || '').slice(0, 150) // Aggressive truncation
+        content: (m.text || '').slice(0, 500)
       }));
 
     // 3. Prepare the streaming request to /api/ask
     const askRes = await fetch(`${backendUrl}/api/ask`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': backendApiKey },
       body: JSON.stringify({
         question: text,
         chart_context: chartContext,

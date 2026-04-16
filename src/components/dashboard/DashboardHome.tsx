@@ -71,7 +71,6 @@ export default function DashboardHome() {
     };
 
     return (
-        console.log(user),
         <div className="w-full flex-grow relative bg-[var(--bg)] min-h-screen overflow-hidden">
             
             

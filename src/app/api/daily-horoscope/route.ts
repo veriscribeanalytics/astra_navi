@@ -91,9 +91,9 @@ export async function GET(req: Request) {
         let externalData = null;
         try {
             const externalApiUrl = `${process.env.AI_BACKEND_URL}/api/daily-horoscope?sign=${encodeURIComponent(sign)}&lang=English`;
-            const response = await fetch(externalApiUrl, { 
+            const response = await fetch(externalApiUrl, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.AI_BACKEND_API_KEY || '' },
                 signal: AbortSignal.timeout(10000)
             });
             

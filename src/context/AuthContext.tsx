@@ -12,6 +12,7 @@ interface User {
     phoneNumber?: string;
     moonSign?: string;
     sunSign?: string;
+    astrologyData?: any;
 }
 
 interface AuthContextType {
