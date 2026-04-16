@@ -52,7 +52,8 @@ export async function GET(req: Request) {
                 tob: user.tob,
                 pob: user.pob,
                 moonSign: user.moonSign,
-                sunSign: user.sunSign
+                sunSign: user.sunSign,
+                astrologyData: user.astrologyData
             }
         });
     } catch (error) {
@@ -74,19 +75,34 @@ export async function PUT(req: Request) {
         const db = client.db("astra-navi-database");
         const users = db.collection("users");
 
-        // Update the user document with full profile details
+        // Check if birth details changed (requires chart recomputation)
+        const existingUser = await users.findOne({ email });
+        const birthChanged = existingUser && (
+            existingUser.dob !== dob ||
+            existingUser.tob !== tob ||
+            existingUser.pob !== pob
+        );
+
+        const updateFields: any = {
+            name,
+            dob,
+            tob,
+            pob,
+            updatedAt: getCurrentDateTime()
+        };
+
+        // If birth details changed, invalidate chart + signs so they recompute on next chat
+        if (birthChanged) {
+            updateFields.chartContext = null;
+            updateFields["preferences.chartContext"] = null;
+            updateFields.moonSign = null;
+            updateFields.sunSign = null;
+        }
+
+        // Update the user document
         const result = await users.updateOne(
             { email },
-            { 
-                $set: { 
-                    name, 
-                    dob, 
-                    tob, 
-                    pob,
-                    chartContext: null, // Reset to force recomputation on next message
-                    updatedAt: getCurrentDateTime() 
-                } 
-            }
+            { $set: updateFields }
         );
 
         if (result.matchedCount === 0) {
@@ -105,7 +121,8 @@ export async function PUT(req: Request) {
                 tob: updatedUser?.tob,
                 pob: updatedUser?.pob,
                 moonSign: updatedUser?.moonSign,
-                sunSign: updatedUser?.sunSign
+                sunSign: updatedUser?.sunSign,
+                astrologyData: updatedUser?.astrologyData
             }
         });
 

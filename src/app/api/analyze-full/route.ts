@@ -61,9 +61,9 @@ export async function POST(req: Request) {
         let analysisData = null;
         try {
             const externalApiUrl = `${process.env.AI_BACKEND_URL}/api/analyze-full`;
-            const response = await fetch(externalApiUrl, { 
+            const response = await fetch(externalApiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.AI_BACKEND_API_KEY || '' },
                 body: JSON.stringify({ 
                     email: email, 
                     chart_context: effectiveChartContext 
