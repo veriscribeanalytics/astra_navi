@@ -47,15 +47,15 @@ const Input: React.FC<InputProps> = ({ icon, label, error, helperText, className
                     aria-invalid={error ? 'true' : 'false'}
                     aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
                     className={`
-                        w-full bg-background/50 dark:bg-surface/30 border transition-all outline-none
-                        text-primary placeholder:text-primary/60 font-body
-                        rounded-xl
+                        w-full bg-surface/40 backdrop-blur-md border transition-all outline-none
+                        text-primary placeholder:text-primary/40 font-body
+                        rounded-[20px] sm:rounded-[24px]
                         ${icon ? 'pl-10 sm:pl-12 pr-3 sm:pr-4' : 'px-3 sm:px-4'} 
                         py-3 sm:py-3.5 md:py-4
                         text-sm sm:text-base
                         ${error 
                             ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500' 
-                            : 'border-secondary/10 focus:ring-2 focus:ring-secondary/30 focus:border-secondary'
+                            : 'border-outline-variant/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary'
                         }
                         disabled:opacity-50 disabled:cursor-not-allowed
                         ${className}

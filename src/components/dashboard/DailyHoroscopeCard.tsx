@@ -219,7 +219,9 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                                 strokeDasharray={circumference}
                                 strokeDashoffset={progress}
                                 className="transition-all duration-[1500ms] cubic-bezier(0.2, 0, 0, 1)"
-                                style={{ stroke: displayColorHex }}
+                                style={{ 
+                                    stroke: score >= 80 ? '#D4A017' : score >= 60 ? '#E8832A' : '#E84A2A' 
+                                }}
                             />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -235,15 +237,15 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
             </div>
 
             <div className={`transition-all duration-700 ease-out ${showContent ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'}`}>
-                {/* Top Info Row - Dynamic Columns */}
+                    {/* Top Info Row - Dynamic Columns */}
                     <div className={`grid grid-cols-2 ${horoscope.dominant_planet ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} border-b border-outline-variant/30 bg-surface/5`}>
-                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 border-r border-b sm:border-b-0 border-secondary/10">
+                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 border-r border-b sm:border-b-0 border-white/5">
                             <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1">Mood</span>
                             <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
                                 {horoscope.mood || 'Neutral'}
                             </span>
                         </div>
-                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 sm:border-r border-b sm:border-b-0 border-secondary/10">
+                        <div className="flex flex-col items-center justify-center p-2 sm:p-3 sm:border-r border-b sm:border-b-0 border-white/8">
                             <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky Color</span>
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 <div 
@@ -255,7 +257,7 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                                 </span>
                             </div>
                         </div>
-                        <div className={`flex flex-col items-center justify-center p-2 sm:p-3 border-r sm:border-b-0 border-secondary/10 ${!horoscope.dominant_planet ? 'sm:border-r-0' : ''}`}>
+                        <div className={`flex flex-col items-center justify-center p-2 sm:p-3 border-r sm:border-b-0 border-white/8 ${!horoscope.dominant_planet ? 'sm:border-r-0' : ''}`}>
                             <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky #</span>
                             <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
                                 {horoscope.lucky_number || 8}

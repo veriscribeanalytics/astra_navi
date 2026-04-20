@@ -58,10 +58,10 @@ html, body {
   }
 }
 
-/* Glassmorphism Panel */
+/* Glassmorphism Panel - Standardized with Dashboard Home Design */
 .glass-panel {
-  @apply backdrop-blur-md bg-surface/50 border border-outline-variant/30 shadow-2xl;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05), transparent);
+  @apply backdrop-blur-md bg-surface/40 border border-outline-variant/30 rounded-[32px];
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03), transparent);
 }
 
 /* Standard Label Styling */
@@ -505,7 +505,6 @@ a {
     bottom: 0 !important;
     width: 280px !important;
     transform: none !important;
-    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.2) !important;
     z-index: 999 !important;
     background: var(--surface) !important;
     /* Theme-aware background */

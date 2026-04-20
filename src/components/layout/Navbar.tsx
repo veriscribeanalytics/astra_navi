@@ -307,13 +307,13 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     return(
         <>
             <ToastContainer />
-            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-[#faf7f2]/90 dark:bg-[#0b071a]/90 backdrop-blur-xl shadow-sm border-b border-secondary/10 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
+            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface/40 backdrop-blur-md border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
-            <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-3.5 w-full mx-auto max-w-[1600px]">
+            <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start">
-                    <Link href="/" className="flex shrink-0 items-center justify-center text-xl lg:text-2xl font-bold tracking-tighter text-primary font-headline">
-                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={32} width={32} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
+                    <Link href="/" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline">
+                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={26} width={26} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
                         Astra Navi
                     </Link>
                 </div>
@@ -327,14 +327,14 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                             onMouseEnter={() => setHoveredSection(section.id)}
                             onMouseLeave={() => setHoveredSection(null)}
                         >
-                            <button className={`flex items-center gap-1 px-3 lg:px-4 py-2 rounded-full transition-all duration-300 font-body font-bold text-[13px] lg:text-sm tracking-wide ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}>
+                            <button className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-all duration-300 font-body font-bold text-xs lg:text-[13px] tracking-wide ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}>
                                 {section.label}
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${hoveredSection === section.id ? 'rotate-180 text-secondary' : 'opacity-40'}`} />
                             </button>
 
                             {/* Mega Dropdown Bridge */}
                             <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`}>
-                                <div className="w-72 lg:w-80 p-2 bg-background/95 backdrop-blur-2xl rounded-2xl border border-secondary/20 shadow-2xl">
+                                <div className="w-72 lg:w-80 p-2 bg-surface backdrop-blur-2xl rounded-2xl border border-outline-variant/30 shadow-2xl">
                                     <div className="space-y-1">
                                         {section.items.map((item, idx) => {
                                             return (
@@ -368,7 +368,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 <div className="flex items-center justify-end space-x-4 lg:space-x-5">
                     <ThemeToggle />
                     {!isLoggedIn ? (
-                        <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="md" className="!px-6 shadow-md shadow-secondary/10">Login</Button>
+                        <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="sm" className="!px-5 shadow-md shadow-secondary/10 text-xs">Login</Button>
                     ) : (
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
                             <div className="profile-ring-glow cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
@@ -376,7 +376,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                                 <div className="profile-avatar-content !text-sm">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </div>
                             {isUserDropdownOpen && (
-                                <div className="absolute top-[56px] right-0 w-60 bg-background/98 backdrop-blur-2xl border border-secondary/20 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-[56px] right-0 w-60 bg-surface backdrop-blur-2xl border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Seeker Identity</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "Seeker"}</p>
@@ -397,21 +397,21 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
             </div>
 
             {/* ===== MOBILE NAVBAR (<md) ===== */}
-            <div className="flex md:hidden items-center px-4 py-3 w-full relative h-[64px]">
+            <div className="flex md:hidden items-center px-4 py-2 w-full relative h-[56px]">
                 {/* Left Section (33%) */}
                 <div className="flex-[1] flex justify-start">
                     <button 
                         onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                        className="p-2.5 -ml-2 text-primary/80 hover:text-primary transition-all rounded-xl hover:bg-primary/5 active:scale-90"
+                        className="p-2 -ml-2 text-primary/80 hover:text-primary transition-all rounded-xl hover:bg-primary/5 active:scale-90"
                     >
-                        {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
                 </div>
 
                 {/* Center Section */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
-                    <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tighter text-primary font-headline">
-                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={28} width={28} className="object-contain rounded-md" priority />
+                    <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tighter text-primary font-headline">
+                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={24} width={24} className="object-contain rounded-md" priority />
                         <span className="whitespace-nowrap">Astra Navi</span>
                     </Link>
                 </div>
@@ -420,17 +420,17 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
                     <ThemeToggle />
                     {!isLoggedIn ? (
-                        <Link href="/login" className="w-9 h-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
-                            <User className="w-4.5 h-4.5" />
+                        <Link href="/login" className="w-8 h-8 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
+                            <User className="w-4 h-4" />
                         </Link>
                     ) : (
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
-                            <div className="profile-ring-glow !w-9 !h-9 cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
+                            <div className="profile-ring-glow !w-8 !h-8 cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
                                 <div className="profile-comet-dot"></div>
-                                <div className="profile-avatar-content !text-xs font-bold">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
+                                <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </div>
                             {isUserDropdownOpen && (
-                                <div className="absolute top-[56px] right-0 w-60 bg-background/98 backdrop-blur-2xl border border-secondary/20 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-[56px] right-0 w-60 bg-surface backdrop-blur-2xl border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Seeker Identity</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "Seeker"}</p>
@@ -451,9 +451,9 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
             </div>
 
             {/* ===== SITE MENU OVERLAY (Mobile) ===== */}
-            <div className={`md:hidden fixed inset-0 top-[var(--navbar-height,64px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
+            <div className={`md:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
             
-            <div className={`md:hidden fixed top-[var(--navbar-height,64px)] left-0 right-0 h-[calc(100vh-64px)] bg-background/98 backdrop-blur-2xl border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+            <div className={`md:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 h-[calc(100vh-56px)] bg-background/98 backdrop-blur-2xl border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
                 <div className="p-6 space-y-8">
                     {navSections.map((section) => (
                         <div key={section.id} className="space-y-4">

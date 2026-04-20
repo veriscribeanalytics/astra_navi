@@ -164,7 +164,7 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <Card padding="lg" className="cosmic-glow border-secondary/10 !p-5 sm:!p-8" hoverable={false}>
+                <Card padding="lg" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 !p-5 sm:!p-8" hoverable={false}>
                     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                         <Input 
                             label="Email Address" 

@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import DailyHoroscopeCard from '@/components/dashboard/DailyHoroscopeCard';
+import HealthForecastPanel from '@/components/dashboard/HealthForecastPanel';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Sparkles, ArrowLeft, Lock } from 'lucide-react';
@@ -102,6 +103,9 @@ export default function HoroscopePage() {
 
                 {/* Horoscope Card */}
                 <DailyHoroscopeCard email={user.email!} />
+
+                {/* Health Forecast */}
+                <HealthForecastPanel email={user.email!} />
 
                 {/* Info Footer */}
                 <Card padding="md" className="!rounded-[24px] mt-8 border-outline-variant/30 bg-surface/50">

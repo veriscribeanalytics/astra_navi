@@ -3,216 +3,66 @@
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import Image from "next/image";
 import {
-    Sparkles, Home, Globe, Users, Briefcase, Heart, Shield,
-    Zap, Eye, BookOpen, TrendingUp, DollarSign, Lock,
-    ChevronDown, ChevronRight, ArrowLeft, RefreshCw,
-    Sun, Moon, Flame, Star, Gem, CircleDot,
-    Activity, Clock, Calendar, MapPin, Target, Compass
+    Sparkles, Home, Globe, Lock,
+    ArrowLeft, RefreshCw, ChevronLeft,
+    Activity, Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 // ─── Types ───────────────────────────────────────────────────
-interface Occupant {
-    planet: string;
-    dignity: string;
-    retrograde: boolean;
-}
+interface Occupant { planet: string; dignity: string; retrograde: boolean; }
+interface HouseData { house: number; name: string; areas: string[]; sign: string; lord: string; lordHouse: number; occupants: Occupant[]; interpretation: string[]; }
+interface Yoga { name: string; effect: string; }
+interface PlanetData { planet: string; sign: string; house: number; degree: number; dignity: string; shadbala: number; retrograde: boolean; conjunctions: string[]; lordOf: number[]; interpretation: string[]; yogas: Yoga[]; }
+interface DashaData { active: { type: string; planet: string; start: string; end: string }[]; explanation: string[]; }
+interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: DashaData; }
 
-interface HouseData {
-    house: number;
-    name: string;
-    areas: string[];
-    sign: string;
-    lord: string;
-    lordHouse: number;
-    occupants: Occupant[];
-    interpretation: string[];
-}
-
-interface Yoga {
-    name: string;
-    effect: string;
-}
-
-interface PlanetData {
-    planet: string;
-    sign: string;
-    house: number;
-    degree: number;
-    dignity: string;
-    shadbala: number;
-    retrograde: boolean;
-    conjunctions: string[];
-    lordOf: number[];
-    interpretation: string[];
-    yogas: Yoga[];
-}
-
-interface DashaData {
-    active: { type: string; planet: string; start: string; end: string }[];
-    explanation: string[];
-}
-
-interface AnalysisData {
-    houses: HouseData[];
-    planets: PlanetData[];
-    dasha: DashaData;
-}
-
-// ─── Planet Glyphs (Unicode Astrological Symbols) ────────────
+// ─── Constants ───────────────────────────────────────────────
 const PLANET_GLYPHS: Record<string, string> = {
-    'Sun': '☉',
-    'Moon': '☽',
-    'Mars': '♂',
-    'Mercury': '☿',
-    'Jupiter': '♃',
-    'Venus': '♀',
-    'Saturn': '♄',
-    'Rahu': '☊',
-    'Ketu': '☋',
+    'Sun': '☉', 'Moon': '☽', 'Mars': '♂', 'Mercury': '☿',
+    'Jupiter': '♃', 'Venus': '♀', 'Saturn': '♄', 'Rahu': '☊', 'Ketu': '☋',
 };
-
 const PLANET_COLORS: Record<string, string> = {
-    'Sun': '#F59E0B',
-    'Moon': '#E0E7FF',
-    'Mars': '#EF4444',
-    'Mercury': '#34D399',
-    'Jupiter': '#FBBF24',
-    'Venus': '#F472B6',
-    'Saturn': '#818CF8',
-    'Rahu': '#6B7280',
-    'Ketu': '#A78BFA',
+    'Sun': '#F59E0B', 'Moon': '#C7D2FE', 'Mars': '#EF4444',
+    'Mercury': '#34D399', 'Jupiter': '#FBBF24', 'Venus': '#F472B6',
+    'Saturn': '#818CF8', 'Rahu': '#9CA3AF', 'Ketu': '#A78BFA',
 };
-
-const PLANET_GRADIENT: Record<string, string> = {
-    'Sun': 'from-amber-500/20 to-orange-600/10',
-    'Moon': 'from-indigo-300/20 to-slate-400/10',
-    'Mars': 'from-red-500/20 to-rose-600/10',
-    'Mercury': 'from-emerald-400/20 to-teal-500/10',
-    'Jupiter': 'from-yellow-400/20 to-amber-500/10',
-    'Venus': 'from-pink-400/20 to-rose-400/10',
-    'Saturn': 'from-indigo-400/20 to-violet-500/10',
-    'Rahu': 'from-gray-400/20 to-slate-500/10',
-    'Ketu': 'from-purple-400/20 to-violet-400/10',
-};
-
-// ─── Sign to Rashi Icon Map ──────────────────────────────────
 const SIGN_TO_ICON: Record<string, string> = {
-    'Aries': '/icons/rashi/aries.png',
-    'Taurus': '/icons/rashi/taurus.png',
-    'Gemini': '/icons/rashi/gemini.png',
-    'Cancer': '/icons/rashi/cancer.png',
-    'Leo': '/icons/rashi/leo.png',
-    'Virgo': '/icons/rashi/virgo.png',
-    'Libra': '/icons/rashi/libra.png',
-    'Scorpio': '/icons/rashi/scorpio.png',
-    'Sagittarius': '/icons/rashi/sagittarius.png',
-    'Capricorn': '/icons/rashi/capricorn.png',
-    'Aquarius': '/icons/rashi/aquarius.png',
-    'Pisces': '/icons/rashi/pisces.png',
+    'Aries': '/icons/rashi/aries.png', 'Taurus': '/icons/rashi/taurus.png',
+    'Gemini': '/icons/rashi/gemini.png', 'Cancer': '/icons/rashi/cancer.png',
+    'Leo': '/icons/rashi/leo.png', 'Virgo': '/icons/rashi/virgo.png',
+    'Libra': '/icons/rashi/libra.png', 'Scorpio': '/icons/rashi/scorpio.png',
+    'Sagittarius': '/icons/rashi/sagittarius.png', 'Capricorn': '/icons/rashi/capricorn.png',
+    'Aquarius': '/icons/rashi/aquarius.png', 'Pisces': '/icons/rashi/pisces.png',
+};
+const PLANET_TO_ICON: Record<string, string> = {
+    'Sun': '/icons/planets/sun.png', 'Moon': '/icons/planets/moon.png',
+    'Mars': '/icons/planets/mars.png', 'Saturn': '/icons/planets/saturn.png',
+    'Mercury': '/icons/planets/mercury.png', 'Jupiter': '/icons/planets/jupiter.png',
+    'Venus': '/icons/planets/venus.png',
 };
 
-// ─── Helper: Planet Icon ─────────────────────────────────────
-const getPlanetIcon = (planet: string) => {
-    const p = planet.toLowerCase();
-    if (p === 'sun') return <Sun className="w-4 h-4" />;
-    if (p === 'moon') return <Moon className="w-4 h-4" />;
-    if (p === 'mars') return <Flame className="w-4 h-4" />;
-    if (p === 'mercury') return <Zap className="w-4 h-4" />;
-    if (p === 'jupiter') return <Star className="w-4 h-4" />;
-    if (p === 'venus') return <Heart className="w-4 h-4" />;
-    if (p === 'saturn') return <Shield className="w-4 h-4" />;
-    if (p === 'rahu') return <Eye className="w-4 h-4" />;
-    if (p === 'ketu') return <CircleDot className="w-4 h-4" />;
-    return <Star className="w-4 h-4" />;
-};
-
-// ─── Helper: Dignity Badge ───────────────────────────────────
 const getDignityStyle = (dignity: string) => {
-    if (dignity === 'Exalted') return {
-        bg: 'bg-emerald-500/12',
-        border: 'border-emerald-500/25',
-        text: 'text-emerald-400',
-        dot: 'bg-emerald-400',
-        label: 'Exalted',
-    };
-    if (dignity === 'Debilitated') return {
-        bg: 'bg-red-500/12',
-        border: 'border-red-500/25',
-        text: 'text-red-400',
-        dot: 'bg-red-400',
-        label: 'Debilitated',
-    };
-    return {
-        bg: 'bg-surface/30',
-        border: 'border-outline-variant/20',
-        text: 'text-foreground/50',
-        dot: 'bg-foreground/30',
-        label: 'Normal',
-    };
+    if (dignity === 'Exalted') return { text: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', label: 'Exalted', dot: 'bg-emerald-400' };
+    if (dignity === 'Debilitated') return { text: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/30', label: 'Debilitated', dot: 'bg-red-400' };
+    return { text: 'text-foreground/40', bg: 'bg-foreground/5', border: 'border-foreground/10', label: 'Normal', dot: 'bg-foreground/20' };
 };
 
-// ─── Helper: House Icons ─────────────────────────────────────
-const getHouseIcon = (house: number) => {
-    const icons = [
-        <Users key={1} className="w-4 h-4" />,       // 1 Self
-        <DollarSign key={2} className="w-4 h-4" />,   // 2 Wealth
-        <Zap key={3} className="w-4 h-4" />,          // 3 Siblings
-        <Home key={4} className="w-4 h-4" />,         // 4 Home
-        <Star key={5} className="w-4 h-4" />,         // 5 Creativity
-        <Shield key={6} className="w-4 h-4" />,       // 6 Obstacles
-        <Heart key={7} className="w-4 h-4" />,        // 7 Partnerships
-        <Eye key={8} className="w-4 h-4" />,          // 8 Transformation
-        <BookOpen key={9} className="w-4 h-4" />,     // 9 Spirituality
-        <Briefcase key={10} className="w-4 h-4" />,   // 10 Career
-        <TrendingUp key={11} className="w-4 h-4" />,  // 11 Gains
-        <Globe key={12} className="w-4 h-4" />,       // 12 Losses
-    ];
-    return icons[(house - 1) % 12];
-};
+const PlanetIcon = ({ planet, size = "w-12 h-12" }: { planet: string; size?: string }) => (
+    <div className={`${size} relative flex items-center justify-center shrink-0`}>
+        <div className="absolute inset-[-6px] blur-[28px] opacity-35 rounded-full" style={{ backgroundColor: PLANET_COLORS[planet] || '#c8880a' }} />
+        {PLANET_TO_ICON[planet] ? (
+            <img src={PLANET_TO_ICON[planet]} alt={planet} className="w-full h-full object-contain relative z-10 drop-shadow-xl" />
+        ) : (
+            <span className="text-4xl drop-shadow-lg relative z-10" style={{ color: PLANET_COLORS[planet] }}>{PLANET_GLYPHS[planet]}</span>
+        )}
+    </div>
+);
 
-// ─── House Sanskrit Names ────────────────────────────────────
-const HOUSE_SANSKRIT: Record<number, string> = {
-    1: 'Tanu Bhava', 2: 'Dhana Bhava', 3: 'Sahaja Bhava',
-    4: 'Sukha Bhava', 5: 'Putra Bhava', 6: 'Ari Bhava',
-    7: 'Yuvati Bhava', 8: 'Randhra Bhava', 9: 'Dharma Bhava',
-    10: 'Karma Bhava', 11: 'Labha Bhava', 12: 'Vyaya Bhava',
-};
-
-// ─── Tab Types ───────────────────────────────────────────────
-type TabId = 'overview' | 'planets' | 'houses' | 'dasha';
-
-// ─── Shadbala Strength Ring ──────────────────────────────────
-const StrengthRing = ({ value, max = 2.0, size = 48, color }: { value: number; max?: number; size?: number; color: string }) => {
-    const pct = Math.min(100, (value / max) * 100);
-    const radius = (size - 6) / 2;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (pct / 100) * circumference;
-
-    return (
-        <svg width={size} height={size} className="transform -rotate-90">
-            <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" className="text-outline-variant/10" strokeWidth="3" />
-            <circle
-                cx={size / 2} cy={size / 2} r={radius} fill="none"
-                stroke={color} strokeWidth="3" strokeLinecap="round"
-                strokeDasharray={circumference} strokeDashoffset={offset}
-                className="transition-all duration-700"
-            />
-            <text
-                x={size / 2} y={size / 2}
-                textAnchor="middle" dominantBaseline="central"
-                className="fill-foreground text-[11px] font-bold"
-                transform={`rotate(90, ${size / 2}, ${size / 2})`}
-            >
-                {value.toFixed(1)}
-            </text>
-        </svg>
-    );
-};
 
 export default function KundliPage() {
     const { user, isLoggedIn, isLoading: authLoading } = useAuth();
@@ -220,856 +70,505 @@ export default function KundliPage() {
     const [data, setData] = useState<AnalysisData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<TabId>('overview');
-    const [expandedHouse, setExpandedHouse] = useState<number | null>(null);
-    const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
+    const [planetDetails, setPlanetDetails] = useState<any>(null);
+    const [planetLoading, setPlanetLoading] = useState(false);
+    const [houseFilter, setHouseFilter] = useState<'active' | 'all'>('active');
+
+    const handlePlanetClick = async (planet: PlanetData) => {
+        if (selectedPlanet?.planet === planet.planet) { setSelectedPlanet(null); setPlanetDetails(null); return; }
+        setSelectedPlanet(planet);
+        setPlanetDetails(null);
+        setPlanetLoading(true);
+        try {
+            const res = await fetch(`/api/planets/${planet.planet}?email=${encodeURIComponent(user?.email || '')}`);
+            const result = await res.json();
+            if (result.success && result.details) setPlanetDetails(result.details);
+        } catch (err) { console.error("Failed to fetch planet details", err); }
+        finally { setPlanetLoading(false); }
+    };
 
     useEffect(() => {
         if (authLoading) return;
-        if (!isLoggedIn || !user?.email) {
-            setLoading(false);
-            return;
-        }
+        if (!isLoggedIn || !user?.email) { setLoading(false); return; }
         fetchAnalysis();
     }, [isLoggedIn, user?.email, authLoading]);
 
     const fetchAnalysis = async (forceRefresh = false) => {
         if (!user?.email) return;
         try {
-            if (forceRefresh) setRefreshing(true);
-            else setLoading(true);
-
-            const res = await fetch('/api/analyze-full', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, force_refresh: forceRefresh }),
-            });
-
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.error || 'Failed to fetch analysis');
-            }
-
+            if (forceRefresh) setRefreshing(true); else setLoading(true);
+            const res = await fetch('/api/analyze-full', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: user.email, force_refresh: forceRefresh }) });
+            if (!res.ok) { const errData = await res.json().catch(() => ({})); throw new Error(errData.error || 'Failed'); }
             const result = await res.json();
-            // The data might be nested under result.data or result.data.astrologyData
-            const analysisPayload = result.data?.astrologyData || result.data || result;
-            
-            if (analysisPayload.houses && analysisPayload.planets) {
-                setData({
-                    houses: analysisPayload.houses,
-                    planets: analysisPayload.planets,
-                    dasha: analysisPayload.dasha,
-                });
-                setError(null);
-            } else {
-                throw new Error('No chart analysis data found. Please generate your chart first.');
-            }
-        } catch (err: any) {
-            console.error('Analysis fetch error:', err);
-            setError(err.message || 'Unable to load analysis.');
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
+            const payload = result.data?.astrologyData || result.data || result;
+            if (payload.houses && payload.planets) { setData(payload); setError(null); }
+            else throw new Error('No chart data found.');
+        } catch (err: any) { setError(err.message); }
+        finally { setLoading(false); setRefreshing(false); }
     };
 
-    // ─── Derived data ────────────────────────────────────────
-    const lagnaSign = useMemo(() => {
-        if (!data) return null;
-        const h1 = data.houses.find(h => h.house === 1);
-        return h1?.sign || null;
-    }, [data]);
-
+    const lagnaSign = useMemo(() => data?.houses.find(h => h.house === 1)?.sign || null, [data]);
     const sunPlanet = useMemo(() => data?.planets.find(p => p.planet === 'Sun'), [data]);
     const moonPlanet = useMemo(() => data?.planets.find(p => p.planet === 'Moon'), [data]);
+    const allYogas = useMemo(() => data ? data.planets.flatMap(p => p.yogas.map(y => ({ ...y, planet: p.planet }))) : [], [data]);
 
-    const totalYogas = useMemo(() => {
-        if (!data) return 0;
-        return data.planets.reduce((acc, p) => acc + p.yogas.length, 0);
-    }, [data]);
+    // Group yogas by name pattern
+    const groupedYogas = useMemo(() => {
+        const groups: Record<string, { yogas: (Yoga & { planet: string })[], count: number }> = {};
+        allYogas.forEach(y => {
+            const baseName = y.name.split('(')[0].trim();
+            if (!groups[baseName]) groups[baseName] = { yogas: [], count: 0 };
+            groups[baseName].yogas.push(y);
+            groups[baseName].count++;
+        });
+        return groups;
+    }, [allYogas]);
 
-    const exaltedCount = useMemo(() => data?.planets.filter(p => p.dignity === 'Exalted').length || 0, [data]);
-    const debilitatedCount = useMemo(() => data?.planets.filter(p => p.dignity === 'Debilitated').length || 0, [data]);
-    const retrogradeCount = useMemo(() => data?.planets.filter(p => p.retrograde).length || 0, [data]);
+    const filteredHouses = useMemo(() => {
+        if (!data) return [];
+        if (houseFilter === 'active') return data.houses.filter(h => h.occupants.length > 0);
+        return data.houses;
+    }, [data, houseFilter]);
 
-    // ─── Auth Gate ────────────────────────────────────────────
+    // ─── Guard States ────────────────────────────────────────
     if (!authLoading && !isLoggedIn) {
-        return (
-            <div className="min-h-screen flex items-center justify-center px-4">
-                <Card className="glass-panel max-w-md w-full text-center p-8">
-                    <Lock className="w-12 h-12 text-secondary mx-auto mb-4" />
-                    <h2 className="text-2xl font-headline font-bold text-foreground mb-2">Sign In Required</h2>
-                    <p className="text-foreground/60 text-sm mb-6">Please log in to view your personalized Kundli analysis.</p>
-                    <Button onClick={() => router.push('/login')} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">
-                        Sign In
-                    </Button>
-                </Card>
-            </div>
-        );
+        return (<div className="min-h-screen flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
+            <Lock className="w-12 h-12 text-secondary mx-auto mb-4" /><h2 className="text-2xl font-headline font-bold text-foreground mb-2">Sign In Required</h2>
+            <p className="text-foreground/60 text-sm mb-6">Please log in to view your Kundli.</p>
+            <Button onClick={() => router.push('/login')} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">Sign In</Button>
+        </Card></div>);
     }
-
-    // ─── Loading State ────────────────────────────────────────
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="relative">
-                        <div className="w-16 h-16 rounded-full border-2 border-secondary/20 flex items-center justify-center">
-                            <Sparkles className="w-7 h-7 text-secondary animate-pulse" />
-                        </div>
-                        <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-transparent border-t-secondary animate-spin" />
-                    </div>
-                    <div className="text-center">
-                        <p className="text-[13px] text-foreground/60 font-bold uppercase tracking-[0.2em]">Decoding Your Kundli</p>
-                        <p className="text-[11px] text-foreground/30 mt-1">Analyzing planetary positions...</p>
-                    </div>
-                </div>
-            </div>
-        );
+        return (<div className="min-h-screen flex items-center justify-center"><div className="relative">
+            <div className="w-16 h-16 rounded-full border-2 border-secondary/20 flex items-center justify-center"><Sparkles className="w-7 h-7 text-secondary animate-pulse" /></div>
+            <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-transparent border-t-secondary animate-spin" />
+        </div></div>);
     }
-
-    // ─── Error State ──────────────────────────────────────────
     if (error || !data) {
-        return (
-            <div className="min-h-screen flex items-center justify-center px-4">
-                <Card className="glass-panel max-w-md w-full text-center p-8">
-                    <Sparkles className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-headline font-bold text-foreground mb-2">Analysis Unavailable</h2>
-                    <p className="text-foreground/60 text-sm mb-6">{error || 'No analysis data found.'}</p>
-                    <div className="flex gap-3 justify-center">
-                        <Button onClick={() => router.push('/')} variant="secondary" className="px-6 py-3 rounded-xl font-bold">
-                            Go Home
-                        </Button>
-                        <Button onClick={() => fetchAnalysis(true)} className="gold-gradient text-white border-none font-bold px-6 py-3 rounded-xl">
-                            Generate Analysis
-                        </Button>
-                    </div>
-                </Card>
-            </div>
-        );
+        return (<div className="min-h-screen flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
+            <Sparkles className="w-12 h-12 text-orange-500 mx-auto mb-4" /><h2 className="text-xl font-headline font-bold text-foreground mb-2">Analysis Unavailable</h2>
+            <p className="text-foreground/60 text-sm mb-6">{error || 'No data found.'}</p>
+            <Button onClick={() => fetchAnalysis(true)} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">Generate Dashboard</Button>
+        </Card></div>);
     }
 
-    const tabs: { id: TabId; label: string; count?: number }[] = [
-        { id: 'overview', label: 'Overview' },
-        { id: 'planets', label: 'Grahas', count: data.planets.length },
-        { id: 'houses', label: 'Bhavas', count: data.houses.length },
-        { id: 'dasha', label: 'Dasha', count: data.dasha?.active?.length || 0 },
-    ];
-
+    // ═══════════════════════════════════════════════════════════
     return (
-        <div className="min-h-screen bg-[var(--bg)] relative">
-            <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 pb-24">
+        <div className="h-screen bg-[var(--bg)] pt-14 lg:pt-16 flex flex-col overflow-hidden">
+            <div className="flex-1 max-w-[1600px] w-full mx-auto px-3 py-2 flex flex-col gap-2 min-h-0">
 
-                {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                    HERO IDENTITY SECTION
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-                <div className="mb-8">
-                    {/* Back & Refresh */}
-                    <div className="flex items-center justify-between mb-5">
-                        <button onClick={() => router.back()} className="flex items-center gap-1.5 text-foreground/40 hover:text-secondary text-[12px] font-bold uppercase tracking-widest transition-colors">
-                            <ArrowLeft className="w-3.5 h-3.5" /> Back
+                {/* ═══ HEADER ═══ */}
+                <div className="flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2.5">
+                        <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-surface/30 border border-outline-variant/10 flex items-center justify-center text-foreground/40 hover:text-foreground transition-all">
+                            <ArrowLeft className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                            onClick={() => fetchAnalysis(true)}
-                            disabled={refreshing}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/60 border border-outline-variant/20 text-[12px] font-bold text-foreground/50 uppercase tracking-widest hover:border-secondary/30 hover:text-secondary transition-all disabled:opacity-50"
-                        >
-                            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                            <span className="hidden sm:inline">Refresh</span>
-                        </button>
-                    </div>
-
-                    {/* Identity Card */}
-                    <Card padding="none" className="glass-panel overflow-hidden">
-                        <div className="relative p-5 sm:p-7 lg:p-8">
-                            {/* Subtle gradient overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-secondary/[0.04] via-transparent to-purple-500/[0.03] pointer-events-none" />
-                            
-                            <div className="relative flex flex-col lg:flex-row lg:items-start gap-6">
-                                {/* Left: Title + Birth Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-headline font-bold text-foreground tracking-tight">
-                                            {user?.name ? `${user.name}'s` : 'Your'} Kundli
-                                        </h1>
-                                    </div>
-                                    <p className="text-[12px] text-foreground/35 font-bold uppercase tracking-[0.2em] mb-5">
-                                        Personalized Vedic Birth Chart Analysis
-                                    </p>
-
-                                    {/* Birth Details Row */}
-                                    {(user?.dob || user?.tob || user?.pob) && (
-                                        <div className="flex flex-wrap gap-x-5 gap-y-2 text-[12px] text-foreground/45 font-bold">
-                                            {user?.dob && (
-                                                <span className="flex items-center gap-1.5">
-                                                    <Calendar className="w-3.5 h-3.5 text-secondary/60" />
-                                                    {new Date(user.dob).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                </span>
-                                            )}
-                                            {user?.tob && (
-                                                <span className="flex items-center gap-1.5">
-                                                    <Clock className="w-3.5 h-3.5 text-secondary/60" />
-                                                    {user.tob}
-                                                </span>
-                                            )}
-                                            {user?.pob && (
-                                                <span className="flex items-center gap-1.5">
-                                                    <MapPin className="w-3.5 h-3.5 text-secondary/60" />
-                                                    {user.pob}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Right: Key Signs — Lagna, Sun, Moon */}
-                                <div className="flex gap-3 sm:gap-4 shrink-0">
-                                    {/* Lagna */}
-                                    {lagnaSign && (
-                                        <div className="flex flex-col items-center gap-2 px-4 py-3 rounded-2xl bg-surface/40 border border-outline-variant/15">
-                                            <div className="w-10 h-10 sm:w-12 sm:h-12 relative">
-                                                <Image src={SIGN_TO_ICON[lagnaSign] || '/icons/rashi/aries.png'} alt={lagnaSign} fill className="object-contain opacity-80" />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Lagna</p>
-                                                <p className="text-[13px] font-headline font-bold text-foreground">{lagnaSign}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {/* Sun Sign */}
-                                    {sunPlanet && (
-                                        <div className="flex flex-col items-center gap-2 px-4 py-3 rounded-2xl bg-surface/40 border border-outline-variant/15">
-                                            <div className="w-10 h-10 sm:w-12 sm:h-12 relative">
-                                                <Image src={SIGN_TO_ICON[sunPlanet.sign] || '/icons/rashi/aries.png'} alt={sunPlanet.sign} fill className="object-contain opacity-80" />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Sun</p>
-                                                <p className="text-[13px] font-headline font-bold text-foreground">{sunPlanet.sign}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {/* Moon Sign */}
-                                    {moonPlanet && (
-                                        <div className="flex flex-col items-center gap-2 px-4 py-3 rounded-2xl bg-surface/40 border border-outline-variant/15">
-                                            <div className="w-10 h-10 sm:w-12 sm:h-12 relative">
-                                                <Image src={SIGN_TO_ICON[moonPlanet.sign] || '/icons/rashi/aries.png'} alt={moonPlanet.sign} fill className="object-contain opacity-80" />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Moon</p>
-                                                <p className="text-[13px] font-headline font-bold text-foreground">{moonPlanet.sign}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                        <div>
+                            <h1 className="text-lg font-headline font-bold text-foreground leading-none">Cosmic Blueprint</h1>
+                            <p className="text-[9px] text-foreground/30 font-bold uppercase tracking-[0.15em]">{user?.name}&apos;s Vedic Chart</p>
                         </div>
-                    </Card>
+                    </div>
+                    <button onClick={() => fetchAnalysis(true)} disabled={refreshing}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface/30 border border-outline-variant/10 text-[10px] font-bold text-foreground/40 uppercase tracking-widest hover:text-secondary hover:border-secondary/20 transition-all">
+                        <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin text-secondary' : ''}`} />
+                        <span className="hidden sm:inline">Refresh</span>
+                    </button>
                 </div>
 
-                {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                    TAB BAR
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-                <div className="flex gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide pb-1">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`relative flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-[12px] sm:text-[13px] font-bold uppercase tracking-[0.08em] transition-all whitespace-nowrap border ${
-                                activeTab === tab.id
-                                    ? 'bg-secondary/15 border-secondary/30 text-secondary'
-                                    : 'bg-surface/30 border-outline-variant/15 text-foreground/45 hover:border-outline-variant/30 hover:text-foreground/65'
-                            }`}
-                        >
-                            {tab.label}
-                            {tab.count !== undefined && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-                                    activeTab === tab.id ? 'bg-secondary/20 text-secondary' : 'bg-surface/50 text-foreground/25'
-                                }`}>
-                                    {tab.count}
-                                </span>
-                            )}
-                        </button>
-                    ))}
-                </div>
+                {/* ═══ TWO-COLUMN LAYOUT ═══ */}
+                <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 lg:gap-0 lg:overflow-hidden overflow-y-auto scrollbar-hide">
 
-                {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                    TAB CONTENT
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={activeTab}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        {/* ══════════════════════════════════════════
-                            OVERVIEW TAB
-                        ══════════════════════════════════════════ */}
-                        {activeTab === 'overview' && (
-                            <div className="space-y-6">
-                                {/* ── Quick Stats Row ── */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    <div className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/15 text-center">
-                                        <p className="text-[22px] sm:text-[26px] font-headline font-bold text-emerald-400">{exaltedCount}</p>
-                                        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mt-1">Exalted</p>
-                                    </div>
-                                    <div className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/15 text-center">
-                                        <p className="text-[22px] sm:text-[26px] font-headline font-bold text-red-400">{debilitatedCount}</p>
-                                        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mt-1">Debilitated</p>
-                                    </div>
-                                    <div className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/15 text-center">
-                                        <p className="text-[22px] sm:text-[26px] font-headline font-bold text-orange-400">{retrogradeCount}</p>
-                                        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mt-1">Retrograde</p>
-                                    </div>
-                                    <div className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/15 text-center">
-                                        <p className="text-[22px] sm:text-[26px] font-headline font-bold text-secondary">{totalYogas}</p>
-                                        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mt-1">Active Yogas</p>
-                                    </div>
+                    {/* ─── LEFT SIDEBAR ─── */}
+                    <div className="w-full lg:w-[300px] xl:w-[330px] shrink-0 flex flex-col gap-2.5 lg:overflow-y-auto scrollbar-hide pr-0 lg:pr-3 border-b lg:border-b-0 lg:border-r border-outline-variant/10 pb-4 lg:pb-0">
+
+                        {/* ── Core Identity ── */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-2.5">
+                                <div className="w-1 h-4 rounded-full bg-secondary" />
+                                <h2 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Core Identity</h2>
+                            </div>
+                            <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
+                                <div className="space-y-3">
+                                    {[
+                                        { label: 'Ascendant (Lagna)', sign: lagnaSign, color: 'text-secondary', accent: 'border-secondary/20' },
+                                        { label: 'Moon Sign (Rashi)', sign: moonPlanet?.sign, color: 'text-indigo-300', accent: 'border-indigo-400/20' },
+                                        { label: 'Sun Sign (Surya)', sign: sunPlanet?.sign, color: 'text-amber-400', accent: 'border-amber-500/20' },
+                                    ].map((item, i) => (
+                                        <div key={i} className={`flex items-center gap-3 pb-3 ${i < 2 ? 'border-b border-outline-variant/10' : ''}`}>
+                                            <div className="w-14 h-14 relative shrink-0">
+                                                <Image src={SIGN_TO_ICON[item.sign || 'Aries'] || '/icons/rashi/aries.png'} alt={item.label} fill className="object-contain drop-shadow-[0_0_12px_rgba(200,136,10,0.15)]" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-[10px] font-bold ${item.color} uppercase tracking-[0.2em]`}>{item.label}</p>
+                                                <p className="text-lg font-headline font-bold text-foreground leading-tight">{item.sign}</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
+                            </Card>
+                        </div>
 
-                                {/* ── Planet Overview Grid ── */}
-                                <div>
-                                    <h2 className="text-[12px] font-bold text-foreground/30 uppercase tracking-[0.2em] mb-3">Graha Positions</h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {data.planets.map((planet) => {
-                                            const dignity = getDignityStyle(planet.dignity);
-                                            const color = PLANET_COLORS[planet.planet] || '#c8880a';
+                        {/* ── Current Dasha ── */}
+                        {data.dasha?.active?.length > 0 && (
+                            <div>
+                                <div className="flex items-center gap-2 mb-2.5">
+                                    <div className="w-1 h-4 rounded-full bg-secondary" />
+                                    <h2 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Current Dasha</h2>
+                                </div>
+                                <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
+                                    <div className="space-y-3">
+                                        {data.dasha.active.map((period, idx) => {
+                                            const start = new Date(period.start);
+                                            const end = new Date(period.end);
+                                            const now = Date.now();
+                                            const pct = Math.min(100, Math.max(0, ((now - start.getTime()) / (end.getTime() - start.getTime())) * 100));
+                                            const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
+                                            const rem = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                                            const isMaha = period.type === 'Mahadasha';
                                             return (
-                                                <motion.div
-                                                    key={planet.planet}
-                                                    whileHover={{ scale: 1.01 }}
-                                                    transition={{ duration: 0.15 }}
-                                                    onClick={() => { setActiveTab('planets'); setExpandedPlanet(planet.planet); }}
-                                                    className="cursor-pointer group"
-                                                >
-                                                    <div className={`relative p-4 rounded-2xl bg-surface/40 border border-outline-variant/15 hover:border-secondary/25 transition-all overflow-hidden`}>
-                                                        {/* Gradient accent */}
-                                                        <div className={`absolute inset-0 bg-gradient-to-br ${PLANET_GRADIENT[planet.planet] || 'from-secondary/10 to-transparent'} opacity-0 group-hover:opacity-100 transition-opacity`} />
-                                                        
-                                                        <div className="relative flex items-center gap-3">
-                                                            {/* Glyph */}
-                                                            <div className="flex flex-col items-center gap-1 shrink-0">
-                                                                <span className="text-[28px] leading-none" style={{ color }}>{PLANET_GLYPHS[planet.planet] || '★'}</span>
-                                                                <StrengthRing value={planet.shadbala} color={color} size={40} />
-                                                            </div>
-
-                                                            {/* Info */}
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <h3 className="text-[15px] font-headline font-bold text-foreground">{planet.planet}</h3>
-                                                                    {planet.retrograde && (
-                                                                        <span className="text-[9px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded-md uppercase tracking-wider">℞</span>
-                                                                    )}
-                                                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border ${dignity.bg} ${dignity.border} ${dignity.text}`}>
-                                                                        {dignity.label}
-                                                                    </span>
-                                                                </div>
-                                                                <p className="text-[12px] text-foreground/40 font-bold">
-                                                                    {planet.sign} · H{planet.house} · {planet.degree.toFixed(1)}°
-                                                                </p>
-                                                                {/* Lord Of */}
-                                                                {planet.lordOf.length > 0 && (
-                                                                    <p className="text-[11px] text-foreground/25 font-bold mt-0.5">
-                                                                        Lord of {planet.lordOf.map(h => `H${h}`).join(', ')}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Rashi icon */}
-                                                            {SIGN_TO_ICON[planet.sign] && (
-                                                                <div className="w-8 h-8 relative opacity-30 group-hover:opacity-50 transition-opacity shrink-0">
-                                                                    <Image src={SIGN_TO_ICON[planet.sign]} alt={planet.sign} fill className="object-contain" />
-                                                                </div>
+                                                <div key={idx} className={idx < data.dasha.active.length - 1 ? 'pb-3 border-b border-outline-variant/10' : ''}>
+                                                    <div className="flex items-center gap-2.5 mb-1.5">
+                                                        <div className="w-8 h-8 relative shrink-0 flex items-center justify-center">
+                                                            {PLANET_TO_ICON[period.planet] ? (
+                                                                <Image src={PLANET_TO_ICON[period.planet]} alt={period.planet} fill className="object-contain" />
+                                                            ) : (
+                                                                <span className="text-lg" style={{ color: PLANET_COLORS[period.planet] }}>{PLANET_GLYPHS[period.planet]}</span>
                                                             )}
                                                         </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[13px] font-bold text-foreground">{period.planet}
+                                                                    <span className={`ml-1.5 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                                                                        isMaha ? 'bg-secondary/10 text-secondary' : 'bg-purple-500/10 text-purple-400'
+                                                                    }`}>{isMaha ? 'Mahādashā' : 'Antardasā'}</span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </motion.div>
+                                                    <div className="h-2 rounded-full bg-surface-variant/30 overflow-hidden mb-1">
+                                                        <motion.div className="h-full rounded-full bg-gradient-to-r from-secondary/80 to-amber-500/80"
+                                                            initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1.2, ease: 'easeOut' }} />
+                                                    </div>
+                                                    <div className="flex justify-between text-[11px]">
+                                                        <span className="text-foreground/30 font-bold">{pct.toFixed(0)}% elapsed</span>
+                                                        <span className="text-secondary font-bold">{rem} left</span>
+                                                    </div>
+                                                </div>
                                             );
                                         })}
                                     </div>
+                                    {data.dasha.explanation?.[0] && (
+                                        <p className="text-[12px] text-foreground/40 leading-relaxed mt-3 pt-3 border-t border-outline-variant/10">
+                                            {data.dasha.explanation[0]}
+                                        </p>
+                                    )}
+                                </Card>
+                            </div>
+                        )}
+
+                        {/* ── Cosmic Strengths (Yogas) — Grouped ── */}
+                        {allYogas.length > 0 && (
+                            <div className="flex-1 min-h-0">
+                                <div className="flex items-center gap-2 mb-2.5">
+                                    <div className="w-1 h-4 rounded-full bg-amber-400" />
+                                    <h2 className="text-[12px] font-bold text-amber-400 uppercase tracking-[0.2em]">Cosmic Strengths</h2>
+                                    <span className="text-[10px] text-foreground/20 font-bold ml-auto">{allYogas.length} yogas</span>
                                 </div>
-
-                                {/* ── Active Dasha Summary ── */}
-                                {data.dasha?.active?.length > 0 && (
-                                    <div>
-                                        <h2 className="text-[12px] font-bold text-foreground/30 uppercase tracking-[0.2em] mb-3">Current Dasha Period</h2>
-                                        <Card padding="none" className="glass-panel overflow-hidden">
-                                            <div className="divide-y divide-outline-variant/10">
-                                                {data.dasha.active.map((period, idx) => {
-                                                    const startDate = new Date(period.start);
-                                                    const endDate = new Date(period.end);
-                                                    const now = Date.now();
-                                                    const totalDuration = endDate.getTime() - startDate.getTime();
-                                                    const elapsed = now - startDate.getTime();
-                                                    const pct = Math.min(100, Math.max(2, (elapsed / totalDuration) * 100));
-                                                    const remainingDays = Math.max(0, Math.ceil((endDate.getTime() - now) / (1000 * 60 * 60 * 24)));
-                                                    const remainingYears = (remainingDays / 365).toFixed(1);
-                                                    const color = PLANET_COLORS[period.planet] || '#c8880a';
-
-                                                    return (
-                                                        <div key={idx} className="p-5 sm:p-6">
-                                                            <div className="flex items-center justify-between mb-4">
-                                                                <div className="flex items-center gap-3">
-                                                                    <span className="text-[24px]" style={{ color }}>{PLANET_GLYPHS[period.planet] || '★'}</span>
-                                                                    <div>
-                                                                        <h4 className="text-[16px] font-headline font-bold text-foreground">{period.planet} {period.type}</h4>
-                                                                        <p className="text-[11px] text-foreground/35 font-bold uppercase tracking-wider">
-                                                                            {period.type === 'Mahadasha' ? 'Major Period' : 'Sub-Period'} · {remainingYears}y remaining
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${
-                                                                    period.type === 'Mahadasha'
-                                                                        ? 'bg-secondary/10 text-secondary border border-secondary/20'
-                                                                        : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                                                }`}>
-                                                                    Active
-                                                                </span>
-                                                            </div>
-
-                                                            {/* Progress Bar */}
-                                                            <div className="relative">
-                                                                <div className="flex items-center gap-3 text-[11px] text-foreground/35 font-bold mb-2">
-                                                                    <span>{startDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</span>
-                                                                    <div className="flex-1" />
-                                                                    <span>{endDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</span>
-                                                                </div>
-                                                                <div className="h-2 rounded-full bg-surface/60 border border-outline-variant/10 overflow-hidden">
-                                                                    <motion.div
-                                                                        className="h-full rounded-full"
-                                                                        style={{ backgroundColor: color }}
-                                                                        initial={{ width: 0 }}
-                                                                        animate={{ width: `${pct}%` }}
-                                                                        transition={{ duration: 1, ease: 'easeOut' }}
-                                                                    />
-                                                                </div>
-                                                                <p className="text-[10px] text-foreground/25 font-bold mt-1.5 text-right">{pct.toFixed(0)}% complete</p>
-                                                            </div>
+                                <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
+                                    <div className="space-y-2.5">
+                                        {Object.entries(groupedYogas).map(([baseName, group], idx) => (
+                                            <div key={idx} className={idx < Object.keys(groupedYogas).length - 1 ? 'pb-2.5 border-b border-outline-variant/10' : ''}>
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                    <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
+                                                    <h4 className="text-[12px] font-bold text-amber-400 leading-tight flex-1">{baseName}</h4>
+                                                    {group.count > 1 && (
+                                                        <span className="text-[8px] font-bold text-amber-400/60 bg-amber-500/10 px-1.5 py-0.5 rounded-full">{group.count}×</span>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {group.yogas.map((yoga, yi) => (
+                                                        <div key={yi} className="flex items-start gap-1.5 pl-4">
+                                                            <span className="text-[10px] shrink-0 mt-0.5" style={{ color: PLANET_COLORS[yoga.planet] }}>{PLANET_GLYPHS[yoga.planet]}</span>
+                                                            <p className="text-[11px] text-foreground/40 leading-snug">{yoga.effect}</p>
                                                         </div>
-                                                    );
-                                                })}
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </Card>
+                                        ))}
                                     </div>
-                                )}
+                                </Card>
+                            </div>
+                        )}
+                    </div>
 
-                                {/* ── All Yogas Summary ── */}
-                                {totalYogas > 0 && (
-                                    <div>
-                                        <h2 className="text-[12px] font-bold text-foreground/30 uppercase tracking-[0.2em] mb-3">Active Yogas</h2>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            {data.planets.filter(p => p.yogas.length > 0).map(planet => (
-                                                planet.yogas.map((yoga, yIdx) => (
-                                                    <div key={`${planet.planet}-${yIdx}`} className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/15">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <span className="text-[18px]" style={{ color: PLANET_COLORS[planet.planet] }}>{PLANET_GLYPHS[planet.planet]}</span>
-                                                            <h4 className="text-[14px] font-headline font-bold text-foreground">{yoga.name}</h4>
-                                                        </div>
-                                                        <p className="text-[13px] text-foreground/55 leading-relaxed">{yoga.effect}</p>
-                                                    </div>
-                                                ))
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                    {/* ─── RIGHT MAIN ─── */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-2.5 lg:min-h-0 pl-0 lg:pl-3 w-full">
 
-                                {/* ── House Occupancy Visual ── */}
-                                <div>
-                                    <h2 className="text-[12px] font-bold text-foreground/30 uppercase tracking-[0.2em] mb-3">Bhava Map</h2>
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                                        {data.houses.map(house => (
-                                            <button
-                                                key={house.house}
-                                                onClick={() => { setActiveTab('houses'); setExpandedHouse(house.house); }}
-                                                className={`p-3 rounded-xl border text-center transition-all hover:border-secondary/25 ${
-                                                    house.occupants.length > 0
-                                                        ? 'bg-secondary/[0.06] border-secondary/15'
-                                                        : 'bg-surface/30 border-outline-variant/12'
-                                                }`}
+                        <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px] flex flex-col flex-1 lg:min-h-0 overflow-hidden">
+
+                            {/* ── HEADER — always visible ── */}
+                            <div className="flex items-center gap-2 mb-2 shrink-0">
+                                {selectedPlanet ? (
+                                    <button onClick={() => { setSelectedPlanet(null); setPlanetDetails(null); }}
+                                        className="flex items-center gap-1.5 text-[11px] font-bold text-foreground/30 uppercase tracking-widest hover:text-secondary transition-colors">
+                                        <ChevronLeft className="w-4 h-4" /> Back
+                                    </button>
+                                ) : null}
+                                <div className="flex-1" />
+                                <Globe className="w-4 h-4 text-blue-400" />
+                                <h2 className="text-[12px] font-bold uppercase text-foreground tracking-wider">Planetary Powers</h2>
+                                {!selectedPlanet && (
+                                    <span className="text-[10px] text-secondary/60 font-bold ml-2 uppercase tracking-widest animate-pulse">
+                                        ✦ Click any planet
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* ── PLANET STRIP — collapses when a planet is selected ── */}
+                            <motion.div
+                                animate={{
+                                    height: selectedPlanet ? 0 : 'auto',
+                                    opacity: selectedPlanet ? 0 : 1,
+                                    marginBottom: selectedPlanet ? 0 : 12,
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="shrink-0 overflow-hidden"
+                            >
+                                <div className="flex justify-start lg:justify-center items-start gap-3 sm:gap-4 lg:gap-5 pb-3 overflow-x-auto scrollbar-hide px-1">
+                                    {data.planets.map(planet => {
+                                        const dignity = getDignityStyle(planet.dignity);
+                                        return (
+                                            <motion.div
+                                                key={planet.planet}
+                                                whileHover={{ scale: 1.08 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => handlePlanetClick(planet)}
+                                                className="flex flex-col items-center gap-1 cursor-pointer group relative h-[140px] sm:h-[155px] lg:h-[170px] justify-start shrink-0"
                                             >
-                                                <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-wider">H{house.house}</p>
-                                                <p className="text-[12px] font-headline font-bold text-foreground mt-0.5">{house.sign}</p>
-                                                {house.occupants.length > 0 && (
-                                                    <div className="flex justify-center gap-0.5 mt-1.5">
-                                                        {house.occupants.map((occ, i) => (
-                                                            <span key={i} className="text-[12px]" style={{ color: PLANET_COLORS[occ.planet] }}>{PLANET_GLYPHS[occ.planet]}</span>
+                                                <motion.div layoutId={`planet-fly-${planet.planet}`}>
+                                                    <PlanetIcon planet={planet.planet} size="w-[56px] h-[56px] sm:w-[72px] sm:h-[72px] lg:w-[96px] lg:h-[96px]" />
+                                                </motion.div>
+
+                                                <p className="text-[11px] sm:text-[12px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors leading-none relative z-10">
+                                                    {planet.planet}
+                                                </p>
+
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                    <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${dignity.bg} ${dignity.text} ${dignity.border}`}>
+                                                        {dignity.label}
+                                                    </span>
+                                                    {planet.retrograde ? (
+                                                        <span className="text-[8px] font-bold text-orange-400">℞ Retro</span>
+                                                    ) : (
+                                                        <span className="text-[8px] invisible">℞ Retro</span>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            </motion.div>
+
+                            {/* ── CONTENT AREA — planet detail or houses ── */}
+                            <div className="flex-1 min-h-0 overflow-hidden">
+                                {selectedPlanet ? (
+                                    /* ═══ PLANET DETAIL: Giant icon left + details right ═══ */
+                                    <motion.div
+                                        key={`detail-${selectedPlanet.planet}`}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="h-full flex flex-col md:flex-row gap-6 md:gap-8 lg:overflow-y-auto"
+                                    >
+                                        {/* LEFT: Giant planet — flies here via layoutId */}
+                                        <div className="w-full md:w-[240px] xl:w-[280px] shrink-0 flex flex-col items-center justify-center pt-8 md:pt-0">
+                                            <div className="relative mb-6">
+                                                <motion.div
+                                                    className="absolute inset-[-40px] rounded-full blur-[70px] opacity-25"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 0.25 }}
+                                                    transition={{ delay: 0.3 }}
+                                                    style={{ backgroundColor: PLANET_COLORS[selectedPlanet.planet] }}
+                                                />
+                                                <motion.div
+                                                    layoutId={`planet-fly-${selectedPlanet.planet}`}
+                                                    transition={{ type: "spring", stiffness: 180, damping: 24 }}
+                                                >
+                                                    <PlanetIcon planet={selectedPlanet.planet} size="w-[180px] h-[180px] xl:w-[220px] xl:h-[220px]" />
+                                                </motion.div>
+                                            </div>
+
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 15 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: 0.25 }}
+                                                className="text-center"
+                                            >
+                                                <h3 className="text-3xl xl:text-4xl font-headline font-bold text-foreground leading-none mb-2">
+                                                    {selectedPlanet.planet}
+                                                </h3>
+                                                <p className="text-[12px] font-bold text-secondary uppercase tracking-[0.3em] mb-3">
+                                                    {selectedPlanet.sign} · House {selectedPlanet.house}
+                                                </p>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${getDignityStyle(selectedPlanet.dignity).bg} ${getDignityStyle(selectedPlanet.dignity).text} ${getDignityStyle(selectedPlanet.dignity).border}`}>
+                                                        {selectedPlanet.dignity}
+                                                    </span>
+                                                    {selectedPlanet.retrograde && (
+                                                        <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full">℞ Retrograde</span>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        </div>
+
+                                        {/* RIGHT: Details */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 40 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.15, type: "spring", stiffness: 250, damping: 28 }}
+                                            className="flex-1 min-w-0 space-y-5 overflow-y-auto pr-1"
+                                        >
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[
+                                                    { l: "Degree", v: `${selectedPlanet.degree.toFixed(2)}°` },
+                                                    { l: "Shadbala", v: selectedPlanet.shadbala > 0 ? selectedPlanet.shadbala.toFixed(1) : '—' },
+                                                    { l: "Lord Of", v: selectedPlanet.lordOf?.length ? `H${selectedPlanet.lordOf.join(', H')}` : '—' },
+                                                    { l: "Sign", v: selectedPlanet.sign },
+                                                ].map((stat, i) => (
+                                                    <motion.div key={i}
+                                                        initial={{ opacity: 0, y: 8 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.2 + i * 0.04 }}
+                                                        className="flex justify-between items-center px-3 py-2.5 bg-surface-variant/20 rounded-[12px] border border-outline-variant/5">
+                                                        <span className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest">{stat.l}</span>
+                                                        <span className="text-[13px] font-bold text-foreground">{stat.v}</span>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+
+                                            {selectedPlanet.conjunctions.length > 0 && (
+                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                                                    <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest block mb-2">Conjunctions</span>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {selectedPlanet.conjunctions.map((p, i) => (
+                                                            <span key={i} className="px-3 py-1.5 bg-surface-variant/30 rounded-full text-[11px] font-bold text-foreground/50 border border-outline-variant/10">
+                                                                <span style={{ color: PLANET_COLORS[p] }}>{PLANET_GLYPHS[p]}</span> {p}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            <div>
+                                                <h4 className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
+                                                    <Info className="w-3.5 h-3.5" /> Cosmic Interpretation
+                                                </h4>
+                                                {planetLoading ? (
+                                                    <div className="space-y-3 animate-pulse">
+                                                        <div className="h-4 bg-surface-variant/20 rounded w-full" />
+                                                        <div className="h-4 bg-surface-variant/20 rounded w-4/5" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-3">
+                                                        {(planetDetails?.interpretation || selectedPlanet.interpretation).map((line: string, i: number) => (
+                                                            <motion.p key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.06 }}
+                                                                className="text-[13px] text-foreground/55 leading-relaxed pl-4 border-l-2 border-secondary/20">{line}</motion.p>
                                                         ))}
                                                     </div>
                                                 )}
-                                                {house.occupants.length === 0 && (
-                                                    <p className="text-[10px] text-foreground/15 mt-1.5">—</p>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ══════════════════════════════════════════
-                            PLANETS TAB
-                        ══════════════════════════════════════════ */}
-                        {activeTab === 'planets' && (
-                            <div className="space-y-3">
-                                {data.planets.map((planet) => {
-                                    const dignity = getDignityStyle(planet.dignity);
-                                    const color = PLANET_COLORS[planet.planet] || '#c8880a';
-                                    const isExpanded = expandedPlanet === planet.planet;
-
-                                    return (
-                                        <Card
-                                            key={planet.planet}
-                                            padding="none"
-                                            className="glass-panel overflow-hidden"
-                                        >
-                                            {/* Planet Header (always visible) */}
-                                            <button
-                                                onClick={() => setExpandedPlanet(isExpanded ? null : planet.planet)}
-                                                className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-surface/10 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 border bg-gradient-to-br ${PLANET_GRADIENT[planet.planet] || ''} ${dignity.border}`}>
-                                                        <span className="text-[26px] sm:text-[30px]" style={{ color }}>{PLANET_GLYPHS[planet.planet] || '★'}</span>
-                                                    </div>
-                                                    <div className="text-left min-w-0">
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <h3 className="text-[16px] sm:text-[18px] font-headline font-bold text-foreground">{planet.planet}</h3>
-                                                            {planet.retrograde && (
-                                                                <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded-md uppercase tracking-wider">℞ Retro</span>
-                                                            )}
-                                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border ${dignity.bg} ${dignity.border} ${dignity.text}`}>
-                                                                {dignity.label}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-[12px] text-foreground/40 font-bold mt-0.5">
-                                                            {planet.sign} · House {planet.house} · {planet.degree.toFixed(1)}°
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3 shrink-0">
-                                                    {SIGN_TO_ICON[planet.sign] && (
-                                                        <div className="w-7 h-7 relative opacity-25 hidden sm:block">
-                                                            <Image src={SIGN_TO_ICON[planet.sign]} alt={planet.sign} fill className="object-contain" />
-                                                        </div>
-                                                    )}
-                                                    <ChevronDown className={`w-4 h-4 text-foreground/30 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                                                </div>
-                                            </button>
-
-                                            {/* Planet Details (expanded) */}
-                                            <AnimatePresence>
-                                                {isExpanded && (
-                                                    <motion.div
-                                                        initial={{ height: 0, opacity: 0 }}
-                                                        animate={{ height: 'auto', opacity: 1 }}
-                                                        exit={{ height: 0, opacity: 0 }}
-                                                        transition={{ duration: 0.25 }}
-                                                        className="overflow-hidden"
-                                                    >
-                                                        <div className="border-t border-outline-variant/20">
-                                                            {/* Stats Row */}
-                                                            <div className="grid grid-cols-2 sm:grid-cols-4 bg-surface/5">
-                                                                <div className="p-3 sm:p-4 border-r border-b sm:border-b-0 border-outline-variant/10 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Shadbala</span>
-                                                                    <StrengthRing value={planet.shadbala} color={color} size={44} />
-                                                                </div>
-                                                                <div className="p-3 sm:p-4 sm:border-r border-b sm:border-b-0 border-outline-variant/10 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Lord Of</span>
-                                                                    <span className="text-[14px] font-headline font-bold text-secondary">
-                                                                        {planet.lordOf.length > 0 ? planet.lordOf.map(h => `H${h}`).join(', ') : '—'}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="p-3 sm:p-4 border-r border-outline-variant/10 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Conjunct</span>
-                                                                    <span className="text-[14px] font-headline font-bold text-secondary">
-                                                                        {planet.conjunctions.length > 0 ? planet.conjunctions.join(', ') : '—'}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="p-3 sm:p-4 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Degree</span>
-                                                                    <span className="text-[14px] font-headline font-bold text-secondary">{planet.degree.toFixed(2)}°</span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Interpretations */}
-                                                            {planet.interpretation.length > 0 && (
-                                                                <div className="p-5 sm:p-6 border-t border-outline-variant/10">
-                                                                    <span className="text-[11px] font-bold text-foreground/25 uppercase tracking-[0.15em] block mb-3">Interpretation</span>
-                                                                    {planet.interpretation.map((text, idx) => (
-                                                                        <p key={idx} className="text-[14px] sm:text-[15px] text-foreground/75 leading-relaxed mb-2 last:mb-0">{text}</p>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-
-                                                            {/* Yogas */}
-                                                            {planet.yogas.length > 0 && (
-                                                                <div className="p-5 sm:p-6 border-t border-outline-variant/10 bg-secondary/[0.03]">
-                                                                    <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.15em] block mb-3">Active Yogas</span>
-                                                                    <div className="space-y-3">
-                                                                        {planet.yogas.map((yoga, idx) => (
-                                                                            <div key={idx}>
-                                                                                <h4 className="text-[14px] font-bold text-foreground mb-1">{yoga.name}</h4>
-                                                                                <p className="text-[13px] text-foreground/55 leading-relaxed">{yoga.effect}</p>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </Card>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* ══════════════════════════════════════════
-                            HOUSES TAB
-                        ══════════════════════════════════════════ */}
-                        {activeTab === 'houses' && (
-                            <div className="space-y-3">
-                                {data.houses.map((house) => {
-                                    const isExpanded = expandedHouse === house.house;
-                                    return (
-                                        <Card
-                                            key={house.house}
-                                            padding="none"
-                                            className="glass-panel overflow-hidden"
-                                        >
-                                            {/* House Header */}
-                                            <button
-                                                onClick={() => setExpandedHouse(isExpanded ? null : house.house)}
-                                                className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-surface/10 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-surface/50 border border-outline-variant/20 flex flex-col items-center justify-center shrink-0">
-                                                        <span className="text-[18px] sm:text-[20px] font-headline font-bold text-secondary leading-none">{house.house}</span>
-                                                        <span className="text-[8px] font-bold text-foreground/25 uppercase tracking-wider leading-none mt-0.5">Bhava</span>
-                                                    </div>
-                                                    <div className="text-left min-w-0">
-                                                        <div className="flex items-center gap-2">
-                                                            <h3 className="text-[15px] sm:text-[17px] font-headline font-bold text-foreground truncate">{house.name}</h3>
-                                                        </div>
-                                                        <p className="text-[11px] text-foreground/30 font-bold mt-0.5 italic">{HOUSE_SANSKRIT[house.house]}</p>
-                                                        <p className="text-[12px] text-foreground/40 font-bold mt-0.5">
-                                                            {house.sign} · Lord: {house.lord}
-                                                            {house.occupants.length > 0 && ` · ${house.occupants.length} graha${house.occupants.length > 1 ? 's' : ''}`}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    {house.occupants.length > 0 && (
-                                                        <div className="flex -space-x-0.5">
-                                                            {house.occupants.slice(0, 4).map((occ, idx) => (
-                                                                <span key={idx} className="text-[14px]" style={{ color: PLANET_COLORS[occ.planet] }}>{PLANET_GLYPHS[occ.planet]}</span>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    {SIGN_TO_ICON[house.sign] && (
-                                                        <div className="w-7 h-7 relative opacity-20 hidden sm:block">
-                                                            <Image src={SIGN_TO_ICON[house.sign]} alt={house.sign} fill className="object-contain" />
-                                                        </div>
-                                                    )}
-                                                    <ChevronDown className={`w-4 h-4 text-foreground/30 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                                                </div>
-                                            </button>
-
-                                            {/* House Details */}
-                                            <AnimatePresence>
-                                                {isExpanded && (
-                                                    <motion.div
-                                                        initial={{ height: 0, opacity: 0 }}
-                                                        animate={{ height: 'auto', opacity: 1 }}
-                                                        exit={{ height: 0, opacity: 0 }}
-                                                        transition={{ duration: 0.25 }}
-                                                        className="overflow-hidden"
-                                                    >
-                                                        <div className="border-t border-outline-variant/20">
-                                                            {/* Areas */}
-                                                            <div className="p-4 sm:p-5 bg-surface/5">
-                                                                <span className="text-[10px] font-bold text-foreground/25 uppercase tracking-[0.15em] block mb-2">Life Areas</span>
-                                                                <div className="flex flex-wrap gap-1.5">
-                                                                    {house.areas.map((area, idx) => (
-                                                                        <span key={idx} className="px-2.5 py-1 rounded-lg bg-surface/50 border border-outline-variant/15 text-[11px] font-bold text-foreground/50">
-                                                                            {area}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Stats */}
-                                                            <div className="grid grid-cols-3 border-t border-outline-variant/10 bg-surface/5">
-                                                                <div className="p-3 sm:p-4 border-r border-outline-variant/10 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Sign</span>
-                                                                    <div className="flex items-center justify-center gap-1.5">
-                                                                        {SIGN_TO_ICON[house.sign] && (
-                                                                            <div className="w-5 h-5 relative opacity-60">
-                                                                                <Image src={SIGN_TO_ICON[house.sign]} alt={house.sign} fill className="object-contain" />
-                                                                            </div>
-                                                                        )}
-                                                                        <span className="text-[14px] font-headline font-bold text-secondary">{house.sign}</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="p-3 sm:p-4 border-r border-outline-variant/10 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Lord</span>
-                                                                    <div className="flex items-center justify-center gap-1">
-                                                                        <span className="text-[14px]" style={{ color: PLANET_COLORS[house.lord] }}>{PLANET_GLYPHS[house.lord]}</span>
-                                                                        <span className="text-[14px] font-headline font-bold text-secondary">{house.lord}</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="p-3 sm:p-4 text-center">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider block mb-1">Lord In</span>
-                                                                    <span className="text-[14px] font-headline font-bold text-secondary">H{house.lordHouse}</span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Occupants */}
-                                                            {house.occupants.length > 0 && (
-                                                                <div className="p-4 sm:p-5 border-t border-outline-variant/10">
-                                                                    <span className="text-[11px] font-bold text-foreground/30 uppercase tracking-[0.15em] block mb-3">Occupying Grahas</span>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {house.occupants.map((occ, idx) => {
-                                                                            const occDignity = getDignityStyle(occ.dignity);
-                                                                            return (
-                                                                                <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${occDignity.bg} ${occDignity.border}`}>
-                                                                                    <span className="text-[16px]" style={{ color: PLANET_COLORS[occ.planet] }}>{PLANET_GLYPHS[occ.planet]}</span>
-                                                                                    <span className={`text-[13px] font-bold ${occDignity.text}`}>{occ.planet}</span>
-                                                                                    {occ.retrograde && <span className="text-[9px] bg-orange-500/10 text-orange-400 px-1 rounded font-bold">℞</span>}
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Interpretations */}
-                                                            {house.interpretation.length > 0 && (
-                                                                <div className="p-5 sm:p-6 border-t border-outline-variant/10">
-                                                                    <span className="text-[11px] font-bold text-foreground/25 uppercase tracking-[0.15em] block mb-3">Interpretation</span>
-                                                                    {house.interpretation.map((text, idx) => (
-                                                                        <p key={idx} className="text-[14px] sm:text-[15px] text-foreground/75 leading-relaxed mb-2 last:mb-0">{text}</p>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </Card>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* ══════════════════════════════════════════
-                            DASHA TAB
-                        ══════════════════════════════════════════ */}
-                        {activeTab === 'dasha' && data.dasha && (
-                            <div className="space-y-4">
-                                {/* Active Periods */}
-                                <Card padding="none" className="glass-panel overflow-hidden">
-                                    <div className="p-4 sm:p-5 border-b border-outline-variant/20 bg-surface/10">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-                                                <Activity className="w-4 h-4 text-secondary" />
                                             </div>
-                                            <div>
-                                                <span className="text-[13px] font-bold text-foreground block">Active Periods</span>
-                                                <span className="text-[10px] text-foreground/30 font-bold uppercase tracking-wider">Current Vimshottari Dasha</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="divide-y divide-outline-variant/10">
-                                        {data.dasha.active.map((period, idx) => {
-                                            const startDate = new Date(period.start);
-                                            const endDate = new Date(period.end);
-                                            const now = Date.now();
-                                            const totalDuration = endDate.getTime() - startDate.getTime();
-                                            const elapsed = now - startDate.getTime();
-                                            const pct = Math.min(100, Math.max(2, (elapsed / totalDuration) * 100));
-                                            const remainingDays = Math.max(0, Math.ceil((endDate.getTime() - now) / (1000 * 60 * 60 * 24)));
-                                            const totalYearsRemain = (remainingDays / 365).toFixed(1);
-                                            const color = PLANET_COLORS[period.planet] || '#c8880a';
 
-                                            return (
-                                                <div key={idx} className="p-5 sm:p-6">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center border ${
-                                                                period.type === 'Mahadasha' ? 'bg-secondary/10 border-secondary/20' : 'bg-purple-500/10 border-purple-500/20'
-                                                            }`}>
-                                                                <span className="text-[22px]" style={{ color }}>{PLANET_GLYPHS[period.planet] || '★'}</span>
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-[16px] font-headline font-bold text-foreground">{period.planet} {period.type}</h4>
-                                                                <p className="text-[11px] text-foreground/35 font-bold">
-                                                                    {period.type === 'Mahadasha' ? 'Major Period' : 'Sub-Period'} · ~{totalYearsRemain} years remaining
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${
-                                                            period.type === 'Mahadasha' ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                                        }`}>
-                                                            Active
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Timeline Bar */}
-                                                    <div>
-                                                        <div className="flex items-center justify-between text-[11px] text-foreground/35 font-bold mb-2">
-                                                            <span>{startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                                                            <span>{endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                                                        </div>
-                                                        <div className="h-2.5 rounded-full bg-surface/60 border border-outline-variant/10 overflow-hidden">
-                                                            <motion.div
-                                                                className="h-full rounded-full"
-                                                                style={{ backgroundColor: color }}
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${pct}%` }}
-                                                                transition={{ duration: 1, ease: 'easeOut' }}
-                                                            />
-                                                        </div>
-                                                        <p className="text-[10px] text-foreground/25 font-bold mt-1.5 text-center">{pct.toFixed(0)}% of period elapsed</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </Card>
-
-                                {/* Explanations */}
-                                {data.dasha.explanation.length > 0 && (
-                                    <Card padding="none" className="glass-panel overflow-hidden">
-                                        <div className="p-4 sm:p-5 border-b border-outline-variant/20 bg-surface/10">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                                    <BookOpen className="w-4 h-4 text-emerald-500" />
-                                                </div>
+                                            {(planetDetails?.yogas?.length > 0 || selectedPlanet.yogas?.length > 0) && (
                                                 <div>
-                                                    <span className="text-[13px] font-bold text-foreground block">Period Analysis</span>
-                                                    <span className="text-[10px] text-foreground/30 font-bold uppercase tracking-wider">What this means for you</span>
+                                                    <h4 className="text-[11px] font-bold text-amber-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
+                                                        <Sparkles className="w-3.5 h-3.5" /> Active Yogas
+                                                    </h4>
+                                                    <div className="space-y-2">
+                                                        {(planetDetails?.yogas || selectedPlanet.yogas).map((yoga: any, i: number) => (
+                                                            <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.06 }}
+                                                                className="bg-amber-500/[0.04] border border-amber-500/15 rounded-[14px] p-3">
+                                                                <h5 className="text-[12px] font-bold text-amber-400 mb-1">{yoga.name}</h5>
+                                                                <p className="text-[11px] text-foreground/40 leading-relaxed">{yoga.effect}</p>
+                                                            </motion.div>
+                                                        ))}
+                                                    </div>
                                                 </div>
+                                            )}
+                                        </motion.div>
+                                    </motion.div>
+                                ) : (
+                                    /* ═══ HOUSES GRID ═══ */
+                                    <div className="h-full overflow-y-auto border-t border-outline-variant/10 pt-3">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <Home className="w-4 h-4 text-emerald-400" />
+                                            <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">Houses</h3>
+                                            <div className="w-12 h-px bg-gradient-to-r from-secondary/30 to-transparent" />
+                                            <div className="flex gap-1.5 ml-auto">
+                                                {(['active', 'all'] as const).map(f => (
+                                                    <button key={f} onClick={() => setHouseFilter(f)}
+                                                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border transition-all ${
+                                                            houseFilter === f
+                                                                ? 'bg-secondary/15 text-secondary border-secondary/30'
+                                                                : 'text-foreground/25 border-outline-variant/10 hover:text-foreground/40'
+                                                        }`}>
+                                                        {f === 'active' ? 'Active Houses' : 'All 12 Houses'}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
-                                        <div className="p-5 sm:p-6 space-y-4">
-                                            {data.dasha.explanation.map((text, idx) => (
-                                                <p key={idx} className="text-[14px] sm:text-[15px] text-foreground/75 leading-relaxed">{text}</p>
-                                            ))}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                                            {filteredHouses.map(house => {
+                                                const hasOcc = house.occupants.length > 0;
+                                                return (
+                                                    <div key={house.house} className={`rounded-[16px] p-3 border transition-all relative overflow-hidden ${
+                                                        hasOcc
+                                                            ? 'bg-surface/40 border-secondary/15 hover:border-secondary/30'
+                                                            : 'bg-surface/15 border-outline-variant/8 opacity-70 hover:opacity-90'
+                                                    }`}>
+                                                        {hasOcc && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-secondary/40 rounded-l-[14px]" />}
+                                                        <div className="mb-1.5">
+                                                            <p className="text-[14px] font-headline font-bold text-foreground leading-tight">{house.name.split('(')[0].trim()}</p>
+                                                            <p className="text-[10px] text-foreground/30 font-bold">H{house.house} · {house.sign} · Lord: {house.lord}</p>
+                                                        </div>
+                                                        {hasOcc && (
+                                                            <div className="flex flex-wrap gap-1 mb-1.5">
+                                                                {house.occupants.map((occ, i) => (
+                                                                    <span key={i} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                                                                        style={{
+                                                                            color: PLANET_COLORS[occ.planet],
+                                                                            backgroundColor: `${PLANET_COLORS[occ.planet]}15`,
+                                                                            borderColor: `${PLANET_COLORS[occ.planet]}30`,
+                                                                        }}>
+                                                                        {PLANET_GLYPHS[occ.planet]} {occ.planet}
+                                                                        {occ.dignity !== 'Normal' && <span className="text-[7px] opacity-70">{occ.dignity === 'Exalted' ? '⬆' : '⬇'}</span>}
+                                                                        {occ.retrograde && <span className="text-[7px] text-orange-400">℞</span>}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        {house.interpretation?.[0] && (
+                                                            <p className="text-[11px] text-foreground/40 leading-snug line-clamp-2">{house.interpretation[0]}</p>
+                                                        )}
+                                                        {!house.interpretation?.[0] && house.areas.length > 0 && (
+                                                            <div className="flex flex-wrap gap-0.5">
+                                                                {house.areas.slice(0, 3).map((a, i) => (
+                                                                    <span key={i} className="text-[9px] text-foreground/25 font-bold">{a}{i < 2 && house.areas.length > 1 ? ' · ' : ''}</span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                    </Card>
+                                    </div>
                                 )}
                             </div>
-                        )}
-                    </motion.div>
-                </AnimatePresence>
 
-                <p className="text-center mt-12 text-[11px] text-foreground/12 font-bold tracking-[0.3em] uppercase">
-                    Decoded by AstraNavi Intelligence
-                </p>
+                        </Card>
+                    </div>
+                </div>
             </div>
         </div>
     );

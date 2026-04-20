@@ -19,13 +19,13 @@ const Card: React.FC<CardProps> = ({
   allowOverflow = false,
   colorScheme = 'default',
 }) => {
-  const baseStyles = `transition-all duration-300 rounded-3xl ${allowOverflow ? '' : 'overflow-hidden'}`;
+  const baseStyles = `transition-all duration-300 rounded-[32px] ${allowOverflow ? '' : 'overflow-hidden'}`;
   
   const colorSchemes = {
     default: {
-      default: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/30 dark:border-secondary/10',
-      elevated: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/35 dark:border-secondary/15',
-      bordered: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/40 dark:border-secondary/20',
+      default: 'bg-surface/40 dark:bg-surface/40 border-outline-variant/30 dark:border-outline-variant/20',
+      elevated: 'bg-surface/50 dark:bg-surface/50 border-outline-variant/35 dark:border-outline-variant/25',
+      bordered: 'bg-surface/60 dark:bg-surface/60 border-outline-variant/40 dark:border-outline-variant/30',
     },
     ivory: {
       default: 'bg-background border-outline-variant/30',
@@ -50,9 +50,9 @@ const Card: React.FC<CardProps> = ({
   };
 
   const variants = {
-    default: `${colorSchemes[colorScheme].default} backdrop-blur-sm dark:backdrop-blur-md border`,
-    elevated: `${colorSchemes[colorScheme].elevated} backdrop-blur-sm dark:backdrop-blur-md border`,
-    bordered: `${colorSchemes[colorScheme].bordered} backdrop-blur-sm border-[1.5px]`,
+    default: `${colorSchemes[colorScheme].default} backdrop-blur-md border`,
+    elevated: `${colorSchemes[colorScheme].elevated} backdrop-blur-md border`,
+    bordered: `${colorSchemes[colorScheme].bordered} backdrop-blur-lg border-[1.5px]`,
   };
 
   const paddings = {

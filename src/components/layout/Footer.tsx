@@ -27,7 +27,10 @@ const Footer = () => {
                         <li><Link className="hover:text-secondary transition-colors" href="/chat">Consult Navi</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/horoscope">Rashi Predictions</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/kundli">Birth Chart Analysis</Link></li>
-                        <li><span className="text-primary/40 cursor-not-allowed" title="Coming Soon">Sacred Items</span></li>
+                        <li className="relative group/tool cursor-not-allowed opacity-[0.35]">
+                            <span>Sacred Items</span>
+                            <span className="absolute left-0 -bottom-4 text-[10px] text-secondary whitespace-nowrap opacity-0 group-hover/tool:opacity-100 transition-opacity">Coming soon</span>
+                        </li>
                     </ul>
                 </div>
                 
@@ -35,9 +38,18 @@ const Footer = () => {
                     <h5 className="font-bold text-primary mb-3 sm:mb-5 uppercase tracking-widest text-[10px] sm:text-xs">Company Info</h5>
                     <ul className="space-y-2 sm:space-y-3 font-body text-xs sm:text-sm text-primary/60 font-medium">
                         <li><Link className="hover:text-secondary transition-colors" href="/about">About Us</Link></li>
-                        <li><span className="text-primary/40 cursor-not-allowed" title="Coming Soon">Our Astrologers</span></li>
-                        <li><span className="text-primary/40 cursor-not-allowed" title="Coming Soon">Careers</span></li>
-                        <li><span className="text-primary/40 cursor-not-allowed" title="Coming Soon">Contact Support</span></li>
+                        <li className="relative group/tool cursor-not-allowed opacity-[0.35]">
+                            <span>Our Astrologers</span>
+                            <span className="absolute left-0 -bottom-4 text-[10px] text-secondary whitespace-nowrap opacity-0 group-hover/tool:opacity-100 transition-opacity">Coming soon</span>
+                        </li>
+                        <li className="relative group/tool cursor-not-allowed opacity-[0.35]">
+                            <span>Careers</span>
+                            <span className="absolute left-0 -bottom-4 text-[10px] text-secondary whitespace-nowrap opacity-0 group-hover/tool:opacity-100 transition-opacity">Coming soon</span>
+                        </li>
+                        <li className="relative group/tool cursor-not-allowed opacity-[0.35]">
+                            <span>Contact Support</span>
+                            <span className="absolute left-0 -bottom-4 text-[10px] text-secondary whitespace-nowrap opacity-0 group-hover/tool:opacity-100 transition-opacity">Coming soon</span>
+                        </li>
                     </ul>
                 </div>
                 
@@ -46,7 +58,7 @@ const Footer = () => {
                     <p className="text-xs sm:text-sm text-primary/60 font-medium mb-3 sm:mb-4">Receive planetary insights in your inbox.</p>
                     <div className="mt-3 sm:mt-5 relative flex items-center group opacity-50 cursor-not-allowed" title="Coming Soon">
                         <Input 
-                            placeholder="Email address" 
+                            placeholder="your@cosmos.com" 
                             type="email"
                             disabled
                             className="!py-3 !rounded-xl !pr-14 sm:!pr-16 border-secondary/20 !bg-surface/30 cursor-not-allowed" 
@@ -59,7 +71,10 @@ const Footer = () => {
             </div>
             
             <div className="mt-8 sm:mt-12 pt-6 border-t border-secondary/5 text-center">
-                <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-body font-bold text-primary/40">
+                <p 
+                    className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-body font-bold"
+                    style={{ color: 'rgba(212, 160, 23, 0.5)' }}
+                >
                     © {new Date().getFullYear()} Astra Navi. Jyotish for the Modern Age.
                 </p>
             </div>

@@ -192,7 +192,7 @@ export default function ProfileSettingsPage() {
                     </p>
                 </div>
 
-                <Card padding="md" className="cosmic-glow border-secondary/20" hoverable={false}>
+                <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="grid grid-cols-1 gap-6">
                             <Input 

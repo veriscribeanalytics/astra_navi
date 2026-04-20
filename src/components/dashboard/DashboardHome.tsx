@@ -1,59 +1,209 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useChat } from "@/context/ChatContext";
-import { Sparkles, Sun, ArrowRight, Clock, MessageSquare, Compass, Plus } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { 
+    Sparkles, MessageSquare, Globe, Heart, 
+    ChevronRight, Orbit, ArrowRight, 
+    Briefcase, Activity, DollarSign, Star,
+    ShoppingBag, Users
+} from "lucide-react";
 import Card from "@/components/ui/Card";
-import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { calculateAge, getAgeBracket, getPersonalizedQuestions, getStarterCards } from "@/utils/personalizedQuestions";
+import { calculateAge, getAgeBracket, getPersonalizedQuestions } from "@/utils/personalizedQuestions";
+
+// ─── Horoscope Data Interface ─────────────────────────────
+interface HoroscopeData {
+    sign?: string;
+    date?: string;
+    overall_score?: number;
+    mood?: string;
+    lucky_color?: string;
+    lucky_number?: number;
+    career?: string;
+    love?: string;
+    health?: string;
+    finance?: string;
+    tip?: string;
+    dominant_planet?: string;
+}
+
+// ─── Kundli Quick Stats Interface ─────────────────────────
+interface KundliStats {
+    nakshatra?: string;
+    nakshatraLord?: string;
+    activeDasha?: string;
+    dashaRemaining?: string;
+    moonPhase?: string;
+    lagnaSign?: string;
+}
+
+// ─── Time-based greeting ─────────────────────────────
+const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 5) return "Good Night";
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    if (hour < 21) return "Good Evening";
+    return "Good Night";
+};
+
+// ─── Rashi sign mapper ─────────────────────────────
+const getRashiData = (sign: string) => {
+    if (!sign) return null;
+    const s = sign.toLowerCase();
+    if (s.includes('mesh') || s.includes('aries')) return { id: 'aries', name: 'Mesh', en: 'Aries', icon: '/icons/rashi/aries.png' };
+    if (s.includes('vrish') || s.includes('taurus')) return { id: 'taurus', name: 'Vrish', en: 'Taurus', icon: '/icons/rashi/taurus.png' };
+    if (s.includes('mithun') || s.includes('gemini')) return { id: 'gemini', name: 'Mithun', en: 'Gemini', icon: '/icons/rashi/gemini.png' };
+    if (s.includes('kark') || s.includes('cancer')) return { id: 'cancer', name: 'Kark', en: 'Cancer', icon: '/icons/rashi/cancer.png' };
+    if (s.includes('simha') || s.includes('leo')) return { id: 'leo', name: 'Simha', en: 'Leo', icon: '/icons/rashi/leo.png' };
+    if (s.includes('kanya') || s.includes('virgo')) return { id: 'virgo', name: 'Kanya', en: 'Virgo', icon: '/icons/rashi/virgo.png' };
+    if (s.includes('tula') || s.includes('libra')) return { id: 'libra', name: 'Tula', en: 'Libra', icon: '/icons/rashi/libra.png' };
+    if (s.includes('vrishchik') || s.includes('scorpio')) return { id: 'scorpio', name: 'Vrishchik', en: 'Scorpio', icon: '/icons/rashi/scorpio.png' };
+    if (s.includes('dhanu') || s.includes('sagittarius')) return { id: 'sagittarius', name: 'Dhanu', en: 'Sagittarius', icon: '/icons/rashi/sagittarius.png' };
+    if (s.includes('makar') || s.includes('capricorn')) return { id: 'capricorn', name: 'Makar', en: 'Capricorn', icon: '/icons/rashi/capricorn.png' };
+    if (s.includes('kumbh') || s.includes('aquarius')) return { id: 'aquarius', name: 'Kumbh', en: 'Aquarius', icon: '/icons/rashi/aquarius.png' };
+    if (s.includes('meen') || s.includes('pisces')) return { id: 'pisces', name: 'Meen', en: 'Pisces', icon: '/icons/rashi/pisces.png' };
+    return null;
+};
+
+// ─── Score color helper ─────────────────────────────
+const getScoreColor = (score: number) => {
+    if (score >= 75) return '#22c55e';
+    if (score >= 50) return '#eab308';
+    return '#f97316';
+};
+
+// ─── Score ring component ─────────────────────────────
+function ScoreRing({ score, size = 88 }: { score: number; size?: number }) {
+    const [animatedScore, setAnimatedScore] = useState(0);
+    const radius = (size / 2) - 6;
+    const circumference = 2 * Math.PI * radius;
+    const progress = circumference - (animatedScore / 100) * circumference;
+
+    useEffect(() => {
+        const timer = setTimeout(() => setAnimatedScore(score), 200);
+        return () => clearTimeout(timer);
+    }, [score]);
+
+    return (
+        <div className="relative" style={{ width: size, height: size }}>
+            <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
+                <circle
+                    cx={size / 2} cy={size / 2} r={radius}
+                    fill="none" stroke="currentColor" strokeWidth="5"
+                    className="text-surface-variant/20"
+                />
+                <circle
+                    cx={size / 2} cy={size / 2} r={radius}
+                    fill="none" strokeWidth="5" strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={progress}
+                    className="transition-all duration-[1500ms] ease-out"
+                    style={{ stroke: getScoreColor(score) }}
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl font-bold leading-none" style={{ color: getScoreColor(score) }}>
+                    {animatedScore}
+                </span>
+                <span className="text-[9px] text-foreground/40 font-bold uppercase tracking-wider mt-0.5">
+                    Score
+                </span>
+            </div>
+        </div>
+    );
+}
+
+// ─── Skeleton loader ─────────────────────────────
+function SkeletonPulse({ className = "" }: { className?: string }) {
+    return <div className={`animate-pulse bg-surface-variant/20 rounded-xl ${className}`} />;
+}
+
 
 export default function DashboardHome() {
     const { user } = useAuth();
-    const { chats } = useChat();
     const router = useRouter();
     const [quickQuery, setQuickQuery] = useState("");
-    const [customQuestion, setCustomQuestion] = useState("");
+    const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
+    const [horoscopeLoading, setHoroscopeLoading] = useState(true);
+    const [horoscopeError, setHoroscopeError] = useState(false);
+    const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
+    const [kundliLoading, setKundliLoading] = useState(true);
+    const [greeting, setGreeting] = useState(getGreeting());
 
-    // Date formatting helper for archives
-    const formatArchiveDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        const now = new Date();
-        const diffDays = Math.floor((now.getTime() - date.getTime()) / (86400000));
-        
-        if (diffDays === 0) return 'Today';
-        if (diffDays === 1) return 'Yesterday';
-        if (diffDays < 7) return date.toLocaleDateString('en-US', { weekday: 'short' });
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
-
-    const getRashiData = (sign: string) => {
-        const s = sign.toLowerCase();
-        if (s.includes('mesh') || s.includes('aries')) return { name: 'Mesh', en: 'Aries', icon: '/icons/rashi/aries.png' };
-        if (s.includes('vrish') || s.includes('taurus')) return { name: 'Vrish', en: 'Taurus', icon: '/icons/rashi/taurus.png' };
-        if (s.includes('mithun') || s.includes('gemini')) return { name: 'Mithun', en: 'Gemini', icon: '/icons/rashi/gemini.png' };
-        if (s.includes('kark') || s.includes('cancer')) return { name: 'Kark', en: 'Cancer', icon: '/icons/rashi/cancer.png' };
-        if (s.includes('simha') || s.includes('leo')) return { name: 'Simha', en: 'Leo', icon: '/icons/rashi/leo.png' };
-        if (s.includes('kanya') || s.includes('virgo')) return { name: 'Kanya', en: 'Virgo', icon: '/icons/rashi/virgo.png' };
-        if (s.includes('tula') || s.includes('libra')) return { name: 'Tula', en: 'Libra', icon: '/icons/rashi/libra.png' };
-        if (s.includes('vrishchik') || s.includes('scorpio')) return { name: 'Vrishchik', en: 'Scorpio', icon: '/icons/rashi/scorpio.png' };
-        if (s.includes('dhanu') || s.includes('sagittarius')) return { name: 'Dhanu', en: 'Sagittarius', icon: '/icons/rashi/sagittarius.png' };
-        if (s.includes('makar') || s.includes('capricorn')) return { name: 'Makar', en: 'Capricorn', icon: '/icons/rashi/capricorn.png' };
-        if (s.includes('kumbh') || s.includes('aquarius')) return { name: 'Kumbh', en: 'Aquarius', icon: '/icons/rashi/aquarius.png' };
-        if (s.includes('meen') || s.includes('pisces')) return { name: 'Meen', en: 'Pisces', icon: '/icons/rashi/pisces.png' };
-        return null;
-    };
-
-    const rashiData = user?.moonSign ? getRashiData(user.moonSign) : null;
-
-    // Calculate age and get personalized content
     const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
     const ageBracket = useMemo(() => getAgeBracket(age), [age]);
     const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
-    const starterCards = useMemo(() => getStarterCards(ageBracket), [ageBracket]);
+
+    // Update greeting every minute
+    useEffect(() => {
+        const interval = setInterval(() => setGreeting(getGreeting()), 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Fetch horoscope
+    useEffect(() => {
+        if (!user?.email) return;
+        setHoroscopeLoading(true);
+        setHoroscopeError(false);
+
+        fetch(`/api/daily-horoscope?email=${encodeURIComponent(user.email)}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed');
+                return res.json();
+            })
+            .then(data => {
+                setHoroscope(data);
+                setHoroscopeError(false);
+            })
+            .catch(() => setHoroscopeError(true))
+            .finally(() => setHoroscopeLoading(false));
+    }, [user?.email]);
+
+    // Fetch kundli quick stats
+    useEffect(() => {
+        if (!user?.email) return;
+        setKundliLoading(true);
+
+        fetch('/api/analyze-full', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email, force_refresh: false }),
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(result => {
+                if (!result) { setKundliStats(null); return; }
+                const analysis = result.data?.astrologyData || result.data || result;
+
+                const stats: KundliStats = {};
+                if (analysis?.houses) {
+                    const lagna = analysis.houses.find((h: any) => h.house === 1)?.sign;
+                    if (lagna) stats.lagnaSign = lagna;
+                }
+                if (analysis?.nakshatra) stats.nakshatra = analysis.nakshatra;
+                if (analysis?.nakshatraLord) stats.nakshatraLord = analysis.nakshatraLord;
+                if (analysis?.dasha) {
+                    stats.activeDasha = analysis.dasha.currentMahaDasha || analysis.dasha.current;
+                    stats.dashaRemaining = analysis.dasha.remaining;
+                }
+                if (analysis?.moonPhase) stats.moonPhase = analysis.moonPhase;
+
+                // Only set if we got something meaningful
+                if (Object.keys(stats).length > 0) {
+                    setKundliStats(stats);
+                }
+            })
+            .catch(() => setKundliStats(null))
+            .finally(() => setKundliLoading(false));
+    }, [user?.email]);
+
+    // Sign data from user profile
+    const moonSignData = user?.moonSign ? getRashiData(user.moonSign) : null;
+    const sunSignData = user?.sunSign ? getRashiData(user.sunSign) : null;
+    const ascSignRaw = (user as any)?.ascendantSign || kundliStats?.lagnaSign;
+    const ascendantSignData = ascSignRaw ? getRashiData(ascSignRaw) : null;
 
     const handleQuickQuery = (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,299 +214,339 @@ export default function DashboardHome() {
     };
 
     const handleQuickAsk = (question: string) => {
-        if (question.trim()) {
-            localStorage.setItem('astranavi_pending_message', question.trim());
-        }
+        localStorage.setItem('astranavi_pending_message', question.trim());
         router.push('/chat');
     };
 
+    const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    // Horoscope helper: get lucky color hex
+    const getLuckyColorHex = (color: string) => {
+        const c = color.toLowerCase();
+        const map: Record<string, string> = {
+            pink: '#f472b6', rose: '#f472b6', red: '#dc2626', maroon: '#dc2626',
+            blue: '#2563eb', navy: '#2563eb', indigo: '#2563eb',
+            green: '#059669', emerald: '#059669', teal: '#059669',
+            yellow: '#f59e0b', gold: '#f59e0b', amber: '#f59e0b', saffron: '#f59e0b',
+            orange: '#ea580c', peach: '#ea580c',
+            purple: '#7c3aed', violet: '#7c3aed', lavender: '#7c3aed',
+            white: '#e2e8f0', cream: '#e2e8f0', ivory: '#e2e8f0',
+            black: '#94a3b8', grey: '#94a3b8', gray: '#94a3b8', silver: '#94a3b8',
+        };
+        return Object.entries(map).find(([k]) => c.includes(k))?.[1] || '#fbbf24';
+    };
+
+    // ─── Services data ─────────────────────────────
+    const services = [
+        { title: "My Kundli", desc: "Complete birth chart analysis", href: "/kundli", icon: <Globe className="w-7 h-7" />, color: "from-blue-500/15 to-indigo-500/10", iconColor: "text-blue-400", border: "hover:border-blue-500/30" },
+        { title: "Rashi Library", desc: "Explore all 12 zodiac signs", href: "/rashis", icon: <Orbit className="w-7 h-7" />, color: "from-amber-500/15 to-orange-500/10", iconColor: "text-amber-500", border: "hover:border-amber-500/30" },
+        { title: "Daily Horoscope", desc: "Predictions for any sign", href: "/horoscope", icon: <Sparkles className="w-7 h-7" />, color: "from-purple-500/15 to-violet-500/10", iconColor: "text-purple-400", border: "hover:border-purple-500/30" },
+        { title: "Consult Navi AI", desc: "AI astrology consultation", href: "/chat", icon: <MessageSquare className="w-7 h-7" />, color: "from-secondary/15 to-amber-500/10", iconColor: "text-secondary", border: "hover:border-secondary/30" },
+        { title: "Talk to Expert", desc: "Live astrologer consultation", href: "/astrologers", icon: <Users className="w-7 h-7" />, color: "from-green-500/15 to-emerald-500/10", iconColor: "text-green-400", border: "hover:border-green-500/30" },
+        { title: "Remedy Shop", desc: "Vedic gems, rituals & more", href: "/shop", icon: <ShoppingBag className="w-7 h-7" />, color: "from-emerald-500/15 to-teal-500/10", iconColor: "text-emerald-400", border: "hover:border-emerald-500/30" },
+    ];
+
     return (
-        <div className="w-full flex-grow relative bg-[var(--bg)] min-h-screen overflow-hidden">
-            
-            
-            {/* SECTION 1: PERSONAL HERO & CONSOLE */}
-            <section className="pt-12 sm:pt-16 md:pt-20 lg:pt-24 xl:pt-28 pb-3 sm:pb-4 md:pb-5 lg:pb-6 xl:pb-8 relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-                <div className="flex flex-col items-center justify-between gap-6 sm:gap-8 md:gap-10 lg:gap-12 lg:flex-row">
-                    
-                    {/* Left: Welcome & Console */}
-                    <div className="flex-1 flex flex-col items-center text-center relative z-10 w-full max-w-2xl lg:max-w-none">
-                        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-full border border-secondary/20 bg-secondary/5 text-secondary text-[12px] sm:text-[13px] font-bold font-mono tracking-[0.15em] sm:tracking-widest uppercase mb-2.5 sm:mb-3 md:mb-4 lg:mb-6">
-                            <Sparkles className="w-3 h-3" />
-                            <span className="hidden sm:inline">AstraNavi Intelligence</span>
-                            <span className="sm:hidden">AI Intelligence</span>
-                        </div>
-                        
-                        <h1 className="text-[26px] leading-[1.15] sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-headline mb-3 sm:mb-4 md:mb-5 lg:mb-6 xl:mb-8 text-foreground tracking-tight">
-                            Welcome back,
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-amber-500 capitalize block">
-                                {user?.name || user?.email?.split('@')[0] || "Seeker"}
-                            </span>
+        <div className="w-full flex-grow relative bg-[var(--bg)] min-h-screen overflow-x-hidden">
+            <div className="max-w-[1400px] mx-auto w-full relative z-10 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-12 pb-12">
+                
+                {/* ═══════════════════════════════════════════════
+                    ZONE 1: IDENTITY BAR
+                    ═══════════════════════════════════════════════ */}
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+                    {/* Left: Greeting */}
+                    <div>
+                        <p className="text-[11px] font-bold text-foreground/30 uppercase tracking-[0.25em] mb-1">{currentDate}</p>
+                        <h1 className="text-3xl sm:text-4xl font-headline font-bold text-foreground leading-tight">
+                            {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-amber-500 capitalize">{user?.name || user?.email?.split('@')[0] || "Seeker"}</span>
                         </h1>
-
-                        <form onSubmit={handleQuickQuery} className="w-full group">
-                            <Card padding="none" hoverable className="rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-full !bg-surface p-2 sm:p-2.5 flex flex-col sm:flex-row gap-2 sm:gap-2.5 items-stretch sm:items-center relative z-20 border border-outline-variant/30">
-                                <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-secondary ml-3 hidden sm:block opacity-70 flex-shrink-0" />
-                                <input
-                                    type="text"
-                                    value={quickQuery}
-                                    onChange={(e) => setQuickQuery(e.target.value)}
-                                    placeholder="What guidance do you seek today?"
-                                    className="w-full bg-transparent text-foreground placeholder:text-foreground/40 focus:outline-none px-3 sm:px-4 py-3 text-sm sm:text-base font-sans min-h-[42px] sm:min-h-[44px] md:min-h-[48px]"
-                                />
-                                <Button type="submit" className="w-full sm:w-auto shrink-0 gold-gradient text-white border-none font-bold rounded-xl sm:rounded-xl md:rounded-2xl lg:rounded-full px-5 sm:px-6 md:px-8 min-h-[42px] sm:min-h-[44px] md:min-h-[48px] text-sm z-30 relative whitespace-nowrap">
-                                    Consult Navi
-                                </Button>
-                            </Card>
-                        </form>
                     </div>
 
-                    {/* Right: Rashi Circles */}
-                    <div className="flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-0 w-full lg:w-auto justify-center items-center overflow-x-auto pb-2 sm:pb-0 px-1 sm:px-0 scrollbar-hide">
-                        {/* Moon Sign Circle */}
-                        <div 
-                            onClick={() => !rashiData && handleQuickAsk("Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.")}
-                            className={`shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-sm border border-outline-variant/30 transition-all duration-500 hover:border-secondary/60 z-10 ${!rashiData ? 'cursor-pointer active:scale-95' : ''}`}
-                            style={{ maxWidth: 'min(272px, 35vw)' }}
-                        >
-                            
-                            <p className="text-[clamp(11px,1.5vw,13px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
-                                {rashiData ? 'Your Moon Sign' : 'Identify your Sign'}
-                            </p>
-                            
-                            {rashiData?.icon ? (
-                                <img 
-                                    src={`${rashiData.icon}?v=4`}
-                                    alt={rashiData.name}
-                                    className="w-[clamp(48px,12vw,112px)] h-[clamp(48px,12vw,112px)] object-contain mb-[clamp(8px,2vw,24px)] relative z-10 group-hover:scale-110 transition-transform duration-500"
-                                />
-                            ) : (
-                                <span className="text-[clamp(2rem,8vw,3rem)] mb-[clamp(8px,2vw,24px)]">🔍</span>
-                            )}
-                            
-                            <h3 className="text-[clamp(0.875rem,3vw,1.25rem)] font-headline font-bold text-secondary tracking-[0.08em] sm:tracking-[0.1em] uppercase relative z-10 group-hover:text-amber-400 transition-colors text-center px-[clamp(8px,2vw,16px)] mb-[clamp(2px,0.5vw,4px)]">
-                                {rashiData?.name || 'Unknown'}
-                            </h3>
-                            
-                            {!rashiData ? (
-                                <Button 
-                                    size="sm" 
-                                    variant="secondary" 
-                                    className="mt-[clamp(6px,1.5vw,16px)] relative z-10 px-[clamp(12px,3vw,24px)] py-[clamp(2px,0.5vw,4px)] rounded-full border-secondary/20 hover:border-secondary text-[clamp(11px,1.8vw,13px)] font-bold tracking-widest uppercase text-secondary"
-                                >
-                                    Consult ✦
-                                </Button>
-                            ) : (
-                                <p className="text-[11px] xs:text-[12px] sm:text-[14px] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
-                                    {rashiData.en}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Sun Sign Circle */}
-                        {user?.sunSign && (() => {
-                            const sunSignData = getRashiData(user.sunSign);
-                            return sunSignData ? (
-                                <div 
-                                    className="shrink-0 flex flex-col items-center justify-center relative group min-w-[140px] w-[clamp(140px,35vw,272px)] aspect-square rounded-[24px] sm:rounded-[32px] lg:rounded-full bg-surface/80 backdrop-blur-sm border border-outline-variant/30 transition-all duration-500 hover:border-secondary/60 z-10"
-                                    style={{ maxWidth: 'min(272px, 35vw)' }}
-                                >
-                                    
-                                    <p className="text-[clamp(11px,1.5vw,13px)] uppercase font-bold text-foreground/40 tracking-[0.12em] mb-[clamp(8px,2vw,24px)] relative z-10 px-[clamp(8px,2vw,24px)] text-center leading-tight">
-                                        Your Sun Sign
-                                    </p>
-                                    
-                                    <img 
-                                        src={`${sunSignData.icon}?v=4`}
-                                        alt={sunSignData.name}
-                                        className="w-[clamp(48px,12vw,112px)] h-[clamp(48px,12vw,112px)] object-contain mb-[clamp(8px,2vw,24px)] relative z-10 group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                    
-                                    <h3 className="text-[clamp(0.875rem,3vw,1.25rem)] font-headline font-bold text-secondary tracking-[0.08em] sm:tracking-[0.1em] uppercase relative z-10 group-hover:text-amber-400 transition-colors text-center px-[clamp(8px,2vw,16px)] mb-[clamp(2px,0.5vw,4px)]">
-                                        {sunSignData.name}
-                                    </h3>
-                                    
-                                    <p className="text-[clamp(11px,1.8vw,14px)] font-medium text-foreground/50 uppercase tracking-[0.12em] sm:tracking-[0.15em] relative z-10">
-                                        {sunSignData.en}
-                                    </p>
-                                </div>
-                            ) : null;
-                        })()}
-                    </div>
-                </div>
-            </section>
-
-            {/* SECTION 2: THE DASHBOARD GRID */}
-            <section className="pb-16 sm:pb-20 lg:pb-24 relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
-                    
-                    {/* LEFT: HOROSCOPE COMING SOON & NAVI IS LIVE */}
-                    <div className="flex-1 flex flex-col gap-6 sm:gap-8">
-                        {/* Daily Horoscope */}
-                        <div className="flex flex-col gap-4">
-                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground leading-none">Your Daily Cosmic Guide</h2>
-                            {user?.email ? (
-                                <DailyHoroscopeCard email={user.email} />
-                            ) : (
-                                <Card padding="md" className="!rounded-[28px] sm:!rounded-[40px] border-outline-variant/30">
-                                    <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-6 text-center">
-                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary/10 flex items-center justify-center mb-6 border border-secondary/20">
-                                            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-secondary animate-pulse" />
-                                        </div>
-                                        <h3 className="text-2xl sm:text-3xl font-headline font-bold text-foreground mb-3">
-                                            Personalized Predictions
-                                        </h3>
-                                        <p className="text-sm sm:text-base text-foreground/60 mb-6 max-w-md leading-relaxed">
-                                            Complete your profile to see your personalized cosmic guide and daily horoscope.
-                                        </p>
-                                        <Button 
-                                            href="/profile"
-                                            className="px-8 py-4 rounded-xl gold-gradient text-white font-bold border-none hover:scale-105 transition-all"
-                                        >
-                                            Complete Profile ✦
-                                        </Button>
-                                    </div>
-                                </Card>
-                            )}
-                        </div>
-
-                        {/* ─── Explore: Rashi Library & My Kundli ─── */}
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            <Link href="/rashis" className="group">
-                                <Card padding="none" className="!rounded-[20px] sm:!rounded-[24px] border-outline-variant/30 overflow-hidden hover:border-secondary/40 transition-all h-full">
-                                    <div className="p-4 sm:p-6 flex flex-col items-center text-center gap-3">
-                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Compass className="w-6 h-6 sm:w-7 sm:h-7 text-secondary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-[14px] sm:text-[16px] font-headline font-bold text-foreground mb-1">Rashi Library</h3>
-                                            <p className="text-[11px] sm:text-[12px] text-foreground/40 font-bold uppercase tracking-wider">General Signs</p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                            <Link href="/kundli" className="group">
-                                <Card padding="none" className="!rounded-[20px] sm:!rounded-[24px] border-outline-variant/30 overflow-hidden hover:border-secondary/40 transition-all h-full">
-                                    <div className="p-4 sm:p-6 flex flex-col items-center text-center gap-3">
-                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Sun className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-[14px] sm:text-[16px] font-headline font-bold text-foreground mb-1">My Kundli</h3>
-                                            <p className="text-[11px] sm:text-[12px] text-foreground/40 font-bold uppercase tracking-wider">Personal Chart</p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        </div>
-
-                        {/* AstraNavi Intelligence */}
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-0">
-                                <h2 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground leading-none">AstraNavi Intelligence</h2>
-                                <div className="flex items-center gap-1.5 sm:gap-2 bg-secondary/10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-secondary/20">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
-                                    <span className="text-[12px] sm:text-[13px] font-bold text-secondary uppercase tracking-widest">Navi is Live</span>
+                    {/* Right: Sign Badges */}
+                    <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+                        {[
+                            { label: "Moon", data: moonSignData },
+                            { label: "Sun", data: sunSignData },
+                            { label: "Ascendant", data: ascendantSignData },
+                        ].map((sign, idx) => (
+                            <div key={idx} className="flex items-center gap-2.5 bg-surface/40 backdrop-blur-md border border-outline-variant/20 rounded-full px-4 py-2 hover:border-secondary/30 transition-colors">
+                                {sign.data?.icon ? (
+                                    <img src={`${sign.data.icon}?v=4`} alt={sign.label} className="w-8 h-8 object-contain" />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-surface-variant/30 flex items-center justify-center text-sm">✨</div>
+                                )}
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] text-foreground/35 font-bold uppercase tracking-widest leading-none">{sign.label}</span>
+                                    <span className="text-sm font-headline font-bold text-secondary leading-tight">{sign.data?.name || '—'}</span>
                                 </div>
                             </div>
-    
-                            <Card padding="none" className="!rounded-[28px] sm:!rounded-[40px] overflow-hidden group border-outline-variant/30 relative min-h-[240px] sm:min-h-[280px] flex flex-col justify-center">
-                                <div className="flex flex-col sm:flex-row items-center p-6 sm:p-8 lg:p-10 gap-6 sm:gap-8 lg:gap-10 relative z-10">
-                                    <div className="shrink-0 relative">
-                                         <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-[24px] sm:rounded-[28px] lg:rounded-[32px] bg-background border border-secondary/30 flex items-center justify-center group-hover:scale-105 transition-all duration-700">
-                                            <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-[22px] sm:rounded-[26px] lg:rounded-[30px]">
-                                                <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-secondary animate-pulse" />
-                                            </div>
-                                         </div>
-                                         <div className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-secondary flex items-center justify-center border-2 border-surface">
-                                            <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                                         </div>
-                                    </div>
-                                    <div className="flex-1 text-center sm:text-left">
-                                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-headline font-bold text-foreground mb-3 sm:mb-4 leading-tight tracking-tight">
-                                            Navi is ready to <br className="hidden sm:block"/>guide your path
-                                        </h3>
-                                        <p className="text-foreground/60 text-xs sm:text-sm lg:text-base max-w-xl mb-5 sm:mb-6 lg:mb-8 leading-relaxed font-medium">
-                                            Connect with 5,000+ years of Vedic wisdom synthesized by AI. Your personal guide is waiting for your next query.
-                                        </p>
-                                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center">
-                                            <Button 
-                                                onClick={() => router.push('/chat')}
-                                                className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl gold-gradient text-white font-bold border-none hover:scale-105 transition-all text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
-                                            >
-                                                Consult Navi Now ✦
-                                            </Button>
+                        ))}
+                    </div>
+                </div>
+
+
+                {/* ═══════════════════════════════════════════════
+                    ZONE 2: TODAY'S DASHBOARD (THE HERO)
+                    ═══════════════════════════════════════════════ */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-10">
+                    
+                    {/* ── LEFT: Today's Horoscope (Real Data) ── */}
+                    <div className="lg:col-span-7 xl:col-span-8">
+                        <Card padding="none" className="!rounded-[28px] border-outline-variant/15 bg-surface/30 backdrop-blur-md h-full">
+                            
+                            {horoscopeLoading ? (
+                                /* Skeleton loader */
+                                <div className="p-6 sm:p-8 space-y-6">
+                                    <div className="flex items-center gap-4">
+                                        <SkeletonPulse className="w-20 h-20 !rounded-full" />
+                                        <div className="flex-1 space-y-2">
+                                            <SkeletonPulse className="h-4 w-40" />
+                                            <SkeletonPulse className="h-3 w-28" />
+                                            <SkeletonPulse className="h-3 w-36" />
                                         </div>
                                     </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <SkeletonPulse className="h-24" />
+                                        <SkeletonPulse className="h-24" />
+                                        <SkeletonPulse className="h-24" />
+                                        <SkeletonPulse className="h-24" />
+                                    </div>
+                                    <SkeletonPulse className="h-16" />
                                 </div>
-                            </Card>
-                        </div>
+                            ) : horoscopeError || !horoscope ? (
+                                /* Error state */
+                                <div className="p-6 sm:p-8 flex flex-col items-center justify-center text-center min-h-[300px] gap-4">
+                                    <div className="w-14 h-14 rounded-full bg-orange-500/10 flex items-center justify-center">
+                                        <Sparkles className="w-6 h-6 text-orange-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-headline font-bold text-foreground mb-1">Horoscope Unavailable</h3>
+                                        <p className="text-sm text-foreground/40 mb-4">We couldn't load your daily reading. Try again in a moment.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { setHoroscopeError(false); setHoroscopeLoading(true); 
+                                            fetch(`/api/daily-horoscope?email=${encodeURIComponent(user?.email || '')}`)
+                                                .then(r => r.ok ? r.json() : null)
+                                                .then(d => { if (d) { setHoroscope(d); setHoroscopeError(false); } else { setHoroscopeError(true); } })
+                                                .catch(() => setHoroscopeError(true))
+                                                .finally(() => setHoroscopeLoading(false));
+                                        }}
+                                        className="text-[11px] font-bold text-secondary uppercase tracking-widest bg-secondary/10 px-5 py-2.5 rounded-full hover:bg-secondary/20 transition-colors"
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            ) : (
+                                /* Real horoscope data */
+                                <>
+                                    {/* Header: Score + Sign info + Meta badges */}
+                                    <div className="p-5 sm:p-6 pb-4 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                                        <ScoreRing score={horoscope.overall_score || 50} />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <Sparkles className="w-4 h-4 text-secondary" />
+                                                <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em]">Today's Horoscope</span>
+                                            </div>
+                                            <h2 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight mb-2">
+                                                {horoscope.sign || 'Your Sign'}
+                                            </h2>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {horoscope.mood && (
+                                                    <span className="text-[10px] font-bold text-foreground/50 bg-surface-variant/30 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                                        Mood: {horoscope.mood}
+                                                    </span>
+                                                )}
+                                                {horoscope.lucky_color && (
+                                                    <span className="text-[10px] font-bold text-foreground/50 bg-surface-variant/30 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getLuckyColorHex(horoscope.lucky_color) }} />
+                                                        {horoscope.lucky_color}
+                                                    </span>
+                                                )}
+                                                {horoscope.lucky_number && (
+                                                    <span className="text-[10px] font-bold text-foreground/50 bg-surface-variant/30 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                                        Lucky #{horoscope.lucky_number}
+                                                    </span>
+                                                )}
+                                                {horoscope.dominant_planet && (
+                                                    <span className="text-[10px] font-bold text-secondary/80 bg-secondary/10 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                                        {horoscope.dominant_planet}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 4-tile grid: Career, Love, Health, Finance */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 border-t border-outline-variant/10">
+                                        {[
+                                            { label: "Career", text: horoscope.career, icon: <Briefcase className="w-4 h-4 text-orange-500" />, bg: "bg-orange-500/8" },
+                                            { label: "Love", text: horoscope.love, icon: <Heart className="w-4 h-4 text-pink-500" />, bg: "bg-pink-500/8" },
+                                            { label: "Health", text: horoscope.health, icon: <Activity className="w-4 h-4 text-green-500" />, bg: "bg-green-500/8" },
+                                            { label: "Finance", text: horoscope.finance, icon: <DollarSign className="w-4 h-4 text-amber-500" />, bg: "bg-amber-500/8" },
+                                        ].map((tile, idx) => (
+                                            <div key={idx} className={`p-4 sm:p-5 hover:bg-surface/10 transition-colors ${idx < 2 ? 'border-b border-outline-variant/10' : ''} ${idx % 2 === 0 ? 'sm:border-r border-outline-variant/10' : ''}`}>
+                                                <div className="flex items-center gap-2.5 mb-2">
+                                                    <div className={`w-7 h-7 rounded-lg ${tile.bg} flex items-center justify-center`}>
+                                                        {tile.icon}
+                                                    </div>
+                                                    <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest">{tile.label}</span>
+                                                </div>
+                                                <p className="text-[13px] sm:text-sm font-medium leading-relaxed text-foreground/70">
+                                                    {tile.text || 'Insights loading...'}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Tip + CTA */}
+                                    <div className="p-4 sm:p-5 bg-surface/10 border-t border-outline-variant/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                                            <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                <Star className="w-3.5 h-3.5 text-secondary" />
+                                            </div>
+                                            <p className="text-sm font-medium italic text-foreground/60 leading-relaxed">
+                                                &ldquo;{horoscope.tip || 'Follow your heart today.'}&rdquo;
+                                            </p>
+                                        </div>
+                                        <Link href="/horoscope" className="text-[10px] font-bold text-secondary uppercase tracking-widest bg-secondary/10 px-4 py-2 rounded-full hover:bg-secondary/20 transition-colors whitespace-nowrap shrink-0">
+                                            Full Horoscope →
+                                        </Link>
+                                    </div>
+                                </>
+                            )}
+                        </Card>
                     </div>
 
-                    {/* RIGHT: ARCHIVES & QUICK ASK - Shifted down on desktop for better alignment */}
-                    <div className="w-full lg:w-[380px] xl:w-[400px] flex flex-col gap-5 sm:gap-6 shrink-0 lg:mt-20">
-                        {/* Archives */}
-                        <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-outline-variant/30">
-                            <h4 className="text-[13px] sm:text-[14px] font-bold text-secondary mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
-                                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Archives
-                            </h4>
-                            
-                            <div className="flex flex-col gap-2 sm:gap-2.5 mb-4 sm:mb-5">
-                                {chats.length > 0 ? (
-                                    chats.slice(0, 3).map((chat) => (
-                                        <Link 
-                                            key={chat._id}
-                                            href={`/chat?id=${chat._id}`}
-                                            className="text-left text-[13px] sm:text-[14px] font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98 truncate"
+                    {/* ── RIGHT: Ask Navi AI + Quick Stats ── */}
+                    <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+                        
+                        {/* Navi AI Prompt */}
+                        <Card padding="none" className="!rounded-[28px] border-outline-variant/15 bg-surface/30 backdrop-blur-md overflow-visible">
+                            <div className="p-5 sm:p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-9 h-9 rounded-xl gold-gradient flex items-center justify-center">
+                                        <MessageSquare className="w-4.5 h-4.5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-[15px] font-bold text-foreground leading-tight">Consult Navi AI</h3>
+                                        <p className="text-[10px] text-foreground/30 font-medium">Ask anything about your chart</p>
+                                    </div>
+                                </div>
+
+                                {/* Search bar */}
+                                <form onSubmit={handleQuickQuery} className="mb-4">
+                                    <div className="flex items-center bg-surface/50 border border-outline-variant/20 rounded-full p-1 focus-within:border-secondary/40 transition-colors">
+                                        <Sparkles className="w-3.5 h-3.5 text-secondary/40 ml-3.5 shrink-0" />
+                                        <input
+                                            type="text"
+                                            value={quickQuery}
+                                            onChange={(e) => setQuickQuery(e.target.value)}
+                                            placeholder="Ask about your chart..."
+                                            className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/25 px-3 py-2 outline-none font-medium"
+                                        />
+                                        <button type="submit" className="gold-gradient text-white rounded-full px-5 py-2 text-[10px] font-bold uppercase tracking-widest shrink-0 hover:scale-[1.02] transition-transform">
+                                            Ask
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {/* Suggested questions */}
+                                <div className="flex flex-col gap-1.5">
+                                    {personalizedQuestions.map((q, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleQuickAsk(q)}
+                                            className="text-left w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-surface/30 border border-outline-variant/10 hover:border-secondary/25 hover:bg-secondary/5 transition-all group"
                                         >
-                                            {chat.title}
+                                            <span className="text-[11px] font-medium text-foreground/50 group-hover:text-foreground/70 truncate transition-colors">{q}</span>
+                                            <ChevronRight className="w-3 h-3 text-foreground/20 group-hover:text-secondary/60 shrink-0 transition-colors" />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* Cosmic Profile (Quick Stats from real API) */}
+                        <Card padding="none" className="!rounded-[28px] border-outline-variant/15 bg-surface/30 backdrop-blur-md flex-1">
+                            <div className="p-5 sm:p-6">
+                                <h4 className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em] flex items-center gap-2 mb-4">
+                                    <Orbit className="w-3.5 h-3.5" /> Your Cosmic Profile
+                                </h4>
+
+                                {kundliLoading ? (
+                                    <div className="space-y-3">
+                                        <SkeletonPulse className="h-8" />
+                                        <SkeletonPulse className="h-8" />
+                                        <SkeletonPulse className="h-8" />
+                                    </div>
+                                ) : kundliStats ? (
+                                    <div className="flex flex-col gap-2">
+                                        {([
+                                            kundliStats.nakshatra ? { label: "Nakshatra", value: kundliStats.nakshatra } : null,
+                                            kundliStats.activeDasha ? { label: "Active Dasha", value: `${kundliStats.activeDasha}${kundliStats.dashaRemaining ? ` (${kundliStats.dashaRemaining})` : ''}` } : null,
+                                            kundliStats.nakshatraLord ? { label: "Nakshatra Lord", value: kundliStats.nakshatraLord } : null,
+                                            kundliStats.moonPhase ? { label: "Moon Phase", value: kundliStats.moonPhase } : null,
+                                            kundliStats.lagnaSign ? { label: "Lagna", value: kundliStats.lagnaSign } : null,
+                                        ] as ({ label: string; value: string } | null)[]).filter((s): s is { label: string; value: string } => s !== null).map((stat, idx) => (
+                                            <div key={idx} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface/20 border border-outline-variant/8">
+                                                <span className="text-[10px] font-bold text-foreground/35 uppercase tracking-widest">{stat.label}</span>
+                                                <span className="text-[13px] font-bold text-foreground">{stat.value}</span>
+                                            </div>
+                                        ))}
+                                        <Link href="/kundli" className="mt-2 text-center text-[10px] font-bold text-secondary uppercase tracking-widest hover:text-foreground transition-colors">
+                                            View Full Kundli →
                                         </Link>
-                                    ))
+                                    </div>
                                 ) : (
-                                    <div className="text-[13px] sm:text-[14px] font-bold text-foreground/40 bg-surface/30 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] text-center">
-                                        No conversations yet
+                                    /* No data — CTA to generate chart */
+                                    <div className="flex flex-col items-center text-center py-4 gap-3">
+                                        <Globe className="w-8 h-8 text-foreground/15" />
+                                        <div>
+                                            <p className="text-sm font-bold text-foreground/60 mb-0.5">Birth chart not generated yet</p>
+                                            <p className="text-[11px] text-foreground/30">Unlock your full cosmic profile</p>
+                                        </div>
+                                        <Link 
+                                            href="/kundli" 
+                                            className="gold-gradient text-white rounded-full px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] transition-transform flex items-center gap-2"
+                                        >
+                                            Generate My Kundli <ArrowRight className="w-3.5 h-3.5" />
+                                        </Link>
                                     </div>
                                 )}
                             </div>
-                            
-                            <Link href="/chat" className="block">
-                                <button className="w-full gold-gradient text-white rounded-[10px] sm:rounded-[12px] px-4 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95 min-h-[36px] sm:min-h-[40px] flex items-center justify-center gap-2">
-                                    <Plus className="w-3 h-3" />
-                                    New Chat
-                                </button>
-                            </Link>
-                        </Card>
-
-                        {/* Quick Ask Navi */}
-                        <Card padding="sm" className="!rounded-[24px] sm:!rounded-[32px] relative border border-outline-variant/30 flex flex-col">
-                            <h4 className="text-[13px] sm:text-[14px] font-bold text-secondary mb-3 sm:mb-4 lg:mb-5 flex items-center gap-1.5 sm:gap-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] border-b border-secondary/10 pb-2.5 sm:pb-3">
-                                <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Ask Navi
-                            </h4>
-                            <div className="flex flex-col gap-2 sm:gap-2.5 mb-4 sm:mb-5 lg:mb-6">
-                                {personalizedQuestions.map((question, idx) => (
-                                    <button 
-                                        key={idx}
-                                        onClick={() => handleQuickAsk(question)} 
-                                        className="text-left text-[13px] sm:text-[14px] font-bold text-foreground/70 bg-surface/50 border border-secondary/10 px-4 sm:px-5 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[16px] hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98"
-                                    >
-                                        {question}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="flex gap-2 items-center bg-background border border-secondary/20 p-2 sm:p-2.5 rounded-[16px] sm:rounded-[20px] mt-auto">
-                                <input 
-                                    type="text" 
-                                    placeholder="Your own question..." 
-                                    value={customQuestion}
-                                    onChange={(e) => setCustomQuestion(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleQuickAsk(customQuestion)}
-                                    className="flex-1 min-w-0 bg-transparent border-none text-[13px] sm:text-[14px] px-2 text-foreground font-medium placeholder:text-foreground/30 focus:outline-none min-h-[36px] sm:min-h-[40px]" 
-                                />
-                                <button onClick={() => handleQuickAsk(customQuestion)} className="gold-gradient text-white rounded-[10px] sm:rounded-[12px] px-4 sm:px-5 py-2 text-[11px] sm:text-[12px] font-bold uppercase tracking-widest transition-all shrink-0 active:scale-95 min-h-[36px] sm:min-h-[40px] flex items-center justify-center">Ask ✦</button>
-                            </div>
                         </Card>
                     </div>
                 </div>
-            </section>
+
+
+                {/* ═══════════════════════════════════════════════
+                    ZONE 3: SERVICES HUB ("Where Do I Go?")
+                    ═══════════════════════════════════════════════ */}
+                <div>
+                    <h2 className="text-lg font-headline font-bold text-foreground flex items-center gap-3 mb-5 px-1">
+                        <span className="text-secondary">✦</span> Explore AstraNavi
+                    </h2>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        {services.map((service, idx) => (
+                            <Link key={idx} href={service.href} className="group">
+                                <div className={`relative flex flex-col gap-3 sm:gap-4 p-5 sm:p-6 rounded-[24px] bg-gradient-to-br ${service.color} backdrop-blur-md border border-outline-variant/10 ${service.border} transition-all h-full group-hover:-translate-y-0.5`}>
+                                    <div className={`w-12 h-12 rounded-2xl bg-surface/40 flex items-center justify-center shrink-0 ${service.iconColor} group-hover:scale-[1.05] transition-transform`}>
+                                        {service.icon}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center justify-between mb-0.5">
+                                            <h3 className="text-[14px] sm:text-[15px] font-bold text-foreground group-hover:text-secondary transition-colors">{service.title}</h3>
+                                            <ChevronRight className="w-4 h-4 text-foreground/10 group-hover:text-secondary/40 transition-colors" />
+                                        </div>
+                                        <p className="text-[11px] text-foreground/30 font-medium leading-relaxed">{service.desc}</p>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 }

@@ -206,7 +206,7 @@ export default function BlogsPage() {
                             >
                                 <Card 
                                     padding="none" 
-                                    className={`!rounded-[32px] glass-panel transition-all duration-500 h-full overflow-hidden ${
+                                    className={`!rounded-[32px] transition-all duration-500 h-full overflow-hidden ${
                                         category.status === 'available' 
                                             ? 'hover:border-secondary/40 hover:shadow-[0_20px_50px_rgba(200,136,10,0.1)] hover:-translate-y-2' 
                                             : ''
