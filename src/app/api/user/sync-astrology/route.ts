@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         const backendUrl = process.env.AI_BACKEND_URL || "http://localhost:5050";
         const response = await fetch(`${backendUrl}/api/analyze-full`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.AI_BACKEND_API_KEY || '' },
             body: JSON.stringify({ chart_context: chartContext }),
         });
 

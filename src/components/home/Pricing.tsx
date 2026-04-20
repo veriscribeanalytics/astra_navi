@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import PricingCard from '../ui/PricingCard';
 
 const Pricing = () => {
@@ -59,9 +60,11 @@ const Pricing = () => {
                         
                         <div className="relative z-10 space-y-4 sm:space-y-6">
                             <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-secondary/10 flex items-center justify-center border-2 border-secondary/30 overflow-hidden">
-                                <img 
+                                <Image 
                                     src="/icons/logo.jpeg" 
                                     alt="AstraNavi" 
+                                    width={80}
+                                    height={80}
                                     className="w-full h-full object-cover"
                                 />
                             </div>

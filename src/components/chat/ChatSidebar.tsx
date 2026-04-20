@@ -39,12 +39,24 @@ const ChatSidebar: React.FC = () => {
       const res = await fetch(`/api/chat/${chatId}`);
       const data = await res.json();
       if (data.chat) {
-        const text = JSON.stringify(data.chat, null, 2);
-        const blob = new Blob([text], { type: 'application/json' });
+        const messages = data.chat.messages || [];
+        let text = `AstraNavi Chat — "${title}"\n`;
+        text += `Date: ${new Date(data.chat.createdAt).toLocaleString()}\n`;
+        text += `================================\n\n`;
+
+        messages.forEach((msg: any) => {
+          if (msg.type === 'system') return;
+          const role = msg.type === 'user' ? 'You' : 'Navi';
+          // Strip HTML tags from AI messages
+          const cleanContent = msg.text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+          text += `${role}: ${cleanContent}\n\n`;
+        });
+
+        const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Astranavi_ChatBackup_${title.replace(/\s+/g, '_')}.json`;
+        a.download = `Astranavi_Chat_${title.replace(/\s+/g, '_')}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -127,9 +139,18 @@ const ChatSidebar: React.FC = () => {
                   return (
                     <div
                       key={chat._id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => {
                           selectChat(chat._id);
                           setIsMobileMenuOpen(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          selectChat(chat._id);
+                          setIsMobileMenuOpen(false);
+                        }
                       }}
                       className={`group relative px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 ${
                         menuOpenId === chat._id ? 'z-50' : 'z-0'

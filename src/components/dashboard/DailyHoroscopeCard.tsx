@@ -124,11 +124,12 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
         return 'text-orange-500';
     };
 
-    // Get lucky color or default to gold
-    const luckyColor = horoscope.lucky_color?.toLowerCase() || 'gold';
+    // Get lucky color or default to grey
+    const luckyColor = horoscope.lucky_color?.toLowerCase() || '';
     
     // Convert color name or description to the closest major family hex
     const getLuckyColorStyle = () => {
+        if (!luckyColor) return '#94a3b8'; // Default to grey
         const searchColor = luckyColor.toLowerCase();
         
         const families = [
@@ -253,14 +254,14 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                                     style={{ backgroundColor: luckyColorHex }}
                                 />
                                 <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
-                                    {horoscope.lucky_color || 'Gold'}
+                                    {horoscope.lucky_color ?? '—'}
                                 </span>
                             </div>
                         </div>
                         <div className={`flex flex-col items-center justify-center p-2 sm:p-3 border-r sm:border-b-0 border-white/8 ${!horoscope.dominant_planet ? 'sm:border-r-0' : ''}`}>
                             <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1 text-center leading-none">Lucky #</span>
                             <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
-                                {horoscope.lucky_number || 8}
+                                {horoscope.lucky_number ?? '—'}
                             </span>
                         </div>
                         {horoscope.dominant_planet && (
@@ -335,7 +336,7 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                     </div>
                     <div className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em] mb-2">Tip of the Day</div>
                     <p className="text-sm sm:text-base font-headline font-semibold italic leading-relaxed text-foreground max-w-md">
-                        "{horoscope.tip || 'Follow your heart today.'}"
+                        {horoscope.tip ? `"${horoscope.tip}"` : '—'}
                     </p>
                 </div>
             </div>

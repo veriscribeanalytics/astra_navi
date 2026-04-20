@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const response = await fetch(`${backendUrl}/api/chart`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.AI_BACKEND_API_KEY || '' },
       body: JSON.stringify({ name, dob, tob, place }),
     });
 

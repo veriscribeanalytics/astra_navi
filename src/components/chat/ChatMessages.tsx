@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useMemo } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import Card from '@/components/ui/Card';
 import ChatBubble from '@/components/ui/ChatBubble';
 import RatingMeter from '@/components/ui/RatingMeter';
@@ -228,7 +229,7 @@ const ChatMessages: React.FC = () => {
 
                   <div
                     className="text-on-surface-variant [&_strong]:text-secondary [&_strong]:font-semibold"
-                    dangerouslySetInnerHTML={{ __html: mainText }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mainText) }}
                   />
 
                   {/* Insight Card */}

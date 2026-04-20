@@ -12,6 +12,7 @@
     "@auth/mongodb-adapter": "^3.11.1",
     "@types/react-window": "^1.8.8",
     "bcryptjs": "^3.0.3",
+    "isomorphic-dompurify": "^3.9.0",
     "lucide-react": "^1.7.0",
     "mongodb": "^7.1.1",
     "motion": "^12.38.0",
