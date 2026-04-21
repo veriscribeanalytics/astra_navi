@@ -14,16 +14,36 @@ interface MatchScoreRingProps {
 }
 
 export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
-  const [animatedScore, setAnimatedScore] = useState(0);
+  const [displayScore, setDisplayScore] = useState(0);
   const size = 180;
   const radius = (size / 2) - 10;
   const circumference = 2 * Math.PI * radius;
   
   const percentage = (score / 36) * 100;
-  const progress = circumference - (animatedScore / 36) * circumference;
+  const progress = circumference - (score / 36) * circumference;
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimatedScore(score), 300);
+    let startTime: number | null = null;
+    const duration = 1500; // 1.5 seconds to match ring animation
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progressRatio = Math.min(elapsed / duration, 1);
+      
+      // Use easeOutQuad for counter
+      const currentScore = Math.floor(progressRatio * score);
+      setDisplayScore(currentScore);
+      
+      if (progressRatio < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    const timer = setTimeout(() => {
+      requestAnimationFrame(animate);
+    }, 300);
+    
     return () => clearTimeout(timer);
   }, [score]);
 
@@ -80,7 +100,7 @@ export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
               animate={{ opacity: 1, scale: 1 }}
               className="text-4xl sm:text-5xl font-headline font-bold text-foreground leading-none"
             >
-              {animatedScore}
+              {displayScore}
             </motion.span>
             <span className="text-lg sm:text-xl text-foreground/40 font-body ml-1 font-medium">/ 36</span>
           </div>

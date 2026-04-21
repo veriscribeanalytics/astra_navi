@@ -133,6 +133,20 @@ export default function MatchClient() {
     setMatchResult(null);
   };
 
+  const getKootHumanLabel = (name: string) => {
+    const labels: Record<string, { label: string; icon: string }> = {
+      'Varna': { label: 'Spiritual Alignment', icon: '🌟' },
+      'Vashya': { label: 'Mutual Attraction', icon: '🧲' },
+      'Tara': { label: 'Star Harmony', icon: '💫' },
+      'Yoni': { label: 'Physical Chemistry', icon: '🔥' },
+      'Graha Maitri': { label: 'Mental Connection', icon: '🧠' },
+      'Gana': { label: 'Temperament Match', icon: '⭐' },
+      'Bhakoot': { label: 'Emotional Bond', icon: '💕' },
+      'Nadi': { label: 'Health Compatibility', icon: '🏥' },
+    };
+    return labels[name] || { label: name, icon: '✨' };
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
@@ -342,29 +356,21 @@ export default function MatchClient() {
               </div>
 
               {/* Orbiting particles */}
-              {[...Array(6)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <motion.div
                   key={i}
-                  className="absolute w-2 h-2 rounded-full bg-secondary/40"
-                  animate={{
-                    rotate: 360,
-                  }}
+                  className="absolute inset-0"
+                  animate={{ rotate: 360 }}
                   transition={{
-                    duration: 3 + i,
+                    duration: 4 + i,
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  style={{
-                    originX: "50%",
-                    originY: "50%",
-                    width: "100%",
-                    height: "100%",
-                  }}
                 >
                   <div 
-                    className="w-1.5 h-1.5 rounded-full bg-secondary/60"
+                    className="w-1.5 h-1.5 rounded-full bg-secondary/60 absolute top-0 left-1/2 -translate-x-1/2"
                     style={{
-                      marginTop: `${i * 10}%`,
+                      transform: `translateY(${i * 10}px)`,
                     }}
                   />
                 </motion.div>
@@ -407,15 +413,15 @@ export default function MatchClient() {
                <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/5 rounded-full blur-[100px] -ml-32 -mb-32" />
 
                <MatchScoreRing 
-                score={matchResult.total_points} 
-                tier={matchResult.match_tier}
+                score={matchResult.ashtakoot?.total_score || 0} 
+                tier={matchResult.tier}
                />
 
                <div className="flex-1 space-y-6 text-center md:text-left">
                   <div className="space-y-2">
                     <h2 className="text-3xl font-headline font-bold text-foreground">Celestial Verdict</h2>
                     <p className="text-foreground/60 leading-relaxed font-body">
-                      {matchResult.match_summary || "The alignment reveals a unique bond between these two charts."}
+                      {matchResult.summary || "The alignment reveals a unique bond between these two charts."}
                     </p>
                   </div>
 
@@ -423,18 +429,18 @@ export default function MatchClient() {
                     <PersonCard 
                       name={person1.name} 
                       gender={person1.gender}
-                      rashi={matchResult.groom_details?.rashi}
-                      rashiEn={matchResult.groom_details?.rashi_en}
-                      nakshatra={matchResult.groom_details?.nakshatra}
-                      pada={matchResult.groom_details?.pada}
+                      rashi={matchResult.mangal_dosha?.person1?.rashi}
+                      rashiEn={matchResult.mangal_dosha?.person1?.rashi_en}
+                      nakshatra={matchResult.mangal_dosha?.person1?.nakshatra}
+                      pada={matchResult.mangal_dosha?.person1?.pada}
                     />
                     <PersonCard 
                       name={person2.name} 
                       gender={person2.gender}
-                      rashi={matchResult.bride_details?.rashi}
-                      rashiEn={matchResult.bride_details?.rashi_en}
-                      nakshatra={matchResult.bride_details?.nakshatra}
-                      pada={matchResult.bride_details?.pada}
+                      rashi={matchResult.mangal_dosha?.person2?.rashi}
+                      rashiEn={matchResult.mangal_dosha?.person2?.rashi_en}
+                      nakshatra={matchResult.mangal_dosha?.person2?.nakshatra}
+                      pada={matchResult.mangal_dosha?.person2?.pada}
                     />
                   </div>
                </div>
@@ -471,23 +477,26 @@ export default function MatchClient() {
             <div className="space-y-8">
               <div className="flex items-center gap-3">
                 <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                <h3 className="text-[12px] font-bold text-foreground/30 uppercase tracking-[0.3em] whitespace-nowrap">The 8 Cosmic Koots</h3>
+                <h3 className="text-[12px] font-bold text-foreground/30 uppercase tracking-[0.3em] whitespace-nowrap">The 8 Cosmic Areas</h3>
                 <div className="h-[1px] flex-1 bg-outline-variant/10" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {matchResult.ashtakoot_milan && Object.entries(matchResult.ashtakoot_milan).map(([key, koot]: [string, any], idx) => (
-                  <KootCard 
-                    key={key}
-                    name={koot.name}
-                    sanskritName={koot.sanskrit_name}
-                    meaning={koot.meaning}
-                    obtained={koot.obtained}
-                    max={koot.max}
-                    detail={koot.detail}
-                    delay={idx * 0.1}
-                  />
-                ))}
+                {matchResult.ashtakoot?.koots && matchResult.ashtakoot.koots.map((koot: any, idx: number) => {
+                  const humanLabel = getKootHumanLabel(koot.name);
+                  return (
+                    <KootCard 
+                      key={idx}
+                      name={`${humanLabel.icon} ${humanLabel.label}`}
+                      sanskritName={koot.name}
+                      meaning={koot.description}
+                      obtained={koot.obtained}
+                      max={koot.max}
+                      detail={koot.detail}
+                      delay={idx * 0.05}
+                    />
+                  );
+                })}
               </div>
             </div>
 
@@ -497,14 +506,14 @@ export default function MatchClient() {
                 <MangalDoshaPanel 
                   person1={{
                     name: person1.name,
-                    ...matchResult.mangal_dosha?.groom
+                    ...matchResult.mangal_dosha?.person1
                   }}
                   person2={{
                     name: person2.name,
-                    ...matchResult.mangal_dosha?.bride
+                    ...matchResult.mangal_dosha?.person2
                   }}
-                  verdict={matchResult.mangal_dosha?.verdict}
-                  isCompatible={matchResult.mangal_dosha?.is_compatible}
+                  verdict={matchResult.mangal_dosha?.note || "Checking Mars alignment..."}
+                  isCompatible={matchResult.mangal_dosha?.compatible}
                 />
               </div>
 
@@ -514,20 +523,20 @@ export default function MatchClient() {
                     {
                       name: "Rajju Dosha",
                       meaning: "Well-being & Longevity",
-                      isClear: matchResult.rajju_dosha?.is_clear,
-                      detail: matchResult.rajju_dosha?.detail
+                      isClear: !matchResult.additional?.rajju_dosha?.present,
+                      detail: matchResult.additional?.rajju_dosha?.detail
                     },
                     {
                       name: "Vedha Dosha",
                       meaning: "Affliction & Obstacles",
-                      isClear: matchResult.vedha_dosha?.is_clear,
-                      detail: matchResult.vedha_dosha?.detail
+                      isClear: !matchResult.additional?.vedha_dosha?.present,
+                      detail: matchResult.additional?.vedha_dosha?.detail
                     },
                     {
                       name: "Stree Deergha",
                       meaning: "Happiness for Bride",
-                      isClear: matchResult.stree_deergha?.is_clear,
-                      detail: matchResult.stree_deergha?.detail
+                      isClear: !matchResult.additional?.stree_deergha?.present,
+                      detail: matchResult.additional?.stree_deergha?.detail
                     }
                   ]}
                 />
