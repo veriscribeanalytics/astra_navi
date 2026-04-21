@@ -1,10 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useChat } from '@/context/ChatContext';
+import { useChat, ChatMessage } from '@/context/ChatContext';
+import { 
+    Plus, Mic, MicOff, RotateCcw, 
+    ArrowUp, Paperclip 
+} from 'lucide-react';
 
 // Generate contextual follow-up questions based on chat history
-const getContextualSuggestions = (messages: any[]): string[] => {
+const getContextualSuggestions = (messages: ChatMessage[]): string[] => {
   if (!messages || messages.length === 0) return [];
   
   const lastMessages = messages.slice(-3);
@@ -187,7 +191,7 @@ const ChatInput: React.FC = () => {
             disabled
             aria-label="Attach file"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <Paperclip className="w-4.5 h-4.5" />
           </button>
 
           <textarea
@@ -214,7 +218,7 @@ const ChatInput: React.FC = () => {
               {isListening && (
                 <span className="absolute inset-0 bg-red-500/20 rounded-lg animate-ping" />
               )}
-              <span className="material-symbols-outlined text-[18px] relative z-10">{isListening ? 'mic_off' : 'mic'}</span>
+              {isListening ? <MicOff className="w-4.5 h-4.5 relative z-10" /> : <Mic className="w-4.5 h-4.5 relative z-10" />}
             </button>
             
             {inputText.trim() ? (
@@ -226,9 +230,9 @@ const ChatInput: React.FC = () => {
                 aria-label="Send message"
               >
                 {isSending ? (
-                  <span className="material-symbols-outlined text-[18px] animate-spin">autorenew</span>
+                  <RotateCcw className="w-4.5 h-4.5 animate-spin" />
                 ) : (
-                  <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
+                  <ArrowUp className="w-4.5 h-4.5" />
                 )}
               </button>
             ) : null}

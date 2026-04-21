@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import Card from './Card';
 import Button from './Button';
 
@@ -54,7 +55,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
       <ul className="space-y-4 mb-10 text-sm text-primary/70 font-medium text-left w-full">
         {features.map((feature, idx) => (
           <li key={idx} className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-secondary text-lg select-none">check_circle</span> 
+            <CheckCircle2 className="text-secondary w-5 h-5 shrink-0 select-none" />
             {feature}
           </li>
         ))}

@@ -1,7 +1,8 @@
 import React, { InputHTMLAttributes, useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-    icon?: string;
+    icon?: React.ReactNode;
     label?: string;
     error?: string;
     helperText?: string;
@@ -12,11 +13,11 @@ const Input: React.FC<InputProps> = ({ icon, label, error, helperText, className
     const inputId = id || `input-${label?.replace(/\s+/g, '-').toLowerCase()}`;
     
     return (
-        <div className="space-y-2 w-full">
+        <div className="space-y-2 w-full text-left">
             {label && (
                 <label 
                     htmlFor={inputId}
-                    className="text-[10px] sm:text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body"
+                    className="text-[10px] sm:text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body block"
                 >
                     {label}
                     {props.required && <span className="text-secondary ml-1">*</span>}
@@ -24,14 +25,14 @@ const Input: React.FC<InputProps> = ({ icon, label, error, helperText, className
             )}
             <div className="relative">
                 {icon && (
-                    <span 
-                        className={`material-symbols-outlined absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-lg sm:text-xl transition-colors duration-200 ${
+                    <div 
+                        className={`absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 transition-colors duration-200 ${
                             error ? 'text-red-500' : isFocused ? 'text-secondary' : 'text-secondary/60'
                         }`}
                         aria-hidden="true"
                     >
                         {icon}
-                    </span>
+                    </div>
                 )}
                 <input
                     {...props}
@@ -64,7 +65,7 @@ const Input: React.FC<InputProps> = ({ icon, label, error, helperText, className
             </div>
             {error && (
                 <p id={`${inputId}-error`} className="text-[10px] sm:text-xs text-red-500 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200" role="alert">
-                    <span className="material-symbols-outlined text-xs sm:text-sm">error</span>
+                    <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     {error}
                 </p>
             )}

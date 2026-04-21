@@ -18,7 +18,7 @@ export interface ChatMessage {
 }
 
 export interface Chat {
-  _id: string;
+  id: string; // Changed from _id to id for PostgreSQL consistency
   userEmail: string;
   title: string;
   messages: ChatMessage[];
@@ -28,7 +28,7 @@ export interface Chat {
 }
 
 export interface ChatSummary {
-  _id: string;
+  id: string; // Changed from _id to id
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -80,11 +80,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user?.email) return;
     setIsLoadingChats(true);
     try {
-      const res = await fetch(`/api/chat?email=${encodeURIComponent(user.email)}&limit=20`);
+      const res = await fetch(`/api/chat?limit=20`);
       const data = await res.json();
       if (data.chats) {
         setChats(data.chats);
-        setHasMoreChats(data.hasMore || false);
+        setHasMoreChats(!!data.nextCursor);
         setNextCursor(data.nextCursor || null);
       }
     } catch (err) {
@@ -95,14 +95,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user?.email]);
 
   const loadMoreChats = useCallback(async () => {
-    if (!user?.email || !hasMoreChats || !nextCursor || isLoadingChats) return;
+    if (!user?.email || !nextCursor || isLoadingChats) return;
     setIsLoadingChats(true);
     try {
-      const res = await fetch(`/api/chat?email=${encodeURIComponent(user.email)}&limit=20&cursor=${nextCursor}`);
+      const res = await fetch(`/api/chat?limit=20&cursor=${nextCursor}`);
       const data = await res.json();
       if (data.chats) {
         setChats(prev => [...prev, ...data.chats]);
-        setHasMoreChats(data.hasMore || false);
+        setHasMoreChats(!!data.nextCursor);
         setNextCursor(data.nextCursor || null);
       }
     } catch (err) {
@@ -110,9 +110,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingChats(false);
     }
-  }, [user?.email, hasMoreChats, nextCursor, isLoadingChats]);
+  }, [user?.email, nextCursor, isLoadingChats]);
 
   const selectChat = useCallback(async (chatId: string) => {
+    if (!chatId) return;
     setActiveChatId(chatId);
     setIsLoadingMessages(true);
     try {
@@ -128,9 +129,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMessage = useCallback(async (text: string, overrideChatId?: string) => {
     let targetId = overrideChatId || activeChatId;
-    if (!targetId || !text.trim() || !user?.email) return;
+    if (!targetId || !text.trim() || !user?.email) {
+        console.warn("[Chat] sendMessage blocked: missing targetId, text or userEmail");
+        return;
+    }
     
-    // Request deduplication: prevent duplicate sends
     if (isSending) return;
     
     setIsSending(true);
@@ -153,24 +156,28 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: now
     };
 
+    // Optimistically update UI
     setActiveChat(prev => {
       if (!prev) return prev;
       return { ...prev, messages: [...prev.messages, userMessage, aiPlaceholder] };
     });
 
     try {
+      // PROD FIX: If targetId is temp, create it in DB first sequentially
       if (targetId.startsWith('temp-')) {
         const createRes = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user.email, title: text.slice(0, 30) }),
+          body: JSON.stringify({ title: text.slice(0, 30) }),
         });
         const createData = await createRes.json();
-        if (createData.chat) {
-          targetId = createData.chat._id;
+        if (createData.chat && createData.chat.id) {
+          targetId = createData.chat.id;
           setActiveChatId(targetId);
+          // Sync existing state with real ID
+          setActiveChat(prev => prev ? { ...prev, id: targetId as string } : null);
         } else {
-          throw new Error('Failed to instantiate temp chat in DB');
+          throw new Error('Could not synchronize celestial conversation with server.');
         }
       }
 
@@ -181,8 +188,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to send message');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'The stars are currently obscured.');
       }
 
       const reader = res.body?.getReader();
@@ -194,7 +201,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
+          const chunk = decoder.decode(value, { stream: true });
           fullText += chunk;
 
           setActiveChat(prev => {
@@ -209,26 +216,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // Sync profile if the dashboard 'Identify Sign' button was clicked to show changes immediately
+      // Handle profile refreshes if specific questions were asked
       const DASHBOARD_RASHI_QUERY = 'Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.';
-
-      if (text === DASHBOARD_RASHI_QUERY && user?.email) {
-        fetch(`/api/user/profile?email=${encodeURIComponent(user.email)}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.user) refreshUser(data.user);
-          })
-          .catch(err => console.error('Sign sync error:', err));
+      if (text === DASHBOARD_RASHI_QUERY) {
+        fetch('/api/user/profile')
+          .then(r => r.json())
+          .then(d => { if (d.user) refreshUser(d.user); })
+          .catch(() => {});
       }
 
       loadChats();
     } catch (err: any) {
       console.error('Failed to send message:', err);
       
-      let errorMsg = `I apologize, but I've encountered a celestial disturbance: ${err.message || 'Unknown error'}. Please try again.`;
+      let errorMsg = `Celestial disturbance: ${err.message || 'Unknown error'}. Please try again.`;
       
-      if (err.message?.includes('Birth Profile')) {
-        errorMsg = "Namaste! To give you an accurate reading, I need your birth date, time, and place. Please update your [Celestial Profile](/profile) first so I can align with your stars.";
+      if (err.message?.includes('birth details') || err.message?.includes('Profile')) {
+        errorMsg = "Namaste! To give you an accurate reading, I need your birth coordinates. Please update your [Celestial Profile](/profile) first.";
       }
       
       setActiveChat(prev => {
@@ -241,35 +245,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
       });
     } finally {
-
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending]);
+  }, [activeChatId, loadChats, user, isSending, refreshUser]);
 
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (!user?.email) return null;
 
+    // Use a temp ID for immediate UI feedback
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
-    const systemMessage: ChatMessage = {
-      id: generateUUID(),
-      type: 'system',
-      text: 'Session started · Reading your chart only',
-      createdAt: now,
-    };
+    
     const welcomeMessage: ChatMessage = {
       id: generateUUID(),
       type: 'ai',
-      text: `Namaste${user?.name ? ` ${user.name}` : ''} ✦ I'm Navi, your AI Vedic astrologer. Ask me anything about your chart, transits, career, relationships, or timing of events.`,
+      text: `Namaste${user?.name ? ` ${user.name.split(' ')[0]}` : ''} ✦ I'm Navi, your AI Vedic astrologer. Ask me anything about your chart, transits, career, or destiny.`,
       createdAt: now,
     };
 
     const tempChat: Chat = {
-      _id: tempId,
+      id: tempId,
       userEmail: user.email,
       title: initialMessage ? initialMessage.slice(0, 30) : 'New conversation',
-      messages: [systemMessage, welcomeMessage],
+      messages: [welcomeMessage],
       averageRating: null,
       createdAt: now,
       updatedAt: now,
@@ -279,6 +278,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveChatId(tempId);
 
     if (initialMessage) {
+        // This will now handle the temp -> real ID transition internally
         sendMessage(initialMessage, tempId);
     }
 
@@ -305,10 +305,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ messageId, rating, feedbackTags, feedbackComment }),
       });
       const data = await res.json();
-      setActiveChat(prev => {
-        if (!prev) return prev;
-        return { ...prev, averageRating: data.averageRating ?? prev.averageRating };
-      });
+      if (data.averageRating !== undefined) {
+        setActiveChat(prev => prev ? { ...prev, averageRating: data.averageRating } : null);
+      }
     } catch (err) {
       console.error('Failed to rate message:', err);
     }
@@ -318,7 +317,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await fetch(`/api/chat/${chatId}`, { method: 'DELETE' });
       if (res.ok) {
-        setChats(prev => prev.filter(c => c._id !== chatId));
+        setChats(prev => prev.filter(c => c.id !== chatId));
         if (activeChatId === chatId) {
           setActiveChatId(null);
           setActiveChat(null);
@@ -329,13 +328,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeChatId]);
 
-  // Clear chat state when user changes (logout/login with different account)
+  // Handle user identity changes
   useEffect(() => {
     const currentEmail = user?.email || null;
-    
-    // If user email changed (different user logged in or logged out)
     if (previousUserEmail.current !== null && previousUserEmail.current !== currentEmail) {
-      // Clear all chat state
       setChats([]);
       setActiveChat(null);
       setActiveChatId(null);
@@ -344,11 +340,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setInputText('');
       initialLoadDone.current = false;
     }
-    
     previousUserEmail.current = currentEmail;
   }, [user?.email]);
 
-  // Load chats on mount or when user changes
   useEffect(() => {
     if (!initialLoadDone.current && user?.email) {
       initialLoadDone.current = true;

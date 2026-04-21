@@ -1,24 +1,44 @@
 import type { NextConfig } from "next";
 
-const nextConfig: any = {
-  /* config options here */
+/**
+ * AstraNavi Next.js Configuration
+ * Optimized for production and security.
+ */
+const nextConfig: NextConfig = {
   reactCompiler: true,
-  // Allow all devices on local network for development
-  allowedDevOrigins: [
-    '192.168.1.3', 
-    '192.168.1.3:3000', 
-    '192.168.1.2', 
-    '192.168.1.2:3000',
-    '192.168.1.15',
-    '192.168.1.15:3000',
-    'localhost', 
-    'localhost:3000', 
-    '0.0.0.0'
-  ].concat(
-    // Allow any IP in 192.168.x.x range
-    Array.from({ length: 255 }, (_, i) => `192.168.1.${i}`),
-    Array.from({ length: 255 }, (_, i) => `192.168.1.${i}:3000`)
-  )
+  
+  // Image optimization - allow external sources if needed in future
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+
+  // Security Headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

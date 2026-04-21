@@ -1,65 +1,37 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { getCurrentDateTime } from '@/lib/datetime';
+import { getAuthSession, unauthorizedResponse } from '@/lib/session';
+import { backendFetch } from '@/lib/backendClient';
 
+/**
+ * Sync Astrology Data API Route (Proxy Mode)
+ * 
+ * Proxies sync requests to the FastAPI backend.
+ * Verification via session email.
+ */
 export async function POST(req: Request) {
     try {
-        const { email } = await req.json();
+        const session = await getAuthSession();
+        if (!session) return unauthorizedResponse();
+        const email = session.user?.email;
 
-        if (!email) {
-            return NextResponse.json({ error: "Email is required." }, { status: 400 });
-        }
+        const body = await req.json();
 
-        const client = await clientPromise;
-        const db = client.db("astra-navi-database");
-        const users = db.collection("users");
-
-        const user = await users.findOne({ email });
-
-        if (!user) {
-            return NextResponse.json({ error: "User not found." }, { status: 404 });
-        }
-
-        const chartContext = user.chartContext;
-        if (!chartContext) {
-            return NextResponse.json({ error: "No chart data found. Please chat with Navi first or update your profile." }, { status: 400 });
-        }
-
-        // Call the Python backend to analyze the full chart
-        const backendUrl = process.env.AI_BACKEND_URL || "http://localhost:5050";
-        const response = await fetch(`${backendUrl}/api/analyze-full`, {
+        const response = await backendFetch('/api/user/sync-astrology', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.AI_BACKEND_API_KEY || '' },
-            body: JSON.stringify({ chart_context: chartContext }),
+            userEmail: email as string,
+            body: JSON.stringify(body)
         });
+
+        const data = await response.json();
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to analyze chart via backend.");
+            return NextResponse.json({ error: data.error || "Sync failed." }, { status: response.status });
         }
 
-        const result = await response.json();
-        const astrologyData = result.astrologyData;
+        return NextResponse.json(data);
 
-        // Save the structured data back to MongoDB
-        await users.updateOne(
-            { email },
-            { 
-                $set: { 
-                    astrologyData,
-                    updatedAt: getCurrentDateTime() 
-                } 
-            }
-        );
-
-        return NextResponse.json({ 
-            success: true, 
-            message: "Your celestial data has been synchronized!",
-            astrologyData
-        });
-
-    } catch (error: any) {
+    } catch (error) {
         console.error("Astrology sync error:", error);
-        return NextResponse.json({ error: error.message || "Failed to synchronize celestial data." }, { status: 500 });
+        return NextResponse.json({ error: "The stars are obscured. Sync failed." }, { status: 500 });
     }
 }

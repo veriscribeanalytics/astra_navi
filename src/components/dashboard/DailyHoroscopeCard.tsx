@@ -20,12 +20,11 @@ interface HoroscopeData {
 }
 
 interface DailyHoroscopeCardProps {
-    email?: string;
     sign?: string;
     isGeneral?: boolean;
 }
 
-export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoroscopeCardProps) {
+export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCardProps) {
     const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -43,17 +42,13 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
                 setLoading(true);
 
                 // Build query string based on available props and mode
-                let url = isGeneral ? '/api/horoscope-general?' : '/api/daily-horoscope?';
+                // Session is handled server-side now
+                let url = isGeneral ? '/api/horoscope-general' : '/api/daily-horoscope';
                 
                 if (sign) {
-                    url += `sign=${encodeURIComponent(sign)}`;
-                } else if (email && !isGeneral) {
-                    url += `email=${encodeURIComponent(email)}`;
-                } else {
-                    throw new Error('No identifier provided for horoscope');
+                    url += `?sign=${encodeURIComponent(sign)}`;
                 }
 
-                // Call API directly - NO CACHING to ensure fresh data always
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -72,10 +67,8 @@ export default function DailyHoroscopeCard({ email, sign, isGeneral }: DailyHoro
             }
         };
 
-        if (email || sign) {
-            fetchHoroscope();
-        }
-    }, [email, sign, isGeneral]);
+        fetchHoroscope();
+    }, [sign, isGeneral]);
 
 
     useEffect(() => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useEffect, useRef, useState, useMemo } from 'react';
+import Image from 'next/image';
 
 const rashiData = [
   { image: '/icons/rashi/aries.png' },
@@ -95,11 +96,12 @@ const BouncingIcon = ({ image, id, paused }: { image: string; id: number; paused
         opacity: 0.75
       }}
     >
-      <img 
+      <Image 
         src={image} 
         alt="Rashi" 
-        className="w-full h-full object-contain filter-rashi"
-        loading="lazy"
+        fill
+        sizes="110px"
+        className="object-contain filter-rashi"
       />
     </div>
   );

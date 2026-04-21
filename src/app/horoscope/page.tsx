@@ -102,10 +102,10 @@ export default function HoroscopePage() {
                 </div>
 
                 {/* Horoscope Card */}
-                <DailyHoroscopeCard email={user.email!} />
+                <DailyHoroscopeCard />
 
                 {/* Health Forecast */}
-                <HealthForecastPanel email={user.email!} />
+                <HealthForecastPanel />
 
                 {/* Info Footer */}
                 <Card padding="md" className="!rounded-[24px] mt-8 border-outline-variant/30 bg-surface/50">

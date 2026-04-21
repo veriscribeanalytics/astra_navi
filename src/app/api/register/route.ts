@@ -1,74 +1,66 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import bcrypt from 'bcryptjs';
-import { getCurrentDateTime } from '@/lib/datetime';
-import { authRateLimiter } from '@/middleware/rateLimit';
+import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
+import { RegisterSchema } from '@/lib/schemas';
+import { backendFetch } from '@/lib/backendClient';
 
+/**
+ * Registration API Route (Proxy Mode)
+ * 
+ * Proxies registration requests to the FastAPI backend which 
+ * handles PostgreSQL storage and password hashing.
+ */
 export async function POST(req: Request) {
     try {
-        const { email, password, name, dob, tob, pob, phoneNumber } = await req.json();
-
-        if (!email || !password) {
-            return NextResponse.json({ error: "Email and password are required celestial inputs." }, { status: 400 });
+        const body = await req.json();
+        
+        // 1. Validate input with Zod (Frontend first line of defense)
+        const validation = RegisterSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ 
+                error: validation.error.errors[0].message 
+            }, { status: 400 });
         }
 
-        // Rate limiting: 5 attempts per 15 minutes per IP
+        const { email, password, name, dob, tob, pob, phoneNumber } = validation.data;
+
+        // 2. Rate limiting (Upstash Redis)
         const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-        const rateLimitResult = authRateLimiter(`register:${ip}`);
-        
+        const rateLimitResult = await checkRateLimit(`register:${ip}`, AUTH_LIMIT_CONFIG);
+
         if (!rateLimitResult.allowed) {
             const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
             return NextResponse.json({ 
-                error: `Too many registration attempts. Please try again in ${resetInMinutes} minutes.` 
+                error: `Too many celestial inscriptions. Please try again in ${resetInMinutes} minutes.` 
             }, { status: 429 });
         }
 
-        const client = await clientPromise;
-        const db = client.db("astra-navi-database");
-        const users = db.collection("users");
+        // 3. Proxy to AI Backend (PostgreSQL)
+        const response = await backendFetch('/api/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                email,
+                password,
+                name,
+                dob,
+                tob,
+                pob,
+                phoneNumber
+            })
+        });
 
-        // Check if user already exists
-        const existingUser = await users.findOne({ email });
-        if (existingUser) {
-            return NextResponse.json({ error: "This celestial identity already exists in our records." }, { status: 400 });
+        const data = await response.json();
+
+        if (!response.ok) {
+            return NextResponse.json({ error: data.error || "The stars are obscured. Registration failed." }, { status: response.status });
         }
 
-        // Hash the password securely
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        // Create the user document with full celestial profile
-        const newUser = {
-            email,
-            password: hashedPassword,
-            name: name || undefined,
-            dob: dob || undefined,
-            tob: tob || undefined,
-            pob: pob || undefined,
-            phoneNumber: phoneNumber || undefined,
-            createdAt: getCurrentDateTime(),
-            preferences: {
-                horoscope: true,
-                notifications: false
-            }
-        };
-
-        const result = await users.insertOne(newUser);
-
-        // Return user data (without password)
-        return NextResponse.json({ 
-            message: "Welcome to AstraNavi, Seeker!", 
-            user: {
-                email: newUser.email,
-                name: newUser.name,
-                dob: newUser.dob,
-                tob: newUser.tob,
-                pob: newUser.pob,
-                phoneNumber: newUser.phoneNumber
-            }
+        return NextResponse.json({
+            message: "Your celestial identity has been inscribed.",
+            user: data.user
         }, { status: 201 });
 
     } catch (error) {
-        console.error("Database connection error:", error);
+        console.error("Registration error:", error);
         return NextResponse.json({ error: "The stars are currently obscured. Try again later." }, { status: 500 });
     }
 }

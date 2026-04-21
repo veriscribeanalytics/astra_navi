@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { 
+    Sparkles, BookOpen, User, Calendar, 
+    Clock, MapPin, ArrowRight 
+} from 'lucide-react';
 import Input from '../ui/Input';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -86,7 +90,9 @@ const Hero = () => {
         }
         
         // Save to local storage to "Claim" after login/register
-        localStorage.setItem('astranavi_pending_birth_details', JSON.stringify(formData));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('astranavi_pending_birth_details', JSON.stringify(formData));
+        }
         
         // Redirect to login/register to finish the journey
         router.push('/chat');
@@ -100,7 +106,7 @@ const Hero = () => {
             <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20 items-center relative z-10">
                 <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 text-center lg:text-left">
                     <div className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-3.5 md:px-4 py-1.5 sm:py-1.5 md:py-2 rounded-full bg-secondary/10 border border-secondary/30">
-                        <span className="material-symbols-outlined text-secondary text-xs sm:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                        <Sparkles className="text-secondary w-3 h-3 sm:w-3.5 sm:h-3.5" />
                         <span className="text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-[0.12em] sm:tracking-[0.13em] md:tracking-[0.15em] font-bold text-secondary font-body">Jyotish Shastra • Vedic Astrology</span>
                     </div>
                     
@@ -164,7 +170,7 @@ const Hero = () => {
                     ) : (
                         <>
                             <h3 className="text-lg sm:text-xl md:text-2xl font-headline font-bold mb-4 sm:mb-5 md:mb-6 lg:mb-8 flex items-center gap-2 sm:gap-2.5 md:gap-3 text-primary">
-                                <span className="material-symbols-outlined text-secondary text-lg sm:text-xl md:text-2xl">menu_book</span>
+                                <BookOpen className="text-secondary w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                                 Reveal Your Kundli
                             </h3>
                             
@@ -174,6 +180,7 @@ const Hero = () => {
                                         label="Full Name"
                                         placeholder="Enter your full name" 
                                         type="text"
+                                        icon={<User className="w-4 h-4" />}
                                         value={formData.name}
                                         onChange={(e) => {
                                             const value = e.target.value;
@@ -195,7 +202,7 @@ const Hero = () => {
                                     <Input 
                                         label="Date of Birth"
                                         type="date"
-                                        icon="calendar_month"
+                                        icon={<Calendar className="w-4 h-4" />}
                                         value={formData.dob}
                                         onChange={(e) => {
                                             const value = e.target.value;
@@ -215,7 +222,7 @@ const Hero = () => {
                                     <Input 
                                         label="Time of Birth"
                                         type="time"
-                                        icon="schedule"
+                                        icon={<Clock className="w-4 h-4" />}
                                         value={formData.tob}
                                         onChange={(e) => setFormData({...formData, tob: e.target.value})}
                                         helperText="Exact time for precise predictions"
@@ -227,7 +234,7 @@ const Hero = () => {
                                     label="Place of Birth"
                                     placeholder="City, Country" 
                                     type="text"
-                                    icon="location_on"
+                                    icon={<MapPin className="w-4 h-4" />}
                                     value={formData.pob}
                                     onChange={(e) => {
                                         const value = e.target.value;
@@ -249,7 +256,7 @@ const Hero = () => {
                                     type="submit"
                                     fullWidth
                                     size="lg"
-                                    rightIcon={<span className="material-symbols-outlined">arrow_forward</span>}
+                                    rightIcon={<ArrowRight className="w-4 h-4" />}
                                 >
                                     Calculate My Chart
                                 </Button>

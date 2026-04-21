@@ -1,20 +1,23 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
-import { authRateLimiter } from '@/middleware/rateLimit';
+import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
+import { LoginSchema } from '@/lib/schemas';
 
 export async function POST(req: Request) {
     try {
-        const { email, password } = await req.json();
-
-        if (!email || !password) {
-            return NextResponse.json({ error: "Email and password are required credentials." }, { status: 400 });
+        const body = await req.json();
+        const validation = LoginSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
         }
+
+        const { email, password } = validation.data;
 
         // Rate limiting: 5 attempts per 15 minutes per IP
         const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-        const rateLimitResult = authRateLimiter(`login:${ip}`);
-        
+        const rateLimitResult = await checkRateLimit(`login:${ip}`, AUTH_LIMIT_CONFIG);
+
         if (!rateLimitResult.allowed) {
             const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
             return NextResponse.json({ 
@@ -26,36 +29,30 @@ export async function POST(req: Request) {
         const db = client.db("astra-navi-database");
         const users = db.collection("users");
 
-        // Find the user by email
         const user = await users.findOne({ email });
 
-        if (!user) {
-            return NextResponse.json({ error: "These celestial credentials do not align." }, { status: 404 });
+        if (!user || !user.password) {
+            return NextResponse.json({ error: "No celestial identity found with these credentials." }, { status: 401 });
         }
 
-        // Compare the passwords securely
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-        if (!isMatch) {
-            return NextResponse.json({ error: "These celestial credentials do not align." }, { status: 401 });
+        if (!isPasswordCorrect) {
+            return NextResponse.json({ error: "Invalid celestial credentials." }, { status: 401 });
         }
 
-        // For now: Just return the user ID and success
-        // In the future: Add JWT token generation here
-        return NextResponse.json({ 
-            message: "Credentials aligned. Welcome, Seeker!", 
+        return NextResponse.json({
+            message: "Welcome back, Seeker.",
             user: {
-                id: user._id,
                 email: user.email,
                 name: user.name,
                 dob: user.dob,
                 tob: user.tob,
                 pob: user.pob,
-                phoneNumber: user.phoneNumber,
                 moonSign: user.moonSign,
                 sunSign: user.sunSign
             }
-        }, { status: 200 });
+        });
 
     } catch (error) {
         console.error("Login database error:", error);

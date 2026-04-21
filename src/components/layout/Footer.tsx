@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { Globe, Share2, ArrowRight } from 'lucide-react';
 import Input from '../ui/Input';
 
 const Footer = () => {
@@ -13,10 +14,10 @@ const Footer = () => {
                     </p>
                     <div className="flex space-x-3">
                         <a className="w-10 h-10 rounded-full border-2 border-secondary/20 flex items-center justify-center text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all" href="#" title="Globe Link">
-                            <span className="material-symbols-outlined text-lg sm:text-xl">language</span>
+                            <Globe className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </a>
                         <a className="w-10 h-10 rounded-full border-2 border-secondary/20 flex items-center justify-center text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all" href="#" title="Share Link">
-                            <span className="material-symbols-outlined text-lg sm:text-xl">share</span>
+                            <Share2 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </a>
                     </div>
                 </div>
@@ -64,7 +65,7 @@ const Footer = () => {
                             className="!py-3 !rounded-xl !pr-14 sm:!pr-16 border-secondary/20 !bg-surface/30 cursor-not-allowed" 
                         />
                         <button disabled className="gold-gradient flex items-center justify-center text-white h-9 w-9 sm:h-10 sm:w-10 rounded-xl shrink-0 absolute right-1.5 cursor-not-allowed">
-                            <span className="material-symbols-outlined text-base sm:text-lg font-bold">arrow_forward</span>
+                            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 font-bold" />
                         </button>
                     </div>
                 </div>

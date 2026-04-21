@@ -11,22 +11,37 @@ import { motion, AnimatePresence } from 'motion/react';
 import { rashiData } from '@/data/rashiData';
 
 export default function RashisPage() {
-    const { isLoggedIn } = useAuth();
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    interface HoroscopeData {
+        sign?: string;
+        date?: string;
+        overall_score?: number;
+        mood?: string;
+        lucky_color?: string;
+        lucky_number?: number;
+        career?: string;
+        love?: string;
+        health?: string;
+        finance?: string;
+        tip?: string;
+        dominant_planet?: string;
+    }
 
-    // Initialize from URL or defaults
-    const rashiParam = searchParams.get('sign');
-    const modeParam = searchParams.get('mode') as 'encyclopedia' | 'rashi' | null;
+    export default function RashiLibrary() {
+        const router = useRouter();
+        const searchParams = useSearchParams();
 
-    const initialRashi = rashiParam ? rashiData.find(r => r.id === rashiParam) || rashiData[0] : rashiData[0];
-    const initialMode = modeParam || (rashiParam ? 'rashi' : 'encyclopedia');
+        // Parse URL params for direct linking
+        const rashiParam = searchParams.get('sign');
+        const modeParam = searchParams.get('mode') as 'encyclopedia' | 'rashi' | null;
 
-    // Manage which view is active: the global encyclopedia intro or a specific rashi
-    const [viewMode, setViewMode] = React.useState<'encyclopedia' | 'rashi'>(initialMode);
-    const [selectedRashi, setSelectedRashi] = React.useState(initialRashi);
+        const initialRashi = rashiParam ? rashiData.find(r => r.id === rashiParam) || rashiData[0] : rashiData[0];
+        const initialMode = modeParam || (rashiParam ? 'rashi' : 'encyclopedia');
 
-    const [horoscopeData, setHoroscopeData] = React.useState<any>(null);
+        // Manage which view is active: the global encyclopedia intro or a specific rashi
+        const [viewMode, setViewMode] = React.useState<'encyclopedia' | 'rashi'>(initialMode);
+        const [selectedRashi, setSelectedRashi] = React.useState(initialRashi);
+
+        const [horoscopeData, setHoroscopeData] = React.useState<HoroscopeData | null>(null);
     const [horoscopeLoading, setHoroscopeLoading] = React.useState(false);
 
     // Sync state TO URL

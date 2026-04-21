@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/hooks/useTheme';
+import { Sun, Moon } from 'lucide-react';
 
 interface ThemeToggleProps {
   className?: string;
@@ -46,13 +47,12 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
         disabled
         aria-label="Loading theme toggle"
       >
-        <span className="material-symbols-outlined text-lg">light_mode</span>
+        <Sun className="w-4.5 h-4.5 text-foreground/40" />
       </button>
     );
   }
 
   const isDark = theme === 'dark';
-  const icon = isDark ? 'light_mode' : 'dark_mode';
   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
 
   return (
@@ -65,9 +65,11 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
         aria-pressed={isDark}
         type="button"
       >
-        <span className={`material-symbols-outlined text-lg transition-all duration-500 ${isDark ? 'text-secondary rotate-[360deg]' : 'text-primary'}`}>
-          {icon}
-        </span>
+        {isDark ? (
+            <Sun className="w-4.5 h-4.5 text-secondary transition-all duration-500 rotate-[360deg]" />
+        ) : (
+            <Moon className="w-4.5 h-4.5 text-primary transition-all duration-500" />
+        )}
         {showLabel && (
           <span className="ml-2 text-sm font-medium">
             {isDark ? 'Dark' : 'Light'}

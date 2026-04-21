@@ -1,74 +1,54 @@
-// Rate limiting middleware for API routes
-// This prevents abuse and brute force attacks
-
-interface RateLimitStore {
-  [key: string]: {
-    count: number;
-    resetTime: number;
-  };
-}
-
-const store: RateLimitStore = {};
-
-// Clean up old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  Object.keys(store).forEach(key => {
-    if (store[key].resetTime < now) {
-      delete store[key];
-    }
-  });
-}, 5 * 60 * 1000);
+import { redis } from '@/lib/redis';
 
 export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
   max: number; // Max requests per window
 }
 
-export function rateLimit(config: RateLimitConfig) {
-  return (identifier: string): { allowed: boolean; remaining: number; resetTime: number } => {
-    const now = Date.now();
-    const key = identifier;
+/**
+ * Redis-backed rate limiter for Next.js API routes.
+ * Works perfectly in serverless/edge environments.
+ */
+export async function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+  const key = `ratelimit:frontend:${identifier}`;
+  const now = Date.now();
+  
+  try {
+    const results = await redis.pipeline()
+      .incr(key)
+      .pttl(key)
+      .exec();
 
-    if (!store[key] || store[key].resetTime < now) {
-      // Create new window
-      store[key] = {
-        count: 1,
-        resetTime: now + config.windowMs,
-      };
-      return {
-        allowed: true,
-        remaining: config.max - 1,
-        resetTime: store[key].resetTime,
-      };
+    const count = results[0] as number;
+    let pttl = results[1] as number;
+
+    // If key is new, set expiry
+    if (count === 1 || pttl < 0) {
+      await redis.pexpire(key, config.windowMs);
+      pttl = config.windowMs;
     }
 
-    // Increment count
-    store[key].count++;
+    const allowed = count <= config.max;
+    const remaining = Math.max(0, config.max - count);
+    const resetTime = now + pttl;
 
-    if (store[key].count > config.max) {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetTime: store[key].resetTime,
-      };
-    }
-
-    return {
-      allowed: true,
-      remaining: config.max - store[key].count,
-      resetTime: store[key].resetTime,
-    };
-  };
+    return { allowed, remaining, resetTime };
+  } catch (error) {
+    console.error('Rate limit error (allowing by default):', error);
+    return { allowed: true, remaining: 999, resetTime: now + config.windowMs };
+  }
 }
 
-// Pre-configured rate limiters
-export const authRateLimiter = rateLimit({
+// Helper constants for specific limiters
+export const AUTH_LIMIT_CONFIG: RateLimitConfig = {
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per 15 minutes
-});
+  max: 5,
+};
 
-export const apiRateLimiter = rateLimit({
+export const API_LIMIT_CONFIG: RateLimitConfig = {
   windowMs: 60 * 1000, // 1 minute
-  max: 60, // 60 requests per minute
-});
+  max: 60,
+};

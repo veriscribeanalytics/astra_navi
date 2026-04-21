@@ -1,5 +1,6 @@
 import React from 'react';
 import Card from '@/components/ui/Card';
+import { Calculator, Brain, Lock } from 'lucide-react';
 
 export const metadata = {
   title: 'About | AstraNavi',
@@ -63,7 +64,7 @@ export default function AboutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                     <Card className="text-left h-full">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-4 sm:mb-6 text-xl sm:text-2xl">
-                            <span className="material-symbols-outlined">calculate</span>
+                            <Calculator className="w-5 h-5 sm:w-6 sm:h-6" />
                         </div>
                         <h3 className="text-lg sm:text-xl font-bold font-headline text-primary mb-2 sm:mb-3">Astronomical Precision</h3>
                         <p className="text-primary/70 text-xs sm:text-sm leading-relaxed">
@@ -73,7 +74,7 @@ export default function AboutPage() {
 
                     <Card className="text-left h-full">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-4 sm:mb-6 text-xl sm:text-2xl">
-                            <span className="material-symbols-outlined">psychology</span>
+                            <Brain className="w-5 h-5 sm:w-6 sm:h-6" />
                         </div>
                         <h3 className="text-lg sm:text-xl font-bold font-headline text-primary mb-2 sm:mb-3">Empowerment, Not Fatalism</h3>
                         <p className="text-primary/70 text-xs sm:text-sm leading-relaxed">
@@ -83,7 +84,7 @@ export default function AboutPage() {
 
                     <Card className="text-left h-full sm:col-span-2 md:col-span-1">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-4 sm:mb-6 text-xl sm:text-2xl">
-                            <span className="material-symbols-outlined">lock</span>
+                            <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
                         </div>
                         <h3 className="text-lg sm:text-xl font-bold font-headline text-primary mb-2 sm:mb-3">Sacred Privacy</h3>
                         <p className="text-primary/70 text-xs sm:text-sm leading-relaxed">

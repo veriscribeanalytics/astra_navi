@@ -1,63 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import { getAuthSession, unauthorizedResponse } from '@/lib/session';
+import { backendFetch } from '@/lib/backendClient';
 
-// GET /api/chat/[chatId] — Get a single chat with all messages
+/**
+ * Single Chat API Route (Proxy Mode)
+ * 
+ * GET: Proxies request to FastAPI backend to fetch chat messages from PostgreSQL.
+ * DELETE: Proxies deletion request to FastAPI backend.
+ */
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ chatId: string }> }
 ) {
   try {
+    const session = await getAuthSession();
+    if (!session) return unauthorizedResponse();
+    const email = session.user?.email;
+
     const { chatId } = await params;
 
-    if (!ObjectId.isValid(chatId)) {
-      return NextResponse.json({ error: 'Invalid chat ID' }, { status: 400 });
+    const response = await backendFetch(`/api/chats/${chatId}`, {
+      userEmail: email as string
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json({ error: data.error || 'Failed to load conversation' }, { status: response.status });
     }
 
-    const client = await clientPromise;
-    const db = client.db('astra-navi-database');
-    const chats = db.collection('chats');
-
-    const chat = await chats.findOne({ _id: new ObjectId(chatId) });
-
-    if (!chat) {
-      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ chat });
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Get chat error:', error);
-    return NextResponse.json({ error: 'Failed to load chat' }, { status: 500 });
+    console.error('Fetch chat error:', error);
+    return NextResponse.json({ error: 'Failed to load conversation' }, { status: 500 });
   }
 }
 
-// DELETE /api/chat/[chatId] — Delete a chat
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ chatId: string }> }
 ) {
   try {
+    const session = await getAuthSession();
+    if (!session) return unauthorizedResponse();
+    const email = session.user?.email;
+
     const { chatId } = await params;
 
-    if (!ObjectId.isValid(chatId)) {
-      return NextResponse.json({ error: 'Invalid chat ID' }, { status: 400 });
+    const response = await backendFetch(`/api/chats/${chatId}`, {
+      method: 'DELETE',
+      userEmail: email as string
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json({ error: data.error || 'Failed to delete conversation' }, { status: response.status });
     }
 
-    const client = await clientPromise;
-    const db = client.db('astra-navi-database');
-    const chats = db.collection('chats');
-
-    const result = await chats.deleteOne({ _id: new ObjectId(chatId) });
-
-    console.log(`Deletion requested for chat ${chatId}. Deleted count: ${result.deletedCount}`);
-
-    if (result.deletedCount === 0) {
-      return NextResponse.json({ error: 'Chat not found in database' }, { status: 404 });
-    }
-
-    return NextResponse.json({ message: 'Celestial record successfully cleared', deletedCount: result.deletedCount });
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Delete chat error:', error);
-    return NextResponse.json({ error: 'Failed to delete chat' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete conversation' }, { status: 500 });
   }
 }

@@ -4,8 +4,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
-import { useChat, ChatSummary } from '@/context/ChatContext';
-import { MoreVertical, Trash2, Download, AlertTriangle, X } from 'lucide-react';
+import { useChat, ChatSummary, ChatMessage } from '@/context/ChatContext';
+import { 
+    MoreVertical, Trash2, Download, 
+    AlertTriangle, X, MessageSquare, Plus
+} from 'lucide-react';
 import { formatChatTimestamp } from '@/lib/datetime';
 
 /* ---------- Date Formatter ---------- */
@@ -72,7 +75,7 @@ const ChatSidebar: React.FC = () => {
   const confirmDelete = async () => {
     if (!deleteModalChat) return;
     setIsDeleting(true);
-    await deleteChat(deleteModalChat._id);
+    await deleteChat(deleteModalChat.id);
     setIsDeleting(false);
     setDeleteModalChat(null);
   };
@@ -92,7 +95,7 @@ const ChatSidebar: React.FC = () => {
               setIsMobileMenuOpen(false);
             }}
           >
-            <span>✦</span> New conversation
+            <Plus className="w-3.5 h-3.5" /> New conversation
           </Button>
         </div>
         
@@ -124,7 +127,7 @@ const ChatSidebar: React.FC = () => {
           ) : chats.length === 0 ? (
             <div className="text-center py-12 px-4">
               <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                 <span className="material-symbols-outlined text-secondary opacity-40">chat_bubble</span>
+                 <MessageSquare className="text-secondary opacity-40 w-6 h-6" />
               </div>
               <p className="text-[14px] font-bold text-on-surface-variant/50 uppercase tracking-widest">No chats yet</p>
               <p className="text-[12px] text-on-surface-variant/30 mt-2 leading-relaxed">
@@ -135,25 +138,25 @@ const ChatSidebar: React.FC = () => {
             <>
               <div className="flex flex-col gap-0.5">
                 {chats.map((chat) => {
-                  const isActive = chat._id === activeChatId;
+                  const isActive = chat.id === activeChatId;
                   return (
                     <div
-                      key={chat._id}
+                      key={chat.id}
                       role="button"
                       tabIndex={0}
                       onClick={() => {
-                          selectChat(chat._id);
+                          selectChat(chat.id);
                           setIsMobileMenuOpen(false);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          selectChat(chat._id);
+                          selectChat(chat.id);
                           setIsMobileMenuOpen(false);
                         }
                       }}
                       className={`group relative px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                        menuOpenId === chat._id ? 'z-50' : 'z-0'
+                        menuOpenId === chat.id ? 'z-50' : 'z-0'
                       } ${
                         isActive
                           ? 'bg-surface-variant/60 border border-secondary/20 shadow-sm shadow-secondary/5'
@@ -184,7 +187,6 @@ const ChatSidebar: React.FC = () => {
                         }`}
                       />
                       
-                      {/* ... (3-dot menu) ... */}
                       <div 
                         className={`absolute right-1.5 top-1/2 -translate-y-1/2 z-20 transition-opacity duration-200 ${
                           isActive ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'
@@ -194,20 +196,20 @@ const ChatSidebar: React.FC = () => {
                               onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              setMenuOpenId(prev => prev === chat._id ? null : chat._id);
+                              setMenuOpenId(prev => prev === chat.id ? null : chat.id);
                               }}
                               className="chat-menu-btn text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-variant/50 w-7 h-7 flex items-center justify-center !min-w-0 !min-h-0 !p-1 rounded transition-colors cursor-pointer"
                           >
                               <MoreVertical size={14} />
                           </button>
                           
-                          {menuOpenId === chat._id && (
+                          {menuOpenId === chat.id && (
                             <div className="chat-menu-dropdown absolute top-full right-0 mt-1 w-32 bg-background border border-outline-variant/20 rounded-xl shadow-xl z-50 py-1.5 animate-in fade-in zoom-in-95 duration-100">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setMenuOpenId(null);
-                                  handleDownload(chat._id, chat.title);
+                                  handleDownload(chat.id, chat.title);
                                 }}
                                 className="w-full text-left px-3 py-1.5 text-[14px] font-bold text-on-surface-variant hover:bg-surface-variant/40 flex items-center gap-2 transition-colors cursor-pointer"
                               >
@@ -274,7 +276,7 @@ const ChatSidebar: React.FC = () => {
                   size="sm" 
                   fullWidth 
                   className="gap-2 text-[13px]"
-                  onClick={() => handleDownload(deleteModalChat._id, deleteModalChat.title)}
+                  onClick={() => handleDownload(deleteModalChat.id, deleteModalChat.title)}
                   disabled={isDownloading}
                 >
                   <Download size={14} />

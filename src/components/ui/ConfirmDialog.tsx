@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import Card from './Card';
 import Button from './Button';
+import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -48,12 +49,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!isOpen) return null;
 
   const icons = {
-    danger: { icon: 'warning', color: 'text-red-500', bg: 'bg-red-500/10' },
-    warning: { icon: 'error', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-    info: { icon: 'info', color: 'text-secondary', bg: 'bg-secondary/10' },
+    danger: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
+    warning: { icon: AlertCircle, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+    info: { icon: Info, color: 'text-secondary', bg: 'bg-secondary/10' },
   };
 
   const currentIcon = icons[variant];
+  const Icon = currentIcon.icon;
 
   return (
     <div 
@@ -74,9 +76,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       >
         <div className="flex flex-col items-center text-center">
           <div className={`w-16 h-16 rounded-full ${currentIcon.bg} flex items-center justify-center mb-4`}>
-            <span className={`material-symbols-outlined text-3xl ${currentIcon.color}`}>
-              {currentIcon.icon}
-            </span>
+            <Icon className={`w-8 h-8 ${currentIcon.color}`} />
           </div>
           
           <h2 id="dialog-title" className="text-xl font-headline font-bold text-primary mb-2">

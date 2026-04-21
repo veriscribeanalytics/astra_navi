@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { useState } from 'react';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
+import { Volume2, Copy, ChevronRight, Sparkles } from 'lucide-react';
 
 /* ---------- Sub-components ---------- */
 const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
@@ -192,14 +193,14 @@ const ChatMessages: React.FC = () => {
               className="group/speak flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface-variant rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1"
               title="Speak Message"
             >
-              <span className="material-symbols-outlined text-[16px] group-active/speak:scale-90 transition-transform">volume_up</span>
+              <Volume2 className="w-4 h-4 group-active/speak:scale-90 transition-transform" />
             </button>
             <button
               onClick={() => navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''))}
               className="group/copy flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface-variant rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1"
               title="Copy Message"
             >
-              <span className="material-symbols-outlined text-[16px] group-active/copy:scale-90 transition-transform">content_copy</span>
+              <Copy className="w-4 h-4 group-active/copy:scale-90 transition-transform" />
             </button>
           </div>
         ) : null;
@@ -218,7 +219,7 @@ const ChatMessages: React.FC = () => {
                   {thinkingText && (
                     <details className="mb-3 group/think">
                       <summary className="text-[14px] font-bold text-secondary/60 cursor-pointer list-none flex items-center gap-1.5 hover:text-secondary transition-colors">
-                        <span className="material-symbols-outlined text-[14px] group-open/think:rotate-90 transition-transform">chevron_right</span>
+                        <ChevronRight className="w-3.5 h-3.5 group-open/think:rotate-90 transition-transform" />
                         ✦ Thought process
                       </summary>
                       <div className="mt-2 pl-3 border-l border-secondary/20 text-[14px] text-on-surface-variant/60 italic leading-relaxed whitespace-pre-wrap">

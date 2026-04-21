@@ -10,6 +10,7 @@ import {
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from "@/utils/personalizedQuestions";
@@ -134,29 +135,27 @@ export default function DashboardHome() {
     }, []);
 
     useEffect(() => {
-        if (!user?.email) return;
         setHoroscopeLoading(true);
-        fetch(`/api/daily-horoscope?email=${encodeURIComponent(user.email)}`)
+        fetch(`/api/daily-horoscope`)
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => { setHoroscope(data); setHoroscopeError(false); })
             .catch(() => setHoroscopeError(true))
             .finally(() => setHoroscopeLoading(false));
-    }, [user?.email]);
+    }, []);
 
     useEffect(() => {
-        if (!user?.email) return;
         setKundliLoading(true);
         fetch('/api/analyze-full', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, force_refresh: false }),
+            body: JSON.stringify({ force_refresh: false }),
         })
             .then(res => res.ok ? res.json() : null)
             .then(result => {
                 if (!result) return;
                 const analysis = result.data?.astrologyData || result.data || result;
                 const stats: KundliStats = {};
-                if (analysis?.houses) stats.lagnaSign = analysis.houses.find((h: any) => h.house === 1)?.sign;
+                if (analysis?.houses) stats.lagnaSign = analysis.houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
                 if (analysis?.nakshatra) stats.nakshatra = analysis.nakshatra;
                 if (analysis?.nakshatraLord) stats.nakshatraLord = analysis.nakshatraLord;
                 if (analysis?.dasha) {
@@ -220,9 +219,11 @@ export default function DashboardHome() {
                                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-surface/40 backdrop-blur-xl border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     {sign.data?.icon ? (
-                                        <img 
-                                            src={`${sign.data.icon}?v=4`} 
+                                        <Image 
+                                            src={sign.data.icon} 
                                             alt={sign.data.name} 
+                                            width={48}
+                                            height={48}
                                             className="w-10 h-10 sm:w-12 sm:h-12 object-contain transition-transform duration-500 group-hover:scale-110" 
                                         />
                                     ) : (

@@ -31,7 +31,7 @@ interface HealthForecastData {
 }
 
 interface HealthForecastPanelProps {
-    email: string;
+    // No email needed, handled by session
 }
 
 const formatDate = (dateStr: string) => {
@@ -51,7 +51,7 @@ const getTrendIcon = (trend: string) => {
     return '➡️';
 };
 
-export default function HealthForecastPanel({ email }: HealthForecastPanelProps) {
+export default function HealthForecastPanel({}: HealthForecastPanelProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [data, setData] = useState<HealthForecastData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -66,7 +66,7 @@ export default function HealthForecastPanel({ email }: HealthForecastPanelProps)
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`/api/forecast-health?email=${encodeURIComponent(email)}&days_back=3&days_forward=3`);
+            const res = await fetch(`/api/forecast-health?days_back=3&days_forward=3`);
             if (!res.ok) throw new Error('Failed to fetch health forecast');
             const result = await res.json();
             setData(result);

@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { RotateCcw } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -56,9 +57,7 @@ const Button: React.FC<ButtonProps> = ({
   const content = (
     <>
       {loading && (
-        <span className="material-symbols-outlined animate-spin text-current" aria-hidden="true">
-          autorenew
-        </span>
+        <RotateCcw className="w-4 h-4 animate-spin text-current" aria-hidden="true" />
       )}
       {!loading && leftIcon && <span aria-hidden="true">{leftIcon}</span>}
       <span>{children}</span>

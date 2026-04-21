@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -32,26 +33,27 @@ const Toast: React.FC<ToastProps> = ({
     success: {
       bg: 'bg-green-500/10 border-green-500/20',
       text: 'text-green-500',
-      icon: 'check_circle',
+      icon: CheckCircle,
     },
     error: {
       bg: 'bg-red-500/10 border-red-500/20',
       text: 'text-red-500',
-      icon: 'error',
+      icon: AlertCircle,
     },
     warning: {
       bg: 'bg-yellow-500/10 border-yellow-500/20',
       text: 'text-yellow-500',
-      icon: 'warning',
+      icon: AlertTriangle,
     },
     info: {
       bg: 'bg-secondary/10 border-secondary/20',
       text: 'text-secondary',
-      icon: 'info',
+      icon: Info,
     },
   };
 
   const currentStyle = styles[type];
+  const Icon = currentStyle.icon;
 
   return (
     <div
@@ -64,9 +66,7 @@ const Toast: React.FC<ToastProps> = ({
       `}
       role="alert"
     >
-      <span className={`material-symbols-outlined ${currentStyle.text} text-xl shrink-0`}>
-        {currentStyle.icon}
-      </span>
+      <Icon className={`${currentStyle.text} w-5 h-5 shrink-0`} />
       <p className={`text-sm font-medium ${currentStyle.text} flex-1`}>
         {message}
       </p>
@@ -78,7 +78,7 @@ const Toast: React.FC<ToastProps> = ({
         className={`${currentStyle.text} opacity-60 hover:opacity-100 transition-opacity`}
         aria-label="Close notification"
       >
-        <span className="material-symbols-outlined text-lg">close</span>
+        <X className="w-4.5 h-4.5" />
       </button>
     </div>
   );

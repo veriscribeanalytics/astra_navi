@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
@@ -38,7 +39,7 @@ const PlanetIcon = ({ planet, size = "w-12 h-12", withGlow = true }: { planet: s
     <div className={`${size} relative flex items-center justify-center shrink-0`}>
         {withGlow && <div className="absolute inset-[-6px] blur-[28px] opacity-35 rounded-full" style={{ backgroundColor: PLANET_COLORS[planet] || '#c8880a' }} />}
         {PLANET_TO_ICON[planet] ? (
-            <img src={PLANET_TO_ICON[planet]} alt={planet} className="w-full h-full object-contain relative z-10 drop-shadow-xl" />
+            <Image src={PLANET_TO_ICON[planet]} alt={planet} width={64} height={64} className="w-full h-full object-contain relative z-10 drop-shadow-xl" />
         ) : (
             <span className={`${size.includes('w-32') || size.includes('w-48') ? 'text-6xl text-center' : 'text-3xl text-center'} w-full flex items-center justify-center drop-shadow-lg relative z-10`} style={{ color: PLANET_COLORS[planet] }}>{PLANET_GLYPHS[planet]}</span>
         )}
