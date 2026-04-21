@@ -35,6 +35,28 @@ export default function MatchClient() {
   const [phase, setPhase] = useState<'input' | 'loading' | 'result'>('input');
   const [isSubmitting, setIsSending] = useState(false);
   const [matchResult, setMatchResult] = useState<any>(null);
+  const [loadingMessage, setLoadingMessage] = useState("Aligning celestial bodies...");
+
+  const loadingMessages = [
+    "Aligning celestial bodies...",
+    "Calculating Ashtakoot Milan...",
+    "Analyzing Mangal Dosha...",
+    "Checking supplemental alignments...",
+    "Generating cosmic verdict..."
+  ];
+
+  // Cycle loading messages
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (phase === 'loading') {
+      let currentIndex = 0;
+      interval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % loadingMessages.length;
+        setLoadingMessage(loadingMessages[currentIndex]);
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [phase]);
 
   const [person1, setPerson1] = useState<PersonDetails>({
     name: user?.name || '',
@@ -203,6 +225,16 @@ export default function MatchClient() {
                   </div>
                 </Card>
 
+                {/* Mobile Swap Button (visible only on small screens between cards) */}
+                <div className="lg:hidden flex justify-center -my-3 relative z-20">
+                  <button 
+                    onClick={handleSwap}
+                    className="w-12 h-12 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-secondary/50 hover:bg-surface-variant/20 transition-all group shadow-xl active:scale-95"
+                  >
+                    <ArrowLeftRight className="text-foreground/40 group-hover:text-secondary transition-colors" size={20} />
+                  </button>
+                </div>
+
                 {/* Person 2 (Usually Female) */}
                 <Card className="!rounded-[32px] border-outline-variant/20 bg-surface/40 backdrop-blur-md p-6 sm:p-8 space-y-6">
                   <div className="flex items-center gap-3 border-b border-outline-variant/10 pb-4">
@@ -246,7 +278,7 @@ export default function MatchClient() {
                 </Card>
               </div>
 
-              {/* Swap Button */}
+              {/* Desktop Swap Button */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 hidden lg:block">
                 <button 
                   onClick={handleSwap}
@@ -282,27 +314,82 @@ export default function MatchClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+            className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8"
           >
-            <div className="relative w-32 h-32 mb-8">
+            <div className="relative w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
+              {/* Massive animated background rings */}
+              <motion.div 
+                animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-full border border-secondary/10 shadow-[0_0_50px_rgba(255,184,0,0.05)]"
+              />
+              <motion.div 
+                animate={{ rotate: -360, scale: [1, 1.05, 1] }}
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-8 rounded-full border border-pink-500/10 shadow-[0_0_30px_rgba(236,72,153,0.05)]"
+              />
               <motion.div 
                 animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-full border-2 border-dashed border-secondary/20"
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-16 rounded-full border border-dashed border-secondary/20"
               />
-              <motion.div 
-                animate={{ rotate: -360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-4 rounded-full border-2 border-dashed border-pink-500/20"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles className="text-secondary animate-pulse" size={32} />
+              
+              {/* Inner content */}
+              <div className="relative z-10 flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shadow-[0_0_20px_rgba(255,184,0,0.2)]">
+                  <Sparkles className="animate-pulse" size={32} />
+                </div>
               </div>
+
+              {/* Orbiting particles */}
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 rounded-full bg-secondary/40"
+                  animate={{
+                    rotate: 360,
+                  }}
+                  transition={{
+                    duration: 3 + i,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  style={{
+                    originX: "50%",
+                    originY: "50%",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <div 
+                    className="w-1.5 h-1.5 rounded-full bg-secondary/60"
+                    style={{
+                      marginTop: `${i * 10}%`,
+                    }}
+                  />
+                </motion.div>
+              ))}
             </div>
-            <h2 className="text-2xl font-headline font-bold text-foreground mb-2">Aligning the Heavens</h2>
-            <p className="text-sm text-foreground/40 font-body max-w-xs mx-auto">
-              Our Vedic engine is analyzing nakshatras, planet positions, and dasha periods...
-            </p>
+
+            <div className="space-y-4 max-w-md mx-auto px-6">
+              <h2 className="text-3xl font-headline font-bold text-foreground">Aligning the Heavens</h2>
+              <div className="h-6 flex items-center justify-center overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.p 
+                    key={loadingMessage}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -20, opacity: 0 }}
+                    className="text-lg text-secondary font-medium tracking-wide italic"
+                  >
+                    {loadingMessage}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+              <p className="text-sm text-foreground/40 font-body leading-relaxed pt-2">
+                Our Vedic engine is analyzing nakshatras, planet positions, and dasha periods across multiple dimensions...
+              </p>
+            </div>
           </motion.div>
         )}
 

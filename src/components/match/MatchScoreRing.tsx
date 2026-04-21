@@ -38,8 +38,8 @@ export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
   const ringColor = tier?.color || getColor();
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="relative" style={{ width: size, height: size }}>
+    <div className="flex flex-col items-center gap-4 sm:gap-6">
+      <div className="relative w-[140px] h-[140px] sm:w-[180px] sm:h-[180px]">
         {/* Glow effect */}
         <div 
           className="absolute inset-0 rounded-full blur-2xl opacity-20 transition-colors duration-1000"
@@ -77,16 +77,16 @@ export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
           <motion.span 
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-4xl font-headline font-bold text-foreground"
+            className="text-3xl sm:text-4xl font-headline font-bold text-foreground"
           >
             {animatedScore}
-            <span className="text-xl text-foreground/40 font-body ml-1">/ 36</span>
+            <span className="text-lg sm:text-xl text-foreground/40 font-body ml-1">/ 36</span>
           </motion.span>
           <motion.span 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em] mt-1"
+            className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em] mt-0.5 sm:mt-1"
           >
             Compatibility
           </motion.span>
@@ -98,10 +98,10 @@ export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
-          className="px-6 py-2.5 rounded-full bg-surface/40 backdrop-blur-xl border border-outline-variant/20 shadow-xl flex items-center gap-3"
+          className="px-4 py-2 sm:px-6 sm:py-2.5 rounded-full bg-surface/40 backdrop-blur-xl border border-outline-variant/20 shadow-xl flex items-center gap-2 sm:gap-3"
         >
-          <span className="text-xl">{tier.emoji}</span>
-          <span className="text-sm font-headline font-bold uppercase tracking-widest" style={{ color: ringColor }}>
+          <span className="text-lg sm:text-xl">{tier.emoji}</span>
+          <span className="text-xs sm:text-sm font-headline font-bold uppercase tracking-widest" style={{ color: ringColor }}>
             {tier.label}
           </span>
         </motion.div>
