@@ -153,7 +153,7 @@ export default function DashboardHome() {
             .then(res => res.ok ? res.json() : null)
             .then(result => {
                 if (!result) return;
-                const analysis = result.data?.astrologyData || result.data || result;
+                const analysis = result.astrologyData || result.data?.astrologyData || result.data || result;
                 const stats: KundliStats = {};
                 if (analysis?.houses) stats.lagnaSign = analysis.houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
                 if (analysis?.nakshatra) stats.nakshatra = analysis.nakshatra;
@@ -212,7 +212,7 @@ export default function DashboardHome() {
                         {[
                             { label: "Moon Sign", data: moonSign, color: "text-blue-400" },
                             { label: "Sun Sign", data: sunSign, color: "text-amber-500" },
-                            { label: "Ascendant", data: kundliStats?.lagnaSign ? getRashiData(kundliStats.lagnaSign) : null, color: "text-purple-400" }
+                            { label: "Ascendant", data: (user?.lagnaSign || kundliStats?.lagnaSign) ? getRashiData((user?.lagnaSign || kundliStats?.lagnaSign) as string) : null, color: "text-purple-400" }
                         ].map((sign, idx) => (
                             <div key={idx} className="group relative flex flex-col items-center">
                                 {/* The Circle */}

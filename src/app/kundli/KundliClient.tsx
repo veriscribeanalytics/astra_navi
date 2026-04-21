@@ -108,7 +108,7 @@ export default function KundliPage() {
                 throw new Error(errData.error || errData.detail || 'The stars are temporarily obscured.'); 
             }
             const result = await res.json();
-            const payload = result.data?.astrologyData || result.data || result;
+            const payload = result.astrologyData || result.data?.astrologyData || result.data || result;
             if (payload && payload.houses && payload.planets) { 
                 setData(payload); 
                 setError(null); 

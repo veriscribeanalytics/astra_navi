@@ -14,6 +14,7 @@ interface User {
     phoneNumber?: string;
     moonSign?: string;
     sunSign?: string;
+    lagnaSign?: string;
     astrologyData?: any;
 }
 
