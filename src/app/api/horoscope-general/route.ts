@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
         const validation = DailyHoroscopeSchema.safeParse({ sign: signParam || undefined });
         if (!validation.success) {
-            return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
+            return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
         }
 
         const sign = validation.data.sign;

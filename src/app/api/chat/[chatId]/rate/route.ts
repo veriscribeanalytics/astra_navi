@@ -23,7 +23,7 @@ export async function PUT(
 
     const validation = RateMessageSchema.safeParse(body);
     if (!validation.success) {
-        return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
+        return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
     const response = await backendFetch(`/api/chats/${chatId}/messages/${validation.data.messageId}/rate`, {

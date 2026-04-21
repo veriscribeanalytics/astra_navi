@@ -23,7 +23,7 @@ export async function POST(
 
     const validation = SendMessageSchema.safeParse(body);
     if (!validation.success) {
-        return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
+        return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
     // Proxy request to backend (returns a raw stream)

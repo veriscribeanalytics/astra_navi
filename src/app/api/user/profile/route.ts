@@ -41,11 +41,10 @@ export async function PUT(req: Request) {
         const body = await req.json();
         const validation = ProfileUpdateSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ 
-                error: validation.error.errors[0].message 
+            return NextResponse.json({
+                error: validation.error.issues[0].message
             }, { status: 400 });
         }
-
         const email = session.user?.email;
 
         const response = await backendFetch('/api/user/profile', {

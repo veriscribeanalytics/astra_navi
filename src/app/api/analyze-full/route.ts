@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const validation = AnalyzeFullSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
+            return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
         }
 
         const response = await backendFetch('/api/analyze-full', {

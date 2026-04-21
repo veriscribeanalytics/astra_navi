@@ -16,11 +16,10 @@ export async function POST(req: Request) {
         // 1. Validate input with Zod (Frontend first line of defense)
         const validation = RegisterSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ 
-                error: validation.error.errors[0].message 
+            return NextResponse.json({
+                error: validation.error.issues[0].message
             }, { status: 400 });
         }
-
         const { email, password, name, dob, tob, pob, phoneNumber } = validation.data;
 
         // 2. Rate limiting (Upstash Redis)
