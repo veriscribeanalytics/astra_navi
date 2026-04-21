@@ -153,10 +153,24 @@ export default function KundliPage() {
         </Card></div>);
     }
     if (loading) {
-        return (<div className="min-h-screen flex items-center justify-center"><div className="relative">
-            <div className="w-16 h-16 rounded-full border-2 border-secondary/20 flex items-center justify-center"><Sparkles className="w-7 h-7 text-secondary animate-pulse" /></div>
-            <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-transparent border-t-secondary animate-spin" />
-        </div></div>);
+        return (
+            <div className="h-screen bg-[var(--bg)] pt-14 lg:pt-16 flex flex-col overflow-hidden">
+                <div className="flex-1 max-w-[1600px] w-full mx-auto px-3 py-2 flex flex-col gap-4 min-h-0 animate-pulse">
+                    <div className="flex justify-between items-center h-10">
+                        <div className="w-48 h-8 bg-surface-variant/20 rounded-xl" />
+                        <div className="w-24 h-8 bg-surface-variant/20 rounded-xl" />
+                    </div>
+                    <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
+                        <div className="w-full lg:w-[300px] xl:w-[330px] flex flex-col gap-4">
+                            <div className="h-40 bg-surface-variant/10 rounded-[20px]" />
+                            <div className="h-48 bg-surface-variant/10 rounded-[20px]" />
+                            <div className="h-64 bg-surface-variant/10 rounded-[20px]" />
+                        </div>
+                        <div className="flex-1 bg-surface-variant/10 rounded-[20px]" />
+                    </div>
+                </div>
+            </div>
+        );
     }
     if (error || !data) {
         return (<div className="min-h-screen flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">

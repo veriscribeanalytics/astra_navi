@@ -47,7 +47,18 @@ export function ThemeProvider({
     
     setThemeState(initialTheme);
     setMounted(true);
-  }, []);
+
+    // Sync theme across tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
+        setThemeState(e.newValue as Theme);
+        applyThemeWithOptimization(e.newValue as Theme, deviceTier);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [deviceTier]);
 
   const setTheme = useCallback(
     (newTheme: Theme) => {

@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { Sparkles, ArrowLeft, Lock, Calendar, Flame, Droplets, Wind, Mountain } from 'lucide-react';
+import { Metadata } from 'next';
 
 // Rashi metadata
 const rashiMetadata: Record<string, { nameEn: string; nameHi: string; icon: string; element: string }> = {
@@ -23,6 +24,18 @@ const rashiMetadata: Record<string, { nameEn: string; nameHi: string; icon: stri
     aquarius: { nameEn: 'Aquarius', nameHi: 'कुम्भ', icon: '/icons/rashi/aquarius.png', element: 'Air' },
     pisces: { nameEn: 'Pisces', nameHi: 'मीन', icon: '/icons/rashi/pisces.png', element: 'Water' }
 };
+
+export async function generateMetadata({ params }: { params: { rashi: string } }): Promise<Metadata> {
+    const rashiId = params.rashi.toLowerCase();
+    const rashi = rashiMetadata[rashiId];
+    
+    if (!rashi) return { title: 'Horoscope | AstraNavi' };
+
+    return {
+        title: `${rashi.nameEn} Daily Horoscope | Vedic AstraNavi`,
+        description: `Get your free daily Vedic horoscope for ${rashi.nameEn} (${rashi.nameHi}). Comprehensive insights into career, love, health, and finance.`,
+    };
+}
 
 const elementIcons: Record<string, ReactElement> = {
     Fire: <Flame className="w-4 h-4" />,
