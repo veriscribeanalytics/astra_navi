@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -12,7 +11,7 @@ interface ToastProps {
   onClose: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ 
+const useToast: React.FC<ToastProps> = ({ 
   message, 
   type = 'info', 
   duration = 3000,
@@ -33,27 +32,26 @@ const Toast: React.FC<ToastProps> = ({
     success: {
       bg: 'bg-green-500/10 border-green-500/20',
       text: 'text-green-500',
-      icon: CheckCircle,
+      icon: 'check_circle',
     },
     error: {
       bg: 'bg-red-500/10 border-red-500/20',
       text: 'text-red-500',
-      icon: AlertCircle,
+      icon: 'error',
     },
     warning: {
       bg: 'bg-yellow-500/10 border-yellow-500/20',
       text: 'text-yellow-500',
-      icon: AlertTriangle,
+      icon: 'warning',
     },
     info: {
       bg: 'bg-secondary/10 border-secondary/20',
       text: 'text-secondary',
-      icon: Info,
+      icon: 'info',
     },
   };
 
   const currentStyle = styles[type];
-  const Icon = currentStyle.icon;
 
   return (
     <div
@@ -66,7 +64,9 @@ const Toast: React.FC<ToastProps> = ({
       `}
       role="alert"
     >
-      <Icon className={`${currentStyle.text} w-5 h-5 shrink-0`} />
+      <span className={`material-symbols-outlined ${currentStyle.text} text-xl shrink-0`}>
+        {currentStyle.icon}
+      </span>
       <p className={`text-sm font-medium ${currentStyle.text} flex-1`}>
         {message}
       </p>
@@ -78,10 +78,10 @@ const Toast: React.FC<ToastProps> = ({
         className={`${currentStyle.text} opacity-60 hover:opacity-100 transition-opacity`}
         aria-label="Close notification"
       >
-        <X className="w-4.5 h-4.5" />
+        <span className="material-symbols-outlined text-lg">close</span>
       </button>
     </div>
   );
 };
 
-export default Toast;
+export default useToast;
