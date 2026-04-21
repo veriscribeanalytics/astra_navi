@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
 
 interface DoshaCheck {
