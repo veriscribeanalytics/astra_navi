@@ -82,6 +82,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await fetch(`/api/chat?limit=20`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load chats');
       if (data.chats) {
         setChats(data.chats);
         setHasMoreChats(!!data.nextCursor);
@@ -100,6 +101,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await fetch(`/api/chat?limit=20&cursor=${nextCursor}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load more chats');
       if (data.chats) {
         setChats(prev => [...prev, ...data.chats]);
         setHasMoreChats(!!data.nextCursor);
@@ -119,6 +121,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await fetch(`/api/chat/${chatId}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load chat');
       if (data.chat) setActiveChat(data.chat);
     } catch (err) {
       console.error('Failed to load chat:', err);
@@ -195,6 +198,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
+      let buffer = '';
 
       if (reader) {
         while (true) {
@@ -202,17 +206,37 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          fullText += chunk;
+          buffer += chunk;
 
-          setActiveChat(prev => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              messages: prev.messages.map(m => 
-                m.id === aiMsgId ? { ...m, text: fullText } : m
-              )
-            };
-          });
+          const lines = buffer.split('\n');
+          // Keep the last partial line in the buffer
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
+            
+            const dataStr = trimmedLine.slice(6);
+            if (dataStr === '[DONE]') break;
+
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.token) {
+                fullText += data.token;
+                setActiveChat(prev => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    messages: prev.messages.map(m => 
+                      m.id === aiMsgId ? { ...m, text: fullText } : m
+                    )
+                  };
+                });
+              }
+            } catch (e) {
+              console.error("[Chat] SSE Parse Error:", e, dataStr);
+            }
+          }
         }
       }
 
