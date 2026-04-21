@@ -21,7 +21,7 @@ export async function GET(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || "Failed to load summary." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "Failed to load summary." }, { status: response.status });
         }
 
         return NextResponse.json(data);

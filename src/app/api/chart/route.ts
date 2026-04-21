@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json({ error: data.error || 'Failed to fetch chart data' }, { status: response.status });
+      return NextResponse.json({ error: data.error || data.detail || 'Failed to fetch chart data' }, { status: response.status });
     }
 
     // Backend already handles auto-updating the user profile in PostgreSQL

@@ -35,7 +35,7 @@ export async function POST(
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        return NextResponse.json({ error: errorData.error || 'Failed to send message' }, { status: response.status });
+        return NextResponse.json({ error: errorData.error || errorData.detail || 'Failed to send message' }, { status: response.status });
     }
 
     // Return the backend's stream directly to our frontend client

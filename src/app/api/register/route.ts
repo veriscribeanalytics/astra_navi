@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || "The stars are obscured. Registration failed." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "The stars are obscured. Registration failed." }, { status: response.status });
         }
 
         return NextResponse.json({

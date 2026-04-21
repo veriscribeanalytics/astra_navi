@@ -103,11 +103,20 @@ export default function KundliPage() {
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ force_refresh: forceRefresh }) 
             });
-            if (!res.ok) { const errData = await res.json().catch(() => ({})); throw new Error(errData.error || 'Failed'); }
+            if (!res.ok) { 
+                const errData = await res.json().catch(() => ({})); 
+                throw new Error(errData.error || errData.detail || 'The stars are temporarily obscured.'); 
+            }
             const result = await res.json();
             const payload = result.data?.astrologyData || result.data || result;
-            if (payload.houses && payload.planets) { setData(payload); setError(null); }
-            else throw new Error('No chart data found.');
+            if (payload && payload.houses && payload.planets) { 
+                setData(payload); 
+                setError(null); 
+            }
+            else {
+                console.warn("[Kundli] Invalid payload format:", result);
+                throw new Error('Your celestial blueprint is currently being drawn. Please try refreshing in a moment.'); 
+            }
         } catch (err: any) { setError(err.message); }
         finally { setLoading(false); setRefreshing(false); }
     };

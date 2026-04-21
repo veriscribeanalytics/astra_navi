@@ -35,9 +35,8 @@ export async function PUT(
     const data = await response.json();
 
     if (!response.ok) {
-        return NextResponse.json({ error: data.error || 'Failed to rate message' }, { status: response.status });
+      return NextResponse.json({ error: data.error || data.detail || 'Failed to rate message' }, { status: response.status });
     }
-
     return NextResponse.json(data);
   } catch (error) {
     console.error('Rate message error:', error);

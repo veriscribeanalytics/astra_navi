@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || "Failed to fetch profile." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "Failed to fetch profile." }, { status: response.status });
         }
 
         return NextResponse.json(data);
@@ -56,7 +56,7 @@ export async function PUT(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || "Profile update failed." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "Profile update failed." }, { status: response.status });
         }
 
         return NextResponse.json({ 

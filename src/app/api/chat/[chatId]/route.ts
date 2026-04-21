@@ -27,7 +27,7 @@ export async function GET(
     const data = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json({ error: data.error || 'Failed to load conversation' }, { status: response.status });
+      return NextResponse.json({ error: data.error || data.detail || 'Failed to load conversation' }, { status: response.status });
     }
 
     return NextResponse.json(data);
@@ -56,7 +56,7 @@ export async function DELETE(
     const data = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json({ error: data.error || 'Failed to delete conversation' }, { status: response.status });
+      return NextResponse.json({ error: data.error || data.detail || 'Failed to delete conversation' }, { status: response.status });
     }
 
     return NextResponse.json(data);

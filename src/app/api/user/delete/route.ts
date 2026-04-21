@@ -21,7 +21,7 @@ export async function DELETE(req: Request) {
 
         if (!response.ok) {
             const data = await response.json().catch(() => ({}));
-            return NextResponse.json({ error: data.error || "Failed to delete account." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "Failed to delete account." }, { status: response.status });
         }
 
         return new NextResponse(null, { status: 204 });

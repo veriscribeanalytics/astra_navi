@@ -26,7 +26,7 @@ export async function GET(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || "Health forecast failed." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "Health forecast failed." }, { status: response.status });
         }
 
         return NextResponse.json(data);

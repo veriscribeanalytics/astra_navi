@@ -44,7 +44,7 @@ export async function GET(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || "External service error" }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "External service error" }, { status: response.status });
         }
 
         return NextResponse.json(data);
