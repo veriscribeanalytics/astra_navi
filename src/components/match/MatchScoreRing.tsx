@@ -74,19 +74,21 @@ export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
         </svg>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center relative z-10">
-          <motion.span 
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-3xl sm:text-4xl font-headline font-bold text-foreground"
-          >
-            {animatedScore}
-            <span className="text-lg sm:text-xl text-foreground/40 font-body ml-1">/ 36</span>
-          </motion.span>
+          <div className="flex items-baseline justify-center">
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-4xl sm:text-5xl font-headline font-bold text-foreground leading-none"
+            >
+              {animatedScore}
+            </motion.span>
+            <span className="text-lg sm:text-xl text-foreground/40 font-body ml-1 font-medium">/ 36</span>
+          </div>
           <motion.span 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em] mt-0.5 sm:mt-1"
+            className="text-[9px] sm:text-[11px] font-bold text-foreground/30 uppercase tracking-[0.25em] mt-2"
           >
             Compatibility
           </motion.span>

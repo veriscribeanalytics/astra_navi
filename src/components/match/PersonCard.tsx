@@ -8,13 +8,13 @@ interface PersonCardProps {
   rashi?: string;
   rashiEn?: string;
   nakshatra?: string;
-  pada?: number;
+  pada?: number | string;
   gender?: 'male' | 'female';
 }
 
 const getRashiIcon = (sign: string) => {
   if (!sign) return null;
-  const s = sign.toLowerCase();
+  const s = sign.toLowerCase().trim();
   if (s.includes('mesh') || s.includes('aries')) return '/icons/rashi/aries.png';
   if (s.includes('vrish') || s.includes('taurus')) return '/icons/rashi/taurus.png';
   if (s.includes('mithun') || s.includes('gemini')) return '/icons/rashi/gemini.png';
@@ -31,13 +31,16 @@ const getRashiIcon = (sign: string) => {
 };
 
 export default function PersonCard({ name, rashi, rashiEn, nakshatra, pada, gender }: PersonCardProps) {
-  const icon = getRashiIcon(rashi || rashiEn || '');
+  const icon = getRashiIcon(rashiEn || rashi || '');
+  const displaySign = rashiEn || rashi || 'Unknown Sign';
+  const displayNakshatra = nakshatra || 'Unknown';
+  const displayPada = pada !== undefined && pada !== null ? `P-${pada}` : 'P-?';
 
   return (
     <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface/40 border border-outline-variant/10">
       <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/20 relative shrink-0">
         {icon ? (
-          <Image src={icon} alt={rashiEn || 'Rashi'} width={36} height={36} className="object-contain" />
+          <Image src={icon} alt={displaySign} width={36} height={36} className="object-contain" />
         ) : (
           <span className="text-xl font-bold text-secondary">
             {name.charAt(0).toUpperCase()}
@@ -54,11 +57,11 @@ export default function PersonCard({ name, rashi, rashiEn, nakshatra, pada, gend
         <h4 className="text-sm font-headline font-bold text-foreground truncate">{name}</h4>
         <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
           <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
-            {rashiEn || rashi || 'Unknown Sign'}
+            {displaySign}
           </span>
           <span className="text-[10px] text-foreground/30">•</span>
           <span className="text-[10px] font-medium text-foreground/60">
-            {nakshatra || 'Unknown'} (P-{pada || '?'})
+            {displayNakshatra} ({displayPada})
           </span>
         </div>
       </div>
