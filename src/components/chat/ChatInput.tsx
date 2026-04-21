@@ -68,12 +68,37 @@ const getContextualSuggestions = (messages: ChatMessage[]): string[] => {
   return shuffled.slice(0, 2);
 };
 
+// Define interfaces for Web Speech API
+interface SpeechRecognitionEvent extends Event {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  onend: () => void;
+  start: () => void;
+  stop: () => void;
+}
+
 const ChatInput: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendMessage, isSending, activeChat, inputText, setInputText } = useChat();
   const [isListening, setIsListening] = useState(false);
   const [charCount, setCharCount] = useState(0);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const MAX_CHARS = 2000;
 
   // Auto-resize textarea (debounced for performance)
@@ -109,13 +134,14 @@ const ChatInput: React.FC = () => {
 
   useEffect(() => {
     // Initialize Web Speech API
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+    const WindowSpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (WindowSpeechRecognition) {
+      recognitionRef.current = new WindowSpeechRecognition() as SpeechRecognition;
+      const recognition = recognitionRef.current;
+      recognition.continuous = false;
+      recognition.interimResults = false;
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setInputText((prev) => {
           const newText = prev ? `${prev} ${transcript}` : transcript;
@@ -124,7 +150,7 @@ const ChatInput: React.FC = () => {
         setIsListening(false);
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         if (event.error === 'not-allowed') {
           alert('Microphone permission denied. Please enable microphone access in your browser settings to use voice input.');
         } else if (event.error !== 'no-speech') {
@@ -133,7 +159,7 @@ const ChatInput: React.FC = () => {
         setIsListening(false);
       };
 
-      recognitionRef.current.onend = () => {
+      recognition.onend = () => {
         setIsListening(false);
       };
     }

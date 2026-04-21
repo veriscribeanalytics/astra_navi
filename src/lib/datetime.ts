@@ -116,6 +116,6 @@ export function toISOString(date?: Date): string {
 /**
  * Check if date is valid
  */
-export function isValidDate(date: any): boolean {
+export function isValidDate(date: unknown): boolean {
   return date instanceof Date && !isNaN(date.getTime());
 }

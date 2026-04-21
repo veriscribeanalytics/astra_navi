@@ -88,7 +88,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setHasMoreChats(!!data.nextCursor);
         setNextCursor(data.nextCursor || null);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to load chats:', err);
     } finally {
       setIsLoadingChats(false);
@@ -107,7 +107,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setHasMoreChats(!!data.nextCursor);
         setNextCursor(data.nextCursor || null);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to load more chats:', err);
     } finally {
       setIsLoadingChats(false);
@@ -123,7 +123,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load chat');
       if (data.chat) setActiveChat(data.chat);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to load chat:', err);
     } finally {
       setIsLoadingMessages(false);
@@ -250,12 +250,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       loadChats();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to send message:', err);
       
-      let errorMsg = `Celestial disturbance: ${err.message || 'Unknown error'}. Please try again.`;
+      const errorMessage = err instanceof Error ? err.message : 'Unknown celestial disturbance';
+      let errorMsg = `Celestial disturbance: ${errorMessage}. Please try again.`;
       
-      if (err.message?.includes('birth details') || err.message?.includes('Profile')) {
+      if (errorMessage.includes('birth details') || errorMessage.includes('Profile')) {
         errorMsg = "Namaste! To give you an accurate reading, I need your birth coordinates. Please update your [Celestial Profile](/profile) first.";
       }
       
@@ -332,7 +333,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.averageRating !== undefined) {
         setActiveChat(prev => prev ? { ...prev, averageRating: data.averageRating } : null);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to rate message:', err);
     }
   }, [activeChatId]);
@@ -347,7 +348,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setActiveChat(null);
         }
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to delete chat:', err);
     }
   }, [activeChatId]);

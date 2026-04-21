@@ -15,7 +15,14 @@ interface User {
     moonSign?: string;
     sunSign?: string;
     lagnaSign?: string;
-    astrologyData?: any;
+    astrologyData?: Record<string, unknown>;
+}
+
+interface ExtendedSessionUser {
+    id?: string;
+    email?: string | null;
+    name?: string | null;
+    image?: string | null;
 }
 
 interface AuthContextType {
@@ -42,13 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         if (session?.user) {
-            const sessionUser = session.user as any;
+            const sessionUser = session.user as ExtendedSessionUser;
             
             // Initial set from session
-            if (!user || user.email !== sessionUser.email) {
+            if (sessionUser.email && (!user || user.email !== sessionUser.email)) {
                 setUser({
                     id: sessionUser.id,
-                    email: sessionUser.email!,
+                    email: sessionUser.email,
                     name: sessionUser.name || undefined,
                 });
             }
