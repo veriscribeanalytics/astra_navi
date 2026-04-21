@@ -38,6 +38,12 @@ const getNavSections = (isLoggedIn: boolean) => {
                         desc: "Personalized scores for career and love."
                     },
                     {
+                        label: "Kundli Matching",
+                        href: "/kundli/match",
+                        icon: <Heart className="w-4 h-4" />,
+                        desc: "Check compatibility between two charts."
+                    },
+                    {
                         label: "My Birth Chart",
                         href: "/kundli",
                         icon: <BookOpen className="w-4 h-4" />,
@@ -162,6 +168,12 @@ const getNavSections = (isLoggedIn: boolean) => {
                     href: "/horoscope", 
                     icon: <Sparkles className="w-4 h-4" />,
                     desc: "Check your luck, health, and finance."
+                },
+                { 
+                    label: "Kundli Matching", 
+                    href: "/kundli/match", 
+                    icon: <Heart className="w-4 h-4" />,
+                    desc: "Discover compatibility with a partner."
                 },
                 { 
                     label: "Birth Kundli", 

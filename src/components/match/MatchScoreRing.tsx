@@ -1,0 +1,111 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+
+interface MatchScoreRingProps {
+  score: number; // 0 to 36
+  tier?: {
+    tier: string;
+    color: string;
+    emoji: string;
+    label: string;
+  };
+}
+
+export default function MatchScoreRing({ score, tier }: MatchScoreRingProps) {
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const size = 180;
+  const radius = (size / 2) - 10;
+  const circumference = 2 * Math.PI * radius;
+  
+  const percentage = (score / 36) * 100;
+  const progress = circumference - (animatedScore / 36) * circumference;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimatedScore(score), 300);
+    return () => clearTimeout(timer);
+  }, [score]);
+
+  // Color logic based on percentage
+  const getColor = () => {
+    if (percentage >= 75) return '#22c55e'; // Green
+    if (percentage >= 50) return '#eab308'; // Yellow
+    if (percentage >= 33) return '#f97316'; // Orange
+    return '#ef4444'; // Red
+  };
+
+  const ringColor = tier?.color || getColor();
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="relative" style={{ width: size, height: size }}>
+        {/* Glow effect */}
+        <div 
+          className="absolute inset-0 rounded-full blur-2xl opacity-20 transition-colors duration-1000"
+          style={{ backgroundColor: ringColor }}
+        />
+        
+        <svg className="w-full h-full -rotate-90 relative z-10" viewBox={`0 0 ${size} ${size}`}>
+          {/* Background circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="10"
+            className="text-surface-variant/10"
+          />
+          {/* Progress circle */}
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: progress }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            style={{ stroke: ringColor }}
+          />
+        </svg>
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center relative z-10">
+          <motion.span 
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-4xl font-headline font-bold text-foreground"
+          >
+            {animatedScore}
+            <span className="text-xl text-foreground/40 font-body ml-1">/ 36</span>
+          </motion.span>
+          <motion.span 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em] mt-1"
+          >
+            Compatibility
+          </motion.span>
+        </div>
+      </div>
+
+      {tier && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+          className="px-6 py-2.5 rounded-full bg-surface/40 backdrop-blur-xl border border-outline-variant/20 shadow-xl flex items-center gap-3"
+        >
+          <span className="text-xl">{tier.emoji}</span>
+          <span className="text-sm font-headline font-bold uppercase tracking-widest" style={{ color: ringColor }}>
+            {tier.label}
+          </span>
+        </motion.div>
+      )}
+    </div>
+  );
+}

@@ -180,10 +180,10 @@ export default function DashboardHome() {
     // Services
     const services = [
         { title: "My Kundli", desc: "Complete birth chart analysis", href: "/kundli", icon: <Globe className="w-7 h-7" />, color: "from-blue-500/15 to-indigo-500/10", iconColor: "text-blue-400", border: "hover:border-blue-500/30" },
+        { title: "Kundli Match", desc: "Vedic compatibility (36 pts)", href: "/kundli/match", icon: <Heart className="w-7 h-7" />, color: "from-pink-500/15 to-rose-500/10", iconColor: "text-pink-400", border: "hover:border-pink-500/30" },
         { title: "Rashi Library", desc: "Explore all 12 zodiac signs", href: "/rashis", icon: <Orbit className="w-7 h-7" />, color: "from-amber-500/15 to-orange-500/10", iconColor: "text-amber-500", border: "hover:border-amber-500/30" },
         { title: "Daily Horoscope", desc: "Predictions for any sign", href: "/horoscope", icon: <Sparkles className="w-7 h-7" />, color: "from-purple-500/15 to-violet-500/10", iconColor: "text-purple-400", border: "hover:border-purple-500/30" },
         { title: "Consult Navi AI", desc: "AI astrology consultation", href: "/chat", icon: <MessageSquare className="w-7 h-7" />, color: "from-secondary/15 to-amber-500/10", iconColor: "text-secondary", border: "hover:border-secondary/30" },
-        { title: "Talk to Expert", desc: "Live astrologer consultation", href: "/astrologers", icon: <Users className="w-7 h-7" />, color: "from-green-500/15 to-emerald-500/10", iconColor: "text-green-400", border: "hover:border-green-500/30" },
         { title: "Remedy Shop", desc: "Vedic gems, rituals & more", href: "/shop", icon: <ShoppingBag className="w-7 h-7" />, color: "from-emerald-500/15 to-teal-500/10", iconColor: "text-emerald-400", border: "hover:border-emerald-500/30" },
     ];
 

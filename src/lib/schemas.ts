@@ -70,3 +70,18 @@ export const ChartRequestSchema = z.object({
     tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)"),
     place: z.string().min(2).max(200),
   });
+
+// --- MATCHING ---
+
+export const PersonDetailSchema = z.object({
+  name: z.string().min(2, "Name is required").max(100),
+  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date"),
+  tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
+  place: z.string().min(2, "Place is required").max(200),
+  gender: z.enum(["male", "female"]).optional().default("male"),
+});
+
+export const MatchRequestSchema = z.object({
+  person1: PersonDetailSchema,
+  person2: PersonDetailSchema,
+});
