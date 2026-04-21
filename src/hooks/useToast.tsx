@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import Toast, { ToastType } from '@/components/ui/useToast';
+import Toast, { ToastType } from '@/components/ui/Toast';
 
 interface ToastConfig {
   message: string;

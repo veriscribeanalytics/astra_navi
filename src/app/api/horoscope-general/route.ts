@@ -10,9 +10,6 @@ import { backendFetch } from '@/lib/backendClient';
  */
 export async function GET(req: Request) {
     try {
-        const session = await getAuthSession();
-        if (!session) return unauthorizedResponse();
-
         const { searchParams } = new URL(req.url);
         const signParam = searchParams.get('sign');
 
