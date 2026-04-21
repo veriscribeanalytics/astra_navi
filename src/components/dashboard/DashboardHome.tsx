@@ -208,7 +208,7 @@ export default function DashboardHome() {
                     </div>
 
                     {/* Right: Sign Circles (The Identity Badges) */}
-                    <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 flex-wrap">
+                    <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 shrink-0">
                         {[
                             { label: "Moon Sign", data: moonSign, color: "text-blue-400" },
                             { label: "Sun Sign", data: sunSign, color: "text-amber-500" },
