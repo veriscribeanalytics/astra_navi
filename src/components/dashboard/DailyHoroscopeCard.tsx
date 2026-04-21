@@ -174,7 +174,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
                         </div>
                         {!isGeneral && (
                             <h3 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight break-all sm:break-normal">
-                                {horoscope.sign || 'Unknown'}
+                                {horoscope.sign || (sign ? sign.charAt(0).toUpperCase() + sign.slice(1).toLowerCase() : 'Unknown')}
                             </h3>
                         )}
                     </div>
