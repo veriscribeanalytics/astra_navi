@@ -136,7 +136,7 @@ export default function DashboardHome() {
 
     useEffect(() => {
         setHoroscopeLoading(true);
-        fetch(`/api/daily-horoscope`)
+        fetch(`/api/daily-horoscope${user?.moonSign ? `?sign=${encodeURIComponent(user.moonSign)}` : ''}`)
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => { setHoroscope(data); setHoroscopeError(false); })
             .catch(() => setHoroscopeError(true))

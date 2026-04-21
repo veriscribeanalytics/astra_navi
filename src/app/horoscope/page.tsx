@@ -102,7 +102,7 @@ export default function HoroscopePage() {
                 </div>
 
                 {/* Horoscope Card */}
-                <DailyHoroscopeCard />
+                <DailyHoroscopeCard sign={user.moonSign} />
 
                 {/* Health Forecast */}
                 <HealthForecastPanel />

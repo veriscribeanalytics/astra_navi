@@ -8,6 +8,7 @@ import { backendFetch } from '@/lib/backendClient';
  * 
  * Proxies requests to FastAPI backend.
  * Caching logic now lives in the backend (PostgreSQL + Redis).
+ * Auto-detects moon sign from user profile if not provided in query.
  */
 export async function GET(req: Request) {
     try {
@@ -16,19 +17,30 @@ export async function GET(req: Request) {
         const email = session.user?.email;
 
         const { searchParams } = new URL(req.url);
-        const signParam = searchParams.get('sign');
+        let sign = searchParams.get('sign');
         
-        const validation = DailyHoroscopeSchema.safeParse({ sign: signParam || undefined });
+        // 1. If no sign provided, fetch it from user profile
+        if (!sign) {
+            const profileRes = await backendFetch('/api/user/profile', {
+                userEmail: email as string
+            });
+            if (profileRes.ok) {
+                const profileData = await profileRes.json();
+                sign = profileData.user?.moonSign;
+            }
+        }
+
+        const validation = DailyHoroscopeSchema.safeParse({ sign: sign || undefined });
         if (!validation.success) {
             return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
         }
 
-        const sign = validation.data.sign;
+        const validatedSign = validation.data.sign;
         
-        // Backend handles sign extraction from profile if not provided
+        // 2. Call backend with specific sign
         let url = `/api/daily-horoscope?lang=English`;
-        if (sign) {
-            url += `&sign=${encodeURIComponent(sign)}`;
+        if (validatedSign) {
+            url += `&sign=${encodeURIComponent(validatedSign)}`;
         }
 
         const response = await backendFetch(url, {
