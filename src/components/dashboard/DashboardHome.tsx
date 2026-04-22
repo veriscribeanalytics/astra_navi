@@ -109,7 +109,7 @@ function SkeletonPulse({ className = "" }: { className?: string }) {
 
 // ─── Main Component ─────────────────────────────
 export default function DashboardHome() {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const router = useRouter();
     
     // States
@@ -164,10 +164,16 @@ export default function DashboardHome() {
                 }
                 if (analysis?.moonPhase) stats.moonPhase = analysis.moonPhase;
                 setKundliStats(Object.keys(stats).length > 0 ? stats : null);
+
+                // After successful analysis, re-fetch profile to get updated signs
+                fetch('/api/user/profile')
+                    .then(r => r.json())
+                    .then(d => { if (d.user) refreshUser(d.user); })
+                    .catch(() => {});
             })
             .catch(() => setKundliStats(null))
             .finally(() => setKundliLoading(false));
-    }, [user?.email]);
+    }, [user?.email, refreshUser]);
 
     // Handlers
     const handleQuickAsk = (question: string) => {

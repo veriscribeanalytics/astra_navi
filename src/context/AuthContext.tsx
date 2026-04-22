@@ -41,6 +41,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data: session, status, update: updateSession } = useSession();
     const [user, setUser] = useState<User | null>(null);
+    const [profileFetched, setProfileFetched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState<string | undefined>(undefined);
 
@@ -58,23 +59,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     email: sessionUser.email,
                     name: sessionUser.name || undefined,
                 });
+                setProfileFetched(false); // Reset fetch flag for new user
             }
 
-            // Sync full profile from DB if we only have session basics
-            if (sessionUser.email && (!user?.dob || !user?.moonSign)) {
+            // Sync full profile from DB if we haven't fetched it yet this session
+            if (sessionUser.email && !profileFetched) {
                 fetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.user) {
                             setUser(prev => ({ ...prev!, ...data.user }));
                         }
+                        setProfileFetched(true);
                     })
-                    .catch(err => console.error('Profile sync error:', err));
+                    .catch(err => {
+                        console.error('Profile sync error:', err);
+                        setProfileFetched(true); // Don't retry indefinitely on error
+                    });
             }
         } else if (status === 'unauthenticated') {
             setUser(null);
+            setProfileFetched(false);
         }
-    }, [session, status]);
+    }, [session, status, profileFetched, user?.email]);
 
     const login = (email?: string, profile?: Partial<User>) => {
         // This is now primarily handled by NextAuth signIn() in LoginPage
