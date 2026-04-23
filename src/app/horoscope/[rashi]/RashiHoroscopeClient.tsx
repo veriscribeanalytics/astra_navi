@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Sparkles, ArrowLeft, Lock, Calendar, Flame, Droplets, Wind, Mountain, Dna, Compass, Users, Activity, Eye } from 'lucide-react';
 
 // Rashi metadata with expanded theoretical attributes
-const rashiMetadata: Record<string, { 
+export const rashiMetadata: Record<string, { 
     nameEn: string; 
     nameHi: string; 
     icon: string; 
