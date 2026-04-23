@@ -26,7 +26,7 @@ const Footer = () => {
                     <h5 className="font-bold text-primary mb-3 sm:mb-5 uppercase tracking-widest text-[10px] sm:text-xs">Services</h5>
                     <ul className="space-y-2 sm:space-y-3 font-body text-xs sm:text-sm text-primary/60 font-medium">
                         <li><Link className="hover:text-secondary transition-colors" href="/chat">Consult Navi</Link></li>
-                        <li><Link className="hover:text-secondary transition-colors" href="/horoscope">Rashi Predictions</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/rashis">Rashi Predictions</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/kundli">Birth Chart Analysis</Link></li>
                         <li className="relative group/tool cursor-not-allowed opacity-[0.35]">
                             <span>Sacred Items</span>

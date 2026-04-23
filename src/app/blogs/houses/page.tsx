@@ -203,27 +203,27 @@ export default function HousesPage() {
     const router = useRouter();
 
     return (
-        <div className="h-screen bg-[var(--bg)] pt-16 lg:pt-20 pb-4 px-4 overflow-hidden flex flex-col items-center">
+        <div className="h-screen bg-[var(--bg)] pt-16 lg:pt-20 px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
             {/* Background Decorations */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[10%] right-[5%] w-[40%] h-[40%] bg-secondary/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[10%] left-[5%] w-[35%] h-[35%] bg-secondary/3 blur-[100px] rounded-full"></div>
             </div>
 
-            <div className="max-w-[1700px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-4 h-full">
-                {/* ── Sidebar ── */}
-                <div className="lg:w-[220px] flex-shrink-0 flex flex-col h-full border-r border-outline-variant/10 pr-3">
-                    <div className="mb-4 px-1 shrink-0">
+            <div className="max-w-[1500px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-5">
+                {/* Master: Sidebar (Left) */}
+                <div className="lg:w-[260px] lg:h-[calc(100vh-100px)] flex-shrink-0 flex flex-col">
+                    <div className="mb-2 px-1">
                         <Link href="/blogs" className="inline-flex items-center gap-1.5 text-secondary hover:text-secondary/70 transition-all mb-1 group">
                             <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-                            <span className="label-sm">Knowledge Center</span>
+                            <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
-                        <h1 className="text-2xl font-bold text-foreground leading-tight">
+                        <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
                             The 12 <span className="text-secondary italic">Bhavas</span>
                         </h1>
                     </div>
 
-                    <div className="flex-grow overflow-y-auto scrollbar-hide pb-6">
+                    <div className="flex-grow overflow-y-auto scrollbar-hide pb-10">
                         <button
                             onClick={() => setViewMode('encyclopedia')}
                             className={`w-full flex items-center gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left mb-3 ${viewMode === 'encyclopedia'
@@ -241,7 +241,7 @@ export default function HousesPage() {
                         </button>
 
                         <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">The 12 Bhavas</div>
-                        <div className="flex flex-col gap-2">
+                        <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
                             {houses.map((house) => {
                                 const isActive = viewMode === 'detail' && selectedHouse.id === house.id;
                                 return (
@@ -251,19 +251,17 @@ export default function HousesPage() {
                                             setSelectedHouse(house);
                                             setViewMode('detail');
                                         }}
-                                        className={`relative p-3 rounded-[20px] transition-all duration-300 flex items-center gap-3 group border ${
-                                            isActive 
-                                            ? 'bg-secondary text-white shadow-lg border-secondary' 
-                                            : 'bg-surface hover:bg-surface text-foreground/60 border-outline-variant/10'
-                                        } shadow-sm`}
+                                        className={`group flex flex-col items-center justify-center py-2 px-1 rounded-xl border transition-all duration-200 ${isActive
+                                                ? 'border-secondary bg-secondary/5'
+                                                : 'border-transparent hover:bg-surface'
+                                            }`}
                                     >
-                                        <div className="text-left flex-1">
-                                            <p className="text-[13px] font-bold font-headline">{house.nameEn}</p>
-                                            <p className={`text-[9px] uppercase tracking-widest mt-0.5 ${isActive ? 'text-white/60' : 'text-foreground/30'}`}>
-                                                {house.nameHi}
-                                            </p>
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${isActive ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary group-hover:bg-secondary/20'}`}>
+                                            {house.id}
                                         </div>
-                                        <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'translate-x-1' : 'opacity-0'}`} />
+                                        <p className={`text-[10px] font-bold mt-1.5 truncate w-full text-center ${isActive ? 'text-secondary' : 'text-foreground/50'}`}>
+                                            {house.nameEn}
+                                        </p>
                                     </button>
                                 );
                             })}
@@ -271,8 +269,8 @@ export default function HousesPage() {
                     </div>
                 </div>
 
-                {/* ── Detail Panel ── */}
-                <div className="flex-grow min-w-0 h-full overflow-hidden">
+                {/* Detail: Content (Right) */}
+                <div className="flex-grow min-w-0 flex flex-col lg:-mt-12">
                     <AnimatePresence mode="wait">
                         {viewMode === 'encyclopedia' && (
                             <motion.div
@@ -280,11 +278,11 @@ export default function HousesPage() {
                                 initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 1.02 }}
-                                transition={{ duration: 0.25 }}
-                                className="h-full flex items-start justify-center p-2 lg:pt-10"
+                                transition={{ duration: 0.4 }}
+                                className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
                                 <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
-                                    <div className="p-6 lg:p-8 flex-grow flex flex-col">
+                                    <div className="p-8 lg:p-10 flex-grow flex flex-col">
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
                                             <BookOpen className="w-3 h-3" /> Core Concepts
                                         </div>
@@ -362,135 +360,118 @@ export default function HousesPage() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 1.02 }}
                             transition={{ duration: 0.25 }}
-                            className="h-full flex items-center justify-center p-4 lg:p-6"
+                            className="h-full flex flex-col items-start p-2 lg:pt-0"
                         >
-                            <Card padding="none" className="w-full h-full max-h-[820px] !rounded-[40px] border-outline-variant/30 flex flex-col relative overflow-hidden bg-surface">                                <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
-                                
-                                <div className="flex-grow p-6 lg:p-8 overflow-hidden">
-                                    <div className="max-w-[1400px] mx-auto space-y-4 lg:space-y-6">
-                                        
-                                        {/* ── Top Header: Identity (Tightened) ── */}
-                                        <div className="flex items-center gap-8 border-b border-outline-variant/10 pb-4">
-                                            <div className="w-[100px] h-[100px] bg-surface/40 rounded-3xl flex items-center justify-center text-secondary border border-outline-variant/10 relative shrink-0">
-                                                <div className="scale-[2]">{selectedHouse.icon}</div>
+                            <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
+                                    <div className="absolute top-8 right-8 z-20">
+                                        <button
+                                            onClick={() => router.push('/kundli')}
+                                            className="h-12 px-6 bg-gradient-to-r from-secondary to-secondary/80 text-background font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
+                                        >
+                                            <Lock className="w-4 h-4 opacity-40" /> Analyze House
+                                        </button>
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
+                                    
+                                    <div className="flex-grow p-8 lg:p-10 overflow-hidden flex flex-col">
+                                        {/* ── Top Section: Massive Identity ── */}
+                                        <div className="flex items-center gap-12 mb-8">
+                                            <div className="w-[150px] h-[150px] bg-surface border border-secondary/20 rounded-[40px] flex items-center justify-center text-secondary relative z-10 shadow-xl shrink-0 group">
+                                                <div className="scale-[2.5] transition-transform duration-700 group-hover:scale-[2.8]">{selectedHouse.icon}</div>
                                             </div>
-                                            <div className="flex-grow space-y-1.5">
+                                            <div className="flex-grow space-y-6">
                                                 <div className="flex items-baseline gap-4">
-                                                    <h2 className="text-5xl font-bold text-foreground tracking-tighter leading-none">{selectedHouse.nameEn}</h2>
-                                                    <span className="text-2xl font-headline font-bold text-secondary italic opacity-80">— {selectedHouse.nameHi}</span>
+                                                    <h2 className="text-6xl font-bold text-foreground tracking-tighter leading-none">{selectedHouse.nameEn}</h2>
+                                                    <span className="text-3xl font-headline font-bold text-secondary italic opacity-80">— {selectedHouse.nameHi}</span>
                                                 </div>
-                                                <div className="flex flex-wrap gap-x-6 gap-y-1">
-                                                    {[
-                                                        { label: 'Sanskrit', val: selectedHouse.sanskrit },
-                                                        { label: 'Element', val: selectedHouse.element },
-                                                        { label: 'Nature', val: selectedHouse.nature.split(' ')[0] },
-                                                        { label: 'Body Matrix', val: selectedHouse.bodyParts }
-                                                    ].map((item, i) => (
-                                                        <div key={i} className="flex flex-col">
-                                                            <span className="text-[8px] opacity-40 uppercase tracking-widest">{item.label}</span>
-                                                            <span className="text-[12px] font-bold text-foreground/90">{item.val}</span>
-                                                        </div>
-                                                    ))}
+                                                
+                                                {/* Top Metrics Grid */}
+                                                <div className="grid grid-cols-4 gap-8 pt-2">
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Sanskrit</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedHouse.sanskrit}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Significator</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedHouse.karaka}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Nature</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedHouse.nature}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Body Matrix</span>
+                                                        <p className="text-[14px] font-bold text-secondary uppercase">{selectedHouse.bodyParts}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* ── Main Bento Grid ── */}
-                                        <div className="grid grid-cols-12 gap-4 lg:gap-6">
-                                            
-                                            {/* Left Column: Narrative & Signatures */}
-                                            <div className="col-span-7 space-y-4">
-                                                <div className="space-y-2">
-                                                    <h3 className="label-sm text-secondary flex items-center gap-2"><Sparkles className="w-3.5 h-3.5" /> House Essence</h3>
-                                                    <p className="text-[15px] lg:text-[16px] font-light leading-snug text-foreground/80 pr-6">
+                                        {/* ── Middle Section: Bento Grid ── */}
+                                        <div className="grid grid-cols-12 gap-8 flex-grow">
+                                            {/* Left Column */}
+                                            <div className="col-span-7 space-y-8">
+                                                <div className="space-y-4">
+                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
+                                                        <BookOpen className="w-4 h-4" /> House Essence
+                                                    </h3>
+                                                    <p className="text-[16px] font-light leading-relaxed text-foreground/80 pr-6">
                                                         {selectedHouse.deepDive}
                                                     </p>
                                                 </div>
 
-                                                <div className="space-y-3 pt-2">
-                                                    <h3 className="label-sm opacity-40 flex items-center gap-2"><Zap className="w-3.5 h-3.5" /> Dominions</h3>
-                                                    <div className="flex flex-wrap gap-2">
+                                                <div className="space-y-4">
+                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
+                                                        <Zap className="w-4 h-4" /> Dominions
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-3">
                                                         {selectedHouse.traits.map(t => (
-                                                            <span key={t} className="text-[10px] font-bold px-3.5 py-1.5 rounded-lg bg-surface text-foreground/60 border border-outline-variant/10 uppercase tracking-tight">{t}</span>
+                                                            <span key={t} className="px-5 py-2 rounded-xl bg-surface border border-outline-variant/5 text-[11px] font-bold text-foreground/60 uppercase tracking-tight">{t}</span>
                                                         ))}
                                                     </div>
                                                 </div>
-
-                                                <div className="pt-4 border-t border-outline-variant/10">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                                                            <Info className="w-4 h-4 text-secondary" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[13px] font-bold text-foreground">Analyzing Bhavat Bhavam</p>
-                                                            <p className="text-[10px] opacity-40 uppercase tracking-widest">How {selectedHouse.nameEn} affects derivative life domains</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
 
-                                            {/* Right Column: Technical Specials */}
-                                            <div className="col-span-5 space-y-3">
-                                                <div className="bg-surface/30 rounded-[20px] p-5 border border-outline-variant/10">
-                                                    <h3 className="label-sm mb-3 text-secondary/70 uppercase tracking-widest flex items-center gap-2"><Shield className="w-3.5 h-3.5" /> Life Governance</h3>
-                                                    <p className="text-[14px] font-medium leading-tight text-foreground/90">{selectedHouse.represents}</p>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div className="bg-emerald-500/5 rounded-xl p-4 border border-emerald-500/20">
-                                                        <div className="flex items-center gap-2 mb-1.5 text-emerald-500">
-                                                            <CheckCircle2 className="w-3.5 h-3.5" />
-                                                            <span className="text-[9px] font-bold uppercase">Karaka</span>
-                                                        </div>
-                                                        <p className="text-[13px] font-bold text-foreground">{selectedHouse.karaka}</p>
-                                                        <span className="text-[9px] opacity-40 leading-none">Significator</span>
-                                                    </div>
-                                                    <div className="bg-secondary/5 rounded-xl p-4 border border-secondary/20">
-                                                        <div className="flex items-center gap-2 mb-1.5 text-secondary">
-                                                            <Activity className="w-3.5 h-3.5" />
-                                                            <span className="text-[9px] font-bold uppercase">Classification</span>
-                                                        </div>
-                                                        <p className="text-[13px] font-bold text-foreground">{selectedHouse.nature}</p>
-                                                        <span className="text-[9px] opacity-40 leading-none">Category</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="bg-surface/40 rounded-xl p-4 border border-outline-variant/10 relative overflow-hidden group">
-                                                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
-                                                        <Zap className="w-10 h-10" />
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mb-1.5 text-secondary">
-                                                        <Zap className="w-3.5 h-3.5" />
-                                                        <span className="text-[9px] font-bold uppercase">Mechanics</span>
-                                                    </div>
-                                                    <p className="text-[12px] font-bold text-foreground">
-                                                        {selectedHouse.id === '6th' || selectedHouse.id === '8th' || selectedHouse.id === '12th' ? 'Dusthana house - center of karmic clearance.' : 'Ken/Trikona - center of worldly fulfillment.'}
+                                            {/* Right Column */}
+                                            <div className="col-span-5 space-y-4">
+                                                <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
+                                                    <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-3">
+                                                        <Shield className="w-4 h-4" /> Life Governance
+                                                    </h3>
+                                                    <p className="text-[14px] font-medium leading-relaxed text-foreground/90">
+                                                        {selectedHouse.represents}
                                                     </p>
                                                 </div>
+
+                                                <div className="p-6 rounded-3xl bg-surface border border-outline-variant/10 shadow-sm flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                                                        <Compass className="w-5 h-5 text-secondary" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-bold text-foreground">Bhava Mechanics</p>
+                                                        <p className="text-[11px] text-foreground/50 leading-tight">
+                                                            {selectedHouse.id === '6th' || selectedHouse.id === '8th' || selectedHouse.id === '12th' ? 'Dusthana house - center of karmic clearance.' : 'Ken/Trikona - center of worldly fulfillment.'}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
 
+                                        {/* ── Bottom Section ── */}
+                                        <div className="mt-8 pt-6 border-t border-outline-variant/10 flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+                                                    <Dna className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-sm font-bold text-foreground">Bhavat Bhavam Logic</h3>
+                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">How {selectedHouse.nameEn} affects derivative life domains</p>
+                                                </div>
+                                            </div>
+                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">Analyze Alignment ✦</Button>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* ── Bottom Footer (Slim & Anchored) ── */}
-                                <div className="px-8 py-4 bg-surface border-t border-outline-variant/10 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-7 h-7 rounded bg-surface flex items-center justify-center border border-outline-variant/10">
-                                            <Dna className="w-3.5 h-3.5 text-secondary/60" />
-                                        </div>
-                                        <p className="text-[11px] font-medium text-foreground/40 italic">
-                                            Synthesizing the potential of {selectedHouse.nameEn} in your chart...
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => router.push('/kundli')}
-                                        className="h-11 px-8 bg-secondary text-background font-bold text-[12px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
-                                    >
-                                        Analyze Potentials <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </Card>
+                                </Card>
                             </motion.div>
                         )}
                     </AnimatePresence>

@@ -11,7 +11,7 @@ const blogCategories = [
         title: 'The 12 Rashis',
         description: 'Explore detailed information about all 12 Vedic zodiac signs, their characteristics, and cosmic influences.',
         icon: <Sparkles className="w-6 h-6" />,
-        href: '/blogs/rashis',
+        href: '/rashis',
         status: 'available',
         color: 'from-secondary/20 to-amber-500/20 border-secondary/30',
         iconBg: 'bg-secondary/10',

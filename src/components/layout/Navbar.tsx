@@ -33,7 +33,7 @@ const getNavSections = (isLoggedIn: boolean) => {
                     },
                     { 
                         label: "My Daily Predictions", 
-                        href: "/horoscope", 
+                        href: "/", 
                         icon: <Sparkles className="w-4 h-4" />,
                         desc: "Personalized scores for career and love."
                     },
@@ -171,7 +171,7 @@ const getNavSections = (isLoggedIn: boolean) => {
                 },
                 { 
                     label: "Daily Predictions", 
-                    href: "/horoscope", 
+                    href: "/", 
                     icon: <Sparkles className="w-4 h-4" />,
                     desc: "Check your luck, health, and finance."
                 },

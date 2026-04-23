@@ -243,27 +243,27 @@ export default function PlanetsPage() {
 
     return (
         // ─── FIX 2: overflow-hidden on root prevents any bleed outside viewport ───
-        <div className="min-h-screen bg-[var(--bg)] pt-0 pb-10 px-4 relative overflow-hidden flex flex-col items-center">
+        <div className="min-h-screen bg-[var(--bg)] pt-16 lg:pt-20 px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
             {/* Background Decorations */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[10%] right-[5%] w-[40%] h-[40%] bg-secondary/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[10%] left-[5%] w-[35%] h-[35%] bg-secondary/3 blur-[100px] rounded-full"></div>
             </div>
 
-            <div className="max-w-[1500px] w-full mx-auto relative flex flex-col lg:flex-row gap-8 items-start h-full">
-                {/* ── Sidebar ── */}
-                <div className="w-full lg:w-[240px] shrink-0 sticky lg:top-16 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                    <div className="mb-4 px-1 shrink-0">
+            <div className="max-w-[1500px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-5">
+                {/* Master: Sidebar (Left) */}
+                <div className="lg:w-[260px] flex-shrink-0 flex flex-col">
+                    <div className="mb-2 px-1">
                         <Link href="/blogs" className="inline-flex items-center gap-1.5 text-secondary hover:text-secondary/70 transition-all mb-1 group">
                             <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-                            <span className="label-sm">Knowledge Center</span>
+                            <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
-                        <h1 className="text-2xl font-bold text-foreground leading-tight">
+                        <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
                             Navagraha <span className="text-secondary italic">Archetypes</span>
                         </h1>
                     </div>
 
-                    <div className="flex-grow">
+                    <div className="flex-grow overflow-y-auto scrollbar-hide pb-10">
                         <button
                             onClick={() => setViewMode('encyclopedia')}
                             className={`w-full flex items-center gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left mb-3 ${viewMode === 'encyclopedia'
@@ -309,8 +309,8 @@ export default function PlanetsPage() {
                     </div>
                 </div>
 
-                {/* ── Detail Panel ── */}
-                <div className="flex-1 w-full min-w-0">
+                {/* Detail: Content (Right) */}
+                <div className="flex-grow min-w-0 flex flex-col lg:-mt-15">
                     <AnimatePresence mode="wait">
                         {viewMode === 'encyclopedia' && (
                             <motion.div
@@ -319,7 +319,7 @@ export default function PlanetsPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 1.02 }}
                                 transition={{ duration: 0.25 }}
-                                className="h-full flex items-start justify-center p-2 lg:pt-10"
+                                className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
                                 <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
                                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
@@ -397,8 +397,8 @@ export default function PlanetsPage() {
                                 initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 1.02 }}
-                                transition={{ duration: 0.25 }}
-                                className="h-full flex items-start justify-center p-2 lg:pt-10"
+                                transition={{ duration: 0.4 }}
+                                className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
                                 <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
                                     <div className="absolute top-8 right-8 z-20">
@@ -430,10 +430,14 @@ export default function PlanetsPage() {
                                                 </div>
 
                                                 {/* Top Metrics Grid */}
-                                                <div className="grid grid-cols-3 gap-12 pt-2">
+                                                <div className="grid grid-cols-4 gap-8 pt-2">
                                                     <div>
                                                         <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Nature</span>
                                                         <p className="text-[14px] font-bold text-foreground/90">{selectedPlanet.nature}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Element</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedPlanet.element}</p>
                                                     </div>
                                                     <div>
                                                         <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Core Essence</span>
@@ -441,7 +445,7 @@ export default function PlanetsPage() {
                                                     </div>
                                                     <div>
                                                         <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Biological</span>
-                                                        <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedPlanet.bodyParts}</p>
+                                                        <p className="text-[14px] font-bold text-secondary uppercase">{selectedPlanet.bodyParts}</p>
                                                     </div>
                                                 </div>
                                             </div>

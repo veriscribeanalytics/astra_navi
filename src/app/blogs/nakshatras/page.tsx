@@ -6,7 +6,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
     Star, ArrowLeft, ChevronRight, Compass, Info, Scale, 
-    Activity, Lock, Zap, Dna, Moon, Sparkles, Target, Shield
+    Activity, Lock, Zap, Dna, Moon, Sparkles, Target, Shield,
+    BookOpen, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -235,60 +236,55 @@ export default function NakshatrasPage() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] pt-20 pb-20 px-4 relative overflow-hidden">
+        <div className="h-screen bg-[var(--bg)] pt-16 lg:pt-20 px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
             {/* Background Decorations */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[10%] right-[5%] w-[40%] h-[40%] bg-secondary/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[10%] left-[5%] w-[35%] h-[35%] bg-secondary/3 blur-[100px] rounded-full"></div>
             </div>
 
-            <div className="max-w-[1500px] mx-auto relative z-10">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-10">
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                        <Link href="/blogs" className="inline-flex items-center gap-2 group">
-                            <ArrowLeft className="w-4 h-4 text-secondary group-hover:-translate-x-1 transition-transform" />
-                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/60 group-hover:text-secondary transition-colors">Knowledge Center</span>
+            <div className="max-w-[1500px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-5">
+                {/* Master: Sidebar (Left) */}
+                <div className="lg:w-[260px] lg:h-[calc(100vh-100px)] flex-shrink-0 flex flex-col">
+                    <div className="mb-2 px-1">
+                        <Link href="/blogs" className="inline-flex items-center gap-1.5 text-secondary hover:text-secondary/70 transition-all mb-1 group">
+                            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                            <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
-                    </motion.div>
-                    
-                    <div className="text-right">
-                        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight">Lunar <span className="text-secondary italic">Mansions</span></h1>
-                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">Phase 3: The Subconscious Layer</p>
+                        <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                            Lunar <span className="text-secondary italic">Mansions</span>
+                        </h1>
+                    </div>
+
+                    <div className="flex-grow overflow-y-auto scrollbar-hide pb-10">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">The 27 Nakshatras</div>
+                        <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
+                            {nakshatras.map((nak) => {
+                                const isActive = selectedNakshatra.id === nak.id;
+                                return (
+                                    <button
+                                        key={nak.id}
+                                        onClick={() => setSelectedNakshatra(nak)}
+                                        className={`group flex flex-col items-center justify-center py-2 px-1 rounded-xl border transition-all duration-200 ${isActive
+                                                ? 'border-secondary bg-secondary/5'
+                                                : 'border-transparent hover:bg-surface'
+                                            }`}
+                                    >
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${isActive ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary group-hover:bg-secondary/20'}`}>
+                                            {nak.id}
+                                        </div>
+                                        <p className={`text-[10px] font-bold mt-1.5 truncate w-full text-center ${isActive ? 'text-secondary' : 'text-foreground/50'}`}>
+                                            {nak.nameEn}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
-                    {/* Navigation Sidebar */}
-                    <div className="w-full lg:w-[240px] shrink-0 sticky lg:top-24 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                        <div className="flex flex-col gap-2">
-                            {nakshatras.map((nak) => (
-                                <button
-                                    key={nak.id}
-                                    onClick={() => setSelectedNakshatra(nak)}
-                                    className={`relative p-3 rounded-[20px] transition-all duration-300 flex items-center gap-3 group border ${
-                                        selectedNakshatra.id === nak.id 
-                                        ? 'bg-secondary text-white shadow-lg border-secondary' 
-                                        : 'bg-surface/40 hover:bg-surface/80 text-foreground/60 border-outline-variant/10'
-                                    }`}
-                                >
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${selectedNakshatra.id === nak.id ? 'bg-white/20 text-white' : 'bg-secondary/10 text-secondary'}`}>
-                                        {nak.id}
-                                    </div>
-                                    <div className="text-left flex-1">
-                                        <p className="text-[13px] font-bold font-headline">{nak.nameEn}</p>
-                                        <p className={`text-[9px] uppercase tracking-widest mt-0.5 ${selectedNakshatra.id === nak.id ? 'text-white/60' : 'text-foreground/30'}`}>
-                                            {nak.nameHi}
-                                        </p>
-                                    </div>
-                                    <ChevronRight className={`w-4 h-4 transition-transform ${selectedNakshatra.id === nak.id ? 'translate-x-1' : 'opacity-0'}`} />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Detail View */}
-                    <div className="flex-1 w-full min-w-0">
+                {/* Detail: Content (Right) */}
+                <div className="flex-grow min-w-0 flex flex-col lg:-mt-12">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={selectedNakshatra.id}
@@ -296,92 +292,107 @@ export default function NakshatrasPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.4 }}
+                                className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
-                                <Card padding="none" className="!rounded-[32px] border border-outline-variant/30 bg-surface overflow-hidden">
-                                    <div className="p-8 sm:p-12">
-                                        <div className="flex flex-col md:flex-row items-center gap-10 mb-10 pb-10 border-b border-outline-variant/10">
-                                            <div className="relative">
-                                                <div className="absolute inset-[-20px] bg-secondary/10 blur-[40px] rounded-full opacity-60"></div>
-                                                <div className="w-40 h-40 rounded-[48px] bg-surface border border-secondary/20 flex items-center justify-center text-secondary relative z-10 shadow-xl overflow-hidden group">
-                                                    <Star className="w-20 h-20 transition-transform duration-700 group-hover:scale-110" />
-                                                    <div className="absolute bottom-0 left-0 right-0 bg-secondary/10 py-1 text-[10px] font-bold text-center uppercase tracking-widest">{selectedNakshatra.id} / 27</div>
-                                                </div>
+                                <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
+                                    <div className="absolute top-8 right-8 z-20">
+                                        <button
+                                            onClick={() => router.push('/kundli')}
+                                            className="h-12 px-6 bg-gradient-to-r from-secondary to-secondary/80 text-background font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
+                                        >
+                                            <Lock className="w-4 h-4 opacity-40" /> Analyze Nakshatra
+                                        </button>
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
+                                    
+                                    <div className="flex-grow p-8 lg:p-10 overflow-hidden flex flex-col">
+                                        {/* ── Top Section: Massive Identity ── */}
+                                        <div className="flex items-center gap-12 mb-8">
+                                            <div className="w-[150px] h-[150px] bg-surface border border-secondary/20 rounded-[40px] flex items-center justify-center text-secondary relative z-10 shadow-xl group shrink-0">
+                                                <Star className="w-16 h-16 transition-transform duration-700 group-hover:scale-110" />
+                                                <div className="absolute bottom-0 left-0 right-0 bg-secondary/10 py-1 text-[9px] font-bold text-center uppercase tracking-widest">{selectedNakshatra.id} / 27</div>
                                             </div>
-
-                                            <div className="flex-1 text-center md:text-left">
-                                                <div className="flex flex-wrap items-baseline justify-center md:justify-start gap-4 mb-4">
-                                                    <h2 className="text-6xl font-headline font-bold text-foreground">{selectedNakshatra.nameEn}</h2>
-                                                    <span className="text-3xl text-secondary font-headline italic">— {selectedNakshatra.nameHi}</span>
+                                            <div className="flex-grow space-y-6">
+                                                <div className="flex items-baseline gap-4">
+                                                    <h2 className="text-6xl font-bold text-foreground tracking-tighter leading-none">{selectedNakshatra.nameEn}</h2>
+                                                    <span className="text-3xl font-headline font-bold text-secondary italic opacity-80">— {selectedNakshatra.nameHi}</span>
                                                 </div>
                                                 
-                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Lord</p>
-                                                        <p className="text-base font-bold text-secondary">{selectedNakshatra.ruler}</p>
+                                                {/* Top Metrics Grid */}
+                                                <div className="grid grid-cols-4 gap-8 pt-2">
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Ruler (Lord)</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedNakshatra.ruler}</p>
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Symbol</p>
-                                                        <p className="text-base font-bold text-foreground/80">{selectedNakshatra.symbol}</p>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Symbol</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedNakshatra.symbol}</p>
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Gana</p>
-                                                        <p className="text-base font-bold text-foreground/80">{selectedNakshatra.gana}</p>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Gana</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedNakshatra.gana}</p>
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">Animal (Yoni)</p>
-                                                        <p className="text-base font-bold text-secondary">{selectedNakshatra.yoni}</p>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Animal (Yoni)</span>
+                                                        <p className="text-[14px] font-bold text-secondary uppercase">{selectedNakshatra.yoni}</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="grid md:grid-cols-2 gap-12">
-                                            <div className="space-y-8">
-                                                <div>
-                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                                                        <Dna className="w-4 h-4" />
-                                                        Karmic Deep Dive
+                                        {/* ── Middle Section: Bento Grid ── */}
+                                        <div className="grid grid-cols-12 gap-8 flex-grow">
+                                            {/* Left: Archetype & Signatures */}
+                                            <div className="col-span-7 space-y-8">
+                                                <div className="space-y-4">
+                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
+                                                        <BookOpen className="w-4 h-4" /> Karmic Deep Dive
                                                     </h3>
-                                                    <p className="text-lg text-foreground/90 leading-relaxed font-light italic border-l-2 border-secondary/20 pl-6">
+                                                    <p className="text-[16px] font-light leading-relaxed text-foreground/80 italic border-l-2 border-secondary/20 pl-6 pr-6">
                                                         &quot;{selectedNakshatra.deepDive}&quot;
                                                     </p>
                                                 </div>
 
-                                                <div className="p-6 rounded-2xl bg-surface/40 border border-outline-variant/10">
-                                                    <h4 className="text-[10px] font-bold text-foreground/50 mb-3 uppercase tracking-widest">Fundamental Trait</h4>
-                                                    <p className="text-[15px] text-foreground font-medium leading-relaxed">
+                                                <div className="p-6 rounded-2xl bg-secondary/5 border border-secondary/5">
+                                                    <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-2">
+                                                        <Sparkles className="w-4 h-4" /> Fundamental Trait
+                                                    </h3>
+                                                    <p className="text-[14px] font-medium text-foreground/70 leading-relaxed">
                                                         {selectedNakshatra.trait}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-6">
-                                                <div className="space-y-4">
-                                                    <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-center justify-between group">
-                                                        <div className="flex items-center gap-3">
-                                                            <Zap className="w-5 h-5 text-secondary/40 group-hover:text-secondary transition-colors" />
-                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Nakshatra Shakti</span>
+                                            {/* Right: Technical Stats Stack */}
+                                            <div className="col-span-5 space-y-4">
+                                                <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between border-b border-outline-variant/5 pb-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <Zap className="w-4 h-4 text-secondary/60" />
+                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">Nakshatra Shakti</span>
+                                                            </div>
+                                                            <span className="text-sm font-bold text-foreground">{selectedNakshatra.shakti}</span>
                                                         </div>
-                                                        <span className="text-sm font-bold text-foreground">{selectedNakshatra.shakti}</span>
-                                                    </div>
-                                                    <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-center justify-between group">
-                                                        <div className="flex items-center gap-3">
-                                                            <Activity className="w-5 h-5 text-secondary/40 group-hover:text-secondary transition-colors" />
-                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Nadi (Ayurvedic Flow)</span>
+                                                        <div className="flex items-center justify-between border-b border-outline-variant/5 pb-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <Activity className="w-4 h-4 text-secondary/60" />
+                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">Nadi (Ayurvedic)</span>
+                                                            </div>
+                                                            <span className="text-sm font-bold text-foreground">{selectedNakshatra.nadi}</span>
                                                         </div>
-                                                        <span className="text-sm font-bold text-foreground">{selectedNakshatra.nadi}</span>
-                                                    </div>
-                                                    <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-center justify-between group">
-                                                        <div className="flex items-center gap-3">
-                                                            <Compass className="w-5 h-5 text-secondary/40 group-hover:text-secondary transition-colors" />
-                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Purushartha (Goal)</span>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <Compass className="w-4 h-4 text-secondary/60" />
+                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">Purushartha</span>
+                                                            </div>
+                                                            <span className="text-sm font-bold text-foreground">{selectedNakshatra.element}</span>
                                                         </div>
-                                                        <span className="text-sm font-bold text-foreground">{selectedNakshatra.element}</span>
                                                     </div>
                                                 </div>
 
-                                                <div className="p-6 rounded-3xl bg-surface border border-outline-variant/10 flex flex-col gap-4">
-                                                    <div className="flex items-center gap-3">
+                                                <div className="p-6 rounded-3xl bg-surface border border-outline-variant/10 shadow-sm">
+                                                    <div className="flex items-center gap-3 mb-3">
                                                         <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
                                                             <Scale className="w-4 h-4 text-secondary" />
                                                         </div>
@@ -394,23 +405,23 @@ export default function NakshatrasPage() {
                                             </div>
                                         </div>
 
-                                        <div className="mt-12 pt-8 border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                        {/* ── Bottom Section: Action ── */}
+                                        <div className="mt-8 pt-6 border-t border-outline-variant/10 flex items-center justify-between">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
-                                                    <Target className="w-6 h-6" />
+                                                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+                                                    <Target className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-base font-headline font-bold text-foreground">Find My Janma Nakshatra</h3>
-                                                    <p className="text-[10px] text-foreground/40 tracking-wider uppercase font-bold">Discover your core subconscious blueprint</p>
+                                                    <h3 className="text-sm font-bold text-foreground">Subconscious Blueprint</h3>
+                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">Discover your core Janma Nakshatra</p>
                                                 </div>
                                             </div>
-                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-8 !py-3 !rounded-2xl !font-bold">Analyze Chart ✦</Button>
+                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">Analyze Chart ✦</Button>
                                         </div>
                                     </div>
                                 </Card>
                             </motion.div>
                         </AnimatePresence>
-                    </div>
                 </div>
             </div>
         </div>

@@ -18,7 +18,6 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/astrologers") ||
         nextUrl.pathname.startsWith("/support") ||
         nextUrl.pathname.startsWith("/careers") ||
-        nextUrl.pathname.startsWith("/horoscope") ||
         nextUrl.pathname.startsWith("/plans");
 
       // Redirect logged-in users away from login/register
