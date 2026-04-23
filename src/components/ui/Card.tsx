@@ -23,36 +23,36 @@ const Card: React.FC<CardProps> = ({
   
   const colorSchemes = {
     default: {
-      default: 'bg-surface/40 dark:bg-surface/40 border-outline-variant/30 dark:border-outline-variant/20',
-      elevated: 'bg-surface/50 dark:bg-surface/50 border-outline-variant/35 dark:border-outline-variant/25',
-      bordered: 'bg-surface/60 dark:bg-surface/60 border-outline-variant/40 dark:border-outline-variant/30',
+      default: 'bg-surface border-outline-variant/30 dark:border-outline-variant/20',
+      elevated: 'bg-surface border-outline-variant/35 dark:border-outline-variant/25',
+      bordered: 'bg-surface border-outline-variant/40 dark:border-outline-variant/30',
     },
     ivory: {
-      default: 'bg-background border-outline-variant/30',
-      elevated: 'bg-background border-outline-variant/30',
-      bordered: 'bg-background/85 border-outline-variant/40',
+      default: 'bg-surface border-outline-variant/30',
+      elevated: 'bg-surface border-outline-variant/30',
+      bordered: 'bg-surface border-outline-variant/40',
     },
     lavender: {
-      default: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/30',
-      elevated: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/35',
-      bordered: 'bg-surface/50 dark:bg-surface/70 border-outline-variant/40',
+      default: 'bg-surface border-outline-variant/30',
+      elevated: 'bg-surface border-outline-variant/35',
+      bordered: 'bg-surface border-outline-variant/40',
     },
     midnight: {
-      default: 'bg-surface-variant/95 border-secondary/15',
-      elevated: 'bg-surface-variant border-secondary/20',
-      bordered: 'bg-surface-variant/85 border-secondary/25',
+      default: 'bg-surface border-secondary/15',
+      elevated: 'bg-surface border-secondary/20',
+      bordered: 'bg-surface border-secondary/25',
     },
     galaxy: {
-      default: 'bg-surface/95 border-outline-variant/40',
+      default: 'bg-surface border-outline-variant/40',
       elevated: 'bg-surface border-outline-variant/50',
-      bordered: 'bg-surface/85 border-outline-variant/60',
+      bordered: 'bg-surface border-outline-variant/60',
     }
   };
 
   const variants = {
-    default: `${colorSchemes[colorScheme].default} backdrop-blur-md border`,
-    elevated: `${colorSchemes[colorScheme].elevated} backdrop-blur-md border`,
-    bordered: `${colorSchemes[colorScheme].bordered} backdrop-blur-lg border-[1.5px]`,
+    default: `${colorSchemes[colorScheme].default} border`,
+    elevated: `${colorSchemes[colorScheme].elevated} border`,
+    bordered: `${colorSchemes[colorScheme].bordered} border-[1.5px]`,
   };
 
   const paddings = {

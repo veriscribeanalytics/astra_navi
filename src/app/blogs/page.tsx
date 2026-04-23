@@ -11,7 +11,7 @@ const blogCategories = [
         title: 'The 12 Rashis',
         description: 'Explore detailed information about all 12 Vedic zodiac signs, their characteristics, and cosmic influences.',
         icon: <Sparkles className="w-6 h-6" />,
-        href: '/rashis',
+        href: '/blogs/rashis',
         status: 'available',
         color: 'from-secondary/20 to-amber-500/20 border-secondary/30',
         iconBg: 'bg-secondary/10',
@@ -89,7 +89,7 @@ const blogCategories = [
         description: 'Discover gemstones, mantras, rituals, and other remedies to balance planetary influences.',
         icon: <Gem className="w-6 h-6" />,
         href: '/blogs/remedies',
-        status: 'coming-soon',
+        status: 'available',
         color: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/30',
         iconBg: 'bg-yellow-500/10',
         iconColor: 'text-yellow-600'
@@ -175,7 +175,7 @@ export default function BlogsPage() {
                     <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-secondary/20 bg-secondary/5 text-secondary text-[10px] font-bold tracking-[0.2em] uppercase mb-8 shadow-sm">
                         <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                            transition={{ duration: 10, repeat: Infinity, ease: "linear" as const }}
                         >
                             <BookOpen className="w-4 h-4" />
                         </motion.div>
@@ -282,7 +282,7 @@ export default function BlogsPage() {
                     transition={{ duration: 0.8 }}
                     className="mt-24"
                 >
-                    <Card padding="none" className="!rounded-[40px] border-none bg-gradient-to-br from-[#1a1233] via-[#0b071a] to-secondary/10 overflow-hidden relative">
+                    <Card padding="none" className="!rounded-[40px] border-none bg-surface overflow-hidden relative">
                         {/* Decorative Background for CTA */}
                         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none"></div>
                         <div className="absolute top-[-50%] right-[-10%] w-[60%] h-[120%] bg-secondary/10 blur-[100px] rounded-full"></div>

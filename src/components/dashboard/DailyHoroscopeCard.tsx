@@ -160,10 +160,10 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
     return (
         <Card 
             padding="none" 
-            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden glass-panel"
+            className="!rounded-[24px] sm:!rounded-[32px] overflow-hidden"
         >
             {/* Header - Compact for mobile */}
-            <div className="p-3 sm:p-4 border-b border-outline-variant/30 bg-surface/10">
+            <div className="p-3 sm:p-4 border-b border-outline-variant/30 bg-surface">
                 <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-1 sm:gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-0.5">
@@ -232,7 +232,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
 
             <div className={`transition-all duration-700 ease-out ${showContent ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'}`}>
                     {/* Top Info Row - Dynamic Columns */}
-                    <div className={`grid grid-cols-2 ${horoscope.dominant_planet ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} border-b border-outline-variant/30 bg-surface/5`}>
+                    <div className={`grid grid-cols-2 ${horoscope.dominant_planet ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} border-b border-outline-variant/30 bg-surface`}>
                         <div className="flex flex-col items-center justify-center p-2 sm:p-3 border-r border-b sm:border-b-0 border-white/5">
                             <span className="text-[12px] font-bold text-foreground/40 uppercase tracking-widest mb-1">Mood</span>
                             <span className="text-xs sm:text-sm font-headline font-bold text-foreground">
@@ -270,7 +270,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
                 {/* Main Content Grid - Stacked on Mobile, 2x2 on Desktop */}
                 <div className="grid grid-cols-1 sm:grid-cols-2">
                     {/* Career */}
-                    <div className="p-3.5 sm:p-4.5 border-b sm:border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
+                    <div className="p-3.5 sm:p-4.5 border-b sm:border-r border-outline-variant/30 hover:bg-surface-variant/5 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
                                 <Briefcase className="w-3.5 h-3.5 text-orange-600" />
@@ -283,7 +283,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
                     </div>
 
                     {/* Love */}
-                    <div className="p-3.5 sm:p-4.5 border-b border-outline-variant/30 hover:bg-surface/10 transition-colors">
+                    <div className="p-3.5 sm:p-4.5 border-b border-outline-variant/30 hover:bg-surface-variant/5 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-7 h-7 rounded-lg bg-pink-500/10 flex items-center justify-center">
                                 <Heart className="w-3.5 h-3.5 text-pink-600" />
@@ -296,7 +296,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
                     </div>
 
                     {/* Health */}
-                    <div className="p-3.5 sm:p-4.5 border-b sm:border-b-0 sm:border-r border-outline-variant/30 hover:bg-surface/10 transition-colors">
+                    <div className="p-3.5 sm:p-4.5 border-b sm:border-b-0 sm:border-r border-outline-variant/30 hover:bg-surface-variant/5 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
                                 <Activity className="w-3.5 h-3.5 text-green-600" />
@@ -309,7 +309,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
                     </div>
 
                     {/* Finance */}
-                    <div className="p-3.5 sm:p-4.5 hover:bg-surface/10 transition-colors">
+                    <div className="p-3.5 sm:p-4.5 hover:bg-surface-variant/5 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center">
                                 <DollarSign className="w-3.5 h-3.5 text-yellow-600" />
@@ -323,7 +323,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: DailyHoroscopeCa
                 </div>
 
                 {/* Tip of the Day - Centered Bottom */}
-                <div className="p-4 sm:p-6 bg-surface/20 border-t border-outline-variant/30 flex flex-col items-center text-center">
+                <div className="p-4 sm:p-6 bg-surface border-t border-outline-variant/30 flex flex-col items-center text-center">
                     <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center mb-2 border border-secondary/20">
                         <Sparkles className="w-3.5 h-3.5 text-secondary" />
                     </div>

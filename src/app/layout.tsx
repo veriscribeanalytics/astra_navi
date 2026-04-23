@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { Toaster } from "@/hooks/useToast";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -45,6 +46,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -88,9 +90,10 @@ export default function RootLayout({
                 <ThemeProvider>
                   {/* Optimized backgrounds with adaptive quality */}
                   <OptimizedBackgrounds />
+                  <Toaster />
                   
                   <Navbar />
-                  <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent">
+                  <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent pt-[var(--navbar-height,64px)]">
                     {children}
                   </main>
                   <ConditionalFooter />

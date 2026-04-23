@@ -34,7 +34,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message = "Aligning you
           <div className="absolute w-2 h-2 bg-secondary/40 rounded-full animate-orbit-reverse"></div>
           
           {/* Central Star (Logo) */}
-          <div className="relative z-10 w-12 h-12 rounded-full overflow-hidden border border-secondary/30 bg-surface/50 p-1.5 backdrop-blur-md">
+          <div className="relative z-10 w-12 h-12 rounded-full overflow-hidden border border-secondary/30 bg-surface p-1.5">
             <Image
               src="/icons/logo.jpeg"
               alt="Astra Navi"

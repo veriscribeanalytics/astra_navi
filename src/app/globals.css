@@ -2,10 +2,56 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 html {
-  scrollbar-gutter: stable;
   scroll-behavior: smooth;
-  /* Fluid typography base - Increased by 2-4px */
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
   font-size: clamp(16px, 1vw + 0.65rem, 18px);
+}
+
+/* Prevent double scrollbars: body is the SOLE scroll container */
+body {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Global Custom Scrollbar - Premium 4px */
+body, .custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 136, 10, 0.2) transparent;
+}
+
+body::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+body::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(200, 136, 10, 0.2);
+  border-radius: 20px;
+  transition: background 0.3s ease;
+}
+
+body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 136, 10, 0.4);
+}
+
+/* Dark Mode Overrides */
+.dark body, .dark .custom-scrollbar {
+  scrollbar-color: rgba(200, 136, 10, 0.15) transparent;
+}
+
+.dark body::-webkit-scrollbar-thumb, .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(200, 136, 10, 0.15);
 }
 
 /* Mobile: Use dynamic viewport units to account for browser UI */
@@ -16,12 +62,6 @@ html {
       min-height: 100dvh;
     }
   }
-}
-
-/* Prevent horizontal overflow globally */
-html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
 }
 
 /* Micro-Mobile (<500px) Global Layout Safety Net */
@@ -55,8 +95,8 @@ html, body {
 
 /* Glassmorphism Panel */
 .glass-panel {
-  @apply backdrop-blur-md bg-surface/40 border border-outline-variant/30 rounded-[32px];
-  background-image: linear-gradient(rgba(255, 255, 255, 0.03), transparent);
+  @apply bg-surface border border-outline-variant/30 rounded-[32px];
+  background-image: none;
 }
 
 /* Standard Label Styling */
@@ -189,7 +229,7 @@ html, body {
   /* --- PRIMARY THEME: IVORY (LIGHT) --- */
   --background: #faf7f2;
   --foreground: #2a1a4a;
-  --surface: #EDE0E8;
+  --surface: #f1e4db;
   --surface-variant: #E6D8E0;
   --primary: #2a1a4a;
   --secondary: #c8880a;
@@ -248,7 +288,7 @@ html, body {
   /* --- SECONDARY THEME: MIDNIGHT (DARK) --- */
   --background: #0b071a;
   --foreground: #faf7f2;
-  --surface: #1a1233;
+  --surface: #0b071a;
   --surface-variant: #231942;
   --primary: #faf7f2;
   --secondary: #c8880a;
@@ -334,8 +374,7 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 }
 
 @utility dark-glass {
-  background: color-mix(in srgb, var(--surface) 40%, transparent);
-  backdrop-blur: 20px;
+  background: var(--surface);
   border: 1px solid rgba(200, 136, 10, 0.15);
 }
 
@@ -472,8 +511,12 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
 /* CELESTIAL ANIMATIONS */
 @keyframes celestial-pulse { 0%, 100% { transform: scale(1); opacity: 0.1; } 50% { transform: scale(1.6); opacity: 0.25; } }
 @keyframes spin-around { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes orbit { from { transform: rotate(0deg) translateX(48px) rotate(0deg); } to { transform: rotate(360deg) translateX(48px) rotate(-360deg); } }
+@keyframes orbit-reverse { from { transform: rotate(360deg) translateX(36px) rotate(-360deg); } to { transform: rotate(0deg) translateX(36px) rotate(0deg); } }
 
 @utility animate-celestial-pulse { animation: celestial-pulse 4s ease-in-out infinite; }
+@utility animate-orbit { animation: orbit 3s linear infinite; }
+@utility animate-orbit-reverse { animation: orbit-reverse 4s linear infinite; }
 @utility no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
 
 /* FLUID UTILITIES */

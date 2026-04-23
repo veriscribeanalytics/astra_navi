@@ -12,9 +12,9 @@ export default function FAQSection() {
     };
 
     return (
-        <section className="py-6 sm:py-8 md:py-10 lg:py-12 relative" id="faq">
+        <section className="py-4 sm:py-6 md:py-8 relative" id="faq">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-5 sm:mb-7 md:mb-9 lg:mb-10">
+                <div className="text-center mb-4 sm:mb-5 md:mb-6">
                     <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-headline mb-2 sm:mb-2.5 md:mb-3 text-foreground/90">
                         Questions About Jyotish
                     </h2>
@@ -27,11 +27,11 @@ export default function FAQSection() {
                     {faqs.map((faq, idx) => (
                         <div 
                             key={idx} 
-                            className="border border-[var(--border)] rounded-xl sm:rounded-xl md:rounded-2xl bg-background/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:border-[#D4AF37]/30"
+                            className="border border-[var(--border)] rounded-xl sm:rounded-xl md:rounded-2xl bg-surface overflow-hidden transition-all duration-300 hover:border-[#D4AF37]/30"
                         >
                             <button
                                 onClick={() => toggleFAQ(idx)}
-                                className="w-full flex justify-between items-center p-3.5 sm:p-4 md:p-5 lg:p-6 text-left focus:outline-none gap-2.5 sm:gap-3"
+                                className="w-full flex justify-between items-center p-3 sm:p-3.5 md:p-4 text-left focus:outline-none gap-2.5 sm:gap-3"
                             >
                                 <span className="font-headline font-semibold text-sm sm:text-base md:text-lg text-foreground/80">
                                     {faq.question}

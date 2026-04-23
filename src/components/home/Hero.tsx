@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'motion/react';
 import { 
     Sparkles, BookOpen, User, Calendar, 
     Clock, MapPin, ArrowRight 
@@ -12,6 +13,27 @@ import { useAuth } from '@/context/AuthContext';
 const Hero = () => {
     const router = useRouter();
     const { isLoggedIn, user } = useAuth();
+    
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+                delayChildren: 0.3
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.8, ease: "easeOut" as const }
+        }
+    };
+
     const [formData, setFormData] = useState({
         name: '',
         dob: '',
@@ -99,26 +121,39 @@ const Hero = () => {
     };
 
     return (
-        <section className="relative min-h-[550px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 pt-24 sm:pt-28 md:pt-32 lg:pt-40 pb-10 sm:pb-12 md:pb-16 lg:pb-20 overflow-hidden">
-            {/* Background glowing orbs */}
-            <div className="absolute top-[-10%] right-[-10%] w-[250px] sm:w-[400px] md:w-[500px] lg:w-[600px] h-[250px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] sm:blur-[80px] md:blur-[100px] lg:blur-[120px] rounded-full -z-10 opacity-30 dark:opacity-60"></div>
+        <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[650px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-8 sm:pb-10 md:pb-12 lg:pb-14 overflow-hidden">
+            {/* Background glowing orbs - Now Animated */}
+            <motion.div 
+                initial={{ opacity: 0.1, scale: 0.8 }}
+                animate={{ 
+                    opacity: [0.3, 0.5, 0.3],
+                    scale: [1, 1.1, 1],
+                }}
+                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" as const }}
+                className="absolute top-[-10%] right-[-10%] w-[250px] sm:w-[400px] md:w-[500px] lg:w-[600px] h-[250px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] sm:blur-[80px] md:blur-[100px] lg:blur-[120px] rounded-full -z-10 opacity-30 dark:opacity-60"
+            ></motion.div>
             
             <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20 items-center relative z-10">
-                <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 text-center lg:text-left">
-                    <div className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-3.5 md:px-4 py-1.5 sm:py-1.5 md:py-2 rounded-full bg-secondary/10 border border-secondary/30">
+                <motion.div 
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center lg:text-left"
+                >
+                    <motion.div variants={itemVariants} className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-3.5 md:px-4 py-1.5 sm:py-1.5 md:py-2 rounded-full bg-secondary/10 border border-secondary/30">
                         <Sparkles className="text-secondary w-3 h-3 sm:w-3.5 sm:h-3.5" />
                         <span className="text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-[0.12em] sm:tracking-[0.13em] md:tracking-[0.15em] font-bold text-secondary font-body">Jyotish Shastra • Vedic Astrology</span>
-                    </div>
+                    </motion.div>
                     
-                    <h1 className="text-[28px] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-headline font-bold text-primary">
+                    <motion.h1 variants={itemVariants} className="text-[28px] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-headline font-bold text-primary">
                         The Cosmos Spoke<br/>At Your <span className="text-secondary italic drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(245,166,35,0.4)]">Birth</span>
-                    </h1>
+                    </motion.h1>
                     
-                    <p className="text-sm sm:text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0">
+                    <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0">
                         For 5,000 years, Jyotish has mapped human destiny through planetary positions. Enter your birth details and receive your complete Kundli—revealing your soul's journey, karmic patterns, and the precise timing of life's major events.
-                    </p>
+                    </motion.p>
                     
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-5 md:gap-8 lg:gap-10 py-3 sm:py-4 md:py-5 lg:py-6">
+                    <motion.div variants={itemVariants} className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-5 md:gap-8 lg:gap-10 py-2 sm:py-3 md:py-4 lg:py-5">
                         <div>
                             <div className="text-lg sm:text-xl md:text-2xl font-bold text-secondary font-body">Always</div>
                             <div className="text-[12px] sm:text-[13px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Available</div>
@@ -131,14 +166,19 @@ const Hero = () => {
                             <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary font-body">Sacred</div>
                             <div className="text-[12px] sm:text-[13px] uppercase tracking-widest text-on-surface-variant font-bold font-body">Privacy</div>
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
                 {/* Kundli Widget / Welcome Back Card */}
-                <Card 
-                  className="border-secondary/30 min-h-[300px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[400px] flex flex-col justify-center !bg-surface/80 dark:!bg-surface/90"
-                  padding="lg"
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ duration: 1, delay: 0.5, ease: "easeOut" as const }}
                 >
+                    <Card 
+                      className="border-secondary/30 min-h-[280px] sm:min-h-[320px] md:min-h-[360px] lg:min-h-[380px] flex flex-col justify-center !bg-surface hover:shadow-2xl hover:shadow-secondary/5 transition-shadow duration-500"
+                      padding="md"
+                    >
                     {isLoggedIn && user?.name ? (
                         <div className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 py-2 sm:py-3 md:py-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full bg-secondary/10 border border-secondary/30 flex items-center justify-center mb-3 sm:mb-4 md:mb-5 lg:mb-6">
@@ -264,6 +304,7 @@ const Hero = () => {
                         </>
                     )}
                 </Card>
+                </motion.div>
             </div>
         </section>
     );

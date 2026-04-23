@@ -12,6 +12,8 @@ import {
     Activity, Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { PLANET_GLYPHS, PLANET_COLORS, SIGN_TO_ICON, PLANET_TO_ICON, getDignityStyle } from "@/lib/astrology";
+import PlanetIcon from "@/components/ui/astrology/PlanetIcon";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Occupant { planet: string; dignity: string; retrograde: boolean; }
@@ -22,47 +24,6 @@ interface DashaData { active: { type: string; planet: string; start: string; end
 interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: DashaData; }
 
 // ─── Constants ───────────────────────────────────────────────
-const PLANET_GLYPHS: Record<string, string> = {
-    'Sun': '☉', 'Moon': '☽', 'Mars': '♂', 'Mercury': '☿',
-    'Jupiter': '♃', 'Venus': '♀', 'Saturn': '♄', 'Rahu': '☊', 'Ketu': '☋',
-};
-const PLANET_COLORS: Record<string, string> = {
-    'Sun': '#F59E0B', 'Moon': '#C7D2FE', 'Mars': '#EF4444',
-    'Mercury': '#34D399', 'Jupiter': '#FBBF24', 'Venus': '#F472B6',
-    'Saturn': '#818CF8', 'Rahu': '#9CA3AF', 'Ketu': '#A78BFA',
-};
-const SIGN_TO_ICON: Record<string, string> = {
-    'Aries': '/icons/rashi/aries.png', 'Taurus': '/icons/rashi/taurus.png',
-    'Gemini': '/icons/rashi/gemini.png', 'Cancer': '/icons/rashi/cancer.png',
-    'Leo': '/icons/rashi/leo.png', 'Virgo': '/icons/rashi/virgo.png',
-    'Libra': '/icons/rashi/libra.png', 'Scorpio': '/icons/rashi/scorpio.png',
-    'Sagittarius': '/icons/rashi/sagittarius.png', 'Capricorn': '/icons/rashi/capricorn.png',
-    'Aquarius': '/icons/rashi/aquarius.png', 'Pisces': '/icons/rashi/pisces.png',
-};
-const PLANET_TO_ICON: Record<string, string> = {
-    'Sun': '/icons/planets/sun.png', 'Moon': '/icons/planets/moon.png',
-    'Mars': '/icons/planets/mars.png', 'Saturn': '/icons/planets/saturn.png',
-    'Mercury': '/icons/planets/mercury.png', 'Jupiter': '/icons/planets/jupiter.png',
-    'Venus': '/icons/planets/venus.png',
-};
-
-const getDignityStyle = (dignity: string) => {
-    if (dignity === 'Exalted') return { text: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', label: 'Exalted', dot: 'bg-emerald-400' };
-    if (dignity === 'Debilitated') return { text: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/30', label: 'Debilitated', dot: 'bg-red-400' };
-    return { text: 'text-foreground/40', bg: 'bg-foreground/5', border: 'border-foreground/10', label: 'Normal', dot: 'bg-foreground/20' };
-};
-
-const PlanetIcon = ({ planet, size = "w-12 h-12" }: { planet: string; size?: string }) => (
-    <div className={`${size} relative flex items-center justify-center shrink-0`}>
-        <div className="absolute inset-[-6px] blur-[28px] opacity-35 rounded-full" style={{ backgroundColor: PLANET_COLORS[planet] || '#c8880a' }} />
-        {PLANET_TO_ICON[planet] ? (
-            <Image src={PLANET_TO_ICON[planet]} alt={planet} width={64} height={64} className="w-full h-full object-contain relative z-10 drop-shadow-xl" />
-        ) : (
-            <span className="text-4xl drop-shadow-lg relative z-10" style={{ color: PLANET_COLORS[planet] }}>{PLANET_GLYPHS[planet]}</span>
-        )}
-    </div>
-);
-
 
 export default function KundliPage() {
     const { user, isLoggedIn, isLoading: authLoading } = useAuth();
@@ -108,13 +69,29 @@ export default function KundliPage() {
                 throw new Error(errData.error || errData.detail || 'The stars are temporarily obscured.'); 
             }
             const result = await res.json();
-            const payload = result.astrologyData || result.data?.astrologyData || result.data || result;
-            if (payload && payload.houses && payload.planets) { 
+            
+            // Try to extract the core astrology data from various possible response formats
+            let payload = result.astrologyData 
+                || result.data?.astrologyData 
+                || result.insights?.astrologyData 
+                || result.insights 
+                || result.data 
+                || result;
+
+            if (typeof payload === 'string') {
+                try {
+                    payload = JSON.parse(payload);
+                } catch (e) {
+                    console.error("[Kundli] Failed to parse payload string:", e);
+                }
+            }
+
+            if (payload && typeof payload === 'object' && payload.houses && payload.planets) {                 
                 setData(payload); 
                 setError(null); 
             }
             else {
-                console.warn("[Kundli] Invalid payload format:", result);
+                console.warn("[Kundli] Invalid payload format. Keys found:", Object.keys(result), "Payload keys:", payload ? Object.keys(payload) : 'null');
                 throw new Error('Your celestial blueprint is currently being drawn. Please try refreshing in a moment.'); 
             }
         } catch (err: any) { setError(err.message); }
@@ -237,15 +214,16 @@ export default function KundliPage() {
                         </div>
 
                         {/* ── Current Dasha ── */}
-                        {data.dasha?.active?.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-2.5">
-                                    <div className="w-1 h-4 rounded-full bg-secondary" />
-                                    <h2 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Current Dasha</h2>
-                                </div>
-                                <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
-                                    <div className="space-y-3">
-                                        {data.dasha.active.map((period, idx) => {
+                        <div>
+                            <div className="flex items-center gap-2 mb-2.5">
+                                <div className="w-1 h-4 rounded-full bg-secondary" />
+                                <h2 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Current Dasha</h2>
+                            </div>
+                            <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
+                                {data.dasha?.active?.length > 0 ? (
+                                    <>
+                                        <div className="space-y-3">
+                                            {data.dasha.active.map((period, idx) => {
                                             const start = new Date(period.start);
                                             const end = new Date(period.end);
                                             const now = Date.now();
@@ -271,6 +249,9 @@ export default function KundliPage() {
                                                                     }`}>{isMaha ? 'Mahādashā' : 'Antardasā'}</span>
                                                                 </span>
                                                             </div>
+                                                            <p className="text-[9px] text-foreground/40 font-bold mt-0.5 uppercase tracking-wider">
+                                                                {start.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} — {end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     <div className="h-2 rounded-full bg-surface-variant/30 overflow-hidden mb-1">
@@ -284,15 +265,23 @@ export default function KundliPage() {
                                                 </div>
                                             );
                                         })}
-                                    </div>
-                                    {data.dasha.explanation?.[0] && (
-                                        <p className="text-[12px] text-foreground/40 leading-relaxed mt-3 pt-3 border-t border-outline-variant/10">
-                                            {data.dasha.explanation[0]}
+                                        </div>
+                                        {data.dasha.explanation?.[0] && (
+                                            <p className="text-[12px] text-foreground/40 leading-relaxed mt-3 pt-3 border-t border-outline-variant/10">
+                                                {data.dasha.explanation[0]}
+                                            </p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+                                        <Info className="w-6 h-6 text-foreground/20 mb-2" />
+                                        <p className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest leading-relaxed">
+                                            Dasha timing unavailable for this profile.
                                         </p>
-                                    )}
-                                </Card>
-                            </div>
-                        )}
+                                    </div>
+                                )}
+                            </Card>
+                        </div>
 
                         {/* ── Cosmic Strengths (Yogas) — Grouped ── */}
                         {allYogas.length > 0 && (
@@ -544,14 +533,14 @@ export default function KundliPage() {
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             {filteredHouses.map(house => {
                                                 const hasOcc = house.occupants.length > 0;
                                                 return (
                                                     <div key={house.house} className={`rounded-[16px] p-3 border transition-all relative overflow-hidden ${
                                                         hasOcc
                                                             ? 'bg-surface/40 border-secondary/15 hover:border-secondary/30'
-                                                            : 'bg-surface/15 border-outline-variant/8 opacity-70 hover:opacity-90'
+                                                            : 'bg-surface border-outline-variant/8 opacity-70 hover:opacity-90'
                                                     }`}>
                                                         {hasOcc && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-secondary/40 rounded-l-[14px]" />}
                                                         <div className="mb-1.5">

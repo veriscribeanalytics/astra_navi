@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Toast, { ToastType } from '@/components/ui/Toast';
 
 interface ToastConfig {
@@ -9,35 +9,61 @@ interface ToastConfig {
   duration?: number;
 }
 
-export const useToast = () => {
-  const [toasts, setToasts] = useState<Array<ToastConfig & { id: number }>>([]);
+type ToastItem = ToastConfig & { id: number };
 
-  const showToast = useCallback((config: ToastConfig) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { ...config, id }]);
+// Global State allowing toasts to persist across Next.js page transitions
+let globalToasts: ToastItem[] = [];
+let listeners: Set<(toasts: ToastItem[]) => void> = new Set();
+
+const saveToSession = () => {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('astraNaviToasts', JSON.stringify(globalToasts));
+  }
+};
+
+const addGlobalToast = (config: ToastConfig) => {
+  const id = Date.now() + Math.random();
+  globalToasts = [...globalToasts, { ...config, id }];
+  listeners.forEach(listener => listener(globalToasts));
+  saveToSession();
+};
+
+const removeGlobalToast = (id: number) => {
+  globalToasts = globalToasts.filter(toast => toast.id !== id);
+  listeners.forEach(listener => listener(globalToasts));
+  saveToSession();
+};
+
+export const Toaster = () => {
+  const [toasts, setToasts] = useState<ToastItem[]>(globalToasts);
+
+  useEffect(() => {
+    // Restore toasts from previous hard session (e.g. after logout refresh)
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('astraNaviToasts');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.length > 0) {
+            // Keep toasts that haven't timed out drastically (in case of stale data)
+            const valid = parsed.filter((t: any) => Date.now() - t.id < 10000);
+            if (valid.length > 0) {
+              globalToasts = valid;
+              setToasts(valid);
+            }
+          }
+        } catch (e) {}
+        sessionStorage.removeItem('astraNaviToasts');
+      }
+    }
+
+    listeners.add(setToasts);
+    return () => {
+      listeners.delete(setToasts);
+    };
   }, []);
 
-  const removeToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
-
-  const success = useCallback((message: string, duration?: number) => {
-    showToast({ message, type: 'success', duration });
-  }, [showToast]);
-
-  const error = useCallback((message: string, duration?: number) => {
-    showToast({ message, type: 'error', duration });
-  }, [showToast]);
-
-  const info = useCallback((message: string, duration?: number) => {
-    showToast({ message, type: 'info', duration });
-  }, [showToast]);
-
-  const warning = useCallback((message: string, duration?: number) => {
-    showToast({ message, type: 'warning', duration });
-  }, [showToast]);
-
-  const ToastContainer = useCallback(() => (
+  return (
     <>
       {toasts.map(toast => (
         <Toast
@@ -45,14 +71,35 @@ export const useToast = () => {
           message={toast.message}
           type={toast.type}
           duration={toast.duration}
-          onClose={() => removeToast(toast.id)}
+          onClose={() => removeGlobalToast(toast.id)}
         />
       ))}
     </>
-  ), [toasts, removeToast]);
+  );
+};
+
+export const useToast = () => {
+  const success = useCallback((message: string, duration?: number) => {
+    addGlobalToast({ message, type: 'success', duration });
+  }, []);
+
+  const error = useCallback((message: string, duration?: number) => {
+    addGlobalToast({ message, type: 'error', duration });
+  }, []);
+
+  const info = useCallback((message: string, duration?: number) => {
+    addGlobalToast({ message, type: 'info', duration });
+  }, []);
+
+  const warning = useCallback((message: string, duration?: number) => {
+    addGlobalToast({ message, type: 'warning', duration });
+  }, []);
+
+  // Return empty fragment so components that still extract ToastContainer don't break/duplicate
+  const ToastContainer = <></>;
 
   return {
-    showToast,
+    showToast: addGlobalToast,
     ToastContainer,
     success,
     error,

@@ -6,7 +6,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks';
 import { 
     User, Calendar, Clock, MapPin, 
     Save, ArrowLeft, RotateCcw
@@ -179,7 +179,7 @@ export default function ProfileSettingsPage() {
 
     return (
         <main className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center relative overflow-x-hidden bg-[var(--bg)]">
-            <ToastContainer />
+            {ToastContainer}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
             <div className="w-full max-w-xl relative z-10">

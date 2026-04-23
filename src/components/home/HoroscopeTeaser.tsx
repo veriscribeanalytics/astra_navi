@@ -31,7 +31,7 @@ const HoroscopeTeaser = () => {
                     </p>
                     
                     <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 mb-2">
-                        <div className="flex items-center gap-3 bg-surface/40 p-3 rounded-2xl border border-secondary/10">
+                        <div className="flex items-center gap-3 bg-surface p-3 rounded-2xl border border-secondary/10">
                             <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold font-headline">50</div>
                             <div className="text-left">
                                 <div className="text-[10px] font-bold text-secondary uppercase tracking-widest">Score</div>
@@ -56,7 +56,7 @@ const HoroscopeTeaser = () => {
                 <div className="order-1 lg:order-2 relative">
                     <Card padding="none" className="!rounded-[28px] sm:!rounded-[32px] overflow-hidden border-secondary/20 relative z-10 scale-95 sm:scale-100 transition-transform hover:scale-[1.02] duration-500">
                         {/* Mock App Header */}
-                        <div className="p-4 sm:p-5 border-b border-secondary/10 bg-surface/20 flex items-center justify-between">
+                        <div className="p-4 sm:p-5 border-b border-secondary/10 bg-surface flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-red-400"></div>
                                 <div className="w-2 h-2 rounded-full bg-yellow-400"></div>

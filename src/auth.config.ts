@@ -10,7 +10,16 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isAuthRoute = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
-      const isPublicRoute = nextUrl.pathname === "/" || nextUrl.pathname.startsWith("/blogs") || nextUrl.pathname.startsWith("/rashis");
+      const isPublicRoute = 
+        nextUrl.pathname === "/" || 
+        nextUrl.pathname.startsWith("/blogs") || 
+        nextUrl.pathname.startsWith("/rashis") ||
+        nextUrl.pathname.startsWith("/about") ||
+        nextUrl.pathname.startsWith("/astrologers") ||
+        nextUrl.pathname.startsWith("/support") ||
+        nextUrl.pathname.startsWith("/careers") ||
+        nextUrl.pathname.startsWith("/horoscope") ||
+        nextUrl.pathname.startsWith("/plans");
 
       // Redirect logged-in users away from login/register
       if (isAuthRoute) {

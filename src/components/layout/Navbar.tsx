@@ -8,7 +8,7 @@ import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { useChat } from "@/context/ChatContext";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
@@ -55,6 +55,12 @@ const getNavSections = (isLoggedIn: boolean) => {
                 id: "consult",
                 label: "Consult Navi",
                 items: [
+                    {
+                        label: "Guided Reading",
+                        href: "/consult",
+                        icon: <Sparkles className="w-4 h-4" />,
+                        desc: "Step-by-step personalized insights."
+                    },
                     {
                         label: "Active AI Chat",
                         href: "/chat",
@@ -300,31 +306,34 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
         setHoveredSection(null);
     }, [pathname]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsUserDropdownOpen(false);
         setIsMenuOpen(false);
         
-        // Logout and redirect immediately to prevent layout redirect
-        logout();
-        router.replace('/');
+        showLoading("Closing celestial connection...", 2000);
         
-        // Show toast after a brief delay to ensure we're on home page
-        setTimeout(() => {
-            success('Successfully logged out');
-        }, 100);
+        setTimeout(async () => {
+            try {
+                success("Session concluded successfully.");
+                await logout('/');
+            } catch (err) {
+                console.error('Logout failed:', err);
+                router.replace('/');
+            }
+        }, 1500);
     };
     
     const isActive = (path:string) => pathname == path;
 
     return(
         <>
-            <ToastContainer />
-            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface/40 backdrop-blur-md border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
+            {ToastContainer}
+            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start">
-                    <Link href="/" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline">
+                    <Link href="/" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
                         <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={26} width={26} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
                         Astra Navi
                     </Link>
@@ -339,14 +348,14 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                             onMouseEnter={() => setHoveredSection(section.id)}
                             onMouseLeave={() => setHoveredSection(null)}
                         >
-                            <button className={`flex items-center gap-1 px-3 lg:px-4 py-2 rounded-full transition-all duration-300 font-body font-bold text-[13px] lg:text-sm tracking-wide ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}>
+                            <button className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-full transition-all duration-300 font-body font-bold text-[11px] lg:text-[12px] tracking-widest uppercase whitespace-nowrap ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}>
                                 {section.label}
-                                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${hoveredSection === section.id ? 'rotate-180 text-secondary' : 'opacity-40'}`} />
+                                <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${hoveredSection === section.id ? 'rotate-180 text-secondary' : 'opacity-30'}`} />
                             </button>
 
                             {/* Mega Dropdown Bridge */}
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`}>
-                                <div className="w-72 lg:w-80 p-2 bg-background/95 backdrop-blur-2xl rounded-2xl border border-secondary/20 shadow-2xl">
+                            <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-0 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`}>
+                                <div className="w-72 lg:w-80 p-2 bg-surface rounded-b-[24px] border-x border-b border-outline-variant/30 shadow-xl shadow-black/20">
                                     <div className="space-y-1">
                                         {section.items.map((item, idx) => {
                                             return (
@@ -394,7 +403,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                                 <div className="profile-avatar-content !text-sm">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </button>
                             {isUserDropdownOpen && (
-                                <div className="absolute top-[56px] right-0 w-60 bg-surface backdrop-blur-2xl border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Seeker Identity</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "Seeker"}</p>
@@ -448,7 +457,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                                 <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </div>
                             {isUserDropdownOpen && (
-                                <div className="absolute top-[56px] right-0 w-60 bg-surface backdrop-blur-2xl border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Seeker Identity</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "Seeker"}</p>
@@ -469,9 +478,9 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
             </div>
 
             {/* ===== SITE MENU OVERLAY (Mobile) ===== */}
-            <div className={`md:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
+            <div className={`md:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-surface z-[100] transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
             
-            <div className={`md:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 h-[calc(100vh-56px)] bg-background/98 backdrop-blur-2xl border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+            <div className={`md:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 h-[calc(100vh-56px)] bg-surface border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
                 <div className="p-6 space-y-8">
                     {navSections.map((section) => (
                         <div key={section.id} className="space-y-4">

@@ -95,7 +95,7 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                 className={`w-full flex items-center justify-between px-5 py-4 rounded-[20px] border transition-all duration-300 ${
                     isOpen
                         ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.08)]'
-                        : 'bg-surface/40 border-outline-variant/20 hover:border-green-500/30 hover:bg-green-500/5'
+                        : 'bg-surface border-outline-variant/20 hover:border-green-500/30 hover:bg-green-500/5'
                 }`}
             >
                 <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                                         <span className="text-lg leading-none">{getTrendIcon(data.summary.trend)}</span>
                                         <p className="text-[9px] text-foreground/25 font-bold uppercase tracking-widest capitalize">{data.summary.trend}</p>
                                     </div>
-                                    <button onClick={() => setIsOpen(false)} className="w-7 h-7 rounded-full bg-surface/30 flex items-center justify-center text-foreground/30 hover:text-foreground/60 transition-colors">
+                                    <button onClick={() => setIsOpen(false)} className="w-7 h-7 rounded-full bg-surface flex items-center justify-center text-foreground/30 hover:text-foreground/60 transition-colors">
                                         <X className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
@@ -151,7 +151,7 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                         </div>
 
                         {/* Score Timeline - Line Graph */}
-                        <div className="px-5 pt-12 pb-14 border-b border-outline-variant/10 relative overflow-hidden bg-[#0a0c10]/40">
+                        <div className="px-5 pt-12 pb-14 border-b border-outline-variant/10 relative overflow-hidden bg-[#0a0c10]">
                             <div className="relative h-[130px] w-full flex">
                                 {/* SVG Line Chart Area */}
                                 <div className="flex-1 relative">
@@ -284,7 +284,7 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                             if (!day) return null;
                             const colors = getScoreColor(day.score);
                             return (
-                                <div className="px-5 py-4 border-b border-outline-variant/10 bg-surface/5">
+                                <div className="px-5 py-4 border-b border-outline-variant/10 bg-surface">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2.5">
                                             <div className={`w-8 h-8 rounded-xl ${colors.bg} flex items-center justify-center`}>
@@ -320,7 +320,7 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                                         <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-[0.2em] mb-2">Planetary Transits</p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {Object.entries(day.transits).map(([planet, transit]) => (
-                                                <span key={planet} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-surface/30 border border-outline-variant/8">
+                                                <span key={planet} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-surface border border-outline-variant/8">
                                                     <span className="text-foreground/50">{planet}</span>
                                                     <span className="text-foreground/20">·</span>
                                                     <span className="text-secondary/70">{transit.sign}</span>

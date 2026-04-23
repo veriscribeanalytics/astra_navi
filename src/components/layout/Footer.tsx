@@ -62,7 +62,7 @@ const Footer = () => {
                             placeholder="your@cosmos.com" 
                             type="email"
                             disabled
-                            className="!py-3 !rounded-xl !pr-14 sm:!pr-16 border-secondary/20 !bg-surface/30 cursor-not-allowed" 
+                            className="!py-3 !rounded-xl !pr-14 sm:!pr-16 border-secondary/20 !bg-surface cursor-not-allowed" 
                         />
                         <button disabled className="gold-gradient flex items-center justify-center text-white h-9 w-9 sm:h-10 sm:w-10 rounded-xl shrink-0 absolute right-1.5 cursor-not-allowed">
                             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 font-bold" />

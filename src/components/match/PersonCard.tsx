@@ -37,7 +37,7 @@ export default function PersonCard({ name, rashi, rashiEn, nakshatra, pada, gend
   const displayPada = pada !== undefined && pada !== null ? `P-${pada}` : 'P-?';
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface/40 border border-outline-variant/10">
+    <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface border border-outline-variant/10">
       <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/20 relative shrink-0">
         {icon ? (
           <Image src={icon} alt={displaySign} width={36} height={36} className="object-contain" />

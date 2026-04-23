@@ -6,23 +6,13 @@ import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
-    ArrowLeft,
-    ChevronRight, Info, Shield, Scale, Activity,
-    Lock, CheckCircle2, AlertCircle, Sparkles
+    ArrowLeft, ChevronRight, Info, Shield, Scale, Activity,
+    Lock, CheckCircle2, AlertCircle, Sparkles, Zap, Dna, BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
-const LucideIcons = {
-    ArrowLeft, Info, Activity, Shield, CheckCircle2, AlertCircle,
-    Scale, Lock, ChevronRight, Sparkles
-};
 
-// ─── Constants from Kundli context ──────────────────────────
-const PLANET_GLYPHS: Record<string, string> = {
-    'Sun': '☉', 'Moon': '☽', 'Mars': '♂', 'Mercury': '☿',
-    'Jupiter': '♃', 'Venus': '♀', 'Saturn': '♄', 'Rahu': '☊', 'Ketu': '☋',
-};
 const PLANET_COLORS: Record<string, string> = {
     'Sun': '#F59E0B', 'Moon': '#C7D2FE', 'Mars': '#EF4444',
     'Mercury': '#34D399', 'Jupiter': '#FBBF24', 'Venus': '#F472B6',
@@ -35,13 +25,30 @@ const PLANET_TO_ICON: Record<string, string> = {
     'Venus': '/icons/planets/venus.png',
 };
 
+// ─── FIX 1: Glow is now tightly constrained — same size as icon, low blur radius ───
 const PlanetIcon = ({ planet, size = "w-12 h-12", withGlow = true }: { planet: string; size?: string; withGlow?: boolean }) => (
     <div className={`${size} relative flex items-center justify-center shrink-0`}>
-        {withGlow && <div className="absolute inset-[-6px] blur-[28px] opacity-35 rounded-full" style={{ backgroundColor: PLANET_COLORS[planet] || '#c8880a' }} />}
+        {withGlow && (
+            <div 
+                className="absolute inset-0 blur-[14px] opacity-40 rounded-full animate-pulse-slow" 
+                style={{ backgroundColor: PLANET_COLORS[planet] || '#c8880a' }} 
+            />
+        )}
         {PLANET_TO_ICON[planet] ? (
-            <Image src={PLANET_TO_ICON[planet]} alt={planet} width={64} height={64} className="w-full h-full object-contain relative z-10 drop-shadow-xl" />
+            <Image 
+                src={PLANET_TO_ICON[planet]} 
+                alt={planet} 
+                width={400} 
+                height={400} 
+                className="w-full h-full object-contain relative z-10" 
+            />
         ) : (
-            <span className={`${size.includes('w-32') || size.includes('w-48') ? 'text-6xl text-center' : 'text-3xl text-center'} w-full flex items-center justify-center drop-shadow-lg relative z-10`} style={{ color: PLANET_COLORS[planet] }}>{PLANET_GLYPHS[planet]}</span>
+            <span 
+                className="w-full h-full flex items-center justify-center text-3xl font-bold relative z-10" 
+                style={{ color: PLANET_COLORS[planet] }}
+            >
+                {planet[0]}
+            </span>
         )}
     </div>
 );
@@ -57,12 +64,15 @@ const planets = [
         nature: 'Sattvic / Royal',
         element: 'Fire',
         represents: 'The Soul (Atma), Ego, Vitality, Authority, Father, Health, Government.',
-        exaltation: 'Aries (Mesha)',
-        debilitation: 'Libra (Tula)',
-        mooltrikona: 'Leo',
+        exaltation: 'Aries (Mesha) 10°',
+        debilitation: 'Libra (Tula) 10°',
+        mooltrikona: 'Leo 0°-20°',
         bodyParts: 'Heart, Eyes, Right eye (men), Left eye (women)',
         traits: ['Leadership', 'Willpower', 'Radiance', 'Dignity', 'Command'],
-        deepDive: 'Surya is the King of the celestial cabinet. It represents the conscious self and the divine spark within. A strong Sun bestows immense power and fame, while a weak Sun leads to low confidence and health issues.'
+        deepDive: 'Surya is the celestial King, representing the conscious self and divine spark. It governs authority, vitality, and the soul. A strong Sun bestows fame and leadership, while a weak Sun impacts confidence and health.',
+        shadbala: 'Strongest in 10th House (Dik Bala). Solar energy peaks at noon.',
+        avastha: 'Radiant in Aries (Exaltation), it is in "Deepta" Avastha.',
+        functional: 'Benefic for Aries, Leo, Sagittarius, and Scorpio Lagna.'
     },
     {
         id: 'Moon',
@@ -74,12 +84,15 @@ const planets = [
         nature: 'Sattvic / Motherly',
         element: 'Water',
         represents: 'The Mind (Manas), Emotions, Mother, Peace, Intuition, Fluids, Fertility.',
-        exaltation: 'Taurus (Vrishabha)',
-        debilitation: 'Scorpio (Vrishchika)',
-        mooltrikona: 'Taurus',
+        exaltation: 'Taurus (Vrishabha) 3°',
+        debilitation: 'Scorpio (Vrishchika) 3°',
+        mooltrikona: 'Taurus 4°-30°',
         bodyParts: 'Mind, Fluids, Left eye (men), Right eye (women)',
         traits: ['Nurturing', 'Intuitive', 'Sensitive', 'Adaptive', 'Calm'],
-        deepDive: 'Chandra rules over the subconscious and emotional stability. It reflects the light of the Sun and governs our psychological well-being. Its phases dictate the mental fluctuations of all beings.'
+        deepDive: 'Chandra rules the subconscious and emotional stability. It reflects the Sun’s light and governs mental well-being. Its waxing and waning phases dictate the psychological fluctuations of all beings.',
+        shadbala: 'Strongest in 4th House (Dik Bala). Lunar power peaks at night.',
+        avastha: 'Waxing (Shukla Paksha) Moon is considered naturally Benefic.',
+        functional: 'Benefic for Cancer, Aries, Scorpio, and Pisces Lagna.'
     },
     {
         id: 'Mars',
@@ -91,12 +104,15 @@ const planets = [
         nature: 'Tamasic / Warrior',
         element: 'Fire',
         represents: 'Energy, Courage, Aggression, Brothers, Action, Property, Engineering.',
-        exaltation: 'Capricorn (Makara)',
-        debilitation: 'Cancer (Karka)',
-        mooltrikona: 'Aries',
+        exaltation: 'Capricorn (Makara) 28°',
+        debilitation: 'Cancer (Karka) 28°',
+        mooltrikona: 'Aries 0°-12°',
         bodyParts: 'Blood, Bone marrow, Bile, Muscles',
         traits: ['Brave', 'Assertive', 'Competitive', 'Direct', 'Protective'],
-        deepDive: 'Mangal is the Commander-in-Chief. It provides the drive to achieve goals and the strength to fight obstacles. Excessive Mars energy leads to anger, while deficiency leads to cowardice.'
+        deepDive: 'Mangal is the Commander-in-Chief, providing the drive to achieve goals and overcome obstacles. It rules action and property. Excessive Mars energy leads to anger; deficiency leads to lack of drive.',
+        shadbala: 'Strongest in 10th House (Dik Bala). High strength when Retrograde.',
+        avastha: 'In Capricorn (Exaltation), it reaches its "Peak" Avastha.',
+        functional: 'Yogakaraka (Prime Benefic) for Cancer and Leo Lagna.'
     },
     {
         id: 'Mercury',
@@ -108,12 +124,15 @@ const planets = [
         nature: 'Rajasic / Prince',
         element: 'Earth',
         represents: 'Intellect, Communication, Speech, Logic, Business, Mathematics, Youth.',
-        exaltation: 'Virgo (Kanya)',
-        debilitation: 'Pisces (Meena)',
-        mooltrikona: 'Virgo',
+        exaltation: 'Virgo (Kanya) 15°',
+        debilitation: 'Pisces (Meena) 15°',
+        mooltrikona: 'Virgo 16°-20°',
         bodyParts: 'Skin, Nervous system, Speech, Lungs',
         traits: ['Analytical', 'Eloquent', 'Witty', 'Logical', 'Versatile'],
-        deepDive: 'Budh is the messenger of God. It rules over how we process information and communicate it to the world. It is the most adaptable planet, taking on the nature of planets it associates with.'
+        deepDive: 'Budh is the messenger, ruling intellect, speech, and logic. It is highly adaptable, processing information and facilitating trade. It takes on the nature of the planets it associates with.',
+        shadbala: 'Strongest in 1st House (Dik Bala). Peaks at dawn and twilight.',
+        avastha: 'Neutral nature; its state depends entirely on association.',
+        functional: 'Benefic for Gemini, Virgo, Taurus, and Libra Lagna.'
     },
     {
         id: 'Jupiter',
@@ -125,12 +144,15 @@ const planets = [
         nature: 'Sattvic / Teacher',
         element: 'Ether (Akasha)',
         represents: 'Wisdom, Wealth, Spirituality, Knowledge, Children, Fortune, Expansion.',
-        exaltation: 'Cancer (Karka)',
-        debilitation: 'Capricorn (Makara)',
-        mooltrikona: 'Sagittarius',
+        exaltation: 'Cancer (Karka) 5°',
+        debilitation: 'Capricorn (Makara) 5°',
+        mooltrikona: 'Sagittarius 0°-10°',
         bodyParts: 'Liver, Fat, Hips, Arteries',
         traits: ['Ethical', 'Optimistic', 'Magnanimous', 'Wise', 'Generous'],
-        deepDive: 'Guru is the Great Benefic. He is the priest of the Gods and represents the path of Dharma. A strong Jupiter protects the individual from many chart deficiencies through divine grace.'
+        deepDive: 'Guru is the Great Benefic and priest of the Gods. It represents Dharma, wisdom, and expansion. A strong Jupiter protects the individual from chart deficiencies through divine grace.',
+        shadbala: 'Strongest in 1st House (Dik Bala). Highest natural beneficence.',
+        avastha: 'Gives the most "Graceful" results in Trikona (1, 5, 9) houses.',
+        functional: 'Benefic for Aries, Cancer, Leo, Scorpio, Sag, and Pisces.'
     },
     {
         id: 'Venus',
@@ -142,12 +164,15 @@ const planets = [
         nature: 'Rajasic / Minister',
         element: 'Water',
         represents: 'Love, Beauty, Luxury, Art, Comfort, Marriage, Vehicles, Aesthetics.',
-        exaltation: 'Pisces (Meena)',
-        debilitation: 'Virgo (Kanya)',
-        mooltrikona: 'Libra',
+        exaltation: 'Pisces (Meena) 27°',
+        debilitation: 'Virgo (Kanya) 27°',
+        mooltrikona: 'Libra 0°-15°',
         bodyParts: 'Reproductive system, Eyes, Cheeks',
         traits: ['Artistic', 'Charming', 'Sociable', 'Aesthetic', 'Harmonious'],
-        deepDive: 'Shukra is the teacher of the Asuras and master of all material arts. It represents our ability to enjoy life and form meaningful partnerships. It is the Karaka for worldly happiness.'
+        deepDive: 'Shukra is the master of material arts, ruling love, beauty, and luxury. It governs our ability to enjoy life and form partnerships. It is the primary significator of worldly happiness.',
+        shadbala: 'Strongest in 4th House (Dik Bala). Strong during the night.',
+        avastha: 'Creates the powerful "Malavya" Yoga when in Kendras.',
+        functional: 'Yogakaraka (Prime Benefic) for Capricorn and Aquarius Lagna.'
     },
     {
         id: 'Saturn',
@@ -159,12 +184,15 @@ const planets = [
         nature: 'Tamasic / Servant',
         element: 'Air',
         represents: 'Karma, Discipline, Longevity, Grief, Hard work, Delays, Justice, Reality.',
-        exaltation: 'Libra (Tula)',
-        debilitation: 'Aries (Mesha)',
-        mooltrikona: 'Aquarius',
+        exaltation: 'Libra (Tula) 20°',
+        debilitation: 'Aries (Mesha) 20°',
+        mooltrikona: 'Aquarius 0°-20°',
         bodyParts: 'Knees, Joints, Teeth, Bones, Legs',
         traits: ['Persistent', 'Disciplined', 'Patient', 'Practical', 'Lawful'],
-        deepDive: 'Shani is the Great Taskmaster. He ensures that everyone receives the fruits of their past actions. While often feared, a strong Saturn creates great spiritual endurance and worldly foundation.'
+        deepDive: 'Shani is the Taskmaster, ensuring everyone receives the fruits of their Karma. While associated with delays, a strong Saturn creates unmatched spiritual endurance and a solid foundation.',
+        shadbala: 'Strongest in 7th House (Dik Bala). High during the dark lunar half.',
+        avastha: 'In Libra (Exaltation), it is in its most "Judicious" state.',
+        functional: 'Yogakaraka (Prime Benefic) for Taurus and Libra Lagna.'
     },
     {
         id: 'Rahu',
@@ -181,7 +209,10 @@ const planets = [
         mooltrikona: 'Virgo',
         bodyParts: 'Lungs, Breathing system, Intestines',
         traits: ['Ambitious', 'Unconventional', 'Experimental', 'Driven', 'Obsessive'],
-        deepDive: 'Rahu is the North Node of the Moon. It represents the karmic path we are heading towards. It creates a smoky illusion that makes material desires seem irresistible, leading to both peak success and sudden falls.'
+        deepDive: 'Rahu is the North Node, representing the karmic path we are heading towards. It creates smoky illusions and insatiable material desires, leading to sudden peak success or sharp falls.',
+        shadbala: 'Always Retrograde. Gains strength from its house dispositor.',
+        avastha: 'Amplifies results based on the nature of its planetary host.',
+        functional: 'Gives results of its dispositor; behaves like "Saturn".'
     },
     {
         id: 'Ketu',
@@ -198,250 +229,325 @@ const planets = [
         mooltrikona: 'Pisces',
         bodyParts: 'Abdomen, Hair, Nails',
         traits: ['Detached', 'Introverted', 'Mystical', 'Spiritual', 'Sharp-witted'],
-        deepDive: 'Ketu is the South Node of the Moon. It represents the baggage of our past lives. Being headless, it rules over the subconscious and intuition. It is the primary significator of spiritual enlightenment (Moksha).'
+        deepDive: 'Ketu is the South Node, representing past life baggage. Being headless, it rules intuition and detachment. It is the primary significator of Moksha (spiritual enlightenment).',
+        shadbala: 'Always Retrograde. Strongest significator of liberation.',
+        avastha: 'Bestows spiritual clarity, especially when with Jupiter.',
+        functional: 'Benefic for spiritual growth; behaves like "Mars".'
     }
 ];
 
 export default function PlanetsPage() {
     const [selectedPlanet, setSelectedPlanet] = useState(planets[0]);
+    const [viewMode, setViewMode] = useState<'encyclopedia' | 'detail'>('encyclopedia');
     const router = useRouter();
-    const isLoggedIn = false; // Placeholder
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] pt-20 pb-20 px-4 relative overflow-hidden">
-            {/* Background Elements */}
+        // ─── FIX 2: overflow-hidden on root prevents any bleed outside viewport ───
+        <div className="min-h-screen bg-[var(--bg)] pt-0 pb-10 px-4 relative overflow-hidden flex flex-col items-center">
+            {/* Background Decorations */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[10%] right-[5%] w-[40%] h-[40%] bg-secondary/5 blur-[120px] rounded-full"></div>
-                <div className="absolute bottom-[10%] left-[5%] w-[30%] h-[30%] bg-secondary/3 blur-[100px] rounded-full"></div>
+                <div className="absolute bottom-[10%] left-[5%] w-[35%] h-[35%] bg-secondary/3 blur-[100px] rounded-full"></div>
             </div>
 
-            <div className="max-w-[1500px] mx-auto relative z-10 flex flex-col h-full">
-                {/* Header Section */}
-                <div className="flex items-center justify-between mb-10">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                    >
-                        <Link href="/blogs" className="inline-flex items-center gap-2 group">
-                            <LucideIcons.ArrowLeft className="w-4 h-4 text-secondary group-hover:-translate-x-1 transition-transform" />
-                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/60 group-hover:text-secondary transition-colors">Knowledge Center</span>
+            <div className="max-w-[1500px] w-full mx-auto relative flex flex-col lg:flex-row gap-8 items-start h-full">
+                {/* ── Sidebar ── */}
+                <div className="w-full lg:w-[240px] shrink-0 sticky lg:top-16 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="mb-4 px-1 shrink-0">
+                        <Link href="/blogs" className="inline-flex items-center gap-1.5 text-secondary hover:text-secondary/70 transition-all mb-1 group">
+                            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                            <span className="label-sm">Knowledge Center</span>
                         </Link>
-                    </motion.div>
-                    
-                    <div className="text-right">
-                        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight">Navagraha <span className="text-secondary italic">Theory</span></h1>
-                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">The Nine Celestial Influencers</p>
+                        <h1 className="text-2xl font-bold text-foreground leading-tight">
+                            Navagraha <span className="text-secondary italic">Archetypes</span>
+                        </h1>
+                    </div>
+
+                    <div className="flex-grow">
+                        <button
+                            onClick={() => setViewMode('encyclopedia')}
+                            className={`w-full flex items-center gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left mb-3 ${viewMode === 'encyclopedia'
+                                    ? 'border-secondary bg-secondary/10'
+                                    : 'border-transparent hover:bg-surface'
+                                }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${viewMode === 'encyclopedia' ? 'bg-secondary/20' : 'bg-surface border border-outline-variant/20'}`}>
+                                <BookOpen className={`w-4 h-4 ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/50'}`} />
+                            </div>
+                            <div>
+                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>Encyclopedia</h3>
+                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">Introduction</p>
+                            </div>
+                        </button>
+
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">The Nine Planets</div>
+                        <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
+                            {planets.map((p) => {
+                                const isActive = viewMode === 'detail' && selectedPlanet.id === p.id;
+                                return (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => {
+                                            setSelectedPlanet(p);
+                                            setViewMode('detail');
+                                        }}
+                                        className={`group flex flex-col items-center justify-center py-2 px-1 rounded-xl border transition-all duration-200 ${isActive
+                                                ? 'border-secondary bg-secondary/5'
+                                                : 'border-transparent hover:bg-surface'
+                                            }`}
+                                    >
+                                        <div className={`w-6 h-6 sm:w-8 sm:h-8 transition-transform duration-300 ${isActive ? 'scale-110' : 'opacity-70 group-hover:opacity-100 group-hover:scale-110'}`}>
+                                            <PlanetIcon planet={p.id} size="w-full h-full" withGlow={false} />
+                                        </div>
+                                        <p className={`text-[10px] font-bold mt-1.5 truncate w-full text-center ${isActive ? 'text-secondary' : 'text-foreground/50'}`}>
+                                            {p.nameEn}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start min-h-[600px]">
-                    {/* Sidebar Navigation */}
-                    <div className="w-full lg:w-[260px] shrink-0 sticky lg:top-24">
-                        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-1 gap-3">
-                            {planets.map((planet) => (
-                                <button
-                                    key={planet.id}
-                                    onClick={() => setSelectedPlanet(planet)}
-                                    className={`relative p-3 rounded-[24px] transition-all duration-300 flex items-center flex-col lg:flex-row gap-3 group overflow-hidden border ${
-                                        selectedPlanet.id === planet.id 
-                                        ? 'bg-surface border-secondary shadow-lg scale-100 z-10'  
-                                        : 'bg-surface/40 hover:bg-surface/80 text-foreground/60 border-outline-variant/10 hover:border-outline-variant/30 opacity-70 hover:opacity-100'
-                                    }`}
-                                >
-                                    {selectedPlanet.id === planet.id && (
-                                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary rounded-r-full" />
-                                    )}
-                                    
-                                    <div className="shrink-0 transition-transform duration-500 group-hover:scale-110 pl-1">
-                                        <PlanetIcon planet={planet.id} size="w-10 h-10 lg:w-12 lg:h-12" withGlow={selectedPlanet.id === planet.id} />
-                                    </div>
-                                    <div className="text-center lg:text-left">
-                                        <p className="text-[14px] font-headline font-bold leading-tight" style={{ color: selectedPlanet.id === planet.id ? PLANET_COLORS[planet.id] : '' }}>{planet.nameEn}</p>
-                                        <p className={`text-[9px] uppercase font-bold tracking-widest mt-0.5 hidden lg:block ${selectedPlanet.id === planet.id ? 'text-foreground/80' : 'text-foreground/40'}`}>
-                                            {planet.nameHi}
-                                        </p>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Detail View */}
-                    <div className="flex-1 w-full min-w-0">
-                        <AnimatePresence mode="wait">
+                {/* ── Detail Panel ── */}
+                <div className="flex-1 w-full min-w-0">
+                    <AnimatePresence mode="wait">
+                        {viewMode === 'encyclopedia' && (
                             <motion.div
-                                key={selectedPlanet.id}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                                className="h-full"
+                                key="encyclopedia"
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.02 }}
+                                transition={{ duration: 0.25 }}
+                                className="h-full flex items-start justify-center p-2 lg:pt-10"
                             >
-                                {/* Main Planet Card */}
-                                <Card padding="none" className="!rounded-[32px] border border-outline-variant/20 bg-surface/80 backdrop-blur-md overflow-hidden shadow-2xl shadow-black/5">
-                                    <div className="p-8 sm:p-10">
-                                        {/* Hero Header — Split with Planet Icon */}
-                                        <div className="flex flex-col md:flex-row items-center gap-10 mb-10 pb-10 border-b border-outline-variant/10">
-                                            
-                                            {/* Giant Planet Icon */}
-                                            <div className="relative group shrink-0 flex items-center justify-center w-40 h-40 lg:w-48 lg:h-48">
-                                                <div className="absolute inset-[-40px] rounded-full blur-[70px] opacity-40 transition-all duration-1000"
-                                                    style={{ backgroundColor: PLANET_COLORS[selectedPlanet.id] }} />
-                                                    
-                                                <motion.div
-                                                    initial={{ scale: 0.8, rotate: -10 }}
-                                                    animate={{ scale: 1, rotate: 0 }}
-                                                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                                                >
-                                                    <PlanetIcon planet={selectedPlanet.id} size="w-32 h-32 lg:w-48 lg:h-48" withGlow={false} />
-                                                </motion.div>
+                                <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
+                                        <BookOpen className="w-3 h-3" /> Core Concepts
+                                    </div>
+                                    <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-2">
+                                        Understanding the <span className="text-secondary italic">Navagraha</span>
+                                    </h2>
+                                    <p className="text-sm sm:text-base text-foreground/70 leading-relaxed max-w-3xl mb-6">
+                                        In Vedic Astrology, the Navagraha (Nine Planets) are the cosmic agents of karma. They act as the dynamic forces that trigger events, shape your psychology, and guide the soul's evolutionary journey through time and space.
+                                    </p>
+
+                                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">
+                                        {/* Column 1 */}
+                                        <div className="space-y-6">
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center shrink-0 border border-outline-variant/20">
+                                                    <Activity className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-base font-bold text-foreground mb-1">Karmic Deliverers</h4>
+                                                    <p className="text-[13px] text-foreground/60 leading-relaxed">
+                                                        Planets don't just symbolize traits; they actively deliver the fruits of your past actions. Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.
+                                                    </p>
+                                                </div>
                                             </div>
 
-                                            <div className="flex-1 min-w-0 text-center md:text-left">
-                                                <div className="flex flex-col md:flex-row items-center md:items-baseline gap-3 mb-4">
-                                                    <h2 className="text-5xl lg:text-6xl font-headline font-bold text-foreground">
-                                                        {selectedPlanet.nameEn}
-                                                    </h2>
-                                                    <span className="text-xl lg:text-2xl font-headline font-bold italic" style={{ color: PLANET_COLORS[selectedPlanet.id] }}>
-                                                        — {selectedPlanet.nameHi}
-                                                    </span>
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center shrink-0 border border-outline-variant/20">
+                                                    <Dna className="w-5 h-5 text-emerald-500" />
                                                 </div>
-                                                
-                                                <div className="inline-flex flex-wrap gap-2 mb-6 justify-center md:justify-start">
-                                                    <span className="px-3 py-1 rounded-full bg-surface-variant/50 border border-outline-variant/10 text-[10px] font-bold text-foreground/60 uppercase tracking-widest">
-                                                        {selectedPlanet.nameSanskrit}
-                                                    </span>
-                                                    <span className="px-3 py-1 rounded-full bg-surface-variant/50 border border-outline-variant/10 text-[10px] font-bold text-foreground/60 uppercase tracking-widest">
-                                                        {selectedPlanet.element} Element
-                                                    </span>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Nature</p>
-                                                        <p className="text-[13px] font-bold text-foreground/90">{selectedPlanet.nature}</p>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Core Essence</p>
-                                                        <p className="text-[13px] font-bold text-foreground/90">{selectedPlanet.traits[0]}, {selectedPlanet.traits[1]}</p>
-                                                    </div>
-                                                    <div className="space-y-1 col-span-2 md:col-span-1 border-t md:border-t-0 md:border-l border-outline-variant/10 pt-4 md:pt-0 md:pl-6">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Biological</p>
-                                                        <p className="text-[11px] font-bold leading-tight text-foreground/70 uppercase tracking-wider">{selectedPlanet.bodyParts}</p>
-                                                    </div>
+                                                <div>
+                                                    <h4 className="text-base font-bold text-foreground mb-1">Avasthas (Planetary States)</h4>
+                                                    <p className="text-[13px] text-foreground/60 leading-relaxed">
+                                                        A planet's power depends on its condition. An exalted planet expresses its highest, purest potential, while a debilitated planet signifies areas where the soul must work harder to overcome innate weaknesses.
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Content Grid */}
-                                        <div className="grid md:grid-cols-2 gap-10">
-                                            {/* Left Column */}
-                                            <div className="flex flex-col gap-8">
+                                        {/* Column 2 */}
+                                        <div className="space-y-6">
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center shrink-0 border border-outline-variant/20">
+                                                    <Zap className="w-5 h-5 text-rose-500" />
+                                                </div>
                                                 <div>
-                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
-                                                        <LucideIcons.Info className="w-4 h-4" />
-                                                        Cosmic Archetype
-                                                    </h3>
-                                                    <p className="text-[15px] text-foreground/80 leading-[1.8] font-medium border-l-2 border-secondary/30 pl-4">
-                                                        {selectedPlanet.deepDive}
+                                                    <h4 className="text-base font-bold text-foreground mb-1">The Shadow Nodes</h4>
+                                                    <p className="text-[13px] text-foreground/60 leading-relaxed">
+                                                        Rahu and Ketu are not physical masses, but mathematical points where eclipses occur. Despite lacking bodies, these nodes are profound triggers of sudden destiny, obsession, and ultimate spiritual liberation.
                                                     </p>
                                                 </div>
-
-                                                <div>
-                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
-                                                        <LucideIcons.Activity className="w-4 h-4" />
-                                                        Signatures
-                                                    </h3>
-                                                    <div className="flex flex-wrap gap-2.5">
-                                                        {selectedPlanet.traits.map((trait, idx) => (
-                                                            <span key={idx} className="px-4 py-2 rounded-xl bg-surface-variant/30 border border-outline-variant/10 text-[12px] font-bold text-foreground/80">
-                                                                {trait}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
                                             </div>
 
-                                            {/* Right Column */}
-                                            <div className="space-y-6">
-                                                {/* Significance Section */}
-                                                <div className="p-6 rounded-[20px] bg-secondary/5 border border-secondary/10 relative overflow-hidden group/card shadow-inner">
-                                                    <div className="absolute -right-4 -top-4 p-3 opacity-[0.03] scale-150 transform transition-transform group-hover/card:rotate-12 duration-700">
-                                                        <LucideIcons.Shield className="w-32 h-32 text-secondary" />
-                                                    </div>
-                                                    <h4 className="text-[11px] font-bold text-secondary mb-3 uppercase tracking-wider flex items-center gap-1.5">
-                                                        <LucideIcons.Sparkles className="w-3.5 h-3.5" /> Planetary Governance
-                                                    </h4>
-                                                    <p className="text-[14px] text-foreground/90 font-medium leading-[1.7] relative z-10">
-                                                        {selectedPlanet.represents}
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center shrink-0 border border-outline-variant/20">
+                                                    <Scale className="w-5 h-5 text-amber-500" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-base font-bold text-foreground mb-1">Functional Nature</h4>
+                                                    <p className="text-[13px] text-foreground/60 leading-relaxed">
+                                                        Beyond natural traits, a planet acts as a friend or foe based on your specific Ascendant (Lagna). The same Saturn that brings hardship to an Aries lagna acts as a supreme benefactor for a Taurus lagna.
                                                     </p>
                                                 </div>
-
-                                                {/* Technical Grid */}
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/15">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <LucideIcons.CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                                            <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Exaltation</h4>
-                                                        </div>
-                                                        <p className="text-[14px] font-bold text-foreground">{selectedPlanet.exaltation}</p>
-                                                        <p className="text-[9px] text-foreground/40 mt-1.5 uppercase font-bold tracking-wider">Highest potential</p>
-                                                    </div>
-                                                    <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/15">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <LucideIcons.AlertCircle className="w-4 h-4 text-rose-500" />
-                                                            <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Debilitation</h4>
-                                                        </div>
-                                                        <p className="text-[14px] font-bold text-foreground">{selectedPlanet.debilitation}</p>
-                                                        <p className="text-[9px] text-foreground/40 mt-1.5 uppercase font-bold tracking-wider">Lowest vitality</p>
-                                                    </div>
-                                                </div>
-
-                                                {/* Mooltrikona */}
-                                                <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/15">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <LucideIcons.Scale className="w-4 h-4 text-amber-500" />
-                                                            <h4 className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Mooltrikona</h4>
-                                                        </div>
-                                                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-[9px] font-bold text-amber-600 uppercase tracking-wider">Primary Office</span>
-                                                    </div>
-                                                    <p className="text-[14px] font-bold text-foreground">{selectedPlanet.mooltrikona}</p>
-                                                </div>
                                             </div>
-                                        </div>
-
-                                        {/* Integrated Footer: Personalized Insight */}
-                                        <div className="mt-10 pt-6 border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-surface border border-outline-variant/10 flex items-center justify-center p-2 shadow-sm">
-                                                    <PlanetIcon planet={selectedPlanet.id} size="w-8 h-8" withGlow={false} />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-[14px] font-headline font-bold text-foreground">Aligning with {selectedPlanet.nameEn}</h3>
-                                                    <p className="text-[10px] text-foreground/40 tracking-wider uppercase font-bold mt-0.5">Discover how this planet influences your Kundli chart</p>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                onClick={() => router.push('/kundli')}
-                                                className="!px-6 !py-3 !rounded-[14px] !bg-secondary !text-white !font-bold !border-none hover:!scale-[1.02] active:!scale-95 !min-h-0 flex items-center gap-2 group/btn w-full sm:w-auto justify-center transition-all shadow-md shadow-secondary/20"
-                                            >
-                                                {isLoggedIn ? (
-                                                    <><span className="text-[12px] uppercase tracking-wider">Check My Chart</span> <LucideIcons.ChevronRight className="w-4 h-4" /></>
-                                                ) : (
-                                                    <><LucideIcons.Lock className="w-3.5 h-3.5" /> <span className="text-[12px] uppercase tracking-wider">Analyze Alignment</span></>
-                                                )}
-                                            </Button>
                                         </div>
                                     </div>
                                 </Card>
                             </motion.div>
-                        </AnimatePresence>
-                    </div>
-                </div>
+                        )}
 
-                <div className="mt-12 text-center text-[10px] text-foreground/20 font-bold tracking-[0.4em] uppercase pb-8 border-t border-outline-variant/5 pt-12">
-                    <p>Verified AstraNavi Cosmic Research Center</p>
+                        {viewMode === 'detail' && (
+                            <motion.div
+                                key={selectedPlanet.id}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.02 }}
+                                transition={{ duration: 0.25 }}
+                                className="h-full flex items-start justify-center p-2 lg:pt-10"
+                            >
+                                <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
+                                    <div className="absolute top-8 right-8 z-20">
+                                        <button
+                                            onClick={() => router.push('/kundli')}
+                                            className="h-12 px-6 bg-gradient-to-r from-secondary to-secondary/80 text-background font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
+                                        >
+                                            <Lock className="w-4 h-4 opacity-40" /> Analyze Alignment
+                                        </button>
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
+                                    
+                                    <div className="flex-grow p-8 lg:p-10 overflow-hidden flex flex-col">
+                                        {/* ── Top Section: Massive Identity ── */}
+                                        <div className="flex items-center gap-12 mb-8">
+                                            <div className="w-[180px] h-[180px] relative shrink-0">
+                                                <PlanetIcon planet={selectedPlanet.id} size="w-full h-full" withGlow={true} />
+                                            </div>
+                                            <div className="flex-grow space-y-6">
+                                                <div className="flex items-baseline gap-4">
+                                                    <h2 className="text-7xl font-bold text-foreground tracking-tighter leading-none">{selectedPlanet.nameEn}</h2>
+                                                    <span className="text-4xl font-headline font-bold text-secondary italic opacity-80">— {selectedPlanet.nameHi}</span>
+                                                </div>
+                                                
+                                                {/* Badges */}
+                                                <div className="flex gap-3">
+                                                    <span className="px-5 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-[10px] font-bold text-secondary uppercase tracking-widest">{selectedPlanet.nameSanskrit}</span>
+                                                    <span className="px-5 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-[10px] font-bold text-secondary uppercase tracking-widest">{selectedPlanet.element} Element</span>
+                                                </div>
+
+                                                {/* Top Metrics Grid */}
+                                                <div className="grid grid-cols-3 gap-12 pt-2">
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Nature</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedPlanet.nature}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Core Essence</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedPlanet.shadbala.split('.')[0]}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Biological</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedPlanet.bodyParts}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Middle Section: Bento Grid ── */}
+                                        <div className="grid grid-cols-12 gap-8 flex-grow">
+                                            {/* Left: Archetype & Signatures */}
+                                            <div className="col-span-7 space-y-8">
+                                                <div className="space-y-4">
+                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
+                                                        <Info className="w-4 h-4" /> Cosmic Archetype
+                                                    </h3>
+                                                    <p className="text-[17px] font-light leading-relaxed text-foreground/80 pr-6">
+                                                        {selectedPlanet.deepDive}
+                                                    </p>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
+                                                        <Zap className="w-4 h-4" /> Signatures
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-3">
+                                                        {selectedPlanet.traits.map(t => (
+                                                            <span key={t} className="px-6 py-2.5 rounded-xl bg-surface border border-outline-variant/5 text-[12px] font-bold text-foreground/60 uppercase tracking-tight">{t}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* ── New Section: Cosmic Wisdom ── */}
+                                                <div className="pt-4 space-y-4">
+                                                    <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/5 relative overflow-hidden group">
+                                                        <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                                                            <Sparkles className="w-24 h-24" />
+                                                        </div>
+                                                        <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-2">
+                                                            <Activity className="w-4 h-4" /> Functional Impact
+                                                        </h3>
+                                                        <p className="text-[13px] font-medium text-foreground/70 leading-relaxed relative z-10">
+                                                            {selectedPlanet.functional}
+                                                        </p>
+                                                        <div className="mt-4 pt-4 border-t border-outline-variant/5">
+                                                            <p className="text-[11px] italic text-secondary/60">
+                                                                Currently in <span className="font-bold uppercase tracking-wider">{selectedPlanet.avastha.split('"')[1] || 'Standard'}</span> Avastha
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Right: Technical Stats Stack */}
+                                            <div className="col-span-5 space-y-4">
+                                                <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
+                                                    <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-3">
+                                                        <Shield className="w-4 h-4" /> Planetary Governance
+                                                    </h3>
+                                                    <p className="text-[14px] font-medium leading-relaxed text-foreground/90">
+                                                        {selectedPlanet.represents}
+                                                    </p>
+                                                </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="bg-surface rounded-2xl p-5 border border-outline-variant/5 shadow-sm">
+                                                            <div className="flex items-center gap-2 mb-2 text-emerald-500">
+                                                                <CheckCircle2 className="w-4 h-4" />
+                                                                <span className="text-[9px] font-bold uppercase tracking-widest">Exaltation</span>
+                                                            </div>
+                                                            <p className="text-[15px] font-bold text-foreground">{selectedPlanet.exaltation.split('(')[0]}</p>
+                                                            <span className="text-[9px] opacity-40 uppercase">Highest Potential</span>
+                                                        </div>
+                                                        <div className="bg-surface rounded-2xl p-5 border border-outline-variant/5 shadow-sm">
+                                                            <div className="flex items-center gap-2 mb-2 text-red-500">
+                                                                <AlertCircle className="w-4 h-4" />
+                                                                <span className="text-[9px] font-bold uppercase tracking-widest">Debilitation</span>
+                                                            </div>
+                                                            <p className="text-[15px] font-bold text-foreground">{selectedPlanet.debilitation.split('(')[0]}</p>
+                                                            <span className="text-[9px] opacity-40 uppercase">Lowest Vitality</span>
+                                                        </div>
+                                                    </div>
+                                                <div className="bg-surface rounded-2xl p-5 border border-outline-variant/5 shadow-sm">
+                                                    <div className="flex items-baseline justify-between mb-2">
+                                                        <div className="flex items-center gap-2 text-secondary">
+                                                            <Scale className="w-4 h-4" />
+                                                            <span className="text-[9px] font-bold uppercase tracking-widest">Mooltrikona</span>
+                                                        </div>
+                                                        <span className="text-[8px] bg-secondary/10 text-secondary px-2 py-0.5 rounded uppercase font-bold">Primary Office</span>
+                                                    </div>
+                                                    <p className="text-[15px] font-bold text-foreground">{selectedPlanet.mooltrikona || 'Varies by position'}</p>
+                                                </div>
+
+                                                {/* ── Bottom Info (Moved into column) ── */}
+                                                <div className="pt-2 flex items-center gap-3 opacity-80">
+                                                    <div className="w-8 h-8 rounded-full bg-surface border border-outline-variant/5 flex items-center justify-center p-1.5 overflow-hidden shrink-0">
+                                                        <PlanetIcon planet={selectedPlanet.id} size="w-full h-full" withGlow={false} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[12px] font-bold text-foreground">Aligning with {selectedPlanet.nameEn}</p>
+                                                        <p className="text-[9px] opacity-40 uppercase tracking-widest">Discover how this planet influences your chart</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>

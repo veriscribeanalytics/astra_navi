@@ -38,7 +38,7 @@ export default function KootCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-        isExpanded ? 'bg-surface/60 border-outline-variant/30 shadow-lg' : 'bg-surface/30 border-outline-variant/10 hover:border-outline-variant/30'
+        isExpanded ? 'bg-surface border-outline-variant/30 shadow-lg' : 'bg-surface border-outline-variant/10 hover:border-outline-variant/30'
       }`}
     >
       <div 
@@ -69,7 +69,7 @@ export default function KootCard({
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${percentage}%` }}
-            transition={{ delay: delay + 0.3, duration: 1, ease: "easeOut" }}
+            transition={{ delay: delay + 0.3, duration: 1, ease: "easeOut" as const }}
             className={`h-full rounded-full ${getBarColor()}`}
           />
         </div>

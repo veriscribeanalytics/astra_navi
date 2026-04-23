@@ -59,7 +59,7 @@ const ZodiacStrip = () => {
     []);
 
     return (
-        <section className="bg-surface/30 backdrop-blur-md relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full">
+        <section className="bg-surface relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full">
             <LogoLoop
                 logos={logoItems}
                 speed={20}

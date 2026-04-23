@@ -51,11 +51,7 @@ export default function OptimizedBackgrounds() {
       {/* SunFlares - Always visible, lightweight */}
       <SunFlares />
 
-      {/* Rashi Orbit Background - Adaptive icon count */}
-      <RashiOrbitBackground 
-        iconCount={device.rashiIconCount}
-        pauseOnScroll={isPaused}
-      />
+      {/* Rashi Orbit Background removed as requested */}
 
       {/* Particles - Dark Mode */}
       <div className="fixed inset-0 z-[-5] pointer-events-none hidden dark:block">

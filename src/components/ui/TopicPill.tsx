@@ -20,7 +20,7 @@ const TopicPill: React.FC<TopicPillProps> = ({
       onClick={onClick}
       className={`
         flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer text-[10px] 
-        border transition-all duration-200 bg-surface/30
+        border transition-all duration-200 bg-surface
         ${active 
           ? 'text-secondary border-secondary/25 bg-secondary/8 shadow-sm shadow-secondary/5' 
           : 'text-on-surface-variant/70 border-outline-variant/10 hover:bg-surface-variant/40 hover:border-outline-variant/30 hover:text-on-surface-variant'

@@ -30,7 +30,7 @@ interface AuthContextType {
     isLoading: boolean;
     user: User | null;
     login: (email?: string, profile?: Partial<User>) => void; // Keep for interface compatibility, but we use signIn elsewhere
-    logout: () => void;
+    logout: (callbackUrl?: string) => Promise<void>;
     showLoading: (message?: string, duration?: number) => void;
     setLoadingState: (state: boolean) => void;
     refreshUser: (updates: Partial<User>) => void;
@@ -84,8 +84,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const logout = async () => {
-        await signOut({ callbackUrl: '/login' });
+    const logout = async (callbackUrl: string = '/') => {
+        await signOut({ callbackUrl });
     };
 
     const showLoading = (message?: string, duration: number = 2000) => {

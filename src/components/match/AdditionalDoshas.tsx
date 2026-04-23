@@ -19,7 +19,7 @@ export default function AdditionalDoshas({ doshas }: AdditionalDoshasProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
-    <div className="rounded-3xl border border-outline-variant/20 bg-surface/30 backdrop-blur-md overflow-hidden">
+    <div className="rounded-3xl border border-outline-variant/20 bg-surface overflow-hidden">
       <div className="p-5 sm:p-6 border-b border-outline-variant/10 flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center border border-secondary/20">
           <ShieldCheck className="text-secondary" size={20} />
@@ -38,7 +38,7 @@ export default function AdditionalDoshas({ doshas }: AdditionalDoshasProps) {
         {doshas.map((dosha, idx) => (
           <div key={idx} className="group">
             <div 
-              className="p-5 flex items-center justify-between cursor-pointer hover:bg-surface/20 transition-colors"
+              className="p-5 flex items-center justify-between cursor-pointer hover:bg-surface transition-colors"
               onClick={() => setExpandedIdx(expandedIdx === idx ? null : idx)}
             >
               <div className="flex items-center gap-4">
@@ -91,7 +91,7 @@ export default function AdditionalDoshas({ doshas }: AdditionalDoshasProps) {
         ))}
       </div>
 
-      <div className="p-4 bg-surface/40 border-t border-outline-variant/10 flex items-center gap-3">
+      <div className="p-4 bg-surface border-t border-outline-variant/10 flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-secondary/5 flex items-center justify-center shrink-0">
           <Info size={14} className="text-secondary/50" />
         </div>

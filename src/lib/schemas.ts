@@ -85,3 +85,18 @@ export const MatchRequestSchema = z.object({
   person1: PersonDetailSchema,
   person2: PersonDetailSchema,
 });
+
+// --- GUIDED CONSULTATION ---
+
+export const ConsultRequestSchema = z.object({
+  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date"),
+  birth_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
+  birth_place: z.string().min(2).max(200),
+  name: z.string().max(100).default("Friend"),
+  language: z.string().max(20).default("english"),
+  primary_category: z.string().max(50),
+  secondary_category: z.string().max(50),
+  final_question: z.string().max(200),
+  response_tone: z.enum(["warm", "emotional", "realistic", "short", "detailed"]).default("warm"),
+  optional_note: z.string().max(120).optional(),
+});

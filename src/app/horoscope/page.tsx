@@ -108,7 +108,7 @@ export default function HoroscopePage() {
                 <HealthForecastPanel />
 
                 {/* Info Footer */}
-                <Card padding="md" className="!rounded-[24px] mt-8 border-outline-variant/30 bg-surface/50">
+                <Card padding="md" className="!rounded-[24px] mt-8 border-outline-variant/30 bg-surface">
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                             <Sparkles className="w-5 h-5 text-secondary" />

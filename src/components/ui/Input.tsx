@@ -48,7 +48,7 @@ const Input: React.FC<InputProps> = ({ icon, label, error, helperText, className
                     aria-invalid={error ? 'true' : 'false'}
                     aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
                     className={`
-                        w-full bg-surface/40 backdrop-blur-md border transition-all outline-none
+                        w-full bg-surface border transition-all outline-none
                         text-primary placeholder:text-primary/40 font-body
                         rounded-[20px] sm:rounded-[24px]
                         ${icon ? 'pl-10 sm:pl-12 pr-3 sm:pr-4' : 'px-3 sm:px-4'} 

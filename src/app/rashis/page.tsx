@@ -86,10 +86,10 @@ export default function RashisPage() {
                             onClick={() => setViewMode('encyclopedia')}
                             className={`w-full flex items-center gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left mb-3 ${viewMode === 'encyclopedia'
                                     ? 'border-secondary bg-secondary/10'
-                                    : 'border-transparent hover:bg-surface/40'
+                                    : 'border-transparent hover:bg-surface'
                                 }`}
                         >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${viewMode === 'encyclopedia' ? 'bg-secondary/20' : 'bg-surface/50 border border-outline-variant/20'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${viewMode === 'encyclopedia' ? 'bg-secondary/20' : 'bg-surface border border-outline-variant/20'}`}>
                                 <BookOpen className={`w-4 h-4 ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/50'}`} />
                             </div>
                             <div>
@@ -113,7 +113,7 @@ export default function RashisPage() {
                                         }}
                                         className={`group flex flex-col items-center justify-center py-2 px-1 rounded-xl border transition-all duration-200 ${isActive
                                                 ? 'border-secondary bg-secondary/5'
-                                                : 'border-transparent hover:bg-surface/40'
+                                                : 'border-transparent hover:bg-surface'
                                             }`}
                                     >
                                         <Image
@@ -147,8 +147,8 @@ export default function RashisPage() {
                                 transition={{ duration: 0.3 }}
                                 className="flex flex-col"
                             >
-                                <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 bg-surface/40 backdrop-blur-md" hoverable={false}>
-                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface/50 border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
+                                <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 bg-surface" hoverable={false}>
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
                                         <BookOpen className="w-3 h-3" /> Core Concepts
                                     </div>
                                     <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-2">
@@ -266,7 +266,7 @@ export default function RashisPage() {
                                     <div className="grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-outline-variant/20">
 
                                         {/* LEFT PANE: Rashi Identity */}
-                                        <div className="flex flex-col bg-surface/10">
+                                        <div className="flex flex-col bg-surface">
                                             {/* Row 1: Header */}
                                             <div className="p-5 h-[85px] sm:h-[95px] flex items-center border-b border-outline-variant/20 shrink-0">
                                                 <div className="flex items-center gap-4 w-full">

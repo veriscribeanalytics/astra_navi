@@ -15,7 +15,7 @@ import { Volume2, Copy, ChevronRight, Sparkles } from 'lucide-react';
 /* ---------- Sub-components ---------- */
 const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
   <div className="text-center my-1">
-    <span className="inline-block text-[14px] text-on-surface-variant/50 bg-surface/40 px-3.5 py-1 rounded-full">
+    <span className="inline-block text-[14px] text-on-surface-variant/50 bg-surface px-3.5 py-1 rounded-full">
       {text}
     </span>
   </div>
@@ -154,7 +154,7 @@ const ChatMessages: React.FC = () => {
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 chat-messages-scroll min-w-0 w-full"
+      className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 min-w-0 w-full"
     >
       {messages.map((msg, i) => {
         if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;

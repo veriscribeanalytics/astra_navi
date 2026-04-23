@@ -55,7 +55,7 @@ const Pricing = () => {
                 
                 {/* Coming Soon Placeholder */}
                 <div className="max-w-3xl mx-auto">
-                    <div className="relative rounded-2xl sm:rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-secondary/5 border border-secondary/20 bg-gradient-to-br from-surface/50 to-surface/30 backdrop-blur-sm p-8 sm:p-12 md:p-16 lg:p-20">
+                    <div className="relative rounded-2xl sm:rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-secondary/5 border border-secondary/20 bg-surface p-8 sm:p-12 md:p-16 lg:p-20">
                         <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
                         
                         <div className="relative z-10 space-y-4 sm:space-y-6">

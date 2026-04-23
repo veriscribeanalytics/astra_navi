@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks';
+import { useAuth } from '@/context/AuthContext';
 import { 
     Mail, Lock, User, Calendar, MapPin, 
     Clock, Smartphone, ArrowRight, Eye, EyeOff,
@@ -18,6 +19,7 @@ import Image from 'next/image';
 const LoginPage = () => {
     const router = useRouter();
     const { success, error, ToastContainer } = useToast();
+    const { showLoading } = useAuth();
     const [isRegister, setIsRegister] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -105,20 +107,23 @@ const LoginPage = () => {
                         : result.error);
                 }
 
-                success("Welcome back, Seeker.");
-                router.push('/');
-                router.refresh();
+                showLoading("Aligning your celestial path...", 2000);
+                setTimeout(() => {
+                    router.push('/');
+                    router.refresh();
+                    // Show toast *after* redirect so it appears on next page
+                    success("Welcome back, Seeker.");
+                }, 2000);
             }
         } catch (err: any) {
             error(err.message);
-        } finally {
             setIsLoading(false);
         }
     };
 
     return (
         <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center p-4 relative overflow-hidden">
-            <ToastContainer />
+            {ToastContainer}
             
             {/* Ambient Background Glow */}
             <div className="absolute inset-0 pointer-events-none">
@@ -132,7 +137,7 @@ const LoginPage = () => {
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-[460px] relative z-10"
             >
-                <Card padding="lg" className="!rounded-[32px] sm:!rounded-[48px] border-outline-variant/20 bg-surface/80 backdrop-blur-xl shadow-2xl">
+                <Card padding="lg" className="!rounded-[32px] sm:!rounded-[48px] border-outline-variant/20 bg-surface shadow-2xl">
                     <div className="text-center mb-8">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-surface border border-outline-variant/20 mb-6 shadow-inner group">
                             <Image 

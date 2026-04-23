@@ -25,7 +25,7 @@ export default function PlansPage() {
 
             {/* Beta Info Section */}
             <div className="max-w-4xl mx-auto px-4 mt-6 sm:mt-12 w-full">
-                <Card padding="lg" variant="bordered" className="backdrop-blur text-center border-secondary/20 !p-5 sm:!p-8">
+                <Card padding="lg" variant="bordered" className="text-center border-secondary/20 !p-5 sm:!p-8">
                     <h3 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3">Early Adopter Benefits</h3>
                     <p className="text-xs sm:text-base text-primary/70">
                         As a beta tester, you'll shape the future of AstraNavi. When we launch, early supporters will receive exclusive benefits, special pricing, and lifetime recognition as founding members.

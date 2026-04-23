@@ -117,7 +117,7 @@ const ChatSidebar: React.FC = () => {
         <div className="px-3.5 mb-1 shrink-0 flex items-center justify-between">
           <SidebarSectionLabel>RECENT CHATS</SidebarSectionLabel>
         </div>
-        <div className="flex-1 overflow-y-auto px-3.5 pb-2 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-3.5 pb-2">
           {isLoadingChats && chats.length === 0 ? (
             <div className="flex flex-col gap-2 animate-pulse">
               {[...Array(6)].map((_, i) => (
@@ -251,8 +251,8 @@ const ChatSidebar: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteModalChat && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-background border border-outline-variant/20 rounded-2xl p-6 w-[90%] max-w-[400px] shadow-2xl relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 animate-in fade-in duration-200">
+          <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 w-[90%] max-w-[400px] shadow-2xl relative animate-in zoom-in-95 duration-200">
             <button 
               className="absolute top-4 right-4 text-on-surface-variant/40 hover:text-on-surface-variant bg-surface-variant/30 hover:bg-surface-variant/60 rounded-full p-1 transition-all cursor-pointer"
               onClick={() => setDeleteModalChat(null)}

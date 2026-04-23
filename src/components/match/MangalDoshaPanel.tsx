@@ -58,7 +58,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="rounded-3xl border border-outline-variant/20 bg-surface/30 backdrop-blur-md overflow-hidden"
+      className="rounded-3xl border border-outline-variant/20 bg-surface overflow-hidden"
     >
       <div className="p-5 sm:p-6 border-b border-outline-variant/10 flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center border border-secondary/20">
@@ -77,7 +77,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
       <div className="p-6 flex flex-col gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Person 1 */}
-          <div className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/10 space-y-3">
+          <div className="p-4 rounded-2xl bg-surface border border-outline-variant/10 space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-foreground/40 uppercase tracking-widest">{person1.name}</span>
               {getStatusBadge(person1)}
@@ -100,7 +100,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
           </div>
 
           {/* Person 2 */}
-          <div className="p-4 rounded-2xl bg-surface/40 border border-outline-variant/10 space-y-3">
+          <div className="p-4 rounded-2xl bg-surface border border-outline-variant/10 space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-foreground/40 uppercase tracking-widest">{person2.name}</span>
               {getStatusBadge(person2)}

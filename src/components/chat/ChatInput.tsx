@@ -6,6 +6,7 @@ import {
     Plus, Mic, MicOff, RotateCcw, 
     ArrowUp, Paperclip 
 } from 'lucide-react';
+import { useToast } from '@/hooks';
 
 // Generate contextual follow-up questions based on chat history
 const getContextualSuggestions = (messages: ChatMessage[]): string[] => {
@@ -96,6 +97,7 @@ interface SpeechRecognition extends EventTarget {
 const ChatInput: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendMessage, isSending, activeChat, inputText, setInputText } = useChat();
+  const { error, warning, ToastContainer } = useToast();
   const [isListening, setIsListening] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -152,9 +154,9 @@ const ChatInput: React.FC = () => {
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         if (event.error === 'not-allowed') {
-          alert('Microphone permission denied. Please enable microphone access in your browser settings to use voice input.');
+          error('Microphone permission denied. Please allow microphone access in your browser settings.');
         } else if (event.error !== 'no-speech') {
-          alert(`Voice input error: ${event.error}. Please try again.`);
+          error(`Voice input error: ${event.error}. Please try again.`);
         }
         setIsListening(false);
       };
@@ -167,7 +169,7 @@ const ChatInput: React.FC = () => {
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-        alert('Voice input is not supported in your browser.');
+        warning('Voice input is not supported in your browser.');
         return;
     }
 
@@ -187,6 +189,7 @@ const ChatInput: React.FC = () => {
 
   return (
     <div className="shrink-0 bg-background min-w-0 w-full overflow-hidden">
+      {ToastContainer}
       {/* Suggested Questions - Context-aware */}
       {activeChat && activeChat.messages.length > 0 && !isSending && (
         <div className="px-3 sm:px-4 md:px-5 pt-2 pb-2 min-w-0 w-full">

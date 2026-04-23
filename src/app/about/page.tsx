@@ -37,7 +37,7 @@ export default function AboutPage() {
                 </div>
                 
                 {/* Visual Data Representation */}
-                <Card variant="bordered" padding="lg" hoverable={false} className="backdrop-blur border-outline-variant/30 h-full flex flex-col justify-center gap-4 sm:gap-6 relative overflow-hidden">
+                <Card variant="bordered" padding="lg" hoverable={false} className="border-outline-variant/30 h-full flex flex-col justify-center gap-4 sm:gap-6 relative overflow-hidden">
                     <div className="absolute -right-12 -top-12 w-48 h-48 bg-secondary/20 rounded-full blur-3xl mix-blend-multiply dark:mix-blend-screen opacity-50"></div>
                     <div className="space-y-2">
                         <h4 className="font-headline font-bold text-secondary text-base sm:text-lg">What Navi Knows</h4>
