@@ -20,7 +20,14 @@ interface Occupant { planet: string; dignity: string; retrograde: boolean; }
 interface HouseData { house: number; name: string; areas: string[]; sign: string; lord: string; lordHouse: number; occupants: Occupant[]; interpretation: string[]; }
 interface Yoga { name: string; effect: string; }
 interface PlanetData { planet: string; sign: string; house: number; degree: number; dignity: string; shadbala: number; retrograde: boolean; conjunctions: string[]; lordOf: number[]; interpretation: string[]; yogas: Yoga[]; }
-interface DashaData { active: { type: string; planet: string; start: string; end: string }[]; explanation: string[]; }
+interface DashaData { 
+    active?: { type: string; planet: string; start: string; end: string }[]; 
+    rows?: { planet: string; dates: string; type?: string; active?: boolean }[];
+    current?: string;
+    currentMahaDasha?: string;
+    remaining?: string;
+    explanation: string[]; 
+}
 interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: DashaData; }
 
 // ─── Constants ───────────────────────────────────────────────
@@ -220,19 +227,22 @@ export default function KundliPage() {
                                 <h2 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Current Dasha</h2>
                             </div>
                             <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
-                                {data.dasha?.active?.length > 0 ? (
+                                { ((data.dasha?.active?.length || 0) > 0) || ((data.dasha?.rows?.length || 0) > 0) || data.dasha?.current || data.dasha?.currentMahaDasha ? (
                                     <>
                                         <div className="space-y-3">
-                                            {data.dasha.active.map((period, idx) => {
+                                            {/* Format 1: Active periods with start/end */}
+                                            {data.dasha?.active?.map((period, idx) => {
                                             const start = new Date(period.start);
                                             const end = new Date(period.end);
                                             const now = Date.now();
-                                            const pct = Math.min(100, Math.max(0, ((now - start.getTime()) / (end.getTime() - start.getTime())) * 100));
+                                            const total = end.getTime() - start.getTime();
+                                            const elapsed = now - start.getTime();
+                                            const pct = total > 0 ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
                                             const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
                                             const rem = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
                                             const isMaha = period.type === 'Mahadasha';
                                             return (
-                                                <div key={idx} className={idx < data.dasha.active.length - 1 ? 'pb-3 border-b border-outline-variant/10' : ''}>
+                                                <div key={idx} className={idx < (data.dasha?.active?.length || 0) - 1 ? 'pb-3 border-b border-outline-variant/10' : ''}>
                                                     <div className="flex items-center gap-2.5 mb-1.5">
                                                         <div className="w-8 h-8 relative shrink-0 flex items-center justify-center">
                                                             {PLANET_TO_ICON[period.planet] ? (
@@ -265,6 +275,34 @@ export default function KundliPage() {
                                                 </div>
                                             );
                                         })}
+
+                                        {/* Format 2: Rows (Chat format) */}
+                                        {!data.dasha?.active?.length && data.dasha?.rows?.map((row, idx) => (
+                                            <div key={idx} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-0">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg" style={{ color: PLANET_COLORS[row.planet] }}>{PLANET_GLYPHS[row.planet] || '✦'}</span>
+                                                    <span className="text-xs font-bold text-foreground">{row.planet}</span>
+                                                    {row.active && <span className="text-[8px] font-bold bg-secondary/10 text-secondary px-1 py-0.5 rounded ml-1 uppercase">Active</span>}
+                                                </div>
+                                                <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider">{row.dates}</span>
+                                            </div>
+                                        ))}
+
+                                        {/* Format 3: Single current string (Dashboard format) */}
+                                        {!data.dasha?.active?.length && !data.dasha?.rows?.length && (data.dasha?.current || data.dasha?.currentMahaDasha) && (
+                                            <div className="py-2">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Active Period</span>
+                                                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">{data.dasha?.currentMahaDasha || data.dasha?.current}</span>
+                                                </div>
+                                                {data.dasha?.remaining && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Time Remaining</span>
+                                                        <span className="text-xs font-bold text-foreground/60">{data.dasha.remaining}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                         </div>
                                         {data.dasha.explanation?.[0] && (
                                             <p className="text-[12px] text-foreground/40 leading-relaxed mt-3 pt-3 border-t border-outline-variant/10">

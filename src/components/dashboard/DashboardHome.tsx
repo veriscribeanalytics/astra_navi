@@ -129,8 +129,27 @@ export default function DashboardHome() {
                 if (analysis?.nakshatra) stats.nakshatra = analysis.nakshatra;
                 if (analysis?.nakshatraLord) stats.nakshatraLord = analysis.nakshatraLord;
                 if (analysis?.dasha) {
-                    stats.activeDasha = analysis.dasha.currentMahaDasha || analysis.dasha.current;
-                    stats.dashaRemaining = analysis.dasha.remaining;
+                    // Try different formats to extract the current dasha name
+                    let dashaName = analysis.dasha.currentMahaDasha || analysis.dasha.current;
+                    let dashaRemaining = analysis.dasha.remaining;
+
+                    // Fallback to the active array if flat strings are missing
+                    if (!dashaName && analysis.dasha.active?.length > 0) {
+                        const maha = analysis.dasha.active.find((p: any) => p.type === 'Mahadasha') || analysis.dasha.active[0];
+                        const anta = analysis.dasha.active.find((p: any) => p.type === 'Antardasha');
+                        dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
+                        
+                        // Calculate remaining time if end date exists
+                        if (!dashaRemaining && maha.end) {
+                            const end = new Date(maha.end);
+                            const now = Date.now();
+                            const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
+                            dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                        }
+                    }
+
+                    stats.activeDasha = dashaName;
+                    stats.dashaRemaining = dashaRemaining;
                 }
                 if (analysis?.moonPhase) stats.moonPhase = analysis.moonPhase;
                 setKundliStats(Object.keys(stats).length > 0 ? stats : null);
