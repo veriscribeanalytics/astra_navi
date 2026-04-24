@@ -18,7 +18,7 @@ export interface ChatMessage {
 }
 
 export interface Chat {
-  id: string; // Changed from _id to id for PostgreSQL consistency
+  id: string;
   userEmail: string;
   title: string;
   messages: ChatMessage[];
@@ -28,7 +28,7 @@ export interface Chat {
 }
 
 export interface ChatSummary {
-  id: string; // Changed from _id to id
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -43,6 +43,10 @@ interface ChatContextType {
   isLoadingMessages: boolean;
   isSending: boolean;
   hasMoreChats: boolean;
+  isGuest: boolean;
+  guestTimeRemaining: number;
+  isGuestExpired: boolean;
+  enableGuestMode: () => void;
   loadChats: () => Promise<void>;
   loadMoreChats: () => Promise<void>;
   selectChat: (chatId: string) => Promise<void>;
@@ -76,8 +80,34 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const initialLoadDone = useRef(false);
   const previousUserEmail = useRef<string | null>(null);
 
+  // Guest State - Minimal for preview purposes
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestTimeRemaining, setGuestTimeRemaining] = useState(600); // 10 minutes default
+  const [isGuestExpired, setIsGuestExpired] = useState(false);
+
+  const enableGuestMode = useCallback(() => {
+    setIsGuest(true);
+    const now = new Date().toISOString();
+    const guestChat: Chat = {
+      id: 'guest-session',
+      userEmail: 'guest@astranavi.com',
+      title: 'Guest Preview',
+      messages: [{
+        id: 'welcome',
+        type: 'ai',
+        text: "Namaste ✦ You're in Preview Mode. To consult Navi and receive deep Vedic analysis, please log in to your celestial account.",
+        createdAt: now
+      }],
+      averageRating: null,
+      createdAt: now,
+      updatedAt: now
+    };
+    setActiveChat(guestChat);
+    setActiveChatId('guest-session');
+  }, []);
+
   const loadChats = useCallback(async () => {
-    if (!user?.email) return;
+    if (!user?.email || isGuest) return;
     setIsLoadingChats(true);
     try {
       const res = await fetch(`/api/chat?limit=20`);
@@ -93,10 +123,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingChats(false);
     }
-  }, [user?.email]);
+  }, [user?.email, isGuest]);
 
   const loadMoreChats = useCallback(async () => {
-    if (!user?.email || !nextCursor || isLoadingChats) return;
+    if (!user?.email || !nextCursor || isLoadingChats || isGuest) return;
     setIsLoadingChats(true);
     try {
       const res = await fetch(`/api/chat?limit=20&cursor=${nextCursor}`);
@@ -112,10 +142,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingChats(false);
     }
-  }, [user?.email, nextCursor, isLoadingChats]);
+  }, [user?.email, nextCursor, isLoadingChats, isGuest]);
 
   const selectChat = useCallback(async (chatId: string) => {
-    if (!chatId) return;
+    if (!chatId || isGuest) return;
     setActiveChatId(chatId);
     setIsLoadingMessages(true);
     try {
@@ -128,45 +158,47 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingMessages(false);
     }
-  }, []);
+  }, [isGuest]);
 
   const sendMessage = useCallback(async (text: string, overrideChatId?: string) => {
     let targetId = overrideChatId || activeChatId;
-    if (!targetId || !text.trim() || !user?.email) {
-        console.warn("[Chat] sendMessage blocked: missing targetId, text or userEmail");
-        return;
-    }
     
+    // In guest mode, we show a 'Login Required' mock response
+    if (isGuest) {
+      const now = new Date().toISOString();
+      const userMsg: ChatMessage = { id: generateUUID(), type: 'user', text: text.trim(), createdAt: now };
+      const aiMsg: ChatMessage = { id: generateUUID(), type: 'ai', text: '...', createdAt: now };
+      
+      setActiveChat(prev => prev ? { ...prev, messages: [...prev.messages, userMsg, aiMsg] } : null);
+      setIsSending(true);
+
+      setTimeout(() => {
+        setActiveChat(prev => {
+           if (!prev) return null;
+           return {
+             ...prev,
+             messages: prev.messages.map(m => m.id === aiMsg.id ? { ...m, text: "Consulting Navi requires a celestial identity. Please log in to receive your full Vedic analysis and planetary insights." } : m)
+           };
+        });
+        setIsSending(false);
+      }, 1000);
+      return;
+    }
+
+    if (!targetId || !text.trim() || !user?.email) return;
     if (isSending) return;
     
     setIsSending(true);
-    
     const now = new Date().toISOString();
     const userMsgId = generateUUID();
     const aiMsgId = generateUUID();
     
-    const userMessage: ChatMessage = {
-      id: userMsgId,
-      type: 'user',
-      text: text.trim(),
-      createdAt: now
-    };
+    const userMessage: ChatMessage = { id: userMsgId, type: 'user', text: text.trim(), createdAt: now };
+    const aiPlaceholder: ChatMessage = { id: aiMsgId, type: 'ai', text: '', createdAt: now };
 
-    const aiPlaceholder: ChatMessage = {
-      id: aiMsgId,
-      type: 'ai',
-      text: '',
-      createdAt: now
-    };
-
-    // Optimistically update UI
-    setActiveChat(prev => {
-      if (!prev) return prev;
-      return { ...prev, messages: [...prev.messages, userMessage, aiPlaceholder] };
-    });
+    setActiveChat(prev => prev ? { ...prev, messages: [...prev.messages, userMessage, aiPlaceholder] } : prev);
 
     try {
-      // PROD FIX: If targetId is temp, create it in DB first sequentially
       if (targetId.startsWith('temp-')) {
         const createRes = await fetch('/api/chat', {
           method: 'POST',
@@ -174,13 +206,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           body: JSON.stringify({ title: text.slice(0, 30) }),
         });
         const createData = await createRes.json();
-        if (createData.chat && createData.chat.id) {
+        if (createData.chat?.id) {
           targetId = createData.chat.id;
           setActiveChatId(targetId);
-          // Sync existing state with real ID
           setActiveChat(prev => prev ? { ...prev, id: targetId as string } : null);
-        } else {
-          throw new Error('Could not synchronize celestial conversation with server.');
         }
       }
 
@@ -189,11 +218,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'The stars are currently obscured.');
-      }
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -204,180 +228,69 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
-
+          buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n');
-          // Keep the last partial line in the buffer
           buffer = lines.pop() || '';
-
           for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
-            
-            const dataStr = trimmedLine.slice(6);
+            if (!line.trim().startsWith('data: ')) continue;
+            const dataStr = line.trim().slice(6);
             if (dataStr === '[DONE]') break;
-
             try {
               const data = JSON.parse(dataStr);
               if (data.token) {
                 fullText += data.token;
-                setActiveChat(prev => {
-                  if (!prev) return prev;
-                  return {
-                    ...prev,
-                    messages: prev.messages.map(m => 
-                      m.id === aiMsgId ? { ...m, text: fullText } : m
-                    )
-                  };
-                });
+                setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: fullText } : m) } : null);
               }
-            } catch (e) {
-              console.error("[Chat] SSE Parse Error:", e, dataStr);
-            }
+            } catch {}
           }
         }
       }
-
-      // Handle profile refreshes if specific questions were asked
-      const DASHBOARD_RASHI_QUERY = 'Tell me my Rashi (Moon Sign) and Sun Sign based on my birth chart.';
-      if (text === DASHBOARD_RASHI_QUERY) {
-        fetch('/api/user/profile')
-          .then(r => r.json())
-          .then(d => { if (d.user) refreshUser(d.user); })
-          .catch(() => {});
-      }
-
       loadChats();
-    } catch (err: unknown) {
-      console.error('Failed to send message:', err);
-      
-      const errorMessage = err instanceof Error ? err.message : 'Unknown celestial disturbance';
-      let errorMsg = `Celestial disturbance: ${errorMessage}. Please try again.`;
-      
-      if (errorMessage.includes('birth details') || errorMessage.includes('Profile')) {
-        errorMsg = "Namaste! To give you an accurate reading, I need your birth coordinates. Please update your [Celestial Profile](/profile) first.";
-      }
-      
-      setActiveChat(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          messages: prev.messages.map(m => 
-            m.id === aiMsgId ? { ...m, text: errorMsg } : m
-          )
-        };
-      });
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending, refreshUser]);
-
+  }, [activeChatId, loadChats, user, isSending, isGuest, isGuestExpired]);
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
+    if (isGuest) return 'guest-session';
     if (!user?.email) return null;
-
-    // Use a temp ID for immediate UI feedback
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
-    
-    const welcomeMessage: ChatMessage = {
-      id: generateUUID(),
-      type: 'ai',
-      text: `Namaste${user?.name ? ` ${user.name.split(' ')[0]}` : ''} ✦ I'm Navi, your AI Vedic astrologer. Ask me anything about your chart, transits, career, or destiny.`,
-      createdAt: now,
-    };
-
-    const tempChat: Chat = {
-      id: tempId,
-      userEmail: user.email,
-      title: initialMessage ? initialMessage.slice(0, 30) : 'New conversation',
-      messages: [welcomeMessage],
-      averageRating: null,
-      createdAt: now,
-      updatedAt: now,
-    };
-
+    const tempChat: Chat = { id: tempId, userEmail: user.email, title: initialMessage?.slice(0,30) || 'New conversation', messages: [{ id: generateUUID(), type: 'ai', text: `Namaste ✦ I'm Navi. Ask me anything.`, createdAt: now }], averageRating: null, createdAt: now, updatedAt: now };
     setActiveChat(tempChat);
     setActiveChatId(tempId);
-
-    if (initialMessage) {
-        // This will now handle the temp -> real ID transition internally
-        sendMessage(initialMessage, tempId);
-    }
-
+    if (initialMessage) sendMessage(initialMessage, tempId);
     return tempId;
-  }, [user, sendMessage]);
+  }, [user, sendMessage, isGuest]);
 
-  const rateMessage = useCallback(async (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => {
-    if (!activeChatId || activeChatId.startsWith('temp-')) return;
-
-    setActiveChat(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        messages: prev.messages.map(m => 
-          m.id === messageId ? { ...m, rating, feedbackTags, feedbackComment } : m
-        ),
-      };
-    });
-
+  const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
+    if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
     try {
-      const res = await fetch(`/api/chat/${activeChatId}/rate`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageId, rating, feedbackTags, feedbackComment }),
-      });
-      const data = await res.json();
-      if (data.averageRating !== undefined) {
-        setActiveChat(prev => prev ? { ...prev, averageRating: data.averageRating } : null);
-      }
-    } catch (err: unknown) {
-      console.error('Failed to rate message:', err);
-    }
-  }, [activeChatId]);
+      await fetch(`/api/chat/${activeChatId}/rate`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messageId, rating, feedbackTags: tags, feedbackComment: comment }) });
+    } catch {}
+  }, [activeChatId, isGuest]);
 
   const deleteChat = useCallback(async (chatId: string) => {
+    if (isGuest) return;
     try {
-      const res = await fetch(`/api/chat/${chatId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setChats(prev => prev.filter(c => c.id !== chatId));
-        if (activeChatId === chatId) {
-          setActiveChatId(null);
-          setActiveChat(null);
-        }
-      }
-    } catch (err: unknown) {
-      console.error('Failed to delete chat:', err);
-    }
-  }, [activeChatId]);
-
-  // Handle user identity changes
-  useEffect(() => {
-    const currentEmail = user?.email || null;
-    if (previousUserEmail.current !== null && previousUserEmail.current !== currentEmail) {
-      setChats([]);
-      setActiveChat(null);
-      setActiveChatId(null);
-      setHasMoreChats(false);
-      setNextCursor(null);
-      setInputText('');
-      initialLoadDone.current = false;
-    }
-    previousUserEmail.current = currentEmail;
-  }, [user?.email]);
+      await fetch(`/api/chat/${chatId}`, { method: 'DELETE' });
+      setChats(prev => prev.filter(c => c.id !== chatId));
+    } catch {}
+  }, [isGuest]);
 
   useEffect(() => {
-    if (!initialLoadDone.current && user?.email) {
+    if (!initialLoadDone.current && user?.email && !isGuest) {
       initialLoadDone.current = true;
       loadChats();
     }
-  }, [user?.email, loadChats]);
+  }, [user?.email, loadChats, isGuest]);
 
   return (
     <ChatContext.Provider value={{
       chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, hasMoreChats,
+      isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
       loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat,
       inputText, setInputText, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen
     }}>

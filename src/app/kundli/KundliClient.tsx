@@ -130,7 +130,7 @@ export default function KundliPage() {
 
     // ─── Guard States ────────────────────────────────────────
     if (!authLoading && !isLoggedIn) {
-        return (<div className="min-h-screen flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
+        return (<div className="min-h-[calc(100dvh-var(--navbar-height,64px))] flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
             <Lock className="w-12 h-12 text-secondary mx-auto mb-4" /><h2 className="text-2xl font-headline font-bold text-foreground mb-2">Sign In Required</h2>
             <p className="text-foreground/60 text-sm mb-6">Please log in to view your Kundli.</p>
             <Button onClick={() => router.push('/login')} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">Sign In</Button>
@@ -138,7 +138,7 @@ export default function KundliPage() {
     }
     if (loading) {
         return (
-            <div className="h-screen bg-[var(--bg)] pt-14 lg:pt-16 flex flex-col overflow-hidden">
+            <div className="h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] flex flex-col overflow-hidden">
                 <div className="flex-1 max-w-[1600px] w-full mx-auto px-3 py-2 flex flex-col gap-4 min-h-0 animate-pulse">
                     <div className="flex justify-between items-center h-10">
                         <div className="w-48 h-8 bg-surface-variant/20 rounded-xl" />
@@ -157,7 +157,7 @@ export default function KundliPage() {
         );
     }
     if (error || !data) {
-        return (<div className="min-h-screen flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
+        return (<div className="min-h-[calc(100dvh-var(--navbar-height,64px))] flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
             <Sparkles className="w-12 h-12 text-orange-500 mx-auto mb-4" /><h2 className="text-xl font-headline font-bold text-foreground mb-2">Analysis Unavailable</h2>
             <p className="text-foreground/60 text-sm mb-6">{error || 'No data found.'}</p>
             <Button onClick={() => fetchAnalysis(true)} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">Generate Dashboard</Button>
@@ -166,7 +166,7 @@ export default function KundliPage() {
 
     // ═══════════════════════════════════════════════════════════
     return (
-        <div className="h-screen bg-[var(--bg)] pt-14 lg:pt-16 flex flex-col overflow-hidden">
+        <div className="h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] flex flex-col overflow-hidden">
             <div className="flex-1 max-w-[1600px] w-full mx-auto px-3 py-2 flex flex-col gap-2 min-h-0">
 
                 {/* ═══ HEADER ═══ */}

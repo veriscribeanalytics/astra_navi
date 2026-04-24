@@ -324,7 +324,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 {/* Left: Logo */}
                 <div className="flex justify-start">
                     <Link href="/" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
-                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={26} width={26} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
+                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
                         Astra Navi
                     </Link>
                 </div>
@@ -428,7 +428,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                 {/* Center Section */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
                     <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tighter text-primary font-headline">
-                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={24} width={24} className="object-contain rounded-md" priority />
+                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
                         <span className="whitespace-nowrap">Astra Navi</span>
                     </Link>
                 </div>

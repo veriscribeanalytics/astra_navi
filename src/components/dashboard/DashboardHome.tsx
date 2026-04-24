@@ -130,7 +130,7 @@ export default function DashboardHome() {
     ];
 
     return (
-        <div className="w-full flex-grow bg-[var(--bg)] min-h-screen">
+        <div className="w-full flex-grow bg-[var(--bg)] min-h-[calc(100dvh-var(--navbar-height,64px))]">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
                 
                 {/* ZONE 1: IDENTITY BAR */}
@@ -150,7 +150,7 @@ export default function DashboardHome() {
                     </div>
 
                     {/* Right: Sign Circles (The Identity Badges) */}
-                    <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 shrink-0">
+                    <div className="grid grid-cols-3 gap-3 sm:gap-6 lg:gap-8 shrink-0">
                         {[
                             { label: "Moon Sign", data: moonSign, color: "text-blue-400" },
                             { label: "Sun Sign", data: sunSign, color: "text-amber-500" },
@@ -158,7 +158,7 @@ export default function DashboardHome() {
                         ].map((sign, idx) => (
                             <Link key={idx} href={sign.data?.id ? `/rashis?sign=${sign.data.id}` : '/rashis'} className="group relative flex flex-col items-center">
                                 {/* The Circle */}
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden">
+                                <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     {sign.data?.icon ? (
                                         <Image 
@@ -166,16 +166,16 @@ export default function DashboardHome() {
                                             alt={sign.data.name} 
                                             width={48}
                                             height={48}
-                                            className="w-10 h-10 sm:w-12 sm:h-12 object-contain transition-transform duration-500 group-hover:scale-110" 
+                                            className="w-8 h-8 sm:w-12 sm:h-12 object-contain transition-transform duration-500 group-hover:scale-110" 
                                         />
                                     ) : (
-                                        <Sparkles className="w-6 h-6 text-foreground/10" />
+                                        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/10" />
                                     )}
                                 </div>
                                 {/* Label & Name */}
-                                <div className="mt-3 text-center">
-                                    <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-[0.2em] leading-none mb-1.5">{sign.label}</p>
-                                    <p className={`text-[13px] sm:text-sm font-headline font-bold ${sign.color} group-hover:text-amber-500 transition-colors uppercase tracking-[0.1em]`}>
+                                <div className="mt-2 sm:mt-3 text-center">
+                                    <p className="text-[8px] sm:text-[9px] font-bold text-foreground/30 uppercase tracking-[0.2em] leading-none mb-1 sm:mb-1.5">{sign.label}</p>
+                                    <p className={`text-[11px] sm:text-sm font-headline font-bold ${sign.color} group-hover:text-amber-500 transition-colors uppercase tracking-[0.1em]`}>
                                         {sign.data?.name || "???"}
                                     </p>
                                 </div>

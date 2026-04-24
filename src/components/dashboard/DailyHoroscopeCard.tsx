@@ -84,6 +84,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
     const [forecast, setForecast] = useState<ForecastData | null>(null);
     const [forecastLoading, setForecastLoading] = useState(false);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
+    const [realScores, setRealScores] = useState<Record<string, number>>({});
 
     const today = new Date();
     const dateString = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
@@ -106,6 +107,23 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
     useEffect(() => {
         if (!loading && horoscope) {
             const t = setTimeout(() => { setShowContent(true); setAnimatedScore(horoscope.overall_score || 0); }, 100);
+            
+            // Fetch real scores for metrics in parallel
+            const areas = ['career', 'health', 'love', 'finance'];
+            areas.forEach(area => {
+                fetch(`/api/forecast/${area}`)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (data?.days) {
+                            const todayScore = data.days.find((d: any) => d.is_today)?.score;
+                            if (todayScore !== undefined) {
+                                setRealScores(prev => ({ ...prev, [area]: todayScore }));
+                            }
+                        }
+                    })
+                    .catch(() => {});
+            });
+
             return () => clearTimeout(t);
         }
     }, [loading, horoscope]);
@@ -118,11 +136,11 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
     const scoreColor = (s: number) => s >= 75 ? 'text-green-500' : s >= 50 ? 'text-yellow-500' : 'text-orange-500';
 
     const metrics = useMemo(() => [
-        { label: "Career", score: Math.min(100, Math.max(0, score + 5)), info: horoscope?.career || 'Keep pushing for your goals.', icon: <Briefcase className="w-5 h-5" />, color: "text-orange-500", bg: "bg-orange-500/10", colorHex: "#f97316", area: "career" },
-        { label: "Health", score: Math.min(100, Math.max(0, score - 3)), info: horoscope?.health || 'Vitality is on your side.', icon: <Activity className="w-5 h-5" />, color: "text-green-500", bg: "bg-green-500/10", colorHex: "#22c55e", area: "health" },
-        { label: "Love", score: Math.min(100, Math.max(0, score + 8)), info: horoscope?.love || 'Harmony flows through relationships.', icon: <Heart className="w-5 h-5" />, color: "text-pink-500", bg: "bg-pink-500/10", colorHex: "#ec4899", area: "love" },
-        { label: "Finance", score: Math.min(100, Math.max(0, score - 5)), info: horoscope?.finance || 'Growth opportunities emerging.', icon: <DollarSign className="w-5 h-5" />, color: "text-amber-500", bg: "bg-amber-500/10", colorHex: "#f59e0b", area: "finance" },
-    ], [score, horoscope]);
+        { label: "Career", score: realScores.career ?? Math.min(100, Math.max(0, score + 5)), info: horoscope?.career || 'Keep pushing for your goals.', icon: <Briefcase className="w-5 h-5" />, color: "text-orange-500", bg: "bg-orange-500/10", colorHex: "#f97316", area: "career" },
+        { label: "Health", score: realScores.health ?? Math.min(100, Math.max(0, score - 3)), info: horoscope?.health || 'Vitality is on your side.', icon: <Activity className="w-5 h-5" />, color: "text-green-500", bg: "bg-green-500/10", colorHex: "#22c55e", area: "health" },
+        { label: "Love", score: realScores.love ?? Math.min(100, Math.max(0, score + 8)), info: horoscope?.love || 'Harmony flows through relationships.', icon: <Heart className="w-5 h-5" />, color: "text-pink-500", bg: "bg-pink-500/10", colorHex: "#ec4899", area: "love" },
+        { label: "Finance", score: realScores.finance ?? Math.min(100, Math.max(0, score - 5)), info: horoscope?.finance || 'Growth opportunities emerging.', icon: <DollarSign className="w-5 h-5" />, color: "text-amber-500", bg: "bg-amber-500/10", colorHex: "#f59e0b", area: "finance" },
+    ], [score, horoscope, realScores]);
 
     const luckyColorHex = useMemo(() => {
         const lc = horoscope?.lucky_color?.toLowerCase() || '';
@@ -235,11 +253,11 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 10 }}
                             transition={{ type: "spring", damping: 30, stiffness: 300 }} onClick={e => e.stopPropagation()}
-                            className="relative w-full max-w-6xl h-full max-h-[85vh] bg-surface rounded-[32px] border border-outline-variant/20 shadow-2xl overflow-hidden flex flex-col">
+                            className="relative w-full max-w-6xl h-full max-h-[92dvh] sm:max-h-[85vh] bg-surface rounded-[24px] sm:rounded-[32px] border border-outline-variant/20 shadow-2xl overflow-hidden flex flex-col">
 
                             {/* Close */}
-                            <button onClick={() => setActiveModal(null)} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-surface-variant/30 flex items-center justify-center hover:bg-surface-variant/50 transition-colors z-[100] group">
-                                <X className="w-5 h-5 text-foreground/70 group-hover:text-foreground transition-colors" />
+                            <button onClick={() => setActiveModal(null)} className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-variant/30 flex items-center justify-center hover:bg-surface-variant/50 transition-colors z-[100] group">
+                                <X className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-foreground/70 group-hover:text-foreground transition-colors" />
                             </button>
 
                             <div className="flex flex-col lg:flex-row w-full h-full min-h-0">

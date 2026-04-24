@@ -4,10 +4,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
-import { useChat, ChatSummary, ChatMessage } from '@/context/ChatContext';
+import { useChat, ChatSummary } from '@/context/ChatContext';
 import { 
     MoreVertical, Trash2, Download, 
-    AlertTriangle, X, MessageSquare, Plus
+    AlertTriangle, X, MessageSquare, Plus, Lock
 } from 'lucide-react';
 import { formatChatTimestamp } from '@/lib/datetime';
 
@@ -17,7 +17,10 @@ function formatChatDate(dateStr: string): string {
 }
 
 const ChatSidebar: React.FC = () => {
-  const { chats, activeChatId, isLoadingChats, hasMoreChats, selectChat, createNewChat, deleteChat, loadMoreChats, setIsMobileMenuOpen } = useChat();
+  const { 
+    chats, activeChatId, isLoadingChats, hasMoreChats, selectChat, 
+    createNewChat, deleteChat, loadMoreChats, setIsMobileMenuOpen, isGuest 
+  } = useChat();
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [deleteModalChat, setDeleteModalChat] = useState<ChatSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -90,6 +93,7 @@ const ChatSidebar: React.FC = () => {
             size="sm"
             fullWidth
             className="!border-secondary/25 !text-secondary !font-bold gap-1.5"
+            disabled={isGuest}
             onClick={() => {
               createNewChat();
               setIsMobileMenuOpen(false);
@@ -113,7 +117,15 @@ const ChatSidebar: React.FC = () => {
       </div>
 
       {/* Recent Chats (Scrollable Area) */}
-      <div className="flex-1 min-h-0 flex flex-col pt-4">
+      <div className="flex-1 min-h-0 flex flex-col pt-4 relative">
+        {isGuest && (
+          <div className="absolute inset-0 z-50 backdrop-blur-[2px] bg-surface/40 flex flex-col items-center justify-center p-6 text-center">
+            <Lock className="w-10 h-10 text-secondary/40 mb-4" />
+            <p className="text-sm font-bold text-primary mb-2">History Locked</p>
+            <p className="text-[11px] text-on-surface-variant/60 mb-6 leading-relaxed">Login to save your celestial conversations and access them later.</p>
+            <Button href="/login" size="sm" className="gold-gradient w-full">Login to Unlock</Button>
+          </div>
+        )}
         <div className="px-3.5 mb-1 shrink-0 flex items-center justify-between">
           <SidebarSectionLabel>RECENT CHATS</SidebarSectionLabel>
         </div>

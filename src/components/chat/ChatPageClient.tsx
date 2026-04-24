@@ -14,9 +14,20 @@ import { useAuth } from '@/context/AuthContext';
 const ChatPageClient: React.FC = () => {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const { isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, createNewChat, selectChat } = useChat();
+  const { 
+    isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
+    createNewChat, selectChat, isGuest, enableGuestMode, guestTimeRemaining, isGuestExpired 
+  } = useChat();
 
   React.useEffect(() => {
+    // 1. Handle Guest Mode from URL
+    const mode = searchParams.get('mode');
+    if (mode === 'guest') {
+      enableGuestMode();
+      return;
+    }
+
+    // 2. Handle Logged-In User
     if (!user?.email) return;
 
     // Check if there's a chat ID in the URL
@@ -26,17 +37,25 @@ const ChatPageClient: React.FC = () => {
       return;
     }
 
-    // Check for pending message and auto-create chat only if message exists
+    // Check for pending message and auto-create chat
     const pendingMsg = localStorage.getItem('astranavi_pending_message');
     if (pendingMsg && pendingMsg.trim()) {
       localStorage.removeItem('astranavi_pending_message');
       createNewChat(pendingMsg);
     }
-    // If no chatId and no pending message, just show empty chat page (user can select from sidebar or start new)
-  }, [user, searchParams, createNewChat, selectChat]);
+  }, [user, searchParams, createNewChat, selectChat, enableGuestMode]);
 
   return (
     <div className="chat-layout relative overflow-hidden">
+      {/* Guest Banner */}
+      {isGuest && (
+        <div className="absolute top-0 left-0 right-0 z-[100] h-10 bg-amber-500/90 backdrop-blur-md flex items-center justify-center gap-4 shadow-lg border-b border-white/10">
+          <div className="text-white text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+             Preview Mode ✦ Identity Required for Vedic Analysis
+          </div>
+          <a href="/login" className="px-3 py-1 bg-white text-amber-600 rounded-full text-[10px] font-bold hover:bg-gray-100 transition-colors shadow-sm">Login Now</a>
+        </div>
+      )}
       {/* Background Glow Elements */}
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
@@ -58,7 +77,7 @@ const ChatPageClient: React.FC = () => {
       </div>
 
       {/* Center — Chat Area */}
-      <div className="chat-main-area relative z-10">
+      <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-10' : ''}`}>
         <ChatHeader />
         <ChatMessages />
         <ChatInput />

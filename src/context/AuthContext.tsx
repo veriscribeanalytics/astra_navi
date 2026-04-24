@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const logout = async (callbackUrl: string = '/') => {
+    const logout = async (callbackUrl: string = '/?logout=success') => {
         await signOut({ callbackUrl });
     };
 

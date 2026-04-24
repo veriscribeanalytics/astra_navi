@@ -157,7 +157,7 @@ const item = {
 
 export default function BlogsPage() {
     return (
-        <div className="min-h-screen bg-[var(--bg)] pt-24 safe-bottom-buffer px-4 relative overflow-hidden">
+        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] safe-bottom-buffer px-4 relative overflow-hidden">
             {/* Animated Background Orbs */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] animate-pulse"></div>

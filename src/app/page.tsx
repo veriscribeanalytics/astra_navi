@@ -1,12 +1,32 @@
 "use client";
 
+import React, { useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import LandingPage from "@/components/home/LandingPage";
 import DashboardHome from "@/components/dashboard/DashboardHome";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from '@/hooks';
 
 export default function Home() {
   const { isLoggedIn, isLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { success, ToastContainer } = useToast();
   
+  useEffect(() => {
+    const loginStatus = searchParams.get('login');
+    const logoutStatus = searchParams.get('logout');
+    
+    if (loginStatus === 'success') {
+      success("Welcome back, Seeker.");
+      // Clear param without reload
+      router.replace('/');
+    } else if (logoutStatus === 'success') {
+      success("Your path remains, even in departure.");
+      router.replace('/');
+    }
+  }, [searchParams, success, router]);
+
   if (isLoading) {
     return (
       <div className="flex-grow flex items-center justify-center min-h-[60vh]">
@@ -17,6 +37,7 @@ export default function Home() {
 
   return (
     <main className="flex-grow">
+       {ToastContainer}
        {isLoggedIn ? <DashboardHome /> : <LandingPage />}
     </main>
   );

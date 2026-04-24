@@ -7,7 +7,7 @@ import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import TopicPill from '@/components/ui/TopicPill';
 import { useAuth } from '@/context/AuthContext';
 import { useChat } from '@/context/ChatContext';
-import { X } from 'lucide-react';
+import { X, Lock } from 'lucide-react';
 
 const topicPills = [
   { icon: '💼', label: 'Career & Finance' },
@@ -42,7 +42,10 @@ const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
 
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
-  const { activeChat, activeChatId, inputText, setInputText, setIsRightPanelOpen, createNewChat, sendMessage } = useChat();
+  const { 
+    activeChat, activeChatId, inputText, setInputText, 
+    setIsRightPanelOpen, createNewChat, sendMessage, isGuest 
+  } = useChat();
 
   // Profile fields from DB — show "—" if missing
   const profileFields: [string, string][] = [
@@ -55,6 +58,7 @@ const ChatDetailPanel: React.FC = () => {
   ];
 
   const handleTopicClick = async (topicLabel: string) => {
+    if (isGuest) return; // Prevent guest from using topic pills for new chats
     // Set the input text
     setInputText(topicLabel);
     
@@ -62,13 +66,18 @@ const ChatDetailPanel: React.FC = () => {
     if (!activeChatId || activeChatId.startsWith('temp-')) {
       await createNewChat(topicLabel);
     }
-    // If there's an active chat, just set the input (user can send manually)
   };
 
   return (
     <>
       {/* My Birth Chart Panel — Data from DB */}
-      <div className="mb-1">
+      <div className="mb-1 relative">
+        {isGuest && (
+          <div className="absolute inset-0 z-50 backdrop-blur-[2px] bg-surface/40 flex flex-col items-center justify-center p-4 text-center rounded-xl">
+             <Lock className="w-8 h-8 text-secondary/40 mb-2" />
+             <p className="text-[10px] font-bold text-primary">Identity Required</p>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-2">
           <SidebarSectionLabel variant="gold">MY BIRTH CHART</SidebarSectionLabel>
           <button 

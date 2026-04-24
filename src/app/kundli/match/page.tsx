@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function MatchPage() {
   return (
-    <div className="min-h-screen bg-[var(--bg)] py-20 px-4">
+    <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] py-10 sm:py-20 px-4">
       <MatchClient />
     </div>
   );
