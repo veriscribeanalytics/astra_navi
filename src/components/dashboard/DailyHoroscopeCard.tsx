@@ -6,7 +6,72 @@ import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Briefcase, Activity, DollarSign, X, MessageSquare, ArrowRight, TrendingUp, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-// ... (interfaces and MiniChart remain same)
+interface HoroscopeData {
+    sign?: string; date?: string; overall_score?: number; mood?: string;
+    lucky_color?: string; lucky_number?: number; career?: string; love?: string;
+    health?: string; finance?: string; tip?: string; dominant_planet?: string;
+}
+
+interface ForecastDay {
+    date: string; is_today: boolean; score: number; text: string;
+    dominant_planet: string; 
+    personalized_alerts: (string | { technical: string; simple: string })[];
+    transits?: Record<string, { sign: string; house_from_moon: number; house_from_lagna: number }>;
+}
+
+interface ForecastData {
+    area: string; days: ForecastDay[];
+    summary: { best_day: string; worst_day: string; average_score: number; trend: string; };
+}
+
+interface ModalData {
+    label: string; score: number; info: string; icon: React.ReactNode;
+    color: string; bg: string; colorHex: string; area: string;
+}
+
+// Mini sparkline SVG
+function MiniChart({ days, colorHex, activeDate, onSelect }: { days: ForecastDay[]; colorHex: string; activeDate?: string; onSelect?: (date: string) => void }) {
+    const h = 60, w = 220;
+    const points = days.map((d, i) => ({ x: (i / (days.length - 1)) * w, y: h - (d.score / 100) * h }));
+    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const areaD = `M 0 ${h} ${points.map(p => `L ${p.x} ${p.y}`).join(' ')} L ${w} ${h} Z`;
+
+    return (
+        <svg viewBox={`-10 -10 ${w + 20} ${h + 40}`} className="w-full h-auto overflow-visible">
+            <defs>
+                <linearGradient id={`area-${colorHex.replace('#','')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
+                    <stop offset="100%" stopColor={colorHex} stopOpacity="0.02" />
+                </linearGradient>
+            </defs>
+            {[25, 50, 75].map(v => (
+                <line key={v} x1="0" y1={h - (v / 100) * h} x2={w} y2={h - (v / 100) * h} stroke="white" strokeOpacity="0.05" strokeWidth="0.5" />
+            ))}
+            <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
+            <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            {points.map((p, i) => {
+                const d = days[i];
+                const isSelected = activeDate === d.date;
+                return (
+                    <g key={i}>
+                        {/* Static Point Representation */}
+                        {(d.is_today || isSelected) && <circle cx={p.x} cy={p.y} r="5" fill={colorHex} opacity={isSelected ? 0.15 : 0.08} />}
+                        <circle cx={p.x} cy={p.y} r={d.is_today ? 3 : 1.5} 
+                            fill={d.is_today || isSelected ? colorHex : 'transparent'} 
+                            stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
+                        
+                        <text x={p.x} y={p.y - 10} textAnchor="middle" 
+                            fill={isSelected ? colorHex : 'white'} 
+                            fillOpacity={isSelected ? 1 : 0.25} 
+                            fontSize="7" fontWeight="bold">{d.score}</text>
+                        
+                        {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 50} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
+                    </g>
+                );
+            })}
+        </svg>
+    );
+}
 
 export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string; isGeneral?: boolean }) {
     const router = useRouter();
@@ -316,12 +381,27 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                                                 <span className="text-[10px] font-bold text-foreground/30 px-2 py-1 rounded-md bg-surface-variant/20 border border-outline-variant/5">🪐 {activeDay.dominant_planet}</span>
                                                             </div>
                                                             <div className="space-y-3">
-                                                                {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => (
-                                                                    <div key={i} className="flex items-start gap-3">
-                                                                        <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: alert.includes('challenging') || alert.includes('mindful') ? '#fbbf24' : activeModal.colorHex }} />
-                                                                        <span className="text-[12px] text-foreground/60 leading-snug">{alert}</span>
-                                                                    </div>
-                                                                ))}
+                                                                {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => {
+                                                                    const isObject = typeof alert === 'object' && alert !== null;
+                                                                    const simpleText = isObject ? alert.simple : alert;
+                                                                    const techText = isObject ? alert.technical : null;
+                                                                    const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
+                                                                    
+                                                                    return (
+                                                                        <div key={i} className="flex items-start gap-3 group/alert">
+                                                                            <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" 
+                                                                                style={{ backgroundColor: isWarning ? '#fbbf24' : activeModal.colorHex }} />
+                                                                            <div className="flex flex-col min-w-0">
+                                                                                <span className="text-[12px] text-foreground/60 leading-snug">{simpleText}</span>
+                                                                                {techText && (
+                                                                                    <span className="text-[10px] text-foreground/25 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover/alert:opacity-100 transition-opacity duration-300">
+                                                                                        {techText}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
                                                     )}

@@ -10,7 +10,7 @@ interface DayForecast {
     score: number;
     text: string;
     dominant_planet: string;
-    personalized_alerts: string[];
+    personalized_alerts: (string | { technical: string; simple: string })[];
     transits: Record<string, { sign: string; house_from_moon: number; house_from_lagna: number }>;
 }
 
@@ -306,12 +306,26 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                                     {/* Alerts */}
                                     {day.personalized_alerts.length > 0 && (
                                         <div className="flex flex-col gap-1.5 mb-3">
-                                            {day.personalized_alerts.map((alert, i) => (
-                                                <div key={i} className="flex items-start gap-2 text-[11px]">
-                                                    <Info className={`w-3 h-3 mt-0.5 shrink-0 ${alert.includes('challenging') ? 'text-amber-400' : 'text-green-400/70'}`} />
-                                                    <span className="text-foreground/45 leading-snug">{alert}</span>
-                                                </div>
-                                            ))}
+                                            {day.personalized_alerts.map((alert, i) => {
+                                                const isObject = typeof alert === 'object' && alert !== null;
+                                                const simpleText = isObject ? alert.simple : alert;
+                                                const techText = isObject ? alert.technical : null;
+                                                const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
+                                                
+                                                return (
+                                                    <div key={i} className="flex items-start gap-2 text-[11px] group/alert">
+                                                        <Info className={`w-3 h-3 mt-0.5 shrink-0 ${isWarning ? 'text-amber-400' : 'text-green-400/70'}`} />
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-foreground/45 leading-snug">{simpleText}</span>
+                                                            {techText && (
+                                                                <span className="text-[9px] text-foreground/20 font-bold uppercase tracking-widest mt-0.5 opacity-0 group-hover/alert:opacity-100 transition-opacity duration-300">
+                                                                    {techText}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
 
