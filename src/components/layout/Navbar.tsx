@@ -31,12 +31,7 @@ const getNavSections = (isLoggedIn: boolean) => {
                         icon: <LayoutDashboard className="w-4 h-4" />,
                         desc: "Your cosmic overview and active insights."
                     },
-                    { 
-                        label: "My Daily Predictions", 
-                        href: "/", 
-                        icon: <Sparkles className="w-4 h-4" />,
-                        desc: "Personalized scores for career and love."
-                    },
+
                     {
                         label: "Kundli Matching",
                         href: "/kundli/match",
@@ -169,12 +164,7 @@ const getNavSections = (isLoggedIn: boolean) => {
                     icon: <Sparkles className="w-4 h-4" />,
                     desc: "Explore Vedic zodiac signs and traits."
                 },
-                { 
-                    label: "Daily Predictions", 
-                    href: "/", 
-                    icon: <Sparkles className="w-4 h-4" />,
-                    desc: "Check your luck, health, and finance."
-                },
+
                 { 
                     label: "Kundli Matching", 
                     href: "/kundli/match", 

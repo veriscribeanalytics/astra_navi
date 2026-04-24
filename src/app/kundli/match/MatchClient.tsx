@@ -94,12 +94,31 @@ export default function MatchClient() {
     }
   };
 
-  const viewHistoryItem = (item: any) => {
-    setMatchResult(item.details);
-    setPerson1(item.person1_details);
-    setPerson2(item.person2_details);
-    setPhase('result');
-    setActiveTab('match');
+  const viewHistoryItem = async (item: any) => {
+    try {
+      setPhase('loading');
+      setLoadingMessage("Retrieving from cosmic archives...");
+      
+      const res = await fetch(`/api/match/${item.id}`);
+      const data = await res.json();
+      
+      if (res.ok) {
+        // The individual record might be nested differently, backend dependent
+        // Usually returns the full result object directly or in a 'details' field
+        const result = data.details || data;
+        setMatchResult(result);
+        setPerson1(data.person1_details || item.person1_details);
+        setPerson2(data.person2_details || item.person2_details);
+        setPhase('result');
+        setActiveTab('match');
+      } else {
+        error("Failed to retrieve the full record.");
+        setPhase('input');
+      }
+    } catch (err) {
+      error("A disruption occurred in the archive retrieval.");
+      setPhase('input');
+    }
   };
 
   const [person1, setPerson1] = useState<PersonDetails>({
@@ -489,7 +508,7 @@ export default function MatchClient() {
                           isCompatible={matchResult.mangal_dosha?.is_compatible ?? true}
                         />
                         <AdditionalDoshas 
-                          doshas={matchResult.additional_doshas}
+                          doshas={matchResult.additional_doshas || []}
                         />
                      </div>
                   </div>

@@ -15,7 +15,7 @@ interface AdditionalDoshasProps {
   doshas: DoshaCheck[];
 }
 
-export default function AdditionalDoshas({ doshas }: AdditionalDoshasProps) {
+export default function AdditionalDoshas({ doshas = [] }: AdditionalDoshasProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
@@ -35,7 +35,7 @@ export default function AdditionalDoshas({ doshas }: AdditionalDoshasProps) {
       </div>
 
       <div className="divide-y divide-outline-variant/10">
-        {doshas.map((dosha, idx) => (
+        {doshas?.map((dosha, idx) => (
           <div key={idx} className="group">
             <div 
               className="p-5 flex items-center justify-between cursor-pointer hover:bg-surface transition-colors"
