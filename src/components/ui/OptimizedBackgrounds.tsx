@@ -56,7 +56,7 @@ export default function OptimizedBackgrounds() {
       {/* Particles - Dark Mode */}
       <div className="fixed inset-0 z-[-5] pointer-events-none hidden dark:block">
         <Particles
-          particleColors={["#c8880a", "#f5a623", "#faf7f2"]}
+          particleColors={["var(--secondary)", "var(--flare-gold)", "var(--foreground)"]}
           particleCount={device.particleCount}
           particleSpread={particleSpread}
           speed={isPaused ? 0 : particleSpeed}
@@ -70,7 +70,7 @@ export default function OptimizedBackgrounds() {
       {/* Particles - Light Mode */}
       <div className="fixed inset-0 z-[-5] pointer-events-none block dark:hidden">
         <Particles
-          particleColors={["#E6D8E0", "#d1b8c6", "#c8880a"]}
+          particleColors={["var(--outline-variant)", "var(--accent)", "var(--secondary)"]}
           particleCount={device.particleCount}
           particleSpread={particleSpread + 2}
           speed={isPaused ? 0 : particleSpeed * 0.8}

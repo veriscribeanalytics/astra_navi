@@ -3,22 +3,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Renderer, Camera, Geometry, Program, Mesh } from 'ogl';
 
-const defaultColors = ['#ffffff', '#ffffff', '#ffffff'];
+import { colorToRgb } from '@/utils/colorUtils';
 
-const hexToRgb = (hex: string) => {
-  hex = hex.replace(/^#/, '');
-  if (hex.length === 3) {
-    hex = hex
-      .split('')
-      .map(c => c + c)
-      .join('');
-  }
-  const int = parseInt(hex, 16);
-  const r = ((int >> 16) & 255) / 255;
-  const g = ((int >> 8) & 255) / 255;
-  const b = (int & 255) / 255;
-  return [r, g, b];
-};
+const defaultColors = ['#ffffff', '#ffffff', '#ffffff'];
 
 const vertex = /* glsl */ `
   attribute vec3 position;
@@ -196,7 +183,7 @@ const Particles: React.FC<ParticlesProps> = ({
       const r = Math.cbrt(Math.random());
       positions.set([x * r, y * r, z * r], i * 3);
       randoms.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
-      const col = hexToRgb(palette[Math.floor(Math.random() * palette.length)] || '#ffffff');
+      const col = colorToRgb(palette[Math.floor(Math.random() * palette.length)] || '#ffffff');
       colors.set(new Float32Array(col), i * 3);
     }
 

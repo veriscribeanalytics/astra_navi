@@ -11,7 +11,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from "@/utils/personalizedQuestions";
 import { useGreeting } from "@/hooks/useGreeting";
@@ -35,13 +35,14 @@ function SkeletonPulse({ className = "" }: { className?: string }) {
 
 // ─── Main Component ─────────────────────────────
 export default function DashboardHome() {
-    const { user, refreshUser } = useAuth();
+    const { user, refreshUser, isLoading: userLoading } = useAuth();
     const router = useRouter();
     
     // States
     const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
     const [kundliLoading, setKundliLoading] = useState(true);
     const greeting = useGreeting();
+    const hasAnalyzedRef = useRef<string | null>(null);
 
     // Memos
     const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
@@ -52,6 +53,9 @@ export default function DashboardHome() {
 
     // Effects
     useEffect(() => {
+        if (!user?.email || hasAnalyzedRef.current === user.email) return;
+        
+        hasAnalyzedRef.current = user.email;
         setKundliLoading(true);
         fetch('/api/analyze-full', {
             method: 'POST',

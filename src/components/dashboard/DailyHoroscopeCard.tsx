@@ -45,7 +45,7 @@ function MiniChart({ days, colorHex, activeDate, onSelect }: { days: ForecastDay
                 </linearGradient>
             </defs>
             {[25, 50, 75].map(v => (
-                <line key={v} x1="0" y1={h - (v / 100) * h} x2={w} y2={h - (v / 100) * h} stroke="white" strokeOpacity="0.05" strokeWidth="0.5" />
+                <line key={v} x1="0" y1={h - (v / 100) * h} x2={w} y2={h - (v / 100) * h} stroke="var(--color-foreground)" strokeOpacity="0.1" strokeWidth="0.5" />
             ))}
             <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
             <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -61,8 +61,8 @@ function MiniChart({ days, colorHex, activeDate, onSelect }: { days: ForecastDay
                             stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
                         
                         <text x={p.x} y={p.y - 10} textAnchor="middle" 
-                            fill={isSelected ? colorHex : 'white'} 
-                            fillOpacity={isSelected ? 1 : 0.25} 
+                            fill={isSelected ? colorHex : 'var(--color-foreground)'} 
+                            fillOpacity={isSelected ? 1 : 0.4} 
                             fontSize="7" fontWeight="bold">{d.score}</text>
                         
                         {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 50} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
@@ -73,7 +73,10 @@ function MiniChart({ days, colorHex, activeDate, onSelect }: { days: ForecastDay
     );
 }
 
-export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string; isGeneral?: boolean }) {
+// ─── Module Level Cache (Persists across re-mounts) ──────────────────
+const GLOBAL_FETCH_CACHE = new Set<string>();
+
+export default function DailyHoroscopeCard({ sign, isGeneral, userLoading }: { sign?: string; isGeneral?: boolean; userLoading?: boolean }) {
     const router = useRouter();
     const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -87,7 +90,6 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
     const [realScores, setRealScores] = useState<Record<string, number>>({});
     
     // Optimization Refs
-    const fetchedAreasRef = useRef<Set<string>>(new Set());
     const lastSignRef = useRef<string | undefined>('');
 
     const today = new Date();
@@ -95,6 +97,8 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
     const dayName = today.toLocaleDateString('en-IN', { weekday: 'long' });
 
     useEffect(() => {
+        if (userLoading) return;
+
         (async () => {
             try {
                 setLoading(true);
@@ -104,9 +108,8 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                 if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Failed'); }
                 const data = await res.json();
                 
-                // If sign changed, clear the fetched areas cache
+                // If sign changed, clear local scores
                 if (sign !== lastSignRef.current) {
-                    fetchedAreasRef.current.clear();
                     setRealScores({});
                     lastSignRef.current = sign;
                 }
@@ -116,54 +119,79 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
             } catch (err: any) { setError(err.message); }
             finally { setLoading(false); }
         })();
-    }, [sign, isGeneral]);
+    }, [sign, isGeneral, userLoading]);
 
     useEffect(() => {
+        if (userLoading) return;
         if (!loading && horoscope) {
-            const t = setTimeout(() => { 
-                setShowContent(true); 
-                setAnimatedScore(horoscope.overall_score || 0); 
-            }, 100);
+            // Set initial animated score from basic horoscope while we fetch detailed ones
+            setAnimatedScore(horoscope.overall_score || 0);
             
-            // Fetch real scores for metrics in parallel, but ONLY if not already fetched for this sign
-            const areas = ['career', 'health', 'love', 'finance'];
-            areas.forEach(area => {
-                if (fetchedAreasRef.current.has(area)) return;
-                
-                fetchedAreasRef.current.add(area);
-                fetch(`/api/forecast/${area}`)
-                    .then(r => r.ok ? r.json() : null)
-                    .then(data => {
-                        if (data?.days) {
-                            const todayScore = data.days.find((d: any) => d.is_today)?.score;
-                            if (todayScore !== undefined) {
-                                setRealScores(prev => ({ ...prev, [area]: todayScore }));
+            const t = setTimeout(() => { setShowContent(true); }, 100);
+            
+            // Key to track uniqueness of this fetch attempt (sign + date)
+            const fetchKey = `${horoscope.sign || 'general'}-${new Date().toISOString().split('T')[0]}`;
+            
+            // Prevent redundant fetches using GLOBAL cache
+            if (GLOBAL_FETCH_CACHE.has(fetchKey)) return;
+            GLOBAL_FETCH_CACHE.add(fetchKey);
+
+            // Fetch real TODAY % scores for all metrics in parallel
+            const areas = ['general', 'career', 'health', 'love', 'finance'];
+            
+            Promise.allSettled(
+                areas.map(area => 
+                    fetch(`/api/forecast/${area}`)
+                        .then(r => r.ok ? r.json() : null)
+                        .catch(() => null)
+                )
+            ).then(results => {
+                const updates: Record<string, number> = {};
+                let newGeneralScore: number | null = null;
+
+                results.forEach((result, idx) => {
+                    if (result.status === 'fulfilled' && result.value) {
+                        const area = areas[idx];
+                        const data = result.value;
+                        if (Array.isArray(data.days)) {
+                            const todayStr = new Date().toISOString().split('T')[0];
+                            const todayEntry = data.days.find((d: any) => 
+                                d.is_today || d.date === todayStr || d.date === data.today
+                            );
+                            
+                            const todayScore = todayEntry?.score;
+                            if (typeof todayScore === 'number' || (typeof todayScore === 'string' && !isNaN(parseInt(todayScore)))) {
+                                const numericScore = Number(todayScore);
+                                updates[area] = numericScore;
+                                if (area === 'general') newGeneralScore = numericScore;
                             }
                         }
-                    })
-                    .catch(() => {
-                        // On error, remove from set so it can be retried if component remounts
-                        fetchedAreasRef.current.delete(area);
-                    });
+                    }
+                });
+
+                if (Object.keys(updates).length > 0) {
+                    setRealScores(prev => ({ ...prev, ...updates }));
+                    if (newGeneralScore !== null) setAnimatedScore(newGeneralScore);
+                }
             });
 
             return () => clearTimeout(t);
         }
     }, [loading, horoscope]);
 
-
-    const score = horoscope?.overall_score || 50;
+    // Priority: 1. Real General Score, 2. Basic Horoscope Score, 3. Zero
+    const score = realScores.general ?? horoscope?.overall_score ?? 0;
     const scoreHex = score >= 80 ? '#D4A017' : score >= 60 ? '#E8832A' : '#E84A2A';
     const circ = 2 * Math.PI * 32;
     const prog = circ - (animatedScore / 100) * circ;
     const scoreColor = (s: number) => s >= 75 ? 'text-green-500' : s >= 50 ? 'text-yellow-500' : 'text-orange-500';
 
     const metrics = useMemo(() => [
-        { label: "Career", score: realScores.career ?? Math.min(100, Math.max(0, score + 5)), info: horoscope?.career || 'Keep pushing for your goals.', icon: <Briefcase className="w-5 h-5" />, color: "text-orange-500", bg: "bg-orange-500/10", colorHex: "#f97316", area: "career" },
-        { label: "Health", score: realScores.health ?? Math.min(100, Math.max(0, score - 3)), info: horoscope?.health || 'Vitality is on your side.', icon: <Activity className="w-5 h-5" />, color: "text-green-500", bg: "bg-green-500/10", colorHex: "#22c55e", area: "health" },
-        { label: "Love", score: realScores.love ?? Math.min(100, Math.max(0, score + 8)), info: horoscope?.love || 'Harmony flows through relationships.', icon: <Heart className="w-5 h-5" />, color: "text-pink-500", bg: "bg-pink-500/10", colorHex: "#ec4899", area: "love" },
-        { label: "Finance", score: realScores.finance ?? Math.min(100, Math.max(0, score - 5)), info: horoscope?.finance || 'Growth opportunities emerging.', icon: <DollarSign className="w-5 h-5" />, color: "text-amber-500", bg: "bg-amber-500/10", colorHex: "#f59e0b", area: "finance" },
-    ], [score, horoscope, realScores]);
+        { label: "Career", score: realScores.career ?? 0, info: horoscope?.career || 'Loading career forecast...', icon: <Briefcase className="w-5 h-5" />, color: "text-orange-500", bg: "bg-orange-500/10", colorHex: "#f97316", area: "career" },
+        { label: "Health", score: realScores.health ?? 0, info: horoscope?.health || 'Loading health forecast...', icon: <Activity className="w-5 h-5" />, color: "text-green-500", bg: "bg-green-500/10", colorHex: "#22c55e", area: "health" },
+        { label: "Love", score: realScores.love ?? 0, info: horoscope?.love || 'Loading love forecast...', icon: <Heart className="w-5 h-5" />, color: "text-pink-500", bg: "bg-pink-500/10", colorHex: "#ec4899", area: "love" },
+        { label: "Finance", score: realScores.finance ?? 0, info: horoscope?.finance || 'Loading finance forecast...', icon: <DollarSign className="w-5 h-5" />, color: "text-amber-500", bg: "bg-amber-500/10", colorHex: "#f59e0b", area: "finance" },
+    ], [horoscope, realScores]);
 
     const luckyColorHex = useMemo(() => {
         const lc = horoscope?.lucky_color?.toLowerCase() || '';
@@ -216,7 +244,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                             <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.1em] leading-none mb-1">{dayName}</span>
                             <span className="text-[11px] font-headline font-bold text-foreground/50 leading-none">{dateString}</span>
                         </div>
-                        <button onClick={() => openModal({ label: "Overall", score, info: horoscope.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: "text-secondary", bg: "bg-secondary/10", colorHex: scoreHex, area: "general" })}
+                        <button onClick={() => openModal({ label: "General", score, info: horoscope.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: "text-secondary", bg: "bg-secondary/10", colorHex: scoreHex, area: "general" })}
                             className="relative w-16 h-16 sm:w-18 sm:h-18 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform group">
                             <svg className="w-full h-full -rotate-90" viewBox="0 0 72 72">
                                 <circle cx="36" cy="36" r="32" fill="none" stroke="currentColor" strokeWidth="6" className="text-surface-variant/20" />
@@ -224,7 +252,7 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
                                 <span className={`text-xl font-bold leading-none ${scoreColor(score)}`}>{score}</span>
-                                <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider mt-0.5">Overall</span>
+                                <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider mt-0.5">General</span>
                             </div>
                             <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-secondary/20 transition-colors" />
                         </button>
@@ -347,40 +375,40 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                     return (
                                         <>
                                             {/* ─── LEFT PANEL: Context & Action ─── */}
-                                            <div className="w-full lg:w-[35%] shrink-0 p-8 lg:p-10 flex flex-col relative overflow-y-auto scrollbar-hide lg:border-r border-outline-variant/10">
+                                            <div className="w-full lg:w-[35%] lg:shrink-0 p-6 sm:p-8 lg:p-10 flex flex-col relative overflow-y-auto scrollbar-hide lg:border-r border-outline-variant/10 max-h-[40%] lg:max-h-full">
                                                 <div className="absolute top-0 left-0 w-[150%] h-64 blur-[100px] opacity-10 pointer-events-none" style={{ backgroundColor: activeModal.colorHex }} />
                                                 
                                                 <div className="relative z-10 flex flex-col h-full">
-                                                    <div className="flex items-center gap-4 mb-6">
-                                                        <div className={`w-16 h-16 rounded-2xl ${activeModal.bg} flex items-center justify-center shrink-0 shadow-lg shadow-black/20`} style={{ color: activeModal.colorHex }}>
+                                                    <div className="flex items-center gap-4 mb-4 sm:mb-6">
+                                                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${activeModal.bg} flex items-center justify-center shrink-0 shadow-lg shadow-black/20`} style={{ color: activeModal.colorHex }}>
                                                             {activeModal.icon}
                                                         </div>
                                                         <div>
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h3 className="text-[12px] font-bold text-foreground/40 uppercase tracking-[0.3em]">{activeModal.label} Forecast</h3>
-                                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-variant/20 border border-outline-variant/5 text-foreground/30 uppercase tracking-tighter">
+                                                            <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+                                                                <h3 className="text-[10px] sm:text-[12px] font-bold text-foreground/40 uppercase tracking-[0.3em]">{activeModal.label}</h3>
+                                                                <span className="text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-variant/20 border border-outline-variant/5 text-foreground/30 uppercase tracking-tighter">
                                                                     {activeDay.is_today ? 'Today' : fmtDay(activeDay.date)}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-baseline gap-2">
-                                                                <span className="text-5xl font-headline font-bold leading-none" style={{ color: activeModal.colorHex }}>{activeDay.score}%</span>
+                                                                <span className="text-3xl sm:text-5xl font-headline font-bold leading-none" style={{ color: activeModal.colorHex }}>{activeDay.score}%</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <p className="text-sm sm:text-base font-body leading-relaxed text-foreground/80 mb-8">{activeModal.info}</p>
+                                                    <p className="text-xs sm:text-sm font-body leading-relaxed text-foreground/80 mb-4 sm:mb-8">{activeModal.info}</p>
 
                                                     {/* Alerts for selected Day */}
                                                     {activeDay.personalized_alerts?.length > 0 && (
-                                                        <div className="mb-auto p-5 rounded-2xl bg-[#0a0c10] border border-outline-variant/10 shadow-inner">
-                                                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-outline-variant/10">
+                                                        <div className="mb-4 sm:mb-auto p-4 sm:p-5 rounded-2xl bg-surface-variant/10 border border-outline-variant/10 shadow-inner">
+                                                            <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-outline-variant/10">
                                                                 <div className="flex items-center gap-2">
-                                                                    <Info className="w-4 h-4" style={{ color: activeModal.colorHex }} />
-                                                                    <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-widest">{activeDay.is_today ? 'Today' : fmtDay(activeDay.date)}&apos;s Alerts</span>
+                                                                    <Info className="w-3.5 h-3.5" style={{ color: activeModal.colorHex }} />
+                                                                    <span className="text-[10px] sm:text-[11px] font-bold text-foreground/50 uppercase tracking-widest">{activeDay.is_today ? 'Today' : fmtDay(activeDay.date)}&apos;s Alerts</span>
                                                                 </div>
-                                                                <span className="text-[10px] font-bold text-foreground/30 px-2 py-1 rounded-md bg-surface-variant/20 border border-outline-variant/5">🪐 {activeDay.dominant_planet}</span>
+                                                                <span className="text-[9px] sm:text-[10px] font-bold text-foreground/30 px-1.5 py-0.5 rounded-md bg-surface-variant/20 border border-outline-variant/5">🪐 {activeDay.dominant_planet}</span>
                                                             </div>
-                                                            <div className="space-y-3">
+                                                            <div className="space-y-2 sm:space-y-3">
                                                                 {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => {
                                                                     const isObject = typeof alert === 'object' && alert !== null;
                                                                     const simpleText = isObject ? alert.simple : alert;
@@ -388,13 +416,13 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                                                     const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
                                                                     
                                                                     return (
-                                                                        <div key={i} className="flex items-start gap-3 group/alert">
+                                                                        <div key={i} className="flex items-start gap-2 sm:gap-3 group/alert">
                                                                             <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" 
                                                                                 style={{ backgroundColor: isWarning ? '#fbbf24' : activeModal.colorHex }} />
                                                                             <div className="flex flex-col min-w-0">
-                                                                                <span className="text-[12px] text-foreground/60 leading-snug">{simpleText}</span>
+                                                                                <span className="text-[11px] sm:text-[12px] text-foreground/60 leading-snug">{simpleText}</span>
                                                                                 {techText && (
-                                                                                    <span className="text-[10px] text-foreground/25 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover/alert:opacity-100 transition-opacity duration-300">
+                                                                                    <span className="text-[9px] sm:text-[10px] text-foreground/25 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover/alert:opacity-100 transition-opacity duration-300">
                                                                                         {techText}
                                                                                     </span>
                                                                                 )}
@@ -407,34 +435,34 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                                     )}
 
                                                     <button onClick={() => handleConsult(activeModal.label)}
-                                                        className="w-full mt-8 flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-secondary text-background font-bold text-base hover:bg-secondary/90 transition-all duration-300 hover:shadow-xl hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0">
-                                                        <MessageSquare className="w-5 h-5" /> Consult Navi for details <ArrowRight className="w-5 h-5" />
+                                                        className="w-full mt-4 sm:mt-8 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-secondary text-background font-bold text-sm sm:text-base hover:bg-secondary/90 transition-all duration-300 hover:shadow-xl hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0">
+                                                        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> Consult Navi <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                                     </button>
                                                 </div>
                                             </div>
 
                                             {/* ─── RIGHT PANEL: Data & Interactive Grid ─── */}
-                                            <div className="w-full lg:w-[65%] shrink-0 bg-[#06080a] flex flex-col min-h-0 relative">
+                                            <div className="w-full lg:w-[65%] flex-1 lg:shrink-0 bg-surface-variant/5 flex flex-col min-h-0 relative overflow-hidden">
                                                 <>
                                                     {/* Top Chart Section */}
-                                                        <div className="p-8 pb-4 shrink-0">
-                                                            <div className="flex items-center justify-between mb-4">
-                                                                <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2">
-                                                                    <TrendingUp className="w-4 h-4" style={{ color: activeModal.colorHex }} /> 7-Day Trajectory
+                                                        <div className="p-4 sm:p-8 pb-2 sm:pb-4 shrink-0">
+                                                            <div className="flex items-center justify-between mb-2 sm:mb-4">
+                                                                <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2">
+                                                                    <TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4" style={{ color: activeModal.colorHex }} /> 7-Day Trajectory
                                                                 </span>
-                                                                <div className="flex gap-3">
-                                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/10 text-[10px] font-bold bg-surface">
+                                                                <div className="flex gap-2 sm:gap-3">
+                                                                    <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/10 text-[10px] font-bold bg-surface">
                                                                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeModal.colorHex }} />
                                                                         <span className="text-foreground/40">Peak:</span>
                                                                         <span style={{ color: activeModal.colorHex }}>{fmtDate(forecast.summary.best_day)}</span>
                                                                     </div>
-                                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/10 text-[10px] font-bold bg-surface">
+                                                                    <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-outline-variant/10 text-[9px] sm:text-[10px] font-bold bg-surface">
                                                                         <span className="text-foreground/40">Trend:</span>
                                                                         <span className="text-foreground/70 capitalize">{forecast.summary.trend === 'improving' ? '📈' : forecast.summary.trend === 'declining' ? '📉' : '➡️'} {forecast.summary.trend}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="h-28 w-full relative px-6 sm:px-8">
+                                                            <div className="h-20 sm:h-28 w-full relative px-4 sm:px-8">
                                                                 <MiniChart 
                                                                     days={forecast.days} 
                                                                     colorHex={activeModal.colorHex} 
@@ -446,11 +474,11 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                                         <div className="px-8 h-[1px] bg-outline-variant/5 shrink-0" />
 
                                                         {/* Bottom Interactive Day Details */}
-                                                        <div className="flex flex-col flex-1 min-h-0 p-8 pt-6">
-                                                            <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mb-4 px-2">Select Day for Details</span>
+                                                        <div className="flex flex-col flex-1 min-h-0 p-4 sm:p-8 pt-4 sm:pt-6">
+                                                            <span className="text-[9px] sm:text-[10px] font-bold text-foreground/30 uppercase tracking-widest mb-3 sm:mb-4 px-2">Select Day</span>
                                                             
                                                             {/* Day Selector Row */}
-                                                            <div className="grid grid-cols-7 gap-2 mb-6 shrink-0 px-1">
+                                                            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-4 sm:mb-6 shrink-0 px-1">
                                                                 {forecast.days.map(day => {
                                                                     const isSelected = activeDay.date === day.date;
                                                                     return (
@@ -460,40 +488,40 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                                                             onClick={() => {
                                                                                 setExpandedDay(day.date);
                                                                             }}
-                                                                            className={`relative z-20 flex flex-col items-center justify-center py-3 px-1 rounded-xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-surface-variant/15 shadow-lg' : 'bg-surface border-outline-variant/10 hover:border-outline-variant/30 hover:bg-surface-variant/5'}`}
+                                                                            className={`relative z-20 flex flex-col items-center justify-center py-2 sm:py-3 px-1 rounded-lg sm:rounded-xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-surface-variant/15 shadow-lg' : 'bg-surface border-outline-variant/10 hover:border-outline-variant/30 hover:bg-surface-variant/5'}`}
                                                                             style={{ borderColor: isSelected ? activeModal.colorHex + '60' : undefined }}>
-                                                                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: isSelected ? activeModal.colorHex : 'rgba(255,255,255,0.4)' }}>
-                                                                                {day.is_today ? 'Today' : fmtDay(day.date)}
+                                                                            <span className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-widest transition-colors ${!isSelected && 'text-foreground/40'}`} style={{ color: isSelected ? activeModal.colorHex : undefined }}>
+                                                                                {day.is_today ? 'Tdy' : fmtDay(day.date)}
                                                                             </span>
-                                                                            {isSelected && <motion.div layoutId="activeDayGlow" className="absolute inset-0 rounded-xl bg-current opacity-5 pointer-events-none" style={{ color: activeModal.colorHex }} />}
+                                                                            {isSelected && <motion.div layoutId="activeDayGlow" className="absolute inset-0 rounded-lg sm:rounded-xl bg-current opacity-5 pointer-events-none" style={{ color: activeModal.colorHex }} />}
                                                                         </motion.button>
                                                                     );
                                                                 })}
                                                             </div>
 
                                                             {/* Detailed card for selected day */}
-                                                            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide p-6 rounded-2xl bg-surface border border-outline-variant/10">
-                                                                <div className="flex items-center gap-3 mb-4">
-                                                                    <div className="px-3 py-1 rounded-md bg-surface-variant/20 border border-outline-variant/10 text-[11px] font-bold text-foreground/60">
+                                                            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide p-4 sm:p-6 rounded-2xl bg-surface border border-outline-variant/10">
+                                                                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                                                                    <div className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md bg-surface-variant/20 border border-outline-variant/10 text-[10px] sm:text-[11px] font-bold text-foreground/60">
                                                                         {fmtDate(activeDay.date)}
                                                                     </div>
-                                                                    {activeDay.is_today && <div className="px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest" style={{ backgroundColor: activeModal.colorHex + '20', color: activeModal.colorHex }}>Current</div>}
-                                                                    <div className="ml-auto flex items-center gap-2 text-[11px] font-bold text-foreground/40">
-                                                                        <span>Dominant:</span>
+                                                                    {activeDay.is_today && <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[8px] sm:text-[9px] font-bold uppercase tracking-widest" style={{ backgroundColor: activeModal.colorHex + '20', color: activeModal.colorHex }}>Current</div>}
+                                                                    <div className="ml-auto flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-bold text-foreground/40">
+                                                                        <span className="hidden sm:inline">Dominant:</span>
                                                                         <span className="text-foreground/80">{activeDay.dominant_planet}</span>
                                                                     </div>
                                                                 </div>
-                                                                <p className="text-sm text-foreground/70 leading-relaxed mb-6">{activeDay.text}</p>
+                                                                <p className="text-xs sm:text-sm text-foreground/70 leading-relaxed mb-4 sm:mb-6">{activeDay.text}</p>
                                                                 
                                                                 {activeDay.transits && (
                                                                     <div className="mt-auto">
-                                                                        <span className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest mb-3 block">Key Transits</span>
-                                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                        <span className="text-[8px] sm:text-[9px] font-bold text-foreground/30 uppercase tracking-widest mb-2 sm:mb-3 block">Key Transits</span>
+                                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
                                                                             {Object.entries(activeDay.transits).map(([planet, t]) => (
-                                                                                <div key={planet} className="flex items-center justify-between p-2 rounded-lg bg-[#0a0c10] border border-outline-variant/10">
-                                                                                    <span className="text-[10px] font-bold text-foreground/60">{planet}</span>
-                                                                                    <div className="flex items-center gap-1 text-[9px]">
-                                                                                        <span className="text-secondary/80 font-medium">{(t as any).sign}</span>
+                                                                                <div key={planet} className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-surface-variant/10 border border-outline-variant/10">
+                                                                                    <span className="text-[9px] sm:text-[10px] font-bold text-foreground/60">{planet}</span>
+                                                                                    <div className="flex items-center gap-1 text-[8px] sm:text-[9px]">
+                                                                                        <span className="text-secondary/80 font-medium">{(t as any).sign.slice(0,3)}</span>
                                                                                         <span className="text-foreground/20">|</span>
                                                                                         <span className="text-foreground/40">H{(t as any).house_from_lagna}</span>
                                                                                     </div>

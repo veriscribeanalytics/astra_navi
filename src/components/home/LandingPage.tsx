@@ -229,9 +229,9 @@ export default function LandingPage() {
             >
                 <motion.div 
                     initial={{ opacity: 0.1, scale: 0.8 }}
-                    animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.1, 1] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-[-10%] right-[-10%] w-[250px] lg:w-[600px] h-[250px] lg:h-[600px] bg-[var(--glow-color)] blur-[100px] rounded-full -z-10 opacity-30 dark:opacity-60"
+                    animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.05, 1] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-[-10%] right-[-10%] w-[250px] lg:w-[600px] h-[250px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] rounded-full -z-10 opacity-30 dark:opacity-60 will-change-transform"
                 ></motion.div>
                 
                 <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10 py-10 lg:py-0 lg:-mt-[150px]">
@@ -339,7 +339,7 @@ export default function LandingPage() {
 
                             <CardSwap width={320} height={500} cardDistance={40} verticalDistance={60} delay={5000}>
                                 {/* CARD 1: KUNDLI DECODED */}
-                                <SwapCard className="bg-[#0b0a1a] border-[8px] border-outline-variant/30 overflow-hidden">
+                                <SwapCard className="bg-[#12122b] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
                                         <div className="h-32 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
@@ -365,7 +365,7 @@ export default function LandingPage() {
                                 </SwapCard>
 
                                 {/* CARD 2: AI NAVI CHAT */}
-                                <SwapCard className="bg-[#07111a] border-[8px] border-outline-variant/30 overflow-hidden">
+                                <SwapCard className="bg-[#0a1824] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-4">
                                         <div className="flex items-center gap-3 mb-4">
@@ -392,7 +392,7 @@ export default function LandingPage() {
                                 </SwapCard>
 
                                 {/* CARD 3: SOULMATE SYNC */}
-                                <SwapCard className="bg-[#1a070e] border-[8px] border-outline-variant/30 overflow-hidden">
+                                <SwapCard className="bg-[#240a12] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
                                         <div className="h-32 w-full rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
@@ -421,7 +421,7 @@ export default function LandingPage() {
                                 </SwapCard>
 
                                 {/* CARD 4: DAILY ENERGY */}
-                                <SwapCard className="bg-[#071a0e] border-[8px] border-outline-variant/30 overflow-hidden">
+                                <SwapCard className="bg-[#0a2414] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
                                         <div className="h-32 w-full rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center justify-center">
@@ -490,7 +490,7 @@ export default function LandingPage() {
                     gap={40}
                     hoverSpeed={-2}
                     fadeOut
-                    fadeOutColor="hsl(var(--surface))"
+                    fadeOutColor="var(--surface)"
                 />
             </section>
 
@@ -894,14 +894,13 @@ export default function LandingPage() {
             </motion.section>
 
             {/* 11. FINAL CTA Section */}
-            <section className="py-12 lg:py-16 relative overflow-hidden">
-                <div className="absolute inset-0 bg-primary z-0" />
-                <div className="absolute inset-0 opacity-10 bg-celestial-silk mix-blend-overlay" />
+            <section className="py-16 lg:py-24 relative overflow-hidden bg-[#1a0733]">
+                <div className="absolute inset-0 opacity-15 bg-celestial-silk mix-blend-overlay" />
                 <motion.div 
                     initial={{ opacity: 0.1, scale: 0.8 }}
-                    animate={{ opacity: [0.2, 0.3, 0.2], scale: [1, 1.2, 1] }}
+                    animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.2, 1] }}
                     transition={{ duration: 15, repeat: Infinity }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-secondary/20 blur-[150px] rounded-full"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-secondary/30 blur-[150px] rounded-full"
                 />
                 
                 <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
