@@ -467,7 +467,10 @@ export default function LandingPage() {
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                         className="flex flex-col items-center gap-2"
                     >
-                        <span className="text-[9px] font-bold text-secondary/40 group-hover:text-secondary uppercase tracking-[0.3em] transition-colors">Explore</span>
+                        <div className="flex flex-col items-center">
+                            <span className="text-[7px] font-bold text-secondary/30 group-hover:text-secondary/50 uppercase tracking-[0.2em] transition-colors leading-none mb-1">Click to</span>
+                            <span className="text-[10px] font-bold text-secondary/60 group-hover:text-secondary uppercase tracking-[0.3em] transition-colors leading-none">Explore Below</span>
+                        </div>
                         <div className="w-5 h-8 rounded-full border border-secondary/20 group-hover:border-secondary/40 flex justify-center p-1.5 transition-colors">
                             <div className="w-1 h-1.5 bg-secondary/40 group-hover:bg-secondary rounded-full" />
                         </div>
