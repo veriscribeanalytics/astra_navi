@@ -127,7 +127,7 @@ export default function LandingPage() {
     useEffect(() => {
         const timer = setInterval(() => {
             setActiveSlide((prev) => (prev + 1) % slides.length);
-        }, 10000);
+        }, 5000);
         return () => clearInterval(timer);
     }, [interactionTick]);
 
@@ -337,83 +337,146 @@ export default function LandingPage() {
                                 </div>
                             </div>
 
-                            <CardSwap width={320} height={500} cardDistance={40} verticalDistance={60} delay={4000}>
-                                <SwapCard className="bg-[#0b071a] border-[8px] border-outline-variant/30 overflow-hidden">
+                            <CardSwap width={320} height={500} cardDistance={40} verticalDistance={60} delay={5000}>
+                                {/* CARD 1: KUNDLI DECODED */}
+                                <SwapCard className="bg-[#0b0a1a] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
                                         <div className="h-32 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
                                             <div className="text-center px-4">
-                                                <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Transit</div>
-                                                <div className="text-white font-headline text-lg">Jupiter in Taurus</div>
+                                                <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Your Life Decoded</div>
+                                                <div className="text-white font-headline text-lg">Birth Chart Analysis</div>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="h-20 rounded-xl bg-white/5 border border-white/10"></div>
-                                            <div className="h-20 rounded-xl bg-white/5 border border-white/10"></div>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {[1,2,3,4,5,6].map(i => (
+                                                <div key={i} className="h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-secondary/40 font-bold">H{i}</div>
+                                            ))}
                                         </div>
-                                        <div className="h-32 w-full rounded-2xl bg-gradient-to-br from-secondary/20 to-transparent border border-secondary/10"></div>
+                                        <div className="h-24 w-full rounded-2xl bg-gradient-to-br from-secondary/20 to-transparent border border-secondary/10 p-3">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider">Karmic Pattern</span>
+                                            </div>
+                                            <p className="text-[11px] text-white/50 leading-snug">Rahu in 10th house suggests a career in innovation and leadership.</p>
+                                        </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-secondary flex items-center justify-center shadow-lg shadow-secondary/50"><Sparkles className="text-white w-6 h-6" /></div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-secondary flex items-center justify-center shadow-lg shadow-secondary/50"><Compass className="text-white w-6 h-6" /></div>
                                 </SwapCard>
-                                <SwapCard className="bg-[#1a0b2e] border-[8px] border-outline-variant/30 overflow-hidden">
+
+                                {/* CARD 2: AI NAVI CHAT */}
+                                <SwapCard className="bg-[#07111a] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
-                                    <div className="p-6 pt-10 space-y-6">
-                                        <div className="h-32 w-full rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                                            <div className="text-center px-4">
-                                                <div className="text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-1">Daily Guide</div>
-                                                <div className="text-white font-headline text-lg">Moon in Revati</div>
+                                    <div className="p-6 pt-10 space-y-4">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><Brain className="text-white w-5 h-5" /></div>
+                                            <div>
+                                                <div className="text-white text-sm font-bold">Navi AI</div>
+                                                <div className="text-blue-400 text-[10px] flex items-center gap-1 font-bold"><div className="w-1 h-1 rounded-full bg-blue-400" /> Online</div>
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <div className="h-8 w-full rounded-lg bg-white/5 border border-white/10 flex items-center px-3">
-                                                <div className="w-full h-1.5 bg-indigo-500/20 rounded-full overflow-hidden">
-                                                    <div className="w-[70%] h-full bg-indigo-400" />
-                                                </div>
+                                            <div className="max-w-[80%] self-start p-3 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 text-[11px] text-white/70">
+                                                "How does Jupiter's transit affect my career this month?"
                                             </div>
-                                            <div className="h-8 w-full rounded-lg bg-white/5 border border-white/10 flex items-center px-3">
-                                                <div className="w-full h-1.5 bg-indigo-500/20 rounded-full overflow-hidden">
-                                                    <div className="w-[45%] h-full bg-indigo-400" />
-                                                </div>
+                                            <div className="max-w-[85%] self-end ml-auto p-3 rounded-2xl rounded-tr-none bg-blue-500/20 border border-blue-500/30 text-[11px] text-blue-100 italic">
+                                                "Jupiter in your 10th house brings massive professional expansion. Focus on..."
                                             </div>
                                         </div>
-                                        <div className="h-32 w-full rounded-2xl bg-gradient-to-br from-indigo-500/20 to-transparent border border-indigo-500/10 p-4">
-                                            <div className="text-[10px] text-indigo-300 uppercase font-bold mb-2">Soul Insight</div>
-                                            <div className="text-[11px] text-white/60 leading-relaxed italic">"Trust your intuition today. The cosmic flow favors spiritual reflection."</div>
+                                        <div className="mt-auto h-10 w-full rounded-full bg-white/5 border border-white/10 flex items-center px-4 justify-between">
+                                            <span className="text-[10px] text-white/30">Ask Navi anything...</span>
+                                            <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/50"><Brain className="text-white w-6 h-6" /></div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/50"><MessageSquare className="text-white w-6 h-6" /></div>
                                 </SwapCard>
-                                <SwapCard className="bg-[#2e0b1a] border-[8px] border-outline-variant/30 overflow-hidden">
+
+                                {/* CARD 3: SOULMATE SYNC */}
+                                <SwapCard className="bg-[#1a070e] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
                                         <div className="h-32 w-full rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
                                             <div className="text-center px-4">
                                                 <div className="text-rose-400 text-[10px] font-bold uppercase tracking-widest mb-1">Compatibility</div>
-                                                <div className="text-white font-headline text-lg">28/36 Gunas Match</div>
+                                                <div className="text-white font-headline text-2xl">28/36 Gunas</div>
                                             </div>
                                         </div>
-                                        <div className="flex justify-around">
-                                            <div className="w-16 h-16 rounded-full border-2 border-rose-500/30 flex items-center justify-center">
-                                                <Heart className="text-rose-400 w-8 h-8" />
-                                            </div>
-                                            <div className="w-16 h-16 rounded-full border-2 border-rose-500/30 flex items-center justify-center">
+                                        <div className="flex justify-around items-center py-2">
+                                            <div className="w-16 h-16 rounded-full border-2 border-rose-500/30 flex items-center justify-center relative">
+                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-500 text-[10px] flex items-center justify-center font-bold text-white shadow-lg">M</div>
                                                 <User className="text-rose-400 w-8 h-8" />
                                             </div>
+                                            <div className="w-10 h-px bg-rose-500/20" />
+                                            <div className="w-16 h-16 rounded-full border-2 border-rose-500/30 flex items-center justify-center relative">
+                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-pink-500 text-[10px] flex items-center justify-center font-bold text-white shadow-lg">F</div>
+                                                <User className="text-pink-400 w-8 h-8" />
+                                            </div>
                                         </div>
-                                        <div className="h-24 w-full rounded-2xl bg-gradient-to-br from-rose-500/20 to-transparent border border-rose-500/10 flex items-center justify-center">
-                                            <div className="text-[12px] font-bold text-rose-300 uppercase tracking-widest">Soulmate Sync</div>
+                                        <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-rose-500/20 to-transparent border border-rose-500/10 flex flex-col items-center justify-center text-center p-2">
+                                            <div className="text-[12px] font-bold text-rose-300 uppercase tracking-widest mb-1">High Compatibility</div>
+                                            <p className="text-[10px] text-white/40 leading-tight">Strong emotional & spiritual bond detected.</p>
                                         </div>
                                     </div>
                                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/50"><Heart className="text-white w-6 h-6" /></div>
+                                </SwapCard>
+
+                                {/* CARD 4: DAILY ENERGY */}
+                                <SwapCard className="bg-[#071a0e] border-[8px] border-outline-variant/30 overflow-hidden">
+                                    <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
+                                    <div className="p-6 pt-10 space-y-6">
+                                        <div className="h-32 w-full rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center justify-center">
+                                            <div className="text-emerald-400 text-3xl font-headline font-bold">85%</div>
+                                            <div className="text-[10px] text-emerald-400/60 font-bold uppercase tracking-widest">Today's Alignment</div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {[
+                                                { l: 'Energy', v: 'High', c: 'bg-emerald-400' },
+                                                { l: 'Focus', v: 'Sharp', c: 'bg-blue-400' },
+                                                { l: 'Mood', v: 'Spiritual', c: 'bg-purple-400' }
+                                            ].map((s, i) => (
+                                                <div key={i} className="flex items-center justify-between">
+                                                    <span className="text-[11px] text-white/50">{s.l}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-24 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                                            <div className={`h-full ${s.c} w-[80%]`} />
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-white">{s.v}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 p-4">
+                                            <div className="text-[10px] text-emerald-300 uppercase font-bold mb-1">Transit Tip</div>
+                                            <p className="text-[11px] text-white/60 italic leading-tight">"Auspicious time for new beginnings."</p>
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/50"><Activity className="text-white w-6 h-6" /></div>
                                 </SwapCard>
                             </CardSwap>
                         </div>
                     </div>
                 </div>
+
+                {/* Scroll Indicator */}
+                <div 
+                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer z-20 group hidden lg:flex"
+                    onClick={() => document.getElementById('portals')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                    <motion.div 
+                        animate={{ y: [0, 8, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        className="flex flex-col items-center gap-2"
+                    >
+                        <span className="text-[9px] font-bold text-secondary/40 group-hover:text-secondary uppercase tracking-[0.3em] transition-colors">Explore</span>
+                        <div className="w-5 h-8 rounded-full border border-secondary/20 group-hover:border-secondary/40 flex justify-center p-1.5 transition-colors">
+                            <div className="w-1 h-1.5 bg-secondary/40 group-hover:bg-secondary rounded-full" />
+                        </div>
+                    </motion.div>
+                </div>
             </section>
-            
-            {/* 2. ZODIAC STRIP */}
-            <section className="bg-surface relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full z-20 border-b border-outline-variant/20 lg:mt-0">
+
+            {/* 3. ZODIAC STRIP */}
+            <section className="bg-surface relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full z-20 border-b border-outline-variant/20">
                 <div className="absolute inset-0 bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 animate-pulse opacity-50" />
                 <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent,rgba(200,136,10,0.1),transparent)] bg-[length:200%_100%] animate-[shimmer_5s_infinite_linear]" />
                 <LogoLoop
@@ -428,11 +491,11 @@ export default function LandingPage() {
                 />
             </section>
 
-            {/* 3. INTERACTIVE PORTALS (Horoscope, Kundli, Match) */}
+            {/* 4. INTERACTIVE PORTALS (Horoscope, Kundli, Match) */}
             <motion.section 
                 id="portals"
                 initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants}
-                className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-20 lg:-mt-10"
+                className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-16"
             >
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/5 border border-secondary/10 mb-4">
@@ -447,7 +510,7 @@ export default function LandingPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
                     
-                    {/* 1. Horoscope Portal (Moved to first) */}
+                    {/* 1. Horoscope Portal */}
                     <Card className="border-outline-variant/30 flex flex-col shadow-xl h-[520px]" padding="none">
                         <div className="p-6 border-b border-outline-variant/20 bg-surface flex justify-between items-center">
                             <h3 className="text-xl font-headline font-bold flex items-center gap-2 text-primary">
@@ -504,7 +567,7 @@ export default function LandingPage() {
                         </div>
                     </Card>
 
-                    {/* 2. Birth Chart Form (Moved to second) */}
+                    {/* 2. Birth Chart Form */}
                     <Card className="border-secondary/30 flex flex-col shadow-xl shadow-secondary/5 h-[520px] relative overflow-hidden" padding="lg">
                         <AnimatePresence mode="wait">
                             {isCalculating && teaserMode.type === 'kundli' ? (
@@ -606,8 +669,8 @@ export default function LandingPage() {
                 </div>
             </motion.section>
 
-            {/* 4. SERVICES BENTO GRID */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-20 lg:py-32 relative">
+            {/* 5. SERVICES BENTO GRID */}
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-12 lg:py-16 relative">
                 <div className="absolute inset-0 bg-celestial-silk opacity-10 pointer-events-none rounded-[40px]" />
                 <div className="text-center mb-16 relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/5 border border-indigo-500/10 mb-4">
@@ -653,8 +716,8 @@ export default function LandingPage() {
                 </div>
             </motion.section>
 
-            {/* 5. CELESTIAL KNOWLEDGE */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-20 lg:py-32">
+            {/* 6. CELESTIAL KNOWLEDGE */}
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-12 lg:py-16">
                 <div className="flex flex-col lg:flex-row justify-between items-end gap-6 mb-16">
                     <div className="max-w-2xl text-center lg:text-left">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/10 mb-4">
@@ -691,8 +754,8 @@ export default function LandingPage() {
                 </div>
             </motion.section>
 
-            {/* 6. AI SPECIALIZED INSIGHTS */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-20 lg:py-32">
+            {/* 7. AI SPECIALIZED INSIGHTS */}
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-12 lg:py-16">
                 <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
                     <div className="max-w-2xl">
                         <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-secondary/5 border border-secondary/10 mb-6">
@@ -739,8 +802,8 @@ export default function LandingPage() {
                 </div>
             </motion.section>
 
-            {/* 7. HOW IT WORKS */}
-            <motion.section id="how-it-works" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-24 lg:py-40 relative overflow-hidden bg-transparent">
+            {/* 8. HOW IT WORKS */}
+            <motion.section id="how-it-works" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-12 lg:py-16 relative overflow-hidden bg-transparent">
                 <div className="absolute inset-0 opacity-5 pointer-events-none">
                     <svg className="w-full h-full" viewBox="0 0 1200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M100 300C300 300 300 100 500 100C700 100 700 500 900 500C1100 500 1100 300 1300 300" stroke="var(--secondary)" strokeWidth="2" strokeDasharray="8 8" className="animate-[dash_20s_linear_infinite]" />
@@ -768,44 +831,11 @@ export default function LandingPage() {
                 </div>
             </motion.section>
 
-            {/* AUTHORITY STRIP */}
-            <div className="w-full bg-secondary/5 border-y border-outline-variant/10 py-10 overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-24 opacity-80">
-                    <div className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/20 group-hover:scale-110 transition-transform">
-                            <CheckCircle className="text-secondary w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-primary uppercase tracking-widest">Precise Algorithms</p>
-                            <p className="text-[10px] text-on-surface-variant/60 uppercase">Based on BPHS & Phaladeepika</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/20 group-hover:scale-110 transition-transform">
-                            <Shield className="text-secondary w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-primary uppercase tracking-widest">Absolute Privacy</p>
-                            <p className="text-[10px] text-on-surface-variant/60 uppercase">Secure birth data handling</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/20 group-hover:scale-110 transition-transform">
-                            <Zap className="text-secondary w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-primary uppercase tracking-widest">Ancient Wisdom</p>
-                            <p className="text-[10px] text-on-surface-variant/60 uppercase">Authentic 16 Varga Analysis</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* 7. PRICING / PLANS */}
+            {/* 9. PRICING / PLANS */}
             <Pricing />
 
-            {/* 8. TRUST & FAQ */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-24 lg:py-40 relative bg-transparent px-4 lg:px-12 max-w-7xl mx-auto">
+            {/* 10. TRUST & FAQ */}
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-12 lg:py-16 relative bg-transparent px-4 lg:px-12 max-w-7xl mx-auto">
                 <div className="text-center mb-20">
                     <div className="text-[10px] text-secondary font-bold tracking-[0.25em] uppercase mb-4">Our Commitment</div>
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-headline text-primary mb-12">Guarded by Tradition</h2>
@@ -860,8 +890,8 @@ export default function LandingPage() {
                 </div>
             </motion.section>
 
-            {/* Final CTA Section */}
-            <section className="py-24 lg:py-40 relative overflow-hidden">
+            {/* 11. FINAL CTA Section */}
+            <section className="py-12 lg:py-16 relative overflow-hidden">
                 <div className="absolute inset-0 bg-primary z-0" />
                 <div className="absolute inset-0 opacity-10 bg-celestial-silk mix-blend-overlay" />
                 <motion.div 
