@@ -12,7 +12,7 @@ import { useToast } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
-    History, Gem, ShieldQuestion, Users
+    History, Gem, ShieldQuestion, Users, Brain
 } from "lucide-react";
 
 interface INavbarProps{}
@@ -69,10 +69,10 @@ const getNavSections = (isLoggedIn: boolean) => {
                 label: "Community",
                 items: [
                     { 
-                        label: "Live Astrologers", 
-                        href: "/astrologers", 
-                        icon: <Users className="w-4 h-4" />,
-                        desc: "Connect with verified human experts."
+                        label: "AI Specialized Models", 
+                        href: "/chat", 
+                        icon: <Brain className="w-4 h-4" />,
+                        desc: "Deep Vedic intelligence for every domain."
                     },
                     // { label: "Gemstone Shop", href: "/shop", icon: <Gem className="w-4 h-4" />, desc: "Remedial gems for planetary balance." },
                     { 
@@ -147,12 +147,11 @@ const getNavSections = (isLoggedIn: boolean) => {
                     desc: "Our mission to blend AI with Jyotish."
                 },
                 { 
-                    label: "Live Astrologers", 
-                    href: "/astrologers", 
-                    icon: <Users className="w-4 h-4" />,
-                    desc: "Connect with verified human experts."
-                },
-            ]
+                    label: "AI Specialized Models", 
+                    href: "/chat", 
+                    icon: <Brain className="w-4 h-4" />,
+                    desc: "Deep Vedic intelligence for every domain."
+                },            ]
         },
         {
             id: "horoscope",

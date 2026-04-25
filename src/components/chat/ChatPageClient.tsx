@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useChat } from '@/context/ChatContext';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import ChatHeader from '@/components/chat/ChatHeader';
@@ -12,14 +12,17 @@ import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
 import { useAuth } from '@/context/AuthContext';
 
 const ChatPageClient: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { 
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
     createNewChat, selectChat, isGuest, enableGuestMode, guestTimeRemaining, isGuestExpired 
-  } = useChat();
+    } = useChat();
 
-  React.useEffect(() => {
+    React.useEffect(() => {
+        if (isLoading) return;
+
     // 1. Handle Guest Mode from URL
     const mode = searchParams.get('mode');
     if (mode === 'guest') {
@@ -27,9 +30,13 @@ const ChatPageClient: React.FC = () => {
       return;
     }
 
-    // 2. Handle Logged-In User
-    if (!user?.email) return;
+    // 2. Handle Authentication
+    if (!user?.email) {
+      router.push('/login?callbackUrl=/chat');
+      return;
+    }
 
+    // 3. Handle Logged-In User
     // Check if there's a chat ID in the URL
     const chatId = searchParams.get('id');
     if (chatId) {

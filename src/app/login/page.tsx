@@ -118,7 +118,8 @@ const LoginPage = () => {
 
                 showLoading("Aligning your celestial path...", 1500);
                 setTimeout(() => {
-                    router.push('/?login=success');
+                    const callbackUrl = searchParams?.get('callbackUrl') || '/?login=success';
+                    router.push(callbackUrl);
                 }, 1500);
             }
         } catch (err: any) {
@@ -300,7 +301,10 @@ const LoginPage = () => {
                                 type="button"
                                 variant="ghost"
                                 fullWidth
-                                onClick={() => signIn('google', { callbackUrl: '/' })}
+                                onClick={() => {
+                                    const callbackUrl = searchParams?.get('callbackUrl') || '/';
+                                    signIn('google', { callbackUrl });
+                                }}
                                 className="bg-surface/50 dark:bg-white/5 border border-outline-variant/20 dark:border-white/10 hover:bg-surface dark:hover:bg-white/10 !rounded-xl text-on-surface-variant/60 text-xs py-2 h-10"
                             >
                                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
