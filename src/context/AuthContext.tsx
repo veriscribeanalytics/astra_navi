@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
