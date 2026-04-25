@@ -7,14 +7,14 @@ import { ShieldAlert, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-re
 interface DoshaStatus {
   hasDosha: boolean;
   isCancelled: boolean;
-  cancellationReason?: string;
+  cancellationReason?: string | { technical: string; simple: string };
   severity: 'none' | 'low' | 'medium' | 'high';
 }
 
 interface MangalDoshaPanelProps {
   person1: DoshaStatus & { name: string };
   person2: DoshaStatus & { name: string };
-  verdict: string;
+  verdict: string | { technical: string; simple: string };
   isCompatible: boolean;
 }
 
@@ -92,7 +92,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
                 </div>
                 {person1.isCancelled && person1.cancellationReason && (
                   <p className="text-[11px] text-blue-400 italic leading-snug">
-                    {person1.cancellationReason}
+                    {typeof person1.cancellationReason === 'object' ? person1.cancellationReason.simple : person1.cancellationReason}
                   </p>
                 )}
               </div>
@@ -115,7 +115,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
                 </div>
                 {person2.isCancelled && person2.cancellationReason && (
                   <p className="text-[11px] text-blue-400 italic leading-snug">
-                    {person2.cancellationReason}
+                    {typeof person2.cancellationReason === 'object' ? person2.cancellationReason.simple : person2.cancellationReason}
                   </p>
                 )}
               </div>
@@ -138,9 +138,16 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
             }`}>
               Compatibility Verdict
             </h4>
-            <p className="text-sm text-foreground/80 leading-relaxed font-body">
-              {verdict}
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm text-foreground/80 leading-relaxed font-body">
+                {typeof verdict === 'object' ? verdict.simple : verdict}
+              </p>
+              {typeof verdict === 'object' && verdict.technical && (
+                <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest mt-1">
+                  {verdict.technical}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

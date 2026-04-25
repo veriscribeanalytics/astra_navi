@@ -8,7 +8,7 @@ interface DoshaCheck {
   name: string;
   isClear: boolean;
   meaning: string;
-  detail: string;
+  detail: string | { technical: string; simple: string };
 }
 
 interface AdditionalDoshasProps {
@@ -79,10 +79,15 @@ export default function AdditionalDoshas({ doshas = [] }: AdditionalDoshasProps)
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="px-14 pb-5 pt-0">
+                  <div className="px-14 pb-5 pt-0 flex flex-col gap-1.5">
                     <p className="text-xs text-foreground/60 leading-relaxed font-body">
-                      {dosha.detail}
+                      {typeof dosha.detail === 'object' ? dosha.detail.simple : dosha.detail}
                     </p>
+                    {typeof dosha.detail === 'object' && dosha.detail.technical && (
+                      <p className="text-[9px] text-foreground/25 font-bold uppercase tracking-widest">
+                        {dosha.detail.technical}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               )}

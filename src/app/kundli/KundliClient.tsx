@@ -17,16 +17,16 @@ import PlanetIcon from "@/components/ui/astrology/PlanetIcon";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Occupant { planet: string; dignity: string; retrograde: boolean; }
-interface HouseData { house: number; name: string; areas: string[]; sign: string; lord: string; lordHouse: number; occupants: Occupant[]; interpretation: string[]; }
+interface HouseData { house: number; name: string; areas: string[]; sign: string; lord: string; lordHouse: number; occupants: Occupant[]; interpretation: (string | { technical: string; simple: string })[]; }
 interface Yoga { name: string; effect: string; }
-interface PlanetData { planet: string; sign: string; house: number; degree: number; dignity: string; shadbala: number; retrograde: boolean; conjunctions: string[]; lordOf: number[]; interpretation: string[]; yogas: Yoga[]; }
+interface PlanetData { planet: string; sign: string; house: number; degree: number; dignity: string; shadbala: number; retrograde: boolean; conjunctions: string[]; lordOf: number[]; interpretation: (string | { technical: string; simple: string })[]; yogas: Yoga[]; }
 interface DashaData { 
     active?: { type: string; planet: string; start: string; end: string }[]; 
     rows?: { planet: string; dates: string; type?: string; active?: boolean }[];
     current?: string;
     currentMahaDasha?: string;
     remaining?: string;
-    explanation: string[]; 
+    explanation: (string | { technical: string; simple: string })[]; 
 }
 interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: DashaData; }
 
@@ -57,13 +57,7 @@ export default function KundliPage() {
         finally { setPlanetLoading(false); }
     };
 
-    useEffect(() => {
-        if (authLoading) return;
-        if (!isLoggedIn || !user?.email) { setLoading(false); return; }
-        fetchAnalysis();
-    }, [isLoggedIn, user?.email, authLoading]);
-
-    const fetchAnalysis = async (forceRefresh = false) => {
+    const fetchAnalysis = useCallback(async (forceRefresh = false) => {
         try {
             if (forceRefresh) setRefreshing(true); else setLoading(true);
             const res = await fetch('/api/analyze-full', { 
@@ -103,7 +97,13 @@ export default function KundliPage() {
             }
         } catch (err: any) { setError(err.message); }
         finally { setLoading(false); setRefreshing(false); }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (authLoading) return;
+        if (!isLoggedIn || !user?.email) { setLoading(false); return; }
+        fetchAnalysis();
+    }, [isLoggedIn, user?.email, authLoading, fetchAnalysis]);
 
     const lagnaSign = useMemo(() => data?.houses.find(h => h.house === 1)?.sign || null, [data]);
     const sunPlanet = useMemo(() => data?.planets.find(p => p.planet === 'Sun'), [data]);
@@ -304,11 +304,25 @@ export default function KundliPage() {
                                             </div>
                                         )}
                                         </div>
-                                        {data.dasha.explanation?.[0] && (
-                                            <p className="text-[12px] text-foreground/40 leading-relaxed mt-3 pt-3 border-t border-outline-variant/10">
-                                                {data.dasha.explanation[0]}
-                                            </p>
-                                        )}
+                                        <div className="mt-3 pt-3 border-t border-outline-variant/10 space-y-3">
+                                            {data.dasha.explanation?.map((item, idx) => {
+                                                const isObject = typeof item === 'object' && item !== null;
+                                                const simpleText = isObject ? item.simple : item;
+                                                const techText = isObject ? item.technical : null;
+                                                return (
+                                                    <div key={idx} className="group/dasha-exp">
+                                                        <p className="text-[12px] text-foreground/40 leading-relaxed">
+                                                            {simpleText}
+                                                        </p>
+                                                        {techText && (
+                                                            <p className="text-[10px] text-foreground/20 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover/dasha-exp:opacity-100 transition-opacity duration-300">
+                                                                {techText}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
@@ -525,10 +539,24 @@ export default function KundliPage() {
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-3">
-                                                        {(planetDetails?.interpretation || selectedPlanet.interpretation).map((line: string, i: number) => (
-                                                            <motion.p key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.06 }}
-                                                                className="text-[13px] text-foreground/55 leading-relaxed pl-4 border-l-2 border-secondary/20">{line}</motion.p>
-                                                        ))}
+                                                        {(planetDetails?.interpretation || selectedPlanet.interpretation).map((item: any, i: number) => {
+                                                            const isObject = typeof item === 'object' && item !== null;
+                                                            const simpleText = isObject ? item.simple : item;
+                                                            const techText = isObject ? item.technical : null;
+                                                            return (
+                                                                <div key={i} className="group/int-line pl-4 border-l-2 border-secondary/20">
+                                                                    <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.06 }}
+                                                                        className="text-[13px] text-foreground/55 leading-relaxed">
+                                                                        {simpleText}
+                                                                    </motion.p>
+                                                                    {techText && (
+                                                                        <p className="text-[10px] text-foreground/20 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover/int-line:opacity-100 transition-opacity duration-300">
+                                                                            {techText}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 )}
                                             </div>
@@ -601,9 +629,14 @@ export default function KundliPage() {
                                                                 ))}
                                                             </div>
                                                         )}
-                                                        {house.interpretation?.[0] && (
-                                                            <p className="text-[11px] text-foreground/40 leading-snug line-clamp-2">{house.interpretation[0]}</p>
-                                                        )}
+                                                        {house.interpretation?.[0] && (() => {
+                                                            const item = house.interpretation[0];
+                                                            const isObject = typeof item === 'object' && item !== null;
+                                                            const simpleText = isObject ? (item as any).simple : item;
+                                                            return (
+                                                                <p className="text-[11px] text-foreground/40 leading-snug line-clamp-2">{simpleText}</p>
+                                                            );
+                                                        })()}
                                                         {!house.interpretation?.[0] && house.areas.length > 0 && (
                                                             <div className="flex flex-wrap gap-0.5">
                                                                 {house.areas.slice(0, 3).map((a, i) => (

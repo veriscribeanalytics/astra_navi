@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Briefcase, Activity, DollarSign, X, MessageSquare, ArrowRight, TrendingUp, Info } from 'lucide-react';
@@ -14,7 +14,8 @@ interface HoroscopeData {
 
 interface ForecastDay {
     date: string; is_today: boolean; score: number; text: string;
-    dominant_planet: string; personalized_alerts: string[];
+    dominant_planet: string; 
+    personalized_alerts: (string | { technical: string; simple: string })[];
     transits?: Record<string, { sign: string; house_from_moon: number; house_from_lagna: number }>;
 }
 
@@ -51,7 +52,6 @@ function MiniChart({ days, colorHex, activeDate, onSelect }: { days: ForecastDay
             {points.map((p, i) => {
                 const d = days[i];
                 const isSelected = activeDate === d.date;
-                const label = d.is_today ? 'Today' : new Date(d.date + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' });
                 return (
                     <g key={i}>
                         {/* Static Point Representation */}
@@ -85,6 +85,10 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
     const [forecastLoading, setForecastLoading] = useState(false);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
     const [realScores, setRealScores] = useState<Record<string, number>>({});
+    
+    // Optimization Refs
+    const fetchedAreasRef = useRef<Set<string>>(new Set());
+    const lastSignRef = useRef<string | undefined>('');
 
     const today = new Date();
     const dateString = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
@@ -98,7 +102,17 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                 if (sign) url += `?sign=${encodeURIComponent(sign)}`;
                 const res = await fetch(url);
                 if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Failed'); }
-                setHoroscope(await res.json()); setError(null);
+                const data = await res.json();
+                
+                // If sign changed, clear the fetched areas cache
+                if (sign !== lastSignRef.current) {
+                    fetchedAreasRef.current.clear();
+                    setRealScores({});
+                    lastSignRef.current = sign;
+                }
+                
+                setHoroscope(data); 
+                setError(null);
             } catch (err: any) { setError(err.message); }
             finally { setLoading(false); }
         })();
@@ -106,11 +120,17 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
 
     useEffect(() => {
         if (!loading && horoscope) {
-            const t = setTimeout(() => { setShowContent(true); setAnimatedScore(horoscope.overall_score || 0); }, 100);
+            const t = setTimeout(() => { 
+                setShowContent(true); 
+                setAnimatedScore(horoscope.overall_score || 0); 
+            }, 100);
             
-            // Fetch real scores for metrics in parallel
+            // Fetch real scores for metrics in parallel, but ONLY if not already fetched for this sign
             const areas = ['career', 'health', 'love', 'finance'];
             areas.forEach(area => {
+                if (fetchedAreasRef.current.has(area)) return;
+                
+                fetchedAreasRef.current.add(area);
                 fetch(`/api/forecast/${area}`)
                     .then(r => r.ok ? r.json() : null)
                     .then(data => {
@@ -121,7 +141,10 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                             }
                         }
                     })
-                    .catch(() => {});
+                    .catch(() => {
+                        // On error, remove from set so it can be retried if component remounts
+                        fetchedAreasRef.current.delete(area);
+                    });
             });
 
             return () => clearTimeout(t);
@@ -358,12 +381,27 @@ export default function DailyHoroscopeCard({ sign, isGeneral }: { sign?: string;
                                                                 <span className="text-[10px] font-bold text-foreground/30 px-2 py-1 rounded-md bg-surface-variant/20 border border-outline-variant/5">🪐 {activeDay.dominant_planet}</span>
                                                             </div>
                                                             <div className="space-y-3">
-                                                                {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => (
-                                                                    <div key={i} className="flex items-start gap-3">
-                                                                        <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: alert.includes('challenging') || alert.includes('mindful') ? '#fbbf24' : activeModal.colorHex }} />
-                                                                        <span className="text-[12px] text-foreground/60 leading-snug">{alert}</span>
-                                                                    </div>
-                                                                ))}
+                                                                {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => {
+                                                                    const isObject = typeof alert === 'object' && alert !== null;
+                                                                    const simpleText = isObject ? alert.simple : alert;
+                                                                    const techText = isObject ? alert.technical : null;
+                                                                    const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
+                                                                    
+                                                                    return (
+                                                                        <div key={i} className="flex items-start gap-3 group/alert">
+                                                                            <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" 
+                                                                                style={{ backgroundColor: isWarning ? '#fbbf24' : activeModal.colorHex }} />
+                                                                            <div className="flex flex-col min-w-0">
+                                                                                <span className="text-[12px] text-foreground/60 leading-snug">{simpleText}</span>
+                                                                                {techText && (
+                                                                                    <span className="text-[10px] text-foreground/25 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover/alert:opacity-100 transition-opacity duration-300">
+                                                                                        {techText}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
                                                     )}

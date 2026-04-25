@@ -83,31 +83,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [session, status, profileFetched, user?.email]);
 
-    const login = (email?: string, profile?: Partial<User>) => {
+    const login = useCallback((email?: string, profile?: Partial<User>) => {
         // This is now primarily handled by NextAuth signIn() in LoginPage
         // We keep it for local state synchronization if needed
         if (email) {
-            setUser(prev => ({ ...prev!, email, ...profile }));
+            setUser(prev => prev ? { ...prev, email, ...profile } : { email, ...profile } as User);
         }
-    };
+    }, []);
 
-    const logout = async (callbackUrl: string = '/?logout=success') => {
+    const logout = useCallback(async (callbackUrl: string = '/?logout=success') => {
         await signOut({ callbackUrl });
-    };
+    }, []);
 
-    const showLoading = (message?: string, duration: number = 2000) => {
+    const showLoading = useCallback((message?: string, duration: number = 2000) => {
         setLoadingMessage(message);
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
         }, duration);
-    };
+    }, []);
 
-    const setLoadingState = (state: boolean) => setIsLoading(state);
+    const setLoadingState = useCallback((state: boolean) => setIsLoading(state), []);
 
-    const refreshUser = (updates: Partial<User>) => {
+    const refreshUser = useCallback((updates: Partial<User>) => {
         setUser(prev => prev ? { ...prev, ...updates } : null);
-    };
+    }, []);
 
     return (
         <AuthContext.Provider value={{ 

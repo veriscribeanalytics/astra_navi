@@ -10,7 +10,7 @@ interface KootCardProps {
   meaning: string;
   obtained: number;
   max: number;
-  detail: string;
+  detail: string | { technical: string; simple: string };
   delay?: number;
 }
 
@@ -19,6 +19,10 @@ export default function KootCard({
 }: KootCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const percentage = (obtained / max) * 100;
+  
+  const isObject = typeof detail === 'object' && detail !== null;
+  const simpleText = isObject ? (detail as any).simple : detail;
+  const techText = isObject ? (detail as any).technical : null;
 
   const getColor = () => {
     if (percentage >= 75) return 'text-green-400 bg-green-500/10 border-green-500/20';
@@ -96,10 +100,15 @@ export default function KootCard({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="px-5 pb-5 pt-1 border-t border-outline-variant/10 mt-1">
+            <div className="px-5 pb-5 pt-1 border-t border-outline-variant/10 mt-1 flex flex-col gap-2">
               <p className="text-sm text-foreground/70 leading-relaxed font-body">
-                {detail}
+                {simpleText}
               </p>
+              {techText && (
+                <p className="text-[10px] text-foreground/25 font-bold uppercase tracking-widest mt-1">
+                  {techText}
+                </p>
+              )}
             </div>
           </motion.div>
         )}
