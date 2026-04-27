@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./globals.css";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/layout/Navbar";
@@ -9,7 +10,6 @@ import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/hooks/useToast";
-import "./globals.css";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",

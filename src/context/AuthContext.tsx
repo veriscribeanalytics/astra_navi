@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profileFetched, setProfileFetched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState<string | undefined>(undefined);
+    const fetchInProgressRef = useRef(false);
 
     const isLoggedIn = status === 'authenticated';
     const isSessionLoading = status === 'loading';
@@ -59,27 +60,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     email: sessionUser.email,
                     name: sessionUser.name || undefined,
                 });
-                setProfileFetched(false); // Reset fetch flag for new user
+                // We don't reset profileFetched here if the email is the same, 
+                // but if it's a different user, we should.
+                if (user && user.email !== sessionUser.email) {
+                    setProfileFetched(false);
+                    fetchInProgressRef.current = false;
+                }
             }
 
             // Sync full profile from DB if we haven't fetched it yet this session
-            if (sessionUser.email && !profileFetched) {
+            if (sessionUser.email && !profileFetched && !fetchInProgressRef.current) {
+                fetchInProgressRef.current = true;
                 fetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.user) {
-                            setUser(prev => ({ ...prev!, ...data.user }));
+                            setUser(prev => prev ? ({ ...prev, ...data.user }) : data.user);
                         }
                         setProfileFetched(true);
                     })
                     .catch(err => {
                         console.error('Profile sync error:', err);
                         setProfileFetched(true); // Don't retry indefinitely on error
+                    })
+                    .finally(() => {
+                        fetchInProgressRef.current = false;
                     });
             }
         } else if (status === 'unauthenticated') {
             setUser(null);
             setProfileFetched(false);
+            fetchInProgressRef.current = false;
         }
     }, [session, status, profileFetched, user?.email]);
 
@@ -112,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
         <AuthContext.Provider value={{ 
             isLoggedIn, 
-            isLoading: isLoading || isSessionLoading, 
+            isLoading: isLoading || isSessionLoading || (isLoggedIn && !profileFetched), 
             user, 
             login, 
             logout, 

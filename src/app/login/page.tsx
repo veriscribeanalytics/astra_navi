@@ -168,7 +168,7 @@ const LoginPage = () => {
                     <div className="relative z-10 flex flex-col h-full">
                         {/* Static Top: Logo */}
                         <div className="flex items-center gap-3 mb-auto">
-                            <Image src="/icons/logo.jpeg" alt="AstraNavi" width={36} height={36} className="rounded-lg shadow-lg" />
+                            <Image src="/icons/logo.jpeg" alt="AstraNavi" width={36} height={36} style={{ width: "auto", height: "auto" }} className="rounded-lg shadow-lg" />
                             <span className="text-xl font-headline font-bold tracking-tight text-primary">AstraNavi</span>
                         </div>
 
@@ -220,7 +220,7 @@ const LoginPage = () => {
                     <div className="p-4 sm:p-6 pb-2 shrink-0">
                         <div className="lg:hidden flex justify-center mb-4">
                             <div className="flex flex-col items-center gap-1">
-                                <Image src="/icons/logo.jpeg" alt="AstraNavi" width={32} height={32} className="rounded-lg" />
+                                <Image src="/icons/logo.jpeg" alt="AstraNavi" width={32} height={32} style={{ width: "auto", height: "auto" }} className="rounded-lg" />
                                 <h2 className="text-base font-headline font-bold text-primary">AstraNavi</h2>
                             </div>
                         </div>

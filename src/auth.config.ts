@@ -17,7 +17,10 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/about") ||
         nextUrl.pathname.startsWith("/support") ||
         nextUrl.pathname.startsWith("/careers") ||
-        nextUrl.pathname.startsWith("/plans");
+        nextUrl.pathname.startsWith("/plans") ||
+        nextUrl.pathname.startsWith("/kundli") ||
+        nextUrl.pathname.startsWith("/chat") ||
+        nextUrl.pathname.startsWith("/consult");
 
       // Redirect logged-in users away from login/register
       if (isAuthRoute) {

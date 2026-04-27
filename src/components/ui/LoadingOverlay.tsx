@@ -40,6 +40,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message = "Aligning you
               alt="Astra Navi"
               width={48}
               height={48}
+              style={{ width: "auto", height: "auto" }}
               className="object-contain"
             />
           </div>

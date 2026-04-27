@@ -1,13 +1,14 @@
 'use client';
 
-import React, { 
-    Children, 
-    cloneElement, 
-    forwardRef, 
-    isValidElement, 
-    useEffect, 
-    useMemo, 
-    useRef 
+import React, {
+    Children,
+    cloneElement,
+    forwardRef,
+    isValidElement,
+    useEffect,
+    useMemo,
+    useRef,
+    useCallback
 } from 'react';
 import gsap from 'gsap';
 
@@ -27,7 +28,7 @@ const makeSlot = (i: number, distX: number, distY: number, total: number) => ({
     zIndex: total - i
 });
 
-const placeNow = (el: HTMLElement | null, slot: any, skew: number) => {
+const placeNow = (el: HTMLElement | null, slot: ReturnType<typeof makeSlot>, skew: number) => {
     if (!el) return;
     gsap.set(el, {
         x: slot.x,
@@ -52,6 +53,7 @@ interface CardSwapProps {
     onCardClick?: (index: number) => void;
     skewAmount?: number;
     easing?: 'elastic' | 'smooth';
+    activeIndex?: number;
     children: React.ReactNode;
 }
 
@@ -65,6 +67,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
     onCardClick,
     skewAmount = 6,
     easing = 'elastic',
+    activeIndex,
     children
 }) => {
     const config =
@@ -89,15 +92,103 @@ const CardSwap: React.FC<CardSwapProps> = ({
     const childArr = useMemo(() => Children.toArray(children), [children]);
     const refs = useMemo(
         () => childArr.map(() => React.createRef<HTMLDivElement>()),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [childArr.length]
     );
 
     const order = useRef<number[]>(Array.from({ length: childArr.length }, (_, i) => i));
-
     const tlRef = useRef<gsap.core.Timeline | null>(null);
     const intervalRef = useRef<number | null>(null);
     const container = useRef<HTMLDivElement>(null);
+    const isAnimating = useRef(false);
 
+    // Resets every card to its correct slot position based on current order.
+    // This is the critical function that makes everything work —
+    // by snapping cards to their canonical positions before any new animation,
+    // we guarantee the relative `y: '+=500'` always starts from the right place.
+    const resetAllToSlots = useCallback(() => {
+        const total = refs.length;
+        order.current.forEach((cardIdx, slotIdx) => {
+            const el = refs[cardIdx]?.current;
+            if (el) {
+                placeNow(el, makeSlot(slotIdx, cardDistance, verticalDistance, total), skewAmount);
+            }
+        });
+    }, [refs, cardDistance, verticalDistance, skewAmount]);
+
+    // The core swap animation — identical to the original react-bits code.
+    // Drops the front card down, promotes remaining cards forward,
+    // then returns the dropped card to the back of the stack.
+    const swap = useCallback(() => {
+        if (order.current.length < 2) return;
+        if (isAnimating.current) return;
+
+        const [front, ...rest] = order.current;
+        const elFront = refs[front]?.current;
+        if (!elFront) return;
+
+        isAnimating.current = true;
+        const tl = gsap.timeline();
+        tlRef.current = tl;
+
+        // Drop the front card down (relative — this is how the original works)
+        tl.to(elFront, {
+            y: '+=500',
+            duration: config.durDrop,
+            ease: config.ease
+        });
+
+        // Promote remaining cards forward into their new slots
+        tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
+        rest.forEach((idx, i) => {
+            const el = refs[idx]?.current;
+            if (!el) return;
+            const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
+            tl.set(el, { zIndex: slot.zIndex }, 'promote');
+            tl.to(
+                el,
+                {
+                    x: slot.x,
+                    y: slot.y,
+                    z: slot.z,
+                    duration: config.durMove,
+                    ease: config.ease
+                },
+                `promote+=${i * 0.15}`
+            );
+        });
+
+        // Return the dropped card to the back of the stack
+        const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
+        tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
+        tl.call(
+            () => {
+                gsap.set(elFront, { zIndex: backSlot.zIndex });
+            },
+            undefined,
+            'return'
+        );
+        tl.to(
+            elFront,
+            {
+                x: backSlot.x,
+                y: backSlot.y,
+                z: backSlot.z,
+                duration: config.durReturn,
+                ease: config.ease
+            },
+            'return'
+        );
+
+        // Update the order array once animation completes
+        tl.call(() => {
+            order.current = [...rest, front];
+            isAnimating.current = false;
+        });
+    }, [refs, cardDistance, verticalDistance, config]);
+
+    // Main initialization effect — matches the original code exactly.
+    // Places all cards, kicks off initial swap, starts the auto-rotation interval.
     useEffect(() => {
         const total = refs.length;
         refs.forEach((r, i) => {
@@ -106,68 +197,11 @@ const CardSwap: React.FC<CardSwapProps> = ({
             }
         });
 
-        const swap = () => {
-            if (order.current.length < 2) return;
-
-            const [front, ...rest] = order.current;
-            const elFront = refs[front].current;
-            if (!elFront) return;
-
-            const tl = gsap.timeline();
-            tlRef.current = tl;
-
-            tl.to(elFront, {
-                y: '+=500',
-                duration: config.durDrop,
-                ease: config.ease
-            });
-
-            tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
-            rest.forEach((idx, i) => {
-                const el = refs[idx].current;
-                if (!el) return;
-                const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
-                tl.set(el, { zIndex: slot.zIndex }, 'promote');
-                tl.to(
-                    el,
-                    {
-                        x: slot.x,
-                        y: slot.y,
-                        z: slot.z,
-                        duration: config.durMove,
-                        ease: config.ease
-                    },
-                    `promote+=${i * 0.15}`
-                );
-            });
-
-            const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
-            tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
-            tl.call(
-                () => {
-                    gsap.set(elFront, { zIndex: backSlot.zIndex });
-                },
-                undefined,
-                'return'
-            );
-            tl.to(
-                elFront,
-                {
-                    x: backSlot.x,
-                    y: backSlot.y,
-                    z: backSlot.z,
-                    duration: config.durReturn,
-                    ease: config.ease
-                },
-                'return'
-            );
-
-            tl.call(() => {
-                order.current = [...rest, front];
-            });
-        };
-
-        intervalRef.current = window.setInterval(swap, delay);
+        // Only auto-rotate when there's no external activeIndex control
+        if (activeIndex === undefined) {
+            swap();
+            intervalRef.current = window.setInterval(swap, delay);
+        }
 
         const node = container.current;
         if (pauseOnHover && node) {
@@ -177,7 +211,9 @@ const CardSwap: React.FC<CardSwapProps> = ({
             };
             const resume = () => {
                 tlRef.current?.play();
-                intervalRef.current = window.setInterval(swap, delay);
+                if (activeIndex === undefined) {
+                    intervalRef.current = window.setInterval(swap, delay);
+                }
             };
             node.addEventListener('mouseenter', pause);
             node.addEventListener('mouseleave', resume);
@@ -190,7 +226,42 @@ const CardSwap: React.FC<CardSwapProps> = ({
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing, refs, config]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing]);
+
+    // External activeIndex sync effect.
+    // When the left text slider changes the activeIndex, we need to bring
+    // the matching card to the front of the gallery.
+    useEffect(() => {
+        if (activeIndex === undefined) return;
+        if (order.current[0] === activeIndex) return;
+
+        // Step 1: Kill any running animation and mark as not animating
+        if (tlRef.current) {
+            tlRef.current.kill();
+            tlRef.current = null;
+        }
+        isAnimating.current = false;
+
+        // Step 2: Rearrange the internal order so the target card is at position [1]
+        // (i.e. "next in line"), keeping the current front card at [0].
+        const newOrder = [...order.current];
+        const targetPos = newOrder.indexOf(activeIndex);
+        if (targetPos === -1) return;
+
+        // Pull the target out and insert it right after the current front
+        newOrder.splice(targetPos, 1);
+        newOrder.splice(1, 0, activeIndex);
+        order.current = newOrder;
+
+        // Step 3: Snap every card to its correct slot position instantly.
+        // This is the key fix — by resetting positions before swap(),
+        // the relative `y: '+=500'` will always start from the right place.
+        resetAllToSlots();
+
+        // Step 4: Run the normal swap animation (drops front, promotes target to front)
+        swap();
+    }, [activeIndex, swap, resetAllToSlots]);
 
     const rendered = childArr.map((child, i) => {
         if (!isValidElement(child)) return child;

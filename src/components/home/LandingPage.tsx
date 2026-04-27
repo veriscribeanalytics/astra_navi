@@ -8,27 +8,27 @@ import Link from 'next/link';
 import { 
     Sparkles, BookOpen, User, Calendar, 
     Clock, MapPin, ArrowRight, Heart, Briefcase, Activity, DollarSign,
-    Compass, Network, Star, Zap, Home as HomeIcon, Lock, CheckCircle, Shield, Brain, ChevronDown, MessageSquare, Gem
+    Compass, Network, Star, Zap, Home as HomeIcon, Lock, CheckCircle, Shield, Brain, ChevronDown, MessageSquare, Gem, Sun
 } from 'lucide-react';
 import Input from '../ui/Input';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import LogoLoop from '@/components/ui/LogoLoop';
 import CardSwap, { Card as SwapCard } from '@/components/ui/CardSwap';
-import Pricing from './Pricing';
+// Pricing is on its own /plans page
 import { faqs } from "@/data/faqs";
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DATA ARRAYS
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const rashiItems = [
-    { id: 'aries', nameEn: 'Aries', nameHi: 'मेष', icon: '/icons/rashi/aries.png', href: '/rashis' },
-    { id: 'taurus', nameEn: 'Taurus', nameHi: 'वृषभ', icon: '/icons/rashi/taurus.png', href: '/rashis' },
-    { id: 'gemini', nameEn: 'Gemini', nameHi: 'मिथुन', icon: '/icons/rashi/gemini.png', href: '/rashis' },
-    { id: 'cancer', nameEn: 'Cancer', nameHi: 'कर्क', icon: '/icons/rashi/cancer.png', href: '/rashis' },
-    { id: 'leo', nameEn: 'Leo', nameHi: 'सिंह', icon: '/icons/rashi/leo.png', href: '/rashis' },
-    { id: 'virgo', nameEn: 'Virgo', nameHi: 'कन्या', icon: '/icons/rashi/virgo.png', href: '/rashis' },
-    { id: 'libra', nameEn: 'Libra', nameHi: 'तुला', icon: '/icons/rashi/libra.png', href: '/rashis' },
+    { id: 'aries', nameEn: 'Aries', nameHi: 'à¤®à¥‡à¤·', icon: '/icons/rashi/aries.png', href: '/rashis' },
+    { id: 'taurus', nameEn: 'Taurus', nameHi: 'à¤µà¥ƒà¤·à¤­', icon: '/icons/rashi/taurus.png', href: '/rashis' },
+    { id: 'gemini', nameEn: 'Gemini', nameHi: 'à¤®à¤¿à¤¥à¥à¤¨', icon: '/icons/rashi/gemini.png', href: '/rashis' },
+    { id: 'cancer', nameEn: 'Cancer', nameHi: 'à¤•à¤°à¥à¤•', icon: '/icons/rashi/cancer.png', href: '/rashis' },
+    { id: 'leo', nameEn: 'Leo', nameHi: 'à¤¸à¤¿à¤‚à¤¹', icon: '/icons/rashi/leo.png', href: '/rashis' },
+    { id: 'virgo', nameEn: 'Virgo', nameHi: 'à¤•à¤¨à¥à¤¯à¤¾', icon: '/icons/rashi/virgo.png', href: '/rashis' },
+    { id: 'libra', nameEn: 'Libra', nameHi: 'à¤¤à¥à¤²à¤¾', icon: '/icons/rashi/libra.png', href: '/rashis' },
     { id: 'scorpio', nameEn: 'Scorpio', nameHi: 'वृश्चिक', icon: '/icons/rashi/scorpio.png', href: '/rashis' },
     { id: 'sagittarius', nameEn: 'Sagittarius', nameHi: 'धनु', icon: '/icons/rashi/sagittarius.png', href: '/rashis' },
     { id: 'capricorn', nameEn: 'Capricorn', nameHi: 'मकर', icon: '/icons/rashi/capricorn.png', href: '/rashis' },
@@ -37,30 +37,35 @@ const rashiItems = [
 ];
 
 const services = [
-    { icon: '📿', title: 'Complete Kundli', desc: 'Lagna, Navamsha & 16 Varga charts.', badge: 'Standard', iconBg: 'bg-secondary/10', available: true, detail: "16+ Varga Charts" },
-    { icon: '🤖', title: 'Navi AI Guide', desc: 'Conversational AI trained on classical Jyotish.', badge: 'AI Powered', iconBg: 'bg-primary/10 dark:bg-primary/20', available: true, detail: "Instant Answers" },
-    { icon: '💑', title: 'Match Making', desc: '36-Guna Milan plus deep planetary sync.', badge: 'Coming Soon', iconBg: 'bg-rose-500/10 text-rose-500', available: false, detail: "Ashtakoot Milan" },
-    { icon: '🌙', title: 'Daily Forecast', desc: 'Personalized transit analysis based on your Moon.', badge: 'Personalized', iconBg: 'bg-secondary/10', available: true, detail: "Nakshatra Based" },
-    { icon: '🏥', title: 'Health Forecast', desc: 'Vedic wellness timing and Ayurvedic analysis.', badge: 'Health', iconBg: 'bg-emerald-500/10 text-emerald-500', available: true, detail: "Transit Health" },
-    { icon: '💎', title: 'Remedial Shop', desc: 'Authentic gemstones prescribed by strengths.', badge: 'Shop', iconBg: 'bg-amber-500/10 text-amber-500', available: false, detail: "Ratna Vigyan" },
+    { icon: <Compass className="w-6 h-6" />, title: 'Complete Kundli', desc: 'Lagna, Navamsha & 16 Varga charts.', iconBg: 'bg-indigo-500/10 text-indigo-400', available: true, detail: "16+ Varga Charts" },
+    { icon: <Brain className="w-6 h-6" />, title: 'Navi AI Guide', desc: 'Conversational AI trained on classical Jyotish.', iconBg: 'bg-secondary/10 text-secondary', available: true, detail: "Instant Answers" },
+    { icon: <Calendar className="w-6 h-6" />, title: 'Daily Forecast', desc: 'Personalized transit analysis based on your Moon.', iconBg: 'bg-emerald-500/10 text-emerald-400', available: true, detail: "Nakshatra Based" },
+    { icon: <Activity className="w-6 h-6" />, title: 'Health Forecast', desc: 'Vedic wellness timing and Ayurvedic analysis.', iconBg: 'bg-rose-500/10 text-rose-400', available: true, detail: "Transit Health" },
+    { icon: <Briefcase className="w-6 h-6" />, title: 'Career & Artha', desc: 'Wealth timing and professional success guidance.', iconBg: 'bg-amber-500/10 text-amber-400', available: true, detail: "Wealth Mapping" },
+    { icon: <Heart className="w-6 h-6" />, title: 'Soulmate Sync', desc: '36-point Guna Milan plus deep planetary sync.', iconBg: 'bg-pink-500/10 text-pink-400', available: true, detail: "Relationship AI" },
 ];
 
 const knowledgeAreas = [
-    { title: "The 27 Nakshatras", desc: "Deep dive into the lunar mansions.", icon: <Star className="w-6 h-6 text-secondary" />, link: "/blogs/nakshatras", count: "27 Deep Dives", color: "from-amber-500/10 to-transparent" },
-    { title: "Planetary Yogas", desc: "Specific planetary combinations that trigger massive life shifts.", icon: <Zap className="w-6 h-6 text-indigo-400" />, link: "/blogs/yogas", count: "100+ Combinations", color: "from-indigo-500/10 to-transparent" },
-    { title: "The 12 Bhavas", desc: "Master the 12 domains of human experience.", icon: <HomeIcon className="w-6 h-6 text-emerald-400" />, link: "/blogs/houses", count: "Complete Guide", color: "from-emerald-500/10 to-transparent" }
+    { title: "The 27 Nakshatras", desc: "Deep dive into the 27 lunar mansions.", icon: <Star className="w-6 h-6 text-secondary" />, link: "/blogs/nakshatras", count: "27 Deep Dives", detail: "Lunar Matrix" },
+    { title: "Planetary Yogas", desc: "Life-shifting planetary combinations.", icon: <Zap className="w-6 h-6 text-indigo-400" />, link: "/blogs/yogas", count: "100+ Yogas", detail: "Karmic Codes" },
+    { title: "The 12 Bhavas", desc: "Master the 12 domains of human life.", icon: <HomeIcon className="w-6 h-6 text-emerald-400" />, link: "/blogs/houses", count: "12 Houses", detail: "Life Spheres" },
+    { title: "Dashas & Periods", desc: "Understanding the planetary time-lords.", icon: <Clock className="w-6 h-6 text-rose-400" />, link: "/blogs", count: "Time Mapping", detail: "Predictive AI" },
+    { title: "Remedies & Gems", desc: "Authentic prescriptions for balance.", icon: <Gem className="w-6 h-6 text-amber-400" />, link: "/blogs", count: "Vedic Cure", detail: "Ratna Vigyan" },
+    { title: "Panchang Pulse", desc: "Daily Tithi, Yoga, Karana & Muhurta.", icon: <Sun className="w-6 h-6 text-indigo-400" />, link: "/blogs", count: "Daily Flux", detail: "Event Timing" }
 ];
 
 const steps = [
-    { icon: <Compass className="w-8 h-8 text-[#D4AF37]" />, title: "Provide Coordinates", desc: "Your exact birth moment is the seed from which your chart unfolds." },
-    { icon: <Network className="w-8 h-8 text-[#D4AF37]" />, title: "Navi Calculates", desc: "Mapping 9 Grahas across 12 Bhavas to identify karmic patterns." },
-    { icon: <Sparkles className="w-8 h-8 text-[#D4AF37]" />, title: "Receive Guidance", desc: "Ask Navi about your Dharma, relationships, or career timing." }
+    { icon: <MapPin className="w-8 h-8 text-[#D4AF37]" />, title: "Precise Input", desc: "Coordinates and exact birth time seed your astronomical map.", detail: "GPS Sync" },
+    { icon: <Network className="w-8 h-8 text-[#D4AF37]" />, title: "Chart Assembly", desc: "Mapping 9 Grahas across 16 Varga charts for deep resolution.", detail: "Varga Matrix" },
+    { icon: <Clock className="w-8 h-8 text-[#D4AF37]" />, title: "Dasha Timeline", desc: "Calculating Vimshottari periods to unlock your personal time-lords.", detail: "Predictive" },
+    { icon: <Brain className="w-8 h-8 text-[#D4AF37]" />, title: "Navi Analysis", desc: "AI trained on 5,000+ classical rules synthesizes your karma.", detail: "Logic Engine" },
+    { icon: <Sparkles className="w-8 h-8 text-[#D4AF37]" />, title: "Living Guidance", desc: "Receive actionable counsel on Dharma, Artha, and relationship sync.", detail: "Action Plan" }
 ];
 
 const trustPoints = [
-    { icon: <Lock className="w-6 h-6 text-secondary" />, title: "Absolute Privacy", desc: "Your birth data is encrypted end-to-end." },
-    { icon: <CheckCircle className="w-6 h-6 text-secondary" />, title: "Classical Accuracy", desc: "Trained on authentic Jyotish texts—BPHS, Phaladeepika." },
-    { icon: <Shield className="w-6 h-6 text-secondary" />, title: "Always Available", desc: "Planetary transits don't wait. Consult Navi at any hour." }
+    { icon: <Lock className="w-6 h-6 text-secondary" />, title: "Privacy First", desc: "Birth data is AES-256 encrypted and never shared with third parties.", sub: "End-to-End Secure" },
+    { icon: <CheckCircle className="w-6 h-6 text-secondary" />, title: "Textual Purity", desc: "Logic derived strictly from BPHS, Phaladeepika, and Jataka Parijata.", sub: "Classical Standards" },
+    { icon: <Shield className="w-6 h-6 text-secondary" />, title: "Global Resilience", desc: "Edge-based computation ensures high availability for transit tracking.", sub: "99.9% Uptime" }
 ];
 
 
@@ -74,32 +79,32 @@ const horoscopeCategories = [
 
 const slides = [
     {
-        tag: "Free Kundli • Instant Result",
-        title: <>Your Life, <br/><span className="text-secondary italic">Decoded in 30s</span></>,
-        desc: "Get your precise Vedic Kundli instantly. Unlock your life's purpose and karmic patterns with 5,000 years of astronomical wisdom.",
+        tag: "Free Kundli â€¢ Instant Result",
+        title: <>Ancient Wisdom, <br/><span className="text-secondary italic">Decoded in 30s</span></>,
+        desc: "Get your precise Vedic Kundli instantly. Unlock your life's purpose and karmic patterns with 5,000 years of authentic astronomical wisdom.",
         stats: [{ v: "30 Sec", l: "Free Kundli" }, { v: "16 Varga", l: "Charts" }, { v: "Precise", l: "AI Jyotish" }],
-        btn1: { label: "Get Free Kundli", action: "portals" },
+        btn1: { label: "Get My Janam Kundli", action: "portals" },
         btn2: { label: "Explore AI Guide", href: "/chat" }
     },
     {
         tag: "AI Astro Guidance",
-        title: <>Wisdom <br/><span className="text-secondary italic">Beyond Boundaries</span></>,
-        desc: "Get instant, deep clarity from Navi, our specialized AI trained on thousands of classical Vedic texts. Available 24/7 for your path.",
+        title: <>Vedic Wisdom <br/><span className="text-secondary italic">Beyond Boundaries</span></>,
+        desc: "Get instant, deep clarity from Navi, our specialized AI trained on BPHS and classical Jyotish texts. Available 24/7 for your path.",
         stats: [{ v: "AI Navi", l: "24/7 Chat" }, { v: "Classical", l: "Logic" }, { v: "100%", l: "Private" }],
         btn1: { label: "Chat with Navi AI", href: "/chat" },
         btn2: { label: "How it Works", action: "how-it-works" }
     },
     {
         tag: "Soulmate Matchmaking",
-        title: <>Discover Your <br/><span className="text-secondary italic">Perfect Alignment</span></>,
-        desc: "Advanced 36-point Guna Milan plus deep planetary sync analysis. Understand your relationship's spiritual and karmic destiny.",
+        title: <>Discover Your <br/><span className="text-secondary italic">Karmic Alignment</span></>,
+        desc: "Advanced 36-point Guna Milan plus deep planetary sync analysis based on Ashtakoot standards. Understand your relationship's destiny.",
         stats: [{ v: "36 Gunas", l: "Milan" }, { v: "Dosha", l: "Check" }, { v: "Soul", l: "Sync" }],
-        btn1: { label: "Check Compatibility", action: "portals" },
+        btn1: { label: "Check 36 Guna Match", action: "portals" },
         btn2: { label: "Sync Souls", href: "/chat" }
     },
     {
         tag: "Daily Personalized Flow",
-        title: <>Align With <br/><span className="text-secondary italic">Your Soul Purpose</span></>,
+        title: <>Align With <br/><span className="text-secondary italic">Your Moon Purpose</span></>,
         desc: "Your daily horoscope is calculated down to your exact Moon sign and Nakshatra. Stop following generic, sun-sign predictions.",
         stats: [{ v: "Personal", l: "Insights" }, { v: "Nakshatra", l: "Based" }, { v: "Daily", l: "Guidance" }],
         btn1: { label: "Get Daily Guide", href: "/chat" },
@@ -107,9 +112,9 @@ const slides = [
     }
 ];
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function LandingPage() {
     const router = useRouter();
     const [activeSlide, setActiveSlide] = useState(0);
@@ -201,6 +206,7 @@ export default function LandingPage() {
                             src={rashi.icon}
                             width={24}
                             height={24}
+                            style={{ width: 'auto', height: 'auto' }}
                             draggable={false}
                         />
                     </div>
@@ -225,7 +231,7 @@ export default function LandingPage() {
             {/* 1. HERO SECTION */}
             <section 
                 onPointerDown={() => setInteractionTick(prev => prev + 1)}
-                className="relative min-h-[600px] lg:h-[720px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden border-b border-outline-variant/10"
+                className="relative min-h-[600px] lg:h-[640px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden border-b border-outline-variant/10 pt-20 lg:pt-0"
             >
                 <motion.div 
                     initial={{ opacity: 0.1, scale: 0.8 }}
@@ -234,35 +240,35 @@ export default function LandingPage() {
                     className="absolute top-[-10%] right-[-10%] w-[250px] lg:w-[600px] h-[250px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] rounded-full -z-10 opacity-30 dark:opacity-60 will-change-transform"
                 ></motion.div>
                 
-                <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10 py-10 lg:py-0 lg:-mt-[150px]">
+                <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center relative z-10 py-10 lg:py-0 lg:-mt-[120px]">
                     
-                    {/* Left: Rotating Text Content (50% span) */}
-                    <div className="lg:col-span-6 relative h-[480px] flex flex-col justify-start text-center lg:text-left">
+                    {/* Left: Rotating Text Content */}
+                    <div className="lg:col-span-6 relative flex flex-col justify-start text-center lg:text-left min-h-[440px]">
                         <AnimatePresence mode="wait">
                             <motion.div 
                                 key={activeSlide}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
-                                transition={{ duration: 0.6, ease: "easeInOut" }}
-                                className="space-y-4 sm:space-y-6 absolute inset-0 flex flex-col justify-start pt-10 lg:pt-12"
+                                transition={{ duration: 0.5, ease: "easeInOut" }}
+                                className="space-y-4 sm:space-y-6 flex flex-col justify-start pt-4 lg:pt-10"
                             >
-                                <div className="inline-flex w-fit mx-auto lg:mx-0 items-center space-x-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/30">
+                                <div className="inline-flex w-fit mx-auto lg:mx-0 items-center space-x-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30">
                                     <Sparkles className="text-secondary w-3.5 h-3.5" />
-                                    <span className="text-[12px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-secondary font-body">
+                                    <span className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] font-bold text-secondary font-body">
                                         {slides[activeSlide].tag}
                                     </span>
                                 </div>
                                 
-                                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-headline font-bold text-primary leading-[1.1]">
+                                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-headline font-bold text-primary leading-[1.15]">
                                     {slides[activeSlide].title}
                                 </h1>
                                 
-                                <p className="text-base sm:text-lg md:text-lg text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0">
+                                <p className="text-sm sm:text-base md:text-base text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0 opacity-80">
                                     {slides[activeSlide].desc}
                                 </p>
                                 
-                                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-1">
                                     <Button 
                                         onClick={() => {
                                             if (slides[activeSlide].btn1.action) {
@@ -292,76 +298,66 @@ export default function LandingPage() {
                                     </Button>
                                 </div>
 
-                                <div className="mt-auto pb-4 space-y-4">
-                                    <div className="flex items-center justify-center lg:justify-start gap-4 text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest py-2 border-t border-outline-variant/10">
+                                <div className="mt-auto pb-2 space-y-3">
+                                    <div className="flex items-center justify-center lg:justify-start gap-3 text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest py-2 border-t border-outline-variant/10">
+                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> BPHS Standards</span>
                                         <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> English & Hindi</span>
                                         <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> AI Precision</span>
-                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> 100% Private</span>
                                     </div>
 
                                     <div className="flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10">
                                         {slides[activeSlide].stats.map((stat, idx) => (
                                             <div key={idx} className="flex flex-col">
-                                                <div className="text-xl sm:text-2xl font-bold text-secondary font-body">{stat.v}</div>
-                                                <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.2em] text-on-surface-variant/60 font-bold font-body">{stat.l}</div>
+                                                <div className="text-lg sm:text-xl font-bold text-secondary font-body">{stat.v}</div>
+                                                <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-on-surface-variant/50 font-bold font-body">{stat.l}</div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </motion.div>
                         </AnimatePresence>
-
-                        {/* Indicators Moved to Bottom-Left for Desktop */}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex justify-center lg:justify-start gap-2 z-30">
-                            {slides.map((_, idx) => (
-                                <button 
-                                    key={idx}
-                                    onClick={() => {
-                                        setActiveSlide(idx);
-                                        setInteractionTick(prev => prev + 1);
-                                    }}
-                                    className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === idx ? 'w-8 bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'w-2 bg-secondary/20 hover:bg-secondary/40'}`}
-                                    aria-label={`Go to slide ${idx + 1}`}
-                                />
-                            ))}
-                        </div>
                     </div>
 
-                    {/* Right: Permanent Visuals (50% span) - Hidden on Mobile */}
-                    <div className="hidden lg:flex lg:col-span-6 relative h-[500px] w-full items-center justify-center">
+                    {/* Right: Permanent Visuals - Synced with activeSlide */}
+                    <div className="hidden lg:flex lg:col-span-6 relative h-[480px] w-full items-center justify-center">
                         <div className="relative w-full h-full flex items-center justify-center">
-                            {/* App Coming Soon Badge */}
-                            <div className="absolute top-10 right-10 z-20 rotate-12 animate-float">
-                                <div className="px-4 py-2 rounded-xl bg-secondary shadow-[0_0_20px_rgba(212,175,55,0.4)] border border-white/20">
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">App Coming Soon</span>
-                                </div>
-                            </div>
-
-                            <CardSwap width={320} height={500} cardDistance={40} verticalDistance={60} delay={5000}>
+                            
+                            <CardSwap 
+                                width={300} 
+                                height={480} 
+                                cardDistance={40} 
+                                verticalDistance={55} 
+                                activeIndex={activeSlide}
+                            >
                                 {/* CARD 1: KUNDLI DECODED */}
-                                <SwapCard className="bg-[#12122b] border-[8px] border-outline-variant/30 overflow-hidden">
+                                <SwapCard className="bg-[#12122b] border-[8px] border-outline-variant/30 overflow-hidden relative">
+                                    <div className="absolute top-4 right-4 z-20">
+                                        <div className="px-3 py-1.5 rounded-lg bg-secondary/90 backdrop-blur-sm border border-white/20 shadow-lg">
+                                            <span className="text-[8px] font-bold text-white uppercase tracking-widest">BPHS Certified</span>
+                                        </div>
+                                    </div>
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
-                                        <div className="h-32 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
+                                        <div className="h-28 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
                                             <div className="text-center px-4">
-                                                <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Your Life Decoded</div>
-                                                <div className="text-white font-headline text-lg">Birth Chart Analysis</div>
+                                                <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Authentic Jyotish</div>
+                                                <div className="text-white font-headline text-lg">Janam Kundli</div>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-3 gap-2">
                                             {[1,2,3,4,5,6].map(i => (
-                                                <div key={i} className="h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-secondary/40 font-bold">H{i}</div>
+                                                <div key={i} className="h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-secondary/40 font-bold">Bhava {i}</div>
                                             ))}
                                         </div>
-                                        <div className="h-24 w-full rounded-2xl bg-gradient-to-br from-secondary/20 to-transparent border border-secondary/10 p-3">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider">Karmic Pattern</span>
+                                        <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-secondary/20 to-transparent border border-secondary/10 p-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                                                <span className="text-[9px] font-bold text-white uppercase tracking-wider">Scriptural Insight</span>
                                             </div>
-                                            <p className="text-[11px] text-white/50 leading-snug">Rahu in 10th house suggests a career in innovation and leadership.</p>
+                                            <p className="text-[10px] text-white/50 leading-tight">Accurate Dasha & Varga calculations based on Brihat Parashara Hora Shastra.</p>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-secondary flex items-center justify-center shadow-lg shadow-secondary/50"><Compass className="text-white w-6 h-6" /></div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-secondary flex items-center justify-center shadow-lg"><Compass className="text-white w-5 h-5" /></div>
                                 </SwapCard>
 
                                 {/* CARD 2: AI NAVI CHAT */}
@@ -369,112 +365,109 @@ export default function LandingPage() {
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-4">
                                         <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><Brain className="text-white w-5 h-5" /></div>
+                                            <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><Brain className="text-white w-5 h-5" /></div>
                                             <div>
-                                                <div className="text-white text-sm font-bold">Navi AI</div>
-                                                <div className="text-blue-400 text-[10px] flex items-center gap-1 font-bold"><div className="w-1 h-1 rounded-full bg-blue-400" /> Online</div>
+                                                <div className="text-white text-xs font-bold">Navi AI Guide</div>
+                                                <div className="text-blue-400 text-[9px] flex items-center gap-1 font-bold"><div className="w-1 h-1 rounded-full bg-blue-400" /> Online</div>
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <div className="max-w-[80%] self-start p-3 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 text-[11px] text-white/70">
+                                            <div className="max-w-[85%] self-start p-3 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 text-[10px] text-white/70">
                                                 "How does Jupiter's transit affect my career this month?"
                                             </div>
-                                            <div className="max-w-[85%] self-end ml-auto p-3 rounded-2xl rounded-tr-none bg-blue-500/20 border border-blue-500/30 text-[11px] text-blue-100 italic">
-                                                "Jupiter in your 10th house brings massive professional expansion. Focus on..."
+                                            <div className="max-w-[90%] self-end ml-auto p-3 rounded-2xl rounded-tr-none bg-blue-500/20 border border-blue-500/30 text-[10px] text-blue-100 italic">
+                                                "Jupiter in your 10th house brings professional expansion. Focus on leadership..."
                                             </div>
                                         </div>
-                                        <div className="mt-auto h-10 w-full rounded-full bg-white/5 border border-white/10 flex items-center px-4 justify-between">
-                                            <span className="text-[10px] text-white/30">Ask Navi anything...</span>
-                                            <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                                        <div className="mt-auto h-9 w-full rounded-full bg-white/5 border border-white/10 flex items-center px-4 justify-between">
+                                            <span className="text-[10px] text-white/30">Ask Navi...</span>
+                                            <MessageSquare className="w-3 h-3 text-blue-400" />
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/50"><MessageSquare className="text-white w-6 h-6" /></div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg"><MessageSquare className="text-white w-5 h-5" /></div>
                                 </SwapCard>
 
                                 {/* CARD 3: SOULMATE SYNC */}
                                 <SwapCard className="bg-[#240a12] border-[8px] border-outline-variant/30 overflow-hidden">
+                                    <div className="absolute top-4 right-4 z-20">
+                                        <div className="px-3 py-1.5 rounded-lg bg-rose-500/90 backdrop-blur-sm border border-white/20 shadow-lg">
+                                            <span className="text-[8px] font-bold text-white uppercase tracking-widest">Ashtakoot Milan</span>
+                                        </div>
+                                    </div>
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
-                                        <div className="h-32 w-full rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                                        <div className="h-28 w-full rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
                                             <div className="text-center px-4">
-                                                <div className="text-rose-400 text-[10px] font-bold uppercase tracking-widest mb-1">Compatibility</div>
-                                                <div className="text-white font-headline text-2xl">28/36 Gunas</div>
+                                                <div className="text-rose-400 text-[9px] font-bold uppercase tracking-widest mb-1">Guna Matching</div>
+                                                <div className="text-white font-headline text-xl">28/36 Gunas</div>
                                             </div>
                                         </div>
                                         <div className="flex justify-around items-center py-2">
-                                            <div className="w-16 h-16 rounded-full border-2 border-rose-500/30 flex items-center justify-center relative">
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-500 text-[10px] flex items-center justify-center font-bold text-white shadow-lg">M</div>
-                                                <User className="text-rose-400 w-8 h-8" />
+                                            <div className="w-14 h-14 rounded-full border border-rose-500/30 flex items-center justify-center relative">
+                                                <User className="text-rose-400 w-6 h-6" />
                                             </div>
-                                            <div className="w-10 h-px bg-rose-500/20" />
-                                            <div className="w-16 h-16 rounded-full border-2 border-rose-500/30 flex items-center justify-center relative">
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-pink-500 text-[10px] flex items-center justify-center font-bold text-white shadow-lg">F</div>
-                                                <User className="text-pink-400 w-8 h-8" />
+                                            <div className="w-8 h-px bg-rose-500/20" />
+                                            <div className="w-14 h-14 rounded-full border border-rose-500/30 flex items-center justify-center relative">
+                                                <User className="text-pink-400 w-6 h-6" />
                                             </div>
                                         </div>
-                                        <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-rose-500/20 to-transparent border border-rose-500/10 flex flex-col items-center justify-center text-center p-2">
-                                            <div className="text-[12px] font-bold text-rose-300 uppercase tracking-widest mb-1">High Compatibility</div>
-                                            <p className="text-[10px] text-white/40 leading-tight">Strong emotional & spiritual bond detected.</p>
+                                        <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-rose-500/20 to-transparent border border-rose-500/10 flex flex-col items-center justify-center text-center p-2">
+                                            <div className="text-[11px] font-bold text-rose-300 uppercase tracking-widest mb-0.5">High Compatibility</div>
+                                            <p className="text-[9px] text-white/40 leading-tight">Strong emotional & spiritual bond.</p>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/50"><Heart className="text-white w-6 h-6" /></div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center shadow-lg"><Heart className="text-white w-5 h-5" /></div>
                                 </SwapCard>
 
                                 {/* CARD 4: DAILY ENERGY */}
                                 <SwapCard className="bg-[#0a2414] border-[8px] border-outline-variant/30 overflow-hidden">
                                     <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                     <div className="p-6 pt-10 space-y-6">
-                                        <div className="h-32 w-full rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center justify-center">
-                                            <div className="text-emerald-400 text-3xl font-headline font-bold">85%</div>
-                                            <div className="text-[10px] text-emerald-400/60 font-bold uppercase tracking-widest">Today's Alignment</div>
+                                        <div className="h-28 w-full rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center justify-center">
+                                            <div className="text-emerald-400 text-2xl font-headline font-bold">85%</div>
+                                            <div className="text-[9px] text-emerald-400/60 font-bold uppercase tracking-widest">Daily Alignment</div>
                                         </div>
-                                        <div className="space-y-4">
+                                        <div className="space-y-3">
                                             {[
                                                 { l: 'Energy', v: 'High', c: 'bg-emerald-400' },
                                                 { l: 'Focus', v: 'Sharp', c: 'bg-blue-400' },
-                                                { l: 'Mood', v: 'Spiritual', c: 'bg-purple-400' }
                                             ].map((s, i) => (
                                                 <div key={i} className="flex items-center justify-between">
-                                                    <span className="text-[11px] text-white/50">{s.l}</span>
+                                                    <span className="text-[10px] text-white/50">{s.l}</span>
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-24 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                                        <div className="w-20 h-1 rounded-full bg-white/5 overflow-hidden">
                                                             <div className={`h-full ${s.c} w-[80%]`} />
                                                         </div>
-                                                        <span className="text-[10px] font-bold text-white">{s.v}</span>
+                                                        <span className="text-[9px] font-bold text-white">{s.v}</span>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 p-4">
-                                            <div className="text-[10px] text-emerald-300 uppercase font-bold mb-1">Transit Tip</div>
-                                            <p className="text-[11px] text-white/60 italic leading-tight">"Auspicious time for new beginnings."</p>
+                                        <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 p-3">
+                                            <div className="text-[9px] text-emerald-300 uppercase font-bold mb-0.5">Transit Tip</div>
+                                            <p className="text-[10px] text-white/60 italic leading-tight">"Auspicious time for new beginnings."</p>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/50"><Activity className="text-white w-6 h-6" /></div>
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"><Activity className="text-white w-5 h-5" /></div>
                                 </SwapCard>
                             </CardSwap>
                         </div>
                     </div>
                 </div>
 
-                {/* Scroll Indicator */}
-                <div 
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer z-20 group hidden lg:flex"
-                    onClick={() => document.getElementById('portals')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                    <motion.div 
-                        animate={{ y: [0, 8, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        className="flex flex-col items-center gap-2"
-                    >
-                        <div className="flex flex-col items-center">
-                            <span className="text-[7px] font-bold text-secondary/30 group-hover:text-secondary/50 uppercase tracking-[0.2em] transition-colors leading-none mb-1">Click to</span>
-                            <span className="text-[10px] font-bold text-secondary/60 group-hover:text-secondary uppercase tracking-[0.3em] transition-colors leading-none">Explore Below</span>
-                        </div>
-                        <div className="w-5 h-8 rounded-full border border-secondary/20 group-hover:border-secondary/40 flex justify-center p-1.5 transition-colors">
-                            <div className="w-1 h-1.5 bg-secondary/40 group-hover:bg-secondary rounded-full" />
-                        </div>
-                    </motion.div>
+                {/* Hero Slider Indicators - Centered at bottom */}
+                <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex justify-center gap-1.5 z-30">
+                    {slides.map((_, idx) => (
+                        <button 
+                            key={idx}
+                            onClick={() => {
+                                setActiveSlide(idx);
+                                setInteractionTick(prev => prev + 1);
+                            }}
+                            className={`h-1 rounded-full transition-all duration-300 ${activeSlide === idx ? 'w-6 bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'w-1.5 bg-secondary/20 hover:bg-secondary/40'}`}
+                            aria-label={`Go to slide ${idx + 1}`}
+                        />
+                    ))}
                 </div>
             </section>
 
@@ -494,379 +487,307 @@ export default function LandingPage() {
                 />
             </section>
 
-            {/* 4. INTERACTIVE PORTALS (Horoscope, Kundli, Match) */}
+            {/* 4. MAIN CONTENT BELOW ZODIAC */}
             <motion.section 
                 id="portals"
                 initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants}
-                className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-16"
+                className="max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12 relative"
             >
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/5 border border-secondary/10 mb-4">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
-                        </span>
-                        <span className="text-[10px] font-bold tracking-[0.25em] text-secondary uppercase">Your Cosmic Journey</span>
-                    </div>
-                    <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-4">Start Exploring Now</h2>
+                {/* Section Headline */}
+                <div className="text-center mb-8">
+                    <div className="text-[10px] text-secondary font-bold tracking-[0.25em] uppercase mb-3">Your Vedic Command Center</div>
+                    <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Everything You Need, <span className="text-secondary italic">One Platform</span></h2>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
-                    
-                    {/* 1. Horoscope Portal */}
-                    <Card className="border-outline-variant/30 flex flex-col shadow-xl h-[520px]" padding="none">
-                        <div className="p-6 border-b border-outline-variant/20 bg-surface flex justify-between items-center">
-                            <h3 className="text-xl font-headline font-bold flex items-center gap-2 text-primary">
-                                <Sparkles className="text-secondary w-5 h-5" /> Today's Detail
-                            </h3>
-                            <span className="text-[9px] font-bold text-secondary px-2 py-0.5 bg-secondary/10 rounded-full border border-secondary/20">LIVE TRANSIT</span>
-                        </div>
-                        <div className="p-6 space-y-6 flex-grow overflow-y-auto hide-scrollbar">
-                            <div className="flex justify-between items-end">
-                                <div>
-                                    <div className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Moon Sign</div>
-                                    <div className="text-2xl font-bold text-primary">Pisces (Meen)</div>
+                {/* 4-Column Grid: Chat Navi + 3 Portals */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {/* Chat Navi Card */}
+                    <Link href="/chat" className="group">
+                        <Card className="border-outline-variant/30 hover:border-secondary/50 transition-all duration-500 h-[440px] flex flex-col relative overflow-hidden" padding="md">
+                            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="relative z-10 flex flex-col items-center text-center justify-center h-full">
+                                <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-inner">
+                                    <MessageSquare className="w-7 h-7 text-secondary" />
                                 </div>
-                                <div className="text-right">
-                                    <div className="text-[10px] font-bold text-on-surface-variant/40 uppercase">Nakshatra</div>
-                                    <div className="text-sm font-bold text-primary">Revati ✦✦✦</div>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Online Now</span>
+                                </div>
+                                <h3 className="text-xl font-headline font-bold text-primary mb-3">Chat with Navi</h3>
+                                <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-6 max-w-[220px]">Ask anything about your Kundli, Dashas, transits, or life guidance. AI trained on 5000+ classical texts.</p>
+                                <div className="flex items-center text-[11px] font-bold text-secondary uppercase tracking-widest gap-2 group-hover:translate-x-1 transition-transform bg-secondary/5 px-4 py-2 rounded-full border border-secondary/10">
+                                    Start Conversation <ArrowRight className="w-3.5 h-3.5" />
+                                </div>
+                            </div>
+                        </Card>
+                    </Link>
+
+                    {/* Horoscope Portal */}
+                    <Card className="border-outline-variant/30 flex flex-col h-full items-center text-center justify-center" padding="md">
+                        <div className="flex flex-col items-center justify-center w-full">
+                            <Sparkles className="text-secondary w-10 h-10 mb-4 animate-pulse" />
+                            <h3 className="text-xl font-headline font-bold text-primary mb-1 uppercase tracking-widest">Today&apos;s Forecast</h3>
+                            <span className="text-[8px] font-bold text-secondary px-2 py-0.5 bg-secondary/10 rounded-full border border-secondary/20 mb-6">LIVE TRANSIT</span>
+                            
+                            <div className="w-full space-y-4 mb-6">
+                                <div className="flex justify-between items-center bg-secondary/5 p-3 rounded-xl border border-secondary/10">
+                                    <div className="text-left">
+                                        <div className="text-[8px] font-bold text-secondary uppercase tracking-[0.2em]">Moon Sign</div>
+                                        <div className="text-base font-bold text-primary">Pisces</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-[8px] font-bold text-on-surface-variant/40 uppercase">Nakshatra</div>
+                                        <div className="text-[10px] font-bold text-primary">Revati</div>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    {[
+                                        { label: 'Energy', val: 85, color: 'bg-amber-400' },
+                                        { label: 'Luck', val: 62, color: 'bg-emerald-400' },
+                                    ].map((s, i) => (
+                                        <div key={i} className="space-y-1">
+                                            <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                                                <span>{s.label}</span><span>{s.val}%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-surface-variant/20 rounded-full overflow-hidden">
+                                                <motion.div initial={{ width: 0 }} whileInView={{ width: `${s.val}%` }} transition={{ duration: 1, delay: i*0.1 }} className={`h-full ${s.color} rounded-full`} />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                             
-                            <div className="space-y-4">
-                                {[
-                                    { label: 'Energy', val: 85, color: 'bg-amber-400' },
-                                    { label: 'Luck', val: 62, color: 'bg-emerald-400' },
-                                    { label: 'Emotion', val: 40, color: 'bg-blue-400' }
-                                ].map((s, i) => (
-                                    <div key={i} className="space-y-1.5">
-                                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
-                                            <span>{s.label}</span>
-                                            <span>{s.val}%</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-surface-variant/20 rounded-full overflow-hidden shadow-inner">
-                                            <motion.div initial={{ width: 0 }} whileInView={{ width: `${s.val}%` }} transition={{ duration: 1, delay: i*0.1 }} className={`h-full ${s.color} rounded-full`} />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 pt-2">
-                                {horoscopeCategories.slice(0, 2).map((cat, i) => (
-                                    <div key={i} className="p-4 bg-secondary/5 rounded-2xl border border-secondary/10">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className={`w-6 h-6 rounded-md ${cat.bg} flex items-center justify-center`}>{cat.icon}</div>
-                                            <span className="text-[9px] font-bold text-foreground/60 uppercase">{cat.title}</span>
-                                        </div>
-                                        <p className="text-[10px] leading-relaxed text-foreground/80 line-clamp-2">{cat.text}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="p-6 border-t border-outline-variant/20 bg-secondary/5 text-center mt-auto">
-                            <Link href="/login" className="text-sm font-bold text-secondary hover:text-secondary/80 flex items-center justify-center gap-2">
-                                Unlock 12 House Predictions <ArrowRight className="w-4 h-4" />
-                            </Link>
+                            <Button href="/login" variant="secondary" size="sm" className="w-full text-[10px] font-bold text-secondary hover:text-secondary/80 flex items-center justify-center gap-1 h-10 border-secondary/20">
+                                Unlock Full Predictions <ArrowRight className="w-3.5 h-3.5" />
+                            </Button>
                         </div>
                     </Card>
 
-                    {/* 2. Birth Chart Form */}
-                    <Card className="border-secondary/30 flex flex-col shadow-xl shadow-secondary/5 h-[520px] relative overflow-hidden" padding="lg">
+                    {/* Kundli Form Portal */}
+                    <Card className="border-secondary/30 flex flex-col h-full relative overflow-hidden" padding="md">
                         <AnimatePresence mode="wait">
                             {isCalculating && teaserMode.type === 'kundli' ? (
-                                <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-4">
-                                    <div className="w-16 h-16 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin" />
-                                    <p className="text-sm font-bold text-secondary animate-pulse uppercase tracking-widest">Mapping Your Destiny...</p>
+                                <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-3">
+                                    <div className="w-10 h-10 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin" />
+                                    <p className="text-[10px] font-bold text-secondary animate-pulse uppercase tracking-widest">Mapping Destiny...</p>
                                 </motion.div>
                             ) : teaserMode.type === 'kundli' ? (
-                                <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="h-full flex flex-col">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <h3 className="text-xl font-headline font-bold text-primary">Insight for {formData.name}</h3>
-                                        <span className="text-[8px] font-bold bg-secondary/20 text-secondary px-1.5 py-0.5 rounded tracking-tighter uppercase">Sample Preview</span>
+                                <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="h-full flex flex-col items-center text-center justify-center">
+                                    <span className="text-[7px] font-bold bg-secondary/20 text-secondary px-1.5 py-0.5 rounded tracking-tighter uppercase mb-2">Sample Preview</span>
+                                    <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/20 mb-4 w-full">
+                                        <div className="text-[8px] font-bold text-secondary uppercase mb-1">Active Mahadasha</div>
+                                        <div className="text-base font-bold text-primary">Jupiter <span className="text-[10px] font-normal text-on-surface-variant/60">- Saturn</span></div>
                                     </div>
-                                    <div className="space-y-4 flex-grow">
-                                        <div className="p-4 bg-secondary/5 rounded-2xl border border-secondary/20">
-                                            <div className="text-[10px] font-bold text-secondary uppercase mb-1">Active Mahadasha</div>
-                                            <div className="text-2xl font-bold text-primary">Jupiter <span className="text-sm font-normal text-on-surface-variant/60">- Saturn</span></div>
-                                            <div className="text-[11px] text-on-surface-variant/70 mt-1">Expansion meets discipline. A period of structural growth.</div>
-                                        </div>
-                                        <div className="relative h-32 w-full rounded-2xl border border-outline-variant/20 overflow-hidden bg-surface-variant/10">
-                                            <div className="absolute inset-0 backdrop-blur-md z-10 flex items-center justify-center">
-                                                <Button href="/login" size="sm" variant="primary">Unlock Full Chart</Button>
-                                            </div>
-                                            <div className="p-4 grid grid-cols-3 gap-2 opacity-30 grayscale">
-                                                {[...Array(9)].map((_, i) => <div key={i} className="h-6 bg-secondary/20 rounded" />)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <Button onClick={() => setTeaserMode({type:null, active:false})} variant="ghost" size="sm" className="mt-4">Back to Search</Button>
+                                    <Button href="/login" size="sm" variant="primary" className="text-xs w-full h-10 mb-2">Unlock Full Kundli</Button>
+                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-[10px] text-on-surface-variant/40 hover:text-secondary transition-colors">Back to Form</button>
                                 </motion.div>
                             ) : (
-                                <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col">
-                                    <h3 className="text-xl font-headline font-bold mb-6 flex items-center gap-2 text-primary">
-                                        <BookOpen className="text-secondary w-5 h-5" /> Generate Kundli
-                                    </h3>
-                                    <form onSubmit={(e) => { e.preventDefault(); handleGenerateTeaser('kundli'); }} className="space-y-4">
-                                        <Input placeholder="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input type="date" value={formData.dob} onChange={(e) => setFormData({...formData, dob: e.target.value})} required />
-                                            <Input type="time" value={formData.tob} onChange={(e) => setFormData({...formData, tob: e.target.value})} required />
+                                <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center text-center justify-center">
+                                    <BookOpen className="text-secondary w-10 h-10 mb-4" />
+                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">Janam Kundli</h3>
+                                    <p className="text-sm text-on-surface-variant/70 mb-6">Generate your precise Vedic birth chart.</p>
+                                    <form onSubmit={(e) => { e.preventDefault(); handleGenerateTeaser('kundli'); }} className="space-y-2 w-full">
+                                        <Input placeholder="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required className="h-9 text-xs" />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Input type="date" value={formData.dob} onChange={(e) => setFormData({...formData, dob: e.target.value})} required className="h-9 text-xs" />
+                                            <Input type="time" value={formData.tob} onChange={(e) => setFormData({...formData, tob: e.target.value})} required className="h-9 text-xs" />
                                         </div>
-                                        <Input placeholder="Place of Birth" value={formData.pob} onChange={(e) => setFormData({...formData, pob: e.target.value})} required />
-                                        <Button type="submit" fullWidth size="lg" className="mt-4">Calculate Chart</Button>
+                                        <Input placeholder="Place of Birth" value={formData.pob} onChange={(e) => setFormData({...formData, pob: e.target.value})} required className="h-9 text-xs" />
+                                        <Button type="submit" fullWidth size="sm" className="h-9 text-xs mt-2">Calculate Kundli</Button>
                                     </form>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </Card>
 
-                    {/* 3. Compatibility Portal */}
-                    <Card className="border-outline-variant/30 flex flex-col shadow-xl relative overflow-hidden h-[520px]" padding="lg">
+                    {/* Compatibility Portal */}
+                    <Card className="border-outline-variant/30 flex flex-col h-full relative overflow-hidden" padding="md">
                         <AnimatePresence mode="wait">
                             {isCalculating && teaserMode.type === 'match' ? (
-                                <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-4">
-                                    <div className="w-16 h-16 border-4 border-rose-500/20 border-t-rose-500 rounded-full animate-spin" />
-                                    <p className="text-sm font-bold text-rose-500 animate-pulse uppercase tracking-widest">Scanning Soul Sync...</p>
+                                <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-3">
+                                    <div className="w-10 h-10 border-4 border-rose-500/20 border-t-rose-500 rounded-full animate-spin" />
+                                    <p className="text-[10px] font-bold text-rose-500 animate-pulse uppercase tracking-widest">Scanning Sync...</p>
                                 </motion.div>
                             ) : teaserMode.type === 'match' ? (
                                 <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="h-full flex flex-col items-center justify-center text-center">
-                                    <span className="text-[8px] font-bold bg-rose-500/20 text-rose-500 px-1.5 py-0.5 rounded tracking-tighter uppercase mb-4">Sample Preview</span>
-                                    <div className="w-32 h-32 rounded-full border-4 border-rose-500 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(244,63,94,0.2)]">
+                                    <div className="w-20 h-20 rounded-full border-4 border-rose-500 flex items-center justify-center mb-3">
                                         <div>
-                                            <div className="text-3xl font-bold text-primary">28<span className="text-sm text-on-surface-variant/40">/36</span></div>
-                                            <div className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Gunas</div>
+                                            <div className="text-xl font-bold text-primary">28<span className="text-[10px] text-on-surface-variant/40">/36</span></div>
+                                            <div className="text-[8px] font-bold text-rose-500 uppercase">Gunas</div>
                                         </div>
                                     </div>
-                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">High Compatibility</h3>
-                                    <p className="text-sm text-on-surface-variant/70 mb-8 px-4">
-                                        Strong Bhakoot and Nadi Koot connection. Great potential for long-term spiritual growth.
-                                    </p>
-                                    <div className="w-full p-4 bg-rose-500/5 rounded-2xl border border-rose-500/20 mb-6">
-                                        <div className="text-[10px] font-bold text-rose-500 uppercase mb-2">Manglik Analysis</div>
-                                        <div className="text-xs italic text-on-surface-variant/60 flex items-center justify-center gap-2">
-                                            <Lock className="w-3 h-3" /> Login to reveal Dosha report
-                                        </div>
-                                    </div>
-                                    <Button href="/login" size="lg" className="gold-gradient w-full">Unlock Soul Report</Button>
-                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-xs text-on-surface-variant/40 mt-4 hover:text-rose-500">Back</button>
+                                    <h3 className="text-sm font-headline font-bold text-primary mb-1">High Match</h3>
+                                    <Button href="/login" size="sm" className="gold-gradient w-full h-9 text-xs mt-3">Unlock Report</Button>
+                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-[9px] text-on-surface-variant/40 mt-2 hover:text-rose-500">Back</button>
                                 </motion.div>
                             ) : (
                                 <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center text-center justify-center">
-                                    <Heart className="w-12 h-12 text-rose-500 mb-6 animate-pulse" />
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-2">Soulmate Sync</h3>
-                                    <p className="text-sm text-on-surface-variant/70 mb-8 max-w-xs">
-                                        Discover compatibility with our advanced 36-point system.
-                                    </p>
-                                    <div className="w-full space-y-4 mb-6">
-                                        <Input placeholder="Your Name" value={matchData.name1} onChange={(e) => setMatchData({...matchData, name1: e.target.value})} />
-                                        <Input placeholder="Partner's Name" value={matchData.name2} onChange={(e) => setMatchData({...matchData, name2: e.target.value})} />
+                                    <Heart className="w-10 h-10 text-rose-500 mb-4 animate-pulse" />
+                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">Soulmate Sync</h3>
+                                    <p className="text-sm text-on-surface-variant/70 mb-6">36-point Guna compatibility check.</p>
+                                    <div className="w-full space-y-2 mb-3">
+                                        <Input placeholder="Your Name" value={matchData.name1} onChange={(e) => setMatchData({...matchData, name1: e.target.value})} className="h-9 text-xs" />
+                                        <Input placeholder="Partner's Name" value={matchData.name2} onChange={(e) => setMatchData({...matchData, name2: e.target.value})} className="h-9 text-xs" />
                                     </div>
-                                    <Button onClick={() => handleGenerateTeaser('match')} variant="secondary" size="lg" className="border-rose-500/30 hover:bg-rose-500/10 text-rose-600 w-full">
-                                        Analyze Connection
+                                    <Button onClick={() => handleGenerateTeaser('match')} variant="secondary" size="sm" className="border-rose-500/30 hover:bg-rose-500/10 text-rose-600 w-full h-9 text-xs">
+                                        Check Match
                                     </Button>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </Card>
-
                 </div>
             </motion.section>
 
-            {/* 5. SERVICES BENTO GRID */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-12 lg:py-16 relative">
-                <div className="absolute inset-0 bg-celestial-silk opacity-10 pointer-events-none rounded-[40px]" />
-                <div className="text-center mb-16 relative z-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/5 border border-indigo-500/10 mb-4">
-                        <Gem className="w-3.5 h-3.5 text-indigo-400" />
-                        <span className="text-[10px] font-bold tracking-[0.25em] text-indigo-400 uppercase">The Jyotish Toolkit</span>
-                    </div>
-                    <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-4">Ancient Wisdom, <span className="text-secondary italic">Modern Detail</span></h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 relative z-10">
-                    {services.map((svc, idx) => {
-                        const isHero = idx < 2;
-                        const isComingSoon = !svc.available;
-                        return (
-                            <motion.div 
-                                key={idx} 
-                                whileHover={{ y: -5 }} 
-                                className={`group relative p-8 rounded-[40px] border transition-all duration-500 flex flex-col h-full 
-                                    ${isHero ? 'md:col-span-3 lg:col-span-6' : 'md:col-span-2 lg:col-span-4'}
-                                    ${svc.available ? 'bg-surface border-outline-variant/30 hover:border-secondary/50 hover:shadow-2xl hover:shadow-secondary/5' : 'bg-surface/40 border-outline-variant/10 grayscale opacity-70'}`}
-                            >
-                                <div className="flex justify-between items-start mb-8">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl ${svc.iconBg} shadow-inner group-hover:scale-110 transition-transform`}>{svc.icon}</div>
-                                    <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${svc.available ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>{svc.badge}</span>
-                                </div>
-                                <h3 className={`font-headline font-bold text-primary mb-3 ${isHero ? 'text-2xl sm:text-3xl' : 'text-xl'}`}>{svc.title}</h3>
-                                <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-8 flex-grow">{svc.desc}</p>
-                                <div className="pt-6 border-t border-outline-variant/10 flex items-center justify-between">
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-secondary/60">{svc.detail}</span>
-                                    {isComingSoon ? (
-                                        <button className="flex items-center gap-2 text-[10px] font-bold text-primary/40 hover:text-secondary transition-colors px-3 py-1.5 rounded-full border border-transparent hover:border-secondary/20">
-                                            <Sparkles className="w-3.5 h-3.5" /> Notify Me
-                                        </button>
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-all duration-300">
-                                            {isHero ? <ArrowRight className="w-5 h-5" /> : <Sparkles className="w-4 h-4" />}
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            </motion.section>
-
-            {/* 6. CELESTIAL KNOWLEDGE */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-12 lg:py-16">
-                <div className="flex flex-col lg:flex-row justify-between items-end gap-6 mb-16">
-                    <div className="max-w-2xl text-center lg:text-left">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/10 mb-4">
-                            <BookOpen className="w-3.5 h-3.5 text-emerald-500" />
-                            <span className="text-[10px] font-bold tracking-[0.25em] text-emerald-500 uppercase">The Cosmic Archive</span>
+            {/* 5. 50/50 SPLIT: Ancient Wisdom + Cosmic Archive */}
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+                    {/* LEFT: Ancient Wisdom (Services in 3x2 Grid) */}
+                    <div className="flex flex-col">
+                        <div className="mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/5 border border-indigo-500/10 mb-3">
+                                <Gem className="w-3 h-3 text-indigo-400" />
+                                <span className="text-[10px] font-bold tracking-[0.25em] text-indigo-400 uppercase">The Jyotish Toolkit</span>
+                            </div>
+                            <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary">Ancient Wisdom, <span className="text-secondary italic">Modern Detail</span></h2>
                         </div>
-                        <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-4">Master the <span className="text-secondary italic">Ancient Codes</span></h2>
-                    </div>
-                    <Link href="/blogs" className="group flex items-center gap-3 px-8 py-4 rounded-2xl bg-surface border border-outline-variant/30 hover:border-secondary transition-all shadow-sm">
-                        <span className="text-sm font-bold uppercase tracking-widest text-primary">Explore Library</span>
-                        <ArrowRight className="w-4 h-4 text-secondary group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {knowledgeAreas.map((area, idx) => (
-                        <Link key={idx} href={area.link} className="group">
-                            <Card padding="none" className="h-full !rounded-[48px] border-outline-variant/20 group-hover:border-secondary/30 group-hover:bg-secondary/[0.02] transition-all duration-500 overflow-hidden bg-surface flex flex-col relative">
-                                <div className={`h-32 w-full bg-gradient-to-br ${area.color} relative overflow-hidden flex items-center justify-center`}>
-                                    <div className="absolute inset-0 opacity-10 bg-celestial-silk" />
-                                    <div className="w-16 h-16 rounded-3xl bg-surface/90 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 z-10">{area.icon}</div>
-                                    <span className="absolute top-6 right-8 text-[9px] font-bold text-primary/40 bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">{area.count}</span>
-                                </div>
-                                <div className="p-10 flex flex-col flex-grow">
-                                    <h3 className="font-headline font-bold text-2xl text-primary mb-4">{area.title}</h3>
-                                    <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-6 flex-grow">{area.desc}</p>
-                                    <div className="flex items-center text-xs font-bold text-secondary uppercase tracking-widest gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        Read Deep Dive <ArrowRight className="w-3.5 h-3.5" />
+                        
+                        <div className="grid grid-cols-2 border border-outline-variant/30 rounded-[32px] overflow-hidden bg-surface divide-x divide-y divide-outline-variant/20">
+                            {services.map((svc, idx) => (
+                                <Link key={idx} href="/chat" className="group p-4 sm:p-5 flex flex-col items-center justify-center text-center hover:bg-secondary/[0.02] transition-colors relative h-full min-h-[220px]">
+                                    <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center ${svc.iconBg} mb-5 shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
+                                        {svc.icon}
                                     </div>
-                                </div>
-                            </Card>
-                        </Link>
-                    ))}
-                </div>
-            </motion.section>
-
-            {/* 7. AI SPECIALIZED INSIGHTS */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="px-4 sm:px-6 md:px-8 lg:px-12 w-full max-w-7xl mx-auto py-12 lg:py-16">
-                <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
-                    <div className="max-w-2xl">
-                        <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-secondary/5 border border-secondary/10 mb-6">
-                            <span className="flex items-center gap-1.5">
-                                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-bold text-primary/60 uppercase">Navi AI Specialized Models</span>
-                            </span>
-                        </div>
-                        <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-4">Deep Vedic <span className="text-secondary italic">Intelligence</span></h2>
-                        <div className="flex items-center gap-2 p-3 bg-secondary/10 rounded-2xl w-fit border border-secondary/20">
-                            <Sparkles className="w-4 h-4 text-secondary" />
-                            <p className="text-primary font-bold text-sm">Experience precision across every domain of life with our dedicated AI engines.</p>
+                                    <h3 className="text-lg sm:text-xl font-headline font-bold text-primary mb-1 group-hover:text-secondary transition-colors">{svc.title}</h3>
+                                    <span className="text-[11px] font-bold text-secondary/60 uppercase tracking-[0.2em] mb-3">{svc.detail}</span>
+                                    <p className="text-sm sm:text-base text-on-surface-variant/80 leading-relaxed max-w-[90%] mx-auto">{svc.desc}</p>
+                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <ArrowRight className="w-5 h-5 text-secondary" />
+                                    </div>
+                                </Link>
+                            ))}
                         </div>
                     </div>
-                    <Button href="/chat" variant="secondary" className="border-secondary/30 text-secondary px-8">Start AI Chat</Button>
+
+                    {/* RIGHT: Cosmic Archive (Library in 3x2 Grid) */}
+                    <div className="flex flex-col">
+                        <div className="mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 mb-3">
+                                <BookOpen className="w-3 h-3 text-emerald-500" />
+                                <span className="text-[10px] font-bold tracking-[0.25em] text-emerald-500 uppercase">Cosmic Archive</span>
+                            </div>
+                            <div className="flex items-end justify-between">
+                                <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary">Explore <span className="text-secondary italic">Library</span></h2>
+                                <Link href="/blogs" className="text-[11px] font-bold text-secondary uppercase tracking-[0.15em] flex items-center gap-1.5 hover:translate-x-1 transition-transform mb-1">
+                                    Full Archive <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 border border-outline-variant/30 rounded-[32px] overflow-hidden bg-surface divide-x divide-y divide-outline-variant/20">
+                            {knowledgeAreas.map((area, idx) => (
+                                <Link key={idx} href={area.link} className="group p-4 sm:p-5 flex flex-col items-center justify-center text-center hover:bg-emerald-500/[0.02] transition-colors relative h-full min-h-[220px]">
+                                    <div className="w-14 h-14 rounded-[20px] bg-surface-variant/30 flex items-center justify-center mb-5 shrink-0 group-hover:scale-110 transition-transform">
+                                        {area.icon}
+                                    </div>
+                                    <h4 className="text-lg sm:text-xl font-headline font-bold text-primary mb-1 group-hover:text-emerald-500 transition-colors">{area.title}</h4>
+                                    <span className="text-[11px] font-bold text-emerald-500/60 uppercase tracking-[0.2em] mb-3">{area.detail}</span>
+                                    <p className="text-sm sm:text-base text-on-surface-variant/80 leading-relaxed max-w-[90%] mx-auto">{area.desc}</p>
+                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <ArrowRight className="w-5 h-5 text-emerald-500" />
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[
-                        { name: "Marriage AI", exp: "5000+ Texts", rate: "Instant", special: "Compatibility, Timing", initial: "M" },
-                        { name: "Career AI", exp: "Artha Shastra", rate: "Instant", special: "Success, Wealth", initial: "C" },
-                        { name: "Health AI", exp: "Ayurvedic Logic", rate: "Instant", special: "Wellness, Vitality", initial: "H" },
-                        { name: "Spiritual AI", exp: "Soul Purpose", rate: "Instant", special: "Karma, Moksha", initial: "S" }
-                    ].map((guru, idx) => (
-                        <Card key={idx} padding="none" className="group hover:border-secondary/40 transition-all duration-500 bg-surface overflow-hidden !rounded-[32px]">
-                            <div className="h-40 bg-secondary/5 relative flex items-center justify-center">
-                                <div className="absolute inset-0 bg-celestial-silk opacity-10" />
-                                <div className="w-20 h-20 rounded-full bg-surface border-4 border-white shadow-xl flex items-center justify-center text-3xl font-headline font-bold text-secondary/40 group-hover:text-secondary group-hover:scale-110 transition-all duration-500">{guru.initial}</div>
-                                <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-emerald-500/20">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[8px] font-bold text-emerald-600 uppercase">Active</span>
+                {/* FULL WIDTH PRICING CTA */}
+                <div className="mt-12">
+                    <Link href="/plans" className="group/p block">
+                        <div className="p-8 rounded-[32px] bg-gradient-to-r from-secondary/5 via-secondary/10 to-secondary/5 border border-secondary/20 flex flex-col sm:flex-row items-center justify-between hover:border-secondary/40 transition-all duration-500 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(212,175,55,0.1),transparent)]" />
+                            <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-left">
+                                <div className="w-16 h-16 rounded-[20px] bg-secondary/10 flex items-center justify-center shadow-lg shadow-secondary/5 border border-secondary/20 group-hover:scale-110 transition-transform">
+                                    <Sparkles className="w-8 h-8 text-secondary" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xl sm:text-2xl font-bold text-primary mb-1">Master Your Destiny with Premium Insights</h4>
+                                    <p className="text-sm sm:text-base text-on-surface-variant/70">Join 10,000+ seekers. Access advanced Muhurtas, AI Dashas, and deep chart analysis.</p>
                                 </div>
                             </div>
-                            <div className="p-6">
-                                <h3 className="font-bold text-primary text-base mb-1">{guru.name}</h3>
-                                <p className="text-[11px] text-on-surface-variant/60 mb-4">{guru.exp} • {guru.special}</p>
-                                <div className="flex items-center justify-between pt-4 border-t border-outline-variant/10">
-                                    <div className="text-sm font-bold text-primary">{guru.rate}</div>
-                                    <Link href="/chat" className="text-[11px] font-bold text-secondary uppercase tracking-widest group-hover:translate-x-1 transition-transform flex items-center gap-1">Ask Navi <ArrowRight className="w-3 h-3" /></Link>
-                                </div>
+                            <div className="mt-6 sm:mt-0 px-8 py-4 rounded-2xl bg-secondary text-background font-bold text-base flex items-center gap-2 group-hover:shadow-xl group-hover:shadow-secondary/20 transition-all">
+                                View Plans & Pricing <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </div>
-                        </Card>
-                    ))}
+                        </div>
+                    </Link>
                 </div>
             </motion.section>
 
             {/* 8. HOW IT WORKS */}
-            <motion.section id="how-it-works" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-12 lg:py-16 relative overflow-hidden bg-transparent">
+            <motion.section id="how-it-works" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-16 lg:py-24 relative overflow-hidden bg-transparent">
                 <div className="absolute inset-0 opacity-5 pointer-events-none">
                     <svg className="w-full h-full" viewBox="0 0 1200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M100 300C300 300 300 100 500 100C700 100 700 500 900 500C1100 500 1100 300 1300 300" stroke="var(--secondary)" strokeWidth="2" strokeDasharray="8 8" className="animate-[dash_20s_linear_infinite]" />
                     </svg>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 text-center mb-20 relative z-10">
-                    <div className="text-[10px] text-secondary font-bold tracking-[0.25em] uppercase mb-4">The Path to Clarity</div>
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-headline mb-4 text-primary">From Birth Moment to <span className="text-secondary italic">Cosmic Map</span></h2>
+                <div className="max-w-[1680px] mx-auto px-4 text-center mb-24 relative z-10">
+                    <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">The Path to Clarity</div>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline mb-6 text-primary">From Birth Moment to <span className="text-secondary italic">Cosmic Map</span></h2>
                 </div>
                 
-                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20 relative z-10 px-8">
+                <div className="max-w-[1600px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12 relative z-10 px-4">
                     {steps.map((step, index) => (
-                        <div key={index} className={`flex flex-col items-center text-center group relative ${index === 1 ? 'md:translate-y-12' : ''}`}>
-                            <div className="w-24 h-24 rounded-full border border-secondary/20 bg-surface flex items-center justify-center mb-8 relative shadow-xl group-hover:border-secondary group-hover:shadow-secondary/20 transition-all duration-500">
-                                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-surface border border-secondary/60 flex items-center justify-center text-secondary font-bold font-mono text-xs shadow-md z-20">
+                        <div key={index} className="flex flex-col items-center text-center group relative">
+                            <div className="w-20 h-20 rounded-full border border-secondary/20 bg-surface flex items-center justify-center mb-6 relative shadow-xl group-hover:border-secondary group-hover:shadow-secondary/20 transition-all duration-500">
+                                <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-surface border border-secondary/60 flex items-center justify-center text-secondary font-bold font-mono text-[10px] shadow-md z-20">
                                     0{index + 1}
                                 </div>
                                 <div className="absolute inset-0 rounded-full bg-secondary/0 group-hover:bg-secondary/5 transition-colors duration-500" />
                                 <div className="transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 z-10">{step.icon}</div>
                             </div>
-                            <h3 className="text-xl font-headline font-bold mb-4 text-primary">{step.title}</h3>
-                            <p className="text-sm text-on-surface-variant/70 leading-relaxed max-w-[280px]">{step.desc}</p>
+                            <h3 className="text-lg font-headline font-bold mb-2 text-primary">{step.title}</h3>
+                            <span className="text-[10px] font-bold text-secondary/50 uppercase tracking-[0.2em] mb-3">{step.detail}</span>
+                            <p className="text-xs text-on-surface-variant/70 leading-relaxed max-w-[180px]">{step.desc}</p>
                         </div>
                     ))}
                 </div>
             </motion.section>
 
-            {/* 9. PRICING / PLANS */}
-            <Pricing />
+
+
 
             {/* 10. TRUST & FAQ */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-12 lg:py-16 relative bg-transparent px-4 lg:px-12 max-w-7xl mx-auto">
-                <div className="text-center mb-20">
-                    <div className="text-[10px] text-secondary font-bold tracking-[0.25em] uppercase mb-4">Our Commitment</div>
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-headline text-primary mb-12">Guarded by Tradition</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto">
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-16 lg:py-24 relative bg-transparent px-4 lg:px-12 max-w-[1680px] mx-auto">
+                <div className="text-center mb-24">
+                    <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">Our Commitment</div>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-16">Guarded by Tradition</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 lg:gap-16 max-w-[1400px] mx-auto">
                         {trustPoints.map((point, idx) => (
-                            <Card key={idx} variant="bordered" padding="lg" className="flex flex-col items-center text-center relative overflow-hidden group">
-                                <div className="absolute -right-8 -bottom-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 scale-150 rotate-12">
+                            <Card key={idx} variant="bordered" padding="lg" className="flex flex-col items-center text-center relative overflow-hidden group !rounded-[32px]">
+                                <div className="absolute -right-10 -bottom-10 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 scale-150 rotate-12">
                                     {point.icon}
                                 </div>
-                                <div className="h-16 w-16 rounded-2xl bg-secondary/5 flex items-center justify-center mb-6 border border-secondary/10 group-hover:scale-110 transition-transform duration-500">{point.icon}</div>
-                                <h3 className="text-xl font-headline font-bold text-primary mb-3">{point.title}</h3>
+                                <div className="h-16 w-16 rounded-[24px] bg-secondary/5 flex items-center justify-center mb-6 border border-secondary/10 group-hover:scale-110 transition-transform duration-500">{point.icon}</div>
+                                <h3 className="text-xl font-headline font-bold text-primary mb-2">{point.title}</h3>
+                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mb-4">{point.sub}</span>
                                 <p className="text-sm text-on-surface-variant/70 leading-relaxed">{point.desc}</p>
                             </Card>
                         ))}
                     </div>
                 </div>
 
-                <div className="max-w-4xl mx-auto mt-32" id="faq">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl sm:text-4xl font-bold font-headline mb-4 text-primary">Questions About Jyotish</h2>
-                        <p className="text-on-surface-variant/60 text-sm">Everything you need to know about our authentic Vedic approach.</p>
+                <div className="max-w-[1150px] mx-auto mt-40" id="faq">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl sm:text-5xl font-bold font-headline mb-5 text-primary">Questions About Jyotish</h2>
+                        <p className="text-on-surface-variant/60 text-lg">Everything you need to know about our authentic Vedic approach.</p>
                     </div>
-                    <div className="space-y-4 mb-16">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-20">
                         {faqs.map((faq, idx) => (
-                            <div key={idx} className="border border-outline-variant/30 rounded-3xl bg-surface overflow-hidden hover:border-secondary/30 transition-colors">
+                            <div key={idx} className="border border-outline-variant/30 rounded-[32px] bg-surface overflow-hidden hover:border-secondary/30 transition-colors h-fit">
                                 <button onClick={() => toggleFAQ(idx)} className="w-full flex justify-between items-center p-6 text-left group">
-                                    <span className="font-headline font-semibold text-lg text-primary group-hover:text-secondary transition-colors">{faq.question}</span>
-                                    <ChevronDown className={`w-5 h-5 text-secondary transition-transform ${openFAQIndex === idx ? 'rotate-180' : ''}`} />
+                                    <span className="font-headline font-semibold text-lg text-primary group-hover:text-secondary transition-colors pr-4">{faq.question}</span>
+                                    <ChevronDown className={`w-5 h-5 text-secondary transition-transform shrink-0 ${openFAQIndex === idx ? 'rotate-180' : ''}`} />
                                 </button>
                                 <AnimatePresence>
                                     {openFAQIndex === idx && (
@@ -880,36 +801,36 @@ export default function LandingPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="p-8 rounded-[40px] bg-secondary/5 border border-secondary/20 flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white"><MessageSquare className="w-6 h-6" /></div>
+                    <div className="p-10 rounded-[48px] bg-secondary/5 border border-secondary/20 flex flex-col sm:flex-row items-center justify-between gap-8">
+                        <div className="flex items-center gap-6">
+                            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white"><MessageSquare className="w-7 h-7" /></div>
                             <div className="text-center sm:text-left">
-                                <h4 className="font-bold text-primary">Still have questions?</h4>
-                                <p className="text-sm text-on-surface-variant/60">Ask Navi, our AI guide, anything about Jyotish.</p>
+                                <h4 className="text-xl font-bold text-primary">Still have questions?</h4>
+                                <p className="text-base text-on-surface-variant/60">Ask Navi, our AI guide, anything about Jyotish.</p>
                             </div>
                         </div>
-                        <Button href="/chat" variant="secondary" className="border-secondary/30 text-secondary px-8">Chat with Navi</Button>
+                        <Button href="/chat" variant="secondary" className="border-secondary/30 text-secondary px-10 h-12 text-base">Chat with Navi</Button>
                     </div>
                 </div>
             </motion.section>
 
             {/* 11. FINAL CTA Section */}
-            <section className="py-16 lg:py-24 relative overflow-hidden bg-[#1a0733]">
+            <section className="py-16 lg:py-24 relative overflow-hidden bg-surface-variant/30 border-t border-outline-variant/20">
                 <div className="absolute inset-0 opacity-15 bg-celestial-silk mix-blend-overlay" />
                 <motion.div 
                     initial={{ opacity: 0.1, scale: 0.8 }}
                     animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.2, 1] }}
                     transition={{ duration: 15, repeat: Infinity }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-secondary/30 blur-[150px] rounded-full"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-secondary/20 blur-[150px] rounded-full"
                 />
                 
                 <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
                     <Sparkles className="w-12 h-12 text-secondary mx-auto mb-8 animate-pulse" />
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold text-white mb-8">Ready to Align with the <span className="text-secondary italic">Cosmos?</span></h2>
-                    <p className="text-white/60 text-lg mb-12 max-w-2xl mx-auto">Join thousands who have discovered clarity through the ancient codes of Vedic astrology.</p>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold text-primary mb-8">Ready to Align with the <span className="text-secondary italic">Cosmos?</span></h2>
+                    <p className="text-on-surface-variant/80 text-lg mb-12 max-w-2xl mx-auto">Join thousands who have discovered clarity through the ancient codes of Vedic astrology.</p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Button href="/chat" size="sm" className="gold-gradient shadow-2xl px-12 text-lg">Begin Your Journey</Button>
-                        <Button href="/about" size="sm" variant="ghost" className="text-white hover:bg-white/5 border border-white/10 px-12 text-lg">Learn Our Method</Button>
+                        <Button href="/about" size="sm" variant="ghost" className="text-primary hover:bg-primary/5 border border-outline-variant/30 px-12 text-lg">Learn Our Method</Button>
                     </div>
                 </div>
             </section>

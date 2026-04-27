@@ -2,10 +2,10 @@
  * AstraNavi Backend API Client
  * 
  * Thin wrapper for fetch that handles service authentication 
- * when calling the FastAPI backend on port 5051.
+ * when calling the FastAPI backend.
  */
 
-const BACKEND_URL = process.env.AI_BACKEND_URL || 'http://localhost:5051';
+const BACKEND_URL = process.env.AI_BACKEND_URL;
 const API_KEY = process.env.AI_BACKEND_API_KEY || '';
 
 export type BackendRequestOptions = RequestInit & {

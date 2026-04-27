@@ -284,7 +284,7 @@ export default function NakshatrasPage() {
                 </div>
 
                 {/* Detail: Content (Right) */}
-                <div className="flex-grow min-w-0 flex flex-col lg:-mt-12">
+                <div className="flex-grow min-w-0 flex flex-col">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={selectedNakshatra.id}

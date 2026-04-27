@@ -26,7 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         try {
             // Call backend login endpoint (PostgreSQL)
-            const backendUrl = process.env.AI_BACKEND_URL || "http://localhost:5051";
+            const backendUrl = process.env.AI_BACKEND_URL;
             const res = await fetch(`${backendUrl}/api/login`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

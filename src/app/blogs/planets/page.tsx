@@ -309,7 +309,7 @@ export default function PlanetsPage() {
                 </div>
 
                 {/* Detail: Content (Right) */}
-                <div className="flex-grow min-w-0 flex flex-col lg:-mt-15">
+                <div className="flex-grow min-w-0 flex flex-col">
                     <AnimatePresence mode="wait">
                         {viewMode === 'encyclopedia' && (
                             <motion.div
