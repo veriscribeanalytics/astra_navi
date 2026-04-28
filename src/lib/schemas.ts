@@ -19,6 +19,8 @@ export const RegisterSchema = z.object({
   tob: optionalString,
   pob: optionalString,
   phoneNumber: optionalString,
+  maritalStatus: optionalString,
+  occupation: optionalString,
 });
 
 export const LoginSchema = z.object({
@@ -32,6 +34,8 @@ export const ProfileUpdateSchema = z.object({
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
   pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
   phoneNumber: z.string().max(20).optional().or(emptyToUndefined),
+  maritalStatus: optionalString,
+  occupation: optionalString,
 });
 
 // --- CHAT ---

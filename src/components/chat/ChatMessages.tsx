@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import DOMPurify from 'isomorphic-dompurify';
 import Card from '@/components/ui/Card';
 import ChatBubble from '@/components/ui/ChatBubble';
@@ -8,7 +9,6 @@ import RatingMeter from '@/components/ui/RatingMeter';
 import { useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
-import { useState } from 'react';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
 import { Volume2, Copy, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -156,6 +156,7 @@ const ChatMessages: React.FC = () => {
       ref={scrollRef}
       className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 min-w-0 w-full"
     >
+      <AnimatePresence mode="popLayout">
       {messages.map((msg, i) => {
         if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;
 
@@ -208,7 +209,13 @@ const ChatMessages: React.FC = () => {
         if (isAi && !msg.text && isSending) return null;
 
         return (
-          <div key={msg.id || i}>
+          <motion.div 
+            key={msg.id || i} 
+            className="group/msg relative"
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          >
             <ChatBubble
               type={isAi ? 'ai' : 'user'}
               label={isAi ? 'NAVI · AI ASTROLOGER' : undefined}
@@ -229,13 +236,13 @@ const ChatMessages: React.FC = () => {
                   )}
 
                   <div
-                    className="text-on-surface-variant [&_strong]:text-secondary [&_strong]:font-semibold"
+                    className="text-on-surface-variant text-[14px] sm:text-[15px] leading-[1.6] [&_strong]:text-secondary [&_strong]:font-semibold"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mainText) }}
                   />
 
                   {/* Insight Card */}
                   {msg.insights && (
-                    <Card variant="bordered" padding="none" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3 mt-3">
+                    <Card variant="bordered" padding="none" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3 mt-3 !bg-background">
                       <p className="text-[13px] font-bold text-secondary flex items-center gap-1.5 mb-2">
                         ✦ Chart factors for this reading
                       </p>
@@ -252,7 +259,7 @@ const ChatMessages: React.FC = () => {
 
                   {/* Dasha Card */}
                   {msg.dasha && (
-                    <Card variant="bordered" padding="none" hoverable={false} className="!rounded-xl !border-secondary/15 !p-3 mt-3">
+                    <Card variant="bordered" padding="none" hoverable={false} className="!rounded-xl !border-secondary/15 !p-3 mt-3 !bg-background">
                       <p className="text-[14px] font-bold text-secondary mb-2">{msg.dasha.title}</p>
                       {msg.dasha.rows.map((row) => (
                         <div key={row.planet} className="flex items-center gap-2 py-1 border-b border-outline-variant/10 last:border-b-0">
@@ -282,11 +289,11 @@ const ChatMessages: React.FC = () => {
               )}
             </ChatBubble>
 
-            {/* Rating meter & Copy below every AI message */}
+            {/* Rating meter & Copy below every AI message - Only visible on hover */}
             {isAi && msg.id && (
-              <div className="flex items-center justify-between w-full mt-1.5 px-2 mb-2">
-                <span className="text-[13px] font-medium text-on-surface-variant/80 tracking-wide uppercase">
-                  Rate this message
+              <div className="flex items-center justify-between w-full mt-1.5 px-2 mb-2 opacity-0 group-hover/msg:opacity-100 transition-all duration-300">
+                <span className="text-[11px] font-bold text-on-surface-variant/30 tracking-widest uppercase">
+                  Quality check
                 </span>
                 <div className="flex items-center gap-2">
                   <RatingMeter
@@ -299,9 +306,10 @@ const ChatMessages: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         );
       })}
+      </AnimatePresence>
 
       {/* AI Processing sequence */}
       {isSending && <ThinkingIndicator />}

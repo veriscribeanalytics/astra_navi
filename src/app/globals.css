@@ -199,8 +199,10 @@ body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:
   }
 }
 
-/* Focus visible for accessibility */
-*:focus-visible {
+/* Focus visible for accessibility - updated to be less intrusive on styled inputs */
+a:focus-visible, 
+button:focus-visible:not(.chat-input-icon-btn),
+[role="button"]:focus-visible {
   outline: 2px solid var(--secondary);
   outline-offset: 2px;
   border-radius: 4px;
@@ -387,12 +389,26 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 }
 
 /* --- CHAT PAGE STYLES --- */
+html:has(.chat-layout), html:has(.chat-layout) body { 
+  height: 100vh !important; 
+  overflow: hidden !important; 
+}
+
+/* Ensure the main container doesn't scroll when chat is active */
+html:has(.chat-layout) main {
+  height: 100vh !important;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
 .chat-layout {
   display: grid;
   grid-template-columns: 260px 1fr 280px;
   flex: 1;
   overflow: hidden;
   height: 100%;
+  min-height: 0;
   position: relative;
 }
 
@@ -441,15 +457,19 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 
 /* Sidebar Utilities */
 .chat-left-sidebar {
-  background: var(--surface);
-  border-right: 1px solid var(--outline-variant);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid color-mix(in srgb, var(--secondary) 10%, var(--outline-variant));
   display: flex; flex-direction: column;
   overflow: hidden; z-index: 30;
 }
 
 .chat-right-sidebar {
-  background: var(--surface);
-  border-left: 1px solid var(--outline-variant);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid color-mix(in srgb, var(--secondary) 10%, var(--outline-variant));
   overflow-y: auto; display: flex;
   flex-direction: column; gap: 12px;
   padding: 16px 14px; z-index: 30;
@@ -472,38 +492,57 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;
 }
 
-.chat-main-area { display: flex; flex-direction: column; overflow: hidden; background: transparent; }
+.chat-main-area { 
+  display: flex; 
+  flex-direction: column; 
+  overflow: hidden; 
+  background: transparent;
+  height: 100%;
+  min-height: 0;
+}
 
 .chat-main-header {
-  background: color-mix(in srgb, var(--surface) 60%, var(--background));
-  border-bottom: 1px solid var(--outline-variant);
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 50%, transparent);
   padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
 }
 
 /* Bubbles & Input */
 .chat-ai-bubble {
-  background: color-mix(in srgb, var(--surface) 90%, var(--secondary));
-  border: 1px solid color-mix(in srgb, var(--outline-variant) 60%, var(--secondary));
-  border-radius: 4px 20px 20px 20px; padding: 14px 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, 
+    var(--surface-variant), 
+    var(--surface)
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid color-mix(in srgb, var(--secondary) 25%, var(--outline-variant));
+  border-radius: 4px 24px 24px 24px; 
+  padding: 18px 22px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 15px color-mix(in srgb, var(--secondary) 5%, transparent);
 }
 
 .chat-user-bubble {
-  background: color-mix(in srgb, var(--secondary) 12%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--secondary) 25%, transparent);
-  border-radius: 20px 20px 4px 20px; padding: 12px 20px;
-  color: var(--on-surface); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--secondary) 15%, var(--surface-variant));
+  border: 1px solid color-mix(in srgb, var(--secondary) 30%, transparent);
+  border-radius: 24px 24px 4px 24px; padding: 14px 22px;
+  color: var(--on-surface); 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .chat-input-container {
-  background: var(--surface); border: 1.5px solid var(--outline-variant);
-  border-radius: 16px; padding: 10px 12px; display: flex; align-items: flex-end;
-  gap: 8px; transition: all 0.2s ease;
+  background: color-mix(in srgb, var(--surface-variant) 60%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid color-mix(in srgb, var(--outline-variant) 50%, transparent);
+  border-radius: 20px; padding: 12px 16px; display: flex; align-items: flex-end;
+  gap: 10px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-input-container:focus-within {
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--secondary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--secondary) 80%, transparent);
+  background: color-mix(in srgb, var(--surface-variant) 80%, transparent);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* DASHBOARD SHELL */
@@ -518,11 +557,17 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
 
 /* CELESTIAL ANIMATIONS */
 @keyframes celestial-pulse { 0%, 100% { transform: scale(1); opacity: 0.1; } 50% { transform: scale(1.6); opacity: 0.25; } }
+@keyframes slow-mesh {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 @keyframes spin-around { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes orbit { from { transform: rotate(0deg) translateX(48px) rotate(0deg); } to { transform: rotate(360deg) translateX(48px) rotate(-360deg); } }
 @keyframes orbit-reverse { from { transform: rotate(360deg) translateX(36px) rotate(-360deg); } to { transform: rotate(0deg) translateX(36px) rotate(0deg); } }
 
 @utility animate-celestial-pulse { animation: celestial-pulse 4s ease-in-out infinite; }
+@utility animate-slow-mesh { animation: slow-mesh 30s ease infinite; }
 @utility animate-orbit { animation: orbit 3s linear infinite; }
 @utility animate-orbit-reverse { animation: orbit-reverse 4s linear infinite; }
 @utility no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }

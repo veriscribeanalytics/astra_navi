@@ -20,7 +20,9 @@ export default function ProfileSettingsPage() {
         name: '',
         dob: '',
         tob: '',
-        pob: ''
+        pob: '',
+        maritalStatus: '',
+        occupation: ''
     });
     const [errors, setErrors] = useState({
         name: '',
@@ -43,7 +45,9 @@ export default function ProfileSettingsPage() {
                 name: user.name || '',
                 dob: user.dob || '',
                 tob: user.tob || '',
-                pob: user.pob || ''
+                pob: user.pob || '',
+                maritalStatus: user.maritalStatus || '',
+                occupation: user.occupation || ''
             };
             setFormData(initialData);
         }
@@ -56,7 +60,9 @@ export default function ProfileSettingsPage() {
                 formData.name !== (user.name || '') ||
                 formData.dob !== (user.dob || '') ||
                 formData.tob !== (user.tob || '') ||
-                formData.pob !== (user.pob || '');
+                formData.pob !== (user.pob || '') ||
+                formData.maritalStatus !== (user.maritalStatus || '') ||
+                formData.occupation !== (user.occupation || '');
             setHasChanges(changed);
         }
     }, [formData, user]);
@@ -169,7 +175,9 @@ export default function ProfileSettingsPage() {
                 name: user.name || '',
                 dob: user.dob || '',
                 tob: user.tob || '',
-                pob: user.pob || ''
+                pob: user.pob || '',
+                maritalStatus: user.maritalStatus || '',
+                occupation: user.occupation || ''
             });
             setErrors({ name: '', dob: '', tob: '', pob: '' });
             setTouched({ name: false, dob: false, tob: false, pob: false });
@@ -272,6 +280,43 @@ export default function ProfileSettingsPage() {
                             helperText="City and country of birth"
                             required
                         />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="space-y-1">
+                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                    Marital Status
+                                </label>
+                                <select 
+                                    className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
+                                    value={formData.maritalStatus}
+                                    onChange={(e) => setFormData({...formData, maritalStatus: e.target.value})}
+                                >
+                                    <option value="" disabled className="bg-surface text-on-surface">Select Status</option>
+                                    <option value="Single" className="bg-surface text-on-surface">Single</option>
+                                    <option value="Married" className="bg-surface text-on-surface">Married</option>
+                                    <option value="Divorced" className="bg-surface text-on-surface">Divorced</option>
+                                    <option value="Widowed" className="bg-surface text-on-surface">Widowed</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                    Occupation
+                                </label>
+                                <select 
+                                    className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
+                                    value={formData.occupation}
+                                    onChange={(e) => setFormData({...formData, occupation: e.target.value})}
+                                >
+                                    <option value="" disabled className="bg-surface text-on-surface">Select Occupation</option>
+                                    <option value="Student" className="bg-surface text-on-surface">Student</option>
+                                    <option value="Business" className="bg-surface text-on-surface">Business</option>
+                                    <option value="Employee" className="bg-surface text-on-surface">Employee</option>
+                                    <option value="Jobseeker" className="bg-surface text-on-surface">Jobseeker</option>
+                                    <option value="Housewife" className="bg-surface text-on-surface">Housewife</option>
+                                    <option value="Retired" className="bg-surface text-on-surface">Retired</option>
+                                </select>
+                            </div>
+                        </div>
                         
                         <div className="pt-4 flex flex-col sm:flex-row gap-4">
                             <Button 

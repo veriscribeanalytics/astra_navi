@@ -17,6 +17,22 @@ import { calculateAge, getAgeBracket, getPersonalizedQuestions } from "@/utils/p
 import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
+import { useChat } from "@/context/ChatContext";
+import { motion, AnimatePresence } from "framer-motion";
+
+function formatRelativeTime(date: Date) {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
 // ─── Data Interfaces ─────────────────────────────
 interface KundliStats {
@@ -36,11 +52,13 @@ function SkeletonPulse({ className = "" }: { className?: string }) {
 // ─── Main Component ─────────────────────────────
 export default function DashboardHome() {
     const { user, refreshUser, isLoading: userLoading } = useAuth();
+    const { chats, loadChats } = useChat();
     const router = useRouter();
     
     // States
     const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
     const [kundliLoading, setKundliLoading] = useState(true);
+    const [sidebarTab, setSidebarTab] = useState<'chat' | 'history' | 'cosmic'>('chat');
     const greeting = useGreeting();
     const hasAnalyzedRef = useRef<string | null>(null);
 
@@ -50,6 +68,10 @@ export default function DashboardHome() {
     const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
     const moonSign = useMemo(() => user?.moonSign ? getRashiData(user.moonSign) : null, [user?.moonSign]);
     const sunSign = useMemo(() => user?.sunSign ? getRashiData(user.sunSign) : null, [user?.sunSign]);
+
+    const recentChats = useMemo(() => {
+        return chats.slice(0, 5);
+    }, [chats]);
 
     // Effects
     useEffect(() => {
@@ -182,58 +204,195 @@ export default function DashboardHome() {
                     
                     {/* Horoscope Hero */}
                     <div className="lg:col-span-8 lg:-mt-4">
-                        <DailyHoroscopeCard sign={user?.moonSign} />
+                        <DailyHoroscopeCard userLoading={userLoading} />
                     </div>
 
-                    {/* Sidebar: Questions & Stats */}
-                    <div className="lg:col-span-4 flex flex-col gap-6">
-                        <Card padding="none" className="!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)]">
-                            <div className="p-6 border-b border-white/5 bg-transparent flex items-center justify-between">
-                                <h3 className="text-[12px] font-bold flex items-center gap-3 text-secondary uppercase tracking-[0.2em]"><MessageSquare className="w-5 h-5" /> Chat With Navi</h3>
-                                <div className="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(200,136,10,0.5)]" />
-                            </div>
-                            <div className="p-5 space-y-3">
-
-                                {personalizedQuestions.map((q, i) => (
-                                    <button key={i} onClick={() => handleQuickAsk(q)} className="w-full text-left p-5 rounded-[24px] bg-surface-variant/40 border border-white/5 hover:border-secondary/30 hover:bg-surface group transition-all duration-300">
-                                        <div className="flex justify-between items-center gap-4"><span className="text-[13px] font-medium text-foreground/80 group-hover:text-foreground transition-colors truncate">{q}</span><ChevronRight className="w-4 h-4 text-foreground/40 group-hover:text-secondary transition-transform group-hover:translate-x-1 shrink-0" /></div>
+                    {/* Sidebar: Unified Unified Tabbed Card */}
+                    <div className="lg:col-span-4 flex flex-col">
+                        <Card padding="none" className="!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-full">
+                            {/* Tab Switcher */}
+                            <div className="p-2 border-b border-white/5 flex items-center gap-1">
+                                {[
+                                    { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-4 h-4" /> },
+                                    { id: 'history', label: 'History', icon: <Users className="w-4 h-4" /> },
+                                    { id: 'cosmic', label: 'Cosmic', icon: <Orbit className="w-4 h-4" /> }
+                                ].map((tab) => (
+                                    <button 
+                                        key={tab.id}
+                                        onClick={() => setSidebarTab(tab.id as any)}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[20px] text-[11px] font-bold uppercase tracking-widest transition-all ${
+                                            sidebarTab === tab.id 
+                                            ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-inner' 
+                                            : 'text-foreground/40 hover:text-foreground/60 hover:bg-white/5'
+                                        }`}
+                                    >
+                                        {tab.icon}
+                                        <span>{tab.label}</span>
                                     </button>
                                 ))}
-                                
-                                <div className="pt-2">
-                                    <Link href="/chat" className="w-full flex items-center justify-center gap-2 p-4 rounded-[24px] bg-transparent border border-secondary/30 hover:bg-secondary/10 transition-all group">
-                                        <Sparkles className="w-4 h-4 text-secondary group-hover:scale-110 transition-transform" />
-                                        <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.1em]">Ask Your Own Question</span>
-                                    </Link>
-                                </div>
                             </div>
-                        </Card>
 
-                        <Card padding="none" className="!rounded-[32px] border-outline-variant/15 overflow-hidden flex-1 flex flex-col">
-                            <div className="p-6 border-b border-outline-variant/10 bg-secondary/5">
-                                <h3 className="text-[11px] font-bold flex items-center gap-2.5 text-secondary uppercase tracking-[0.2em]"><Orbit className="w-4 h-4" /> Cosmic Overview</h3>
+                            <div className="flex-1 overflow-y-auto scrollbar-hide min-h-[400px]">
+                                <AnimatePresence mode="wait">
+                                    {sidebarTab === 'chat' && (
+                                        <motion.div 
+                                            key="chat"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="p-5 space-y-3"
+                                        >
+                                            <div className="flex items-center justify-between mb-4 px-1">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                                                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Navi AI Online</span>
+                                                </div>
+                                            </div>
+
+                                            {personalizedQuestions.map((q, i) => (
+                                                <button key={i} onClick={() => handleQuickAsk(q)} className="w-full text-left p-5 rounded-[24px] bg-surface-variant/40 border border-white/5 hover:border-secondary/30 hover:bg-surface group transition-all duration-300">
+                                                    <div className="flex justify-between items-center gap-4">
+                                                        <span className="text-[13px] font-medium text-foreground/80 group-hover:text-foreground transition-colors line-clamp-1">{q}</span>
+                                                        <ChevronRight className="w-4 h-4 text-foreground/40 group-hover:text-secondary transition-transform group-hover:translate-x-1 shrink-0" />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                            
+                                            <div className="pt-2">
+                                                <Link href="/chat" className="w-full flex items-center justify-center gap-3 p-5 rounded-[24px] bg-secondary text-background font-bold text-[13px] uppercase tracking-widest hover:bg-secondary/90 transition-all shadow-[0_10px_20px_rgba(212,175,55,0.2)] hover:-translate-y-0.5 active:translate-y-0">
+                                                    <MessageSquare className="w-4.5 h-4.5" />
+                                                    Open Full Chat
+                                                </Link>
+                                                <p className="text-center mt-4 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
+                                                    AI analysis based on your birth chart
+                                                </p>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {sidebarTab === 'history' && (
+                                        <motion.div 
+                                            key="history"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="p-5 space-y-3"
+                                        >
+                                            {recentChats.length > 0 ? (
+                                                <>
+                                                    <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
+                                                        Recent Consultations
+                                                    </div>
+                                                    {recentChats.map((chat) => (
+                                                        <Link key={chat.id} href={`/chat?id=${chat.id}`} className="block p-4 rounded-[20px] bg-surface-variant/20 border border-white/5 hover:border-secondary/20 hover:bg-surface-variant/40 transition-all group">
+                                                            <div className="flex justify-between items-start gap-4">
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-[13px] font-bold text-foreground/80 group-hover:text-foreground truncate mb-1">{chat.title || "New Consultation"}</p>
+                                                                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{formatRelativeTime(new Date(chat.updatedAt))}</p>
+                                                                </div>
+                                                                <ChevronRight className="w-3.5 h-3.5 text-foreground/20 group-hover:text-secondary mt-1" />
+                                                            </div>
+                                                        </Link>
+                                                    ))}
+                                                    <Link href="/chat" className="block text-center mt-6 text-[10px] font-bold text-secondary uppercase tracking-[0.3em] hover:text-amber-500 transition-colors">View All Conversations →</Link>
+                                                </>
+                                            ) : (
+                                                <div className="py-20 flex flex-col items-center text-center px-6">
+                                                    <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
+                                                        <Users className="w-8 h-8 text-foreground/10" />
+                                                    </div>
+                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">No History Yet</p>
+                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Start your first conversation with Navi to see it here.</p>
+                                                    <Button onClick={() => setSidebarTab('chat')} variant="secondary" size="sm" className="mt-6 rounded-full text-[10px] font-bold uppercase tracking-widest">Start Chatting</Button>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+
+                                    {sidebarTab === 'cosmic' && (
+                                        <motion.div 
+                                            key="cosmic"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="p-5 flex flex-col h-full"
+                                        >
+                                            {kundliLoading ? (
+                                                <div className="space-y-4 pt-4">
+                                                    <SkeletonPulse className="h-14" />
+                                                    <SkeletonPulse className="h-14" />
+                                                    <SkeletonPulse className="h-14" />
+                                                    <SkeletonPulse className="h-14" />
+                                                </div>
+                                            ) : kundliStats ? (
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
+                                                        Current Transits & Dasha
+                                                    </div>
+                                                    {[
+                                                        { 
+                                                            l: "Nakshatra", 
+                                                            v: kundliStats.nakshatra, 
+                                                            icon: kundliStats.nakshatra ? (
+                                                                <div className="relative w-full h-full overflow-hidden rounded-lg">
+                                                                    <Image 
+                                                                        src={`/icons/nakshatras/${kundliStats.nakshatra.toLowerCase()}.jpeg`}
+                                                                        alt={kundliStats.nakshatra}
+                                                                        fill
+                                                                        className="object-cover"
+                                                                        onError={(e) => {
+                                                                            // Fallback to hidden if image doesn't exist, 
+                                                                            // the parent bg-secondary/10 will still show
+                                                                            (e.target as HTMLImageElement).style.opacity = '0';
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            ) : <Sparkles className="w-3.5 h-3.5" />
+                                                        },
+                                                        { l: "Lord", v: kundliStats.nakshatraLord, icon: <Orbit className="w-3.5 h-3.5" /> },
+                                                        { l: "Active Dasha", v: kundliStats.activeDasha, icon: <TrendingUp className="w-3.5 h-3.5" />, sub: kundliStats.dashaRemaining },
+                                                        { l: "Lagna", v: kundliStats.lagnaSign, icon: <Globe className="w-3.5 h-3.5" /> }
+                                                    ].map((s, i) => s.v && (
+                                                        <div key={i} className="flex items-center gap-4 p-4 rounded-[24px] bg-surface-variant/20 border border-white/5">
+                                                            <div className="w-10 h-10 rounded-xl bg-transparent flex items-center justify-center text-secondary shrink-0 overflow-hidden">
+                                                                {s.icon}
+                                                            </div>
+                                                            <div className="flex-1 flex justify-between items-center">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mb-0.5">{s.l}</span>
+                                                                    <span className="text-xs font-bold text-foreground/90">{s.v}</span>
+                                                                </div>
+                                                                {s.sub && (
+                                                                    <div className="px-2.5 py-1 rounded-lg bg-surface/40 border border-white/5">
+                                                                        <span className="text-[9px] font-bold text-secondary uppercase tracking-tighter">{s.sub}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <div className="pt-4">
+                                                        <Link href="/kundli" className="w-full flex items-center justify-center gap-2 p-4 rounded-[24px] border border-secondary/20 hover:bg-secondary/5 transition-all group">
+                                                            <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em]">Compare Full Chart</span>
+                                                            <ChevronRight className="w-3.5 h-3.5 text-secondary group-hover:translate-x-1 transition-transform" />
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="py-20 flex flex-col items-center text-center px-6">
+                                                    <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
+                                                        <Orbit className="w-8 h-8 text-foreground/10" />
+                                                    </div>
+                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">Chart Pending</p>
+                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Please complete your birth details to unlock cosmic insights.</p>
+                                                    <Link href="/profile" className="mt-6">
+                                                        <Button variant="secondary" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest">Update Profile</Button>
+                                                    </Link>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            {kundliLoading ? (
-                                <div className="space-y-3"><SkeletonPulse className="h-10" /><SkeletonPulse className="h-10" /><SkeletonPulse className="h-10" /></div>
-                            ) : kundliStats ? (
-                                <div className="space-y-2 p-5">
-                                    {[
-                                        { l: "Nakshatra", v: kundliStats.nakshatra },
-                                        { l: "Lord", v: kundliStats.nakshatraLord },
-                                        { l: "Dasha", v: kundliStats.activeDasha },
-                                        { l: "Lagna", v: kundliStats.lagnaSign }
-                                    ].map((s, i) => s.v && (
-                                        <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-surface border border-outline-variant/10"><span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{s.l}</span><span className="text-xs font-bold text-foreground/90">{s.v}</span></div>
-                                    ))}
-                                    <Link href="/kundli" className="block text-center mt-4 text-[10px] font-bold text-secondary uppercase tracking-[0.2em] hover:text-amber-500 transition-colors">Compare Full Chart →</Link>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center text-center gap-4 py-8">
-                                    <Globe className="w-8 h-8 text-foreground/10" />
-                                    <p className="text-[11px] font-bold text-foreground/30 uppercase tracking-widest">Chart data pending</p>
-                                    <Link href="/kundli"><Button size="sm" variant="primary" className="rounded-full px-6 text-[10px] font-bold uppercase tracking-widest">Explore Chart</Button></Link>
-                                </div>
-                            )}
                         </Card>
                     </div>
                 </div>

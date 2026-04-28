@@ -64,6 +64,7 @@ const ChatPageClient: React.FC = () => {
         </div>
       )}
       {/* Background Glow Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-secondary/[0.03] via-transparent to-secondary/[0.05] bg-[length:200%_200%] animate-slow-mesh pointer-events-none" />
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
       

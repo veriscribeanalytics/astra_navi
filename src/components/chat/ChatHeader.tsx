@@ -31,7 +31,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = () => {
           ✦
         </div>
         <div>
-          <p className="text-sm font-bold text-on-surface truncate max-w-[120px] sm:max-w-none">Navi — AI Astrologer</p>
+          <p className="text-sm font-headline font-bold text-on-surface truncate max-w-[120px] sm:max-w-none">Navi — AI Astrologer</p>
           <p className="text-[10px] sm:text-[11px] text-green-500 flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" />
             <span className="hidden xs:inline">Online · Responds instantly</span>

@@ -40,7 +40,7 @@ const services = [
     { icon: <Compass className="w-6 h-6" />, title: 'Complete Kundli', desc: 'Lagna, Navamsha & 16 Varga charts.', iconBg: 'bg-indigo-500/10 text-indigo-400', available: true, detail: "16+ Varga Charts" },
     { icon: <Brain className="w-6 h-6" />, title: 'Navi AI Guide', desc: 'Conversational AI trained on classical Jyotish.', iconBg: 'bg-secondary/10 text-secondary', available: true, detail: "Instant Answers" },
     { icon: <Calendar className="w-6 h-6" />, title: 'Daily Forecast', desc: 'Personalized transit analysis based on your Moon.', iconBg: 'bg-emerald-500/10 text-emerald-400', available: true, detail: "Nakshatra Based" },
-    { icon: <Activity className="w-6 h-6" />, title: 'Health Forecast', desc: 'Vedic wellness timing and Ayurvedic analysis.', iconBg: 'bg-rose-500/10 text-rose-400', available: true, detail: "Transit Health" },
+    { icon: <Sparkles className="w-6 h-6" />, title: 'Guided Consult', desc: "Direct guidance on career, love, and life transitions.", iconBg: 'bg-amber-500/10 text-amber-500', available: true, detail: "Strategic Clarity" },
     { icon: <Briefcase className="w-6 h-6" />, title: 'Career & Artha', desc: 'Wealth timing and professional success guidance.', iconBg: 'bg-amber-500/10 text-amber-400', available: true, detail: "Wealth Mapping" },
     { icon: <Heart className="w-6 h-6" />, title: 'Soulmate Sync', desc: '36-point Guna Milan plus deep planetary sync.', iconBg: 'bg-pink-500/10 text-pink-400', available: true, detail: "Relationship AI" },
 ];
@@ -73,7 +73,7 @@ const trustPoints = [
 const horoscopeCategories = [
     { title: 'Career', text: 'Shani transit suggests discipline in communication.', icon: <Briefcase className="w-4 h-4 text-orange-600" />, bg: 'bg-orange-500/10' },
     { title: 'Love', text: 'Venus alignment favors deep soulmate connection.', icon: <Heart className="w-4 h-4 text-pink-600" />, bg: 'bg-pink-500/10' },
-    { title: 'Healing', text: 'Ketu transit favors meditation and spiritual detox.', icon: <Activity className="w-4 h-4 text-green-600" />, bg: 'bg-green-500/10' },
+    { title: 'Consult', text: 'Ask Navi about the upcoming planetary shifts.', icon: <Sparkles className="w-4 h-4 text-amber-600" />, bg: 'bg-amber-500/10' },
     { title: 'Wealth', text: 'Jupiter aspects your 11th house of permanent gains.', icon: <DollarSign className="w-4 h-4 text-yellow-600" />, bg: 'bg-yellow-500/10' },
 ];
 

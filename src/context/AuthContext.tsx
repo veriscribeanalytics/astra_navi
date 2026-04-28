@@ -12,6 +12,8 @@ interface User {
     tob?: string;
     pob?: string;
     phoneNumber?: string;
+    maritalStatus?: string;
+    occupation?: string;
     moonSign?: string;
     sunSign?: string;
     lagnaSign?: string;

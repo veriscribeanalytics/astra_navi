@@ -12,6 +12,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
+import Image from 'next/image';
+
 const nakshatras = [
     { 
         id: 1, nameEn: 'Ashwini', nameHi: 'अश्विनी', sanskrit: 'Ashwayuja', ruler: 'Ketu', deity: 'Ashwini Kumaras', 
@@ -270,8 +272,17 @@ export default function NakshatrasPage() {
                                                 : 'border-transparent hover:bg-surface'
                                             }`}
                                     >
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${isActive ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary group-hover:bg-secondary/20'}`}>
-                                            {nak.id}
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all relative overflow-hidden ${isActive ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary group-hover:bg-secondary/20'}`}>
+                                            <Image 
+                                                src={`/icons/nakshatras/${nak.nameEn.toLowerCase()}.jpeg`}
+                                                alt={nak.nameEn}
+                                                fill
+                                                className="object-cover"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).style.opacity = '0';
+                                                }}
+                                            />
+                                            <span className="relative z-10">{nak.id}</span>
                                         </div>
                                         <p className={`text-[10px] font-bold mt-1.5 truncate w-full text-center ${isActive ? 'text-secondary' : 'text-foreground/50'}`}>
                                             {nak.nameEn}
@@ -308,9 +319,17 @@ export default function NakshatrasPage() {
                                     <div className="flex-grow p-8 lg:p-10 overflow-hidden flex flex-col">
                                         {/* ── Top Section: Massive Identity ── */}
                                         <div className="flex items-center gap-12 mb-8">
-                                            <div className="w-[150px] h-[150px] bg-surface border border-secondary/20 rounded-[40px] flex items-center justify-center text-secondary relative z-10 shadow-xl group shrink-0">
-                                                <Star className="w-16 h-16 transition-transform duration-700 group-hover:scale-110" />
-                                                <div className="absolute bottom-0 left-0 right-0 bg-secondary/10 py-1 text-[9px] font-bold text-center uppercase tracking-widest">{selectedNakshatra.id} / 27</div>
+                                            <div className="w-[150px] h-[150px] bg-transparent rounded-[40px] flex items-center justify-center text-secondary relative z-10 shadow-sm group shrink-0 overflow-hidden">
+                                                    <Image 
+                                                        src={`/icons/nakshatras/${selectedNakshatra.nameEn.toLowerCase()}.jpeg`}
+                                                        alt={selectedNakshatra.nameEn}
+                                                        fill
+                                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                        }}
+                                                    />
+                                                    <div className="absolute bottom-0 left-0 right-0 bg-secondary/10 py-1 text-[9px] font-bold text-center uppercase tracking-widest z-20 backdrop-blur-sm">{selectedNakshatra.id} / 27</div>
                                             </div>
                                             <div className="flex-grow space-y-6">
                                                 <div className="flex items-baseline gap-4">

@@ -13,7 +13,7 @@ type ToastItem = ToastConfig & { id: number };
 
 // Global State allowing toasts to persist across Next.js page transitions
 let globalToasts: ToastItem[] = [];
-let listeners: Set<(toasts: ToastItem[]) => void> = new Set();
+const listeners: Set<(toasts: ToastItem[]) => void> = new Set();
 
 const saveToSession = () => {
   if (typeof window !== 'undefined') {

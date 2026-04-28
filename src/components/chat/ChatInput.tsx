@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useChat, ChatMessage } from '@/context/ChatContext';
 import { 
     Plus, Mic, MicOff, RotateCcw, 
-    ArrowUp, Paperclip 
+    ArrowUp, Paperclip, Sparkles 
 } from 'lucide-react';
 import { useToast } from '@/hooks';
 
@@ -18,40 +18,40 @@ const getContextualSuggestions = (messages: ChatMessage[]): string[] => {
   // Context-aware suggestions based on conversation topics
   const suggestionSets: Record<string, string[]> = {
     career: [
-      "What's the best time for a job change?",
-      "Which career suits my 10th house?",
-      "When will I get a promotion?",
-      "Should I start my own business?"
+      "Analyze my 10th house for career growth",
+      "When is the most auspicious time for a job change?",
+      "Does my chart support success in entrepreneurship?",
+      "Identify the key planetary significators for my wealth"
     ],
     relationship: [
-      "When will I meet my life partner?",
-      "Is this relationship compatible?",
-      "What does my 7th house reveal?",
-      "When is marriage favorable?"
+      "What does my 7th house reveal about my life partner?",
+      "Analyze compatibility through Vedic synastry",
+      "When are the most favorable periods for marriage?",
+      "Identify any Mangal Dosha or related factors"
     ],
     wealth: [
-      "How can I improve my finances?",
-      "When will wealth increase?",
-      "Which investments are favorable?",
-      "What does my 2nd house say?"
+      "Analyze the Dhana Yogas in my birth chart",
+      "When will my financial situation significantly improve?",
+      "Identify the best investment sectors for my sign",
+      "What is the role of Jupiter in my wealth creation?"
     ],
     health: [
-      "What health precautions should I take?",
-      "Which gemstone supports my health?",
-      "When should I be careful?",
-      "What does my 6th house indicate?"
+      "What health precautions does my 6th house suggest?",
+      "Which Ayurvedic remedies align with my planetary chart?",
+      "Identify periods requiring heightened physical care",
+      "Does my chart indicate strength for recovery?"
     ],
     mahadasha: [
-      "What's my current dasha period?",
-      "When does my next dasha start?",
-      "How will this dasha affect me?",
-      "What remedies for this period?"
+      "Provide a deep dive into my current Mahadasha",
+      "How will the upcoming Antardasha affect my status?",
+      "Identify remedies for my current planetary period",
+      "Explain the long-term impact of my active Dasha"
     ],
     default: [
-      "What's my current planetary period?",
-      "Tell me about upcoming transits",
-      "What remedies do you suggest?",
-      "Analyze my career prospects"
+      "What are the most impactful transits for me right now?",
+      "Analyze my current planetary period (Dasha)",
+      "What are the most effective remedies for my chart?",
+      "Provide a high-level overview of my career prospects"
     ]
   };
 
@@ -201,8 +201,9 @@ const ChatInput: React.FC = () => {
                   setInputText(suggestion);
                   textareaRef.current?.focus();
                 }}
-                className="shrink-0 px-3 py-1.5 text-xs font-medium text-on-surface-variant/70 bg-surface border border-outline-variant/30 rounded-full hover:bg-surface-variant hover:border-secondary/40 hover:text-secondary transition-all whitespace-nowrap"
+                className="shrink-0 px-3.5 py-2 text-[13px] font-medium text-on-surface-variant/70 bg-surface border border-outline-variant/30 rounded-full hover:bg-surface-variant hover:border-secondary/40 hover:text-secondary transition-all whitespace-nowrap flex items-center gap-2 group/chip"
               >
+                <Sparkles className="w-3.5 h-3.5 opacity-30 group-hover/chip:opacity-100 group-hover/chip:scale-110 transition-all text-secondary" />
                 {suggestion}
               </button>
             ))}
@@ -213,16 +214,6 @@ const ChatInput: React.FC = () => {
       {/* Input Area */}
       <div className="px-3 sm:px-4 md:px-5 pb-2 sm:pb-3">
         <div className={`chat-input-container transition-all ${isOverLimit ? '!border-red-500/50' : ''}`}>
-          {/* Plus button on the left */}
-          <button 
-            className="chat-input-icon-btn shrink-0" 
-            title="Attach chart (coming soon)"
-            disabled
-            aria-label="Attach file"
-          >
-            <Paperclip className="w-4.5 h-4.5" />
-          </button>
-
           <textarea
             ref={textareaRef}
             value={inputText}
@@ -232,7 +223,7 @@ const ChatInput: React.FC = () => {
             rows={1}
             disabled={isSending}
             aria-label="Chat message input"
-            className="flex-1 bg-transparent border-none outline-none text-on-surface text-[14px] font-body resize-none leading-relaxed min-h-[22px] max-h-[120px] placeholder:text-on-surface-variant/50 disabled:opacity-50 py-0.5"
+            className="flex-1 bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 focus:ring-0 focus:outline-none focus:border-none text-on-surface text-[14px] font-body resize-none leading-relaxed min-h-[22px] max-h-[120px] placeholder:text-on-surface-variant/50 disabled:opacity-50 py-0.5 ml-1"
           />
           
           {/* Right side buttons */}

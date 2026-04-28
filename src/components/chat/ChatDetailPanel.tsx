@@ -40,6 +40,35 @@ const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
   );
 };
 
+/* ---------- Visual Kundli Graphic ---------- */
+const KundliGraphic: React.FC = () => (
+  <div className="w-full aspect-square relative mb-3 group/kundli">
+    {/* Geometric Grid */}
+    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_rgba(200,136,10,0.2)]">
+      {/* Outer Border */}
+      <rect x="2" y="2" width="96" height="96" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-secondary/30" />
+      
+      {/* Diagonals */}
+      <line x1="2" y1="2" x2="98" y2="98" stroke="currentColor" strokeWidth="0.5" className="text-secondary/30" />
+      <line x1="98" y1="2" x2="2" y2="98" stroke="currentColor" strokeWidth="0.5" className="text-secondary/30" />
+      
+      {/* Diamond Inner Grid */}
+      <path d="M50 2 L98 50 L50 98 L2 50 Z" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-secondary/60" />
+      
+      {/* Center ✦ */}
+      <text x="50" y="53" textAnchor="middle" fontSize="6" className="fill-secondary/80 font-bold">✦</text>
+      
+      {/* Decorative Orbs */}
+      <circle cx="50" cy="50" r="12" fill="none" stroke="currentColor" strokeWidth="0.3" strokeDasharray="1 2" className="text-secondary/20 animate-[spin_20s_linear_infinite]" />
+    </svg>
+    
+    {/* Floating Particles/Stars */}
+    <div className="absolute top-2 left-2 w-1 h-1 bg-secondary/40 rounded-full animate-pulse" />
+    <div className="absolute bottom-4 right-6 w-0.5 h-0.5 bg-secondary/30 rounded-full animate-pulse delay-700" />
+    <div className="absolute top-1/2 right-2 w-1 h-1 bg-secondary/20 rounded-full animate-pulse delay-1000" />
+  </div>
+);
+
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
   const { 
@@ -53,6 +82,8 @@ const ChatDetailPanel: React.FC = () => {
     ['Date of Birth', user?.dob || '—'],
     ['Time of Birth', user?.tob || '—'],
     ['Place of Birth', user?.pob || '—'],
+    ['Marital Status', user?.maritalStatus || '—'],
+    ['Occupation', user?.occupation || '—'],
     ['Moon Sign', user?.moonSign || '—'],
     ['Sun Sign', user?.sunSign || '—'],
   ];
@@ -79,7 +110,7 @@ const ChatDetailPanel: React.FC = () => {
           </div>
         )}
         <div className="flex items-center justify-between mb-2">
-          <SidebarSectionLabel variant="gold">MY BIRTH CHART</SidebarSectionLabel>
+          <SidebarSectionLabel variant="gold" className="font-headline">MY BIRTH CHART</SidebarSectionLabel>
           <button 
             onClick={() => setIsRightPanelOpen(false)}
             className="xl:hidden p-1.5 text-on-surface-variant/50 hover:text-on-surface transition-colors -mt-2"
@@ -88,6 +119,7 @@ const ChatDetailPanel: React.FC = () => {
           </button>
         </div>
         <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3">
+          <KundliGraphic />
           <div className="flex items-center justify-between mb-2">
             <p className="text-[11px] font-bold text-on-surface">
               {user?.name || user?.email || '—'}
@@ -108,7 +140,7 @@ const ChatDetailPanel: React.FC = () => {
       {/* Chat Rating Summary */}
       {activeChat && (
         <div className="mb-1">
-          <SidebarSectionLabel variant="gold">CHAT RATING</SidebarSectionLabel>
+          <SidebarSectionLabel variant="gold" className="font-headline">CHAT RATING</SidebarSectionLabel>
           <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3">
             {activeChat.averageRating != null ? (
               <div className="flex flex-col items-center gap-1.5 py-1">
@@ -129,7 +161,7 @@ const ChatDetailPanel: React.FC = () => {
       {/* Topic Pills */}
       <div className="shrink-0 pt-1 border-t border-outline-variant/10">
         <div className="px-0 pt-2">
-          <SidebarSectionLabel>ASK ABOUT</SidebarSectionLabel>
+          <SidebarSectionLabel variant="gold" className="font-headline">ASK ABOUT</SidebarSectionLabel>
           <div className="grid grid-cols-2 gap-1 gap-x-2">
             {topicPills.map((topic) => (
               <TopicPill
