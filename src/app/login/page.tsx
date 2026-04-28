@@ -101,8 +101,23 @@ const LoginPage = () => {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || "The stars are obscured. Registration failed.");
 
-                success("Your celestial identity has been inscribed. You may now login.");
-                setIsRegister(false);
+                // Auto-login after successful registration
+                const result = await signIn('credentials', {
+                    redirect: false,
+                    email,
+                    password,
+                });
+
+                if (result?.error) {
+                    success("Your celestial identity has been inscribed. You may now login.");
+                    setIsRegister(false);
+                    return;
+                }
+
+                showLoading("Identity inscribed. Aligning your celestial path...", 1500);
+                setTimeout(() => {
+                    router.push('/profile?registered=true');
+                }, 1500);
             } else {
                 const result = await signIn('credentials', {
                     redirect: false,

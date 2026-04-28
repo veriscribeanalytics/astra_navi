@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -15,6 +15,8 @@ import {
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, isLoggedIn } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isNewRegistration = searchParams?.get('registered') === 'true';
     const { showToast, ToastContainer, success, error } = useToast();
     const [formData, setFormData] = useState({
         name: '',
@@ -165,11 +167,14 @@ export default function ProfileSettingsPage() {
 
             // Update local context
             login(user?.email || '', formData);
-            success('Celestial profile successfully updated!');
+            success(isNewRegistration ? 'Welcome! Taking you to your dashboard...' : 'Celestial profile successfully updated!');
             setHasChanges(false);
             
             setTimeout(() => {
                 showLoading("", 0);
+                if (isNewRegistration) {
+                    router.push('/');
+                }
             }, 500);
 
         } catch (err: any) {
@@ -202,13 +207,17 @@ export default function ProfileSettingsPage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
             <div className="w-full max-w-xl relative z-10">
-                <div className="text-center mb-10">
+                <div className="text-center mb-10 mt-8">
                     <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 mb-4 sm:mb-6 cosmic-glow">
                         <User className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">Celestial Profile</h1>
+                    <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">
+                        {isNewRegistration ? 'Complete Your Profile' : 'Celestial Profile'}
+                    </h1>
                     <p className="text-sm font-body text-on-surface-variant max-w-md mx-auto">
-                        Manage your birth coordinates to ensure your cosmic readings are always perfectly aligned.
+                        {isNewRegistration 
+                            ? 'Please verify your birth coordinates to ensure your initial readings are perfectly aligned before entering the dashboard.'
+                            : 'Manage your birth coordinates to ensure your cosmic readings are always perfectly aligned.'}
                     </p>
                 </div>
 
@@ -370,7 +379,7 @@ export default function ProfileSettingsPage() {
                                 loading={isLoading}
                                 leftIcon={!isLoading ? <Save className="w-4 h-4" /> : undefined}
                             >
-                                {isLoading ? 'Updating...' : 'Save Changes'}
+                                {isLoading ? 'Updating...' : (isNewRegistration ? 'Save & Continue to Dashboard' : 'Save Changes')}
                             </Button>
                             {hasChanges && (
                                 <Button 
