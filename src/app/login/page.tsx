@@ -31,11 +31,6 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [name, setName] = useState('');
-    const [dob, setDob] = useState('');
-    const [tob, setTob] = useState('');
-    const [pob, setPob] = useState('');
-    const [phone, setPhone] = useState('');
 
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
@@ -94,7 +89,7 @@ const LoginPage = () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email, password, name, dob, tob, pob, phoneNumber: phone
+                        email, password
                     }),
                 });
 
@@ -259,22 +254,16 @@ const LoginPage = () => {
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            className="space-y-3"
+                                            className="space-y-5"
                                         >
-                                            <Input placeholder="Full Name" icon={<User size={14} className="text-secondary" />} value={name} onChange={(e) => setName(e.target.value)} required />
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <Input type="date" icon={<Calendar size={14} className="text-secondary" />} value={dob} onChange={(e) => setDob(e.target.value)} required />
-                                                <Input type="time" icon={<Clock size={14} className="text-secondary" />} value={tob} onChange={(e) => setTob(e.target.value)} required />
-                                            </div>
-                                            <Input placeholder="Place of Birth" icon={<MapPin size={14} className="text-secondary" />} value={pob} onChange={(e) => setPob(e.target.value)} required />
-                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
-                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
+                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                                             </div>
                                             <div className="relative">
-                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Key" icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-                                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
+                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Key" icon={<ShieldCheck size={16} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                                             </div>
                                         </motion.div>
                                     ) : (
