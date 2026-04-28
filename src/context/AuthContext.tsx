@@ -12,6 +12,7 @@ interface User {
     tob?: string;
     pob?: string;
     phoneNumber?: string;
+    gender?: string;
     maritalStatus?: string;
     occupation?: string;
     moonSign?: string;
@@ -77,7 +78,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     .then(res => res.json())
                     .then(data => {
                         if (data.user) {
-                            setUser(prev => prev ? ({ ...prev, ...data.user }) : data.user);
+                            setUser(prev => {
+                                // Deep comparison to avoid unnecessary state updates
+                                if (!prev) return data.user;
+                                
+                                const isSame = 
+                                    prev.email === data.user.email && 
+                                    prev.moonSign === data.user.moonSign &&
+                                    prev.sunSign === data.user.sunSign &&
+                                    prev.lagnaSign === data.user.lagnaSign &&
+                                    prev.name === data.user.name &&
+                                    JSON.stringify(prev.astrologyData) === JSON.stringify(data.user.astrologyData);
+                                
+                                return isSame ? prev : { ...prev, ...data.user };
+                            });
                         }
                         setProfileFetched(true);
                     })
@@ -100,7 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // This is now primarily handled by NextAuth signIn() in LoginPage
         // We keep it for local state synchronization if needed
         if (email) {
-            setUser(prev => prev ? { ...prev, email, ...profile } : { email, ...profile } as User);
+            setUser(prev => {
+                const isSame = prev && prev.email === email && 
+                               Object.keys(profile || {}).every(k => (prev as any)[k] === (profile as any)[k]);
+                return isSame ? prev : (prev ? { ...prev, email, ...profile } : { email, ...profile } as User);
+            });
         }
     }, []);
 
@@ -119,7 +137,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const setLoadingState = useCallback((state: boolean) => setIsLoading(state), []);
 
     const refreshUser = useCallback((updates: Partial<User>) => {
-        setUser(prev => prev ? { ...prev, ...updates } : null);
+        setUser(prev => {
+            if (!prev) return null;
+            const isSame = Object.keys(updates).every(k => (prev as any)[k] === (updates as any)[k]);
+            return isSame ? prev : { ...prev, ...updates };
+        });
     }, []);
 
     return (

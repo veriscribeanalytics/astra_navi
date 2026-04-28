@@ -21,6 +21,8 @@ export default function ProfileSettingsPage() {
         dob: '',
         tob: '',
         pob: '',
+        phoneNumber: '',
+        gender: '',
         maritalStatus: '',
         occupation: ''
     });
@@ -28,13 +30,15 @@ export default function ProfileSettingsPage() {
         name: '',
         dob: '',
         tob: '',
-        pob: ''
+        pob: '',
+        phoneNumber: ''
     });
     const [touched, setTouched] = useState({
         name: false,
         dob: false,
         tob: false,
-        pob: false
+        pob: false,
+        phoneNumber: false
     });
     const [hasChanges, setHasChanges] = useState(false);
 
@@ -46,6 +50,8 @@ export default function ProfileSettingsPage() {
                 dob: user.dob || '',
                 tob: user.tob || '',
                 pob: user.pob || '',
+                phoneNumber: user.phoneNumber || '',
+                gender: user.gender || '',
                 maritalStatus: user.maritalStatus || '',
                 occupation: user.occupation || ''
             };
@@ -61,6 +67,8 @@ export default function ProfileSettingsPage() {
                 formData.dob !== (user.dob || '') ||
                 formData.tob !== (user.tob || '') ||
                 formData.pob !== (user.pob || '') ||
+                formData.phoneNumber !== (user.phoneNumber || '') ||
+                formData.gender !== (user.gender || '') ||
                 formData.maritalStatus !== (user.maritalStatus || '') ||
                 formData.occupation !== (user.occupation || '');
             setHasChanges(changed);
@@ -118,11 +126,12 @@ export default function ProfileSettingsPage() {
             name: validateField('name', formData.name),
             dob: validateField('dob', formData.dob),
             tob: '',
-            pob: validateField('pob', formData.pob)
+            pob: validateField('pob', formData.pob),
+            phoneNumber: ''
         };
 
         setErrors(newErrors);
-        setTouched({ name: true, dob: true, tob: true, pob: true });
+        setTouched({ name: true, dob: true, tob: true, pob: true, phoneNumber: true });
         return !Object.values(newErrors).some(error => error !== '');
     };
 
@@ -176,11 +185,13 @@ export default function ProfileSettingsPage() {
                 dob: user.dob || '',
                 tob: user.tob || '',
                 pob: user.pob || '',
+                phoneNumber: user.phoneNumber || '',
+                gender: user.gender || '',
                 maritalStatus: user.maritalStatus || '',
                 occupation: user.occupation || ''
             });
-            setErrors({ name: '', dob: '', tob: '', pob: '' });
-            setTouched({ name: false, dob: false, tob: false, pob: false });
+            setErrors({ name: '', dob: '', tob: '', pob: '', phoneNumber: '' });
+            setTouched({ name: false, dob: false, tob: false, pob: false, phoneNumber: false });
             setHasChanges(false);
         }
     };
@@ -281,7 +292,36 @@ export default function ProfileSettingsPage() {
                             required
                         />
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <Input 
+                            label="Phone Number"
+                            placeholder="+1234567890" 
+                            type="tel"
+                            icon={<MapPin className="w-4 h-4 opacity-0" />} // Placeholder icon, we can use Phone if available, but for now just basic text or no icon.
+                            value={formData.phoneNumber}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setFormData({...formData, phoneNumber: value});
+                            }}
+                            helperText="Optional phone number"
+                        />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div className="space-y-1">
+                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                    Gender
+                                </label>
+                                <select 
+                                    className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                                >
+                                    <option value="" disabled className="bg-surface text-on-surface">Select Gender</option>
+                                    <option value="male" className="bg-surface text-on-surface">Male</option>
+                                    <option value="female" className="bg-surface text-on-surface">Female</option>
+                                    <option value="other" className="bg-surface text-on-surface">Other</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
+                                </select>
+                            </div>
                             <div className="space-y-1">
                                 <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
                                     Marital Status
@@ -296,6 +336,7 @@ export default function ProfileSettingsPage() {
                                     <option value="Married" className="bg-surface text-on-surface">Married</option>
                                     <option value="Divorced" className="bg-surface text-on-surface">Divorced</option>
                                     <option value="Widowed" className="bg-surface text-on-surface">Widowed</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
@@ -314,6 +355,7 @@ export default function ProfileSettingsPage() {
                                     <option value="Jobseeker" className="bg-surface text-on-surface">Jobseeker</option>
                                     <option value="Housewife" className="bg-surface text-on-surface">Housewife</option>
                                     <option value="Retired" className="bg-surface text-on-surface">Retired</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
                                 </select>
                             </div>
                         </div>

@@ -75,59 +75,142 @@ export default function DashboardHome() {
 
     // Effects
     useEffect(() => {
-        if (!user || !user.astrologyData) {
-            setKundliLoading(false);
-            return;
-        }
-        
-        try {
-            setKundliLoading(true);
-            let analysis = user.astrologyData;
-            if (typeof analysis === 'string') {
-                try {
-                    analysis = JSON.parse(analysis);
-                } catch (e) {
-                    console.error("Failed to parse analysis string", e);
-                }
-            }
+        if (!user?.email) return;
 
-            const stats: KundliStats = {};
-            if (Array.isArray(analysis?.houses)) stats.lagnaSign = analysis.houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
-            if (typeof analysis?.nakshatra === 'string') stats.nakshatra = analysis.nakshatra;
-            if (typeof analysis?.nakshatraLord === 'string') stats.nakshatraLord = analysis.nakshatraLord;
-            if (analysis?.dasha) {
-                // Try different formats to extract the current dasha name
-                const dasha = analysis.dasha as any;
-                let dashaName = dasha.currentMahaDasha || dasha.current;
-                let dashaRemaining = dasha.remaining;
-
-                // Fallback to the active array if flat strings are missing
-                if (!dashaName && dasha.active?.length > 0) {
-                    const maha = dasha.active.find((p: any) => p.type === 'Mahadasha') || dasha.active[0];
-                    const anta = dasha.active.find((p: any) => p.type === 'Antardasha');
-                    dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
-                    
-                    // Calculate remaining time if end date exists
-                    if (!dashaRemaining && maha.end) {
-                        const end = new Date(maha.end);
-                        const now = Date.now();
-                        const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
-                        dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+        // 1. Try to use data already in user object (from AuthContext sync)
+        if (user.astrologyData) {
+            try {
+                setKundliLoading(true);
+                let analysis = user.astrologyData;
+                if (typeof analysis === 'string') {
+                    try {
+                        analysis = JSON.parse(analysis);
+                    } catch (e) {
+                        console.error("Failed to parse analysis string", e);
                     }
                 }
 
-                stats.activeDasha = dashaName;
-                stats.dashaRemaining = dashaRemaining;
+                const stats: KundliStats = {};
+                if (Array.isArray(analysis?.houses)) stats.lagnaSign = analysis.houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
+                if (typeof analysis?.nakshatra === 'string') stats.nakshatra = analysis.nakshatra;
+                if (typeof analysis?.nakshatraLord === 'string') stats.nakshatraLord = analysis.nakshatraLord;
+                if (analysis?.dasha) {
+                    // Try different formats to extract the current dasha name
+                    const dasha = analysis.dasha as any;
+                    let dashaName = dasha.currentMahaDasha || dasha.current;
+                    let dashaRemaining = dasha.remaining;
+
+                    // Fallback to the active array if flat strings are missing
+                    if (!dashaName && dasha.active?.length > 0) {
+                        const maha = dasha.active.find((p: any) => p.type === 'Mahadasha') || dasha.active[0];
+                        const anta = dasha.active.find((p: any) => p.type === 'Antardasha');
+                        dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
+                        
+                        // Calculate remaining time if end date exists
+                        if (!dashaRemaining && maha.end) {
+                            const end = new Date(maha.end);
+                            const now = Date.now();
+                            const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
+                            dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                        }
+                    }
+
+                    stats.activeDasha = dashaName;
+                    stats.dashaRemaining = dashaRemaining;
+                }
+                if (typeof analysis?.moonPhase === 'string') stats.moonPhase = analysis.moonPhase;
+                
+                if (Object.keys(stats).length > 0) {
+                    setKundliStats(stats);
+                    setKundliLoading(false);
+                    return;
+                }
+            } catch (error) {
+                console.error("Error setting kundli stats from user object:", error);
             }
-            if (typeof analysis?.moonPhase === 'string') stats.moonPhase = analysis.moonPhase;
-            setKundliStats(Object.keys(stats).length > 0 ? stats : null);
-        } catch (error) {
-            console.error("Error setting kundli stats:", error);
-            setKundliStats(null);
-        } finally {
-            setKundliLoading(false);
         }
-    }, [user?.astrologyData]);
+
+        // 2. Fallback to SessionStorage cache
+        const todayStr = new Date().toISOString().split('T')[0];
+        const sessionKey = `analyzed_${user?.email}_${todayStr}`;
+        const statsKey = `stats_${user?.email}_${todayStr}`;
+        
+        const sessionAnalyzed = sessionStorage.getItem(sessionKey);
+        const cachedStats = sessionStorage.getItem(statsKey);
+        
+        if (sessionAnalyzed && cachedStats) {
+            try {
+                setKundliStats(JSON.parse(cachedStats));
+                setKundliLoading(false);
+                return;
+            } catch (e) {
+                console.error("Failed to parse cached stats", e);
+            }
+        }
+
+        // 3. Last resort: Fetch fresh analysis
+        setKundliLoading(true);
+        fetch('/api/analyze-full', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ force_refresh: false }),
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(result => {
+                if (!result) return;
+                
+                let analysis = result.astrologyData || result.data?.astrologyData || result.insights?.astrologyData || result.data || result;
+                if (typeof analysis === 'string') {
+                    try {
+                        analysis = JSON.parse(analysis);
+                    } catch (e) {
+                        console.error("Failed to parse analysis string", e);
+                    }
+                }
+
+                const stats: KundliStats = {};
+                // Using the more robust parsing logic from upstream
+                if (Array.isArray(analysis?.houses)) stats.lagnaSign = analysis.houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
+                if (typeof analysis?.nakshatra === 'string') stats.nakshatra = analysis.nakshatra;
+                if (typeof analysis?.nakshatraLord === 'string') stats.nakshatraLord = analysis.nakshatraLord;
+                if (analysis?.dasha) {
+                    const dasha = analysis.dasha as any;
+                    let dashaName = dasha.currentMahaDasha || dasha.current;
+                    let dashaRemaining = dasha.remaining;
+
+                    if (!dashaName && dasha.active?.length > 0) {
+                        const maha = dasha.active.find((p: any) => p.type === 'Mahadasha') || dasha.active[0];
+                        const anta = dasha.active.find((p: any) => p.type === 'Antardasha');
+                        dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
+                        
+                        if (!dashaRemaining && maha.end) {
+                            const end = new Date(maha.end);
+                            const now = Date.now();
+                            const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
+                            dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                        }
+                    }
+
+                    stats.activeDasha = dashaName;
+                    stats.dashaRemaining = dashaRemaining;
+                }
+                if (typeof analysis?.moonPhase === 'string') stats.moonPhase = analysis.moonPhase;
+                
+                if (Object.keys(stats).length > 0) {
+                    setKundliStats(stats);
+                    sessionStorage.setItem(statsKey, JSON.stringify(stats));
+                    sessionStorage.setItem(sessionKey, 'true');
+                }
+
+                // After successful analysis, re-fetch profile to get updated signs if needed
+                fetch('/api/user/profile')
+                    .then(r => r.json())
+                    .then(d => { if (d.user) refreshUser(d.user); })
+                    .catch(() => {});
+            })
+            .catch(() => setKundliStats(null))
+            .finally(() => setKundliLoading(false));
+    }, [user?.email, user?.astrologyData, refreshUser]);
 
     // Handlers
     const handleQuickAsk = (question: string) => {
