@@ -34,6 +34,7 @@ export function ThemeProvider({
   useEffect(() => {
     // Detect device tier
     const tier = detectDeviceTier();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDeviceTier(tier);
     
     // Set device tier as data attribute for CSS
@@ -58,7 +59,7 @@ export function ThemeProvider({
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [deviceTier]);
+  }, []);
 
   const setTheme = useCallback(
     (newTheme: Theme) => {

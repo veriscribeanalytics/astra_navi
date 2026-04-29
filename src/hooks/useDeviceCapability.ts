@@ -46,7 +46,7 @@ export function useDeviceCapability(): DeviceCapability {
 
       // Detect device performance tier
       const hardwareConcurrency = navigator.hardwareConcurrency || 4;
-      const deviceMemory = (navigator as any).deviceMemory || 4;
+      const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4;
       
       // Performance scoring
       const performanceScore = hardwareConcurrency + deviceMemory;

@@ -56,7 +56,7 @@ export function getSystemTheme(): Theme {
   try {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     return prefersDark ? 'dark' : 'light';
-  } catch (e) {
+  } catch {
     return 'light';
   }
 }
@@ -70,7 +70,7 @@ export function prefersReducedMotion(): boolean {
   
   try {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

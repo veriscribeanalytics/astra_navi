@@ -66,7 +66,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -79,12 +79,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const initialLoadDone = useRef(false);
-  const previousUserEmail = useRef<string | null>(null);
 
   // Guest State - Minimal for preview purposes
   const [isGuest, setIsGuest] = useState(false);
-  const [guestTimeRemaining, setGuestTimeRemaining] = useState(600); // 10 minutes default
-  const [isGuestExpired, setIsGuestExpired] = useState(false);
+  const [guestTimeRemaining] = useState(600); // 10 minutes default
+  const [isGuestExpired] = useState(false);
 
   const enableGuestMode = useCallback(() => {
     setIsGuest(true);
@@ -252,7 +251,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, isGuestExpired]);
+  }, [activeChatId, loadChats, user, isSending, isGuest]);
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (isGuest) return 'guest-session';

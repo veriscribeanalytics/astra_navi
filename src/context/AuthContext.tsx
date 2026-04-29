@@ -58,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             // Initial set from session
             if (sessionUser.email) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setUser(prev => {
                     if (prev && prev.email === sessionUser.email) return prev;
                     return {
