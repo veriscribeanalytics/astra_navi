@@ -202,6 +202,9 @@ export default function DailyHoroscopeCard({
     };
     const hindiSign = hindiSigns[currentSign] || '';
 
+    const fetchedAreasRef = useRef<Set<string>>(new Set());
+    const forecastDataCacheRef = useRef<Map<string, ForecastData>>(new Map());
+    const lastSignRef = useRef<string | undefined>('');
     const lastFetchedUrlRef = useRef<string>('');
     const lastSignRef = useRef<string | undefined>('');
 
@@ -226,7 +229,9 @@ export default function DailyHoroscopeCard({
                 if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Failed'); }
                 const data = await res.json();
                 
-                // If sign changed, clear local scores
+                // If sign changed, we only update the ref. We DO NOT clear the forecast cache
+                // because the forecast endpoints don't take a sign parameter—they use the user's email 
+                // on the backend. So changing the local sign prop doesn't change the forecast data.
                 if (sign !== lastSignRef.current) {
                     lastSignRef.current = sign;
                 }
@@ -243,6 +248,7 @@ export default function DailyHoroscopeCard({
         })();
     }, [sign, isGeneral, userLoading]);
 
+    // Rotation for personalized alerts
     useEffect(() => {
         if (!horoscope?.personalized_alerts || horoscope.personalized_alerts.length <= 1) return;
         const int = setInterval(() => {
@@ -251,14 +257,12 @@ export default function DailyHoroscopeCard({
         return () => clearInterval(int);
     }, [horoscope?.personalized_alerts]);
 
+    // Initial content show and score animation
     useEffect(() => {
         if (userLoading) return;
         if (!loading && horoscope) {
-            // Set initial animated score from basic horoscope while we fetch detailed ones
             setAnimatedScore(horoscope.overall_score || 0);
-            
             const t = setTimeout(() => { setShowContent(true); }, 100);
-            
             return () => clearTimeout(t);
         }
     }, [loading, horoscope, userLoading]);
@@ -318,6 +322,13 @@ export default function DailyHoroscopeCard({
 
     const openModal = (item: ModalData) => {
         setActiveModal(item); setForecast(null); setExpandedDay(null);
+        
+        // Check cache first
+        const cached = forecastDataCacheRef.current.get(item.area);
+        if (cached) {
+            setForecast(cached);
+            return;
+        }
         setForecastLoading(true);
         fetch(`/api/forecast/${item.area}?days_back=3&days_forward=3`)
             .then(r => r.ok ? r.json() : null)
@@ -331,8 +342,16 @@ export default function DailyHoroscopeCard({
         router.push('/chat');
     };
 
-    const fmtDate = (ds: string) => new Date(ds + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
-    const fmtDay = (ds: string) => new Date(ds + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' });
+    const fmtDate = (ds: string) => {
+        if (!ds) return '—';
+        const d = new Date(ds.includes('T') ? ds : ds + 'T00:00:00');
+        return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+    };
+    const fmtDay = (ds: string) => {
+        if (!ds) return '—';
+        const d = new Date(ds.includes('T') ? ds : ds + 'T00:00:00');
+        return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en', { weekday: 'short' });
+    };
 
     if (error && !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">Service Temporarily Unavailable</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
 
@@ -649,8 +668,8 @@ export default function DailyHoroscopeCard({
                                                             <div className="space-y-2 sm:space-y-3">
                                                                 {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => {
                                                                     const isObject = typeof alert === 'object' && alert !== null;
-                                                                    const simpleText = isObject ? alert.simple : alert;
-                                                                    const techText = isObject ? alert.technical : null;
+                                                                    const simpleText = (isObject ? (alert as any).simple : alert) || 'Cosmic alignment in progress';
+                                                                    const techText = isObject ? (alert as any).technical : null;
                                                                     const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
                                                                     return (
                                                                         <div key={i} className="flex items-start gap-2 sm:gap-3 group/alert">

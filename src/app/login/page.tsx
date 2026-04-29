@@ -35,11 +35,6 @@ const LoginContent = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [name, setName] = useState('');
-    const [dob, setDob] = useState('');
-    const [tob, setTob] = useState('');
-    const [pob, setPob] = useState('');
-    const [phone, setPhone] = useState('');
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -95,7 +90,7 @@ const LoginContent = () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email, password, name, dob, tob, pob, phoneNumber: phone
+                        email, password
                     }),
                 });
 
@@ -245,7 +240,7 @@ const LoginContent = () => {
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            className="space-y-3"
+                                            className="space-y-5"
                                         >
                                             <Input placeholder="Full Name" icon={<User size={14} className="text-secondary" />} value={name} onChange={(e) => setName(e.target.value)} required />
                                             <div className="grid grid-cols-2 gap-2">

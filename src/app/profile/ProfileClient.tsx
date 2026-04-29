@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -15,12 +15,16 @@ import {
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, isLoggedIn } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isNewRegistration = searchParams?.get('registered') === 'true';
     const { showToast, ToastContainer, success, error } = useToast();
     const [formData, setFormData] = useState({
         name: '',
         dob: '',
         tob: '',
         pob: '',
+        phoneNumber: '',
+        gender: '',
         maritalStatus: '',
         occupation: ''
     });
@@ -28,13 +32,15 @@ export default function ProfileSettingsPage() {
         name: '',
         dob: '',
         tob: '',
-        pob: ''
+        pob: '',
+        phoneNumber: ''
     });
     const [touched, setTouched] = useState({
         name: false,
         dob: false,
         tob: false,
-        pob: false
+        pob: false,
+        phoneNumber: false
     });
     const [hasChanges, setHasChanges] = useState(false);
 
@@ -46,6 +52,8 @@ export default function ProfileSettingsPage() {
                 dob: user.dob || '',
                 tob: user.tob || '',
                 pob: user.pob || '',
+                phoneNumber: user.phoneNumber || '',
+                gender: user.gender || '',
                 maritalStatus: user.maritalStatus || '',
                 occupation: user.occupation || ''
             };
@@ -61,6 +69,8 @@ export default function ProfileSettingsPage() {
                 formData.dob !== (user.dob || '') ||
                 formData.tob !== (user.tob || '') ||
                 formData.pob !== (user.pob || '') ||
+                formData.phoneNumber !== (user.phoneNumber || '') ||
+                formData.gender !== (user.gender || '') ||
                 formData.maritalStatus !== (user.maritalStatus || '') ||
                 formData.occupation !== (user.occupation || '');
             setHasChanges(changed);
@@ -118,11 +128,12 @@ export default function ProfileSettingsPage() {
             name: validateField('name', formData.name),
             dob: validateField('dob', formData.dob),
             tob: '',
-            pob: validateField('pob', formData.pob)
+            pob: validateField('pob', formData.pob),
+            phoneNumber: ''
         };
 
         setErrors(newErrors);
-        setTouched({ name: true, dob: true, tob: true, pob: true });
+        setTouched({ name: true, dob: true, tob: true, pob: true, phoneNumber: true });
         return !Object.values(newErrors).some(error => error !== '');
     };
 
@@ -161,6 +172,9 @@ export default function ProfileSettingsPage() {
             
             setTimeout(() => {
                 showLoading("", 0);
+                if (isNewRegistration) {
+                    router.push('/');
+                }
             }, 500);
 
         } catch (err: any) {
@@ -176,11 +190,13 @@ export default function ProfileSettingsPage() {
                 dob: user.dob || '',
                 tob: user.tob || '',
                 pob: user.pob || '',
+                phoneNumber: user.phoneNumber || '',
+                gender: user.gender || '',
                 maritalStatus: user.maritalStatus || '',
                 occupation: user.occupation || ''
             });
-            setErrors({ name: '', dob: '', tob: '', pob: '' });
-            setTouched({ name: false, dob: false, tob: false, pob: false });
+            setErrors({ name: '', dob: '', tob: '', pob: '', phoneNumber: '' });
+            setTouched({ name: false, dob: false, tob: false, pob: false, phoneNumber: false });
             setHasChanges(false);
         }
     };
@@ -191,7 +207,7 @@ export default function ProfileSettingsPage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
             <div className="w-full max-w-xl relative z-10">
-                <div className="text-center mb-10">
+                <div className="text-center mb-10 mt-8">
                     <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 mb-4 sm:mb-6 cosmic-glow">
                         <User className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
@@ -281,7 +297,36 @@ export default function ProfileSettingsPage() {
                             required
                         />
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <Input 
+                            label="Phone Number"
+                            placeholder="+1234567890" 
+                            type="tel"
+                            icon={<MapPin className="w-4 h-4 opacity-0" />} // Placeholder icon, we can use Phone if available, but for now just basic text or no icon.
+                            value={formData.phoneNumber}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setFormData({...formData, phoneNumber: value});
+                            }}
+                            helperText="Optional phone number"
+                        />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div className="space-y-1">
+                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                    Gender
+                                </label>
+                                <select 
+                                    className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                                >
+                                    <option value="" disabled className="bg-surface text-on-surface">Select Gender</option>
+                                    <option value="male" className="bg-surface text-on-surface">Male</option>
+                                    <option value="female" className="bg-surface text-on-surface">Female</option>
+                                    <option value="other" className="bg-surface text-on-surface">Other</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
+                                </select>
+                            </div>
                             <div className="space-y-1">
                                 <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
                                     Marital Status
@@ -296,6 +341,7 @@ export default function ProfileSettingsPage() {
                                     <option value="Married" className="bg-surface text-on-surface">Married</option>
                                     <option value="Divorced" className="bg-surface text-on-surface">Divorced</option>
                                     <option value="Widowed" className="bg-surface text-on-surface">Widowed</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
@@ -314,6 +360,7 @@ export default function ProfileSettingsPage() {
                                     <option value="Jobseeker" className="bg-surface text-on-surface">Jobseeker</option>
                                     <option value="Housewife" className="bg-surface text-on-surface">Housewife</option>
                                     <option value="Retired" className="bg-surface text-on-surface">Retired</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
                                 </select>
                             </div>
                         </div>
@@ -328,7 +375,7 @@ export default function ProfileSettingsPage() {
                                 loading={isLoading}
                                 leftIcon={!isLoading ? <Save className="w-4 h-4" /> : undefined}
                             >
-                                {isLoading ? 'Updating...' : 'Save Changes'}
+                                {isLoading ? 'Updating...' : (isNewRegistration ? 'Save & Continue to Dashboard' : 'Save Changes')}
                             </Button>
                             {hasChanges && (
                                 <Button 

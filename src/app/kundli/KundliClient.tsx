@@ -81,6 +81,7 @@ export default function KundliPage() {
                 || result.data 
                 || result;
 
+            // Handle potential stringified JSON within the payload
             if (typeof payload === 'string') {
                 try {
                     payload = JSON.parse(payload);
@@ -89,12 +90,40 @@ export default function KundliPage() {
                 }
             }
 
-            if (payload && typeof payload === 'object' && payload.houses && payload.planets) {                 
+            // Sometimes the data is double-nested in a 'data' or 'astrologyData' key inside the payload
+            if (payload && !payload.houses && payload.astrologyData) {
+                payload = payload.astrologyData;
+            }
+            if (payload && !payload.houses && payload.data) {
+                payload = payload.data;
+            }
+
+            if (payload && typeof payload === 'object' && payload.houses) {                 
+                // Ensure planets exists as an array to avoid rendering crashes
+                if (!payload.planets) payload.planets = [];
+                
+                // Defensive check: ensure every planet has the required arrays
+                payload.planets = payload.planets.map((p: any) => ({
+                    ...p,
+                    yogas: p.yogas || [],
+                    interpretation: p.interpretation || [],
+                    conjunctions: p.conjunctions || [],
+                    lordOf: p.lordOf || []
+                }));
+
+                // Defensive check for houses
+                payload.houses = payload.houses.map((h: any) => ({
+                    ...h,
+                    occupants: h.occupants || [],
+                    interpretation: h.interpretation || [],
+                    areas: h.areas || []
+                }));
+
                 setData(payload); 
                 setError(null); 
             }
             else {
-                console.warn("[Kundli] Invalid payload format. Keys found:", Object.keys(result), "Payload keys:", payload ? Object.keys(payload) : 'null');
+                console.error("[Kundli] Invalid payload format. Keys found:", Object.keys(result));
                 throw new Error('Your celestial blueprint is currently being drawn. Please try refreshing in a moment.'); 
             }
         } catch (err: any) { setError(err.message); }

@@ -35,8 +35,9 @@ interface HealthForecastPanelProps {
 }
 
 const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+    if (!dateStr) return '—';
+    const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
 const getScoreColor = (score: number) => {
@@ -308,8 +309,8 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                                         <div className="flex flex-col gap-1.5 mb-3">
                                             {day.personalized_alerts.map((alert, i) => {
                                                 const isObject = typeof alert === 'object' && alert !== null;
-                                                const simpleText = isObject ? alert.simple : alert;
-                                                const techText = isObject ? alert.technical : null;
+                                                const simpleText = (isObject ? (alert as any).simple : alert) || 'Health alignment in progress';
+                                                const techText = isObject ? (alert as any).technical : null;
                                                 const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
                                                 
                                                 return (
