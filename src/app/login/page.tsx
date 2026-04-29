@@ -39,6 +39,7 @@ const LoginContent = () => {
     const [pob, setPob] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [phone, setPhone] = useState('');
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -94,7 +95,7 @@ const LoginContent = () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email, password, name, dob, tob, pob
+                        email, password, name, dob, tob, pob, phoneNumber: phone
                     }),
                 });
 
@@ -226,10 +227,10 @@ const LoginContent = () => {
                         </div>
 
                         <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5">
-                            Sign In
+                            {isRegister ? "Inscribe Identity" : "Sign In"}
                         </h1>
                         <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium">
-                            Welcome back to AstraNavi.
+                            {isRegister ? "Join the celestial journey." : "Welcome back to AstraNavi."}
                         </p>
                     </div>
 
@@ -244,7 +245,7 @@ const LoginContent = () => {
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            className="space-y-5"
+                                            className="space-y-3"
                                         >
                                             <Input placeholder="Full Name" icon={<User size={14} className="text-secondary" />} value={name} onChange={(e) => setName(e.target.value)} required />
                                             <div className="grid grid-cols-2 gap-2">
@@ -252,13 +253,13 @@ const LoginContent = () => {
                                                 <Input type="time" icon={<Clock size={14} className="text-secondary" />} value={tob} onChange={(e) => setTob(e.target.value)} required />
                                             </div>
                                             <Input placeholder="Place of Birth" icon={<MapPin size={14} className="text-secondary" />} value={pob} onChange={(e) => setPob(e.target.value)} required />
-                                            <Input type="email" placeholder="Email Address" icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Password" icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
                                             </div>
                                             <div className="relative">
-                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Key" icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
                                             </div>
                                         </motion.div>
@@ -270,9 +271,9 @@ const LoginContent = () => {
                                             exit={{ opacity: 0 }}
                                             className="space-y-5"
                                         >
-                                            <Input type="email" placeholder="Email Address" icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Password" icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                                             </div>
                                         </motion.div>
