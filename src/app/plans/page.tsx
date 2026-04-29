@@ -24,7 +24,7 @@ export default function PlansPage() {
             <Pricing />
 
             {/* Beta Info Section */}
-            <div className="max-w-4xl mx-auto px-4 mt-6 sm:mt-12 w-full">
+            <div className="max-w-4xl 2xl:max-w-6xl 3xl:max-w-[1600px] mx-auto px-4 mt-6 sm:mt-12 w-full">
                 <Card padding="lg" variant="bordered" className="text-center border-secondary/20 !p-5 sm:!p-8">
                     <h3 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3">Early Adopter Benefits</h3>
                     <p className="text-xs sm:text-base text-primary/70">

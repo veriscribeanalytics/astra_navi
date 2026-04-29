@@ -14,6 +14,8 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { PLANET_GLYPHS, PLANET_COLORS, SIGN_TO_ICON, PLANET_TO_ICON, getDignityStyle } from "@/lib/astrology";
 import PlanetIcon from "@/components/ui/astrology/PlanetIcon";
+import KundliSvg from "@/components/ui/astrology/KundliSvg";
+import { Skeleton, SkeletonCircle, SkeletonBlock, SkeletonText } from "@/components/ui/Skeleton";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Occupant { planet: string; dignity: string; retrograde: boolean; }
@@ -133,29 +135,94 @@ export default function KundliPage() {
         return (<div className="min-h-[calc(100dvh-var(--navbar-height,64px))] flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
             <Lock className="w-12 h-12 text-secondary mx-auto mb-4" /><h2 className="text-2xl font-headline font-bold text-foreground mb-2">Sign In Required</h2>
             <p className="text-foreground/60 text-sm mb-6">Please log in to view your Kundli.</p>
-            <Button onClick={() => router.push('/login')} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">Sign In</Button>
+            <Button onClick={() => router.push('/login?callbackUrl=' + encodeURIComponent('/kundli'))} className="gold-gradient text-white border-none font-bold px-8 py-3 rounded-xl">Sign In</Button>
         </Card></div>);
     }
+
     if (loading) {
         return (
             <div className="h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] flex flex-col overflow-hidden">
-                <div className="flex-1 max-w-[1600px] w-full mx-auto px-3 py-2 flex flex-col gap-4 min-h-0 animate-pulse">
-                    <div className="flex justify-between items-center h-10">
-                        <div className="w-48 h-8 bg-surface-variant/20 rounded-xl" />
-                        <div className="w-24 h-8 bg-surface-variant/20 rounded-xl" />
-                    </div>
-                    <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
-                        <div className="w-full lg:w-[300px] xl:w-[330px] flex flex-col gap-4">
-                            <div className="h-40 bg-surface-variant/10 rounded-[20px]" />
-                            <div className="h-48 bg-surface-variant/10 rounded-[20px]" />
-                            <div className="h-64 bg-surface-variant/10 rounded-[20px]" />
+                <div className="flex-1 max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] w-full mx-auto px-3 py-2 flex flex-col gap-2 min-h-0">
+                    {/* Header Skeleton */}
+                    <div className="flex items-center justify-between shrink-0 mb-2">
+                        <div className="flex items-center gap-3">
+                            <SkeletonCircle size={32} />
+                            <div className="space-y-1.5">
+                                <Skeleton height={18} width={150} />
+                                <Skeleton height={10} width={100} />
+                            </div>
                         </div>
-                        <div className="flex-1 bg-surface-variant/10 rounded-[20px]" />
+                        <Skeleton height={32} width={80} className="rounded-xl" />
+                    </div>
+
+                    <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 lg:gap-0 lg:overflow-hidden overflow-y-auto scrollbar-hide">
+                        {/* LEFT SIDEBAR SKELETON */}
+                        <div className="w-full lg:w-[300px] xl:w-[330px] shrink-0 flex flex-col gap-2.5 lg:overflow-y-auto scrollbar-hide pr-0 lg:pr-3 border-b lg:border-b-0 lg:border-r border-outline-variant/10 pb-4 lg:pb-0">
+                            {/* Identity Cards */}
+                            <div className="space-y-3">
+                                <Skeleton height={14} width={100} />
+                                <Card padding="sm" className="!rounded-[20px] space-y-4">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="flex gap-4">
+                                            <SkeletonCircle size={56} className="shrink-0 rounded-[14px]" />
+                                            <div className="flex-1 space-y-2 py-1">
+                                                <Skeleton height={10} width={80} />
+                                                <Skeleton height={20} width={120} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </Card>
+                            </div>
+                            {/* Dasha Card */}
+                            <div className="space-y-3">
+                                <Skeleton height={14} width={100} />
+                                <Card padding="sm" className="!rounded-[20px] space-y-4">
+                                    <div className="flex gap-3">
+                                        <SkeletonCircle size={32} className="shrink-0" />
+                                        <div className="flex-1 space-y-2">
+                                            <Skeleton height={12} width={140} />
+                                            <Skeleton height={8} width={100} />
+                                        </div>
+                                    </div>
+                                    <Skeleton height={8} className="w-full rounded-full" />
+                                    <SkeletonText lines={3} className="pt-2" />
+                                </Card>
+                            </div>
+                        </div>
+
+                        {/* RIGHT MAIN SKELETON */}
+                        <div className="flex-1 min-w-0 flex flex-col gap-2.5 lg:min-h-0 pl-0 lg:pl-3 w-full">
+                            <Card padding="sm" className="!rounded-[20px] flex-1 flex flex-col">
+                                <div className="flex justify-between mb-6">
+                                    <div className="flex gap-2"><SkeletonCircle size={16} /><Skeleton height={12} width={120} /></div>
+                                    <Skeleton height={10} width={80} />
+                                </div>
+                                {/* Planets Strip */}
+                                <div className="flex gap-5 mb-8 px-2">
+                                    {[1, 2, 3, 4, 5, 6].map(i => (
+                                        <div key={i} className="flex flex-col items-center gap-2 shrink-0">
+                                            <SkeletonCircle size={80} className="lg:w-24 lg:h-24" />
+                                            <Skeleton height={12} width={40} />
+                                        </div>
+                                    ))}
+                                </div>
+                                {/* Houses Grid */}
+                                <div className="border-t border-outline-variant/10 pt-4">
+                                    <div className="flex gap-2 mb-4"><SkeletonCircle size={16} /><Skeleton height={12} width={100} /></div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[1, 2, 3, 4].map(i => (
+                                            <Card key={i} className="!rounded-[16px] h-32" />
+                                        ))}
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
                     </div>
                 </div>
             </div>
         );
     }
+
     if (error || !data) {
         return (<div className="min-h-[calc(100dvh-var(--navbar-height,64px))] flex items-center justify-center px-4"><Card className="glass-panel max-w-md w-full text-center p-8">
             <Sparkles className="w-12 h-12 text-orange-500 mx-auto mb-4" /><h2 className="text-xl font-headline font-bold text-foreground mb-2">Analysis Unavailable</h2>
@@ -166,8 +233,12 @@ export default function KundliPage() {
 
     // ═══════════════════════════════════════════════════════════
     return (
-        <div className="h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] flex flex-col overflow-hidden">
-            <div className="flex-1 max-w-[1600px] w-full mx-auto px-3 py-2 flex flex-col gap-2 min-h-0">
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] flex flex-col overflow-hidden"
+        >            <div className="flex-1 max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] w-full mx-auto px-3 py-2 flex flex-col gap-2 min-h-0">
 
                 {/* ═══ HEADER ═══ */}
                 <div className="flex items-center justify-between shrink-0">
@@ -403,7 +474,7 @@ export default function KundliPage() {
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 className="shrink-0 overflow-hidden"
                             >
-                                <div className="flex justify-start lg:justify-center items-start gap-3 sm:gap-4 lg:gap-5 pb-3 overflow-x-auto scrollbar-hide px-1">
+                                <div className="flex justify-start items-start gap-3 sm:gap-4 lg:gap-5 pb-3 overflow-x-auto scrollbar-hide px-2 sm:px-6 mx-auto max-w-full">
                                     {data.planets.map(planet => {
                                         const dignity = getDignityStyle(planet.dignity);
                                         return (
@@ -580,73 +651,89 @@ export default function KundliPage() {
                                         </motion.div>
                                     </motion.div>
                                 ) : (
-                                    /* ═══ HOUSES GRID ═══ */
+                                    /* ═══ CHART & HOUSES GRID ═══ */
                                     <div className="h-full overflow-y-auto border-t border-outline-variant/10 pt-3">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <Home className="w-4 h-4 text-emerald-400" />
-                                            <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">Houses</h3>
-                                            <div className="w-12 h-px bg-gradient-to-r from-secondary/30 to-transparent" />
-                                            <div className="flex gap-1.5 ml-auto">
-                                                {(['active', 'all'] as const).map(f => (
-                                                    <button key={f} onClick={() => setHouseFilter(f)}
-                                                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border transition-all ${
-                                                            houseFilter === f
-                                                                ? 'bg-secondary/15 text-secondary border-secondary/30'
-                                                                : 'text-foreground/25 border-outline-variant/10 hover:text-foreground/40'
-                                                        }`}>
-                                                        {f === 'active' ? 'Active Houses' : 'All 12 Houses'}
-                                                    </button>
-                                                ))}
+                                        <div className="flex flex-col xl:flex-row gap-6">
+                                            {/* LEFT: SVG Chart */}
+                                            <div className="w-full xl:w-[45%] shrink-0 flex flex-col">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <Sparkles className="w-4 h-4 text-secondary" />
+                                                    <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">Vedic Birth Chart</h3>
+                                                </div>
+                                                <div className="bg-surface/30 rounded-[24px] p-4 border border-outline-variant/10 flex items-center justify-center">
+                                                    <KundliSvg className="w-full max-w-md mx-auto mix-blend-luminosity drop-shadow-xl" />
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                            {filteredHouses.map(house => {
-                                                const hasOcc = house.occupants.length > 0;
-                                                return (
-                                                    <div key={house.house} className={`rounded-[16px] p-3 border transition-all relative overflow-hidden ${
-                                                        hasOcc
-                                                            ? 'bg-surface/40 border-secondary/15 hover:border-secondary/30'
-                                                            : 'bg-surface border-outline-variant/8 opacity-70 hover:opacity-90'
-                                                    }`}>
-                                                        {hasOcc && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-secondary/40 rounded-l-[14px]" />}
-                                                        <div className="mb-1.5">
-                                                            <p className="text-[14px] font-headline font-bold text-foreground leading-tight">{house.name.split('(')[0].trim()}</p>
-                                                            <p className="text-[10px] text-foreground/30 font-bold">H{house.house} · {house.sign} · Lord: {house.lord}</p>
-                                                        </div>
-                                                        {hasOcc && (
-                                                            <div className="flex flex-wrap gap-1 mb-1.5">
-                                                                {house.occupants.map((occ, i) => (
-                                                                    <span key={i} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border"
-                                                                        style={{
-                                                                            color: PLANET_COLORS[occ.planet],
-                                                                            backgroundColor: `${PLANET_COLORS[occ.planet]}15`,
-                                                                            borderColor: `${PLANET_COLORS[occ.planet]}30`,
-                                                                        }}>
-                                                                        {PLANET_GLYPHS[occ.planet]} {occ.planet}
-                                                                        {occ.dignity !== 'Normal' && <span className="text-[7px] opacity-70">{occ.dignity === 'Exalted' ? '⬆' : '⬇'}</span>}
-                                                                        {occ.retrograde && <span className="text-[7px] text-orange-400">℞</span>}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                        {house.interpretation?.[0] && (() => {
-                                                            const item = house.interpretation[0];
-                                                            const isObject = typeof item === 'object' && item !== null;
-                                                            const simpleText = isObject ? (item as any).simple : item;
-                                                            return (
-                                                                <p className="text-[11px] text-foreground/40 leading-snug line-clamp-2">{simpleText}</p>
-                                                            );
-                                                        })()}
-                                                        {!house.interpretation?.[0] && house.areas.length > 0 && (
-                                                            <div className="flex flex-wrap gap-0.5">
-                                                                {house.areas.slice(0, 3).map((a, i) => (
-                                                                    <span key={i} className="text-[9px] text-foreground/25 font-bold">{a}{i < 2 && house.areas.length > 1 ? ' · ' : ''}</span>
-                                                                ))}
-                                                            </div>
-                                                        )}
+
+                                            {/* RIGHT: Houses Grid */}
+                                            <div className="w-full xl:w-[55%] flex flex-col">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <Home className="w-4 h-4 text-emerald-400" />
+                                                    <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">House Analysis</h3>
+                                                    <div className="flex-1 h-px bg-gradient-to-r from-secondary/30 to-transparent ml-2" />
+                                                    <div className="flex gap-1.5 ml-auto shrink-0">
+                                                        {(['active', 'all'] as const).map(f => (
+                                                            <button key={f} onClick={() => setHouseFilter(f)}
+                                                                className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border transition-all ${
+                                                                    houseFilter === f
+                                                                        ? 'bg-secondary/15 text-secondary border-secondary/30'
+                                                                        : 'text-foreground/25 border-outline-variant/10 hover:text-foreground/40'
+                                                                }`}>
+                                                                {f === 'active' ? 'Active' : 'All 12'}
+                                                            </button>
+                                                        ))}
                                                     </div>
-                                                );
-                                            })}
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                    {filteredHouses.map(house => {
+                                                        const hasOcc = house.occupants.length > 0;
+                                                        return (
+                                                            <div key={house.house} className={`rounded-[16px] p-3 border transition-all relative overflow-hidden ${
+                                                                hasOcc
+                                                                    ? 'bg-surface/40 border-secondary/15 hover:border-secondary/30'
+                                                                    : 'bg-surface border-outline-variant/8 opacity-70 hover:opacity-90'
+                                                            }`}>
+                                                                {hasOcc && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-secondary/40 rounded-l-[14px]" />}
+                                                                <div className="mb-1.5">
+                                                                    <p className="text-[14px] font-headline font-bold text-foreground leading-tight">{house.name.split('(')[0].trim()}</p>
+                                                                    <p className="text-[10px] text-foreground/30 font-bold">H{house.house} · {house.sign} · Lord: {house.lord}</p>
+                                                                </div>
+                                                                {hasOcc && (
+                                                                    <div className="flex flex-wrap gap-1 mb-1.5">
+                                                                        {house.occupants.map((occ, i) => (
+                                                                            <span key={i} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                                                                                style={{
+                                                                                    color: PLANET_COLORS[occ.planet],
+                                                                                    backgroundColor: `${PLANET_COLORS[occ.planet]}15`,
+                                                                                    borderColor: `${PLANET_COLORS[occ.planet]}30`,
+                                                                                }}>
+                                                                                {PLANET_GLYPHS[occ.planet]} {occ.planet}
+                                                                                {occ.dignity !== 'Normal' && <span className="text-[7px] opacity-70">{occ.dignity === 'Exalted' ? '⬆' : '⬇'}</span>}
+                                                                                {occ.retrograde && <span className="text-[7px] text-orange-400">℞</span>}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                                {house.interpretation?.[0] && (() => {
+                                                                    const item = house.interpretation[0];
+                                                                    const isObject = typeof item === 'object' && item !== null;
+                                                                    const simpleText = isObject ? (item as any).simple : item;
+                                                                    return (
+                                                                        <p className="text-[11px] text-foreground/40 leading-snug line-clamp-2">{simpleText}</p>
+                                                                    );
+                                                                })()}
+                                                                {!house.interpretation?.[0] && house.areas.length > 0 && (
+                                                                    <div className="flex flex-wrap gap-0.5">
+                                                                        {house.areas.slice(0, 3).map((a, i) => (
+                                                                            <span key={i} className="text-[9px] text-foreground/25 font-bold">{a}{i < 2 && house.areas.length > 1 ? ' · ' : ''}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -656,6 +743,6 @@ export default function KundliPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }

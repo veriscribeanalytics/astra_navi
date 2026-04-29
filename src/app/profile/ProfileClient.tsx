@@ -139,7 +139,7 @@ export default function ProfileSettingsPage() {
             return;
         }
 
-        showLoading("Syncing your celestial coordinates...", 2000);
+        showLoading("Updating your profile...", 2000);
         
         try {
             const response = await fetch('/api/user/profile', {
@@ -151,12 +151,12 @@ export default function ProfileSettingsPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || "The stars are obscured. Please try again.");
+                throw new Error(data.error || "Update failed. Please try again.");
             }
 
             // Update local context
             login(user?.email || '', formData);
-            success('Celestial profile successfully updated!');
+            success('Profile updated successfully!');
             setHasChanges(false);
             
             setTimeout(() => {
@@ -195,9 +195,9 @@ export default function ProfileSettingsPage() {
                     <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 mb-4 sm:mb-6 cosmic-glow">
                         <User className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">Celestial Profile</h1>
+                    <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">User Profile</h1>
                     <p className="text-sm font-body text-on-surface-variant max-w-md mx-auto">
-                        Manage your birth coordinates to ensure your cosmic readings are always perfectly aligned.
+                        Manage your birth details to ensure your personalized readings are always accurate.
                     </p>
                 </div>
 

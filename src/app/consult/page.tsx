@@ -47,7 +47,7 @@ export default function ConsultPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] py-20 px-4">
+        <div className="h-[calc(100vh-70px)] bg-[var(--bg)] pt-2 overflow-hidden px-4">
             <ConsultClient />
         </div>
     );

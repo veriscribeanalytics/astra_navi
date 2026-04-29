@@ -43,19 +43,19 @@ export async function POST(req: Request) {
 
         if (!response.ok) {
             return NextResponse.json({ 
-                error: data.error || "Invalid celestial credentials." 
+                error: data.error || "Invalid credentials." 
             }, { status: response.status });
         }
 
         return NextResponse.json({
-            message: "Welcome back, Seeker.",
+            message: "Welcome back.",
             user: data.user
         });
 
     } catch (error) {
         console.error("Login proxy error:", error);
         return NextResponse.json({ 
-            error: "The stars are currently obscured. Try again later." 
+            error: "An error occurred. Please try again later." 
         }, { status: 500 });
     }
 }

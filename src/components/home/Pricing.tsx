@@ -8,7 +8,8 @@ import Button from '../ui/Button';
 
 const plans = [
     { 
-        title: 'Seeker', 
+        title: 'Astra Seeker',
+ 
         price: '₹0', 
         period: '/always', 
         features: ['Complete Kundli Generation', 'Daily Rashi Predictions', 'Limited Consultations (5 min/day)', 'Basic Planetary Insights'], 
@@ -39,7 +40,7 @@ const plans = [
 export default function Pricing() {
     return (
         <section className="py-12 lg:py-20 bg-transparent relative overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+            <div className="max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {plans.map((plan, idx) => (
                         <motion.div

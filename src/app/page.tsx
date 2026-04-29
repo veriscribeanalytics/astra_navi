@@ -6,6 +6,7 @@ import LandingPage from "@/components/home/LandingPage";
 import DashboardHome from "@/components/dashboard/DashboardHome";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from '@/hooks';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const { isLoggedIn, isLoading } = useAuth();
@@ -18,7 +19,7 @@ export default function Home() {
     const logoutStatus = searchParams.get('logout');
     
     if (loginStatus === 'success') {
-      success("Welcome back, Seeker.");
+      success("Welcome back.");
       // Clear param without reload
       router.replace('/');
     } else if (logoutStatus === 'success') {
@@ -38,7 +39,13 @@ export default function Home() {
   return (
     <main className="flex-grow">
        {ToastContainer}
-       {isLoggedIn ? <DashboardHome /> : <LandingPage />}
+       <motion.div
+         initial={{ opacity: 0 }}
+         animate={{ opacity: 1 }}
+         transition={{ duration: 0.5 }}
+       >
+         {isLoggedIn ? <DashboardHome /> : <LandingPage />}
+       </motion.div>
     </main>
   );
 }

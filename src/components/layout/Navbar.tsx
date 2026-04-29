@@ -12,7 +12,7 @@ import { useToast } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
-    History, Gem, ShieldQuestion, Users, Brain
+    History, Gem, ShieldQuestion, Users, Brain, Globe
 } from "lucide-react";
 
 interface INavbarProps{}
@@ -34,8 +34,8 @@ const getNavSections = (isLoggedIn: boolean) => {
                     {
                         label: "My Kundli",
                         href: "/kundli",
-                        icon: <BookOpen className="w-4 h-4" />,
-                        desc: "Deep-dive into your celestial DNA."
+                        icon: <Globe className="w-4 h-4" />,
+                        desc: "Deep-dive into your chart details."
                     },
                     {
                         label: "Chart Matching",
@@ -116,10 +116,10 @@ const getNavSections = (isLoggedIn: boolean) => {
                         desc: "Domain-specific Vedic intelligence agents."
                     },
                     { 
-                        label: "Seeker Support", 
+                        label: "Help & Support", 
                         href: "/support", 
                         icon: <ShieldQuestion className="w-4 h-4" />,
-                        desc: "How can we assist your cosmic journey?"
+                        desc: "How can we assist you today?"
                     },
                 ]
             }
@@ -297,11 +297,11 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
         setIsUserDropdownOpen(false);
         setIsMenuOpen(false);
         
-        showLoading("Closing celestial connection...", 2000);
+        showLoading("Logging you out...", 2000);
         
         setTimeout(async () => {
             try {
-                success("Session concluded successfully.");
+                success("Signed out successfully.");
                 await logout('/');
             } catch (err) {
                 console.error('Logout failed:', err);
@@ -317,7 +317,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
             {ToastContainer}
             <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
-            <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px]">
+            <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start">
                     <Link href="/" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
@@ -395,15 +395,15 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                             {isUserDropdownOpen && (
                                 <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
-                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Seeker Identity</p>
-                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "Seeker"}</p>
+                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
+                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "User"}</p>
                                     </div>
                                     <div className="space-y-0.5">
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
-                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> Celestial Profile
+                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> User Profile
                                         </Link>
                                         <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 text-sm text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-medium">
-                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> Logout Journey
+                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> Sign Out
                                         </button>
                                     </div>
                                 </div>
@@ -444,20 +444,20 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
                             <div className="profile-ring-glow !w-8 !h-8 cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
                                 <div className="profile-comet-dot"></div>
-                                <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
+                                <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
                             </div>
                             {isUserDropdownOpen && (
                                 <div className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
-                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Seeker Identity</p>
-                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "Seeker"}</p>
+                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
+                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "User"}</p>
                                     </div>
                                     <div className="space-y-0.5">
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
-                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> Celestial Profile
+                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> User Profile
                                         </Link>
                                         <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 text-sm text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-medium">
-                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> Logout Journey
+                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> Sign Out
                                         </button>
                                     </div>
                                 </div>
@@ -501,7 +501,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
 
                     {!isLoggedIn && (
                         <div className="pt-2">
-                            <Button href="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="rounded-2xl shadow-lg shadow-secondary/20 font-bold tracking-wider">ENTER THE ASCENDANT</Button>
+                            <Button href="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="rounded-2xl shadow-lg shadow-secondary/20 font-bold tracking-wider">GET STARTED</Button>
                         </div>
                     )}
                 </div>

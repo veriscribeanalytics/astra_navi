@@ -39,7 +39,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* ═══════════════════════════════════════════════════════════ */}
             {/* HERO — Full-width with side stats                         */}
             {/* ═══════════════════════════════════════════════════════════ */}
-            <section className="w-full px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto mb-10 sm:mb-14">
+            <section className="w-full px-4 sm:px-8 lg:px-12 max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto mb-10 sm:mb-14">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                     
                     {/* Left stat column */}
@@ -130,7 +130,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* VEDIC HOOK + QUICK STATS — Full-width band                */}
             {/* ═══════════════════════════════════════════════════════════ */}
             <section className="w-full border-y border-outline-variant/10 bg-surface-variant/5 mb-10 sm:mb-14">
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-8 sm:py-10">
+                <div className="max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-8 lg:px-12 py-8 sm:py-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                         {/* Quote */}
                         <div className="lg:col-span-7 relative">
@@ -169,7 +169,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* ═══════════════════════════════════════════════════════════ */}
             {/* FEATURE BENTO GRID — Full-width with side labels          */}
             {/* ═══════════════════════════════════════════════════════════ */}
-            <section className="w-full px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto mb-10 sm:mb-14">
+            <section className="w-full px-4 sm:px-8 lg:px-12 max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto mb-10 sm:mb-14">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     
                     {/* Left label */}
@@ -208,7 +208,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* TRUST + BENEFITS — Full-width with 3-column layout        */}
             {/* ═══════════════════════════════════════════════════════════ */}
             <section className="w-full border-t border-outline-variant/10 pt-10 sm:pt-14 pb-16">
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
+                <div className="max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-8 lg:px-12">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         
                         {/* Privacy card — left */}
@@ -244,7 +244,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
                         <div className="lg:col-span-4 space-y-5">
                             <div>
                                 <p className="text-[10px] text-secondary uppercase tracking-[0.2em] font-bold mb-2">What You Get</p>
-                                <h2 className="text-xl sm:text-2xl font-headline font-bold text-primary">Why Seekers Trust AstraNavi</h2>
+                                <h2 className="text-xl sm:text-2xl font-headline font-bold text-primary">Why Users Trust AstraNavi</h2>
                             </div>
                             <div className="space-y-3">
                                 {benefits.map((benefit, idx) => (
@@ -293,7 +293,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-[10px] text-on-surface-variant/40 font-bold">Join 1,200+ seekers</p>
+                                    <p className="text-[10px] text-on-surface-variant/40 font-bold">Join 1,200+ users</p>
                                 </div>
                             </Card>
                         </motion.div>

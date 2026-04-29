@@ -16,8 +16,12 @@ import Input from '@/components/ui/Input';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 
-const LoginPage = () => {
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+const LoginContent = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { success, error, ToastContainer } = useToast();
     const { showLoading } = useAuth();
     const [isRegister, setIsRegister] = useState(false);
@@ -37,8 +41,6 @@ const LoginPage = () => {
     const [pob, setPob] = useState('');
     const [phone, setPhone] = useState('');
 
-    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (containerRef.current) {
@@ -55,7 +57,6 @@ const LoginPage = () => {
 
     // Handle NextAuth errors from query params
     useEffect(() => {
-        if (!searchParams) return;
         const authError = searchParams.get('error');
         if (authError) {
             const errorMessages: Record<string, string> = {
@@ -67,9 +68,9 @@ const LoginPage = () => {
                 'Callback': 'Try signing in with a different account.',
                 'OAuthAccountNotLinked': 'To confirm your identity, please sign in with the same account you used originally.',
                 'EmailSignin': 'Check your email address.',
-                'CredentialsSignin': 'Invalid celestial credentials.',
+                'CredentialsSignin': 'Invalid credentials.',
                 'SessionRequired': 'Please sign in to access this page.',
-                'default': 'The stars are obscured. Please try again.'
+                'default': 'An error occurred. Please try again.'
             };
 
             const message = errorMessages[authError] || errorMessages.default;
@@ -87,7 +88,7 @@ const LoginPage = () => {
         try {
             if (isRegister) {
                 if (password !== confirmPassword) {
-                    throw new Error("The celestial keys (passwords) do not match.");
+                    throw new Error("The passwords do not match.");
                 }
 
                 const res = await fetch('/api/register', {
@@ -99,9 +100,9 @@ const LoginPage = () => {
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "The stars are obscured. Registration failed.");
+                if (!res.ok) throw new Error(data.error || "Registration failed. Please try again.");
 
-                success("Your celestial identity has been inscribed. You may now login.");
+                success("Your account has been created. You may now login.");
                 setIsRegister(false);
             } else {
                 const result = await signIn('credentials', {
@@ -112,13 +113,13 @@ const LoginPage = () => {
 
                 if (result?.error) {
                     throw new Error(result.error === 'CredentialsSignin'
-                        ? "Invalid celestial credentials."
+                        ? "Invalid credentials."
                         : result.error);
                 }
 
-                showLoading("Aligning your celestial path...", 1500);
+                showLoading("Signing you in...", 1500);
                 setTimeout(() => {
-                    const callbackUrl = searchParams?.get('callbackUrl') || '/?login=success';
+                    const callbackUrl = searchParams.get('callbackUrl') || '/?login=success';
                     router.push(callbackUrl);
                 }, 1500);
             }
@@ -176,7 +177,7 @@ const LoginPage = () => {
                         <div className="flex-1 flex flex-col justify-center py-12">
                             <div className="space-y-4">
                                 <h2 className="text-3xl xl:text-4xl font-headline font-bold text-primary leading-tight">
-                                    Unlock your <span className="text-secondary italic">Celestial</span> Blueprint.
+                                    Unlock your <span className="text-secondary italic">Personal</span> Blueprint.
                                 </h2>
                                 <p className="text-base text-on-surface-variant max-w-sm leading-relaxed">
                                     Merging ancient Vedic Jyotish with Artificial Intelligence to illuminate your path.
@@ -226,10 +227,10 @@ const LoginPage = () => {
                         </div>
 
                         <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5">
-                            Celestial Portal
+                            Sign In
                         </h1>
                         <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium">
-                            Align with your cosmic path and unlock ancient wisdom.
+                            Welcome back to AstraNavi.
                         </p>
                     </div>
 
@@ -252,13 +253,13 @@ const LoginPage = () => {
                                                 <Input type="time" icon={<Clock size={14} className="text-secondary" />} value={tob} onChange={(e) => setTob(e.target.value)} required />
                                             </div>
                                             <Input placeholder="Place of Birth" icon={<MapPin size={14} className="text-secondary" />} value={pob} onChange={(e) => setPob(e.target.value)} required />
-                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input type="email" placeholder="Email Address" icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input type={showPassword ? "text" : "password"} placeholder="Password" icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
                                             </div>
                                             <div className="relative">
-                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Key" icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
                                             </div>
                                         </motion.div>
@@ -270,9 +271,9 @@ const LoginPage = () => {
                                             exit={{ opacity: 0 }}
                                             className="space-y-5"
                                         >
-                                            <Input type="email" placeholder="Celestial Address" icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input type="email" placeholder="Email Address" icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input type={showPassword ? "text" : "password"} placeholder="Password" icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                                             </div>
                                         </motion.div>
@@ -286,14 +287,14 @@ const LoginPage = () => {
                                     loading={isLoading}
                                     className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg mt-2"
                                 >
-                                    {isRegister ? "Inscribe Identity" : "Enter Ascendant"}
+                                    {isRegister ? "Create Account" : "Access Dashboard"}
                                     {!isLoading && <ArrowRight size={14} />}
                                 </Button>
                             </form>
 
                             <div className="flex items-center gap-4 py-3">
                                 <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                                <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">Divine Connection</span>
+                                <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">Secure Connection</span>
                                 <div className="h-[1px] flex-1 bg-outline-variant/10" />
                             </div>
 
@@ -302,7 +303,7 @@ const LoginPage = () => {
                                 variant="ghost"
                                 fullWidth
                                 onClick={() => {
-                                    const callbackUrl = searchParams?.get('callbackUrl') || '/';
+                                    const callbackUrl = searchParams.get('callbackUrl') || '/';
                                     signIn('google', { callbackUrl });
                                 }}
                                 className="bg-surface/50 dark:bg-white/5 border border-outline-variant/20 dark:border-white/10 hover:bg-surface dark:hover:bg-white/10 !rounded-xl text-on-surface-variant/60 text-xs py-2 h-10"
@@ -329,9 +330,9 @@ const LoginPage = () => {
                                     className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
                                 >
                                     {isRegister ? (
-                                        <>Already have an identity? <span className="text-secondary ml-1">Login</span></>
+                                        <>Already have an account? <span className="text-secondary ml-1">Sign In</span></>
                                     ) : (
-                                        <>No celestial records? <span className="text-secondary ml-1">Create Account</span></>
+                                        <>Don't have an account? <span className="text-secondary ml-1">Create Account</span></>
                                     )}
                                 </button>
                         </div>
@@ -352,6 +353,18 @@ const LoginPage = () => {
                 </div>
             </div>
         </div>
+    );
+};
+
+const LoginPage = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen w-full flex items-center justify-center bg-background">
+                <div className="w-10 h-10 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 };
 

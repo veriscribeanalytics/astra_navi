@@ -3,8 +3,9 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
-import { Sparkles, Heart, Briefcase, Activity, DollarSign, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit } from 'lucide-react';
+import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, Briefcase, Activity, DollarSign, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import Link from 'next/link';
 
 interface HoroscopeData {
     sign?: string; date?: string; overall_score?: number; mood?: string;
@@ -79,7 +80,96 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
 }
 
 
-export default function DailyHoroscopeCard({ sign, isGeneral, userLoading }: { sign?: string; isGeneral?: boolean; userLoading?: boolean }) {
+// ─── Skeleton Sub-component ─────────────────────────────
+import { Skeleton, SkeletonCircle, SkeletonBlock, SkeletonText } from '@/components/ui/Skeleton';
+
+function DailyHoroscopeCardSkeleton() {
+    return (
+        <div className="flex flex-col h-full">
+            {/* Highlight Banner Skeleton */}
+            <div className="bg-secondary/5 border-b border-secondary/10 px-6 py-2">
+                <Skeleton height={14} className="w-2/3 mx-auto sm:mx-0" />
+            </div>
+
+            {/* HERO SECTION Skeleton */}
+            <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-secondary/[0.03] border-b border-white/5">
+                <div className="lg:col-span-8 flex items-center gap-5">
+                    <SkeletonBlock height={64} className="w-16 h-16 rounded-2xl shrink-0" />
+                    <div className="flex-1 space-y-3">
+                        <Skeleton height={14} width={120} />
+                        <SkeletonText lines={2} className="text-xl" />
+                    </div>
+                </div>
+                <div className="lg:col-span-4 flex items-center justify-center lg:justify-end gap-6 lg:border-l border-white/5 lg:pl-8">
+                    <div className="relative">
+                        <SkeletonCircle size={96} className="sm:w-24 sm:h-24" />
+                        <div className="absolute inset-[-10%] rounded-full bg-secondary/5 blur-xl animate-pulse" />
+                    </div>
+                    <div className="hidden lg:flex flex-col gap-2">
+                        <SkeletonBlock height={40} className="w-32 rounded-xl" />
+                    </div>
+                </div>
+            </div>
+
+            {/* HEADER & STATS Skeleton (Unified) */}
+            <div className="px-6 sm:px-8 py-5 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="md:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <Skeleton height={12} width={140} className="mb-2" />
+                        <Skeleton height={32} width={200} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-white/5">
+                        <div className="space-y-2">
+                            <Skeleton height={10} width={40} />
+                            <Skeleton height={16} width={80} />
+                        </div>
+                        <div className="space-y-2">
+                            <Skeleton height={10} width={40} />
+                            <Skeleton height={16} width={80} />
+                        </div>
+                        <div className="space-y-2">
+                            <Skeleton height={10} width={40} />
+                            <Skeleton height={16} width={80} />
+                        </div>
+                        <div className="space-y-2">
+                            <Skeleton height={10} width={40} />
+                            <Skeleton height={16} width={80} />
+                        </div>
+                    </div>
+                </div>
+                <div className="md:col-span-2">
+                    <SkeletonBlock height={140} className="w-full rounded-[20px]" />
+                </div>
+            </div>
+
+            {/* CATEGORY SCORES Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">
+                {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex items-center gap-5 p-5 sm:p-7 border-outline-variant/10 border-b md:border-r last:border-r-0">
+                        <SkeletonBlock height={80} className="w-20 rounded-[28px] shrink-0" />
+                        <div className="flex-1 space-y-3">
+                            <Skeleton height={32} width={80} />
+                            <SkeletonText lines={2} />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
+export default function DailyHoroscopeCard({ 
+    sign, 
+    isGeneral, 
+    userLoading, 
+    onSendMessage 
+}: { 
+    sign?: string; 
+    isGeneral?: boolean; 
+    userLoading?: boolean;
+    onSendMessage?: (msg: string) => void;
+}) {
     const router = useRouter();
     const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -93,8 +183,27 @@ export default function DailyHoroscopeCard({ sign, isGeneral, userLoading }: { s
     const [activeAlertIdx, setActiveAlertIdx] = useState(0);
     
     // Optimization Refs
-    const lastSignRef = useRef<string | undefined>('');
+    const currentSign = horoscope?.sign || sign || 'Aries';
+    
+    // Hindi translation mapping for signs
+    const hindiSigns: Record<string, string> = {
+        'Aries': 'Mesh',
+        'Taurus': 'Vrishabh',
+        'Gemini': 'Mithun',
+        'Cancer': 'Kark',
+        'Leo': 'Simha',
+        'Virgo': 'Kanya',
+        'Libra': 'Tula',
+        'Scorpio': 'Vrishchik',
+        'Sagittarius': 'Dhanu',
+        'Capricorn': 'Makar',
+        'Aquarius': 'Kumbha',
+        'Pisces': 'Meen'
+    };
+    const hindiSign = hindiSigns[currentSign] || '';
+
     const lastFetchedUrlRef = useRef<string>('');
+    const lastSignRef = useRef<string | undefined>('');
 
     const today = new Date();
     const dateString = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
@@ -154,23 +263,50 @@ export default function DailyHoroscopeCard({ sign, isGeneral, userLoading }: { s
         }
     }, [loading, horoscope, userLoading]);
 
-    // Priority: 1. Real General Score, 2. Basic Horoscope Score, 3. Zero
+    // ─── Score Color Logic ─────────────────────────────
+    const getScoreStyle = (s: number) => {
+        if (s >= 85) return { color: 'text-green-600', bg: 'bg-green-600/10', hex: '#16a34a', label: 'Excellent' };
+        if (s >= 70) return { color: 'text-green-400', bg: 'bg-green-400/10', hex: '#4ade80', label: 'Good' };
+        if (s >= 50) return { color: 'text-yellow-500', bg: 'bg-yellow-500/10', hex: '#eab308', label: 'Fair' };
+        return { color: 'text-red-500', bg: 'bg-red-500/10', hex: '#ef4444', label: 'Low' };
+    };
+
     const score = horoscope?.today_scores?.general ?? horoscope?.overall_score ?? 0;
-    const scoreHex = score >= 80 ? '#D4A017' : score >= 60 ? '#E8832A' : '#E84A2A';
+    const currentScoreStyle = getScoreStyle(score);
+    const scoreHex = currentScoreStyle.hex;
     const circ = 2 * Math.PI * 32;
     const prog = circ - (animatedScore / 100) * circ;
-    const scoreColor = (s: number) => s >= 75 ? 'text-green-500' : s >= 50 ? 'text-yellow-500' : 'text-orange-500';
 
     const metrics = useMemo(() => {
         const scores = horoscope?.today_scores || {};
+        const CATEGORY_THEMES = {
+            career: { color: "text-orange-500", bg: "bg-orange-500/10", hex: "#f97316" },
+            health: { color: "text-green-500", bg: "bg-green-500/10", hex: "#22c55e" },
+            love: { color: "text-pink-500", bg: "bg-pink-500/10", hex: "#ec4899" },
+            finance: { color: "text-amber-500", bg: "bg-amber-500/10", hex: "#f59e0b" }
+        };
         
         return [
-            { label: "Career", score: scores.career ?? 0, info: horoscope?.career || '---', icon: <Briefcase className="w-5 h-5" />, color: "text-orange-500", bg: "bg-orange-500/10", colorHex: "#f97316", area: "career" },
-            { label: "Health", score: scores.health ?? 0, info: horoscope?.health || '---', icon: <Activity className="w-5 h-5" />, color: "text-green-500", bg: "bg-green-500/10", colorHex: "#22c55e", area: "health" },
-            { label: "Love", score: scores.love ?? 0, info: horoscope?.love || '---', icon: <Heart className="w-5 h-5" />, color: "text-pink-500", bg: "bg-pink-500/10", colorHex: "#ec4899", area: "love" },
-            { label: "Finance", score: scores.finance ?? 0, info: horoscope?.finance || '---', icon: <DollarSign className="w-5 h-5" />, color: "text-amber-500", bg: "bg-amber-500/10", colorHex: "#f59e0b", area: "finance" },
-        ];
-    }, [horoscope]);
+            { label: "Career", score: scores.career ?? 0, info: horoscope?.career || '---', icon: <Trophy className="w-5 h-5" />, area: "career" },
+            { label: "Health", score: scores.health ?? 0, info: horoscope?.health || '---', icon: <Sun className="w-5 h-5" />, area: "health" },
+            { label: "Love", score: scores.love ?? 0, info: horoscope?.love || '---', icon: <Heart className="w-5 h-5" />, area: "love" },
+            { label: "Finance", score: scores.finance ?? 0, info: horoscope?.finance || '---', icon: <Gem className="w-5 h-5" />, area: "finance" },
+        ].map(item => {
+            const scoreStyle = getScoreStyle(item.score);
+            const theme = CATEGORY_THEMES[item.area as keyof typeof CATEGORY_THEMES];
+            return { 
+                ...item, 
+                // Icon styling stays thematic
+                iconColor: theme.color,
+                iconBg: theme.bg,
+                iconHex: theme.hex,
+                // Score styling stays rating-based
+                scoreColor: scoreStyle.color,
+                scoreBg: scoreStyle.bg,
+                scoreHex: scoreStyle.hex
+            };
+        });
+    }, [horoscope, getScoreStyle]);
 
     const luckyColorHex = useMemo(() => {
         const lc = horoscope?.lucky_color?.toLowerCase() || '';
@@ -198,160 +334,244 @@ export default function DailyHoroscopeCard({ sign, isGeneral, userLoading }: { s
     const fmtDate = (ds: string) => new Date(ds + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
     const fmtDay = (ds: string) => new Date(ds + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' });
 
-    if (loading) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px] animate-pulse"><div className="h-64 flex items-center justify-center"><Sparkles className="w-8 h-8 text-secondary animate-spin" /></div></Card>;
-    if (error || !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">Service Temporarily Unavailable</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
+    if (error && !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">Service Temporarily Unavailable</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
 
-    const displayDate = horoscope.date_display || dateString;
+    const displayDate = horoscope?.date_display || dateString;
     
     // Auto-pick highlight area
     const highlightMetric = [...metrics].sort((a,b) => b.score - a.score)[0];
 
     return (
-        <Card padding="none" className="!rounded-[32px] sm:!rounded-[40px] overflow-hidden relative bg-surface border-secondary/10 flex flex-col">
-            {/* Highlight Banner (Optional Enhancement) */}
-            {highlightMetric.score > 70 && (
-                <div className="bg-secondary/10 border-b border-secondary/10 px-6 py-2 flex items-center gap-2.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-                    <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">
-                        ⭐ Today&apos;s Highlight: Your {highlightMetric.label} score is at an impressive {highlightMetric.score}%
-                    </span>
-                </div>
-            )}
+        <Card padding="none" className="!rounded-[32px] sm:!rounded-[40px] overflow-hidden relative bg-surface border-secondary/10 flex flex-col h-full min-h-[600px]">
+            {loading || userLoading ? (
+                <DailyHoroscopeCardSkeleton />
+            ) : (
+                <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col h-full"
+                >
+                    {/* Highlight Banner */}
+                    {highlightMetric.score > 70 && (
+                        <div className={`${highlightMetric.iconBg} border-b border-white/5 px-6 py-2 flex items-center gap-2.5`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${highlightMetric.iconColor} animate-pulse`} />
+                            <span className={`text-[10px] font-bold ${highlightMetric.scoreColor} uppercase tracking-[0.2em]`}>
+                                ⭐ Today&apos;s Highlight: Your {highlightMetric.label} score is at an impressive {highlightMetric.score}%
+                            </span>
+                        </div>
+                    )}
 
-            {/* HERO SECTION: Integrated Alert + Score Ring (Now on Top) */}
-            <div className="p-5 sm:p-7 grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-secondary/[0.03] border-b border-white/5">
-                {/* Alert Side */}
-                <div className="md:col-span-8 flex items-center gap-5">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 shadow-[0_4px_12px_rgba(200,136,10,0.1)]">
-                        <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-secondary" />
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-center relative min-h-[80px]">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[12px] sm:text-[13px] font-bold text-secondary uppercase tracking-[0.2em]">Your Day Today</span>
-                            {horoscope.personalized_alerts && horoscope.personalized_alerts.length > 1 && (
-                                <div className="flex gap-1">
-                                    {horoscope.personalized_alerts.map((_, i) => (
-                                        <div key={i} className={`w-1 h-1 rounded-full transition-all duration-500 ${i === activeAlertIdx ? 'bg-secondary w-3' : 'bg-secondary/20'}`} />
-                                    ))}
+                    {/* HERO SECTION: Integrated Alert + Score Ring (Now on Top) */}
+                    <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-secondary/[0.03] border-b border-white/5">
+                        {/* Alert Side */}
+                        <div className="lg:col-span-8 flex items-center gap-5">
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 shadow-[0_4px_12px_rgba(200,136,10,0.1)]">
+                                <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-secondary" />
+                            </div>
+                            <div className="flex-1 min-w-0 flex flex-col justify-center relative h-[120px]">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-[12px] sm:text-[13px] font-bold text-secondary uppercase tracking-[0.2em]">Your Day Today</span>
+                                    {horoscope?.personalized_alerts && horoscope.personalized_alerts.length > 1 && (
+                                        <div className="flex gap-1">
+                                            {horoscope?.personalized_alerts.map((_, i) => (
+                                                <div key={i} className={`w-1 h-1 rounded-full transition-all duration-500 ${i === activeAlertIdx ? 'bg-secondary w-3' : 'bg-secondary/20'}`} />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                        <div className="relative">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeAlertIdx}
-                                    initial={{ opacity: 0, x: 10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.4, ease: "easeOut" }}
-                                    className="flex flex-col justify-center py-1"
-                                >
-                                    {(() => {
-                                        const alert = horoscope.personalized_alerts?.[activeAlertIdx] || "Alignment is neutral today.";
-                                        const simple = typeof alert === 'object' ? alert.simple : alert;
-                                        const tech = typeof alert === 'object' ? alert.technical : null;
-                                        return (
-                                            <>
-                                                <p className="text-base sm:text-xl text-foreground font-headline font-bold leading-relaxed line-clamp-2">{simple}</p>
-                                                {tech && (
-                                                    <p className="text-[9px] sm:text-[10px] text-secondary font-bold uppercase tracking-[0.12em] mt-2 flex items-center gap-1.5 opacity-80">
-                                                        <Orbit className="w-2.5 h-2.5" /> {tech}
-                                                    </p>
-                                                )}
-                                            </>
-                                        );
-                                    })()}
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Score Side */}
-                <div className="md:col-span-4 flex items-center justify-center md:justify-end gap-6 md:border-l border-white/5 md:pl-8">
-                    <button onClick={() => openModal({ label: "General", score, info: horoscope.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: "text-secondary", bg: "bg-secondary/10", colorHex: scoreHex, area: "general" })}
-                        className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform group">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 72 72">
-                            <circle cx="36" cy="36" r="32" fill="none" stroke="currentColor" strokeWidth="5" className="text-surface-variant/20" />
-                            <circle cx="36" cy="36" r="32" fill="none" strokeWidth="5" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={prog} className="transition-all duration-[1500ms]" style={{ stroke: scoreHex }} />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-2xl sm:text-3xl font-bold leading-none ${scoreColor(score)}`}>{score}</span>
-                            <span className="text-[9px] text-foreground/30 font-bold uppercase tracking-wider mt-1">General</span>
-                        </div>
-                        <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-secondary/20 transition-colors shadow-[0_0_20px_rgba(200,136,10,0.05)]" />
-                    </button>
-                    <div className="hidden lg:flex flex-col gap-2">
-                        <button onClick={() => openModal({ label: "General", score, info: horoscope.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: "text-secondary", bg: "bg-secondary/10", colorHex: scoreHex, area: "general" })}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-outline-variant/10 hover:border-secondary/30 transition-all text-[11px] font-bold text-foreground/80 uppercase tracking-widest whitespace-nowrap group/btn">
-                            Weekly Forecast <ArrowRight className="w-3.5 h-3.5 text-secondary group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* HEADER: Sign & Date (Now Below Hero) */}
-            <div className="px-6 sm:px-8 py-5 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <TrendingUp className="w-3.5 h-3.5 text-secondary" />
-                        <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em]">Personalized Forecast</span>
-                    </div>
-                    <h3 className="text-2xl sm:text-3xl font-headline font-bold text-foreground leading-tight">{horoscope.sign || sign}</h3>
-                </div>
-                <div className="flex flex-col items-end text-right">
-                    <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em] mb-0.5">{dayName}</span>
-                    <span className="text-base font-headline font-bold text-foreground/60">{displayDate}</span>
-                </div>
-            </div>
-
-            <div className={`transition-all duration-700 ease-out flex-1 flex flex-col ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                {/* TIP OF THE DAY */}
-                <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-white/5">
-                    <div className="p-5 sm:p-6 rounded-[24px] bg-secondary/5 border border-secondary/10 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 blur-[40px] rounded-full -mr-16 -mt-16 group-hover:bg-secondary/10 transition-colors" />
-                        <h4 className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em] mb-2.5 flex items-center gap-2"><Sparkles className="w-3.5 h-3.5" /> Tip of the Day</h4>
-                        <p className="text-base sm:text-lg font-body font-medium italic leading-relaxed text-foreground/80 relative z-10">&quot;{horoscope.tip || 'Stay mindful of your surroundings today.'}&quot;</p>
-                    </div>
-                </div>
-
-                {/* STATS GRID */}
-                <div className={`grid grid-cols-2 ${horoscope.dominant_planet ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} border-b border-white/5`}>
-                    {[{ l: 'Mood', v: horoscope.mood || 'Neutral' }, { l: 'Lucky Color', v: horoscope.lucky_color ?? '—', dot: luckyColorHex }, { l: 'Lucky #', v: String(horoscope.lucky_number ?? '—') }, ...(horoscope.dominant_planet ? [{ l: 'Dominant', v: horoscope.dominant_planet, sec: true }] : [])].map((s, i, arr) => (
-                        <div key={i} className={`flex flex-col items-center justify-center p-4 sm:p-6 ${i < arr.length - 1 ? 'border-r' : ''} ${i < 2 ? 'border-b sm:border-b-0' : ''} border-white/5 hover:bg-white/[0.02] transition-colors`}>
-                            <span className="text-[11px] font-bold text-foreground/30 uppercase tracking-[0.2em] mb-1.5 text-center leading-none">{s.l}</span>
-                            <div className="flex items-center gap-2">
-                                {s.dot && <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.1)]" style={{ backgroundColor: s.dot }} />}
-                                <span className={`text-sm sm:text-base font-headline font-bold ${s.sec ? 'text-secondary' : 'text-foreground'}`}>{s.v}</span>
+                                <div className="relative">
+                                    <AnimatePresence mode="wait">
+                                        <motion.div
+                                            key={activeAlertIdx}
+                                            initial={{ opacity: 0, x: 10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -10 }}
+                                            transition={{ duration: 0.4, ease: "easeOut" }}
+                                            className="flex flex-col justify-center py-1"
+                                        >
+                                            {(() => {
+                                                const alert = horoscope?.personalized_alerts?.[activeAlertIdx] || "Alignment is neutral today.";
+                                                const simple = typeof alert === 'object' ? alert.simple : alert;
+                                                const tech = typeof alert === 'object' ? alert.technical : null;
+                                                return (
+                                                    <>
+                                                        <p className="text-base sm:text-xl text-foreground font-headline font-bold leading-relaxed line-clamp-2">{simple}</p>
+                                                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                                                            {tech && (
+                                                                <p className="text-[9px] sm:text-[10px] text-secondary font-bold uppercase tracking-[0.12em] flex items-center gap-1.5 opacity-80">
+                                                                    <Orbit className="w-2.5 h-2.5" /> {tech}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                        </motion.div>
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
-                    ))}
-                </div>
 
-                {/* CATEGORY SCORES */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                    {metrics.map((item, i) => (
-                        <button key={i} onClick={() => openModal(item)}
-                            className={`flex items-start text-left gap-5 p-5 sm:p-7 transition-all duration-300 hover:bg-secondary/[0.02] cursor-pointer group relative ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
-                            <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-[28px] ${item.bg} ${item.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
-                                {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, { className: "w-7 h-7 sm:w-9 sm:h-9" })}
-                            </div>
-                            <div className="flex-1 min-w-0 pr-4">
-                                <div className="flex items-center gap-3 mb-1.5">
-                                    <div className={`text-3xl sm:text-4xl font-headline font-bold ${item.color}`}>
-                                        {item.score > 0 ? `${item.score}%` : '--'}
+                        {/* Score Side */}
+                        <div className="lg:col-span-4 flex items-center justify-center lg:justify-end lg:border-l border-white/5 lg:pl-8">
+                            <div className="relative group/score">
+                                {/* THE COSMIC AURA */}
+                                <motion.div 
+                                    animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="absolute inset-[-15%] rounded-full bg-secondary/15 blur-[30px]" 
+                                />
+                                
+                                <button onClick={() => openModal({ label: "General", score, info: horoscope?.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: currentScoreStyle.color, bg: currentScoreStyle.bg, colorHex: scoreHex, area: "general" })}
+                                    className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 cursor-pointer hover:scale-105 transition-all duration-500">
+                                    <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(200,136,10,0.15)]" viewBox="0 0 72 72">
+                                        <circle cx="36" cy="36" r="32" fill="none" stroke="currentColor" strokeWidth="5" className="text-surface-variant/20" />
+                                        <circle cx="36" cy="36" r="32" fill="none" strokeWidth="5" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={prog} className="transition-all duration-[1500ms]" style={{ stroke: scoreHex }} />
+                                    </svg>
+                                    
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 group-hover/score:opacity-0 group-hover/score:scale-95">
+                                        <span className={`text-3xl sm:text-4xl font-bold leading-none ${currentScoreStyle.color}`}>{score}</span>
+                                        <span className="text-[10px] text-foreground/30 font-bold uppercase tracking-wider mt-1">General</span>
                                     </div>
-                                    <div className="text-[11px] font-bold text-foreground/40 uppercase tracking-[0.2em]">{item.label}</div>
+
+                                    {/* HOVER CTA for General Score */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 scale-110 group-hover/score:opacity-100 group-hover/score:scale-100 transition-all duration-500">
+                                        <div className="bg-secondary/10 border border-secondary/20 p-3 rounded-full mb-1">
+                                            <TrendingUp className="w-5 h-5 text-secondary" />
+                                        </div>
+                                        <span className="text-[9px] font-black text-secondary uppercase tracking-[0.2em] text-center leading-tight">Weekly<br/>Forecast</span>
+                                    </div>
+
+                                    <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover/score:border-secondary/30 transition-colors" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* UNIFIED HEADER & STATS */}
+                    <div className="px-6 sm:px-8 py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+                        {/* LEFT: Sign & Cramped Stats */}
+                        <div className="md:col-span-2 flex flex-col justify-between">
+                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.sign || sign} characteristics and what they mean for me.`)}>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <TrendingUp className="w-4 h-4 text-secondary" />
+                                    <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Personalized Forecast</span>
                                 </div>
-                                <p className="text-[13px] text-foreground/60 leading-relaxed line-clamp-2">{item.info}</p>
+                                <div className="relative">
+                                    <h3 className="text-2xl sm:text-4xl font-headline font-bold text-foreground leading-tight transition-all duration-500 group-hover/sign:opacity-0 group-hover/sign:-translate-y-2 flex items-baseline gap-3">
+                                        <span>{currentSign}</span>
+                                        {hindiSign && (
+                                            <span className="text-lg sm:text-2xl text-foreground/40 font-medium">/ {hindiSign}</span>
+                                        )}
+                                    </h3>
+                                    <div className="absolute inset-0 flex items-center opacity-0 translate-y-2 transition-all duration-500 group-hover/sign:opacity-100 group-hover/sign:translate-y-0">
+                                        <span className="text-sm font-bold text-secondary uppercase tracking-[0.3em] flex items-center gap-2">
+                                            Learn more <ChevronRight className="w-4 h-4" />
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                                <ArrowRight className={`w-6 h-6 ${item.color}`} />
+
+                            {/* CRAMPED STATS GRID */}
+                            <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-4 border-t border-white/5">
+                                {[{ l: 'Mood', v: horoscope?.mood || 'Neutral' }, { l: 'Lucky Color', v: horoscope?.lucky_color ?? '—', dot: luckyColorHex }, { l: 'Lucky #', v: String(horoscope?.lucky_number ?? '—') }, ...(horoscope?.dominant_planet ? [{ l: 'Dominant', v: horoscope.dominant_planet, sec: true }] : [])].map((s, i) => (
+                                    <button 
+                                        key={i} 
+                                        onClick={() => onSendMessage?.(`My ${s.l} today is ${s.v}. What does this mean for my day and how should I use it?`)}
+                                        className="flex flex-col gap-0.5 text-left group/stat hover:bg-white/[0.03] p-2.5 -m-2 rounded-xl transition-all duration-300 relative overflow-hidden"
+                                    >
+                                        <div className="relative h-9">
+                                            <div className="absolute inset-0 flex flex-col transition-all duration-300 group-hover/stat:-translate-y-full group-hover/stat:opacity-0">
+                                                <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-[0.2em] leading-none mb-1">{s.l}</span>
+                                                <div className="flex items-center gap-2">
+                                                    {s.dot && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: s.dot }} />}
+                                                    <span className={`text-[15px] sm:text-[16px] font-black ${s.sec ? 'text-secondary' : 'text-foreground/80'} truncate`}>{s.v}</span>
+                                                </div>
+                                            </div>
+                                            <div className="absolute inset-0 flex items-center justify-between opacity-0 translate-y-full group-hover/stat:translate-y-0 group-hover/stat:opacity-100 transition-all duration-300">
+                                                <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Analyze</span>
+                                                <Sparkles className="w-4 h-4 text-secondary" />
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
+                        </div>
+
+                        {/* RIGHT: Tip of the Day (Spans Height) */}
+                        <button onClick={() => handleConsult("Tip")}
+                                className="md:col-span-2 p-6 sm:p-8 flex items-center gap-6 group hover:bg-secondary/[0.04] transition-all duration-500 relative overflow-hidden bg-secondary/[0.02] rounded-[24px] border border-secondary/10">
+                                <div className="absolute inset-0 border-l-4 border-transparent group-hover:border-secondary transition-all duration-500" />
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 relative z-10">
+                                    <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-secondary" />
+                                </div>
+                                <div className="flex-1 relative z-10 text-left">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <h4 className="text-[12px] font-black text-secondary uppercase tracking-[0.3em] flex items-center gap-2">
+                                            Tip of the Day
+                                        </h4>
+                                        <div className="h-[1px] flex-1 bg-secondary/10" />
+                                        <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Ask Navi →</span>
+                                    </div>
+                                    <p className="text-[17px] sm:text-[20px] font-body font-medium italic leading-relaxed text-foreground/90 pr-4 group-hover:text-foreground transition-colors">
+                                        &quot;{horoscope?.tip || 'Stay mindful of your surroundings.'}&quot;
+                                    </p>
+                                </div>
                         </button>
-                    ))}
-                </div>
-            </div>
+                    </div>
+
+                    <div className={`transition-all duration-700 ease-out flex-1 flex flex-col ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">
+                            {metrics.map((item, i) => (
+                                <div key={i} className={`flex items-center text-left gap-6 p-6 sm:p-8 h-full transition-all duration-500 hover:bg-secondary/[0.05] relative group ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
+                                    
+                                    {/* Subtle Gradient Background on Hover */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-secondary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                                    
+                                    {/* Icon: Smaller (10% reduction) and stays visible */}
+                                    <div className={`w-[72px] h-[72px] sm:w-[86px] sm:h-[86px] rounded-[28px] ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 group-hover:scale-95 transition-all duration-500 relative z-10`}>
+                                        {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, { className: "w-8 h-8 sm:w-10 sm:h-10" })}
+                                    </div>
+
+                                    <div className="flex-1 min-w-0 relative z-10">
+                                        <div className="flex items-center justify-between mb-2 transition-all duration-500 group-hover:-translate-y-1">
+                                            <span className="text-[13px] sm:text-[14px] font-black text-foreground/30 uppercase tracking-[0.25em] group-hover:text-secondary transition-colors">{item.label}</span>
+                                            <div className={`text-xl sm:text-2xl font-black ${item.scoreColor} group-hover:scale-105 transition-transform`}>
+                                                {item.score > 0 ? `${item.score}%` : '--'}
+                                            </div>
+                                        </div>
+
+                                        <div className="relative h-[60px]">
+                                            {/* Original Info - Slides up and out on hover */}
+                                            <p className="text-[15px] sm:text-[17px] text-foreground/60 leading-relaxed line-clamp-2 font-medium transition-all duration-500 group-hover:-translate-y-4 group-hover:opacity-0">
+                                                {item.info}
+                                            </p>
+
+                                            {/* Hover Actions: ONLY THESE ARE CLICKABLE */}
+                                            <div className="absolute inset-0 flex items-center gap-4 opacity-0 translate-y-4 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                                                <button 
+                                                    onClick={() => openModal({ label: item.label, score: item.score, info: item.info, icon: item.icon, color: item.iconColor, bg: item.iconBg, colorHex: item.scoreHex, area: item.area })}
+                                                    className="flex-1 px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground font-black text-[11px] uppercase tracking-wider hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    Detailed Forecast <ChevronRight className="w-3.5 h-3.5" />
+                                                </button>
+                                                
+                                                <button 
+                                                    onClick={() => onSendMessage?.(`Why is my ${item.label} score at ${item.score}% today and what can I do about it?`)}
+                                                    className="flex-[1.5] px-6 py-3.5 rounded-2xl bg-secondary text-background font-black text-[11px] uppercase tracking-widest hover:scale-105 hover:bg-amber-500 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    Ask Navi about today {item.label} <MessageSquare className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Modal remains the same */}
             <AnimatePresence>

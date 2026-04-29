@@ -17,7 +17,7 @@ export async function getAuthSession() {
  */
 export function unauthorizedResponse() {
   return Response.json(
-    { error: "Unauthorized. Please log in to your celestial account." },
+    { error: "Unauthorized. Please log in to your account." },
     { status: 401 }
   );
 }

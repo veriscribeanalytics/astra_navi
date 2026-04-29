@@ -249,7 +249,7 @@ export default function PlanetsPage() {
                 <div className="absolute bottom-[10%] left-[5%] w-[35%] h-[35%] bg-secondary/3 blur-[100px] rounded-full"></div>
             </div>
 
-            <div className="max-w-[1500px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-5">
+            <div className="max-w-[1500px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] w-full mx-auto relative z-10 flex flex-col xl:flex-row gap-5">
                 {/* Master: Sidebar (Left) */}
                 <div className="lg:w-[260px] flex-shrink-0 flex flex-col">
                     <div className="mb-2 px-1">

@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function AboutPage() {
     return (
-        <div className="min-h-screen pt-20 sm:pt-28 pb-12 sm:pb-20 flex flex-col relative z-10 px-4 sm:px-6 max-w-6xl mx-auto space-y-12 sm:space-y-24 scale-content">
+        <div className="min-h-screen pt-20 sm:pt-28 pb-12 sm:pb-20 flex flex-col relative z-10 px-4 sm:px-6 max-w-6xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] mx-auto space-y-12 sm:space-y-24 scale-content">
             
             {/* Hero Section */}
             <section className="text-center max-w-4xl mx-auto space-y-4 sm:space-y-6">

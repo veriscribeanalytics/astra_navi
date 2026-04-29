@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         if (!rateLimitResult.allowed) {
             const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
             return NextResponse.json({ 
-                error: `Too many celestial inscriptions. Please try again in ${resetInMinutes} minutes.` 
+                error: `Too many registration attempts. Please try again in ${resetInMinutes} minutes.` 
             }, { status: 429 });
         }
 
@@ -50,16 +50,16 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.detail || "The stars are obscured. Registration failed." }, { status: response.status });
+            return NextResponse.json({ error: data.error || data.detail || "Registration failed. Please try again." }, { status: response.status });
         }
 
         return NextResponse.json({
-            message: "Your celestial identity has been inscribed.",
+            message: "Your account has been created.",
             user: data.user
         }, { status: 201 });
 
     } catch (error) {
         console.error("Registration error:", error);
-        return NextResponse.json({ error: "The stars are currently obscured. Try again later." }, { status: 500 });
+        return NextResponse.json({ error: "Registration failed. Please try again later." }, { status: 500 });
     }
 }

@@ -60,6 +60,7 @@ interface ChatContextType {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   isRightPanelOpen: boolean;
   setIsRightPanelOpen: (isOpen: boolean) => void;
+  resetChat: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -95,7 +96,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages: [{
         id: 'welcome',
         type: 'ai',
-        text: "Namaste ✦ You're in Preview Mode. To consult Navi and receive deep Vedic analysis, please log in to your celestial account.",
+        text: "Namaste ✦ You're in Preview Mode. To consult Navi and receive deep Vedic analysis, please log in to your account.",
         createdAt: now
       }],
       averageRating: null,
@@ -177,7 +178,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
            if (!prev) return null;
            return {
              ...prev,
-             messages: prev.messages.map(m => m.id === aiMsg.id ? { ...m, text: "Consulting Navi requires a celestial identity. Please log in to receive your full Vedic analysis and planetary insights." } : m)
+             messages: prev.messages.map(m => m.id === aiMsg.id ? { ...m, text: "Consulting Navi requires an account. Please log in to receive your full Vedic analysis and planetary insights." } : m)
            };
         });
         setIsSending(false);
@@ -280,6 +281,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {}
   }, [isGuest]);
 
+  const resetChat = useCallback(() => {
+    setActiveChat(null);
+    setActiveChatId(null);
+  }, []);
+
   useEffect(() => {
     if (!initialLoadDone.current && user?.email && !isGuest) {
       initialLoadDone.current = true;
@@ -291,7 +297,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <ChatContext.Provider value={{
       chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, hasMoreChats,
       isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
-      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat,
+      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat, resetChat,
       inputText, setInputText, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen
     }}>
       {children}

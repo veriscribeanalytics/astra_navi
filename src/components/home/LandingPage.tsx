@@ -491,7 +491,7 @@ export default function LandingPage() {
             <motion.section 
                 id="portals"
                 initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants}
-                className="max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12 relative"
+                className="max-w-[1680px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12 relative"
             >
                 {/* Section Headline */}
                 <div className="text-center mb-8">
@@ -640,7 +640,7 @@ export default function LandingPage() {
             </motion.section>
 
             {/* 5. 50/50 SPLIT: Ancient Wisdom + Cosmic Archive */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12">
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="max-w-[1680px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
                     {/* LEFT: Ancient Wisdom (Services in 3x2 Grid) */}
                     <div className="flex flex-col">
@@ -713,7 +713,7 @@ export default function LandingPage() {
                                 </div>
                                 <div>
                                     <h4 className="text-xl sm:text-2xl font-bold text-primary mb-1">Master Your Destiny with Premium Insights</h4>
-                                    <p className="text-sm sm:text-base text-on-surface-variant/70">Join 10,000+ seekers. Access advanced Muhurtas, AI Dashas, and deep chart analysis.</p>
+                                    <p className="text-sm sm:text-base text-on-surface-variant/70">Join 10,000+ users. Access advanced Muhurtas, AI Dashas, and deep chart analysis.</p>
                                 </div>
                             </div>
                             <div className="mt-6 sm:mt-0 px-8 py-4 rounded-2xl bg-secondary text-background font-bold text-base flex items-center gap-2 group-hover:shadow-xl group-hover:shadow-secondary/20 transition-all">
@@ -731,12 +731,12 @@ export default function LandingPage() {
                         <path d="M100 300C300 300 300 100 500 100C700 100 700 500 900 500C1100 500 1100 300 1300 300" stroke="var(--secondary)" strokeWidth="2" strokeDasharray="8 8" className="animate-[dash_20s_linear_infinite]" />
                     </svg>
                 </div>
-                <div className="max-w-[1680px] mx-auto px-4 text-center mb-24 relative z-10">
+                <div className="max-w-[1680px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto px-4 text-center mb-24 relative z-10">
                     <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">The Path to Clarity</div>
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline mb-6 text-primary">From Birth Moment to <span className="text-secondary italic">Cosmic Map</span></h2>
                 </div>
                 
-                <div className="max-w-[1600px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12 relative z-10 px-4">
+                <div className="max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12 relative z-10 px-4">
                     {steps.map((step, index) => (
                         <div key={index} className="flex flex-col items-center text-center group relative">
                             <div className="w-20 h-20 rounded-full border border-secondary/20 bg-surface flex items-center justify-center mb-6 relative shadow-xl group-hover:border-secondary group-hover:shadow-secondary/20 transition-all duration-500">
@@ -758,11 +758,11 @@ export default function LandingPage() {
 
 
             {/* 10. TRUST & FAQ */}
-            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-16 lg:py-24 relative bg-transparent px-4 lg:px-12 max-w-[1680px] mx-auto">
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-16 lg:py-24 relative bg-transparent px-4 lg:px-12 max-w-[1680px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto">
                 <div className="text-center mb-24">
                     <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">Our Commitment</div>
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-16">Guarded by Tradition</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 lg:gap-16 max-w-[1400px] mx-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 lg:gap-16 max-w-[1400px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto">
                         {trustPoints.map((point, idx) => (
                             <Card key={idx} variant="bordered" padding="lg" className="flex flex-col items-center text-center relative overflow-hidden group !rounded-[32px]">
                                 <div className="absolute -right-10 -bottom-10 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 scale-150 rotate-12">
@@ -777,7 +777,7 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                <div className="max-w-[1150px] mx-auto mt-40" id="faq">
+                <div className="max-w-[1150px] 2xl:max-w-[1500px] 3xl:max-w-[1800px] mx-auto mt-40" id="faq">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl sm:text-5xl font-bold font-headline mb-5 text-primary">Questions About Jyotish</h2>
                         <p className="text-on-surface-variant/60 text-lg">Everything you need to know about our authentic Vedic approach.</p>

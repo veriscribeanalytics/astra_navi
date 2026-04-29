@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant 3xl (@media (min-width: 2560px));
 
 html {
   scroll-behavior: smooth;
@@ -7,6 +8,18 @@ html {
   width: 100%;
   overflow: hidden;
   font-size: clamp(14px, 0.85vw + 0.5rem, 16px);
+}
+
+@media (min-width: 2560px) {
+  html {
+    font-size: clamp(16px, 0.417vw + 5.33px, 22px);
+  }
+}
+
+@media (max-width: 1280px) {
+  html {
+    font-size: clamp(13px, 1.2vw + 2px, 15.5px);
+  }
 }
 
 /* Prevent double scrollbars: body is the SOLE scroll container */
@@ -556,6 +569,23 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
 }
 
 /* CELESTIAL ANIMATIONS */
+/* --- SHIMMER ANIMATION --- */
+@keyframes shimmer-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@utility animate-skeleton-shimmer {
+  background: linear-gradient(
+    90deg, 
+    var(--surface-variant) 25%, 
+    rgba(255,255,255,0.08) 50%, 
+    var(--surface-variant) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-sweep 1.5s ease-in-out infinite;
+}
+
 @keyframes celestial-pulse { 0%, 100% { transform: scale(1); opacity: 0.1; } 50% { transform: scale(1.6); opacity: 0.25; } }
 @keyframes slow-mesh {
   0% { background-position: 0% 50%; }
@@ -656,5 +686,17 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
   .card-swap-container {
     transform: scale(0.65);
     margin: 10px auto;
+  }
+}
+
+/* --- Ultra-wide screens (2560px+) --- */
+@media (min-width: 2560px) {
+  /* Larger glass panel corner radius to match scale */
+  .glass-panel {
+    border-radius: 40px;
+  }
+  /* Wider chat sidebars so they don't look paper-thin */
+  .chat-layout {
+    grid-template-columns: 320px 1fr 340px;
   }
 }

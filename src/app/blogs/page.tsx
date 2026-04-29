@@ -156,6 +156,9 @@ const item = {
 } as const;
 
 export default function BlogsPage() {
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => setMounted(true), []);
+
     return (
         <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] safe-bottom-buffer px-4 relative overflow-hidden">
             {/* Animated Background Orbs */}
@@ -164,7 +167,7 @@ export default function BlogsPage() {
                 <div className="absolute bottom-[-5%] left-[-5%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
 
-            <div className="max-w-7xl mx-auto relative z-10">
+            <div className="max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto relative z-10">
                 {/* Header Section */}
                 <motion.div 
                     initial={{ opacity: 0, y: -20 }}
@@ -191,88 +194,96 @@ export default function BlogsPage() {
                 </motion.div>
 
                 {/* Categories Grid */}
-                <motion.div 
-                    variants={container}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, margin: "-50px" }}
-                    className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                >
-                    {blogCategories.map((category) => (
-                        <motion.div key={category.id} variants={item}>
-                            <Link
-                                href={category.status === 'available' ? category.href : '#'}
-                                className={`group block h-full relative ${category.status === 'coming-soon' ? 'cursor-not-allowed opacity-70' : ''}`}
-                            >
-                                <Card 
-                                    padding="none" 
-                                    className={`!rounded-[32px] transition-all duration-500 h-full overflow-hidden ${
-                                        category.status === 'available' 
-                                            ? 'hover:border-secondary/40 hover:shadow-[0_20px_50px_rgba(200,136,10,0.1)] hover:-translate-y-2' 
-                                            : ''
-                                    }`}
+                {!mounted ? (
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <Card key={i} className="!rounded-[32px] h-[300px]" />
+                        ))}
+                    </div>
+                ) : (
+                    <motion.div 
+                        variants={container}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, margin: "-50px" }}
+                        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                        {blogCategories.map((category) => (
+                            <motion.div key={category.id} variants={item}>
+                                <Link
+                                    href={category.status === 'available' ? category.href : '#'}
+                                    className={`group block h-full relative ${category.status === 'coming-soon' ? 'cursor-not-allowed opacity-70' : ''}`}
                                 >
-                                    <div className="p-8 flex flex-col h-full relative z-10">
-                                        {/* Category Decorative Accent */}
-                                        <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${category.color} blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                                    <Card 
+                                        padding="none" 
+                                        className={`!rounded-[32px] transition-all duration-500 h-full overflow-hidden ${
+                                            category.status === 'available' 
+                                                ? 'hover:border-secondary/40 hover:shadow-[0_20px_50px_rgba(200,136,10,0.1)] hover:-translate-y-2' 
+                                                : ''
+                                        }`}
+                                    >
+                                        <div className="p-8 flex flex-col h-full relative z-10">
+                                            {/* Category Decorative Accent */}
+                                            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${category.color} blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
 
-                                        {/* Icon Header */}
-                                        <div className="flex items-start justify-between mb-8">
-                                            <div className={`w-14 h-14 rounded-2xl ${category.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-inner`}>
-                                                <div className={`${category.iconColor} group-hover:animate-pulse`}>
-                                                    {category.icon}
+                                            {/* Icon Header */}
+                                            <div className="flex items-start justify-between mb-8">
+                                                <div className={`w-14 h-14 rounded-2xl ${category.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-inner`}>
+                                                    <div className={`${category.iconColor} group-hover:animate-pulse`}>
+                                                        {category.icon}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            
-                                            {category.status === 'available' ? (
-                                                <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                                                    <ArrowRight className="w-5 h-5" />
-                                                </div>
-                                            ) : (
-                                                <div className="w-8 h-8 rounded-full bg-foreground/5 flex items-center justify-center text-foreground/40">
-                                                    <Clock className="w-4 h-4" />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Text Content */}
-                                        <div className="flex-grow">
-                                            <h3 className="text-2xl font-headline font-bold text-foreground mb-3 group-hover:text-secondary transition-colors duration-300">
-                                                {category.title}
-                                            </h3>
-                                            <p className="text-sm text-foreground/60 leading-relaxed mb-6">
-                                                {category.description}
-                                            </p>
-                                        </div>
-
-                                        {/* Footer / Meta */}
-                                        <div className="pt-6 border-t border-secondary/5 mt-auto">
-                                            <div className="flex items-center justify-between">
-                                                {category.status === 'available' ? (
-                                                    <span className="text-[10px] font-bold text-secondary tracking-widest uppercase flex items-center gap-2">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
-                                                        Live Guide
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-[10px] font-bold text-foreground/40 tracking-widest uppercase flex items-center gap-2">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-foreground/20"></span>
-                                                        In Production
-                                                    </span>
-                                                )}
                                                 
-                                                {category.status === 'available' && (
-                                                    <span className="text-xs font-bold text-foreground/40 group-hover:text-foreground transition-colors">
-                                                        Read Story
-                                                    </span>
+                                                {category.status === 'available' ? (
+                                                    <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-foreground/5 flex items-center justify-center text-foreground/40">
+                                                        <Clock className="w-4 h-4" />
+                                                    </div>
                                                 )}
                                             </div>
+
+                                            {/* Text Content */}
+                                            <div className="flex-grow">
+                                                <h3 className="text-2xl font-headline font-bold text-foreground mb-3 group-hover:text-secondary transition-colors duration-300">
+                                                    {category.title}
+                                                </h3>
+                                                <p className="text-sm text-foreground/60 leading-relaxed mb-6">
+                                                    {category.description}
+                                                </p>
+                                            </div>
+
+                                            {/* Footer / Meta */}
+                                            <div className="pt-6 border-t border-secondary/5 mt-auto">
+                                                <div className="flex items-center justify-between">
+                                                    {category.status === 'available' ? (
+                                                        <span className="text-[10px] font-bold text-secondary tracking-widest uppercase flex items-center gap-2">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+                                                            Live Guide
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-foreground/40 tracking-widest uppercase flex items-center gap-2">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-foreground/20"></span>
+                                                            In Production
+                                                        </span>
+                                                    )}
+                                                    
+                                                    {category.status === 'available' && (
+                                                        <span className="text-xs font-bold text-foreground/40 group-hover:text-foreground transition-colors">
+                                                            Read Story
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </motion.div>
+                                    </Card>
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
 
                 {/* Bottom CTA / Newsletter Style Section */}
                 <motion.div

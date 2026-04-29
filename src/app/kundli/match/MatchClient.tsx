@@ -36,17 +36,17 @@ export default function MatchClient() {
   const [phase, setPhase] = useState<'input' | 'loading' | 'result'>('input');
   const [isSubmitting, setIsSending] = useState(false);
   const [matchResult, setMatchResult] = useState<any>(null);
-  const [loadingMessage, setLoadingMessage] = useState("Aligning celestial bodies...");
+  const [loadingMessage, setLoadingMessage] = useState("Analyzing profiles...");
 
   const [history, setHistory] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const loadingMessages = [
-    "Aligning celestial bodies...",
+    "Analyzing profiles...",
     "Calculating Ashtakoot Milan...",
-    "Analyzing Mangal Dosha...",
-    "Checking supplemental alignments...",
-    "Generating cosmic verdict..."
+    "Checking Mangal Dosha...",
+    "Reviewing planetary positions...",
+    "Calculating compatibility results..."
   ];
 
   // Cycle loading messages
@@ -181,9 +181,9 @@ export default function MatchClient() {
 
       setMatchResult(data);
       setPhase('result');
-      success("Celestial alignment complete!");
+      success("Analysis complete!");
     } catch (err: any) {
-      error(err.message || "Failed to align charts. Please check details.");
+      error(err.message || "Failed to analyze profiles. Please check details.");
       setPhase('input');
     } finally {
       setIsSending(false);
@@ -217,7 +217,7 @@ export default function MatchClient() {
             <Lock className="w-10 h-10 text-secondary" />
           </div>
           <h2 className="text-2xl font-headline font-bold text-foreground mb-4">
-            Auth Required
+            Login Required
           </h2>
           <p className="text-sm text-foreground/60 mb-8 leading-relaxed">
             Kundli Matching is a personalized experience. Please login to compute compatibility and save to your history.
@@ -231,7 +231,7 @@ export default function MatchClient() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4">
+    <div className="max-w-6xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] mx-auto px-4 pt-12">
       {ToastContainer}
       {/* Tab Switcher */}
       <div className="flex justify-center mb-10">
@@ -279,10 +279,10 @@ export default function MatchClient() {
                       Ashtakoot Milan
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-headline font-bold text-foreground tracking-tight">
-                      Kundli Matching
+                      Relationship Analysis
                     </h1>
                     <p className="text-foreground/60 leading-relaxed font-body">
-                      Discover your spiritual and cosmic compatibility using the ancient 36-point Vedic system. 
+                      Discover your spiritual and personal compatibility using the ancient 36-point Vedic system. 
                       Enter the birth details of both individuals to begin.
                     </p>
                   </div>
@@ -297,7 +297,7 @@ export default function MatchClient() {
                             <span className="text-xl font-bold">1</span>
                           </div>
                           <div>
-                            <h3 className="text-lg font-headline font-bold text-foreground leading-tight">First Seeker</h3>
+                            <h3 className="text-lg font-headline font-bold text-foreground leading-tight">First Person</h3>
                             <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">Groom Details</p>
                           </div>
                         </div>
@@ -348,7 +348,7 @@ export default function MatchClient() {
                             <span className="text-xl font-bold">2</span>
                           </div>
                           <div>
-                            <h3 className="text-lg font-headline font-bold text-foreground leading-tight">Second Seeker</h3>
+                            <h3 className="text-lg font-headline font-bold text-foreground leading-tight">Second Person</h3>
                             <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">Bride Details</p>
                           </div>
                         </div>
@@ -402,7 +402,7 @@ export default function MatchClient() {
                       disabled={isSubmitting}
                       loading={isSubmitting}
                     >
-                      Match Kundlis <Sparkles className="ml-2 w-4 h-4" />
+                      Calculate Compatibility <Sparkles className="ml-2 w-4 h-4" />
                     </Button>
                     <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest flex items-center gap-2">
                       <ShieldCheck size={12} className="text-green-500/40" />
@@ -439,7 +439,7 @@ export default function MatchClient() {
                     </div>
                   </div>
                   <div className="space-y-4 max-w-md mx-auto px-6">
-                    <h2 className="text-3xl font-headline font-bold text-foreground">Aligning the Heavens</h2>
+                    <h2 className="text-3xl font-headline font-bold text-foreground">Analyzing Charts</h2>
                     <div className="h-6 flex items-center justify-center overflow-hidden">
                       <AnimatePresence mode="wait">
                         <motion.p key={loadingMessage} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="text-lg text-secondary font-medium tracking-wide italic">
@@ -464,7 +464,7 @@ export default function MatchClient() {
                     <MatchScoreRing score={matchResult.ashtakoot?.total_score || 0} tier={matchResult.tier} />
                     <div className="flex-1 space-y-6 text-center md:text-left">
                         <div className="space-y-2">
-                          <h2 className="text-3xl font-headline font-bold text-foreground">Celestial Verdict</h2>
+                          <h2 className="text-3xl font-headline font-bold text-foreground">Compatibility Result</h2>
                           <p className="text-foreground/60 leading-relaxed font-body">{matchResult.summary}</p>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -525,8 +525,8 @@ export default function MatchClient() {
         ) : (
           <motion.div key="history-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
             <div className="text-center space-y-2 mb-8">
-               <h2 className="text-3xl font-headline font-bold text-foreground">Celestial Archive</h2>
-               <p className="text-foreground/40 text-sm">Your previously computed matches are stored in the stars.</p>
+               <h2 className="text-3xl font-headline font-bold text-foreground">Match History</h2>
+               <p className="text-foreground/40 text-sm">Your previously computed matches are saved for your review.</p>
             </div>
             {isLoadingHistory ? (
               <div className="space-y-4">
@@ -564,7 +564,7 @@ export default function MatchClient() {
               </div>
             ) : (
               <div className="text-center py-20 bg-surface/10 rounded-[40px] border border-dashed border-outline-variant/20">
-                <p className="text-foreground/40 font-medium">No celestial history found.</p>
+                <p className="text-foreground/40 font-medium">No saved history found.</p>
                 <Button variant="ghost" onClick={() => setActiveTab('match')} className="mt-4 text-secondary">Compute your first match</Button>
               </div>
             )}

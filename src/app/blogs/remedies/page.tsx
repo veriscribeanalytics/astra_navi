@@ -106,7 +106,7 @@ export default function RemediesPage() {
                 <div className="absolute bottom-[10%] left-[5%] w-[35%] h-[35%] bg-secondary/3 blur-[100px] rounded-full"></div>
             </div>
 
-            <div className="max-w-[1500px] mx-auto relative z-10">
+            <div className="max-w-[1500px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto relative z-10">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-10">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -122,7 +122,7 @@ export default function RemediesPage() {
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                <div className="flex flex-col xl:flex-row gap-8 items-start">
                     {/* Navigation Sidebar */}
                     <div className="w-full lg:w-[240px] shrink-0 sticky lg:top-24 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div className="flex flex-col gap-2">

@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
 import { Volume2, Copy, ChevronRight, Sparkles } from 'lucide-react';
+import KundliSvg from '@/components/ui/astrology/KundliSvg';
 
 /* ---------- Sub-components ---------- */
 const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
@@ -22,24 +23,33 @@ const SystemBubble: React.FC<{ text: string }> = ({ text }) => (
 );
 
 const EmptyState: React.FC<{ onNewChat: () => void; onQuestionClick: (question: string) => void; suggestedQuestions: string[] }> = ({ onNewChat, onQuestionClick, suggestedQuestions }) => (
-  <div className="flex-1 flex items-center justify-center">
-    <div className="text-center max-w-2xl px-6">
-      <div className="text-5xl mb-4 opacity-30">✦</div>
-      <h3 className="text-lg font-headline font-bold text-on-surface/80 mb-2">
+  <div className="flex-1 flex flex-col xl:flex-row items-center justify-center gap-10 max-w-5xl mx-auto w-full px-4 xl:px-8 py-8">
+    <div className="w-full max-w-[320px] xl:max-w-[400px] shrink-0 mx-auto order-2 xl:order-1">
+      <div className="bg-surface/50 rounded-[32px] p-6 border border-outline-variant/10 shadow-[0_0_40px_rgba(0,0,0,0.05)] backdrop-blur-xl mb-4 text-center">
+         <h4 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em] mb-4 flex items-center justify-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" /> Your Cosmic Blueprint
+         </h4>
+         <KundliSvg className="w-full mix-blend-luminosity drop-shadow-xl" />
+      </div>
+    </div>
+
+    <div className="text-center xl:text-left max-w-md mx-auto xl:mx-0 w-full order-1 xl:order-2">
+      <div className="text-4xl mb-4 opacity-30 text-secondary hidden xl:block">✦</div>
+      <h3 className="text-2xl font-headline font-bold text-on-surface/90 mb-3 tracking-tight">
         Start a Conversation
       </h3>
-      <p className="text-sm text-on-surface-variant/50 mb-6 leading-relaxed">
-        Select a recent chat from the sidebar or start a new conversation to get personalized Vedic astrology insights.
+      <p className="text-[15px] text-on-surface-variant/60 mb-8 leading-relaxed">
+        Select a recent chat from the sidebar or start a new conversation to get personalized Vedic astrology insights based on your birth chart.
       </p>
       
       {/* Suggested Questions */}
-      <div className="mb-6 space-y-2">
-        <p className="text-[14px] font-bold text-secondary uppercase tracking-wider mb-3">Suggested Questions</p>
+      <div className="mb-8 space-y-2.5">
+        <p className="text-[11px] font-bold text-secondary uppercase tracking-[0.15em] mb-4">Suggested Questions</p>
         {suggestedQuestions.map((question, idx) => (
           <button
             key={idx}
             onClick={() => onQuestionClick(question)}
-            className="w-full text-left text-sm text-on-surface-variant/70 bg-surface/50 border border-outline-variant/20 px-4 py-3 rounded-xl hover:border-secondary/40 hover:bg-surface/80 transition-all hover:text-secondary active:scale-98"
+            className="w-full text-left text-[14px] text-on-surface-variant/80 bg-surface/40 border border-outline-variant/15 px-4 py-3.5 rounded-2xl hover:border-secondary/30 hover:bg-surface/80 hover:shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
           >
             {question}
           </button>
@@ -48,9 +58,9 @@ const EmptyState: React.FC<{ onNewChat: () => void; onQuestionClick: (question: 
 
       <button
         onClick={onNewChat}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-on-primary text-sm font-bold transition-all hover:opacity-90 hover:scale-[1.02] cursor-pointer"
+        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-secondary text-on-primary text-[14px] font-bold shadow-lg shadow-secondary/20 transition-all hover:shadow-xl hover:scale-[1.02] cursor-pointer"
       >
-        ✦ New Conversation
+        <Sparkles className="w-4 h-4" /> New Conversation
       </button>
     </div>
   </div>

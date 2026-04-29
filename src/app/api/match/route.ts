@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json({ 
-        error: data.error || data.detail || 'Celestial matching failed.' 
+        error: data.error || data.detail || 'Analysis failed. Please try again.' 
       }, { status: response.status });
     }
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Match proxy error:', error);
     return NextResponse.json({ 
-      error: 'An unexpected error occurred during celestial alignment.' 
+      error: 'An unexpected error occurred during analysis.' 
     }, { status: 500 });
   }
 }

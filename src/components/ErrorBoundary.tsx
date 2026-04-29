@@ -37,7 +37,7 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4 opacity-30">✦</div>
             <h2 className="text-2xl font-headline font-bold text-primary mb-3">
-              Celestial Disturbance Detected
+              System Error Detected
             </h2>
             <p className="text-sm text-on-surface-variant mb-6 leading-relaxed">
               The cosmic energies have shifted unexpectedly. Please refresh the page to realign your connection.

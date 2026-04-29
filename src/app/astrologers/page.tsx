@@ -25,7 +25,7 @@ export default function AstrologersPage() {
     
     return (
         <main className="min-h-screen bg-[var(--bg)] pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto">
                 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">

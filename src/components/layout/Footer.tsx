@@ -6,11 +6,11 @@ import Input from '../ui/Input';
 const Footer = () => {
     return (
         <footer className="w-full pt-8 sm:pt-14 pb-6 sm:pb-8 px-4 sm:px-8 lg:px-12 bg-background border-t border-secondary/10 relative z-20">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto">
                 <div className="col-span-2 md:col-span-1 space-y-3 sm:space-y-4">
                     <div className="font-headline text-xl sm:text-2xl text-primary font-bold">Astra Navi</div>
                     <p className="text-xs text-primary/60 font-medium leading-relaxed max-w-[240px]">
-                        Preserving the mathematical precision of Jyotish Shastra for the modern seeker.
+                        Preserving the mathematical precision of Jyotish Shastra for the modern individual.
                     </p>
                     <div className="flex space-x-3">
                         <a className="w-10 h-10 rounded-full border-2 border-secondary/20 flex items-center justify-center text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all" href="#" title="Globe Link">

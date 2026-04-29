@@ -8,7 +8,7 @@ interface LoadingOverlayProps {
   isVisible: boolean;
 }
 
-const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message = "Aligning your celestial path...", isVisible }) => {
+const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message = "Loading your path...", isVisible }) => {
   if (!isVisible) return null;
 
   return (

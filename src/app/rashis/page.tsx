@@ -66,7 +66,7 @@ export default function RashisPage() {
     return (
         <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
 
-            <div className="max-w-[1500px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-5">
+            <div className="max-w-[1500px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] w-full mx-auto relative z-10 flex flex-col xl:flex-row gap-5">
 
                 {/* Master: Sidebar (Left) */}
                 <div className="lg:w-[260px] flex-shrink-0 flex flex-col">
@@ -384,67 +384,53 @@ export default function RashisPage() {
                                                     {/* Horoscope Stats Area */}
                                                     <div className="grid grid-cols-3 border-b border-outline-variant/20 shrink-0">
                                                         {[
-                                                            { label: 'Mood', val: horoscopeData?.mood || (horoscopeLoading ? '...' : '') },
-                                                            { label: 'Color', val: horoscopeData?.lucky_color || (horoscopeLoading ? (horoscopeLoading ? '...' : '') : '') },
-                                                            { label: 'Number', val: horoscopeData?.lucky_number || (horoscopeLoading ? '...' : '') }
+                                                            { label: 'Mood', val: horoscopeData?.mood },
+                                                            { label: 'Color', val: horoscopeData?.lucky_color },
+                                                            { label: 'Number', val: horoscopeData?.lucky_number }
                                                         ].map((stat, i) => (
                                                             <div key={i} className={`flex flex-col items-center justify-center p-3 border-outline-variant/10 text-center ${i < 2 ? 'border-r' : ''}`}>
                                                                 <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.1em] mb-1">{stat.label}</span>
-                                                                <span className={`text-sm font-bold ${horoscopeLoading ? 'animate-pulse text-foreground/20' : 'text-foreground/90 truncate w-full'}`}>
-                                                                    {stat.val || '—'}
-                                                                </span>
+                                                                <div className="h-5 flex items-center justify-center w-full px-2">
+                                                                    {horoscopeLoading ? (
+                                                                        <Skeleton height={14} width="100%" />
+                                                                    ) : (
+                                                                        <span className="text-sm font-bold text-foreground/90 truncate w-full">
+                                                                            {stat.val || '—'}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
 
                                                     {/* Quadrant Grid */}
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 lg:divide-y-0 lg:grid-cols-1 xl:grid-cols-2 xl:divide-y-0 divide-outline-variant/10">
-                                                        <div className="sm:border-r border-b border-outline-variant/10 p-5 flex flex-col justify-center">
-                                                            <div className="flex items-center gap-1.5 mb-2">
-                                                                <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Career</span>
+                                                        {[
+                                                            { label: 'Career', val: horoscopeData?.career, border: 'sm:border-r border-b' },
+                                                            { label: 'Love', val: horoscopeData?.love, border: 'border-b' },
+                                                            { label: 'Health', val: horoscopeData?.health, border: 'sm:border-r sm:border-y-0 border-b' },
+                                                            { label: 'Finance', val: horoscopeData?.finance, border: '' }
+                                                        ].map((item, i) => (
+                                                            <div key={i} className={`${item.border} border-outline-variant/10 p-5 flex flex-col justify-center min-h-[100px]`}>
+                                                                <div className="flex items-center gap-1.5 mb-2">
+                                                                    <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{item.label}</span>
+                                                                </div>
+                                                                {horoscopeLoading ? (
+                                                                    <div className="space-y-2">
+                                                                        <Skeleton height={12} width="100%" />
+                                                                        <Skeleton height={12} width="80%" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className="text-sm text-foreground/70 leading-relaxed">{item.val || 'Cosmic energy is aligning...'}</p>
+                                                                )}
                                                             </div>
-                                                            {horoscopeLoading ? (
-                                                                <div className="space-y-2"><div className="h-2.5 bg-foreground/10 rounded w-full animate-pulse"></div><div className="h-2.5 bg-foreground/10 rounded w-[80%] animate-pulse"></div></div>
-                                                            ) : (
-                                                                <p className="text-sm text-foreground/70 leading-relaxed">{horoscopeData?.career || 'Cosmic energy is aligning...'}</p>
-                                                            )}
-                                                        </div>
-                                                        <div className="border-b border-outline-variant/10 p-5 flex flex-col justify-center">
-                                                            <div className="flex items-center gap-1.5 mb-2">
-                                                                <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Love</span>
-                                                            </div>
-                                                            {horoscopeLoading ? (
-                                                                <div className="space-y-2"><div className="h-2.5 bg-foreground/10 rounded w-full animate-pulse"></div><div className="h-2.5 bg-foreground/10 rounded w-[80%] animate-pulse"></div></div>
-                                                            ) : (
-                                                                <p className="text-sm text-foreground/70 leading-relaxed">{horoscopeData?.love || 'Cosmic energy is aligning...'}</p>
-                                                            )}
-                                                        </div>
-                                                        <div className="sm:border-r sm:border-y-0 border-b border-outline-variant/10 p-5 flex flex-col justify-center shrink-0">
-                                                            <div className="flex items-center gap-1.5 mb-2">
-                                                                <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Health</span>
-                                                            </div>
-                                                            {horoscopeLoading ? (
-                                                                <div className="space-y-2"><div className="h-2.5 bg-foreground/10 rounded w-full animate-pulse"></div><div className="h-2.5 bg-foreground/10 rounded w-[80%] animate-pulse"></div></div>
-                                                            ) : (
-                                                                <p className="text-sm text-foreground/70 leading-relaxed">{horoscopeData?.health || 'Cosmic energy is aligning...'}</p>
-                                                            )}
-                                                        </div>
-                                                        <div className="p-5 flex flex-col justify-center shrink-0">
-                                                            <div className="flex items-center gap-1.5 mb-2">
-                                                                <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">Finance</span>
-                                                            </div>
-                                                            {horoscopeLoading ? (
-                                                                <div className="space-y-2"><div className="h-2.5 bg-foreground/10 rounded w-full animate-pulse"></div><div className="h-2.5 bg-foreground/10 rounded w-[80%] animate-pulse"></div></div>
-                                                            ) : (
-                                                                <p className="text-sm text-foreground/70 leading-relaxed">{horoscopeData?.finance || 'Cosmic energy is aligning...'}</p>
-                                                            )}
-                                                        </div>
+                                                        ))}
                                                     </div>
 
                                                     {/* Tip of the Day */}
                                                     <div className="p-5 bg-surface/5 border-t border-outline-variant/20 flex flex-col items-center justify-center text-center shrink-0 h-[100px]">
                                                         {horoscopeLoading ? (
-                                                            <div className="h-3 bg-foreground/10 rounded w-48 animate-pulse"></div>
+                                                            <Skeleton height={18} width={200} />
                                                         ) : (
                                                             <p className="text-[15px] font-bold text-foreground italic max-w-sm">
                                                                 "{horoscopeData?.tip || 'Follow the cosmic flow today.'}"

@@ -122,7 +122,7 @@ const ChatSidebar: React.FC = () => {
           <div className="absolute inset-0 z-50 backdrop-blur-[2px] bg-surface/40 flex flex-col items-center justify-center p-6 text-center">
             <Lock className="w-10 h-10 text-secondary/40 mb-4" />
             <p className="text-sm font-bold text-primary mb-2">History Locked</p>
-            <p className="text-[11px] text-on-surface-variant/60 mb-6 leading-relaxed">Login to save your celestial conversations and access them later.</p>
+            <p className="text-[11px] text-on-surface-variant/60 mb-6 leading-relaxed">Login to save your conversations and access them later.</p>
             <Button href="/login" size="sm" className="gold-gradient w-full">Login to Unlock</Button>
           </div>
         )}
@@ -131,9 +131,12 @@ const ChatSidebar: React.FC = () => {
         </div>
         <div className="flex-1 overflow-y-auto px-3.5 pb-2">
           {isLoadingChats && chats.length === 0 ? (
-            <div className="flex flex-col gap-2 animate-pulse">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-10 rounded-lg bg-surface-variant/30" />
+            <div className="flex flex-col gap-2">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="px-2.5 py-3 rounded-xl border border-transparent space-y-2">
+                  <Skeleton height={14} width="85%" />
+                  <Skeleton height={10} width="40%" />
+                </div>
               ))}
             </div>
           ) : chats.length === 0 ? (
