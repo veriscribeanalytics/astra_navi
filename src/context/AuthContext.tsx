@@ -42,7 +42,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { data: session, status, update: updateSession } = useSession();
+    const { data: session, status } = useSession();
     const [user, setUser] = useState<User | null>(null);
     const [profileFetched, setProfileFetched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -57,14 +57,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const sessionUser = session.user as ExtendedSessionUser;
             
             // Initial set from session
-            if (sessionUser.email && (!user || user.email !== sessionUser.email)) {
-                setUser({
-                    id: sessionUser.id,
-                    email: sessionUser.email,
-                    name: sessionUser.name || undefined,
+            if (sessionUser.email) {
+                setUser(prev => {
+                    if (prev && prev.email === sessionUser.email) return prev;
+                    return {
+                        id: sessionUser.id,
+                        email: sessionUser.email!,
+                        name: sessionUser.name || undefined,
+                    };
                 });
-                // We don't reset profileFetched here if the email is the same, 
-                // but if it's a different user, we should.
+
+                // Reset profileFetched if it's a different user
                 if (user && user.email !== sessionUser.email) {
                     setProfileFetched(false);
                     fetchInProgressRef.current = false;
@@ -104,11 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     });
             }
         } else if (status === 'unauthenticated') {
-            setUser(null);
-            setProfileFetched(false);
+            setUser(prev => prev === null ? prev : null);
+            setProfileFetched(prev => prev === false ? prev : false);
             fetchInProgressRef.current = false;
         }
-    }, [session, status, profileFetched, user?.email]);
+    }, [session, status, profileFetched, user]);
 
     const login = useCallback((email?: string, profile?: Partial<User>) => {
         // This is now primarily handled by NextAuth signIn() in LoginPage
@@ -116,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (email) {
             setUser(prev => {
                 const isSame = prev && prev.email === email && 
-                               Object.keys(profile || {}).every(k => (prev as any)[k] === (profile as any)[k]);
+                               Object.keys(profile || {}).every(k => (prev as unknown as Record<string, unknown>)[k] === (profile as Record<string, unknown>)[k]);
                 return isSame ? prev : (prev ? { ...prev, email, ...profile } : { email, ...profile } as User);
             });
         }
@@ -139,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const refreshUser = useCallback((updates: Partial<User>) => {
         setUser(prev => {
             if (!prev) return null;
-            const isSame = Object.keys(updates).every(k => (prev as any)[k] === (updates as any)[k]);
+            const isSame = Object.keys(updates).every(k => (prev as unknown as Record<string, unknown>)[k] === (updates as Record<string, unknown>)[k]);
             return isSame ? prev : { ...prev, ...updates };
         });
     }, []);

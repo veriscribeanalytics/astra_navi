@@ -328,7 +328,7 @@ export default function PlanetsPage() {
                                         Understanding the <span className="text-secondary italic">Navagraha</span>
                                     </h2>
                                     <p className="text-sm sm:text-base text-foreground/70 leading-relaxed max-w-3xl mb-6">
-                                        In Vedic Astrology, the Navagraha (Nine Planets) are the cosmic agents of karma. They act as the dynamic forces that trigger events, shape your psychology, and guide the soul's evolutionary journey through time and space.
+                                        In Vedic Astrology, the Navagraha (Nine Planets) are the cosmic agents of karma. They act as the dynamic forces that trigger events, shape your psychology, and guide the soul&apos;s evolutionary journey through time and space.
                                     </p>
 
                                     <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">
@@ -341,7 +341,7 @@ export default function PlanetsPage() {
                                                 <div>
                                                     <h4 className="text-base font-bold text-foreground mb-1">Karmic Deliverers</h4>
                                                     <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                        Planets don't just symbolize traits; they actively deliver the fruits of your past actions. Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.
+                                                        Planets don&apos;t just symbolize traits; they actively deliver the fruits of your past actions. Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.
                                                     </p>
                                                 </div>
                                             </div>
@@ -353,7 +353,7 @@ export default function PlanetsPage() {
                                                 <div>
                                                     <h4 className="text-base font-bold text-foreground mb-1">Avasthas (Planetary States)</h4>
                                                     <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                        A planet's power depends on its condition. An exalted planet expresses its highest, purest potential, while a debilitated planet signifies areas where the soul must work harder to overcome innate weaknesses.
+                                                        A planet&apos;s power depends on its condition. An exalted planet expresses its highest, purest potential, while a debilitated planet signifies areas where the soul must work harder to overcome innate weaknesses.
                                                     </p>
                                                 </div>
                                             </div>

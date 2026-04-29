@@ -21,19 +21,8 @@ export default function KundliSvg({ className = '', style = 'north' }: KundliSvg
             setLoading(true);
             setError(false);
             try {
-                // If theme is 'system', fallback to 'dark' or use a client-side check.
-                // Assuming `theme` is already resolved to 'light' or 'dark' by useTheme, 
-                // or if it returns 'system', we'll use window.matchMedia
-                let actualTheme = theme;
-                if (theme === 'system') {
-                    if (typeof window !== 'undefined') {
-                        actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                    } else {
-                        actualTheme = 'dark';
-                    }
-                }
-
-                const res = await fetch(`/api/profile/svg?style=${style}&theme=${actualTheme}`);
+                // The theme is already resolved to 'light' or 'dark' by useTheme()
+                const res = await fetch(`/api/profile/svg?style=${style}&theme=${theme}`);
                 if (!res.ok) throw new Error('Failed to fetch SVG');
                 const data = await res.text();
                 if (isMounted) {

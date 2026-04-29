@@ -206,7 +206,6 @@ export default function DailyHoroscopeCard({
     const forecastDataCacheRef = useRef<Map<string, ForecastData>>(new Map());
     const lastSignRef = useRef<string | undefined>('');
     const lastFetchedUrlRef = useRef<string>('');
-    const lastSignRef = useRef<string | undefined>('');
 
     const today = new Date();
     const dateString = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });

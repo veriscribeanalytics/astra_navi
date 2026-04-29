@@ -5,7 +5,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   formatDisplayDate, 
   formatDisplayTime, 
@@ -23,7 +23,7 @@ export default function DateTimeExamples() {
   const currentTime = useRealTime(); // Updates every minute
   
   // Example 3: Auto-updating relative time
-  const messageDate = new Date(Date.now() - 1000 * 60 * 5); // 5 minutes ago
+  const [messageDate] = useState(() => new Date(Date.now() - 1000 * 60 * 5)); // 5 minutes ago
   const relativeTime = useRelativeTime(messageDate);
 
   return (

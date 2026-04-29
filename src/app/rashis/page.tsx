@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, BookOpen, Moon, Star, Activity, Compass, Flame, Leaf, Wind, Droplets, Mountain, Sparkles, Briefcase, Heart, Zap, TrendingUp, Info, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { rashiData } from '@/data/rashiData';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function RashisPage() {
     const { isLoggedIn } = useAuth();

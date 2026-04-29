@@ -20,19 +20,31 @@ const rashiData = [
 
 const BouncingIcon = ({ image, id, paused }: { image: string; id: number; paused: boolean }) => {
   const iconRef = useRef<HTMLDivElement>(null);
-  const startTime = useRef(Math.random() * 10000); // Random start time for sin waves
+  const startTime = useRef(0);
   
   const pos = useRef({ 
-    x: Math.random() * 80 + 10, // %
-    y: Math.random() * 80 + 10, // %
-    // Linear Speed: Extremely slow
-    vx: (Math.random() * 0.006 + 0.003) * (Math.random() > 0.5 ? 1 : -1), 
-    vy: (Math.random() * 0.006 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
-    rotation: Math.random() * 360,
-    vr: (Math.random() * 0.015 + 0.005) * (Math.random() > 0.5 ? 1 : -1) 
+    x: 50, // Default center
+    y: 50,
+    vx: 0,
+    vy: 0,
+    rotation: 0,
+    vr: 0 
   });
   
   const size = 110; // px
+  
+  useEffect(() => {
+    // Initialize random values after mount
+    startTime.current = Math.random() * 10000;
+    pos.current = {
+      x: Math.random() * 80 + 10,
+      y: Math.random() * 80 + 10,
+      vx: (Math.random() * 0.006 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+      vy: (Math.random() * 0.006 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+      rotation: Math.random() * 360,
+      vr: (Math.random() * 0.015 + 0.005) * (Math.random() > 0.5 ? 1 : -1)
+    };
+  }, []);
   
   useEffect(() => {
     let animationId: number;

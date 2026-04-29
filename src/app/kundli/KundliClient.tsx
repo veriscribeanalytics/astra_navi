@@ -9,13 +9,13 @@ import Button from "@/components/ui/Button";
 import {
     Sparkles, Home, Globe, Lock,
     ArrowLeft, RefreshCw, ChevronLeft,
-    Activity, Info
+    Info
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { PLANET_GLYPHS, PLANET_COLORS, SIGN_TO_ICON, PLANET_TO_ICON, getDignityStyle } from "@/lib/astrology";
 import PlanetIcon from "@/components/ui/astrology/PlanetIcon";
 import KundliSvg from "@/components/ui/astrology/KundliSvg";
-import { Skeleton, SkeletonCircle, SkeletonBlock, SkeletonText } from "@/components/ui/Skeleton";
+import { Skeleton, SkeletonCircle, SkeletonText } from "@/components/ui/Skeleton";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Occupant { planet: string; dignity: string; retrograde: boolean; }
@@ -42,7 +42,7 @@ export default function KundliPage() {
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
-    const [planetDetails, setPlanetDetails] = useState<any>(null);
+    const [planetDetails, setPlanetDetails] = useState<PlanetData | null>(null);
     const [planetLoading, setPlanetLoading] = useState(false);
     const [houseFilter, setHouseFilter] = useState<'active' | 'all'>('active');
 
@@ -103,20 +103,20 @@ export default function KundliPage() {
                 if (!payload.planets) payload.planets = [];
                 
                 // Defensive check: ensure every planet has the required arrays
-                payload.planets = payload.planets.map((p: any) => ({
+                payload.planets = (payload.planets as Record<string, unknown>[]).map((p) => ({
                     ...p,
-                    yogas: p.yogas || [],
-                    interpretation: p.interpretation || [],
-                    conjunctions: p.conjunctions || [],
-                    lordOf: p.lordOf || []
+                    yogas: (p.yogas as Yoga[]) || [],
+                    interpretation: (p.interpretation as (string | { technical: string; simple: string })[]) || [],
+                    conjunctions: (p.conjunctions as string[]) || [],
+                    lordOf: (p.lordOf as number[]) || []
                 }));
 
                 // Defensive check for houses
-                payload.houses = payload.houses.map((h: any) => ({
+                payload.houses = (payload.houses as Record<string, unknown>[]).map((h) => ({
                     ...h,
-                    occupants: h.occupants || [],
-                    interpretation: h.interpretation || [],
-                    areas: h.areas || []
+                    occupants: (h.occupants as Occupant[]) || [],
+                    interpretation: (h.interpretation as (string | { technical: string; simple: string })[]) || [],
+                    areas: (h.areas as string[]) || []
                 }));
 
                 setData(payload); 
@@ -126,7 +126,9 @@ export default function KundliPage() {
                 console.error("[Kundli] Invalid payload format. Keys found:", Object.keys(result));
                 throw new Error('Your celestial blueprint is currently being drawn. Please try refreshing in a moment.'); 
             }
-        } catch (err: any) { setError(err.message); }
+        } catch (err: unknown) { 
+            setError(err instanceof Error ? err.message : String(err)); 
+        }
         finally { setLoading(false); setRefreshing(false); }
     }, []);
 
@@ -240,7 +242,9 @@ export default function KundliPage() {
                                     <div className="flex gap-2 mb-4"><SkeletonCircle size={16} /><Skeleton height={12} width={100} /></div>
                                     <div className="grid grid-cols-2 gap-3">
                                         {[1, 2, 3, 4].map(i => (
-                                            <Card key={i} className="!rounded-[16px] h-32" />
+                                            <Card key={i} className="!rounded-[16px] h-32">
+                                                <div className="w-full h-full animate-pulse bg-surface-variant/10" />
+                                            </Card>
                                         ))}
                                     </div>
                                 </div>
@@ -639,7 +643,7 @@ export default function KundliPage() {
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-3">
-                                                        {(planetDetails?.interpretation || selectedPlanet.interpretation).map((item: any, i: number) => {
+                                                        {(planetDetails?.interpretation || selectedPlanet.interpretation).map((item, i: number) => {
                                                             const isObject = typeof item === 'object' && item !== null;
                                                             const simpleText = isObject ? item.simple : item;
                                                             const techText = isObject ? item.technical : null;
@@ -661,7 +665,7 @@ export default function KundliPage() {
                                                 )}
                                             </div>
 
-                                            {(planetDetails?.yogas?.length > 0 || selectedPlanet.yogas?.length > 0) && (
+                                            {((planetDetails?.yogas?.length ?? 0) > 0 || (selectedPlanet.yogas?.length ?? 0) > 0) && (
                                                 <div>
                                                     <h4 className="text-[11px] font-bold text-amber-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
                                                         <Sparkles className="w-3.5 h-3.5" /> Active Yogas
@@ -746,7 +750,7 @@ export default function KundliPage() {
                                                                 {house.interpretation?.[0] && (() => {
                                                                     const item = house.interpretation[0];
                                                                     const isObject = typeof item === 'object' && item !== null;
-                                                                    const simpleText = isObject ? (item as any).simple : item;
+                                                                    const simpleText = isObject ? item.simple : item;
                                                                     return (
                                                                         <p className="text-[11px] text-foreground/40 leading-snug line-clamp-2">{simpleText}</p>
                                                                     );

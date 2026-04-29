@@ -35,10 +35,10 @@ export default function MatchClient() {
   const [activeTab, setActiveTab] = useState<'match' | 'history'>('match');
   const [phase, setPhase] = useState<'input' | 'loading' | 'result'>('input');
   const [isSubmitting, setIsSending] = useState(false);
-  const [matchResult, setMatchResult] = useState<any>(null);
+  const [matchResult, setMatchResult] = useState<Record<string, any> | null>(null);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing profiles...");
 
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<Record<string, any>[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const loadingMessages = [
@@ -94,7 +94,7 @@ export default function MatchClient() {
     }
   };
 
-  const viewHistoryItem = async (item: any) => {
+  const viewHistoryItem = async (item: Record<string, any>) => {
     try {
       setPhase('loading');
       setLoadingMessage("Retrieving from cosmic archives...");
@@ -103,8 +103,6 @@ export default function MatchClient() {
       const data = await res.json();
       
       if (res.ok) {
-        // The individual record might be nested differently, backend dependent
-        // Usually returns the full result object directly or in a 'details' field
         const result = data.details || data;
         setMatchResult(result);
         setPerson1(data.person1_details || item.person1_details);
@@ -182,8 +180,9 @@ export default function MatchClient() {
       setMatchResult(data);
       setPhase('result');
       success("Analysis complete!");
-    } catch (err: any) {
-      error(err.message || "Failed to analyze profiles. Please check details.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to analyze profiles. Please check details.";
+      error(message);
       setPhase('input');
     } finally {
       setIsSending(false);
@@ -475,7 +474,7 @@ export default function MatchClient() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {matchResult.ashtakoot?.koots?.map((koot: any, idx: number) => {
+                    {matchResult.ashtakoot?.koots?.map((koot: Record<string, any>, idx: number) => {
                       const humanLabel = getKootHumanLabel(koot.name);
                       return (
                         <KootCard 
@@ -574,4 +573,3 @@ export default function MatchClient() {
     </div>
   );
 }
-;

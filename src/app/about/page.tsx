@@ -88,7 +88,7 @@ export default function AboutPage() {
                         </div>
                         <h3 className="text-lg sm:text-xl font-bold font-headline text-primary mb-2 sm:mb-3">Sacred Privacy</h3>
                         <p className="text-primary/70 text-xs sm:text-sm leading-relaxed">
-                            Your birth chart is your soul's fingerprint. We encrypt all data end-to-end. Your cosmic blueprint belongs to you alone.
+                            Your birth chart is your soul&apos;s fingerprint. We encrypt all data end-to-end. Your cosmic blueprint belongs to you alone.
                         </p>
                     </Card>
                 </div>

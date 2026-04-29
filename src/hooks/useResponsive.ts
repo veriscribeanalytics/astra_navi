@@ -82,7 +82,7 @@ export function useIsMobileDevice(): boolean {
 
   useEffect(() => {
     const checkMobileDevice = () => {
-      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera?: string }).opera;
       const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
       setIsMobileDevice(mobileRegex.test(userAgent));
     };

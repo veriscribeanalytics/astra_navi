@@ -18,6 +18,7 @@ import Particles from '@/components/ui/Particles';
 import { ChevronRight, ChevronLeft, Sparkles, Send, RefreshCw, Calendar, MapPin, Clock, Languages, MessageSquare, Info } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { useRouter } from 'next/navigation';
+import { Skeleton, SkeletonCircle } from '@/components/ui/Skeleton';
 
 type Step = 'birth' | 'categories' | 'subcategories' | 'questions' | 'reading';
 

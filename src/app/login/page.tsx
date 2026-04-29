@@ -33,6 +33,10 @@ const LoginContent = () => {
 
     // Form states
     const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [dob, setDob] = useState('');
+    const [tob, setTob] = useState('');
+    const [pob, setPob] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -90,7 +94,7 @@ const LoginContent = () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email, password
+                        email, password, name, dob, tob, pob
                     }),
                 });
 

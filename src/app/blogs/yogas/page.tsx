@@ -221,7 +221,7 @@ export default function YogasPage() {
                                             Understanding <span className="text-secondary italic">Yogas</span>
                                         </h2>
                                         <p className="text-sm sm:text-base text-foreground/70 leading-relaxed max-w-3xl mb-6">
-                                            In Vedic Astrology, a "Yoga" means union. It refers to specific planetary combinations and alignments that lock together to create powerful, destined effects. These cosmic signatures dictate the heights of wealth, power, and spiritual liberation in a chart.
+                                            In Vedic Astrology, a &quot;Yoga&quot; means union. It refers to specific planetary combinations and alignments that lock together to create powerful, destined effects. These cosmic signatures dictate the heights of wealth, power, and spiritual liberation in a chart.
                                         </p>
 
                                         <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">

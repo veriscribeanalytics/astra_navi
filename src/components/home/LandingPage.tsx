@@ -445,7 +445,7 @@ export default function LandingPage() {
                                         </div>
                                         <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 p-3">
                                             <div className="text-[9px] text-emerald-300 uppercase font-bold mb-0.5">Transit Tip</div>
-                                            <p className="text-[10px] text-white/60 italic leading-tight">"Auspicious time for new beginnings."</p>
+                                            <p className="text-[10px] text-white/60 italic leading-tight">&quot;Auspicious time for new beginnings.&quot;</p>
                                         </div>
                                     </div>
                                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"><Activity className="text-white w-5 h-5" /></div>

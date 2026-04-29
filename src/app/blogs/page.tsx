@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { BookOpen, Sparkles, Calendar, Users, Gem, Heart, Brain, Clock, ArrowRight } from 'lucide-react';
@@ -197,7 +198,9 @@ export default function BlogsPage() {
                 {!mounted ? (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <Card key={i} className="!rounded-[32px] h-[300px]" />
+                            <Card key={i} className="!rounded-[32px] h-[300px]">
+                                <div className="w-full h-full animate-pulse bg-surface-variant/20" />
+                            </Card>
                         ))}
                     </div>
                 ) : (
@@ -303,7 +306,7 @@ export default function BlogsPage() {
                                 <Brain className="w-10 h-10 text-secondary" />
                             </div>
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-bold text-white mb-6">
-                                Can't find what you're <br />
+                                Can&apos;t find what you&apos;re <br />
                                 <span className="text-secondary italic">looking for?</span>
                             </h2>
                             <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto">

@@ -12,10 +12,8 @@ import { useToast } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
-    History, Gem, ShieldQuestion, Users, Brain, Globe
+    Gem, ShieldQuestion, Brain, Globe
 } from "lucide-react";
-
-interface INavbarProps{}
 
 // Navigation structure based on auth state
 const getNavSections = (isLoggedIn: boolean) => {
@@ -245,11 +243,10 @@ const getNavSections = (isLoggedIn: boolean) => {
     ];
 };
 
-const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
+const Navbar: React.FC = () => {
     const pathname = usePathname();
     const router = useRouter();
     const { isLoggedIn, logout, showLoading, user } = useAuth();
-    const { setIsMobileMenuOpen } = useChat();
     const { success, ToastContainer } = useToast();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -288,9 +285,9 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
     }, []);
 
     useEffect(() => {
-        setIsMenuOpen(false);
-        setIsUserDropdownOpen(false);
-        setHoveredSection(null);
+        setIsMenuOpen(prev => prev ? false : prev);
+        setIsUserDropdownOpen(prev => prev ? false : prev);
+        setHoveredSection(prev => prev !== null ? null : prev);
     }, [pathname]);
 
     const handleLogout = async () => {
@@ -480,7 +477,7 @@ const Navbar: React.FunctionComponent<INavbarProps> = (props) => {
                                     return (
                                         <Link key={idx} href={item.href} onClick={() => setIsMenuOpen(false)} className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all active:scale-[0.98] ${isActive(item.href) ? 'bg-secondary/10' : 'hover:bg-primary/5'}`}>
                                             <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition-colors ${isActive(item.href) ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary'}`}>
-                                                {cloneElement(item.icon as any, { size: 18 })}
+                                                {cloneElement(item.icon as React.ReactElement<any>, { size: 18 })}
                                             </div>
                                             <div className="flex flex-col min-w-0">
                                                 <span className={`text-[13px] font-bold tracking-tight ${isActive(item.href) ? 'text-secondary' : 'text-primary'}`}>

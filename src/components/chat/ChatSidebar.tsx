@@ -10,6 +10,7 @@ import {
     AlertTriangle, X, MessageSquare, Plus, Lock
 } from 'lucide-react';
 import { formatChatTimestamp } from '@/lib/datetime';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 /* ---------- Date Formatter ---------- */
 function formatChatDate(dateStr: string): string {

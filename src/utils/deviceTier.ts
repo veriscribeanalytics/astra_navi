@@ -20,7 +20,7 @@ export interface DeviceCapabilities {
 export function detectDeviceTier(): DeviceTier {
   // Fallback values for unsupported browsers
   const cpuCores = navigator.hardwareConcurrency || 2;
-  const deviceMemory = (navigator as any).deviceMemory || 4;
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4;
   
   // Calculate device score
   let score = 0;
@@ -70,7 +70,7 @@ function checkGPUSupport(): boolean {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
     return !!gl;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -81,7 +81,7 @@ function checkGPUSupport(): boolean {
  */
 export function getDeviceCapabilities(): DeviceCapabilities {
   const cpuCores = navigator.hardwareConcurrency || 2;
-  const deviceMemory = (navigator as any).deviceMemory || 4;
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4;
   const hasGPUAcceleration = checkGPUSupport();
   const supportsWillChange = CSS.supports('will-change', 'transform');
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
