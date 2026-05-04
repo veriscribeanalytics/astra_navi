@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { generateUUID } from '@/lib/uuid';
+import { clientFetch } from '@/lib/apiClient';
 
 /* ---------- Types ---------- */
 export interface ChatMessage {
@@ -110,7 +111,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user?.email || isGuest) return;
     setIsLoadingChats(true);
     try {
-      const res = await fetch(`/api/chat?limit=20`);
+      const res = await clientFetch(`/api/chat?limit=20`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load chats');
       if (data.chats) {
@@ -129,7 +130,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user?.email || !nextCursor || isLoadingChats || isGuest) return;
     setIsLoadingChats(true);
     try {
-      const res = await fetch(`/api/chat?limit=20&cursor=${nextCursor}`);
+      const res = await clientFetch(`/api/chat?limit=20&cursor=${nextCursor}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load more chats');
       if (data.chats) {
@@ -149,7 +150,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveChatId(chatId);
     setIsLoadingMessages(true);
     try {
-      const res = await fetch(`/api/chat/${chatId}`);
+      const res = await clientFetch(`/api/chat/${chatId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load chat');
       if (data.chat) setActiveChat(data.chat);
@@ -200,7 +201,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       if (targetId.startsWith('temp-')) {
-        const createRes = await fetch('/api/chat', {
+        const createRes = await clientFetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: text.slice(0, 30) }),
@@ -213,7 +214,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      const res = await fetch(`/api/chat/${targetId}/message`, {
+      const res = await clientFetch(`/api/chat/${targetId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
@@ -268,14 +269,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
     try {
-      await fetch(`/api/chat/${activeChatId}/rate`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messageId, rating, feedbackTags: tags, feedbackComment: comment }) });
+      await clientFetch(`/api/chat/${activeChatId}/rate`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messageId, rating, feedbackTags: tags, feedbackComment: comment }) });
     } catch {}
   }, [activeChatId, isGuest]);
 
   const deleteChat = useCallback(async (chatId: string) => {
     if (isGuest) return;
     try {
-      await fetch(`/api/chat/${chatId}`, { method: 'DELETE' });
+      await clientFetch(`/api/chat/${chatId}`, { method: 'DELETE' });
       setChats(prev => prev.filter(c => c.id !== chatId));
     } catch {}
   }, [isGuest]);

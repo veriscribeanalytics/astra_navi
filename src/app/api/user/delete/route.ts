@@ -13,10 +13,12 @@ export async function DELETE(req: Request) {
         const session = await getAuthSession();
         if (!session) return unauthorizedResponse();
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const response = await backendFetch('/api/user', {
             method: 'DELETE',
-            userEmail: email as string
+            userEmail: email as string,
+            accessToken: accessToken as string
         });
 
         if (!response.ok) {

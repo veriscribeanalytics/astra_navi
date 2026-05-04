@@ -14,6 +14,7 @@ export async function POST(req: Request) {
         const session = await getAuthSession();
         if (!session) return unauthorizedResponse();
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const body = await req.json();
         const validation = AnalyzeFullSchema.safeParse(body);
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
         const response = await backendFetch('/api/analyze-full', {
             method: 'POST',
             userEmail: email as string,
+            accessToken: accessToken as string,
             body: JSON.stringify(validation.data)
         });
 

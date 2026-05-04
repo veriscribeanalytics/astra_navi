@@ -12,6 +12,7 @@ export async function GET(req: Request) {
         const session = await getAuthSession();
         if (!session) return unauthorizedResponse();
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const { searchParams } = new URL(req.url);
         const daysBack = searchParams.get('days_back') || '3';
@@ -20,7 +21,8 @@ export async function GET(req: Request) {
         const url = `/api/forecast/health?days_back=${daysBack}&days_forward=${daysForward}`;
         
         const response = await backendFetch(url, {
-            userEmail: email as string
+            userEmail: email as string,
+            accessToken: accessToken as string
         });
 
         const data = await response.json();

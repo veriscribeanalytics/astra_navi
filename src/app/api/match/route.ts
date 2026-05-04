@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getAuthSession();
     const email = session?.user?.email;
+    const accessToken = (session?.user as any)?.accessToken;
 
     const body = await req.json();
     const validation = MatchRequestSchema.safeParse(body);
@@ -30,7 +31,8 @@ export async function POST(req: NextRequest) {
     const response = await backendFetch(`/api/match?narrative=${narrative}`, {
       method: 'POST',
       body: JSON.stringify(validation.data),
-      userEmail: email || undefined, // Forward JWT if available
+      userEmail: (email as string) || undefined,
+      accessToken: accessToken as string
     });
 
     const data = await response.json();

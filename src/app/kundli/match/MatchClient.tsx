@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
+import { clientFetch } from '@/lib/apiClient';
 import { useToast } from '@/hooks';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -72,7 +73,7 @@ export default function MatchClient() {
   const loadHistory = async () => {
     try {
       setIsLoadingHistory(true);
-      const res = await fetch('/api/match/history?limit=10');
+      const res = await clientFetch('/api/match/history?limit=10');
       const data = await res.json();
       if (res.ok) setHistory(data.results || []);
     } catch (err) {
@@ -84,7 +85,7 @@ export default function MatchClient() {
 
   const deleteHistoryItem = async (id: string) => {
     try {
-      const res = await fetch(`/api/match/${id}`, { method: 'DELETE' });
+      const res = await clientFetch(`/api/match/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setHistory(prev => prev.filter(item => item.id !== id));
         success("Record cleared from history.");
@@ -99,7 +100,7 @@ export default function MatchClient() {
       setPhase('loading');
       setLoadingMessage("Retrieving from cosmic archives...");
       
-      const res = await fetch(`/api/match/${item.id}`);
+      const res = await clientFetch(`/api/match/${item.id}`);
       const data = await res.json();
       
       if (res.ok) {
@@ -165,7 +166,7 @@ export default function MatchClient() {
     setIsSending(true);
 
     try {
-      const res = await fetch('/api/match?narrative=true', {
+      const res = await clientFetch('/api/match?narrative=true', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ person1, person2 }),

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/hooks/useTheme';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { clientFetch } from '@/lib/apiClient';
 
 interface KundliSvgProps {
     className?: string;
@@ -22,7 +23,7 @@ export default function KundliSvg({ className = '', style = 'north' }: KundliSvg
             setError(false);
             try {
                 // The theme is already resolved to 'light' or 'dark' by useTheme()
-                const res = await fetch(`/api/profile/svg?style=${style}&theme=${theme}`);
+                const res = await clientFetch(`/api/profile/svg?style=${style}&theme=${theme}`);
                 if (!res.ok) throw new Error('Failed to fetch SVG');
                 const data = await res.text();
                 if (isMounted) {

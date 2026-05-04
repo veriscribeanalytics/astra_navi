@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
+import { clientFetch } from '@/lib/apiClient';
 import { useChat, ChatSummary } from '@/context/ChatContext';
 import { 
     MoreVertical, Trash2, Download, 
@@ -43,7 +44,7 @@ const ChatSidebar: React.FC = () => {
   const handleDownload = async (chatId: string, title: string) => {
     setIsDownloading(true);
     try {
-      const res = await fetch(`/api/chat/${chatId}`);
+      const res = await clientFetch(`/api/chat/${chatId}`);
       const data = await res.json();
       if (data.chat) {
         const messages = data.chat.messages || [];

@@ -10,17 +10,19 @@ const API_KEY = process.env.AI_BACKEND_API_KEY || '';
 
 export type BackendRequestOptions = RequestInit & {
   userEmail?: string;
+  accessToken?: string;
 };
 
 export async function backendFetch(
   path: string,
   options: BackendRequestOptions = {}
 ) {
-  const { userEmail, headers: extraHeaders, ...rest } = options;
+  const { userEmail, accessToken, headers: extraHeaders, ...rest } = options;
   
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-API-Key': API_KEY,
+    ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
     ...(userEmail ? { 'X-User-Email': userEmail } : {}),
     ...(extraHeaders as Record<string, string> || {}),
   };

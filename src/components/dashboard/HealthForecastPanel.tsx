@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import { Activity, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Sparkles, X, Info } from 'lucide-react';
+import { clientFetch } from '@/lib/apiClient';
 
 interface DayForecast {
     date: string;
@@ -67,7 +68,7 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`/api/forecast-health?days_back=3&days_forward=3`);
+            const res = await clientFetch(`/api/forecast-health?days_back=3&days_forward=3`);
             if (!res.ok) throw new Error('Failed to fetch health forecast');
             const result = await res.json();
             setData(result);

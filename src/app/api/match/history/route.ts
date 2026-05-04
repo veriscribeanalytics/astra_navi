@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const session = await getAuthSession();
     if (!session) return unauthorizedResponse();
     const email = session.user?.email;
+    const accessToken = (session.user as any).accessToken;
 
     const { searchParams } = new URL(req.url);
     const page = searchParams.get('page') || '1';
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     // Forward to backend
     const response = await backendFetch(`/api/match/history?page=${page}&limit=${limit}`, {
       userEmail: email as string,
+      accessToken: accessToken as string
     });
 
     const data = await response.json();

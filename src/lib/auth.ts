@@ -8,7 +8,43 @@ import { authConfig } from "@/auth.config";
  * MongoDB dependency has been removed. All user data now lives 
  * in the PostgreSQL backend. The authorize() callback proxies 
  * login requests to the FastAPI backend.
+ * 
+ * Updated to support Access/Refresh Token architecture.
  */
+
+async function refreshAccessToken(token: any) {
+  try {
+    const backendUrl = process.env.AI_BACKEND_URL;
+    const response = await fetch(`${backendUrl}/api/auth/refresh`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-API-Key": process.env.AI_BACKEND_API_KEY || '',
+      },
+      body: JSON.stringify({ refreshToken: token.refreshToken }),
+    });
+
+    const refreshedTokens = await response.json();
+
+    if (!response.ok) {
+      throw refreshedTokens;
+    }
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.accessToken,
+      refreshToken: refreshedTokens.refreshToken ?? token.refreshToken, // Fallback to old refresh token
+      accessTokenExpires: Date.now() + refreshedTokens.expiresIn * 1000,
+    };
+  } catch (error) {
+    console.error("[Auth] RefreshAccessToken error:", error);
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   // NO database adapter - using pure JWT session strategy
@@ -27,34 +63,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
             // Call backend login endpoint (PostgreSQL)
             const backendUrl = process.env.AI_BACKEND_URL;
+            console.log("[Auth] Attempting login proxy to:", `${backendUrl}/api/login`);
             const res = await fetch(`${backendUrl}/api/login`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                'Content-Type': 'application/json',
+                'X-API-Key': process.env.AI_BACKEND_API_KEY || '',
+              },
               body: JSON.stringify({
                 email: credentials.email,
                 password: credentials.password,
               }),
             });
             
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                console.error("[Auth] Login failed:", errorData.error || res.statusText);
-                return null;
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await res.text();
+                console.error("[Auth] Non-JSON response from backend:", text);
+                throw new Error("The celestial server returned an invalid response.");
             }
-            
+
             const data = await res.json();
             
-            // Return user object for JWT session
-            // Note: backend returns user in 'user' field
+            if (!res.ok) {
+                console.error("[Auth] Login failed:", data.error || res.statusText);
+                // Return error message for display
+                throw new Error(data.error || "Invalid credentials.");
+            }
+            
+            // Return user object + tokens for JWT session
             return {
               id: data.user.id,
               email: data.user.email,
               name: data.user.name,
               image: data.user.image,
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+              accessTokenExpires: Date.now() + data.expiresIn * 1000,
             };
-        } catch (error) {
+        } catch (error: any) {
             console.error("[Auth] Authorize error:", error);
-            return null;
+            // Re-throw to pass the error message to the client
+            throw error;
         }
       },
     }),
@@ -63,18 +113,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    async jwt({ token, user, account }) {
+      // Initial sign in
+      if (user && account) {
+        return {
+          ...token,
+          id: user.id,
+          accessToken: (user as any).accessToken,
+          refreshToken: (user as any).refreshToken,
+          accessTokenExpires: (user as any).accessTokenExpires,
+        };
       }
-      return token;
+
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < (token.accessTokenExpires as number)) {
+        return token;
+      }
+
+      // Access token has expired, try to update it
+      return refreshAccessToken(token);
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
+        (session.user as any).id = token.id as string;
+        (session.user as any).accessToken = token.accessToken as string;
+        (session.user as any).refreshToken = token.refreshToken as string;
+        (session.user as any).error = token.error;
       }
       return session;
     },
     ...authConfig.callbacks,
   },
 });
+

@@ -271,34 +271,43 @@ export default function DashboardHome() {
                 }
 
                 const stats: KundliStats = {};
-                if (Array.isArray(analysis?.houses)) stats.lagnaSign = analysis.houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
-                if (typeof analysis?.nakshatra === 'string') stats.nakshatra = analysis.nakshatra;
-                if (typeof analysis?.nakshatraLord === 'string') stats.nakshatraLord = analysis.nakshatraLord;
-                if (analysis?.dasha) {
-                    // Try different formats to extract the current dasha name
-                    const dasha = analysis.dasha as any;
-                    let dashaName = dasha.currentMahaDasha || dasha.current;
-                    let dashaRemaining = dasha.remaining;
+                const houses = (analysis as any)?.houses || (analysis as any)?.chart?.houses;
+                if (Array.isArray(houses)) stats.lagnaSign = houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
+                
+                stats.nakshatra = typeof (analysis as any)?.nakshatra === 'object' ? (analysis as any).nakshatra.value : (analysis as any)?.nakshatra;
+                stats.nakshatraLord = typeof (analysis as any)?.nakshatraLord === 'object' ? (analysis as any).nakshatraLord.value : (analysis as any)?.nakshatraLord;
+                
+                const dasha = (analysis as any)?.dasha || (analysis as any)?.planetary?.active_dasha;
+                if (dasha) {
+                    if (typeof dasha === 'string') {
+                        stats.activeDasha = dasha;
+                    } else {
+                        // Try different formats to extract the current dasha name
+                        const d = dasha as any;
+                        let dashaName = d.currentMahaDasha || d.current || d.value;
+                        let dashaRemaining = d.remaining;
 
-                    // Fallback to the active array if flat strings are missing
-                    if (!dashaName && dasha.active?.length > 0) {
-                        const maha = dasha.active.find((p: any) => p.type === 'Mahadasha') || dasha.active[0];
-                        const anta = dasha.active.find((p: any) => p.type === 'Antardasha');
-                        dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
-                        
-                        // Calculate remaining time if end date exists
-                        if (!dashaRemaining && maha.end) {
-                            const end = new Date(maha.end);
-                            const now = Date.now();
-                            const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
-                            dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                        // Fallback to the active array if flat strings are missing
+                        if (!dashaName && d.active?.length > 0) {
+                            const maha = d.active.find((p: any) => p.type === 'Mahadasha') || d.active[0];
+                            const anta = d.active.find((p: any) => p.type === 'Antardasha');
+                            dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
+                            
+                            // Calculate remaining time if end date exists
+                            if (!dashaRemaining && maha.end) {
+                                const end = new Date(maha.end);
+                                const now = Date.now();
+                                const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
+                                dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                            }
                         }
+                        stats.activeDasha = dashaName;
+                        stats.dashaRemaining = dashaRemaining;
                     }
-
-                    stats.activeDasha = dashaName;
-                    stats.dashaRemaining = dashaRemaining;
                 }
-                if (typeof analysis?.moonPhase === 'string') stats.moonPhase = analysis.moonPhase;
+                
+                const moonPhase = typeof (analysis as any)?.moonPhase === 'object' ? (analysis as any).moonPhase.value : (analysis as any)?.moonPhase;
+                if (typeof moonPhase === 'string') stats.moonPhase = moonPhase;
                 
                 if (Object.keys(stats).length > 0) {
                     setKundliStats(stats);

@@ -2,20 +2,53 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { clientFetch } from '@/lib/apiClient';
 import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, Briefcase, Activity, DollarSign, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 
 interface HoroscopeData {
-    sign?: string; date?: string; overall_score?: number; mood?: string;
-    lucky_color?: string; lucky_number?: number; career?: string; love?: string;
-    health?: string; finance?: string; tip?: string; dominant_planet?: string;
-    today_scores?: Record<string, number>;
+    user?: { sign: string; name: string };
+    meta?: { date: string; date_display: string; generated_at: string };
+    score?: {
+        overall: number;
+        areas: {
+            career: { value: number };
+            love: { value: number };
+            health: { value: number };
+            finance: { value: number };
+            general: { value: number };
+        };
+    };
+    lucky?: { color: string; number: number };
+    mood?: any; // Handles both { value, type } and string
+    planetary?: { dominant_planet: string; active_dasha: string };
+    areas_text?: {
+        career: { insight: string; tone: string };
+        love: { insight: string; tone: string };
+        health: { insight: string; tone: string };
+        finance: { insight: string; tone: string };
+    };
+    alerts?: {
+        primary: { technical: string; simple: string; type: string; importance: string };
+        secondary: Array<{ technical: string; simple: string; type: string; importance: string }>;
+    };
+    time_triggers?: Array<{ start: string; end: string; type: string; label: string; advice: string }>;
+    astro_explanations?: {
+        enabled: boolean;
+        items: Array<{ technical: string; simple: string; importance: string }>;
+    };
+    system?: { is_personalized: boolean; language: string };
+    // Compatibility fields (optional, if any old code still needs them)
+    sign?: string;
     date_display?: string;
-    text?: string;
-    is_personalized?: boolean;
-    personalized_alerts?: (string | { technical: string; simple: string })[];
+    overall_score?: number;
+    lucky_color?: string;
+    lucky_number?: number;
+    dominant_planet?: string;
+    tip?: any; // Handles both { text, type } and string
+    today_scores?: Record<string, any>;
 }
 
 interface ForecastDay {
@@ -78,6 +111,7 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
         </svg>
     );
 }
+
 
 
 // ─── Skeleton Sub-component ─────────────────────────────
@@ -224,7 +258,7 @@ export default function DailyHoroscopeCard({
                 lastFetchedUrlRef.current = url;
 
                 setLoading(true);
-                const res = await fetch(url);
+                const res = await clientFetch(url);
                 if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Failed'); }
                 const data = await res.json();
                 
@@ -249,18 +283,20 @@ export default function DailyHoroscopeCard({
 
     // Rotation for personalized alerts
     useEffect(() => {
-        if (!horoscope?.personalized_alerts || horoscope.personalized_alerts.length <= 1) return;
+        const allAlertsCount = (horoscope?.alerts?.primary ? 1 : 0) + (horoscope?.alerts?.secondary?.length || 0);
+        if (allAlertsCount <= 1) return;
+        
         const int = setInterval(() => {
-            setActiveAlertIdx(prev => (prev + 1) % (horoscope.personalized_alerts?.length || 1));
+            setActiveAlertIdx(prev => (prev + 1) % allAlertsCount);
         }, 5000);
         return () => clearInterval(int);
-    }, [horoscope?.personalized_alerts]);
+    }, [horoscope?.alerts]);
 
     // Initial content show and score animation
     useEffect(() => {
         if (userLoading) return;
         if (!loading && horoscope) {
-            setAnimatedScore(horoscope.overall_score || 0);
+            setAnimatedScore(horoscope.score?.overall ?? horoscope.overall_score ?? 0);
             const t = setTimeout(() => { setShowContent(true); }, 100);
             return () => clearTimeout(t);
         }
@@ -274,14 +310,15 @@ export default function DailyHoroscopeCard({
         return { color: 'text-red-500', bg: 'bg-red-500/10', hex: '#ef4444', label: 'Low' };
     };
 
-    const score = horoscope?.today_scores?.general ?? horoscope?.overall_score ?? 0;
+    const score = horoscope?.score?.overall ?? horoscope?.today_scores?.general ?? horoscope?.overall_score ?? 0;
     const currentScoreStyle = getScoreStyle(score);
     const scoreHex = currentScoreStyle.hex;
     const circ = 2 * Math.PI * 32;
     const prog = circ - (animatedScore / 100) * circ;
 
     const metrics = useMemo(() => {
-        const scores = horoscope?.today_scores || {};
+        const areas = (horoscope?.score?.areas || {}) as any;
+        const areasText = (horoscope?.areas_text || {}) as any;
         const CATEGORY_THEMES = {
             career: { color: "text-orange-500", bg: "bg-orange-500/10", hex: "#f97316" },
             health: { color: "text-green-500", bg: "bg-green-500/10", hex: "#22c55e" },
@@ -290,10 +327,10 @@ export default function DailyHoroscopeCard({
         };
         
         return [
-            { label: "Career", score: scores.career ?? 0, info: horoscope?.career || '---', icon: <Trophy className="w-5 h-5" />, area: "career" },
-            { label: "Health", score: scores.health ?? 0, info: horoscope?.health || '---', icon: <Sun className="w-5 h-5" />, area: "health" },
-            { label: "Love", score: scores.love ?? 0, info: horoscope?.love || '---', icon: <Heart className="w-5 h-5" />, area: "love" },
-            { label: "Finance", score: scores.finance ?? 0, info: horoscope?.finance || '---', icon: <Gem className="w-5 h-5" />, area: "finance" },
+            { label: "Career", score: areas.career?.value ?? 0, info: areasText.career?.insight || '---', icon: <Trophy className="w-5 h-5" />, area: "career" },
+            { label: "Health", score: areas.health?.value ?? 0, info: areasText.health?.insight || '---', icon: <Sun className="w-5 h-5" />, area: "health" },
+            { label: "Love", score: areas.love?.value ?? 0, info: areasText.love?.insight || '---', icon: <Heart className="w-5 h-5" />, area: "love" },
+            { label: "Finance", score: areas.finance?.value ?? 0, info: areasText.finance?.insight || '---', icon: <Gem className="w-5 h-5" />, area: "finance" },
         ].map(item => {
             const scoreStyle = getScoreStyle(item.score);
             const theme = CATEGORY_THEMES[item.area as keyof typeof CATEGORY_THEMES];
@@ -312,12 +349,12 @@ export default function DailyHoroscopeCard({
     }, [horoscope, getScoreStyle]);
 
     const luckyColorHex = useMemo(() => {
-        const lc = horoscope?.lucky_color?.toLowerCase() || '';
+        const lc = (horoscope?.lucky?.color || horoscope?.lucky_color || '').toLowerCase();
         if (!lc) return '#94a3b8';
         const fam = [['pink','rose','magenta','#f472b6'],['red','maroon','crimson','#dc2626'],['blue','navy','indigo','cyan','#2563eb'],['green','emerald','teal','#059669'],['purple','violet','lavender','#7c3aed'],['orange','peach','coral','#ea580c'],['purple','violet','lavender','#7c3aed'],['white','cream','ivory','#ffffff'],['black','charcoal','#111827'],['grey','gray','silver','#94a3b8']];
         const m = fam.find(f => f.slice(0, -1).some(k => lc.includes(k)));
         return m ? m[m.length - 1] : '#fbbf24';
-    }, [horoscope?.lucky_color]);
+    }, [horoscope?.lucky?.color, horoscope?.lucky_color]);
 
     const openModal = (item: ModalData) => {
         setActiveModal(item); setForecast(null); setExpandedDay(null);
@@ -329,7 +366,7 @@ export default function DailyHoroscopeCard({
             return;
         }
         setForecastLoading(true);
-        fetch(`/api/forecast/${item.area}?days_back=3&days_forward=3`)
+        clientFetch(`/api/forecast/${item.area}?days_back=3&days_forward=3`)
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d) setForecast(d); })
             .catch(() => {})
@@ -354,7 +391,7 @@ export default function DailyHoroscopeCard({
 
     if (error && !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">Service Temporarily Unavailable</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
 
-    const displayDate = horoscope?.date_display || dateString;
+    const displayDate = horoscope?.meta?.date_display || horoscope?.date_display || dateString;
     
     // Auto-pick highlight area
     const highlightMetric = [...metrics].sort((a,b) => b.score - a.score)[0];
@@ -390,10 +427,11 @@ export default function DailyHoroscopeCard({
                             <div className="flex-1 min-w-0 flex flex-col justify-center relative h-[120px]">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="text-[12px] sm:text-[13px] font-bold text-secondary uppercase tracking-[0.2em]">Your Day Today</span>
-                                    {horoscope?.personalized_alerts && horoscope.personalized_alerts.length > 1 && (
+                                    {horoscope?.alerts?.secondary && horoscope.alerts.secondary.length > 0 && (
                                         <div className="flex gap-1">
-                                            {horoscope?.personalized_alerts.map((_, i) => (
-                                                <div key={i} className={`w-1 h-1 rounded-full transition-all duration-500 ${i === activeAlertIdx ? 'bg-secondary w-3' : 'bg-secondary/20'}`} />
+                                            <div key="p" className={`w-1 h-1 rounded-full transition-all duration-500 ${activeAlertIdx === 0 ? 'bg-secondary w-3' : 'bg-secondary/20'}`} />
+                                            {horoscope.alerts.secondary.map((_, i) => (
+                                                <div key={i} className={`w-1 h-1 rounded-full transition-all duration-500 ${i + 1 === activeAlertIdx ? 'bg-secondary w-3' : 'bg-secondary/20'}`} />
                                             ))}
                                         </div>
                                     )}
@@ -409,9 +447,14 @@ export default function DailyHoroscopeCard({
                                             className="flex flex-col justify-center py-1"
                                         >
                                             {(() => {
-                                                const alert = horoscope?.personalized_alerts?.[activeAlertIdx] || "Alignment is neutral today.";
-                                                const simple = typeof alert === 'object' ? alert.simple : alert;
-                                                const tech = typeof alert === 'object' ? alert.technical : null;
+                                                const allAlerts = [
+                                                    horoscope?.alerts?.primary,
+                                                    ...(horoscope?.alerts?.secondary || [])
+                                                ].filter(Boolean);
+                                                
+                                                const alert = (allAlerts[activeAlertIdx] || { simple: "Alignment is neutral today." }) as any;
+                                                const simple = alert.simple;
+                                                const tech = alert.technical;
                                                 return (
                                                     <>
                                                         <p className="text-base sm:text-xl text-foreground font-headline font-bold leading-relaxed line-clamp-2">{simple}</p>
@@ -441,7 +484,7 @@ export default function DailyHoroscopeCard({
                                     className="absolute inset-[-15%] rounded-full bg-secondary/15 blur-[30px]" 
                                 />
                                 
-                                <button onClick={() => openModal({ label: "General", score, info: horoscope?.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: currentScoreStyle.color, bg: currentScoreStyle.bg, colorHex: scoreHex, area: "general" })}
+                                <button onClick={() => openModal({ label: "General", score, info: horoscope?.tip?.text || horoscope?.tip || 'The stars guide you today.', icon: <Sparkles className="w-5 h-5" />, color: currentScoreStyle.color, bg: currentScoreStyle.bg, colorHex: scoreHex, area: "general" })}
                                     className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 cursor-pointer hover:scale-105 transition-all duration-500">
                                     <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(200,136,10,0.15)]" viewBox="0 0 72 72">
                                         <circle cx="36" cy="36" r="32" fill="none" stroke="currentColor" strokeWidth="5" className="text-surface-variant/20" />
@@ -471,14 +514,14 @@ export default function DailyHoroscopeCard({
                     <div className="px-6 sm:px-8 py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
                         {/* LEFT: Sign & Cramped Stats */}
                         <div className="md:col-span-2 flex flex-col justify-between">
-                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.sign || sign} characteristics and what they mean for me.`)}>
+                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.user?.sign || horoscope?.sign || sign} characteristics and what they mean for me.`)}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <TrendingUp className="w-4 h-4 text-secondary" />
                                     <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Personalized Forecast</span>
                                 </div>
                                 <div className="relative">
                                     <h3 className="text-2xl sm:text-4xl font-headline font-bold text-foreground leading-tight transition-all duration-500 group-hover/sign:opacity-0 group-hover/sign:-translate-y-2 flex items-baseline gap-3">
-                                        <span>{currentSign}</span>
+                                        <span>{horoscope?.user?.sign || currentSign}</span>
                                         {hindiSign && (
                                             <span className="text-lg sm:text-2xl text-foreground/40 font-medium">/ {hindiSign}</span>
                                         )}
@@ -493,7 +536,12 @@ export default function DailyHoroscopeCard({
 
                             {/* CRAMPED STATS GRID */}
                             <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-4 border-t border-white/5">
-                                {[{ l: 'Mood', v: horoscope?.mood || 'Neutral' }, { l: 'Lucky Color', v: horoscope?.lucky_color ?? '—', dot: luckyColorHex }, { l: 'Lucky #', v: String(horoscope?.lucky_number ?? '—') }, ...(horoscope?.dominant_planet ? [{ l: 'Dominant', v: horoscope.dominant_planet, sec: true }] : [])].map((s, i) => (
+                                {[
+                                    { l: 'Mood', v: horoscope?.mood?.value || horoscope?.mood || 'Neutral' }, 
+                                    { l: 'Lucky Color', v: (horoscope?.lucky?.color || horoscope?.lucky_color) ?? '—', dot: luckyColorHex }, 
+                                    { l: 'Lucky #', v: String((horoscope?.lucky?.number || horoscope?.lucky_number) ?? '—') }, 
+                                    ...(horoscope?.planetary?.dominant_planet || horoscope?.dominant_planet ? [{ l: 'Dominant', v: horoscope?.planetary?.dominant_planet || horoscope?.dominant_planet, sec: true }] : [])
+                                ].map((s, i) => (
                                     <button 
                                         key={i} 
                                         onClick={() => onSendMessage?.(`My ${s.l} today is ${s.v}. What does this mean for my day and how should I use it?`)}
@@ -533,11 +581,64 @@ export default function DailyHoroscopeCard({
                                         <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Ask Navi →</span>
                                     </div>
                                     <p className="text-[17px] sm:text-[20px] font-body font-medium italic leading-relaxed text-foreground/90 pr-4 group-hover:text-foreground transition-colors">
-                                        &quot;{horoscope?.tip || 'Stay mindful of your surroundings.'}&quot;
+                                        &quot;{horoscope?.tip?.text || horoscope?.tip || 'Stay mindful of your surroundings.'}&quot;
                                     </p>
                                 </div>
                         </button>
                     </div>
+
+                    {/* NEW SECTION: Cosmic Timing & Explanations */}
+                    {(horoscope?.time_triggers || horoscope?.astro_explanations?.items) && (
+                        <div className="px-6 sm:px-8 py-6 border-b border-white/5 bg-secondary/[0.01]">
+                            <div className="flex flex-col lg:flex-row gap-8">
+                                {/* Time Triggers */}
+                                {horoscope?.time_triggers && horoscope.time_triggers.length > 0 && (
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-1 h-3 bg-secondary rounded-full" />
+                                            <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Cosmic Timing</span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {horoscope.time_triggers.map((trigger, i) => (
+                                                <div key={i} className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                                                    <div className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${trigger.type === 'growth' ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                                                        {trigger.start} - {trigger.end}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-bold text-foreground/90 mb-0.5">{trigger.label}</p>
+                                                        <p className="text-[11px] text-foreground/40 leading-tight truncate">{trigger.advice}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Astro Explanations */}
+                                {horoscope?.astro_explanations?.items && horoscope.astro_explanations.items.length > 0 && (
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-1 h-3 bg-secondary rounded-full" />
+                                            <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Celestial Insights</span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {horoscope.astro_explanations.items.map((item, i) => (
+                                                <div key={i} className="group/item">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-secondary/30 mt-1.5 shrink-0 group-hover/item:bg-secondary transition-colors" />
+                                                        <div className="flex flex-col">
+                                                            <p className="text-xs font-medium text-foreground/70 leading-relaxed group-hover/item:text-foreground transition-colors">{item.simple}</p>
+                                                            <span className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest mt-1 opacity-0 group-hover/item:opacity-100 transition-opacity">{item.technical}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div className={`transition-all duration-700 ease-out flex-1 flex flex-col ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">

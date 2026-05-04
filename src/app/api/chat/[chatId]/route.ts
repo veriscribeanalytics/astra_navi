@@ -17,11 +17,13 @@ export async function GET(
     const session = await getAuthSession();
     if (!session) return unauthorizedResponse();
     const email = session.user?.email;
+    const accessToken = (session.user as any).accessToken;
 
     const { chatId } = await params;
 
     const response = await backendFetch(`/api/chats/${chatId}`, {
-      userEmail: email as string
+      userEmail: email as string,
+      accessToken: accessToken as string
     });
 
     const data = await response.json();
@@ -45,12 +47,14 @@ export async function DELETE(
     const session = await getAuthSession();
     if (!session) return unauthorizedResponse();
     const email = session.user?.email;
+    const accessToken = (session.user as any).accessToken;
 
     const { chatId } = await params;
 
     const response = await backendFetch(`/api/chats/${chatId}`, {
       method: 'DELETE',
-      userEmail: email as string
+      userEmail: email as string,
+      accessToken: accessToken as string
     });
 
     const data = await response.json();

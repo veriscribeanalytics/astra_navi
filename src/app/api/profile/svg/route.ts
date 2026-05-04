@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
         if (!session || !session.user || !session.user.email) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
+        const accessToken = (session.user as any).accessToken;
 
         const url = new URL(request.url);
         const style = url.searchParams.get("style") || "north";
@@ -15,7 +16,8 @@ export async function GET(request: NextRequest) {
 
         const backendRes = await backendFetch(`/api/profile/svg?style=${style}&theme=${theme}`, {
             method: "GET",
-            userEmail: session.user.email,
+            userEmail: session.user.email as string,
+            accessToken: accessToken as string
         });
 
         if (!backendRes.ok) {

@@ -15,9 +15,11 @@ export async function GET(req: Request) {
         const session = await getAuthSession();
         if (!session) return unauthorizedResponse();
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const response = await backendFetch('/api/user/profile', {
-            userEmail: email as string
+            userEmail: email as string,
+            accessToken: accessToken as string
         });
 
         const data = await response.json();
@@ -46,10 +48,12 @@ export async function PUT(req: Request) {
             }, { status: 400 });
         }
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const response = await backendFetch('/api/user/profile', {
             method: 'PUT',
             userEmail: email as string,
+            accessToken: accessToken as string,
             body: JSON.stringify(validation.data)
         });
 

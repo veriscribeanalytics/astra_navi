@@ -15,6 +15,7 @@ export async function GET(req: Request) {
         const session = await getAuthSession();
         if (!session) return unauthorizedResponse();
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const { searchParams } = new URL(req.url);
         let sign = searchParams.get('sign');
@@ -22,7 +23,8 @@ export async function GET(req: Request) {
         // 1. If no sign provided, fetch it from user profile
         if (!sign) {
             const profileRes = await backendFetch('/api/user/profile', {
-                userEmail: email as string
+                userEmail: email as string,
+                accessToken: accessToken as string
             });
             if (profileRes.ok) {
                 const profileData = await profileRes.json();
@@ -44,7 +46,8 @@ export async function GET(req: Request) {
         }
 
         const response = await backendFetch(url, {
-            userEmail: email as string
+            userEmail: email as string,
+            accessToken: accessToken as string
         });
 
         const data = await response.json();

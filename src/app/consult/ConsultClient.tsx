@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { clientFetch } from '@/lib/apiClient';
 import { 
   calculateAge, 
   getAgeGroup, 
@@ -82,7 +83,7 @@ const ConsultClient: React.FC = () => {
 
     setIsLoadingTree(true);
     try {
-      const res = await fetch(`/api/consult/tree?age=${calculatedAge}`);
+      const res = await clientFetch(`/api/consult/tree?age=${calculatedAge}`);
       const data = await res.json();
       if (data.tree) {
         setTree(data.tree);
@@ -106,7 +107,7 @@ const ConsultClient: React.FC = () => {
     setReadingText('');
 
     try {
-      const response = await fetch('/api/consult', {
+      const response = await clientFetch('/api/consult', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

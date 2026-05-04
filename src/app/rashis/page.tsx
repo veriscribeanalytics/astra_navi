@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
+import { clientFetch } from '@/lib/apiClient';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, BookOpen, Moon, Star, Activity, Compass, Flame, Leaf, Wind, Droplets, Mountain, Sparkles, Briefcase, Heart, Zap, TrendingUp, Info, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -49,7 +50,7 @@ export default function RashisPage() {
             setHoroscopeLoading(true);
             try {
                 // Fixed generic fetch for the selected rashi
-                const response = await fetch(`/api/horoscope-general?sign=${encodeURIComponent(selectedRashi.nameEn)}`);
+                const response = await clientFetch(`/api/horoscope-general?sign=${encodeURIComponent(selectedRashi.nameEn)}`);
                 if (response.ok) {
                     const data = await response.json();
                     setHoroscopeData(data);

@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
     const session = await getAuthSession();
     if (!session) return unauthorizedResponse();
     const email = session.user?.email;
+    const accessToken = (session.user as any).accessToken;
 
     const body = await req.json();
     const validation = ConsultRequestSchema.safeParse(body);
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       body: JSON.stringify({ ...validation.data, name: session.user?.name || 'Friend' }),
       userEmail: email as string,
+      accessToken: accessToken as string,
     });
 
     if (!response.ok) {

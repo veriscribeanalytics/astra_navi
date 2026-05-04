@@ -13,7 +13,13 @@ const optionalString = z.string().optional().or(emptyToUndefined);
 
 export const RegisterSchema = z.object({
   email: z.string().email("Invalid celestial address (email)"),
-  password: z.string().min(8, "Password must be at least 8 cycles (characters)"),
+  password: z
+    .string()
+    .min(10, "Password must be at least 10 cycles (characters)")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   name: optionalString,
   dob: optionalString,
   tob: optionalString,

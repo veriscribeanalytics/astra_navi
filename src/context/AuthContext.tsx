@@ -1,10 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signOut, getSession } from 'next-auth/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { clientFetch } from '@/lib/apiClient';
 
 interface User {
+// ... (omitting interface for brevity in this thought, but providing full replacement in tool call)
     id?: string;
     email: string;
     name?: string;
@@ -26,6 +28,8 @@ interface ExtendedSessionUser {
     email?: string | null;
     name?: string | null;
     image?: string | null;
+    accessToken?: string;
+    refreshToken?: string;
 }
 
 interface AuthContextType {
@@ -56,6 +60,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
             const sessionUser = session.user as ExtendedSessionUser;
             
+            // Handle NextAuth refresh errors
+            if ((sessionUser as any).error === "RefreshAccessTokenError") {
+                signOut({ callbackUrl: '/login?error=SessionExpired' });
+                return;
+            }
+            
             // Initial set from session
             if (sessionUser.email) {
                 // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -78,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Sync full profile from DB if we haven't fetched it yet this session
             if (sessionUser.email && !profileFetched && !fetchInProgressRef.current) {
                 fetchInProgressRef.current = true;
-                fetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
+                clientFetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.user) {
@@ -127,7 +137,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const logout = useCallback(async (callbackUrl: string = '/?logout=success') => {
-        await signOut({ callbackUrl });
+        try {
+            const currentSession = await getSession();
+            const refreshToken = (currentSession?.user as ExtendedSessionUser)?.refreshToken;
+
+            if (refreshToken) {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                }).catch(err => console.warn('Backend logout failed:', err));
+            }
+        } catch (err) {
+            console.error('Logout error:', err);
+        } finally {
+            await signOut({ callbackUrl });
+        }
     }, []);
 
     const showLoading = useCallback((message?: string, duration: number = 2000) => {

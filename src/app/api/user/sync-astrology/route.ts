@@ -13,12 +13,14 @@ export async function POST(req: Request) {
         const session = await getAuthSession();
         if (!session) return unauthorizedResponse();
         const email = session.user?.email;
+        const accessToken = (session.user as any).accessToken;
 
         const body = await req.json();
 
         const response = await backendFetch('/api/user/sync-astrology', {
             method: 'POST',
             userEmail: email as string,
+            accessToken: accessToken as string,
             body: JSON.stringify(body)
         });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { clientFetch } from "@/lib/apiClient";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -52,7 +53,7 @@ export default function KundliPage() {
         setPlanetDetails(null);
         setPlanetLoading(true);
         try {
-            const res = await fetch(`/api/planets/${planet.planet}`);
+            const res = await clientFetch(`/api/planets/${planet.planet}`);
             const result = await res.json();
             if (result.success && result.details) setPlanetDetails(result.details);
         } catch (err) { console.error("Failed to fetch planet details", err); }
@@ -62,7 +63,7 @@ export default function KundliPage() {
     const fetchAnalysis = useCallback(async (forceRefresh = false) => {
         try {
             if (forceRefresh) setRefreshing(true); else setLoading(true);
-            const res = await fetch('/api/analyze-full', { 
+            const res = await clientFetch('/api/analyze-full', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ force_refresh: forceRefresh }) 

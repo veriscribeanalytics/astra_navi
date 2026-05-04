@@ -7,9 +7,8 @@ import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import {
     Mail, Lock, User, Calendar, MapPin,
-    Clock, Smartphone, ArrowRight, Eye, EyeOff,
-    Sparkles, ShieldCheck, Orbit, Compass,
-    Star, Heart, MessageSquare, Globe
+    Clock, ArrowRight, Eye,
+    Sparkles, ShieldCheck, Orbit
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -39,7 +38,6 @@ const LoginContent = () => {
     const [pob, setPob] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phone, setPhone] = useState('');
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -70,10 +68,11 @@ const LoginContent = () => {
                 'EmailSignin': 'Check your email address.',
                 'CredentialsSignin': 'Invalid credentials.',
                 'SessionRequired': 'Please sign in to access this page.',
+                'SessionExpired': 'Your session has expired. Please sign in again.',
                 'default': 'An error occurred. Please try again.'
             };
 
-            const message = errorMessages[authError] || errorMessages.default;
+            const message = errorMessages[authError] || authError;
             const timer = setTimeout(() => {
                 error(message);
             }, 500);
@@ -95,7 +94,7 @@ const LoginContent = () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email, password, name, dob, tob, pob, phoneNumber: phone
+                        email, password, name, dob, tob, pob
                     }),
                 });
 
@@ -123,8 +122,9 @@ const LoginContent = () => {
                     router.push(callbackUrl);
                 }, 1500);
             }
-        } catch (err: any) {
-            error(err.message);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "An unexpected cosmic error occurred.";
+            error(message);
             setIsLoading(false);
         }
     };
@@ -142,7 +142,7 @@ const LoginContent = () => {
             setQuoteIndex((prev) => (prev + 1) % quotes.length);
         }, 5000);
         return () => clearInterval(interval);
-    }, []);
+    }, [quotes.length]);
 
     return (
         <div ref={containerRef} className="min-h-[calc(100dvh-var(--navbar-height,64px))] w-full flex items-center justify-center relative overflow-hidden font-body bg-transparent">
@@ -332,7 +332,7 @@ const LoginContent = () => {
                                     {isRegister ? (
                                         <>Already have an account? <span className="text-secondary ml-1">Sign In</span></>
                                     ) : (
-                                        <>Don't have an account? <span className="text-secondary ml-1">Create Account</span></>
+                                        <>Don&apos;t have an account? <span className="text-secondary ml-1">Create Account</span></>
                                     )}
                                 </button>
                         </div>

@@ -17,6 +17,7 @@ export async function PUT(
     const session = await getAuthSession();
     if (!session) return unauthorizedResponse();
     const email = session.user?.email;
+    const accessToken = (session.user as any).accessToken;
 
     const { chatId } = await params;
     const body = await req.json();
@@ -29,6 +30,7 @@ export async function PUT(
     const response = await backendFetch(`/api/chats/${chatId}/messages/${validation.data.messageId}/rate`, {
       method: 'PUT',
       userEmail: email as string,
+      accessToken: accessToken as string,
       body: JSON.stringify(validation.data)
     });
 

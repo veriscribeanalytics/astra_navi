@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     const session = await getAuthSession();
     if (!session) return unauthorizedResponse();
     const email = session.user?.email;
+    const accessToken = (session.user as any).accessToken;
 
     const body = await req.json();
     const validation = ChartRequestSchema.safeParse(body);
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
     const response = await backendFetch('/api/chart', {
       method: 'POST',
       userEmail: email as string,
+      accessToken: accessToken as string,
       body: JSON.stringify(validation.data),
     });
 
