@@ -16,7 +16,6 @@ import { JWT } from "next-auth/jwt";
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     const backendUrl = process.env.AI_BACKEND_URL;
-    console.log("[Auth] Refreshing access token via:", `${backendUrl}/api/auth/refresh`);
     const response = await fetch(`${backendUrl}/api/auth/refresh`, {
       method: "POST",
       headers: { 
@@ -33,8 +32,6 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       throw refreshedTokens;
     }
 
-    console.log("[Auth] Token refreshed successfully, expiresIn:", refreshedTokens.expiresIn);
-    
     // Guard: if expiresIn is missing or invalid, default to 1 hour
     const expiresIn = (typeof refreshedTokens.expiresIn === 'number' && refreshedTokens.expiresIn > 0) 
       ? refreshedTokens.expiresIn 
@@ -73,7 +70,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
             // Call backend login endpoint (PostgreSQL)
             const backendUrl = process.env.AI_BACKEND_URL;
-            console.log("[Auth] Attempting login proxy to:", `${backendUrl}/api/login`);
             const res = await fetch(`${backendUrl}/api/login`, {
               method: 'POST',
               headers: { 
@@ -100,8 +96,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 // Return error message for display
                 throw new Error(data.error || "Invalid credentials.");
             }
-            
-            console.log("[Auth] Login successful. User:", data.user?.email, "expiresIn:", data.expiresIn, "hasAccessToken:", !!data.accessToken, "hasRefreshToken:", !!data.refreshToken);
             
             // Guard: if expiresIn is missing or invalid, default to 1 hour
             const expiresIn = (typeof data.expiresIn === 'number' && data.expiresIn > 0) 
@@ -133,7 +127,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in
       if (user && account) {
-        console.log("[Auth] JWT: Initial sign-in for user:", user.email);
         return {
           ...token,
           id: user.id as string,
@@ -149,15 +142,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const timeUntilExpiry = expiresAt - now;
       
       if (now < expiresAt) {
-        // Token is still valid — but log if it's close to expiry
-        if (timeUntilExpiry < 60000) { // less than 1 minute
-          console.log(`[Auth] JWT: Token expiring soon (${Math.round(timeUntilExpiry / 1000)}s remaining)`);
-        }
         return token;
       }
 
       // Access token has expired, try to update it
-      console.log("[Auth] JWT: Token expired, attempting refresh...");
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
