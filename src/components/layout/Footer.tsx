@@ -6,6 +6,7 @@ import { useTranslation } from '@/hooks';
 
 const Footer = () => {
     const { t } = useTranslation();
+    const currentYear = new Date().getFullYear();
     
     return (
         <footer className="w-full pt-8 sm:pt-14 pb-6 sm:pb-8 px-4 sm:px-8 lg:px-12 bg-background border-t border-secondary/10 relative z-20">
@@ -79,7 +80,7 @@ const Footer = () => {
                     className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-body font-bold"
                     style={{ color: 'rgba(212, 160, 23, 0.5)' }}
                 >
-                    © {new Date().getFullYear()} Astra Navi. {t('footer.copyright')}
+                    © {currentYear} Astra Navi. {t('footer.copyright')}
                 </p>
             </div>
         </footer>

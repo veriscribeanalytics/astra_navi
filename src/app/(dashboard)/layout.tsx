@@ -1,25 +1,18 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 
+/**
+ * Dashboard Layout
+ * 
+ * Note: Route protection is handled by middleware in src/auth.config.ts.
+ * This layout provides the shared shell for all dashboard pages.
+ */
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoggedIn } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      router.push('/login');
-    }
-  }, [isLoggedIn, router]);
-
-  if (!isLoggedIn) return null; // Avoid flicker
-
   return (
     <div className="dashboard-shell">
       {children}

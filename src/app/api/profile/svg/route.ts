@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch } from "@/lib/backendClient";
-import { auth } from "@/lib/auth";
+import { getAuthContext } from "@/lib/session";
 
 export async function GET(request: NextRequest) {
     try {
-        const session = await auth();
-        if (!session || !session.user || !session.user.email) {
+        const authContext = await getAuthContext(request);
+        if (!authContext || !authContext.user || !authContext.user.email) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-        const accessToken = (session.user as any).accessToken;
+        const { user, accessToken } = authContext;
 
         const url = new URL(request.url);
         const style = url.searchParams.get("style") || "north";
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
         const backendRes = await backendFetch(`/api/profile/svg?style=${style}&theme=${theme}`, {
             method: "GET",
-            userEmail: session.user.email as string,
+            userEmail: user.email as string,
             accessToken: accessToken as string
         });
 

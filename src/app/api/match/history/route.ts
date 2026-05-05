@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthSession, unauthorizedResponse } from '@/lib/session';
+import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
 
 /**
@@ -10,10 +10,10 @@ import { backendFetch } from '@/lib/backendClient';
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await getAuthSession();
-    if (!session) return unauthorizedResponse();
-    const email = session.user?.email;
-    const accessToken = (session.user as any).accessToken;
+    const authContext = await getAuthContext(req);
+    if (!authContext) return unauthorizedResponse();
+    const { user, accessToken } = authContext;
+    const email = user?.email;
 
     const { searchParams } = new URL(req.url);
     const page = searchParams.get('page') || '1';

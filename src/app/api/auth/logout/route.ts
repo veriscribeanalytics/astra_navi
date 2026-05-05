@@ -1,37 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { backendFetch } from '@/lib/backendClient';
-import { getAuthSession } from '@/lib/session';
+import { NextResponse, NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { backendFetch } from "@/lib/backendClient";
 
 /**
- * Logout API Route (Proxy Mode)
- * 
- * Proxies logout requests to the FastAPI backend to invalidate tokens.
+ * Server-side logout route.
+ * Extracts the refresh token from the JWT (server-only) and 
+ * notifies the backend to invalidate it.
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { refreshToken } = body;
+    const token = await getToken({ req });
     
-    // We might also need the accessToken for Bearer auth if the backend requires it
-    const session = await getAuthSession();
-    const accessToken = (session?.user as any)?.accessToken;
-
-    const response = await backendFetch('/api/auth/logout', {
-      method: 'POST',
-      accessToken: accessToken as string, // Include accessToken if available
-      body: JSON.stringify({ refreshToken })
-    });
-
-    // Even if backend logout fails, we want the frontend to proceed with its own logout
-    // but we return the status for debugging.
-    if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        console.warn('Backend logout warning:', data.error || response.statusText);
+    if (token?.refreshToken) {
+      // Notify backend to invalidate the refresh token
+      await backendFetch('/api/auth/logout', {
+        method: 'POST',
+        accessToken: token.accessToken as string,
+        body: JSON.stringify({ refreshToken: token.refreshToken })
+      }).catch(err => console.warn('[Logout Route] Backend logout failed:', err));
     }
-
-    return NextResponse.json({ message: "Logged out successfully" });
+    
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Logout proxy error:', error);
-    return NextResponse.json({ message: "Logged out locally" }, { status: 200 });
+    console.error("[Logout Route] Error:", error);
+    return NextResponse.json({ success: false }, { status: 500 });
   }
 }

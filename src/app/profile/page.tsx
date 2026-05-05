@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ProfileClient from './ProfileClient';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'My Celestial Profile | AstraNavi',
@@ -7,5 +8,13 @@ export const metadata: Metadata = {
 };
 
 export default function ProfilePage() {
-  return <ProfileClient />;
+  return (
+    <Suspense fallback={
+      <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+        <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+      </div>
+    }>
+      <ProfileClient />
+    </Suspense>
+  );
 }

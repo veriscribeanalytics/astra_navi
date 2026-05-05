@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAuthSession } from '@/lib/session';
+import { getAuthContext } from '@/lib/session';
 import { DailyHoroscopeSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
 
@@ -16,10 +16,10 @@ export async function GET(req: Request) {
 
         // 1. If no sign provided, try to get it from session
         if (!sign) {
-            const session = await getAuthSession();
-            if (session?.user?.email) {
-                const email = session.user.email;
-                const accessToken = (session.user as any).accessToken;
+            const authContext = await getAuthContext(req);
+            if (authContext) {
+                const { user, accessToken } = authContext;
+                const email = user.email;
                 const profileRes = await backendFetch('/api/user/profile', {
                     userEmail: email as string,
                     accessToken: accessToken as string

@@ -1,4 +1,4 @@
-import { redis } from '@/lib/redis';
+import { getRedis } from '@/lib/redis';
 
 export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -17,7 +17,7 @@ export async function checkRateLimit(
   const now = Date.now();
   
   try {
-    const results = await redis.pipeline()
+    const results = await getRedis().pipeline()
       .incr(key)
       .pttl(key)
       .exec();
@@ -27,7 +27,7 @@ export async function checkRateLimit(
 
     // If key is new, set expiry
     if (count === 1 || pttl < 0) {
-      await redis.pexpire(key, config.windowMs);
+      await getRedis().pexpire(key, config.windowMs);
       pttl = config.windowMs;
     }
 

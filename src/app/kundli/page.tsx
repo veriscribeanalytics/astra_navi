@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import KundliClient from './KundliClient';
 import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
 import { BookOpen, Sparkles, Compass, Star } from 'lucide-react';
 
-export default function KundliPage() {
+function KundliContent() {
     const { isLoggedIn } = useAuth();
 
     if (!isLoggedIn) {
@@ -47,4 +47,16 @@ export default function KundliPage() {
     }
 
     return <KundliClient />;
+}
+
+export default function KundliPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+                <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+            </div>
+        }>
+            <KundliContent />
+        </Suspense>
+    );
 }

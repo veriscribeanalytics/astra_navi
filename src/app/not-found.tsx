@@ -2,6 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { Sparkles, Home, ArrowLeft } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '404 - Page Not Found | AstraNavi',
+};
 
 export default function NotFound() {
   return (

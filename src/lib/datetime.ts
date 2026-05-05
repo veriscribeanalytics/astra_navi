@@ -52,8 +52,13 @@ export function formatDisplayDateTime(date: Date | string): string {
 
 /**
  * Format relative time (e.g., "2 hours ago", "just now")
+ * @param date - Date to format
+ * @param strings - Optional i18n strings for localization
  */
-export function formatRelativeTime(date: Date | string): string {
+export function formatRelativeTime(
+  date: Date | string,
+  strings?: { justNow?: string; minutesAgo?: string; hoursAgo?: string; daysAgo?: string }
+): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = getCurrentDateTime();
   const diffMs = now.getTime() - d.getTime();
@@ -62,10 +67,10 @@ export function formatRelativeTime(date: Date | string): string {
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
 
-  if (diffSec < 60) return 'just now';
-  if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? 'minute' : 'minutes'} ago`;
-  if (diffHour < 24) return `${diffHour} ${diffHour === 1 ? 'hour' : 'hours'} ago`;
-  if (diffDay < 7) return `${diffDay} ${diffDay === 1 ? 'day' : 'days'} ago`;
+  if (diffSec < 60) return strings?.justNow || 'just now';
+  if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? (strings?.minutesAgo?.replace('{n}', '1') || 'minute ago') : (strings?.minutesAgo?.replace('{n}', String(diffMin)) || `${diffMin} minutes ago`)}`;
+  if (diffHour < 24) return `${diffHour} ${diffHour === 1 ? (strings?.hoursAgo?.replace('{n}', '1') || 'hour ago') : (strings?.hoursAgo?.replace('{n}', String(diffHour)) || `${diffHour} hours ago`)}`;
+  if (diffDay < 7) return `${diffDay} ${diffDay === 1 ? (strings?.daysAgo?.replace('{n}', '1') || 'day ago') : (strings?.daysAgo?.replace('{n}', String(diffDay)) || `${diffDay} days ago`)}`;
   
   return formatDisplayDate(d);
 }
@@ -73,7 +78,7 @@ export function formatRelativeTime(date: Date | string): string {
 /**
  * Format chat timestamp (shows time if today, date otherwise)
  */
-export function formatChatTimestamp(date: Date | string): string {
+export function formatChatTimestamp(date: Date | string, yesterdayLabel?: string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = getCurrentDateTime();
   
@@ -88,7 +93,7 @@ export function formatChatTimestamp(date: Date | string): string {
   const isYesterday = d.toDateString() === yesterday.toDateString();
   
   if (isYesterday) {
-    return 'Yesterday';
+    return yesterdayLabel || 'Yesterday';
   }
   
   return formatDisplayDate(d);

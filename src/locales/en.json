@@ -193,6 +193,11 @@
     "minutesAgo": "m ago",
     "hoursAgo": "h ago",
     "daysAgo": "d ago",
+    "yesterday": "Yesterday",
+    "justNow": "just now",
+    "minutesAgo": "{n} minutes ago",
+    "hoursAgo": "{n} hours ago",
+    "daysAgo": "{n} days ago",
     "systemHub": "System Hub",
     "cosmicPortals": "Cosmic Portals",
     "janamKundli": "Janam Kundli",
@@ -331,7 +336,14 @@
     "guestWelcome": "Namaste ✦ You're in Preview Mode. To consult Navi and receive deep Vedic analysis, please log in to your account.",
     "guestLoginRequired": "Consulting Navi requires an account. Please log in to receive your full Vedic analysis and planetary insights.",
     "naviWelcome": "Namaste ✦ I'm Navi. Ask me anything.",
-    "newConversation": "New conversation"
+    "newConversation": "New conversation",
+    "errorSending": "Failed to send message. Please try again.",
+    "ratingSuccess": "Rating saved. Thank you for your feedback!",
+    "ratingError": "Failed to save rating. Please try again.",
+    "deleteSuccess": "Conversation deleted.",
+    "deleteError": "Failed to delete conversation. Please try again.",
+    "workInProgressTitle": "Work in Progress",
+    "workInProgressDesc": "This feature is currently under development. We're working hard to bring you an amazing experience!"
   },
   "signs": {
     "aries": "Aries",

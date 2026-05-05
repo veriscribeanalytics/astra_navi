@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAuthSession, unauthorizedResponse } from '@/lib/session';
+import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { ProfileUpdateSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
 
@@ -12,10 +12,10 @@ import { backendFetch } from '@/lib/backendClient';
 
 export async function GET(req: Request) {
     try {
-        const session = await getAuthSession();
-        if (!session) return unauthorizedResponse();
-        const email = session.user?.email;
-        const accessToken = (session.user as any).accessToken;
+        const authContext = await getAuthContext(req);
+        if (!authContext) return unauthorizedResponse();
+        const { user, accessToken } = authContext;
+        const email = user?.email;
 
         const response = await backendFetch('/api/user/profile', {
             userEmail: email as string,
@@ -37,8 +37,10 @@ export async function GET(req: Request) {
 
 export async function PUT(req: Request) {
     try {
-        const session = await getAuthSession();
-        if (!session) return unauthorizedResponse();
+        const authContext = await getAuthContext(req);
+        if (!authContext) return unauthorizedResponse();
+        const { user, accessToken } = authContext;
+        const email = user?.email;
 
         const body = await req.json();
         const validation = ProfileUpdateSchema.safeParse(body);
@@ -47,8 +49,6 @@ export async function PUT(req: Request) {
                 error: validation.error.issues[0].message
             }, { status: 400 });
         }
-        const email = session.user?.email;
-        const accessToken = (session.user as any).accessToken;
 
         const response = await backendFetch('/api/user/profile', {
             method: 'PUT',

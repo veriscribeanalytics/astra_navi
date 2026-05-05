@@ -28,7 +28,6 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [deviceTier, setDeviceTier] = useState<DeviceTier>('mid');
-  const [mounted, setMounted] = useState(false);
 
   // Initialize theme and device tier on mount
   useEffect(() => {
@@ -47,7 +46,6 @@ export function ThemeProvider({
     const initialTheme = storedTheme || getSystemTheme();
     
     setThemeState(initialTheme);
-    setMounted(true);
 
     // Sync theme across tabs
     const handleStorageChange = (e: StorageEvent) => {
@@ -85,11 +83,6 @@ export function ThemeProvider({
     toggleTheme,
     deviceTier,
   };
-
-  // Prevent flash by not rendering until mounted
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <ThemeContext.Provider value={value}>

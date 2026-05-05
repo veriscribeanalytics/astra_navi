@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from '@/hooks';
 import { Globe, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 const LanguagePicker: React.FC = () => {
   const { language, setLanguage, availableLanguages } = useTranslation();

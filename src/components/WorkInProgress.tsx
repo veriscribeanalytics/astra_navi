@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Button from './ui/Button';
 import { Construction, ArrowLeft, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/hooks';
 
 interface WorkInProgressProps {
     title?: string;
@@ -10,10 +11,13 @@ interface WorkInProgressProps {
 }
 
 export default function WorkInProgress({ 
-    title = "Work in Progress", 
-    description = "This feature is currently under development. We're working hard to bring you an amazing experience!" 
+    title, 
+    description 
 }: WorkInProgressProps) {
     const router = useRouter();
+    const { t } = useTranslation();
+    const displayTitle = title || t('chat.workInProgressTitle');
+    const displayDescription = description || t('chat.workInProgressDesc');
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -24,11 +28,11 @@ export default function WorkInProgress({
                 </div>
 
                 <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground mb-4 tracking-tight">
-                    {title}
+                    {displayTitle}
                 </h1>
 
                 <p className="text-lg text-foreground/60 mb-8 max-w-xl mx-auto leading-relaxed">
-                    {description}
+                    {displayDescription}
                 </p>
 
                 <div className="flex items-center justify-center gap-3 text-sm text-secondary/70 mb-12">

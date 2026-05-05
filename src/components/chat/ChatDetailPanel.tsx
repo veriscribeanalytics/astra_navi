@@ -9,16 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useChat } from '@/context/ChatContext';
 import { X, Lock } from 'lucide-react';
 
-const topicPills = [
-  { icon: '💼', label: 'Career & Finance' },
-  { icon: '💑', label: 'Love & Marriage' },
-  { icon: '🏠', label: 'Property & Home' },
-  { icon: '🌿', label: 'Health & Wellness' },
-  { icon: '✈️', label: 'Travel & Relocation' },
-  { icon: '📿', label: 'Remedies & Mantras' },
-  { icon: '📅', label: 'Muhurat & Timing' },
-  { icon: '🪐', label: 'Current Transits' },
-];
+import { topicPills } from '@/data/topicPills';
 
 /* ---------- Chart Rating Display ---------- */
 const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {

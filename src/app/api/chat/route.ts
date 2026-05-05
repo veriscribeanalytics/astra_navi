@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthSession, unauthorizedResponse } from '@/lib/session';
+import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { CreateChatSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
 
@@ -11,10 +11,10 @@ import { backendFetch } from '@/lib/backendClient';
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await getAuthSession();
-    if (!session) return unauthorizedResponse();
-    const email = session.user?.email;
-    const accessToken = (session.user as any).accessToken;
+    const authContext = await getAuthContext(req);
+    if (!authContext) return unauthorizedResponse();
+    const { user, accessToken } = authContext;
+    const email = user?.email;
 
     const limit = req.nextUrl.searchParams.get('limit') || '50';
     const cursor = req.nextUrl.searchParams.get('cursor') || '';
@@ -45,10 +45,10 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await getAuthSession();
-    if (!session) return unauthorizedResponse();
-    const email = session.user?.email;
-    const accessToken = (session.user as any).accessToken;
+    const authContext = await getAuthContext(req);
+    if (!authContext) return unauthorizedResponse();
+    const { user, accessToken } = authContext;
+    const email = user?.email;
 
     const body = await req.json();
     const validation = CreateChatSchema.safeParse(body);

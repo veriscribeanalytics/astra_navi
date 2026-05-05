@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { clientFetch } from '@/lib/apiClient';
 import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, Briefcase, Activity, DollarSign, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks';
 

@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/auth.config";
+import { JWT } from "next-auth/jwt";
 
 /**
  * NextAuth Configuration (PostgreSQL/JWT Mode)
@@ -12,7 +13,7 @@ import { authConfig } from "@/auth.config";
  * Updated to support Access/Refresh Token architecture.
  */
 
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     const backendUrl = process.env.AI_BACKEND_URL;
     const response = await fetch(`${backendUrl}/api/auth/refresh`, {
@@ -118,10 +119,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user && account) {
         return {
           ...token,
-          id: user.id,
-          accessToken: (user as any).accessToken,
-          refreshToken: (user as any).refreshToken,
-          accessTokenExpires: (user as any).accessTokenExpires,
+          id: user.id as string,
+          accessToken: user.accessToken as string,
+          refreshToken: user.refreshToken as string,
+          accessTokenExpires: user.accessTokenExpires as number,
         };
       }
 
@@ -135,14 +136,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).accessToken = token.accessToken as string;
-        (session.user as any).refreshToken = token.refreshToken as string;
-        (session.user as any).error = token.error;
+        session.user.id = token.id;
+        session.user.error = token.error;
       }
       return session;
     },
     ...authConfig.callbacks,
   },
 });
-

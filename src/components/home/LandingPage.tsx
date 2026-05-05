@@ -211,6 +211,7 @@ export default function LandingPage() {
                             height={24}
                             style={{ width: 'auto', height: 'auto' }}
                             draggable={false}
+                            priority
                         />
                     </div>
                     <div className="flex flex-col gap-0.5">
@@ -378,10 +379,10 @@ export default function LandingPage() {
                                         </div>
                                         <div className="space-y-3">
                                             <div className="max-w-[85%] self-start p-3 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 text-[10px] text-white/70">
-                                                "How does Jupiter's transit affect my career this month?"
+                                                &quot;How does Jupiter&apos;s transit affect my career this month?&quot;
                                             </div>
                                             <div className="max-w-[90%] self-end ml-auto p-3 rounded-2xl rounded-tr-none bg-blue-500/20 border border-blue-500/30 text-[10px] text-blue-100 italic">
-                                                "Jupiter in your 10th house brings professional expansion. Focus on leadership..."
+                                                &quot;Jupiter in your 10th house brings professional expansion. Focus on leadership...&quot;
                                             </div>
                                         </div>
                                         <div className="mt-auto h-9 w-full rounded-full bg-white/5 border border-white/10 flex items-center px-4 justify-between">

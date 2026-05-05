@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthSession } from '@/lib/session';
+import { getAuthContext } from '@/lib/session';
 import { MatchRequestSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
 
@@ -11,9 +11,9 @@ import { backendFetch } from '@/lib/backendClient';
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await getAuthSession();
-    const email = session?.user?.email;
-    const accessToken = (session?.user as any)?.accessToken;
+    const authContext = await getAuthContext(req);
+    const email = authContext?.user?.email;
+    const accessToken = authContext?.accessToken;
 
     const body = await req.json();
     const validation = MatchRequestSchema.safeParse(body);

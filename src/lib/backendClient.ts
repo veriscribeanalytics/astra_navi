@@ -5,6 +5,10 @@
  * when calling the FastAPI backend.
  */
 
+if (typeof window !== 'undefined') {
+  throw new Error('backendClient can only be used on the server.');
+}
+
 const BACKEND_URL = process.env.AI_BACKEND_URL;
 const API_KEY = process.env.AI_BACKEND_API_KEY || '';
 

@@ -1,14 +1,22 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import LandingPage from "@/components/home/LandingPage";
-import DashboardHome from "@/components/dashboard/DashboardHome";
+import dynamic from 'next/dynamic';
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from '@/hooks';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
-export default function Home() {
+const LandingPage = dynamic(() => import('@/components/home/LandingPage'));
+const DashboardHome = dynamic(() => import('@/components/dashboard/DashboardHome'), {
+  loading: () => (
+    <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+      <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+    </div>
+  ),
+});
+
+function HomeContent() {
   const { isLoggedIn, isLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -50,3 +58,14 @@ export default function Home() {
   );
 }
 
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+        <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
+  );
+}

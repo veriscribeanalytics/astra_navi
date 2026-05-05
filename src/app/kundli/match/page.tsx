@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import MatchClient from './MatchClient';
 import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
 import { Heart, Users, Sparkles, Shield } from 'lucide-react';
 
-export default function MatchPage() {
+function MatchContent() {
     const { isLoggedIn } = useAuth();
 
     if (!isLoggedIn) {
@@ -50,5 +50,17 @@ export default function MatchPage() {
         <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] py-10 sm:py-20 px-4">
             <MatchClient />
         </div>
+    );
+}
+
+export default function MatchPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+                <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+            </div>
+        }>
+            <MatchContent />
+        </Suspense>
     );
 }

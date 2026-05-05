@@ -134,7 +134,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-lg bg-surface border border-outline-variant/30 rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[580px]">
+      <div className="relative w-full max-w-lg bg-surface border border-outline-variant/30 rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-5 flex items-center justify-between border-b border-outline-variant/10 flex-shrink-0">
           <h3 className="text-lg font-headline font-bold text-on-surface">Share feedback</h3>

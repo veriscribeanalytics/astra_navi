@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
+import { clientFetch } from '@/lib/apiClient';
 import { 
     User, Calendar, Clock, MapPin, 
     Save, ArrowLeft, RotateCcw
@@ -17,7 +18,7 @@ export default function ProfileSettingsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const isNewRegistration = searchParams?.get('registered') === 'true';
-    const { showToast, ToastContainer, success, error } = useToast();
+    const { ToastContainer, success, error } = useToast();
     const [formData, setFormData] = useState({
         name: '',
         dob: '',
@@ -153,10 +154,9 @@ export default function ProfileSettingsPage() {
         showLoading("Updating your profile...", 2000);
         
         try {
-            const response = await fetch('/api/user/profile', {
+            const response = await clientFetch('/api/user/profile', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData), // Session handles email now
+                body: JSON.stringify(formData), 
             });
 
             const data = await response.json();
@@ -170,6 +170,11 @@ export default function ProfileSettingsPage() {
             success('Profile updated successfully!');
             setHasChanges(false);
             
+            // Phase 7.2: Trigger astrology recalculation
+            fetch('/api/user/sync-astrology', { method: 'POST' }).catch(err =>
+                console.warn('Astrology sync failed:', err)
+            );
+
             setTimeout(() => {
                 showLoading("", 0);
                 if (isNewRegistration) {
@@ -301,7 +306,7 @@ export default function ProfileSettingsPage() {
                             label="Phone Number"
                             placeholder="+1234567890" 
                             type="tel"
-                            icon={<MapPin className="w-4 h-4 opacity-0" />} // Placeholder icon, we can use Phone if available, but for now just basic text or no icon.
+                            icon={<MapPin className="w-4 h-4 opacity-0" />} 
                             value={formData.phoneNumber}
                             onChange={(e) => {
                                 const value = e.target.value;
@@ -312,10 +317,11 @@ export default function ProfileSettingsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <div className="space-y-1">
-                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                <label htmlFor="gender" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
                                     Gender
                                 </label>
                                 <select 
+                                    id="gender"
                                     className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
                                     value={formData.gender}
                                     onChange={(e) => setFormData({...formData, gender: e.target.value})}
@@ -328,10 +334,11 @@ export default function ProfileSettingsPage() {
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                <label htmlFor="maritalStatus" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
                                     Marital Status
                                 </label>
                                 <select 
+                                    id="maritalStatus"
                                     className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
                                     value={formData.maritalStatus}
                                     onChange={(e) => setFormData({...formData, maritalStatus: e.target.value})}
@@ -345,10 +352,11 @@ export default function ProfileSettingsPage() {
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
+                                <label htmlFor="occupation" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
                                     Occupation
                                 </label>
                                 <select 
+                                    id="occupation"
                                     className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
                                     value={formData.occupation}
                                     onChange={(e) => setFormData({...formData, occupation: e.target.value})}

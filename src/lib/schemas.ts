@@ -90,7 +90,7 @@ export const PersonDetailSchema = z.object({
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date"),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
   place: z.string().min(2, "Place is required").max(200),
-  gender: z.enum(["male", "female"]).optional().default("male"),
+  gender: z.enum(["male", "female", "other", "Not Specified"]).optional().default("Not Specified"),
 });
 
 export const MatchRequestSchema = z.object({
@@ -105,7 +105,7 @@ export const ConsultRequestSchema = z.object({
   birth_time: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
   birth_place: z.string().min(2).max(200),
   name: z.string().max(100).default("Friend"),
-  language: z.string().max(20).default("english"),
+  language: z.string().max(20).default("en"),
   primary_category: z.string().max(50),
   secondary_category: z.string().max(50),
   final_question: z.string().max(200),

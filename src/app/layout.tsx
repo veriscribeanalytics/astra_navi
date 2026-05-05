@@ -11,66 +11,87 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/hooks/useToast";
+import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["400", "700"],
   style: ["normal", "italic"],
+  display: 'swap',
 });
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
 });
 
+// Non-latin fonts - explicitly set display swap and preload false if possible 
+// to avoid blocking the main latin content
 const notoDevanagari = Noto_Sans_Devanagari({
   variable: "--font-noto-devanagari",
   subsets: ["devanagari"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoTamil = Noto_Sans_Tamil({
   variable: "--font-noto-tamil",
   subsets: ["tamil"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoTelugu = Noto_Sans_Telugu({
   variable: "--font-noto-telugu",
   subsets: ["telugu"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoKannada = Noto_Sans_Kannada({
   variable: "--font-noto-kannada",
   subsets: ["kannada"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoBengali = Noto_Sans_Bengali({
   variable: "--font-noto-bengali",
   subsets: ["bengali"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoGujarati = Noto_Sans_Gujarati({
   variable: "--font-noto-gujarati",
   subsets: ["gujarati"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoMalayalam = Noto_Sans_Malayalam({
   variable: "--font-noto-malayalam",
   subsets: ["malayalam"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 const notoGurmukhi = Noto_Sans_Gurmukhi({
   variable: "--font-noto-gurmukhi",
   subsets: ["gurmukhi"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -95,7 +116,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <AsyncStylesheet href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

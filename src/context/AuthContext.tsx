@@ -1,12 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useSession, signOut, getSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { clientFetch } from '@/lib/apiClient';
 
 interface User {
-// ... (omitting interface for brevity in this thought, but providing full replacement in tool call)
     id?: string;
     email: string;
     name?: string;
@@ -23,20 +22,11 @@ interface User {
     astrologyData?: Record<string, unknown>;
 }
 
-interface ExtendedSessionUser {
-    id?: string;
-    email?: string | null;
-    name?: string | null;
-    image?: string | null;
-    accessToken?: string;
-    refreshToken?: string;
-}
-
 interface AuthContextType {
     isLoggedIn: boolean;
     isLoading: boolean;
     user: User | null;
-    login: (email?: string, profile?: Partial<User>) => void; // Keep for interface compatibility, but we use signIn elsewhere
+    login: (email?: string, profile?: Partial<User>) => void;
     logout: (callbackUrl?: string) => Promise<void>;
     showLoading: (message?: string, duration?: number) => void;
     setLoadingState: (state: boolean) => void;
@@ -52,102 +42,105 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState<string | undefined>(undefined);
     const fetchInProgressRef = useRef(false);
+    const prevEmailRef = useRef<string | null>(null);
+    const profileRetryCount = useRef(0);
+    const MAX_PROFILE_RETRIES = 2;
 
     const isLoggedIn = status === 'authenticated';
     const isSessionLoading = status === 'loading';
 
     useEffect(() => {
         if (session?.user) {
-            const sessionUser = session.user as ExtendedSessionUser;
+            const sessionUser = session.user;
             
             // Handle NextAuth refresh errors
-            if ((sessionUser as any).error === "RefreshAccessTokenError") {
+            if (sessionUser.error === "RefreshAccessTokenError") {
                 signOut({ callbackUrl: '/login?error=SessionExpired' });
                 return;
             }
             
             // Initial set from session
             if (sessionUser.email) {
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setUser(prev => {
-                    if (prev && prev.email === sessionUser.email) return prev;
-                    return {
+                // If it's a different user, reset profile state
+                if (prevEmailRef.current && prevEmailRef.current !== sessionUser.email) {
+                    setProfileFetched(false);
+                    fetchInProgressRef.current = false;
+                    setUser({
                         id: sessionUser.id,
                         email: sessionUser.email!,
                         name: sessionUser.name || undefined,
-                    };
-                });
+                    });
+                } else if (!user) {
+                    setUser({
+                        id: sessionUser.id,
+                        email: sessionUser.email!,
+                        name: sessionUser.name || undefined,
+                    });
+                }
+                
+                prevEmailRef.current = sessionUser.email;
 
-                // Reset profileFetched if it's a different user
-                if (user && user.email !== sessionUser.email) {
-                    setProfileFetched(false);
-                    fetchInProgressRef.current = false;
+                // Sync full profile from DB if we haven't fetched it yet this session
+                if (!profileFetched && !fetchInProgressRef.current) {
+                    fetchInProgressRef.current = true;
+                    clientFetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.user) {
+                                setUser(prev => {
+                                    if (!prev) return data.user;
+                                    
+                                    const isSame = 
+                                        prev.email === data.user.email && 
+                                        prev.moonSign === data.user.moonSign &&
+                                        prev.sunSign === data.user.sunSign &&
+                                        prev.lagnaSign === data.user.lagnaSign &&
+                                        prev.name === data.user.name &&
+                                        JSON.stringify(prev.astrologyData) === JSON.stringify(data.user.astrologyData);
+                                    
+                                    return isSame ? prev : { ...prev, ...data.user };
+                                });
+                            }
+                            setProfileFetched(true);
+                            profileRetryCount.current = 0;
+                        })
+                        .catch(err => {
+                            console.error('Profile sync error:', err);
+                            profileRetryCount.current++;
+                            if (profileRetryCount.current >= MAX_PROFILE_RETRIES) {
+                                setProfileFetched(true); 
+                            }
+                        })
+                        .finally(() => {
+                            fetchInProgressRef.current = false;
+                        });
                 }
             }
-
-            // Sync full profile from DB if we haven't fetched it yet this session
-            if (sessionUser.email && !profileFetched && !fetchInProgressRef.current) {
-                fetchInProgressRef.current = true;
-                clientFetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.user) {
-                            setUser(prev => {
-                                // Deep comparison to avoid unnecessary state updates
-                                if (!prev) return data.user;
-                                
-                                const isSame = 
-                                    prev.email === data.user.email && 
-                                    prev.moonSign === data.user.moonSign &&
-                                    prev.sunSign === data.user.sunSign &&
-                                    prev.lagnaSign === data.user.lagnaSign &&
-                                    prev.name === data.user.name &&
-                                    JSON.stringify(prev.astrologyData) === JSON.stringify(data.user.astrologyData);
-                                
-                                return isSame ? prev : { ...prev, ...data.user };
-                            });
-                        }
-                        setProfileFetched(true);
-                    })
-                    .catch(err => {
-                        console.error('Profile sync error:', err);
-                        setProfileFetched(true); // Don't retry indefinitely on error
-                    })
-                    .finally(() => {
-                        fetchInProgressRef.current = false;
-                    });
-            }
         } else if (status === 'unauthenticated') {
-            setUser(prev => prev === null ? prev : null);
-            setProfileFetched(prev => prev === false ? prev : false);
+            setUser(null);
+            setProfileFetched(false);
             fetchInProgressRef.current = false;
+            prevEmailRef.current = null;
+            profileRetryCount.current = 0;
         }
-    }, [session, status, profileFetched, user]);
+    }, [session, status, profileFetched]); // Removed user from dependencies
 
     const login = useCallback((email?: string, profile?: Partial<User>) => {
-        // This is now primarily handled by NextAuth signIn() in LoginPage
-        // We keep it for local state synchronization if needed
         if (email) {
             setUser(prev => {
-                const isSame = prev && prev.email === email && 
-                               Object.keys(profile || {}).every(k => (prev as unknown as Record<string, unknown>)[k] === (profile as Record<string, unknown>)[k]);
-                return isSame ? prev : (prev ? { ...prev, email, ...profile } : { email, ...profile } as User);
+                if (!prev) return { email, ...profile } as User;
+                const isSame = prev.email === email && 
+                    Object.keys(profile || {}).every(k => prev[k as keyof User] === (profile as Record<string, unknown>)[k]);
+                return isSame ? prev : { ...prev, email, ...profile };
             });
         }
     }, []);
 
     const logout = useCallback(async (callbackUrl: string = '/?logout=success') => {
         try {
-            const currentSession = await getSession();
-            const refreshToken = (currentSession?.user as ExtendedSessionUser)?.refreshToken;
-
-            if (refreshToken) {
-                await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ refreshToken })
-                }).catch(err => console.warn('Backend logout failed:', err));
-            }
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+            }).catch(err => console.warn('Backend logout call failed:', err));
         } catch (err) {
             console.error('Logout error:', err);
         } finally {
@@ -168,7 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const refreshUser = useCallback((updates: Partial<User>) => {
         setUser(prev => {
             if (!prev) return null;
-            const isSame = Object.keys(updates).every(k => (prev as unknown as Record<string, unknown>)[k] === (updates as Record<string, unknown>)[k]);
+            const isSame = Object.keys(updates).every(k => prev[k as keyof User] === updates[k as keyof User]);
             return isSame ? prev : { ...prev, ...updates };
         });
     }, []);
@@ -176,7 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
         <AuthContext.Provider value={{ 
             isLoggedIn, 
-            isLoading: isLoading || isSessionLoading || (isLoggedIn && !profileFetched), 
+            isLoading: isLoading || isSessionLoading, 
             user, 
             login, 
             logout, 

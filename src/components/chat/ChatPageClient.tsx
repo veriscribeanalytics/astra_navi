@@ -23,15 +23,15 @@ const ChatPageClient: React.FC = () => {
     React.useEffect(() => {
         if (isLoading) return;
 
-    // 1. Handle Guest Mode from URL
-    const mode = searchParams.get('mode');
-    if (mode === 'guest') {
-      enableGuestMode();
-      return;
-    }
-
-    // 2. Handle Authentication
+    // 1. Handle Authentication First
     if (!user?.email) {
+      // 2. Handle Guest Mode from URL (only for unauthenticated users)
+      const mode = searchParams.get('mode');
+      if (mode === 'guest') {
+        enableGuestMode();
+        return;
+      }
+
       router.push('/login?callbackUrl=/chat');
       return;
     }

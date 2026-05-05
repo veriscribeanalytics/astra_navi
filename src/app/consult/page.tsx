@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ConsultClient from './ConsultClient';
 import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
 import { Compass, Sparkles, MapPin, Shield } from 'lucide-react';
 
-export default function ConsultPage() {
+function ConsultContent() {
     const { isLoggedIn } = useAuth();
 
     if (!isLoggedIn) {
@@ -50,5 +50,17 @@ export default function ConsultPage() {
         <div className="h-[calc(100vh-70px)] bg-[var(--bg)] pt-2 overflow-hidden px-4">
             <ConsultClient />
         </div>
+    );
+}
+
+export default function ConsultPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+                <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+            </div>
+        }>
+            <ConsultContent />
+        </Suspense>
     );
 }

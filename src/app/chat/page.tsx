@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ChatPageClient from '@/components/chat/ChatPageClient';
 import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
 import { MessageSquare, Brain, Zap, Shield } from 'lucide-react';
 
-export default function ChatPage() {
+function ChatContent() {
     const { isLoggedIn } = useAuth();
 
     if (!isLoggedIn) {
@@ -47,4 +47,16 @@ export default function ChatPage() {
     }
 
     return <ChatPageClient />;
+}
+
+export default function ChatPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex-grow flex items-center justify-center min-h-[60vh]">
+                <div className="text-4xl text-secondary animate-pulse opacity-50">✦</div>
+            </div>
+        }>
+            <ChatContent />
+        </Suspense>
+    );
 }

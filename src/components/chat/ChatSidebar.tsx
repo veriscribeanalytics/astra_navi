@@ -5,17 +5,18 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import { clientFetch } from '@/lib/apiClient';
-import { useChat, ChatSummary } from '@/context/ChatContext';
+import { useChat, ChatSummary, ChatMessage } from '@/context/ChatContext';
 import { 
     MoreVertical, Trash2, Download, 
     AlertTriangle, X, MessageSquare, Plus, Lock
 } from 'lucide-react';
 import { formatChatTimestamp } from '@/lib/datetime';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useTranslation } from '@/hooks';
 
 /* ---------- Date Formatter ---------- */
-function formatChatDate(dateStr: string): string {
-  return formatChatTimestamp(dateStr);
+function formatChatDate(dateStr: string, t: (key: string) => string): string {
+  return formatChatTimestamp(dateStr, t('dashboard.yesterday') || undefined);
 }
 
 const ChatSidebar: React.FC = () => {
@@ -23,6 +24,7 @@ const ChatSidebar: React.FC = () => {
     chats, activeChatId, isLoadingChats, hasMoreChats, selectChat, 
     createNewChat, deleteChat, loadMoreChats, setIsMobileMenuOpen, isGuest 
   } = useChat();
+  const { t } = useTranslation();
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [deleteModalChat, setDeleteModalChat] = useState<ChatSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -52,7 +54,7 @@ const ChatSidebar: React.FC = () => {
         text += `Date: ${new Date(data.chat.createdAt).toLocaleString()}\n`;
         text += `================================\n\n`;
 
-        messages.forEach((msg: any) => {
+        messages.forEach((msg: ChatMessage) => {
           if (msg.type === 'system') return;
           const role = msg.type === 'user' ? 'You' : 'Navi';
           // Strip HTML tags from AI messages
@@ -187,7 +189,7 @@ const ChatSidebar: React.FC = () => {
                       </p>
                       <div className="flex items-center justify-between">
                         <p className="text-[12px] text-on-surface-variant/40">
-                          {formatChatDate(chat.updatedAt || chat.createdAt)}
+                          {formatChatDate(chat.updatedAt || chat.createdAt, t)}
                         </p>
                         {chat.averageRating != null && (
                           <span className="text-[11px] text-secondary/70 flex items-center gap-0.5">

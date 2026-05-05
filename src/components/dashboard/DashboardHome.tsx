@@ -18,7 +18,7 @@ import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
 
 function formatRelativeTime(date: Date, t: (key: string) => string) {
@@ -48,16 +48,7 @@ interface KundliStats {
 // ─── Sub-components ─────────────────────────────
 import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 
-const getTopicPills = (t: (key: string) => string) => [
-    { icon: '💼', label: 'Career & Finance' },
-    { icon: '💑', label: 'Love & Marriage' },
-    { icon: '🏠', label: 'Property & Home' },
-    { icon: '🌿', label: 'Health & Wellness' },
-    { icon: '✈️', label: 'Travel & Relocation' },
-    { icon: '📿', label: 'Remedies & Mantras' },
-    { icon: '📅', label: 'Muhurat & Timing' },
-    { icon: '🪐', label: 'Current Transits' },
-];
+import { topicPills } from '@/data/topicPills';
 
 const getFeatures = (t: (key: string) => string) => [
     { 
@@ -238,9 +229,8 @@ export default function DashboardHome() {
     const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
     const ageBracket = useMemo(() => getAgeBracket(age), [age]);
     const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
-    const moonSign = useMemo(() => user?.moonSign ? getRashiData(user.moonSign) : null, [user?.moonSign]);
-    const sunSign = useMemo(() => user?.sunSign ? getRashiData(user.sunSign) : null, [user?.sunSign]);
-    const topicPills = useMemo(() => getTopicPills(t), [t]);
+  const moonSign = useMemo(() => user?.moonSign ? getRashiData(user.moonSign) : null, [user?.moonSign]);
+  const sunSign = useMemo(() => user?.sunSign ? getRashiData(user.sunSign) : null, [user?.sunSign]);
 
     const recentChats = useMemo(() => {
         return chats.slice(0, 5);

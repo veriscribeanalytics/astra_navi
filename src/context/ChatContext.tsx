@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { generateUUID } from '@/lib/uuid';
 import { clientFetch } from '@/lib/apiClient';
 import { useTranslation } from '@/context/LanguageContext';
+import { useToast } from '@/hooks';
 
 /* ---------- Types ---------- */
 export interface ChatMessage {
@@ -70,6 +71,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const { t, language } = useTranslation();
+  const { success, error: toastError } = useToast();
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -82,11 +84,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const initialLoadDone = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Guest State - Minimal for preview purposes
+  // Guest State
   const [isGuest, setIsGuest] = useState(false);
-  const [guestTimeRemaining] = useState(600); // 10 minutes default
-  const [isGuestExpired] = useState(false);
+  const [guestTimeRemaining, setGuestTimeRemaining] = useState(600); // 10 minutes default
+  const [isGuestExpired, setIsGuestExpired] = useState(false);
+
+  // Phase 7.1: Guest timer logic
+  useEffect(() => {
+    if (!isGuest || isGuestExpired) return;
+    
+    const interval = setInterval(() => {
+      setGuestTimeRemaining(prev => {
+        if (prev <= 1) {
+          setIsGuestExpired(true);
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isGuest, isGuestExpired]);
 
   const enableGuestMode = useCallback(() => {
     setIsGuest(true);
@@ -166,7 +187,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendMessage = useCallback(async (text: string, overrideChatId?: string) => {
     let targetId = overrideChatId || activeChatId;
     
-    // In guest mode, we show a 'Login Required' mock response
     if (isGuest) {
       const now = new Date().toISOString();
       const userMsg: ChatMessage = { id: generateUUID(), type: 'user', text: text.trim(), createdAt: now };
@@ -206,10 +226,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const createRes = await clientFetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            title: text.slice(0, 30),
-            language // Pass language to initial chat creation
-          }),
+          body: JSON.stringify({ title: text.slice(0, 30), language }),
         });
         const createData = await createRes.json();
         if (createData.chat?.id) {
@@ -219,48 +236,69 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
+      abortControllerRef.current?.abort();
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       const res = await clientFetch(`/api/chat/${targetId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text,
-          language // Pass current language preference to backend
-        }),
+        body: JSON.stringify({ text, language }),
+        signal: abortController.signal,
       });
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
       let buffer = '';
+      
+      // Phase 6.3: Debounce re-renders during streaming
+      let lastUpdate = 0;
+      const updateInterval = 50; // ms
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            // Final update to ensure everything is rendered
+            setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: fullText } : m) } : null);
+            break;
+          }
+          
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n');
           buffer = lines.pop() || '';
+          
           for (const line of lines) {
             if (!line.trim().startsWith('data: ')) continue;
             const dataStr = line.trim().slice(6);
             if (dataStr === '[DONE]') break;
+            
             try {
               const data = JSON.parse(dataStr);
               if (data.token) {
                 fullText += data.token;
-                setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: fullText } : m) } : null);
+                
+                const now = Date.now();
+                if (now - lastUpdate > updateInterval) {
+                  setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: fullText } : m) } : null);
+                  lastUpdate = now;
+                }
               }
-            } catch {}
+            } catch (e) {
+              console.warn('Failed to parse stream token:', dataStr, e);
+            }
           }
         }
       }
       loadChats();
     } catch (err) {
       console.error(err);
+      toastError(t('chat.errorSending'));
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, language, t]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language]);
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (isGuest) return 'guest-session';
@@ -290,17 +328,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
     try {
-      await clientFetch(`/api/chat/${activeChatId}/rate`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messageId, rating, feedbackTags: tags, feedbackComment: comment }) });
-    } catch {}
-  }, [activeChatId, isGuest]);
+      const res = await clientFetch(`/api/chat/${activeChatId}/rate`, { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ messageId, rating, feedbackTags: tags, feedbackComment: comment }) 
+      });
+      if (!res.ok) throw new Error('Rating failed');
+      success(t('chat.ratingSuccess'));
+    } catch (e) {
+      console.error('Rate message error:', e);
+      toastError(t('chat.ratingError'));
+    }
+  }, [activeChatId, isGuest, success, toastError, t]);
 
   const deleteChat = useCallback(async (chatId: string) => {
     if (isGuest) return;
     try {
-      await clientFetch(`/api/chat/${chatId}`, { method: 'DELETE' });
+      const res = await clientFetch(`/api/chat/${chatId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      
       setChats(prev => prev.filter(c => c.id !== chatId));
-    } catch {}
-  }, [isGuest]);
+      if (activeChatId === chatId) {
+        setActiveChat(null);
+        setActiveChatId(null);
+      }
+      success(t('chat.deleteSuccess'));
+    } catch (e) {
+      console.error('Delete chat error:', e);
+      toastError(t('chat.deleteError'));
+    }
+  }, [isGuest, activeChatId, success, toastError, t]);
 
   const resetChat = useCallback(() => {
     setActiveChat(null);

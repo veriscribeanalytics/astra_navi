@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthSession, unauthorizedResponse } from '@/lib/session';
+import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
 
 /**
@@ -15,10 +15,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getAuthSession();
-    if (!session) return unauthorizedResponse();
-    const email = session.user?.email;
-    const accessToken = (session.user as any).accessToken;
+    const authContext = await getAuthContext(req);
+    if (!authContext) return unauthorizedResponse();
+    const { user, accessToken } = authContext;
+    const email = user?.email;
 
     const { id } = await params;
 
@@ -50,10 +50,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getAuthSession();
-    if (!session) return unauthorizedResponse();
-    const email = session.user?.email;
-    const accessToken = (session.user as any).accessToken;
+    const authContext = await getAuthContext(req);
+    if (!authContext) return unauthorizedResponse();
+    const { user, accessToken } = authContext;
+    const email = user?.email;
 
     const { id } = await params;
 
