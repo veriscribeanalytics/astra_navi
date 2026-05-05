@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function ProfileSettingsPage() {
-    const { user, login, showLoading, isLoading, isLoggedIn } = useAuth();
+    const { user, login, showLoading, isLoading, isLoggedIn, refreshUser } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const isNewRegistration = searchParams?.get('registered') === 'true';
@@ -170,10 +170,40 @@ export default function ProfileSettingsPage() {
             success('Profile updated successfully!');
             setHasChanges(false);
             
-            // Phase 7.2: Trigger astrology recalculation
-            fetch('/api/user/sync-astrology', { method: 'POST' }).catch(err =>
-                console.warn('Astrology sync failed:', err)
-            );
+            // Trigger sign calculation if birth details are complete.
+            // NOTE: The backend `sync-astrology` endpoint does NOT extract/save signs.
+            // Signs (moonSign, sunSign, lagnaSign) are only persisted by `analyze-full`.
+            // After analyze-full completes, the backend auto-saves signs to the DB.
+            // We then re-fetch the profile to get the updated sign data.
+            const hasBirthDetails = formData.dob && formData.tob && formData.pob;
+            if (hasBirthDetails) {
+                clientFetch('/api/analyze-full', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ force_refresh: true })
+                }).then(async (res) => {
+                    if (res.ok) {
+                        // Re-fetch profile to get the newly-calculated signs
+                        const profileRes = await clientFetch(`/api/user/profile?email=${encodeURIComponent(user!.email!)}`);
+                        if (profileRes.ok) {
+                            const profileData = await profileRes.json();
+                            if (profileData.user) {
+                                refreshUser({
+                                    moonSign: profileData.user.moonSign,
+                                    sunSign: profileData.user.sunSign,
+                                    lagnaSign: profileData.user.lagnaSign,
+                                    astrologyData: profileData.user.astrologyData,
+                                });
+                            }
+                        }
+                    } else {
+                        const errData = await res.json().catch(() => ({}));
+                        console.warn('Sign calculation (analyze-full) failed:', errData.error || errData.detail || 'Unknown error');
+                    }
+                }).catch(err => {
+                    console.warn('Sign calculation (analyze-full) failed:', err);
+                });
+            }
 
             setTimeout(() => {
                 showLoading("", 0);

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from "@/utils/personalizedQuestions";
 import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
+import { clientFetch } from "@/lib/apiClient";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
@@ -229,8 +230,57 @@ export default function DashboardHome() {
     const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
     const ageBracket = useMemo(() => getAgeBracket(age), [age]);
     const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
-  const moonSign = useMemo(() => user?.moonSign ? getRashiData(user.moonSign) : null, [user?.moonSign]);
-  const sunSign = useMemo(() => user?.sunSign ? getRashiData(user.sunSign) : null, [user?.sunSign]);
+  // Extract signs from profile fields (moonSign, sunSign, lagnaSign) with fallback
+  // to astrologyData if the backend hasn't persisted them yet.
+  // BACKEND DEV NOTE: The /api/user/sync-astrology endpoint does NOT extract/save
+  // moonSign/sunSign/lagnaSign to the DB. Only /api/analyze-full does this (lines 1714-1725
+  // of server.py). When a user saves their profile, the frontend now calls analyze-full,
+  // but existing users who never visited the Kundli page will have NULL signs in the DB.
+  // Please fix sync-astrology to auto-extract and persist signs from astrologyData.
+  const moonSign = useMemo(() => {
+    if (user?.moonSign) return getRashiData(user.moonSign);
+    // Fallback: extract from astrologyData
+    if (user?.astrologyData) {
+      const data = typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData;
+      const planets = (data as any)?.planets;
+      if (Array.isArray(planets)) {
+        const moon = planets.find((p: any) => p.planet === 'Moon');
+        if (moon?.sign) return getRashiData(moon.sign);
+      }
+    }
+    return null;
+  }, [user?.moonSign, user?.astrologyData]);
+  const sunSign = useMemo(() => {
+    if (user?.sunSign) return getRashiData(user.sunSign);
+    // Fallback: extract from astrologyData
+    if (user?.astrologyData) {
+      const data = typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData;
+      const planets = (data as any)?.planets;
+      if (Array.isArray(planets)) {
+        const sun = planets.find((p: any) => p.planet === 'Sun');
+        if (sun?.sign) return getRashiData(sun.sign);
+      }
+    }
+    return null;
+  }, [user?.sunSign, user?.astrologyData]);
+  const ascendantSign = useMemo(() => {
+    if (user?.lagnaSign) return getRashiData(user.lagnaSign);
+    if (kundliStats?.lagnaSign) return getRashiData(kundliStats.lagnaSign);
+    // Fallback: extract from astrologyData
+    if (user?.astrologyData) {
+      const data = typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData;
+      // Try ascendant.sign (backend analyze-full format)
+      const ascSign = (data as any)?.ascendant?.sign;
+      if (ascSign) return getRashiData(ascSign);
+      // Try houses array
+      const houses = (data as any)?.houses || (data as any)?.chart?.houses;
+      if (Array.isArray(houses)) {
+        const h1 = houses.find((h: any) => h.house === 1);
+        if (h1?.sign) return getRashiData(h1.sign);
+      }
+    }
+    return null;
+  }, [user?.lagnaSign, kundliStats?.lagnaSign, user?.astrologyData]);
 
     const recentChats = useMemo(() => {
         return chats.slice(0, 5);
@@ -326,6 +376,41 @@ export default function DashboardHome() {
         }
     }, [user?.email, user?.astrologyData, refreshUser, userLoading]);
 
+    // Auto-trigger sign calculation if user has birth details but no signs.
+    // This handles users who completed their profile but never visited the Kundli page.
+    useEffect(() => {
+        if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
+        const hasBirthDetails = user.dob && user.tob && user.pob;
+        const hasSigns = user.moonSign || user.sunSign || user.lagnaSign;
+        const hasAstrologyData = !!user.astrologyData;
+        if (hasBirthDetails && !hasSigns && !hasAstrologyData) {
+            hasAnalyzedRef.current = user.email;
+            console.log('[Dashboard] User has birth details but no signs — triggering analyze-full');
+            clientFetch('/api/analyze-full', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ force_refresh: false })
+            }).then(async (res) => {
+                if (res.ok) {
+                    const profileRes = await clientFetch(`/api/user/profile?email=${encodeURIComponent(user.email!)}`);
+                    if (profileRes.ok) {
+                        const profileData = await profileRes.json();
+                        if (profileData.user) {
+                            refreshUser({
+                                moonSign: profileData.user.moonSign,
+                                sunSign: profileData.user.sunSign,
+                                lagnaSign: profileData.user.lagnaSign,
+                                astrologyData: profileData.user.astrologyData,
+                            });
+                        }
+                    }
+                }
+            }).catch(err => {
+                console.warn('[Dashboard] Auto analyze-full failed:', err);
+            });
+        }
+    }, [user?.email, user?.dob, user?.tob, user?.pob, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshUser]);
+
     // Handlers
     const handleQuickAsk = (question: string) => {
         localStorage.setItem('astranavi_pending_message', question.trim());
@@ -369,7 +454,7 @@ export default function DashboardHome() {
                             {[
                                 { label: t('dashboard.moonSign'), data: moonSign, color: "text-blue-400" },
                                 { label: t('dashboard.sunSign'), data: sunSign, color: "text-amber-500" },
-                                { label: t('dashboard.ascendant'), data: (user?.lagnaSign || kundliStats?.lagnaSign) ? getRashiData((user?.lagnaSign || kundliStats?.lagnaSign) as string) : null, color: "text-purple-400" }
+                                { label: t('dashboard.ascendant'), data: ascendantSign, color: "text-purple-400" }
                             ].map((sign, idx) => (
                                 <Link key={idx} href={sign.data?.id ? `/rashis?sign=${sign.data.id}` : '/rashis'} className="group relative flex flex-col items-center min-w-[80px] sm:min-w-[100px]">
                                     <div className="w-16 h-16 sm:w-20 lg:w-24 sm:h-20 lg:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden relative">

@@ -32,6 +32,16 @@ export async function GET(req: Request) {
 
         const data = await response.json();
 
+        // Diagnostic: log sign fields from backend response
+        console.log(`[Profile API] Backend response sign fields:`, {
+            moonSign: data?.user?.moonSign ?? data?.moonSign ?? 'MISSING',
+            sunSign: data?.user?.sunSign ?? data?.sunSign ?? 'MISSING',
+            lagnaSign: data?.user?.lagnaSign ?? data?.lagnaSign ?? 'MISSING',
+            hasAstrologyData: !!(data?.user?.astrologyData ?? data?.astrologyData),
+            topLevelKeys: Object.keys(data || {}),
+            userKeys: data?.user ? Object.keys(data.user) : 'no user key',
+        });
+
         return NextResponse.json(data);
     } catch (error) {
         console.error("Profile fetch error:", error);

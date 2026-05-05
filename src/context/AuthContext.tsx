@@ -111,6 +111,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         })
                         .then(data => {
                             if (data?.user) {
+                                // Diagnostic: log sign fields from profile fetch
+                                console.log('[AuthContext] Profile fetch sign fields:', {
+                                    moonSign: data.user.moonSign ?? 'MISSING',
+                                    sunSign: data.user.sunSign ?? 'MISSING',
+                                    lagnaSign: data.user.lagnaSign ?? 'MISSING',
+                                    hasAstrologyData: !!data.user.astrologyData,
+                                });
                                 setUser(prev => {
                                     if (!prev) return data.user;
                                     
@@ -124,6 +131,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                     
                                     return isSame ? prev : { ...prev, ...data.user };
                                 });
+                            } else {
+                                console.warn('[AuthContext] Profile fetch returned no user object. Data keys:', Object.keys(data || {}));
                             }
                             setProfileFetched(true);
                             profileRetryCount.current = 0;
