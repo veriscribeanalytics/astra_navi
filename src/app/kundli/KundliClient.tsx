@@ -398,7 +398,11 @@ export default function KundliPage() {
                                             <div className="py-2">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Active Period</span>
-                                                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">{data.dasha?.currentMahaDasha || data.dasha?.current}</span>
+                                                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+                                                        {typeof (data.dasha?.currentMahaDasha || data.dasha?.current) === 'object' 
+                                                            ? ((data.dasha?.currentMahaDasha || data.dasha?.current) as any).planet || ((data.dasha?.currentMahaDasha || data.dasha?.current) as any).name || 'Saturn'
+                                                            : (data.dasha?.currentMahaDasha || data.dasha?.current)}
+                                                    </span>
                                                 </div>
                                                 {data.dasha?.remaining && (
                                                     <div className="flex items-center justify-between">

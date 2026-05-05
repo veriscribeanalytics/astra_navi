@@ -274,8 +274,13 @@ export default function DashboardHome() {
                 const houses = (analysis as any)?.houses || (analysis as any)?.chart?.houses;
                 if (Array.isArray(houses)) stats.lagnaSign = houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
                 
-                stats.nakshatra = typeof (analysis as any)?.nakshatra === 'object' ? (analysis as any).nakshatra.value : (analysis as any)?.nakshatra;
-                stats.nakshatraLord = typeof (analysis as any)?.nakshatraLord === 'object' ? (analysis as any).nakshatraLord.value : (analysis as any)?.nakshatraLord;
+                const nak = (analysis as any)?.nakshatra;
+                stats.nakshatra = typeof nak === 'object' && nak !== null ? (nak.value || nak.name) : nak;
+                if (stats.nakshatra && typeof stats.nakshatra !== 'string') stats.nakshatra = String(stats.nakshatra);
+
+                const lord = (analysis as any)?.nakshatraLord;
+                stats.nakshatraLord = typeof lord === 'object' && lord !== null ? (lord.value || lord.name) : lord;
+                if (stats.nakshatraLord && typeof stats.nakshatraLord !== 'string') stats.nakshatraLord = String(stats.nakshatraLord);
                 
                 const dasha = (analysis as any)?.dasha || (analysis as any)?.planetary?.active_dasha;
                 if (dasha) {
@@ -288,21 +293,27 @@ export default function DashboardHome() {
                         let dashaRemaining = d.remaining;
 
                         // Fallback to the active array if flat strings are missing
-                        if (!dashaName && d.active?.length > 0) {
+                        if ((!dashaName || typeof dashaName === 'object') && d.active?.length > 0) {
                             const maha = d.active.find((p: any) => p.type === 'Mahadasha') || d.active[0];
                             const anta = d.active.find((p: any) => p.type === 'Antardasha');
                             dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
                             
                             // Calculate remaining time if end date exists
-                            if (!dashaRemaining && maha.end) {
-                                const end = new Date(maha.end);
-                                const now = Date.now();
-                                const remDays = Math.max(0, Math.ceil((end.getTime() - now) / 86400000));
+                            if (!dashaRemaining && (maha.end || maha.end_date)) {
+                                const end = new Date(maha.end || maha.end_date);
+                                const now = new Date();
+                                const remDays = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
                                 dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
                             }
                         }
-                        stats.activeDasha = dashaName;
-                        stats.dashaRemaining = dashaRemaining;
+
+                        // Ensure dashaName is a string even if the API returned an object for .current or .value
+                        if (dashaName && typeof dashaName === 'object') {
+                            dashaName = (dashaName as any).planet || (dashaName as any).name || (dashaName as any).value || "Saturn";
+                        }
+
+                        stats.activeDasha = typeof dashaName === 'string' ? dashaName : (dashaName ? String(dashaName) : "Saturn");
+                        stats.dashaRemaining = typeof dashaRemaining === 'string' ? dashaRemaining : (dashaRemaining ? String(dashaRemaining) : undefined);
                     }
                 }
                 
@@ -799,7 +810,7 @@ export default function DashboardHome() {
                                                     {kundliLoading ? (
                                                         <Skeleton height={24} width={80} className="mt-1" />
                                                     ) : (
-                                                        kundliStats?.activeDasha?.split('-')[0] || "Saturn"
+                                                        (typeof kundliStats?.activeDasha === 'string' ? kundliStats.activeDasha.split('-')[0] : (kundliStats?.activeDasha || "Saturn"))
                                                     )}
                                                 </div>
                                             </div>
