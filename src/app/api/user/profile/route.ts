@@ -17,16 +17,20 @@ export async function GET(req: Request) {
         const { user, accessToken } = authContext;
         const email = user?.email;
 
+        console.log(`[Profile API] Fetching profile for: ${email}, hasAccessToken: ${!!accessToken}, tokenLength: ${accessToken?.length || 0}`);
+
         const response = await backendFetch('/api/user/profile', {
             userEmail: email as string,
             accessToken: accessToken as string
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.detail || "Failed to fetch profile." }, { status: response.status });
+            const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+            console.error(`[Profile API] Backend returned ${response.status}:`, errorData);
+            return NextResponse.json({ error: errorData.error || errorData.detail || "Failed to fetch profile." }, { status: response.status });
         }
+
+        const data = await response.json();
 
         return NextResponse.json(data);
     } catch (error) {

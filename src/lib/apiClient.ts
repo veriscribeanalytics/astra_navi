@@ -8,25 +8,29 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit) 
   const response = await fetch(input, init);
 
   if (response.status === 401) {
-    // A 401 from our own API proxy means the session is invalid or expired.
-    // Calling getSession() with no arguments in NextAuth v5 might not trigger a refresh 
-    // if not configured, but our jwt callback handles rotation.
-    
+    // A 401 from our own API proxy means the backend rejected the access token.
+    // Check if the NextAuth session is still valid before deciding to sign out.
     const session = await getSession();
     
-    // If we still get 401 after getting a fresh session (or if getSession returns null),
-    // then the user must log in again.
     if (!session) {
+      // No session at all — user truly isn't logged in
       await signOut({ callbackUrl: "/login?error=SessionExpired" });
       throw new Error("Session expired. Please log in again.");
     }
     
-    // Optional: Retry the request once if we think getSession() might have refreshed the token
-    // But since the proxy routes call auth() which triggers refresh, a 401 usually means 
-    // the refresh token itself is expired.
+    // Session exists but the backend rejected the token.
+    // This can happen when:
+    //   1. The access token hasn't propagated yet (race condition after login)
+    //   2. The backend's token validation is stricter than expected
+    //   3. The access token expired but the refresh token is still valid
+    //
+    // DO NOT sign out immediately — let the JWT callback handle token refresh.
+    // If the session truly has an error, AuthContext will detect session.user.error
+    // and handle it there with proper user feedback.
+    console.warn("[clientFetch] Got 401 but session is still valid. Backend may have rejected the token. Returning response as-is.");
     
-    await signOut({ callbackUrl: "/login?error=SessionExpired" });
-    throw new Error("Session expired. Please log in again.");
+    // Return the 401 response so the caller can handle it gracefully
+    return response;
   }
 
   return response;

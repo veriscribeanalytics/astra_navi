@@ -49,14 +49,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isLoggedIn = status === 'authenticated';
     const isSessionLoading = status === 'loading';
 
+    // Track how many consecutive times we've seen RefreshAccessTokenError
+    // Only sign out after seeing it persist across multiple session updates
+    const refreshErrorCount = useRef(0);
+    const REFRESH_ERROR_THRESHOLD = 3;
+
     useEffect(() => {
         if (session?.user) {
             const sessionUser = session.user;
             
-            // Handle NextAuth refresh errors
+            // Handle NextAuth refresh errors — but don't sign out immediately.
+            // A single refresh failure could be a transient network issue.
+            // Only sign out if the error persists across multiple session checks.
             if (sessionUser.error === "RefreshAccessTokenError") {
-                signOut({ callbackUrl: '/login?error=SessionExpired' });
-                return;
+                refreshErrorCount.current++;
+                console.warn(`[AuthContext] RefreshAccessTokenError seen (${refreshErrorCount.current}/${REFRESH_ERROR_THRESHOLD})`);
+                
+                if (refreshErrorCount.current >= REFRESH_ERROR_THRESHOLD) {
+                    console.error("[AuthContext] Refresh token is truly invalid. Signing out.");
+                    signOut({ callbackUrl: '/login?error=SessionExpired' });
+                    return;
+                }
+                // Don't sign out yet — let the next session check try again
+            } else {
+                // Reset counter when there's no error
+                refreshErrorCount.current = 0;
             }
             
             // Initial set from session
@@ -84,9 +101,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (!profileFetched && !fetchInProgressRef.current) {
                     fetchInProgressRef.current = true;
                     clientFetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
-                        .then(res => res.json())
+                        .then(res => {
+                            if (!res.ok) {
+                                console.warn(`[AuthContext] Profile fetch returned ${res.status}. Will use session data only.`);
+                                setProfileFetched(true);
+                                return null;
+                            }
+                            return res.json();
+                        })
                         .then(data => {
-                            if (data.user) {
+                            if (data?.user) {
                                 setUser(prev => {
                                     if (!prev) return data.user;
                                     
@@ -122,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             fetchInProgressRef.current = false;
             prevEmailRef.current = null;
             profileRetryCount.current = 0;
+            refreshErrorCount.current = 0;
         }
     }, [session, status, profileFetched]); // Removed user from dependencies
 
