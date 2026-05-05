@@ -33,6 +33,11 @@ export async function backendFetch(
 
   const url = `${BACKEND_URL}${path}`;
   
+  // Diagnostic: log whether auth headers are being sent
+  if (!accessToken) {
+    console.warn(`[backendFetch] No accessToken for ${path}! Headers will only have X-API-Key + X-User-Email. Backend now requires JWT Bearer auth.`);
+  }
+  
   try {
     const response = await fetch(url, {
       ...rest,
