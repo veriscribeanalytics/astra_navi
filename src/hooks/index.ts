@@ -23,3 +23,4 @@ export { useTheme } from './useTheme';
 export { useToast } from './useToast';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { useRealTime } from './useRealTime';
+export { useTranslation } from './useTranslation';

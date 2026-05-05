@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { useToast } from '@/hooks';
+import { useToast, useTranslation } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import {
     Mail, Lock, User, Calendar, MapPin,
@@ -23,6 +23,7 @@ const LoginContent = () => {
     const searchParams = useSearchParams();
     const { success, error, ToastContainer } = useToast();
     const { showLoading } = useAuth();
+    const { t } = useTranslation();
     const [isRegister, setIsRegister] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -66,7 +67,7 @@ const LoginContent = () => {
                 'Callback': 'Try signing in with a different account.',
                 'OAuthAccountNotLinked': 'To confirm your identity, please sign in with the same account you used originally.',
                 'EmailSignin': 'Check your email address.',
-                'CredentialsSignin': 'Invalid credentials.',
+                'CredentialsSignin': t('login.invalidCredentials'),
                 'SessionRequired': 'Please sign in to access this page.',
                 'SessionExpired': 'Your session has expired. Please sign in again.',
                 'default': 'An error occurred. Please try again.'
@@ -78,7 +79,7 @@ const LoginContent = () => {
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [searchParams, error]);
+    }, [searchParams, error, t]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,9 +100,9 @@ const LoginContent = () => {
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Registration failed. Please try again.");
+                if (!res.ok) throw new Error(data.error || t('login.registrationFailed'));
 
-                success("Your account has been created. You may now login.");
+                success(t('login.accountCreated'));
                 setIsRegister(false);
             } else {
                 const result = await signIn('credentials', {
@@ -112,11 +113,11 @@ const LoginContent = () => {
 
                 if (result?.error) {
                     throw new Error(result.error === 'CredentialsSignin'
-                        ? "Invalid credentials."
+                        ? t('login.invalidCredentials')
                         : result.error);
                 }
 
-                showLoading("Signing you in...", 1500);
+                showLoading(t('login.signingYouIn'), 1500);
                 setTimeout(() => {
                     const callbackUrl = searchParams.get('callbackUrl') || '/?login=success';
                     router.push(callbackUrl);
@@ -177,10 +178,12 @@ const LoginContent = () => {
                         <div className="flex-1 flex flex-col justify-center py-12">
                             <div className="space-y-4">
                                 <h2 className="text-3xl xl:text-4xl font-headline font-bold text-primary leading-tight">
-                                    Unlock your <span className="text-secondary italic">Personal</span> Blueprint.
+                                    {t('login.blueprintTitle').split(' ').map((word, i) => (
+                                        word === 'Personal' ? <span key={i} className="text-secondary italic"> {word} </span> : i === 0 ? word : ` ${word}`
+                                    ))}
                                 </h2>
                                 <p className="text-base text-on-surface-variant max-w-sm leading-relaxed">
-                                    Merging ancient Vedic Jyotish with Artificial Intelligence to illuminate your path.
+                                    {t('login.blueprintDesc')}
                                 </p>
                             </div>
                         </div>
@@ -203,12 +206,12 @@ const LoginContent = () => {
                             <div className="mt-6 flex gap-6">
                                 <div className="flex flex-col gap-0.5">
                                     <span className="text-xl font-bold text-primary">12</span>
-                                    <span className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">Rashis</span>
+                                    <span className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">{t('login.statRashis')}</span>
                                 </div>
                                 <div className="w-[1px] bg-outline-variant/30" />
                                 <div className="flex flex-col gap-0.5">
                                     <span className="text-xl font-bold text-primary">27</span>
-                                    <span className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">Nakshatras</span>
+                                    <span className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">{t('login.statNakshatras')}</span>
                                 </div>
                             </div>
                         </div>
@@ -227,10 +230,10 @@ const LoginContent = () => {
                         </div>
 
                         <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5">
-                            {isRegister ? "Inscribe Identity" : "Sign In"}
+                            {isRegister ? t('login.inscribeIdentity') : t('login.signIn')}
                         </h1>
                         <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium">
-                            {isRegister ? "Join the celestial journey." : "Welcome back to AstraNavi."}
+                            {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
                         </p>
                     </div>
 
@@ -247,19 +250,19 @@ const LoginContent = () => {
                                             exit={{ opacity: 0 }}
                                             className="space-y-3"
                                         >
-                                            <Input placeholder="Full Name" icon={<User size={14} className="text-secondary" />} value={name} onChange={(e) => setName(e.target.value)} required />
+                                            <Input placeholder={t('login.fullName')} icon={<User size={14} className="text-secondary" />} value={name} onChange={(e) => setName(e.target.value)} required />
                                             <div className="grid grid-cols-2 gap-2">
                                                 <Input type="date" icon={<Calendar size={14} className="text-secondary" />} value={dob} onChange={(e) => setDob(e.target.value)} required />
                                                 <Input type="time" icon={<Clock size={14} className="text-secondary" />} value={tob} onChange={(e) => setTob(e.target.value)} required />
                                             </div>
-                                            <Input placeholder="Place of Birth" icon={<MapPin size={14} className="text-secondary" />} value={pob} onChange={(e) => setPob(e.target.value)} required />
-                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input placeholder={t('login.pob')} icon={<MapPin size={14} className="text-secondary" />} value={pob} onChange={(e) => setPob(e.target.value)} required />
+                                            <Input type="email" placeholder={t('login.email')} icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input type={showPassword ? "text" : "password"} placeholder={t('login.password')} icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
                                             </div>
                                             <div className="relative">
-                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Key" icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder={t('login.confirmPassword')} icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
                                             </div>
                                         </motion.div>
@@ -271,9 +274,9 @@ const LoginContent = () => {
                                             exit={{ opacity: 0 }}
                                             className="space-y-5"
                                         >
-                                            <Input type="email" placeholder="Celestial Address (Email)" icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input type="email" placeholder={t('login.email')} icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder="Celestial Key" icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input type={showPassword ? "text" : "password"} placeholder={t('login.password')} icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                                             </div>
                                         </motion.div>
@@ -287,14 +290,14 @@ const LoginContent = () => {
                                     loading={isLoading}
                                     className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg mt-2"
                                 >
-                                    {isRegister ? "Create Account" : "Access Dashboard"}
+                                    {isRegister ? t('login.createAccount') : t('login.accessDashboard')}
                                     {!isLoading && <ArrowRight size={14} />}
                                 </Button>
                             </form>
 
                             <div className="flex items-center gap-4 py-3">
                                 <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                                <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">Secure Connection</span>
+                                <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">{t('login.secureConnection')}</span>
                                 <div className="h-[1px] flex-1 bg-outline-variant/10" />
                             </div>
 
@@ -314,7 +317,7 @@ const LoginContent = () => {
                                     <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
                                     <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" />
                                 </svg>
-                                Google
+                                {t('login.googleSignIn')}
                             </Button>
 
                             <div className="text-center pt-3">
@@ -330,9 +333,9 @@ const LoginContent = () => {
                                     className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
                                 >
                                     {isRegister ? (
-                                        <>Already have an account? <span className="text-secondary ml-1">Sign In</span></>
+                                        <>{t('login.alreadyHaveAccount')} <span className="text-secondary ml-1">{t('login.signIn')}</span></>
                                     ) : (
-                                        <>Don&apos;t have an account? <span className="text-secondary ml-1">Create Account</span></>
+                                        <>{t('login.dontHaveAccount')} <span className="text-secondary ml-1">{t('login.createAccount')}</span></>
                                     )}
                                 </button>
                         </div>

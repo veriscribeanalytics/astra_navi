@@ -6,9 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
+import LanguagePicker from "../ui/LanguagePicker";
 import { useAuth } from "@/context/AuthContext";
 import { useChat } from "@/context/ChatContext";
-import { useToast } from "@/hooks";
+import { useToast, useTranslation } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
@@ -16,108 +17,108 @@ import {
 } from "lucide-react";
 
 // Navigation structure based on auth state
-const getNavSections = (isLoggedIn: boolean) => {
+const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
     if (isLoggedIn) {
         return [
             {
                 id: "destiny",
-                label: "My Journey",
+                label: t('nav.myJourney'),
                 items: [
                     { 
-                        label: "Cosmic Dashboard", 
+                        label: t('nav.cosmicDashboard'), 
                         href: "/", 
                         icon: <LayoutDashboard className="w-4 h-4" />,
-                        desc: "Your personalized overview and daily insights."
+                        desc: t('nav.cosmicDashboardDesc')
                     },
                     {
-                        label: "My Kundli",
+                        label: t('nav.myKundli'),
                         href: "/kundli",
                         icon: <Globe className="w-4 h-4" />,
-                        desc: "Deep-dive into your chart details."
+                        desc: t('nav.myKundliDesc')
                     },
                     {
-                        label: "Chart Matching",
+                        label: t('nav.chartMatching'),
                         href: "/kundli/match",
                         icon: <Heart className="w-4 h-4" />,
-                        desc: "Vedic compatibility and relationship analysis."
+                        desc: t('nav.chartMatchingDesc')
                     },
                 ]
             },
             {
                 id: "consult",
-                label: "Consult Navi",
+                label: t('nav.consultNavi'),
                 items: [
                     {
-                        label: "Guided Sessions",
+                        label: t('nav.guidedSessions'),
                         href: "/consult",
                         icon: <Sparkles className="w-4 h-4" />,
-                        desc: "Step-by-step personalized life readings."
+                        desc: t('nav.guidedSessionsDesc')
                     },
                     {
-                        label: "Chat with Navi",
+                        label: t('nav.chatWithNavi'),
                         href: "/chat",
                         icon: <MessageSquare className="w-4 h-4" />,
-                        desc: "Continue your conversation with the stars."
+                        desc: t('nav.chatWithNaviDesc')
                     },
                 ]
             },
             {
                 id: "knowledge",
-                label: "Knowledge",
+                label: t('nav.knowledge'),
                 items: [
                     { 
-                        label: "Astrology Encyclopedia", 
+                        label: t('nav.encyclopedia'), 
                         href: "/blogs", 
                         icon: <BookOpen className="w-4 h-4" />,
-                        desc: "Browse our complete library of Jyotish wisdom."
+                        desc: t('nav.encyclopediaDesc')
                     },
                     { 
-                        label: "The 12 Rashis", 
+                        label: t('nav.the12Rashis'), 
                         href: "/rashis", 
                         icon: <Sparkles className="w-4 h-4" />,
-                        desc: "Moon signs and their deep psychological traits."
+                        desc: t('nav.the12RashisDesc')
                     },
                     { 
-                        label: "The Navagraha", 
+                        label: t('nav.theNavagraha'), 
                         href: "/blogs/planets", 
                         icon: <Compass className="w-4 h-4" />,
-                        desc: "The nine planetary forces shaping your destiny."
+                        desc: t('nav.theNavagrahaDesc')
                     },
                     { 
-                        label: "The 12 Houses", 
+                        label: t('nav.the12Houses'), 
                         href: "/blogs/houses", 
                         icon: <Gem className="w-4 h-4" />,
-                        desc: "The twelve domains of human experience."
+                        desc: t('nav.the12HousesDesc')
                     },
                     { 
-                        label: "The 27 Nakshatras", 
+                        label: t('nav.the27Nakshatras'), 
                         href: "/blogs/nakshatras", 
                         icon: <Sparkles className="w-4 h-4" />,
-                        desc: "The lunar mansions and cosmic archetypes."
+                        desc: t('nav.the27NakshatrasDesc')
                     },
                     { 
-                        label: "Planetary Yogas", 
+                        label: t('nav.planetaryYogas'), 
                         href: "/blogs/yogas", 
                         icon: <BookOpen className="w-4 h-4" />,
-                        desc: "Powerful combinations that define your potential."
+                        desc: t('nav.planetaryYogasDesc')
                     },
                 ]
             },
             {
                 id: "community",
-                label: "Community",
+                label: t('nav.community'),
                 items: [
                     { 
-                        label: "Navi AI Models", 
+                        label: t('nav.naviAiModels'), 
                         href: "/chat", 
                         icon: <Brain className="w-4 h-4" />,
-                        desc: "Domain-specific Vedic intelligence agents."
+                        desc: t('nav.naviAiModelsDesc')
                     },
                     { 
-                        label: "Help & Support", 
+                        label: t('nav.helpSupport'), 
                         href: "/support", 
                         icon: <ShieldQuestion className="w-4 h-4" />,
-                        desc: "How can we assist you today?"
+                        desc: t('nav.helpSupportDesc')
                     },
                 ]
             }
@@ -128,115 +129,115 @@ const getNavSections = (isLoggedIn: boolean) => {
     return [
         {
             id: "explore",
-            label: "Platform",
+            label: t('nav.platform'),
             items: [
                 { 
-                    label: "Cosmic Dashboard", 
+                    label: t('nav.cosmicDashboard'), 
                     href: "/", 
                     icon: <Compass className="w-4 h-4" />,
-                    desc: "The entrance to your cosmic journey."
+                    desc: t('nav.cosmicDashboardDesc')
                 },
                 { 
-                    label: "Our Mission", 
+                    label: t('nav.ourMission'), 
                     href: "/about", 
                     icon: <User className="w-4 h-4" />,
-                    desc: "Blending Vedic wisdom with Artificial Intelligence."
+                    desc: t('nav.ourMissionDesc')
                 },
                 { 
-                    label: "Navi AI Models", 
+                    label: t('nav.naviAiModels'), 
                     href: "/chat", 
                     icon: <Brain className="w-4 h-4" />,
-                    desc: "Deep Jyotish intelligence for every domain."
+                    desc: t('nav.naviAiModelsDesc')
                 },            
             ]
         },
         {
             id: "horoscope",
-            label: "Astrology",
+            label: t('nav.astrology'),
             items: [
                 { 
-                    label: "Birth Chart (Kundli)", 
+                    label: t('nav.birthChart'), 
                     href: "/kundli", 
                     icon: <BookOpen className="w-4 h-4" />,
-                    desc: "Generate your free, highly detailed Vedic chart."
+                    desc: t('nav.birthChartDesc')
                 },
                 { 
-                    label: "Chart Matching", 
+                    label: t('nav.chartMatching'), 
                     href: "/kundli/match", 
                     icon: <Heart className="w-4 h-4" />,
-                    desc: "Vedic compatibility for relationships and marriage."
+                    desc: t('nav.chartMatchingDesc')
                 },
                 { 
-                    label: "Zodiac Signs (Rashis)", 
+                    label: t('nav.zodiacSigns'), 
                     href: "/rashis", 
                     icon: <Sparkles className="w-4 h-4" />,
-                    desc: "Explore the traits of the 12 Vedic moon signs."
+                    desc: t('nav.zodiacSignsDesc')
                 },
             ]
         },
         {
             id: "knowledge",
-            label: "Knowledge",
+            label: t('nav.knowledge'),
             items: [
                 { 
-                    label: "Astrology Encyclopedia", 
+                    label: t('nav.encyclopedia'), 
                     href: "/blogs", 
                     icon: <BookOpen className="w-4 h-4" />,
-                    desc: "Browse our complete library of Jyotish wisdom."
+                    desc: t('nav.encyclopediaDesc')
                 },
                 { 
-                    label: "The 12 Rashis", 
+                    label: t('nav.the12Rashis'), 
                     href: "/rashis", 
                     icon: <Sparkles className="w-4 h-4" />,
-                    desc: "Moon signs and their deep psychological traits."
+                    desc: t('nav.the12RashisDesc')
                 },
                 { 
-                    label: "The Navagraha", 
+                    label: t('nav.theNavagraha'), 
                     href: "/blogs/planets", 
                     icon: <Compass className="w-4 h-4" />,
-                    desc: "The nine planetary forces shaping your destiny."
+                    desc: t('nav.theNavagrahaDesc')
                 },
                 { 
-                    label: "The 12 Houses", 
+                    label: t('nav.the12Houses'), 
                     href: "/blogs/houses", 
                     icon: <Gem className="w-4 h-4" />,
-                    desc: "The twelve domains of human experience."
+                    desc: t('nav.the12HousesDesc')
                 },
                 { 
-                    label: "The 27 Nakshatras", 
+                    label: t('nav.the27Nakshatras'), 
                     href: "/blogs/nakshatras", 
                     icon: <Sparkles className="w-4 h-4" />,
-                    desc: "The lunar mansions and cosmic archetypes."
+                    desc: t('nav.the27NakshatrasDesc')
                 },
                 { 
-                    label: "Planetary Yogas", 
+                    label: t('nav.planetaryYogas'), 
                     href: "/blogs/yogas", 
                     icon: <BookOpen className="w-4 h-4" />,
-                    desc: "Powerful combinations that define your potential."
+                    desc: t('nav.planetaryYogasDesc')
                 },
             ]
         },
         {
             id: "services",
-            label: "Services",
+            label: t('nav.services'),
             items: [
                 {
-                    label: "Chat with Navi",
+                    label: t('nav.chatWithNavi'),
                     href: "/chat",
                     icon: <MessageSquare className="w-4 h-4" />,
-                    desc: "Private, personalized AI astrology sessions."
+                    desc: t('nav.chatWithNaviDesc')
                 },
                 {
-                    label: "Guided Consultation",
+                    label: t('nav.guidedSessions'),
                     href: "/consult", 
                     icon: <Compass className="w-4 h-4" />,
-                    desc: "Step-by-step personalized life readings."
+                    desc: t('nav.guidedSessionsDesc')
                 },
                 { 
-                    label: "AstraNavi Premium", 
+                    label: t('nav.astraNaviPremium'), 
                     href: "/plans", 
                     icon: <Sparkles className="w-4 h-4" />,
-                    desc: "Unlock advanced forecasting and deep insights."
+                    desc: t('nav.astraNaviPremiumDesc')
                 },
             ]
         }
@@ -248,6 +249,7 @@ const Navbar: React.FC = () => {
     const router = useRouter();
     const { isLoggedIn, logout, showLoading, user } = useAuth();
     const { success, ToastContainer } = useToast();
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -256,7 +258,7 @@ const Navbar: React.FC = () => {
     const navRef = useRef<HTMLElement>(null);
 
     const isChatPage = pathname?.startsWith('/chat');
-    const navSections = getNavSections(isLoggedIn);
+    const navSections = getNavSections(isLoggedIn, t);
 
     useEffect(() => {
         const nav = navRef.current;
@@ -375,6 +377,7 @@ const Navbar: React.FC = () => {
 
                 {/* Right: Actions */}
                 <div className="flex items-center justify-end space-x-4 lg:space-x-5">
+                    <LanguagePicker />
                     <ThemeToggle />
                     {!isLoggedIn ? (
                         <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="sm" className="!px-5 shadow-md shadow-secondary/10 text-xs">Login</Button>

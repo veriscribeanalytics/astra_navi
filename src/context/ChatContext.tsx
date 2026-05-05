@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { useAuth } from './AuthContext';
 import { generateUUID } from '@/lib/uuid';
 import { clientFetch } from '@/lib/apiClient';
+import { useTranslation } from '@/context/LanguageContext';
 
 /* ---------- Types ---------- */
 export interface ChatMessage {
@@ -68,6 +69,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  const { t, language } = useTranslation();
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages: [{
         id: 'welcome',
         type: 'ai',
-        text: "Namaste ✦ You're in Preview Mode. To consult Navi and receive deep Vedic analysis, please log in to your account.",
+        text: t('chat.guestWelcome'),
         createdAt: now
       }],
       averageRating: null,
@@ -105,7 +107,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setActiveChat(guestChat);
     setActiveChatId('guest-session');
-  }, []);
+  }, [t]);
 
   const loadChats = useCallback(async () => {
     if (!user?.email || isGuest) return;
@@ -178,7 +180,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
            if (!prev) return null;
            return {
              ...prev,
-             messages: prev.messages.map(m => m.id === aiMsg.id ? { ...m, text: "Consulting Navi requires an account. Please log in to receive your full Vedic analysis and planetary insights." } : m)
+             messages: prev.messages.map(m => m.id === aiMsg.id ? { ...m, text: t('chat.guestLoginRequired') } : m)
            };
         });
         setIsSending(false);
@@ -204,7 +206,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const createRes = await clientFetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: text.slice(0, 30) }),
+          body: JSON.stringify({ 
+            title: text.slice(0, 30),
+            language // Pass language to initial chat creation
+          }),
         });
         const createData = await createRes.json();
         if (createData.chat?.id) {
@@ -217,7 +222,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await clientFetch(`/api/chat/${targetId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ 
+          text,
+          language // Pass current language preference to backend
+        }),
       });
 
       const reader = res.body?.getReader();
@@ -252,19 +260,32 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, language, t]);
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (isGuest) return 'guest-session';
     if (!user?.email) return null;
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
-    const tempChat: Chat = { id: tempId, userEmail: user.email, title: initialMessage?.slice(0,30) || 'New conversation', messages: [{ id: generateUUID(), type: 'ai', text: `Namaste ✦ I'm Navi. Ask me anything.`, createdAt: now }], averageRating: null, createdAt: now, updatedAt: now };
+    const tempChat: Chat = { 
+      id: tempId, 
+      userEmail: user.email, 
+      title: initialMessage?.slice(0,30) || t('chat.newConversation'), 
+      messages: [{ 
+        id: generateUUID(), 
+        type: 'ai', 
+        text: t('chat.naviWelcome'), 
+        createdAt: now 
+      }], 
+      averageRating: null, 
+      createdAt: now, 
+      updatedAt: now 
+    };
     setActiveChat(tempChat);
     setActiveChatId(tempId);
     if (initialMessage) sendMessage(initialMessage, tempId);
     return tempId;
-  }, [user, sendMessage, isGuest]);
+  }, [user, sendMessage, isGuest, t]);
 
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;

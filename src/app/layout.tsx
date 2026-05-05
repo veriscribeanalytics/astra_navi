@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Playfair_Display, DM_Sans } from "next/font/google";
+import { Playfair_Display, DM_Sans, Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu, Noto_Sans_Kannada, Noto_Sans_Bengali, Noto_Sans_Gujarati, Noto_Sans_Malayalam, Noto_Sans_Gurmukhi } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
@@ -8,6 +8,7 @@ import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
 import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/hooks/useToast";
 
@@ -24,6 +25,54 @@ const dmSans = DM_Sans({
   weight: ["300", "400", "500", "700"],
 });
 
+const notoDevanagari = Noto_Sans_Devanagari({
+  variable: "--font-noto-devanagari",
+  subsets: ["devanagari"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoTamil = Noto_Sans_Tamil({
+  variable: "--font-noto-tamil",
+  subsets: ["tamil"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoTelugu = Noto_Sans_Telugu({
+  variable: "--font-noto-telugu",
+  subsets: ["telugu"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoKannada = Noto_Sans_Kannada({
+  variable: "--font-noto-kannada",
+  subsets: ["kannada"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoBengali = Noto_Sans_Bengali({
+  variable: "--font-noto-bengali",
+  subsets: ["bengali"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoGujarati = Noto_Sans_Gujarati({
+  variable: "--font-noto-gujarati",
+  subsets: ["gujarati"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoMalayalam = Noto_Sans_Malayalam({
+  variable: "--font-noto-malayalam",
+  subsets: ["malayalam"],
+  weight: ["300", "400", "500", "700"],
+});
+
+const notoGurmukhi = Noto_Sans_Gurmukhi({
+  variable: "--font-noto-gurmukhi",
+  subsets: ["gurmukhi"],
+  weight: ["300", "400", "500", "700"],
+});
+
 export const metadata: Metadata = {
   title: "AstraNavi | Vedic AI Astrology",
   description: "Bridging ancient Vedic wisdom with modern AI precision.",
@@ -37,7 +86,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${playfair.variable} ${dmSans.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoBengali.variable} ${notoGujarati.variable} ${notoMalayalam.variable} ${notoGurmukhi.variable} h-full antialiased`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
@@ -77,29 +126,32 @@ export default function RootLayout({
         />
       </head>
       <body 
-        className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-full flex flex-col relative"
+        className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-full flex flex-col relative h-full"
         suppressHydrationWarning
       >
-        <a href="#main-content" className="skip-to-content">
-          Skip to main content
-        </a>
         <ErrorBoundary>
           <SessionProvider>
-            <AuthProvider>
-              <ChatProvider>
-                <ThemeProvider>
-                  {/* Optimized backgrounds with adaptive quality */}
-                  <OptimizedBackgrounds />
-                  <Toaster />
-                  
-                  <Navbar />
-                  <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent pt-[var(--navbar-height,64px)]">
-                    {children}
-                  </main>
-                  <ConditionalFooter />
-                </ThemeProvider>
-              </ChatProvider>
-            </AuthProvider>
+            <LanguageProvider>
+              <AuthProvider>
+                <ChatProvider>
+                  <ThemeProvider>
+                    <a href="#main-content" className="skip-to-content">
+                      Skip to main content
+                    </a>
+                    
+                    {/* Optimized backgrounds with adaptive quality */}
+                    <OptimizedBackgrounds />
+                    <Toaster />
+
+                    <Navbar />
+                    <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent pt-[var(--navbar-height,64px)]">
+                      {children}
+                    </main>
+                    <ConditionalFooter />
+                  </ThemeProvider>
+                </ChatProvider>
+              </AuthProvider>
+            </LanguageProvider>
           </SessionProvider>
         </ErrorBoundary>
       </body>

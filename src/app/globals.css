@@ -278,6 +278,32 @@ button:focus-visible:not(.chat-input-icon-btn),
   --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Font fallbacks for Indian scripts */
+[lang="hi"] body, [lang="mr"] body {
+  font-family: var(--font-noto-devanagari), var(--font-dm-sans), sans-serif !important;
+}
+[lang="ta"] body {
+  font-family: var(--font-noto-tamil), var(--font-dm-sans), sans-serif !important;
+}
+[lang="te"] body {
+  font-family: var(--font-noto-telugu), var(--font-dm-sans), sans-serif !important;
+}
+[lang="kn"] body {
+  font-family: var(--font-noto-kannada), var(--font-dm-sans), sans-serif !important;
+}
+[lang="bn"] body {
+  font-family: var(--font-noto-bengali), var(--font-dm-sans), sans-serif !important;
+}
+[lang="gu"] body {
+  font-family: var(--font-noto-gujarati), var(--font-dm-sans), sans-serif !important;
+}
+[lang="ml"] body {
+  font-family: var(--font-noto-malayalam), var(--font-dm-sans), sans-serif !important;
+}
+[lang="pa"] body {
+  font-family: var(--font-noto-gurmukhi), var(--font-dm-sans), sans-serif !important;
+}
+
 /* Device tier durations */
 :root[data-device-tier="low"] { --transition-duration: 0ms; }
 :root[data-device-tier="mid"] { --transition-duration: 150ms; }

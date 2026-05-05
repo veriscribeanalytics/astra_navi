@@ -17,18 +17,17 @@ import LogoLoop from '@/components/ui/LogoLoop';
 import CardSwap, { Card as SwapCard } from '@/components/ui/CardSwap';
 // Pricing is on its own /plans page
 import { faqs } from "@/data/faqs";
+import { useTranslation } from '@/hooks';
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// DATA ARRAYS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-const rashiItems = [
-    { id: 'aries', nameEn: 'Aries', nameHi: 'à¤®à¥‡à¤·', icon: '/icons/rashi/aries.png', href: '/rashis' },
-    { id: 'taurus', nameEn: 'Taurus', nameHi: 'à¤µà¥ƒà¤·à¤­', icon: '/icons/rashi/taurus.png', href: '/rashis' },
-    { id: 'gemini', nameEn: 'Gemini', nameHi: 'à¤®à¤¿à¤¥à¥à¤¨', icon: '/icons/rashi/gemini.png', href: '/rashis' },
-    { id: 'cancer', nameEn: 'Cancer', nameHi: 'à¤•à¤°à¥à¤•', icon: '/icons/rashi/cancer.png', href: '/rashis' },
-    { id: 'leo', nameEn: 'Leo', nameHi: 'à¤¸à¤¿à¤‚à¤¹', icon: '/icons/rashi/leo.png', href: '/rashis' },
-    { id: 'virgo', nameEn: 'Virgo', nameHi: 'à¤•à¤¨à¥à¤¯à¤¾', icon: '/icons/rashi/virgo.png', href: '/rashis' },
-    { id: 'libra', nameEn: 'Libra', nameHi: 'à¤¤à¥à¤²à¤¾', icon: '/icons/rashi/libra.png', href: '/rashis' },
+// Navigation functions to handle translations
+const getRashiItems = (language: string) => [
+    { id: 'aries', nameEn: 'Aries', nameHi: 'मेष', icon: '/icons/rashi/aries.png', href: '/rashis' },
+    { id: 'taurus', nameEn: 'Taurus', nameHi: 'वृषभ', icon: '/icons/rashi/taurus.png', href: '/rashis' },
+    { id: 'gemini', nameEn: 'Gemini', nameHi: 'मिथुन', icon: '/icons/rashi/gemini.png', href: '/rashis' },
+    { id: 'cancer', nameEn: 'Cancer', nameHi: 'कर्क', icon: '/icons/rashi/cancer.png', href: '/rashis' },
+    { id: 'leo', nameEn: 'Leo', nameHi: 'सिंह', icon: '/icons/rashi/leo.png', href: '/rashis' },
+    { id: 'virgo', nameEn: 'Virgo', nameHi: 'कन्या', icon: '/icons/rashi/virgo.png', href: '/rashis' },
+    { id: 'libra', nameEn: 'Libra', nameHi: 'तुला', icon: '/icons/rashi/libra.png', href: '/rashis' },
     { id: 'scorpio', nameEn: 'Scorpio', nameHi: 'वृश्चिक', icon: '/icons/rashi/scorpio.png', href: '/rashis' },
     { id: 'sagittarius', nameEn: 'Sagittarius', nameHi: 'धनु', icon: '/icons/rashi/sagittarius.png', href: '/rashis' },
     { id: 'capricorn', nameEn: 'Capricorn', nameHi: 'मकर', icon: '/icons/rashi/capricorn.png', href: '/rashis' },
@@ -36,25 +35,25 @@ const rashiItems = [
     { id: 'pisces', nameEn: 'Pisces', nameHi: 'मीन', icon: '/icons/rashi/pisces.png', href: '/rashis' },
 ];
 
-const services = [
-    { icon: <Compass className="w-6 h-6" />, title: 'Complete Kundli', desc: 'Lagna, Navamsha & 16 Varga charts.', iconBg: 'bg-indigo-500/10 text-indigo-400', available: true, detail: "16+ Varga Charts" },
-    { icon: <Brain className="w-6 h-6" />, title: 'Navi AI Guide', desc: 'Conversational AI trained on classical Jyotish.', iconBg: 'bg-secondary/10 text-secondary', available: true, detail: "Instant Answers" },
-    { icon: <Calendar className="w-6 h-6" />, title: 'Daily Forecast', desc: 'Personalized transit analysis based on your Moon.', iconBg: 'bg-emerald-500/10 text-emerald-400', available: true, detail: "Nakshatra Based" },
-    { icon: <Sparkles className="w-6 h-6" />, title: 'Guided Consult', desc: "Direct guidance on career, love, and life transitions.", iconBg: 'bg-amber-500/10 text-amber-500', available: true, detail: "Strategic Clarity" },
+const getServices = (t: (key: string) => string) => [
+    { icon: <Compass className="w-6 h-6" />, title: t('nav.birthChart'), desc: t('nav.birthChartDesc'), iconBg: 'bg-indigo-500/10 text-indigo-400', available: true, detail: "16+ Varga Charts" },
+    { icon: <Brain className="w-6 h-6" />, title: t('landing.chatNaviTitle'), desc: t('landing.chatNaviDesc'), iconBg: 'bg-secondary/10 text-secondary', available: true, detail: t('common.onlineNow') },
+    { icon: <Calendar className="w-6 h-6" />, title: t('landing.forecastTitle'), desc: t('nav.cosmicDashboardDesc'), iconBg: 'bg-emerald-500/10 text-emerald-400', available: true, detail: "Nakshatra Based" },
+    { icon: <Sparkles className="w-6 h-6" />, title: t('nav.guidedSessions'), desc: t('nav.guidedSessionsDesc'), iconBg: 'bg-amber-500/10 text-amber-500', available: true, detail: "Strategic Clarity" },
     { icon: <Briefcase className="w-6 h-6" />, title: 'Career & Artha', desc: 'Wealth timing and professional success guidance.', iconBg: 'bg-amber-500/10 text-amber-400', available: true, detail: "Wealth Mapping" },
-    { icon: <Heart className="w-6 h-6" />, title: 'Soulmate Sync', desc: '36-point Guna Milan plus deep planetary sync.', iconBg: 'bg-pink-500/10 text-pink-400', available: true, detail: "Relationship AI" },
+    { icon: <Heart className="w-6 h-6" />, title: t('landing.soulmateSyncTitle'), desc: t('landing.soulmateSyncDesc'), iconBg: 'bg-pink-500/10 text-pink-400', available: true, detail: "Relationship AI" },
 ];
 
-const knowledgeAreas = [
-    { title: "The 27 Nakshatras", desc: "Deep dive into the 27 lunar mansions.", icon: <Star className="w-6 h-6 text-secondary" />, link: "/blogs/nakshatras", count: "27 Deep Dives", detail: "Lunar Matrix" },
-    { title: "Planetary Yogas", desc: "Life-shifting planetary combinations.", icon: <Zap className="w-6 h-6 text-indigo-400" />, link: "/blogs/yogas", count: "100+ Yogas", detail: "Karmic Codes" },
-    { title: "The 12 Bhavas", desc: "Master the 12 domains of human life.", icon: <HomeIcon className="w-6 h-6 text-emerald-400" />, link: "/blogs/houses", count: "12 Houses", detail: "Life Spheres" },
+const getKnowledgeAreas = (t: (key: string) => string) => [
+    { title: t('nav.the27Nakshatras'), desc: t('nav.the27NakshatrasDesc'), icon: <Star className="w-6 h-6 text-secondary" />, link: "/blogs/nakshatras", count: "27 Deep Dives", detail: "Lunar Matrix" },
+    { title: t('nav.planetaryYogas'), desc: t('nav.planetaryYogasDesc'), icon: <Zap className="w-6 h-6 text-indigo-400" />, link: "/blogs/yogas", count: "100+ Yogas", detail: "Karmic Codes" },
+    { title: t('nav.the12Houses'), desc: t('nav.the12HousesDesc'), icon: <HomeIcon className="w-6 h-6 text-emerald-400" />, link: "/blogs/houses", count: "12 Houses", detail: "Life Spheres" },
     { title: "Dashas & Periods", desc: "Understanding the planetary time-lords.", icon: <Clock className="w-6 h-6 text-rose-400" />, link: "/blogs", count: "Time Mapping", detail: "Predictive AI" },
     { title: "Remedies & Gems", desc: "Authentic prescriptions for balance.", icon: <Gem className="w-6 h-6 text-amber-400" />, link: "/blogs", count: "Vedic Cure", detail: "Ratna Vigyan" },
     { title: "Panchang Pulse", desc: "Daily Tithi, Yoga, Karana & Muhurta.", icon: <Sun className="w-6 h-6 text-indigo-400" />, link: "/blogs", count: "Daily Flux", detail: "Event Timing" }
 ];
 
-const steps = [
+const getSteps = (t: (key: string) => string) => [
     { icon: <MapPin className="w-8 h-8 text-[#D4AF37]" />, title: "Precise Input", desc: "Coordinates and exact birth time seed your astronomical map.", detail: "GPS Sync" },
     { icon: <Network className="w-8 h-8 text-[#D4AF37]" />, title: "Chart Assembly", desc: "Mapping 9 Grahas across 16 Varga charts for deep resolution.", detail: "Varga Matrix" },
     { icon: <Clock className="w-8 h-8 text-[#D4AF37]" />, title: "Dasha Timeline", desc: "Calculating Vimshottari periods to unlock your personal time-lords.", detail: "Predictive" },
@@ -62,61 +61,50 @@ const steps = [
     { icon: <Sparkles className="w-8 h-8 text-[#D4AF37]" />, title: "Living Guidance", desc: "Receive actionable counsel on Dharma, Artha, and relationship sync.", detail: "Action Plan" }
 ];
 
-const trustPoints = [
+const getTrustPoints = (t: (key: string) => string) => [
     { icon: <Lock className="w-6 h-6 text-secondary" />, title: "Privacy First", desc: "Birth data is AES-256 encrypted and never shared with third parties.", sub: "End-to-End Secure" },
     { icon: <CheckCircle className="w-6 h-6 text-secondary" />, title: "Textual Purity", desc: "Logic derived strictly from BPHS, Phaladeepika, and Jataka Parijata.", sub: "Classical Standards" },
     { icon: <Shield className="w-6 h-6 text-secondary" />, title: "Global Resilience", desc: "Edge-based computation ensures high availability for transit tracking.", sub: "99.9% Uptime" }
 ];
 
-
-
-const horoscopeCategories = [
-    { title: 'Career', text: 'Shani transit suggests discipline in communication.', icon: <Briefcase className="w-4 h-4 text-orange-600" />, bg: 'bg-orange-500/10' },
-    { title: 'Love', text: 'Venus alignment favors deep soulmate connection.', icon: <Heart className="w-4 h-4 text-pink-600" />, bg: 'bg-pink-500/10' },
-    { title: 'Consult', text: 'Ask Navi about the upcoming planetary shifts.', icon: <Sparkles className="w-4 h-4 text-amber-600" />, bg: 'bg-amber-500/10' },
-    { title: 'Wealth', text: 'Jupiter aspects your 11th house of permanent gains.', icon: <DollarSign className="w-4 h-4 text-yellow-600" />, bg: 'bg-yellow-500/10' },
-];
-
-const slides = [
+const getSlides = (t: (key: string) => string) => [
     {
-        tag: "Free Kundli â€¢ Instant Result",
-        title: <>Ancient Wisdom, <br/><span className="text-secondary italic">Decoded in 30s</span></>,
-        desc: "Get your precise Vedic Kundli instantly. Unlock your life's purpose and karmic patterns with 5,000 years of authentic astronomical wisdom.",
-        stats: [{ v: "30 Sec", l: "Free Kundli" }, { v: "16 Varga", l: "Charts" }, { v: "Precise", l: "AI Jyotish" }],
-        btn1: { label: "Get My Janam Kundli", action: "portals" },
-        btn2: { label: "Explore AI Guide", href: "/chat" }
+        tag: t('landing.slides.0.tag'),
+        title: <>{t('landing.slides.0.title1')} <br/><span className="text-secondary italic">{t('landing.slides.0.titleHighlight')}</span></>,
+        desc: t('landing.slides.0.desc'),
+        stats: [{ v: t('landing.slides.0.stat1v'), l: t('landing.slides.0.stat1l') }, { v: t('landing.slides.0.stat2v'), l: t('landing.slides.0.stat2l') }, { v: t('landing.slides.0.stat3v'), l: t('landing.slides.0.stat3l') }],
+        btn1: { label: t('landing.slides.0.btn1'), action: "portals" },
+        btn2: { label: t('landing.slides.0.btn2'), href: "/chat" }
     },
     {
-        tag: "AI Astro Guidance",
-        title: <>Vedic Wisdom <br/><span className="text-secondary italic">Beyond Boundaries</span></>,
-        desc: "Get instant, deep clarity from Navi, our specialized AI trained on BPHS and classical Jyotish texts. Available 24/7 for your path.",
-        stats: [{ v: "AI Navi", l: "24/7 Chat" }, { v: "Classical", l: "Logic" }, { v: "100%", l: "Private" }],
-        btn1: { label: "Chat with Navi AI", href: "/chat" },
-        btn2: { label: "How it Works", action: "how-it-works" }
+        tag: t('landing.slides.1.tag'),
+        title: <>{t('landing.slides.1.title1')} <br/><span className="text-secondary italic">{t('landing.slides.1.titleHighlight')}</span></>,
+        desc: t('landing.slides.1.desc'),
+        stats: [{ v: t('landing.slides.1.stat1v'), l: t('landing.slides.1.stat1l') }, { v: t('landing.slides.1.stat2v'), l: t('landing.slides.1.stat2l') }, { v: t('landing.slides.1.stat3v'), l: t('landing.slides.1.stat3l') }],
+        btn1: { label: t('landing.slides.1.btn1'), href: "/chat" },
+        btn2: { label: t('landing.slides.1.btn2'), action: "how-it-works" }
     },
     {
-        tag: "Soulmate Matchmaking",
-        title: <>Discover Your <br/><span className="text-secondary italic">Karmic Alignment</span></>,
-        desc: "Advanced 36-point Guna Milan plus deep planetary sync analysis based on Ashtakoot standards. Understand your relationship's destiny.",
-        stats: [{ v: "36 Gunas", l: "Milan" }, { v: "Dosha", l: "Check" }, { v: "Soul", l: "Sync" }],
-        btn1: { label: "Check 36 Guna Match", action: "portals" },
-        btn2: { label: "Sync Souls", href: "/chat" }
+        tag: t('landing.slides.2.tag'),
+        title: <>{t('landing.slides.2.title1')} <br/><span className="text-secondary italic">{t('landing.slides.2.titleHighlight')}</span></>,
+        desc: t('landing.slides.2.desc'),
+        stats: [{ v: t('landing.slides.2.stat1v'), l: t('landing.slides.2.stat1l') }, { v: t('landing.slides.2.stat2v'), l: t('landing.slides.2.stat2l') }, { v: t('landing.slides.2.stat3v'), l: t('landing.slides.2.stat3l') }],
+        btn1: { label: t('landing.slides.2.btn1'), action: "portals" },
+        btn2: { label: t('landing.slides.2.btn2'), href: "/chat" }
     },
     {
-        tag: "Daily Personalized Flow",
-        title: <>Align With <br/><span className="text-secondary italic">Your Moon Purpose</span></>,
-        desc: "Your daily horoscope is calculated down to your exact Moon sign and Nakshatra. Stop following generic, sun-sign predictions.",
-        stats: [{ v: "Personal", l: "Insights" }, { v: "Nakshatra", l: "Based" }, { v: "Daily", l: "Guidance" }],
-        btn1: { label: "Get Daily Guide", href: "/chat" },
-        btn2: { label: "Explore Transits", action: "portals" }
+        tag: t('landing.slides.3.tag'),
+        title: <>{t('landing.slides.3.title1')} <br/><span className="text-secondary italic">{t('landing.slides.3.titleHighlight')}</span></>,
+        desc: t('landing.slides.3.desc'),
+        stats: [{ v: t('landing.slides.3.stat1v'), l: t('landing.slides.3.stat1l') }, { v: t('landing.slides.3.stat2v'), l: t('landing.slides.3.stat2l') }, { v: t('landing.slides.3.stat3v'), l: t('landing.slides.3.stat3l') }],
+        btn1: { label: t('landing.slides.3.btn1'), href: "/chat" },
+        btn2: { label: t('landing.slides.3.btn2'), action: "portals" }
     }
 ];
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// MAIN COMPONENT
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function LandingPage() {
     const router = useRouter();
+    const { t, language } = useTranslation();
     const [activeSlide, setActiveSlide] = useState(0);
     const [interactionTick, setInteractionTick] = useState(0);
     const [openFAQIndex, setOpenFAQIndex] = useState<number | null>(0);
@@ -128,13 +116,28 @@ export default function LandingPage() {
     const [errors, setErrors] = useState({ name: '', dob: '', tob: '', pob: '' });
     const [isCalculating, setIsCalculating] = useState(false);
 
+    // Memoized Data
+    const slides = useMemo(() => getSlides(t), [t]);
+    const services = useMemo(() => getServices(t), [t]);
+    const knowledgeAreas = useMemo(() => getKnowledgeAreas(t), [t]);
+    const steps = useMemo(() => getSteps(t), [t]);
+    const trustPoints = useMemo(() => getTrustPoints(t), [t]);
+    const rashiItems = useMemo(() => getRashiItems(language), [language]);
+    const translatedFaqs = useMemo(() => {
+        const rawFaqs = (t('faqs') as any);
+        if (Array.isArray(rawFaqs)) {
+            return rawFaqs.map(f => ({ question: f.q, answer: f.a }));
+        }
+        return faqs; // Fallback to hardcoded faqs if something is wrong
+    }, [t]);
+
     // Hero Rotation
     useEffect(() => {
         const timer = setInterval(() => {
             setActiveSlide((prev) => (prev + 1) % slides.length);
         }, 5000);
         return () => clearInterval(timer);
-    }, [interactionTick]);
+    }, [interactionTick, slides.length]);
 
     const handleGenerateTeaser = (type: 'kundli' | 'match') => {
         setIsCalculating(true);
@@ -223,7 +226,7 @@ export default function LandingPage() {
             title: `${rashi.nameEn} (${rashi.nameHi})`,
             href: rashi.href
         })), 
-    []);
+    [rashiItems]);
 
     return (
         <div className="flex flex-col w-full bg-transparent pb-20">
@@ -256,57 +259,59 @@ export default function LandingPage() {
                                 <div className="inline-flex w-fit mx-auto lg:mx-0 items-center space-x-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30">
                                     <Sparkles className="text-secondary w-3.5 h-3.5" />
                                     <span className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] font-bold text-secondary font-body">
-                                        {slides[activeSlide].tag}
+                                        {slides[activeSlide]?.tag}
                                     </span>
                                 </div>
                                 
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-headline font-bold text-primary leading-[1.15]">
-                                    {slides[activeSlide].title}
+                                    {slides[activeSlide]?.title}
                                 </h1>
                                 
                                 <p className="text-sm sm:text-base md:text-base text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0 opacity-80">
-                                    {slides[activeSlide].desc}
+                                    {slides[activeSlide]?.desc}
                                 </p>
                                 
                                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-1">
                                     <Button 
                                         onClick={() => {
-                                            if (slides[activeSlide].btn1.action) {
-                                                document.getElementById(slides[activeSlide].btn1.action)?.scrollIntoView({behavior:'smooth'});
+                                            const action = slides[activeSlide]?.btn1.action;
+                                            if (action) {
+                                                document.getElementById(action)?.scrollIntoView({behavior:'smooth'});
                                             } else {
-                                                router.push(slides[activeSlide].btn1.href || '/chat');
+                                                router.push(slides[activeSlide]?.btn1.href || '/chat');
                                             }
                                         }} 
                                         size="lg" 
                                         className="gold-gradient shadow-xl px-10 w-full sm:w-auto"
                                     >
-                                        {slides[activeSlide].btn1.label}
+                                        {slides[activeSlide]?.btn1.label}
                                     </Button>
                                     <Button 
                                         onClick={() => {
-                                            if (slides[activeSlide].btn2.action) {
-                                                document.getElementById(slides[activeSlide].btn2.action)?.scrollIntoView({behavior:'smooth'});
+                                            const action = slides[activeSlide]?.btn2.action;
+                                            if (action) {
+                                                document.getElementById(action)?.scrollIntoView({behavior:'smooth'});
                                             } else {
-                                                router.push(slides[activeSlide].btn2.href || '/chat');
+                                                router.push(slides[activeSlide]?.btn2.href || '/chat');
                                             }
                                         }}
                                         variant="ghost" 
                                         size="lg" 
                                         className="border border-outline-variant/30 px-10 w-full sm:w-auto text-primary"
                                     >
-                                        {slides[activeSlide].btn2.label}
+                                        {slides[activeSlide]?.btn2.label}
                                     </Button>
                                 </div>
 
                                 <div className="mt-auto pb-2 space-y-3">
                                     <div className="flex items-center justify-center lg:justify-start gap-3 text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest py-2 border-t border-outline-variant/10">
-                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> BPHS Standards</span>
-                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> English & Hindi</span>
-                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> AI Precision</span>
+                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> {t('landing.standards.bphs')}</span>
+                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> {t('landing.standards.languages')}</span>
+                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> {t('landing.standards.aiPrecision')}</span>
                                     </div>
 
                                     <div className="flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10">
-                                        {slides[activeSlide].stats.map((stat, idx) => (
+                                        {slides[activeSlide]?.stats.map((stat, idx) => (
                                             <div key={idx} className="flex flex-col">
                                                 <div className="text-lg sm:text-xl font-bold text-secondary font-body">{stat.v}</div>
                                                 <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-on-surface-variant/50 font-bold font-body">{stat.l}</div>
@@ -341,7 +346,7 @@ export default function LandingPage() {
                                         <div className="h-28 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
                                             <div className="text-center px-4">
                                                 <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Authentic Jyotish</div>
-                                                <div className="text-white font-headline text-lg">Janam Kundli</div>
+                                                <div className="text-white font-headline text-lg">{t('landing.janamKundliTitle')}</div>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-3 gap-2">
@@ -367,8 +372,8 @@ export default function LandingPage() {
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><Brain className="text-white w-5 h-5" /></div>
                                             <div>
-                                                <div className="text-white text-xs font-bold">Navi AI Guide</div>
-                                                <div className="text-blue-400 text-[9px] flex items-center gap-1 font-bold"><div className="w-1 h-1 rounded-full bg-blue-400" /> Online</div>
+                                                <div className="text-white text-xs font-bold">{t('landing.chatNaviTitle')}</div>
+                                                <div className="text-blue-400 text-[9px] flex items-center gap-1 font-bold"><div className="w-1 h-1 rounded-full bg-blue-400" /> {t('common.online')}</div>
                                             </div>
                                         </div>
                                         <div className="space-y-3">
@@ -495,8 +500,8 @@ export default function LandingPage() {
             >
                 {/* Section Headline */}
                 <div className="text-center mb-8">
-                    <div className="text-[10px] text-secondary font-bold tracking-[0.25em] uppercase mb-3">Your Vedic Command Center</div>
-                    <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Everything You Need, <span className="text-secondary italic">One Platform</span></h2>
+                    <div className="text-[10px] text-secondary font-bold tracking-[0.25em] uppercase mb-3">{t('landing.portalsHeadline')}</div>
+                    <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-primary">{t('landing.portalsTitle')}<span className="text-secondary italic">{t('landing.portalsTitleHighlight')}</span></h2>
                 </div>
 
                 {/* 4-Column Grid: Chat Navi + 3 Portals */}
@@ -511,12 +516,12 @@ export default function LandingPage() {
                                 </div>
                                 <div className="flex items-center gap-2 mb-3">
                                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Online Now</span>
+                                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{t('common.onlineNow')}</span>
                                 </div>
-                                <h3 className="text-xl font-headline font-bold text-primary mb-3">Chat with Navi</h3>
-                                <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-6 max-w-[220px]">Ask anything about your Kundli, Dashas, transits, or life guidance. AI trained on 5000+ classical texts.</p>
+                                <h3 className="text-xl font-headline font-bold text-primary mb-3">{t('landing.chatNaviTitle')}</h3>
+                                <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-6 max-w-[220px]">{t('landing.chatNaviDesc')}</p>
                                 <div className="flex items-center text-[11px] font-bold text-secondary uppercase tracking-widest gap-2 group-hover:translate-x-1 transition-transform bg-secondary/5 px-4 py-2 rounded-full border border-secondary/10">
-                                    Start Conversation <ArrowRight className="w-3.5 h-3.5" />
+                                    {t('landing.chatNaviCta')} <ArrowRight className="w-3.5 h-3.5" />
                                 </div>
                             </div>
                         </Card>
@@ -526,17 +531,17 @@ export default function LandingPage() {
                     <Card className="border-outline-variant/30 flex flex-col h-full items-center text-center justify-center" padding="md">
                         <div className="flex flex-col items-center justify-center w-full">
                             <Sparkles className="text-secondary w-10 h-10 mb-4 animate-pulse" />
-                            <h3 className="text-xl font-headline font-bold text-primary mb-1 uppercase tracking-widest">Today&apos;s Forecast</h3>
-                            <span className="text-[8px] font-bold text-secondary px-2 py-0.5 bg-secondary/10 rounded-full border border-secondary/20 mb-6">LIVE TRANSIT</span>
+                            <h3 className="text-xl font-headline font-bold text-primary mb-1 uppercase tracking-widest">{t('landing.forecastTitle')}</h3>
+                            <span className="text-[8px] font-bold text-secondary px-2 py-0.5 bg-secondary/10 rounded-full border border-secondary/20 mb-6">{t('landing.liveTransit')}</span>
                             
                             <div className="w-full space-y-4 mb-6">
                                 <div className="flex justify-between items-center bg-secondary/5 p-3 rounded-xl border border-secondary/10">
                                     <div className="text-left">
-                                        <div className="text-[8px] font-bold text-secondary uppercase tracking-[0.2em]">Moon Sign</div>
+                                        <div className="text-[8px] font-bold text-secondary uppercase tracking-[0.2em]">{t('landing.moonSign')}</div>
                                         <div className="text-base font-bold text-primary">Pisces</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-[8px] font-bold text-on-surface-variant/40 uppercase">Nakshatra</div>
+                                        <div className="text-[8px] font-bold text-on-surface-variant/40 uppercase">{t('landing.nakshatra')}</div>
                                         <div className="text-[10px] font-bold text-primary">Revati</div>
                                     </div>
                                 </div>
@@ -558,7 +563,7 @@ export default function LandingPage() {
                             </div>
                             
                             <Button href="/login" variant="secondary" size="sm" className="w-full text-[10px] font-bold text-secondary hover:text-secondary/80 flex items-center justify-center gap-1 h-10 border-secondary/20">
-                                Unlock Full Predictions <ArrowRight className="w-3.5 h-3.5" />
+                                {t('landing.unlockFullPredictions')} <ArrowRight className="w-3.5 h-3.5" />
                             </Button>
                         </div>
                     </Card>
@@ -569,23 +574,23 @@ export default function LandingPage() {
                             {isCalculating && teaserMode.type === 'kundli' ? (
                                 <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-3">
                                     <div className="w-10 h-10 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin" />
-                                    <p className="text-[10px] font-bold text-secondary animate-pulse uppercase tracking-widest">Mapping Destiny...</p>
+                                    <p className="text-[10px] font-bold text-secondary animate-pulse uppercase tracking-widest">{t('landing.mappingDestiny')}</p>
                                 </motion.div>
                             ) : teaserMode.type === 'kundli' ? (
                                 <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="h-full flex flex-col items-center text-center justify-center">
-                                    <span className="text-[7px] font-bold bg-secondary/20 text-secondary px-1.5 py-0.5 rounded tracking-tighter uppercase mb-2">Sample Preview</span>
+                                    <span className="text-[7px] font-bold bg-secondary/20 text-secondary px-1.5 py-0.5 rounded tracking-tighter uppercase mb-2">{t('landing.samplePreview')}</span>
                                     <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/20 mb-4 w-full">
-                                        <div className="text-[8px] font-bold text-secondary uppercase mb-1">Active Mahadasha</div>
+                                        <div className="text-[8px] font-bold text-secondary uppercase mb-1">{t('landing.activeMahadasha')}</div>
                                         <div className="text-base font-bold text-primary">Jupiter <span className="text-[10px] font-normal text-on-surface-variant/60">- Saturn</span></div>
                                     </div>
-                                    <Button href="/login" size="sm" variant="primary" className="text-xs w-full h-10 mb-2">Unlock Full Kundli</Button>
-                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-[10px] text-on-surface-variant/40 hover:text-secondary transition-colors">Back to Form</button>
+                                    <Button href="/login" size="sm" variant="primary" className="text-xs w-full h-10 mb-2">{t('landing.unlockFullKundli')}</Button>
+                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-[10px] text-on-surface-variant/40 hover:text-secondary transition-colors">{t('landing.backToForm')}</button>
                                 </motion.div>
                             ) : (
                                 <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center text-center justify-center">
                                     <BookOpen className="text-secondary w-10 h-10 mb-4" />
-                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">Janam Kundli</h3>
-                                    <p className="text-sm text-on-surface-variant/70 mb-6">Generate your precise Vedic birth chart.</p>
+                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('landing.janamKundliTitle')}</h3>
+                                    <p className="text-sm text-on-surface-variant/70 mb-6">{t('landing.janamKundliDesc')}</p>
                                     <form onSubmit={(e) => { e.preventDefault(); handleGenerateTeaser('kundli'); }} className="space-y-2 w-full">
                                         <Input placeholder="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required className="h-9 text-xs" />
                                         <div className="grid grid-cols-2 gap-2">
@@ -593,7 +598,7 @@ export default function LandingPage() {
                                             <Input type="time" value={formData.tob} onChange={(e) => setFormData({...formData, tob: e.target.value})} required className="h-9 text-xs" />
                                         </div>
                                         <Input placeholder="Place of Birth" value={formData.pob} onChange={(e) => setFormData({...formData, pob: e.target.value})} required className="h-9 text-xs" />
-                                        <Button type="submit" fullWidth size="sm" className="h-9 text-xs mt-2">Calculate Kundli</Button>
+                                        <Button type="submit" fullWidth size="sm" className="h-9 text-xs mt-2">{t('landing.calculateKundli')}</Button>
                                     </form>
                                 </motion.div>
                             )}
@@ -606,7 +611,7 @@ export default function LandingPage() {
                             {isCalculating && teaserMode.type === 'match' ? (
                                 <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-3">
                                     <div className="w-10 h-10 border-4 border-rose-500/20 border-t-rose-500 rounded-full animate-spin" />
-                                    <p className="text-[10px] font-bold text-rose-500 animate-pulse uppercase tracking-widest">Scanning Sync...</p>
+                                    <p className="text-[10px] font-bold text-rose-500 animate-pulse uppercase tracking-widest">{t('landing.scanningSync')}</p>
                                 </motion.div>
                             ) : teaserMode.type === 'match' ? (
                                 <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="h-full flex flex-col items-center justify-center text-center">
@@ -616,21 +621,21 @@ export default function LandingPage() {
                                             <div className="text-[8px] font-bold text-rose-500 uppercase">Gunas</div>
                                         </div>
                                     </div>
-                                    <h3 className="text-sm font-headline font-bold text-primary mb-1">High Match</h3>
-                                    <Button href="/login" size="sm" className="gold-gradient w-full h-9 text-xs mt-3">Unlock Report</Button>
-                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-[9px] text-on-surface-variant/40 mt-2 hover:text-rose-500">Back</button>
+                                    <h3 className="text-sm font-headline font-bold text-primary mb-1">{t('landing.highMatch')}</h3>
+                                    <Button href="/login" size="sm" className="gold-gradient w-full h-9 text-xs mt-3">{t('landing.unlockReport')}</Button>
+                                    <button onClick={() => setTeaserMode({type:null, active:false})} className="text-[9px] text-on-surface-variant/40 mt-2 hover:text-rose-500">{t('common.back')}</button>
                                 </motion.div>
                             ) : (
                                 <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center text-center justify-center">
                                     <Heart className="w-10 h-10 text-rose-500 mb-4 animate-pulse" />
-                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">Soulmate Sync</h3>
-                                    <p className="text-sm text-on-surface-variant/70 mb-6">36-point Guna compatibility check.</p>
+                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('landing.soulmateSyncTitle')}</h3>
+                                    <p className="text-sm text-on-surface-variant/70 mb-6">{t('landing.soulmateSyncDesc')}</p>
                                     <div className="w-full space-y-2 mb-3">
                                         <Input placeholder="Your Name" value={matchData.name1} onChange={(e) => setMatchData({...matchData, name1: e.target.value})} className="h-9 text-xs" />
                                         <Input placeholder="Partner's Name" value={matchData.name2} onChange={(e) => setMatchData({...matchData, name2: e.target.value})} className="h-9 text-xs" />
                                     </div>
                                     <Button onClick={() => handleGenerateTeaser('match')} variant="secondary" size="sm" className="border-rose-500/30 hover:bg-rose-500/10 text-rose-600 w-full h-9 text-xs">
-                                        Check Match
+                                        {t('landing.checkMatch')}
                                     </Button>
                                 </motion.div>
                             )}
@@ -647,9 +652,9 @@ export default function LandingPage() {
                         <div className="mb-6">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/5 border border-indigo-500/10 mb-3">
                                 <Gem className="w-3 h-3 text-indigo-400" />
-                                <span className="text-[10px] font-bold tracking-[0.25em] text-indigo-400 uppercase">The Jyotish Toolkit</span>
+                                <span className="text-[10px] font-bold tracking-[0.25em] text-indigo-400 uppercase">{t('landing.toolkitHeadline')}</span>
                             </div>
-                            <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary">Ancient Wisdom, <span className="text-secondary italic">Modern Detail</span></h2>
+                            <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary">{t('landing.toolkitTitle')}<span className="text-secondary italic">{t('landing.toolkitTitleHighlight')}</span></h2>
                         </div>
                         
                         <div className="grid grid-cols-2 border border-outline-variant/30 rounded-[32px] overflow-hidden bg-surface divide-x divide-y divide-outline-variant/20">
@@ -674,12 +679,12 @@ export default function LandingPage() {
                         <div className="mb-6">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 mb-3">
                                 <BookOpen className="w-3 h-3 text-emerald-500" />
-                                <span className="text-[10px] font-bold tracking-[0.25em] text-emerald-500 uppercase">Cosmic Archive</span>
+                                <span className="text-[10px] font-bold tracking-[0.25em] text-emerald-500 uppercase">{t('landing.archiveHeadline')}</span>
                             </div>
                             <div className="flex items-end justify-between">
-                                <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary">Explore <span className="text-secondary italic">Library</span></h2>
+                                <h2 className="font-headline text-2xl sm:text-4xl font-bold text-primary">{t('landing.archiveTitle')}<span className="text-secondary italic">{t('landing.archiveTitleHighlight')}</span></h2>
                                 <Link href="/blogs" className="text-[11px] font-bold text-secondary uppercase tracking-[0.15em] flex items-center gap-1.5 hover:translate-x-1 transition-transform mb-1">
-                                    Full Archive <ArrowRight className="w-3.5 h-3.5" />
+                                    {t('landing.fullArchive')} <ArrowRight className="w-3.5 h-3.5" />
                                 </Link>
                             </div>
                         </div>
@@ -712,12 +717,12 @@ export default function LandingPage() {
                                     <Sparkles className="w-8 h-8 text-secondary" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xl sm:text-2xl font-bold text-primary mb-1">Master Your Destiny with Premium Insights</h4>
-                                    <p className="text-sm sm:text-base text-on-surface-variant/70">Join 10,000+ users. Access advanced Muhurtas, AI Dashas, and deep chart analysis.</p>
+                                    <h4 className="text-xl sm:text-2xl font-bold text-primary mb-1">{t('landing.premiumTitle')}</h4>
+                                    <p className="text-sm sm:text-base text-on-surface-variant/70">{t('landing.premiumDesc')}</p>
                                 </div>
                             </div>
                             <div className="mt-6 sm:mt-0 px-8 py-4 rounded-2xl bg-secondary text-background font-bold text-base flex items-center gap-2 group-hover:shadow-xl group-hover:shadow-secondary/20 transition-all">
-                                View Plans & Pricing <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                {t('landing.viewPlans')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </div>
                         </div>
                     </Link>
@@ -732,8 +737,8 @@ export default function LandingPage() {
                     </svg>
                 </div>
                 <div className="max-w-[1680px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto px-4 text-center mb-24 relative z-10">
-                    <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">The Path to Clarity</div>
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline mb-6 text-primary">From Birth Moment to <span className="text-secondary italic">Cosmic Map</span></h2>
+                    <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">{t('landing.howItWorksHeadline')}</div>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline mb-6 text-primary">{t('landing.howItWorksTitle')}<span className="text-secondary italic">{t('landing.howItWorksTitleHighlight')}</span></h2>
                 </div>
                 
                 <div className="max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12 relative z-10 px-4">
@@ -760,8 +765,8 @@ export default function LandingPage() {
             {/* 10. TRUST & FAQ */}
             <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={sectionVariants} className="py-16 lg:py-24 relative bg-transparent px-4 lg:px-12 max-w-[1680px] 2xl:max-w-[2000px] 3xl:max-w-[2400px] mx-auto">
                 <div className="text-center mb-24">
-                    <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">Our Commitment</div>
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-16">Guarded by Tradition</h2>
+                    <div className="text-[11px] text-secondary font-bold tracking-[0.25em] uppercase mb-5">{t('landing.trustHeadline')}</div>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-16">{t('landing.trustTitle')}</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 lg:gap-16 max-w-[1400px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto">
                         {trustPoints.map((point, idx) => (
                             <Card key={idx} variant="bordered" padding="lg" className="flex flex-col items-center text-center relative overflow-hidden group !rounded-[32px]">
@@ -779,11 +784,11 @@ export default function LandingPage() {
 
                 <div className="max-w-[1150px] 2xl:max-w-[1500px] 3xl:max-w-[1800px] mx-auto mt-40" id="faq">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl sm:text-5xl font-bold font-headline mb-5 text-primary">Questions About Jyotish</h2>
-                        <p className="text-on-surface-variant/60 text-lg">Everything you need to know about our authentic Vedic approach.</p>
+                        <h2 className="text-4xl sm:text-5xl font-bold font-headline mb-5 text-primary">{t('landing.faqTitle')}</h2>
+                        <p className="text-on-surface-variant/60 text-lg">{t('landing.faqDesc')}</p>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-20">
-                        {faqs.map((faq, idx) => (
+                        {translatedFaqs.map((faq, idx) => (
                             <div key={idx} className="border border-outline-variant/30 rounded-[32px] bg-surface overflow-hidden hover:border-secondary/30 transition-colors h-fit">
                                 <button onClick={() => toggleFAQ(idx)} className="w-full flex justify-between items-center p-6 text-left group">
                                     <span className="font-headline font-semibold text-lg text-primary group-hover:text-secondary transition-colors pr-4">{faq.question}</span>
@@ -805,11 +810,11 @@ export default function LandingPage() {
                         <div className="flex items-center gap-6">
                             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white"><MessageSquare className="w-7 h-7" /></div>
                             <div className="text-center sm:text-left">
-                                <h4 className="text-xl font-bold text-primary">Still have questions?</h4>
-                                <p className="text-base text-on-surface-variant/60">Ask Navi, our AI guide, anything about Jyotish.</p>
+                                <h4 className="text-xl font-bold text-primary">{t('landing.stillHaveQuestions')}</h4>
+                                <p className="text-base text-on-surface-variant/60">{t('landing.askAiGuide')}</p>
                             </div>
                         </div>
-                        <Button href="/chat" variant="secondary" className="border-secondary/30 text-secondary px-10 h-12 text-base">Chat with Navi</Button>
+                        <Button href="/chat" variant="secondary" className="border-secondary/30 text-secondary px-10 h-12 text-base">{t('landing.chatNaviTitle')}</Button>
                     </div>
                 </div>
             </motion.section>
@@ -826,11 +831,11 @@ export default function LandingPage() {
                 
                 <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
                     <Sparkles className="w-12 h-12 text-secondary mx-auto mb-8 animate-pulse" />
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold text-primary mb-8">Ready to Align with the <span className="text-secondary italic">Cosmos?</span></h2>
-                    <p className="text-on-surface-variant/80 text-lg mb-12 max-w-2xl mx-auto">Join thousands who have discovered clarity through the ancient codes of Vedic astrology.</p>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold text-primary mb-8">{t('landing.readyToAlign')}<span className="text-secondary italic">{t('landing.readyToAlignHighlight')}</span></h2>
+                    <p className="text-on-surface-variant/80 text-lg mb-12 max-w-2xl mx-auto">{t('landing.finalCtaDesc')}</p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                        <Button href="/chat" size="sm" className="gold-gradient shadow-2xl px-12 text-lg">Begin Your Journey</Button>
-                        <Button href="/about" size="sm" variant="ghost" className="text-primary hover:bg-primary/5 border border-outline-variant/30 px-12 text-lg">Learn Our Method</Button>
+                        <Button href="/chat" size="sm" className="gold-gradient shadow-2xl px-12 text-lg">{t('landing.beginJourney')}</Button>
+                        <Button href="/about" size="sm" variant="ghost" className="text-primary hover:bg-primary/5 border border-outline-variant/30 px-12 text-lg">{t('landing.learnMethod')}</Button>
                     </div>
                 </div>
             </section>

@@ -19,18 +19,19 @@ import { getRashiData } from "@/lib/astrology";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/hooks";
 
-function formatRelativeTime(date: Date) {
+function formatRelativeTime(date: Date, t: (key: string) => string) {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 60) return t('dashboard.justNow');
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 60) return `${diffInMinutes}${t('dashboard.minutesAgo')}`;
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 24) return `${diffInHours}${t('dashboard.hoursAgo')}`;
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
+    if (diffInDays < 7) return `${diffInDays}${t('dashboard.daysAgo')}`;
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
@@ -47,7 +48,7 @@ interface KundliStats {
 // ─── Sub-components ─────────────────────────────
 import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 
-const TOPIC_PILLS = [
+const getTopicPills = (t: (key: string) => string) => [
     { icon: '💼', label: 'Career & Finance' },
     { icon: '💑', label: 'Love & Marriage' },
     { icon: '🏠', label: 'Property & Home' },
@@ -58,76 +59,77 @@ const TOPIC_PILLS = [
     { icon: '🪐', label: 'Current Transits' },
 ];
 
-const FEATURES = [
+const getFeatures = (t: (key: string) => string) => [
     { 
         type: 'feature',
-        label: "Janam Kundli", 
-        desc: "Detailed birth chart & planetary analysis based on Vedic wisdom.", 
+        label: t('dashboard.janamKundli'), 
+        desc: t('dashboard.janamKundliDesc'), 
         icon: <Globe className="w-5 h-5" />, 
         href: "/kundli",
         color: "text-blue-400"
     },
     { 
         type: 'feature',
-        label: "AI Guidance", 
-        desc: "Instant, mathematically-precise astrological guidance from Navi AI.", 
+        label: t('dashboard.aiGuidance'), 
+        desc: t('dashboard.aiGuidanceDesc'), 
         icon: <MessageSquare className="w-5 h-5" />, 
         href: "/chat",
         color: "text-secondary"
     },
     { 
         type: 'questions',
-        label: "Quick Ask",
-        desc: "How is your day shaping up? Ask Navi instantly:",
+        label: t('dashboard.quickAsk'),
+        desc: t('dashboard.quickAskDesc'),
         questions: ["How is my day today?", "What's my lucky color?", "Career prediction?", "Check health score"],
         color: "text-emerald-400"
     },
     { 
         type: 'feature',
-        label: "Soulmate Sync", 
-        desc: "Precision Guna Milan system for relationship harmony and success.", 
+        label: t('dashboard.soulmateSync'), 
+        desc: t('dashboard.soulmateSyncDesc'), 
         icon: <Heart className="w-5 h-5" />, 
         href: "/kundli/match",
         color: "text-rose-400"
     },
     { 
         type: 'feature',
-        label: "Guided Consulting", 
-        desc: "Structured advice on career, marriage, and life decisions.", 
+        label: t('dashboard.guidedConsulting'), 
+        desc: t('dashboard.guidedConsultingDesc'), 
         icon: <Sparkles className="w-5 h-5" />, 
         href: "/consult",
         color: "text-amber-400"
     },
     { 
         type: 'questions',
-        label: "Deep Dive",
-        desc: "Unlock deeper insights into your cosmic timeline:",
+        label: t('dashboard.deepDive'),
+        desc: t('dashboard.deepDiveDesc'),
         questions: ["Weekly forecast?", "Love compatibility?", "Wealth timing?", "Ask a secret"],
         color: "text-indigo-400"
     },
     { 
         type: 'feature',
-        label: "Cosmic Archive", 
-        desc: "Explore deep articles on Nakshatras, Yogas, and Vedic science.", 
+        label: t('dashboard.cosmicArchive'), 
+        desc: t('dashboard.cosmicArchiveDesc'), 
         icon: <Sun className="w-5 h-5" />, 
         href: "/blogs",
         color: "text-purple-400"
     }
 ];
 
-function FeatureSlider({ onQuestion }: { onQuestion: (q: string) => void }) {
+function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: (key: string) => string }) {
+    const features = useMemo(() => getFeatures(t), [t]);
     const [idx, setIdx] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         if (isHovered) return;
         const timer = setInterval(() => {
-            setIdx((prev) => (prev + 1) % FEATURES.length);
+            setIdx((prev) => (prev + 1) % features.length);
         }, 6000); // Slightly slower rotation for questions
         return () => clearInterval(timer);
-    }, [isHovered]);
+    }, [isHovered, features.length]);
 
-    const current = FEATURES[idx];
+    const current = features[idx];
 
     return (
         <div 
@@ -193,7 +195,7 @@ function FeatureSlider({ onQuestion }: { onQuestion: (q: string) => void }) {
                                 href={current.href!}
                                 className="px-6 py-2.5 rounded-2xl bg-secondary text-background text-[11px] font-black uppercase tracking-[0.2em] hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
                             >
-                                Explore <ChevronRight className="w-4 h-4" />
+                                {t('dashboard.explore')} <ChevronRight className="w-4 h-4" />
                             </Link>
                         </motion.div>
                     )}
@@ -202,7 +204,7 @@ function FeatureSlider({ onQuestion }: { onQuestion: (q: string) => void }) {
 
             {/* Progress Indicators */}
             <div className="absolute bottom-2 left-8 flex gap-1.5">
-                {FEATURES.map((_, i) => (
+                {features.map((_, i) => (
                     <div 
                         key={i} 
                         className={`h-0.5 rounded-full transition-all duration-500 ${i === idx ? 'w-6 bg-secondary' : 'w-2 bg-white/10'}`} 
@@ -222,12 +224,14 @@ export default function DashboardHome() {
         inputText, setInputText 
     } = useChat();
     const router = useRouter();
+    const { t, language } = useTranslation();
     
     // States
     const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
     const [kundliLoading, setKundliLoading] = useState(true);
     const [sidebarTab, setSidebarTab] = useState<'chat' | 'history' | 'cosmic'>('chat');
-    const greeting = useGreeting();
+    const greetingKey = useGreeting();
+    const greeting = t(greetingKey);
     const hasAnalyzedRef = useRef<string | null>(null);
 
     // Memos
@@ -236,6 +240,7 @@ export default function DashboardHome() {
     const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
     const moonSign = useMemo(() => user?.moonSign ? getRashiData(user.moonSign) : null, [user?.moonSign]);
     const sunSign = useMemo(() => user?.sunSign ? getRashiData(user.sunSign) : null, [user?.sunSign]);
+    const topicPills = useMemo(() => getTopicPills(t), [t]);
 
     const recentChats = useMemo(() => {
         return chats.slice(0, 5);
@@ -337,9 +342,7 @@ export default function DashboardHome() {
         router.push('/chat');
     };
 
-    const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
-
+    const currentDate = new Date().toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
     return (
         <div className="w-full flex-grow bg-[var(--bg)] min-h-[calc(100dvh-var(--navbar-height,64px))]">
@@ -365,7 +368,7 @@ export default function DashboardHome() {
                                     <Skeleton height={32} width={180} className="inline-block rounded-xl" />
                                 ) : (
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-amber-500 to-secondary animate-gradient-x capitalize">
-                                        {user?.name || user?.email?.split('@')[0] || "User"}
+                                        {user?.name || user?.email?.split('@')[0] || t('common.user')}
                                     </span>
                                 )}
                             </h1>
@@ -374,9 +377,9 @@ export default function DashboardHome() {
                         {/* Right: Sign Circles (The Identity Badges) */}
                         <div className="flex justify-center lg:justify-end gap-3 sm:gap-6 lg:gap-8 shrink-0 overflow-x-auto no-scrollbar py-2">
                             {[
-                                { label: "Moon Sign", data: moonSign, color: "text-blue-400" },
-                                { label: "Sun Sign", data: sunSign, color: "text-amber-500" },
-                                { label: "Ascendant", data: (user?.lagnaSign || kundliStats?.lagnaSign) ? getRashiData((user?.lagnaSign || kundliStats?.lagnaSign) as string) : null, color: "text-purple-400" }
+                                { label: t('dashboard.moonSign'), data: moonSign, color: "text-blue-400" },
+                                { label: t('dashboard.sunSign'), data: sunSign, color: "text-amber-500" },
+                                { label: t('dashboard.ascendant'), data: (user?.lagnaSign || kundliStats?.lagnaSign) ? getRashiData((user?.lagnaSign || kundliStats?.lagnaSign) as string) : null, color: "text-purple-400" }
                             ].map((sign, idx) => (
                                 <Link key={idx} href={sign.data?.id ? `/rashis?sign=${sign.data.id}` : '/rashis'} className="group relative flex flex-col items-center min-w-[80px] sm:min-w-[100px]">
                                     <div className="w-16 h-16 sm:w-20 lg:w-24 sm:h-20 lg:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden relative">
@@ -394,7 +397,9 @@ export default function DashboardHome() {
                                                 />
                                             </motion.div>
                                         ) : (
-                                            <Sparkles className="w-5 h-5 sm:w-6 text-foreground/10" />
+                                            <div className="w-8 h-8 sm:w-10 lg:w-12 flex items-center justify-center">
+                                                <Sparkles className="w-5 h-5 sm:w-6 text-foreground/10" />
+                                            </div>
                                         )}
                                     </div>
                                     <div className="mt-2 text-center">
@@ -416,7 +421,7 @@ export default function DashboardHome() {
                     <div className="w-full mt-8 mb-2">
                         <div className="w-full h-[100px] relative group">
                             <div className="absolute inset-0 bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
-                                <FeatureSlider onQuestion={handleSendMessage} />
+                                <FeatureSlider onQuestion={handleSendMessage} t={t} />
                             </div>
                         </div>
                     </div>
@@ -470,13 +475,13 @@ export default function DashboardHome() {
                                                 <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between shrink-0 bg-surface/50">
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                        <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Live Session</span>
+                                                        <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">{t('dashboard.liveSession')}</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => resetChat()}
                                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all text-[10px] font-bold uppercase tracking-widest border border-secondary/20"
                                                     >
-                                                        <Plus className="w-3.5 h-3.5" /> New Consultation
+                                                        <Plus className="w-3.5 h-3.5" /> {t('dashboard.newConsultation')}
                                                     </button>
                                                 </div>
                                             )}
@@ -490,21 +495,21 @@ export default function DashboardHome() {
                                                             <div className="absolute inset-0 rounded-full border border-secondary/20 animate-ping opacity-20" />
                                                         </div>
                                                         <div className="space-y-1.5 mb-1">
-                                                            <h3 className="text-xl font-headline font-bold text-foreground tracking-tight">Consult Navi AI</h3>
+                                                            <h3 className="text-xl font-headline font-bold text-foreground tracking-tight">{t('dashboard.consultNaviAi')}</h3>
                                                             <p className="text-xs text-foreground/40 leading-relaxed font-medium max-w-[280px] mx-auto">
-                                                                Vedic wisdom powered by advanced AI.
+                                                                {t('dashboard.vedicWisdomPowered')}
                                                             </p>
                                                         </div>
 
                                                         <div className="w-full px-1">
                                                             <div className="flex items-center gap-3 mb-1.5">
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
-                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Ask About</span>
+                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.askAbout')}</span>
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
                                                             </div>
                                                             {/* Topic Suggestions Grid */}
                                                             <div className="grid grid-cols-2 gap-1.5 w-full">
-                                                                {TOPIC_PILLS.map((topic, i) => (
+                                                                {topicPills.map((topic, i) => (
                                                                     <button 
                                                                         key={i} 
                                                                         onClick={() => handleSendMessage(topic.label)}
@@ -520,7 +525,7 @@ export default function DashboardHome() {
                                                         <div className="w-full px-1 mt-1.5">
                                                             <div className="flex items-center gap-3 mb-2">
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
-                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">Deep Dive</span>
+                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.deepDive')}</span>
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
                                                             </div>
                                                             <div className="flex flex-col gap-1.5 w-full">
@@ -608,7 +613,7 @@ export default function DashboardHome() {
                                                 <div className="flex items-center justify-between px-1">
                                                     <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">Powered by Vedic AI</p>
                                                     <Link href={activeChat ? `/chat?id=${activeChat.id}` : "/chat"} className="text-[11px] font-bold text-secondary uppercase tracking-widest hover:text-amber-500 transition-colors flex items-center gap-1 group">
-                                                        Full Interface <ChevronRight className="w-3 h-3 text-secondary group-hover:translate-x-0.5 transition-transform" />
+                                                        {t('dashboard.fullInterface')} <ChevronRight className="w-3 h-3 text-secondary group-hover:translate-x-0.5 transition-transform" />
                                                     </Link>
                                                 </div>
                                             </div>
@@ -626,7 +631,7 @@ export default function DashboardHome() {
                                             {recentChats.length > 0 ? (
                                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                                     <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
-                                                        Recent Consultations
+                                                        {t('dashboard.recentConsultations')}
                                                     </div>
                                                     {recentChats.map((chat) => (
                                                         <button 
@@ -639,23 +644,23 @@ export default function DashboardHome() {
                                                         >
                                                             <div className="flex justify-between items-start gap-4">
                                                                 <div className="flex-1 min-w-0">
-                                                                    <p className="text-[13px] font-bold text-foreground/80 group-hover:text-foreground truncate mb-1">{chat.title || "New Consultation"}</p>
-                                                                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{formatRelativeTime(new Date(chat.updatedAt))}</p>
+                                                                    <p className="text-[13px] font-bold text-foreground/80 group-hover:text-foreground truncate mb-1">{chat.title || t('dashboard.newConsultation')}</p>
+                                                                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{formatRelativeTime(new Date(chat.updatedAt), t)}</p>
                                                                 </div>
                                                                 <ChevronRight className="w-3.5 h-3.5 text-foreground/20 group-hover:text-secondary mt-1" />
                                                             </div>
                                                         </button>
                                                     ))}
-                                                    <Link href="/chat" className="block text-center mt-6 text-[10px] font-bold text-secondary uppercase tracking-[0.3em] hover:text-amber-500 transition-colors">View All Conversations →</Link>
+                                                    <Link href="/chat" className="block text-center mt-6 text-[10px] font-bold text-secondary uppercase tracking-[0.3em] hover:text-amber-500 transition-colors">{t('dashboard.viewAllConversations')}</Link>
                                                 </motion.div>
                                             ) : (
                                                 <div className="py-20 flex flex-col items-center text-center px-6">
                                                     <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
                                                         <Users className="w-8 h-8 text-foreground/10" />
                                                     </div>
-                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">No History Yet</p>
+                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">{t('dashboard.noHistoryYet')}</p>
                                                     <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Start your first conversation with Navi to see it here.</p>
-                                                    <Button onClick={() => setSidebarTab('chat')} variant="secondary" size="sm" className="mt-6 rounded-full text-[10px] font-bold uppercase tracking-widest">Start Chatting</Button>
+                                                    <Button onClick={() => setSidebarTab('chat')} variant="secondary" size="sm" className="mt-6 rounded-full text-[10px] font-bold uppercase tracking-widest">{t('dashboard.startChatting')}</Button>
                                                 </div>
                                             )}
                                         </motion.div>
@@ -676,7 +681,7 @@ export default function DashboardHome() {
                                             ) : kundliStats ? (
                                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
                                                     <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
-                                                        Current Transits & Dasha
+                                                        {t('dashboard.currentTransitsDasha')}
                                                     </div>
                                                     {[
                                                         { 
@@ -721,7 +726,7 @@ export default function DashboardHome() {
                                                     ))}
                                                     <div className="pt-4">
                                                         <Link href="/kundli" className="w-full flex items-center justify-center gap-2 p-4 rounded-[24px] border border-secondary/20 hover:bg-secondary/5 transition-all group">
-                                                            <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em]">Compare Full Chart</span>
+                                                            <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.compareFullChart')}</span>
                                                             <ChevronRight className="w-3.5 h-3.5 text-secondary group-hover:translate-x-1 transition-transform" />
                                                         </Link>
                                                     </div>
@@ -731,10 +736,10 @@ export default function DashboardHome() {
                                                     <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
                                                         <Orbit className="w-8 h-8 text-foreground/10" />
                                                     </div>
-                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">Chart Pending</p>
-                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Please complete your birth details to unlock cosmic insights.</p>
+                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">{t('dashboard.chartPending')}</p>
+                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">{t('dashboard.completeBirthDetails')}</p>
                                                     <Link href="/profile" className="mt-6">
-                                                        <Button variant="secondary" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest">Update Profile</Button>
+                                                        <Button variant="secondary" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest">{t('dashboard.updateProfile')}</Button>
                                                     </Link>
                                                 </div>
                                             )}
@@ -751,9 +756,9 @@ export default function DashboardHome() {
                     <div className="text-center mb-16">
                         <div className="flex items-center justify-center gap-3 mb-4">
                             <div className="w-1 h-8 bg-gradient-to-b from-secondary to-transparent rounded-full" />
-                            <span className="text-xs font-bold text-secondary uppercase tracking-[0.6em]">System Hub</span>
+                            <span className="text-xs font-bold text-secondary uppercase tracking-[0.6em]">{t('dashboard.systemHub')}</span>
                         </div>
-                        <h2 className="text-4xl font-headline font-bold text-primary tracking-tight">Cosmic Portals</h2>
+                        <h2 className="text-4xl font-headline font-bold text-primary tracking-tight">{t('dashboard.cosmicPortals')}</h2>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -767,22 +772,22 @@ export default function DashboardHome() {
                                         <MessageSquare className="w-7 h-7" />
                                     </div>
                                     
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-secondary transition-colors">Chat Navi</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">Advanced AI trained on ancient Vedic scrolls.</p>
+                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-secondary transition-colors">{t('landing.chatNaviTitle')}</h3>
+                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('landing.chatNaviDesc')}</p>
                                     
                                     <div className="space-y-3 mb-10 opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="h-1 w-full bg-secondary/10 rounded-full overflow-hidden">
                                             <div className="h-full bg-secondary w-3/4" />
                                         </div>
                                         <div className="flex justify-between text-[10px] font-bold text-secondary/40 uppercase tracking-widest">
-                                            <span>Processing</span>
-                                            <span>85% Neural Sync</span>
+                                            <span>{t('dashboard.processing')}</span>
+                                            <span>85% {t('dashboard.neuralSync')}</span>
                                         </div>
                                     </div>
 
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-secondary uppercase tracking-widest group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-all duration-300 shadow-sm">
-                                            Consult AI <ChevronRight className="w-4 h-4" />
+                                            {t('dashboard.consultAi')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -799,13 +804,13 @@ export default function DashboardHome() {
                                         <Globe className="w-7 h-7" />
                                     </div>
                                     
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-blue-400 transition-colors">My Kundli</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">Deep-dive into your 16 Varga birth charts.</p>
+                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-blue-400 transition-colors">{t('dashboard.janamKundli')}</h3>
+                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.janamKundliDesc')}</p>
                                     
                                     <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 mb-10">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Current Dasha</div>
+                                                <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">{t('dashboard.currentDasha')}</div>
                                                 <div className="text-lg font-bold text-primary">
                                                     {kundliLoading ? (
                                                         <Skeleton height={24} width={80} className="mt-1" />
@@ -822,7 +827,7 @@ export default function DashboardHome() {
 
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-blue-400 uppercase tracking-widest group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-300 shadow-sm">
-                                            Open Chart <ChevronRight className="w-4 h-4" />
+                                            {t('dashboard.openChart')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -839,8 +844,8 @@ export default function DashboardHome() {
                                         <Heart className="w-7 h-7" />
                                     </div>
                                     
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-rose-400 transition-colors">Sync Souls</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">Precision Guna Milan & personality sync.</p>
+                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-rose-400 transition-colors">{t('dashboard.soulmateSync')}</h3>
+                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.soulmateSyncDesc')}</p>
                                     
                                     <div className="flex items-center justify-center gap-6 mb-10">
                                         <div className="text-center">
@@ -856,7 +861,7 @@ export default function DashboardHome() {
 
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-rose-400 uppercase tracking-widest group-hover:bg-rose-500/10 group-hover:border-rose-500/20 transition-all duration-300 shadow-sm">
-                                            Analyze Match <ChevronRight className="w-4 h-4" />
+                                            {t('dashboard.analyzeMatch')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -873,8 +878,8 @@ export default function DashboardHome() {
                                         <Sun className="w-7 h-7" />
                                     </div>
                                     
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-emerald-400 transition-colors">Daily Pulse</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">Real-time Tithi, Yoga & Vedic energies.</p>
+                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-emerald-400 transition-colors">{t('dashboard.dailyPulse')}</h3>
+                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.realTimeTithi')}</p>
                                     
                                     <div className="grid grid-cols-2 gap-4 mb-10">
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
@@ -889,7 +894,7 @@ export default function DashboardHome() {
 
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-emerald-400 uppercase tracking-widest group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all duration-300 shadow-sm">
-                                            Check Pulse <ChevronRight className="w-4 h-4" />
+                                            {t('dashboard.checkPulse')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -911,8 +916,8 @@ export default function DashboardHome() {
                                         <Orbit className="w-7 h-7" />
                                     </div>
                                     
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-purple-400 transition-colors">Rashi Lib</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">The encyclopedia of the 12 Zodiac signs.</p>
+                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-purple-400 transition-colors">{t('dashboard.rashiLib')}</h3>
+                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.rashiLibDesc')}</p>
                                     
                                     <div className="grid grid-cols-4 gap-2 mb-10 opacity-40 group-hover:opacity-100 transition-opacity">
                                         {['aries', 'leo', 'sagittarius', 'scorpio'].map((s, idx) => (
@@ -924,7 +929,7 @@ export default function DashboardHome() {
 
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-purple-400 uppercase tracking-widest group-hover:bg-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 shadow-sm">
-                                            Open Library <ChevronRight className="w-4 h-4" />
+                                            {t('dashboard.openLibrary')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -941,19 +946,19 @@ export default function DashboardHome() {
                                         <Sparkles className="w-7 h-7" />
                                     </div>
                                     
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-amber-400 transition-colors">Sessions</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">Interactive council for life's big questions.</p>
+                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-amber-400 transition-colors">{t('dashboard.sessions')}</h3>
+                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.sessionsDesc')}</p>
                                     
                                     <div className="space-y-4 mb-10">
                                         <div className="flex items-center gap-2">
                                             {[1,2,3,4].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${s <= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-white/10'}`} />)}
                                         </div>
-                                        <div className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest text-center">In Progress</div>
+                                        <div className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest text-center">{t('dashboard.inProgress')}</div>
                                     </div>
 
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-amber-400 uppercase tracking-widest group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all duration-300 shadow-sm">
-                                            Join Session <ChevronRight className="w-4 h-4" />
+                                            {t('dashboard.joinSession')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -968,4 +973,3 @@ export default function DashboardHome() {
         </div>
     );
 }
-
