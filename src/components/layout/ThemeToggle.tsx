@@ -5,8 +5,9 @@
  * Accessible theme toggle button with performance optimization
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '@/hooks/useTheme';
+import { useMounted } from '@/hooks/useMounted';
 import { Sun, Moon } from 'lucide-react';
 
 interface ThemeToggleProps {
@@ -16,12 +17,8 @@ interface ThemeToggleProps {
 
 export default function ThemeToggle({ className = '', showLabel = false }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [announcement, setAnnouncement] = useState('');
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleToggle = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';

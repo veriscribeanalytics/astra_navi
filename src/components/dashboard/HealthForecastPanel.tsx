@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Card from '@/components/ui/Card';
-import { Activity, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Sparkles, X, Info } from 'lucide-react';
+import { Activity, ChevronDown, AlertTriangle, X, Info } from 'lucide-react';
 import { clientFetch } from '@/lib/apiClient';
 
 interface DayForecast {
@@ -31,10 +31,6 @@ interface HealthForecastData {
     };
 }
 
-interface HealthForecastPanelProps {
-    // No email needed, handled by session
-}
-
 const formatDate = (dateStr: string) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
@@ -53,7 +49,7 @@ const getTrendIcon = (trend: string) => {
     return '➡️';
 };
 
-export default function HealthForecastPanel({}: HealthForecastPanelProps) {
+export default function HealthForecastPanel() {
     const [isOpen, setIsOpen] = useState(false);
     const [data, setData] = useState<HealthForecastData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -73,8 +69,8 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
             const result = await res.json();
             setData(result);
             setIsOpen(true);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -310,8 +306,8 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                                         <div className="flex flex-col gap-1.5 mb-3">
                                             {day.personalized_alerts.map((alert, i) => {
                                                 const isObject = typeof alert === 'object' && alert !== null;
-                                                const simpleText = (isObject ? (alert as any).simple : alert) || 'Health alignment in progress';
-                                                const techText = isObject ? (alert as any).technical : null;
+                                                const simpleText = (isObject ? alert.simple : alert) || 'Health alignment in progress';
+                                                const techText = isObject ? alert.technical : null;
                                                 const isWarning = simpleText.toLowerCase().includes('challenging') || simpleText.toLowerCase().includes('mindful') || simpleText.toLowerCase().includes('caution');
                                                 
                                                 return (
@@ -348,8 +344,6 @@ export default function HealthForecastPanel({}: HealthForecastPanelProps) {
                                 </div>
                             );
                         })()}
-
-
                     </Card>
                 )}
 

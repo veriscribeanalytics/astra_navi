@@ -17,7 +17,7 @@ const ChatPageClient: React.FC = () => {
   const router = useRouter();
   const { 
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
-    createNewChat, selectChat, isGuest, enableGuestMode, guestTimeRemaining, isGuestExpired 
+    createNewChat, selectChat, isGuest, enableGuestMode 
     } = useChat();
 
     React.useEffect(() => {
@@ -50,7 +50,7 @@ const ChatPageClient: React.FC = () => {
       localStorage.removeItem('astranavi_pending_message');
       createNewChat(pendingMsg);
     }
-  }, [user, searchParams, createNewChat, selectChat, enableGuestMode]);
+  }, [user, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading]);
 
   return (
     <div className="chat-layout relative overflow-hidden">

@@ -43,7 +43,7 @@ interface LogoLoopProps {
   style?: React.CSSProperties;
 }
 
-const useResizeObserver = (callback: () => void, elements: React.RefObject<HTMLElement | null>[], dependencies: any[]) => {
+const useResizeObserver = (callback: () => void, elements: React.RefObject<HTMLElement | null>[], dependencies: unknown[]) => {
   useEffect(() => {
     if (!window.ResizeObserver) {
       const handleResize = () => callback();
@@ -64,7 +64,7 @@ const useResizeObserver = (callback: () => void, elements: React.RefObject<HTMLE
   }, [callback, elements, dependencies]);
 };
 
-const useImageLoader = (seqRef: React.RefObject<HTMLElement | null>, onLoad: () => void, dependencies: any[]) => {
+const useImageLoader = (seqRef: React.RefObject<HTMLElement | null>, onLoad: () => void, dependencies: unknown[]) => {
   useEffect(() => {
     const images = seqRef.current?.querySelectorAll('img') ?? [];
     if (images.length === 0) {
@@ -283,6 +283,7 @@ export const LogoLoop = memo<LogoLoopProps>(
             {item.node}
           </span>
         ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={item.src}
             srcSet={item.srcSet}

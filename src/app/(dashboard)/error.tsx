@@ -5,10 +5,8 @@ import Button from '@/components/ui/Button';
 import { Home, RefreshCw } from 'lucide-react';
 
 export default function DashboardError({
-  error,
   reset,
 }: {
-  error: Error & { digest?: string };
   reset: () => void;
 }) {
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
 import { clientFetch } from '@/lib/apiClient';
@@ -9,9 +9,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { 
-  Heart, Sparkles, ArrowRight, ArrowLeftRight, 
-  RotateCcw, ShieldCheck, ChevronRight, Lock,
-  Info
+  Heart, Sparkles, ArrowLeftRight, 
+  RotateCcw, ShieldCheck, ChevronRight, Lock
 } from 'lucide-react';
 
 // Components
@@ -29,6 +28,61 @@ interface PersonDetails {
   gender: 'male' | 'female';
 }
 
+interface KootResult {
+  name: string;
+  description: string;
+  obtained: number;
+  max: number;
+  detail: string | { technical: string; simple: string };
+}
+
+interface MangalDoshaDetail {
+  is_present: boolean;
+  score: number;
+  description: string;
+  type?: string;
+  is_cancelled?: boolean;
+}
+
+interface MatchResult {
+  id?: string;
+  ashtakoot: {
+    total_score: number;
+    koots: KootResult[];
+  };
+  tier: {
+    tier: string;
+    color: string;
+    emoji: string;
+    label: string;
+  };
+  summary: string;
+  mangal_dosha: {
+    person1: MangalDoshaDetail;
+    person2: MangalDoshaDetail;
+    conclusion: string;
+    is_compatible: boolean;
+  };
+  additional_doshas: {
+    name: string;
+    is_present: boolean;
+    description: string;
+    remedy?: string;
+  }[];
+}
+
+interface HistoryItem {
+  id: string;
+  score: number;
+  created_at: string;
+  person1_name: string;
+  person2_name: string;
+  person1_details?: PersonDetails;
+  person2_details?: PersonDetails;
+}
+
+type DoshaSeverity = 'none' | 'low' | 'medium' | 'high';
+
 export default function MatchClient() {
   const { user, isLoggedIn } = useAuth();
   const { error, success, ToastContainer } = useToast();
@@ -36,19 +90,19 @@ export default function MatchClient() {
   const [activeTab, setActiveTab] = useState<'match' | 'history'>('match');
   const [phase, setPhase] = useState<'input' | 'loading' | 'result'>('input');
   const [isSubmitting, setIsSending] = useState(false);
-  const [matchResult, setMatchResult] = useState<Record<string, any> | null>(null);
+  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing profiles...");
 
-  const [history, setHistory] = useState<Record<string, any>[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-  const loadingMessages = [
+  const loadingMessages = useMemo(() => [
     "Analyzing profiles...",
     "Calculating Ashtakoot Milan...",
     "Checking Mangal Dosha...",
     "Reviewing planetary positions...",
     "Calculating compatibility results..."
-  ];
+  ], []);
 
   // Cycle loading messages
   useEffect(() => {
@@ -61,7 +115,7 @@ export default function MatchClient() {
       }, 2000);
     }
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, loadingMessages]);
 
   // Fetch history when tab changes
   useEffect(() => {
@@ -76,8 +130,8 @@ export default function MatchClient() {
       const res = await clientFetch('/api/match/history?limit=10');
       const data = await res.json();
       if (res.ok) setHistory(data.results || []);
-    } catch (err) {
-      console.error("Failed to load history:", err);
+    } catch (_err) {
+      console.error("Failed to load history:", _err);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -90,12 +144,12 @@ export default function MatchClient() {
         setHistory(prev => prev.filter(item => item.id !== id));
         success("Record cleared from history.");
       }
-    } catch (err) {
+    } catch {
       error("Failed to delete record.");
     }
   };
 
-  const viewHistoryItem = async (item: Record<string, any>) => {
+  const viewHistoryItem = async (item: HistoryItem) => {
     try {
       setPhase('loading');
       setLoadingMessage("Retrieving from cosmic archives...");
@@ -114,7 +168,7 @@ export default function MatchClient() {
         error("Failed to retrieve the full record.");
         setPhase('input');
       }
-    } catch (err) {
+    } catch {
       error("A disruption occurred in the archive retrieval.");
       setPhase('input');
     }
@@ -147,7 +201,7 @@ export default function MatchClient() {
         gender: 'male',
       });
     }
-  }, [user]);
+  }, [user, person1.name]);
 
   const handleSwap = () => {
     const p1 = { ...person1 };
@@ -475,7 +529,7 @@ export default function MatchClient() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {matchResult.ashtakoot?.koots?.map((koot: Record<string, any>, idx: number) => {
+                    {matchResult.ashtakoot?.koots?.map((koot: KootResult, idx: number) => {
                       const humanLabel = getKootHumanLabel(koot.name);
                       return (
                         <KootCard 
@@ -502,13 +556,30 @@ export default function MatchClient() {
                      
                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <MangalDoshaPanel 
-                          person1={{ name: person1.name, ...matchResult.mangal_dosha?.person1 }}
-                          person2={{ name: person2.name, ...matchResult.mangal_dosha?.person2 }}
+                          person1={{ 
+                            name: person1.name, 
+                            hasDosha: matchResult.mangal_dosha?.person1.is_present,
+                            isCancelled: matchResult.mangal_dosha?.person1.is_cancelled ?? false,
+                            severity: (matchResult.mangal_dosha?.person1.score > 75 ? 'high' : matchResult.mangal_dosha?.person1.score > 40 ? 'medium' : matchResult.mangal_dosha?.person1.score > 0 ? 'low' : 'none') as DoshaSeverity,
+                            cancellationReason: matchResult.mangal_dosha?.person1.description
+                          }}
+                          person2={{ 
+                            name: person2.name, 
+                            hasDosha: matchResult.mangal_dosha?.person2.is_present,
+                            isCancelled: matchResult.mangal_dosha?.person2.is_cancelled ?? false,
+                            severity: (matchResult.mangal_dosha?.person2.score > 75 ? 'high' : matchResult.mangal_dosha?.person2.score > 40 ? 'medium' : matchResult.mangal_dosha?.person2.score > 0 ? 'low' : 'none') as DoshaSeverity,
+                            cancellationReason: matchResult.mangal_dosha?.person2.description
+                          }}
                           verdict={matchResult.mangal_dosha?.conclusion}
                           isCompatible={matchResult.mangal_dosha?.is_compatible ?? true}
                         />
                         <AdditionalDoshas 
-                          doshas={matchResult.additional_doshas || []}
+                          doshas={matchResult.additional_doshas?.map(d => ({
+                            name: d.name,
+                            isClear: !d.is_present,
+                            meaning: d.description,
+                            detail: d.remedy || 'No specific remedy required.'
+                          })) || []}
                         />
                      </div>
                   </div>

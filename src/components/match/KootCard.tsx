@@ -21,8 +21,8 @@ export default function KootCard({
   const percentage = (obtained / max) * 100;
   
   const isObject = typeof detail === 'object' && detail !== null;
-  const simpleText = isObject ? (detail as any).simple : detail;
-  const techText = isObject ? (detail as any).technical : null;
+  const simpleText = isObject ? detail.simple : detail;
+  const techText = isObject ? detail.technical : null;
 
   const getColor = () => {
     if (percentage >= 75) return 'text-green-400 bg-green-500/10 border-green-500/20';

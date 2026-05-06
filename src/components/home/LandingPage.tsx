@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { 
     Sparkles, BookOpen, User, Calendar, 
-    Clock, MapPin, ArrowRight, Heart, Briefcase, Activity, DollarSign,
+    Clock, MapPin, ArrowRight, Heart, Briefcase, Activity, 
     Compass, Network, Star, Zap, Home as HomeIcon, Lock, CheckCircle, Shield, Brain, ChevronDown, MessageSquare, Gem, Sun
 } from 'lucide-react';
 import Input from '../ui/Input';
@@ -20,7 +20,7 @@ import { faqs } from "@/data/faqs";
 import { useTranslation } from '@/hooks';
 
 // Navigation functions to handle translations
-const getRashiItems = (language: string) => [
+const getRashiItems = () => [
     { id: 'aries', nameEn: 'Aries', nameHi: 'मेष', icon: '/icons/rashi/aries.png', href: '/rashis' },
     { id: 'taurus', nameEn: 'Taurus', nameHi: 'वृषभ', icon: '/icons/rashi/taurus.png', href: '/rashis' },
     { id: 'gemini', nameEn: 'Gemini', nameHi: 'मिथुन', icon: '/icons/rashi/gemini.png', href: '/rashis' },
@@ -36,35 +36,35 @@ const getRashiItems = (language: string) => [
 ];
 
 const getServices = (t: (key: string) => string) => [
-    { icon: <Compass className="w-6 h-6" />, title: t('nav.birthChart'), desc: t('nav.birthChartDesc'), iconBg: 'bg-indigo-500/10 text-indigo-400', available: true, detail: "16+ Varga Charts" },
+    { icon: <Compass className="w-6 h-6" />, title: t('nav.birthChart'), desc: t('nav.birthChartDesc'), iconBg: 'bg-indigo-500/10 text-indigo-400', available: true, detail: t('landing.vargaCharts') },
     { icon: <Brain className="w-6 h-6" />, title: t('landing.chatNaviTitle'), desc: t('landing.chatNaviDesc'), iconBg: 'bg-secondary/10 text-secondary', available: true, detail: t('common.onlineNow') },
-    { icon: <Calendar className="w-6 h-6" />, title: t('landing.forecastTitle'), desc: t('nav.cosmicDashboardDesc'), iconBg: 'bg-emerald-500/10 text-emerald-400', available: true, detail: "Nakshatra Based" },
-    { icon: <Sparkles className="w-6 h-6" />, title: t('nav.guidedSessions'), desc: t('nav.guidedSessionsDesc'), iconBg: 'bg-amber-500/10 text-amber-500', available: true, detail: "Strategic Clarity" },
-    { icon: <Briefcase className="w-6 h-6" />, title: 'Career & Artha', desc: 'Wealth timing and professional success guidance.', iconBg: 'bg-amber-500/10 text-amber-400', available: true, detail: "Wealth Mapping" },
-    { icon: <Heart className="w-6 h-6" />, title: t('landing.soulmateSyncTitle'), desc: t('landing.soulmateSyncDesc'), iconBg: 'bg-pink-500/10 text-pink-400', available: true, detail: "Relationship AI" },
+    { icon: <Calendar className="w-6 h-6" />, title: t('landing.forecastTitle'), desc: t('nav.cosmicDashboardDesc'), iconBg: 'bg-emerald-500/10 text-emerald-400', available: true, detail: t('landing.nakshatraBased') },
+    { icon: <Sparkles className="w-6 h-6" />, title: t('nav.guidedSessions'), desc: t('nav.guidedSessionsDesc'), iconBg: 'bg-amber-500/10 text-amber-500', available: true, detail: t('landing.strategicClarity') },
+    { icon: <Briefcase className="w-6 h-6" />, title: t('landing.careerArtha'), desc: t('landing.careerArthaDesc'), iconBg: 'bg-amber-500/10 text-amber-400', available: true, detail: t('landing.wealthMapping') },
+    { icon: <Heart className="w-6 h-6" />, title: t('landing.soulmateSyncTitle'), desc: t('landing.soulmateSyncDesc'), iconBg: 'bg-pink-500/10 text-pink-400', available: true, detail: t('landing.relationshipAi') },
 ];
 
 const getKnowledgeAreas = (t: (key: string) => string) => [
-    { title: t('nav.the27Nakshatras'), desc: t('nav.the27NakshatrasDesc'), icon: <Star className="w-6 h-6 text-secondary" />, link: "/blogs/nakshatras", count: "27 Deep Dives", detail: "Lunar Matrix" },
-    { title: t('nav.planetaryYogas'), desc: t('nav.planetaryYogasDesc'), icon: <Zap className="w-6 h-6 text-indigo-400" />, link: "/blogs/yogas", count: "100+ Yogas", detail: "Karmic Codes" },
-    { title: t('nav.the12Houses'), desc: t('nav.the12HousesDesc'), icon: <HomeIcon className="w-6 h-6 text-emerald-400" />, link: "/blogs/houses", count: "12 Houses", detail: "Life Spheres" },
-    { title: "Dashas & Periods", desc: "Understanding the planetary time-lords.", icon: <Clock className="w-6 h-6 text-rose-400" />, link: "/blogs", count: "Time Mapping", detail: "Predictive AI" },
-    { title: "Remedies & Gems", desc: "Authentic prescriptions for balance.", icon: <Gem className="w-6 h-6 text-amber-400" />, link: "/blogs", count: "Vedic Cure", detail: "Ratna Vigyan" },
-    { title: "Panchang Pulse", desc: "Daily Tithi, Yoga, Karana & Muhurta.", icon: <Sun className="w-6 h-6 text-indigo-400" />, link: "/blogs", count: "Daily Flux", detail: "Event Timing" }
+    { title: t('nav.the27Nakshatras'), desc: t('nav.the27NakshatrasDesc'), icon: <Star className="w-6 h-6 text-secondary" />, link: "/blogs/nakshatras", count: t('landing.nakshatraDives'), detail: t('landing.lunarMatrix') },
+    { title: t('nav.planetaryYogas'), desc: t('nav.planetaryYogasDesc'), icon: <Zap className="w-6 h-6 text-indigo-400" />, link: "/blogs/yogas", count: t('landing.yogasCount'), detail: t('landing.karmicCodes') },
+    { title: t('nav.the12Houses'), desc: t('nav.the12HousesDesc'), icon: <HomeIcon className="w-6 h-6 text-emerald-400" />, link: "/blogs/houses", count: t('landing.housesCount'), detail: t('landing.lifeSpheres') },
+    { title: t('landing.dashasTitle'), desc: t('landing.dashasDesc'), icon: <Clock className="w-6 h-6 text-rose-400" />, link: "/blogs", count: t('landing.timeMapping'), detail: t('landing.predictiveAi') },
+    { title: t('landing.remediesTitle'), desc: t('landing.remediesDesc'), icon: <Gem className="w-6 h-6 text-amber-400" />, link: "/blogs", count: t('landing.vedicCure'), detail: t('landing.ratnaVigyan') },
+    { title: t('landing.panchangTitle'), desc: t('landing.panchangDesc'), icon: <Sun className="w-6 h-6 text-indigo-400" />, link: "/blogs", count: t('landing.dailyFlux'), detail: t('landing.eventTiming') }
 ];
 
 const getSteps = (t: (key: string) => string) => [
-    { icon: <MapPin className="w-8 h-8 text-[#D4AF37]" />, title: "Precise Input", desc: "Coordinates and exact birth time seed your astronomical map.", detail: "GPS Sync" },
-    { icon: <Network className="w-8 h-8 text-[#D4AF37]" />, title: "Chart Assembly", desc: "Mapping 9 Grahas across 16 Varga charts for deep resolution.", detail: "Varga Matrix" },
-    { icon: <Clock className="w-8 h-8 text-[#D4AF37]" />, title: "Dasha Timeline", desc: "Calculating Vimshottari periods to unlock your personal time-lords.", detail: "Predictive" },
-    { icon: <Brain className="w-8 h-8 text-[#D4AF37]" />, title: "Navi Analysis", desc: "AI trained on 5,000+ classical rules synthesizes your karma.", detail: "Logic Engine" },
-    { icon: <Sparkles className="w-8 h-8 text-[#D4AF37]" />, title: "Living Guidance", desc: "Receive actionable counsel on Dharma, Artha, and relationship sync.", detail: "Action Plan" }
+    { icon: <MapPin className="w-8 h-8 text-[#D4AF37]" />, title: t('landing.steps.0.title'), desc: t('landing.steps.0.desc'), detail: t('landing.steps.0.detail') },
+    { icon: <Network className="w-8 h-8 text-[#D4AF37]" />, title: t('landing.steps.1.title'), desc: t('landing.steps.1.desc'), detail: t('landing.steps.1.detail') },
+    { icon: <Clock className="w-8 h-8 text-[#D4AF37]" />, title: t('landing.steps.2.title'), desc: t('landing.steps.2.desc'), detail: t('landing.steps.2.detail') },
+    { icon: <Brain className="w-8 h-8 text-[#D4AF37]" />, title: t('landing.steps.3.title'), desc: t('landing.steps.3.desc'), detail: t('landing.steps.3.detail') },
+    { icon: <Sparkles className="w-8 h-8 text-[#D4AF37]" />, title: t('landing.steps.4.title'), desc: t('landing.steps.4.desc'), detail: t('landing.steps.4.detail') }
 ];
 
 const getTrustPoints = (t: (key: string) => string) => [
-    { icon: <Lock className="w-6 h-6 text-secondary" />, title: "Privacy First", desc: "Birth data is AES-256 encrypted and never shared with third parties.", sub: "End-to-End Secure" },
-    { icon: <CheckCircle className="w-6 h-6 text-secondary" />, title: "Textual Purity", desc: "Logic derived strictly from BPHS, Phaladeepika, and Jataka Parijata.", sub: "Classical Standards" },
-    { icon: <Shield className="w-6 h-6 text-secondary" />, title: "Global Resilience", desc: "Edge-based computation ensures high availability for transit tracking.", sub: "99.9% Uptime" }
+    { icon: <Lock className="w-6 h-6 text-secondary" />, title: t('landing.trust.0.title'), desc: t('landing.trust.0.desc'), sub: t('landing.trust.0.sub') },
+    { icon: <CheckCircle className="w-6 h-6 text-secondary" />, title: t('landing.trust.1.title'), desc: t('landing.trust.1.desc'), sub: t('landing.trust.1.sub') },
+    { icon: <Shield className="w-6 h-6 text-secondary" />, title: t('landing.trust.2.title'), desc: t('landing.trust.2.desc'), sub: t('landing.trust.2.sub') }
 ];
 
 const getSlides = (t: (key: string) => string) => [
@@ -104,7 +104,7 @@ const getSlides = (t: (key: string) => string) => [
 
 export default function LandingPage() {
     const router = useRouter();
-    const { t, language } = useTranslation();
+    const { t } = useTranslation();
     const [activeSlide, setActiveSlide] = useState(0);
     const [interactionTick, setInteractionTick] = useState(0);
     const [openFAQIndex, setOpenFAQIndex] = useState<number | null>(0);
@@ -113,7 +113,6 @@ export default function LandingPage() {
     // Form State
     const [formData, setFormData] = useState({ name: '', dob: '', tob: '', pob: '' });
     const [matchData, setMatchData] = useState({ name1: '', name2: '' });
-    const [errors, setErrors] = useState({ name: '', dob: '', tob: '', pob: '' });
     const [isCalculating, setIsCalculating] = useState(false);
 
     // Memoized Data
@@ -122,11 +121,11 @@ export default function LandingPage() {
     const knowledgeAreas = useMemo(() => getKnowledgeAreas(t), [t]);
     const steps = useMemo(() => getSteps(t), [t]);
     const trustPoints = useMemo(() => getTrustPoints(t), [t]);
-    const rashiItems = useMemo(() => getRashiItems(language), [language]);
+    const rashiItems = useMemo(() => getRashiItems(), []);
     const translatedFaqs = useMemo(() => {
-        const rawFaqs = (t('faqs') as any);
+        const rawFaqs = t('faqs');
         if (Array.isArray(rawFaqs)) {
-            return rawFaqs.map(f => ({ question: f.q, answer: f.a }));
+            return (rawFaqs as {q: string, a: string}[]).map(f => ({ question: f.q, answer: f.a }));
         }
         return faqs; // Fallback to hardcoded faqs if something is wrong
     }, [t]);
@@ -145,47 +144,6 @@ export default function LandingPage() {
             setIsCalculating(false);
             setTeaserMode({ type, active: true });
         }, 2000);
-    };
-
-    // Form Validation
-    const validateField = (field: keyof typeof formData, value: string) => {
-        let error = '';
-        switch (field) {
-            case 'name':
-                if (value.trim().length < 2) error = 'Name must be at least 2 characters';
-                else if (!/^[a-zA-Z\s]+$/.test(value)) error = 'Name can only contain letters';
-                break;
-            case 'dob':
-                if (value) {
-                    const dob = new Date(value);
-                    if (dob > new Date()) error = 'Birth date cannot be in the future';
-                }
-                break;
-            case 'pob':
-                if (value.trim().length < 2) error = 'Please enter a valid place';
-                break;
-        }
-        return error;
-    };
-
-    const validateForm = () => {
-        const newErrors = {
-            name: validateField('name', formData.name),
-            dob: validateField('dob', formData.dob),
-            tob: '',
-            pob: validateField('pob', formData.pob)
-        };
-        setErrors(newErrors);
-        return !Object.values(newErrors).some(error => error !== '');
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('astranavi_pending_birth_details', JSON.stringify(formData));
-        }
-        router.push('/chat');
     };
 
     const toggleFAQ = (index: number) => {

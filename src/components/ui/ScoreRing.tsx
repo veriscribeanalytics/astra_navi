@@ -17,7 +17,7 @@ interface ScoreRingProps {
 }
 
 export default function ScoreRing({ score, maxScore = 100, size = 88, tier, label = "Score", animated = true }: ScoreRingProps) {
-    const [animatedScore, setAnimatedScore] = useState(0);
+    const [animatedScore, setAnimatedScore] = useState(animated ? 0 : score);
     const normalizedSize = 100; // Standardize internal coordinate space
     const radius = 42; 
     const strokeWidth = 6;
@@ -25,10 +25,7 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
     const percentage = (score / maxScore) * 100;
     
     useEffect(() => {
-        if (!animated) {
-            setAnimatedScore(score);
-            return;
-        }
+        if (!animated) return;
 
         let startTime: number | null = null;
         const duration = 1500;

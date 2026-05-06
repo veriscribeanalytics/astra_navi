@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, CheckCircle, Shield, Star, BookOpen, Zap, Lock, Clock } from 'lucide-react';
+import { ArrowRight, CheckCircle, Shield, Star, Zap, Lock, Clock } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
@@ -30,7 +30,6 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
     benefits,
     ctaLabel,
     callbackUrl,
-    image,
     vedicAuthority = "Based on Brihat Parashara Hora Shastra (BPHS)"
 }) => {
     return (
@@ -134,7 +133,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                         {/* Quote */}
                         <div className="lg:col-span-7 relative">
-                            <div className="absolute -top-2 -left-1 text-secondary/15 text-5xl font-serif select-none leading-none">"</div>
+                            <div className="absolute -top-2 -left-1 text-secondary/15 text-5xl font-serif select-none leading-none">&quot;</div>
                             <div className="pl-8">
                                 <p className="text-sm sm:text-base text-primary/80 leading-relaxed font-body italic">
                                     {hook}

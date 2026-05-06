@@ -70,23 +70,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
             // Call backend login endpoint (PostgreSQL)
             const backendUrl = process.env.AI_BACKEND_URL;
-            const res = await fetch(`${backendUrl}/api/login`, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'X-API-Key': process.env.AI_BACKEND_API_KEY || '',
-              },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-              }),
-            });
+            
+            if (!backendUrl) {
+              console.error("[Auth] AI_BACKEND_URL is not configured");
+              throw new Error("NetworkError");
+            }
+
+            let res: Response;
+            try {
+              res = await fetch(`${backendUrl}/api/login`, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'X-API-Key': process.env.AI_BACKEND_API_KEY || '',
+                },
+                body: JSON.stringify({
+                  email: credentials.email,
+                  password: credentials.password,
+                }),
+              });
+            } catch (fetchError: unknown) {
+              // Network-level error: ECONNREFUSED, ENOTFOUND, timeout, etc.
+              const err = fetchError instanceof Error ? fetchError : new Error(String(fetchError));
+              console.error("[Auth] Backend unreachable:", err.message);
+              throw new Error("NetworkError");
+            }
             
             const contentType = res.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
                 const text = await res.text();
                 console.error("[Auth] Non-JSON response from backend:", text);
-                throw new Error("The celestial server returned an invalid response.");
+                throw new Error("ServerError");
             }
 
             const data = await res.json();
@@ -112,10 +126,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               refreshToken: data.refreshToken,
               accessTokenExpires: Date.now() + expiresIn * 1000,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("[Auth] Authorize error:", error);
             // Re-throw to pass the error message to the client
-            throw error;
+            if (error instanceof Error) throw error;
+            throw new Error(String(error));
         }
       },
     }),
@@ -139,7 +154,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Return previous token if the access token has not expired yet
       const expiresAt = token.accessTokenExpires as number;
       const now = Date.now();
-      const timeUntilExpiry = expiresAt - now;
       
       if (now < expiresAt) {
         return token;

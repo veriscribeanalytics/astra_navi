@@ -12,7 +12,8 @@
     "back": "Back",
     "howItWorks": "How it Works",
     "online": "Online",
-    "onlineNow": "Online Now"
+    "onlineNow": "Online Now",
+    "friend": "Friend"
   },
   "nav": {
     "myJourney": "My Journey",
@@ -182,7 +183,76 @@
     "readyToAlignHighlight": "Cosmos?",
     "finalCtaDesc": "Join thousands who have discovered clarity through the ancient codes of Vedic astrology.",
     "beginJourney": "Begin Your Journey",
-    "learnMethod": "Learn Our Method"
+    "learnMethod": "Learn Our Method",
+    "vargaCharts": "16+ Varga Charts",
+    "nakshatraBased": "Nakshatra Based",
+    "strategicClarity": "Strategic Clarity",
+    "careerArtha": "Career & Artha",
+    "careerArthaDesc": "Wealth timing and professional success guidance.",
+    "wealthMapping": "Wealth Mapping",
+    "relationshipAi": "Relationship AI",
+    "nakshatraDives": "27 Deep Dives",
+    "lunarMatrix": "Lunar Matrix",
+    "yogasCount": "100+ Yogas",
+    "karmicCodes": "Karmic Codes",
+    "housesCount": "12 Houses",
+    "lifeSpheres": "Life Spheres",
+    "dashasTitle": "Dashas & Periods",
+    "dashasDesc": "Understanding the planetary time-lords.",
+    "timeMapping": "Time Mapping",
+    "predictiveAi": "Predictive AI",
+    "remediesTitle": "Remedies & Gems",
+    "remediesDesc": "Authentic prescriptions for balance.",
+    "vedicCure": "Vedic Cure",
+    "ratnaVigyan": "Ratna Vigyan",
+    "panchangTitle": "Panchang Pulse",
+    "panchangDesc": "Daily Tithi, Yoga, Karana & Muhurta.",
+    "dailyFlux": "Daily Flux",
+    "eventTiming": "Event Timing",
+    "steps": [
+      {
+        "title": "Precise Input",
+        "desc": "Coordinates and exact birth time seed your astronomical map.",
+        "detail": "GPS Sync"
+      },
+      {
+        "title": "Chart Assembly",
+        "desc": "Mapping 9 Grahas across 16 Varga charts for deep resolution.",
+        "detail": "Varga Matrix"
+      },
+      {
+        "title": "Dasha Timeline",
+        "desc": "Calculating Vimshottari periods to unlock your personal time-lords.",
+        "detail": "Predictive"
+      },
+      {
+        "title": "Navi Analysis",
+        "desc": "AI trained on 5,000+ classical rules synthesizes your karma.",
+        "detail": "Logic Engine"
+      },
+      {
+        "title": "Living Guidance",
+        "desc": "Receive actionable counsel on Dharma, Artha, and relationship sync.",
+        "detail": "Action Plan"
+      }
+    ],
+    "trust": [
+      {
+        "title": "Privacy First",
+        "desc": "Birth data is AES-256 encrypted and never shared with third parties.",
+        "sub": "End-to-End Secure"
+      },
+      {
+        "title": "Textual Purity",
+        "desc": "Logic derived strictly from BPHS, Phaladeepika, and Jataka Parijata.",
+        "sub": "Classical Standards"
+      },
+      {
+        "title": "Global Resilience",
+        "desc": "Edge-based computation ensures high availability for transit tracking.",
+        "sub": "99.9% Uptime"
+      }
+    ]
   },
   "dashboard": {
     "greetingMorning": "Good Morning",
@@ -190,14 +260,10 @@
     "greetingEvening": "Good Evening",
     "greetingNight": "Good Night",
     "justNow": "just now",
-    "minutesAgo": "m ago",
-    "hoursAgo": "h ago",
-    "daysAgo": "d ago",
-    "yesterday": "Yesterday",
-    "justNow": "just now",
     "minutesAgo": "{n} minutes ago",
     "hoursAgo": "{n} hours ago",
     "daysAgo": "{n} days ago",
+    "yesterday": "Yesterday",
     "systemHub": "System Hub",
     "cosmicPortals": "Cosmic Portals",
     "janamKundli": "Janam Kundli",
@@ -248,7 +314,15 @@
     "sessions": "Sessions",
     "sessionsDesc": "Interactive council for life's big questions.",
     "inProgress": "In Progress",
-    "joinSession": "Join Session"
+    "joinSession": "Join Session",
+    "qDay": "How is my day today?",
+    "qColor": "What's my lucky color?",
+    "qCareer": "Career prediction?",
+    "qHealth": "Check health score",
+    "qWeekly": "Weekly forecast?",
+    "qLove": "Love compatibility?",
+    "qWealth": "Wealth timing?",
+    "qSecret": "Ask a secret"
   },
   "horoscope": {
     "yourDayToday": "Your Day Today",
@@ -311,7 +385,9 @@
     "blueprintDesc": "Merging ancient Vedic Jyotish with Artificial Intelligence to illuminate your path.",
     "statRashis": "Rashis",
     "statNakshatras": "Nakshatras",
-    "invalidCredentials": "Invalid credentials."
+    "invalidCredentials": "Invalid credentials.",
+    "networkError": "Unable to connect to the server. Please check your internet connection and try again.",
+    "serverError": "The server is currently unavailable. Please try again later."
   },
   "about": {
     "theTradition": "The Tradition",

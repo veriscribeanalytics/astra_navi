@@ -23,13 +23,13 @@ interface Occupant { planet: string; dignity: string; retrograde: boolean; }
 interface HouseData { house: number; name: string; areas: string[]; sign: string; lord: string; lordHouse: number; occupants: Occupant[]; interpretation: (string | { technical: string; simple: string })[]; }
 interface Yoga { name: string; effect: string; }
 interface PlanetData { planet: string; sign: string; house: number; degree: number; dignity: string; shadbala: number; retrograde: boolean; conjunctions: string[]; lordOf: number[]; interpretation: (string | { technical: string; simple: string })[]; yogas: Yoga[]; }
-interface DashaData { 
-    active?: { type: string; planet: string; start: string; end: string }[]; 
+interface DashaData {
+    active?: { type: string; planet: string; start: string; end: string }[];
     rows?: { planet: string; dates: string; type?: string; active?: boolean }[];
-    current?: string;
-    currentMahaDasha?: string;
+    current?: string | { planet?: string; name?: string };
+    currentMahaDasha?: string | { planet?: string; name?: string };
     remaining?: string;
-    explanation: (string | { technical: string; simple: string })[]; 
+    explanation: (string | { technical: string; simple: string })[];
 }
 interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: DashaData; }
 
@@ -38,8 +38,7 @@ interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: Dash
 export default function KundliPage() {
     const { user, isLoggedIn, isLoading: authLoading } = useAuth();
     const router = useRouter();
-    const [data, setData] = useState<AnalysisData | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<AnalysisData | null>(null);    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
@@ -399,9 +398,13 @@ export default function KundliPage() {
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Active Period</span>
                                                     <span className="text-xs font-bold text-secondary uppercase tracking-wider">
-                                                        {typeof (data.dasha?.currentMahaDasha || data.dasha?.current) === 'object' 
-                                                            ? ((data.dasha?.currentMahaDasha || data.dasha?.current) as any).planet || ((data.dasha?.currentMahaDasha || data.dasha?.current) as any).name || 'Saturn'
-                                                            : (data.dasha?.currentMahaDasha || data.dasha?.current)}
+                                                        {(() => {
+                                                            const d = data.dasha?.currentMahaDasha || data.dasha?.current;
+                                                            if (typeof d === 'object' && d !== null) {
+                                                                return d.planet || d.name || 'Saturn';
+                                                            }
+                                                            return d;
+                                                        })()}
                                                     </span>
                                                 </div>
                                                 {data.dasha?.remaining && (

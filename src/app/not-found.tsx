@@ -1,5 +1,4 @@
 import React from 'react';
-import Link from 'next/link';
 import { Sparkles, Home, ArrowLeft } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import type { Metadata } from 'next';

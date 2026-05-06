@@ -4,8 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { 
     Sparkles, MessageSquare, Globe, Heart, 
     ChevronRight, Orbit, TrendingUp,
-    Briefcase, Activity, DollarSign,
-    ShoppingBag, Users, Sun, ArrowUp, Plus
+    Users, Sun, ArrowUp, Plus
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -13,7 +12,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { calculateAge, getAgeBracket, getPersonalizedQuestions } from "@/utils/personalizedQuestions";
+import { calculateAge } from "@/utils/personalizedQuestions";
 import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import { clientFetch } from "@/lib/apiClient";
@@ -21,6 +20,8 @@ import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
+import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
+import { topicPills } from '@/data/topicPills';
 
 function formatRelativeTime(date: Date, t: (key: string) => string) {
     const now = new Date();
@@ -46,10 +47,34 @@ interface KundliStats {
     lagnaSign?: string;
 }
 
-// ─── Sub-components ─────────────────────────────
-import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
+interface DashaPeriod {
+  type: string;
+  planet: string;
+  end?: string;
+  end_date?: string;
+}
 
-import { topicPills } from '@/data/topicPills';
+interface DashaData {
+  currentMahaDasha?: string | { planet: string; name: string; value: string };
+  current?: string | { planet: string; name: string; value: string };
+  value?: string | { planet: string; name: string; value: string };
+  remaining?: string;
+  active?: DashaPeriod[];
+}
+
+interface AstrologyData {
+  planets?: { planet: string; sign: string }[];
+  houses?: { house: number; sign: string }[];
+  chart?: { houses: { house: number; sign: string }[] };
+  ascendant?: { sign: string };
+  nakshatra?: string | { value: string; name: string };
+  nakshatraLord?: string | { value: string; name: string };
+  dasha?: DashaData;
+  planetary?: { active_dasha?: string | DashaData };
+  moonPhase?: string | { value: string };
+}
+
+// ─── Sub-components ─────────────────────────────
 
 const getFeatures = (t: (key: string) => string) => [
     { 
@@ -72,7 +97,12 @@ const getFeatures = (t: (key: string) => string) => [
         type: 'questions',
         label: t('dashboard.quickAsk'),
         desc: t('dashboard.quickAskDesc'),
-        questions: ["How is my day today?", "What's my lucky color?", "Career prediction?", "Check health score"],
+        questions: [
+            t('dashboard.qDay'), 
+            t('dashboard.qColor'), 
+            t('dashboard.qCareer'), 
+            t('dashboard.qHealth')
+        ],
         color: "text-emerald-400"
     },
     { 
@@ -95,7 +125,12 @@ const getFeatures = (t: (key: string) => string) => [
         type: 'questions',
         label: t('dashboard.deepDive'),
         desc: t('dashboard.deepDiveDesc'),
-        questions: ["Weekly forecast?", "Love compatibility?", "Wealth timing?", "Ask a secret"],
+        questions: [
+            t('dashboard.qWeekly'), 
+            t('dashboard.qLove'), 
+            t('dashboard.qWealth'), 
+            t('dashboard.qSecret')
+        ],
         color: "text-indigo-400"
     },
     { 
@@ -117,7 +152,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
         if (isHovered) return;
         const timer = setInterval(() => {
             setIdx((prev) => (prev + 1) % features.length);
-        }, 6000); // Slightly slower rotation for questions
+        }, 6000);
         return () => clearInterval(timer);
     }, [isHovered, features.length]);
 
@@ -209,78 +244,67 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
 
 // ─── Main Component ─────────────────────────────
 export default function DashboardHome() {
-    const { user, refreshUser, isLoading: userLoading } = useAuth();
+    const { user, refreshUser, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
     const { 
-        chats, loadChats, activeChat, activeChatId,
+        activeChat, activeChatId,
         sendMessage, createNewChat, selectChat, resetChat, isSending, 
-        inputText, setInputText 
+        inputText, setInputText, chats 
     } = useChat();
     const router = useRouter();
     const { t, language } = useTranslation();
     
     // States
     const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
-    const [kundliLoading, setKundliLoading] = useState(true);
+    const kundliLoading = userLoading && !!user?.email && !kundliStats;
     const [sidebarTab, setSidebarTab] = useState<'chat' | 'history' | 'cosmic'>('chat');
     const greetingKey = useGreeting();
     const greeting = t(greetingKey);
     const hasAnalyzedRef = useRef<string | null>(null);
 
     // Memos
-    const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
-    const ageBracket = useMemo(() => getAgeBracket(age), [age]);
-    const personalizedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
-  // Extract signs from profile fields (moonSign, sunSign, lagnaSign) with fallback
-  // to astrologyData if the backend hasn't persisted them yet.
-  // BACKEND DEV NOTE: The /api/user/sync-astrology endpoint does NOT extract/save
-  // moonSign/sunSign/lagnaSign to the DB. Only /api/analyze-full does this (lines 1714-1725
-  // of server.py). When a user saves their profile, the frontend now calls analyze-full,
-  // but existing users who never visited the Kundli page will have NULL signs in the DB.
-  // Please fix sync-astrology to auto-extract and persist signs from astrologyData.
-  const moonSign = useMemo(() => {
+    
+  // Extract signs from profile fields with fallback to astrologyData
+  const moonSign = (() => {
     if (user?.moonSign) return getRashiData(user.moonSign);
-    // Fallback: extract from astrologyData
     if (user?.astrologyData) {
-      const data = typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData;
-      const planets = (data as any)?.planets;
+      const data = (typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData) as AstrologyData;
+      const planets = data?.planets;
       if (Array.isArray(planets)) {
-        const moon = planets.find((p: any) => p.planet === 'Moon');
+        const moon = planets.find((p) => p.planet === 'Moon');
         if (moon?.sign) return getRashiData(moon.sign);
       }
     }
     return null;
-  }, [user?.moonSign, user?.astrologyData]);
-  const sunSign = useMemo(() => {
+  })();
+
+  const sunSign = (() => {
     if (user?.sunSign) return getRashiData(user.sunSign);
-    // Fallback: extract from astrologyData
     if (user?.astrologyData) {
-      const data = typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData;
-      const planets = (data as any)?.planets;
+      const data = (typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData) as AstrologyData;
+      const planets = data?.planets;
       if (Array.isArray(planets)) {
-        const sun = planets.find((p: any) => p.planet === 'Sun');
+        const sun = planets.find((p) => p.planet === 'Sun');
         if (sun?.sign) return getRashiData(sun.sign);
       }
     }
     return null;
-  }, [user?.sunSign, user?.astrologyData]);
-  const ascendantSign = useMemo(() => {
+  })();
+
+  const ascendantSign = (() => {
     if (user?.lagnaSign) return getRashiData(user.lagnaSign);
     if (kundliStats?.lagnaSign) return getRashiData(kundliStats.lagnaSign);
-    // Fallback: extract from astrologyData
     if (user?.astrologyData) {
-      const data = typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData;
-      // Try ascendant.sign (backend analyze-full format)
-      const ascSign = (data as any)?.ascendant?.sign;
+      const data = (typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData) as AstrologyData;
+      const ascSign = data?.ascendant?.sign;
       if (ascSign) return getRashiData(ascSign);
-      // Try houses array
-      const houses = (data as any)?.houses || (data as any)?.chart?.houses;
+      const houses = data?.houses || data?.chart?.houses;
       if (Array.isArray(houses)) {
-        const h1 = houses.find((h: any) => h.house === 1);
+        const h1 = houses.find((h) => h.house === 1);
         if (h1?.sign) return getRashiData(h1.sign);
       }
     }
     return null;
-  }, [user?.lagnaSign, kundliStats?.lagnaSign, user?.astrologyData]);
+  })();
 
     const recentChats = useMemo(() => {
         return chats.slice(0, 5);
@@ -298,14 +322,11 @@ export default function DashboardHome() {
     // Effects
     useEffect(() => {
         if (!user?.email || !user.astrologyData) {
-            if (!userLoading) setKundliLoading(false);
             return;
         }
 
-        // 1. Try to use data already in user object (from AuthContext sync)
         if (user.astrologyData) {
             try {
-                setKundliLoading(true);
                 let analysis = user.astrologyData;
                 if (typeof analysis === 'string') {
                     try {
@@ -316,45 +337,42 @@ export default function DashboardHome() {
                 }
 
                 const stats: KundliStats = {};
-                const houses = (analysis as any)?.houses || (analysis as any)?.chart?.houses;
-                if (Array.isArray(houses)) stats.lagnaSign = houses.find((h: { house: number; sign: string }) => h.house === 1)?.sign;
+                const analysisData = analysis as AstrologyData;
+                const houses = analysisData?.houses || analysisData?.chart?.houses;
+                if (Array.isArray(houses)) stats.lagnaSign = houses.find((h) => h.house === 1)?.sign;
                 
-                const nak = (analysis as any)?.nakshatra;
+                const nak = analysisData?.nakshatra;
                 stats.nakshatra = typeof nak === 'object' && nak !== null ? (nak.value || nak.name) : nak;
                 if (stats.nakshatra && typeof stats.nakshatra !== 'string') stats.nakshatra = String(stats.nakshatra);
 
-                const lord = (analysis as any)?.nakshatraLord;
+                const lord = analysisData?.nakshatraLord;
                 stats.nakshatraLord = typeof lord === 'object' && lord !== null ? (lord.value || lord.name) : lord;
                 if (stats.nakshatraLord && typeof stats.nakshatraLord !== 'string') stats.nakshatraLord = String(stats.nakshatraLord);
                 
-                const dasha = (analysis as any)?.dasha || (analysis as any)?.planetary?.active_dasha;
+                const dasha = analysisData?.dasha || analysisData?.planetary?.active_dasha;
                 if (dasha) {
                     if (typeof dasha === 'string') {
                         stats.activeDasha = dasha;
                     } else {
-                        // Try different formats to extract the current dasha name
-                        const d = dasha as any;
+                        const d = dasha as DashaData;
                         let dashaName = d.currentMahaDasha || d.current || d.value;
                         let dashaRemaining = d.remaining;
 
-                        // Fallback to the active array if flat strings are missing
-                        if ((!dashaName || typeof dashaName === 'object') && d.active?.length > 0) {
-                            const maha = d.active.find((p: any) => p.type === 'Mahadasha') || d.active[0];
-                            const anta = d.active.find((p: any) => p.type === 'Antardasha');
+                        if ((!dashaName || typeof dashaName === 'object') && d.active && d.active.length > 0) {
+                            const maha = d.active.find((p) => p.type === 'Mahadasha') || d.active[0];
+                            const anta = d.active.find((p) => p.type === 'Antardasha');
                             dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
                             
-                            // Calculate remaining time if end date exists
                             if (!dashaRemaining && (maha.end || maha.end_date)) {
-                                const end = new Date(maha.end || maha.end_date);
+                                const end = new Date(maha.end || maha.end_date!);
                                 const now = new Date();
                                 const remDays = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
                                 dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
                             }
                         }
 
-                        // Ensure dashaName is a string even if the API returned an object for .current or .value
                         if (dashaName && typeof dashaName === 'object') {
-                            dashaName = (dashaName as any).planet || (dashaName as any).name || (dashaName as any).value || "Saturn";
+                            dashaName = dashaName.planet || dashaName.name || dashaName.value || "Saturn";
                         }
 
                         stats.activeDasha = typeof dashaName === 'string' ? dashaName : (dashaName ? String(dashaName) : "Saturn");
@@ -362,30 +380,35 @@ export default function DashboardHome() {
                     }
                 }
                 
-                const moonPhase = typeof (analysis as any)?.moonPhase === 'object' ? (analysis as any).moonPhase.value : (analysis as any)?.moonPhase;
+                const moonPhase = typeof analysisData?.moonPhase === 'object' ? analysisData.moonPhase?.value : analysisData?.moonPhase;
                 if (typeof moonPhase === 'string') stats.moonPhase = moonPhase;
                 
                 if (Object.keys(stats).length > 0) {
+                    // eslint-disable-next-line react-hooks/set-state-in-effect
                     setKundliStats(stats);
-                    setKundliLoading(false);
                     return;
                 }
             } catch (error) {
                 console.error("Error setting kundli stats from user object:", error);
             }
         }
-    }, [user?.email, user?.astrologyData, refreshUser, userLoading]);
+    }, [user?.email, user?.astrologyData]);
 
     // Auto-trigger sign calculation if user has birth details but no signs.
-    // This handles users who completed their profile but never visited the Kundli page.
     useEffect(() => {
         if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
+        
+        // Redirect to onboarding if profile is incomplete
+        if (profileFetched && !profileComplete && !userLoading) {
+            router.push('/profile?onboarding=true');
+            return;
+        }
+
         const hasBirthDetails = user.dob && user.tob && user.pob;
         const hasSigns = user.moonSign || user.sunSign || user.lagnaSign;
         const hasAstrologyData = !!user.astrologyData;
         if (hasBirthDetails && !hasSigns && !hasAstrologyData) {
             hasAnalyzedRef.current = user.email;
-            console.log('[Dashboard] User has birth details but no signs — triggering analyze-full');
             clientFetch('/api/analyze-full', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -409,13 +432,7 @@ export default function DashboardHome() {
                 console.warn('[Dashboard] Auto analyze-full failed:', err);
             });
         }
-    }, [user?.email, user?.dob, user?.tob, user?.pob, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshUser]);
-
-    // Handlers
-    const handleQuickAsk = (question: string) => {
-        localStorage.setItem('astranavi_pending_message', question.trim());
-        router.push('/chat');
-    };
+    }, [user?.email, user?.dob, user?.tob, user?.pob, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshUser, profileComplete, profileFetched]);
 
     const currentDate = new Date().toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
@@ -430,7 +447,6 @@ export default function DashboardHome() {
                     transition={{ duration: 0.6, ease: "easeOut" }}
                     className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-8 sm:mb-10 pt-4 lg:pt-0"
                 >
-                    {/* Left: Greeting & Sign Circles Row */}
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                         <div className="space-y-3 text-center lg:text-left pt-4 lg:pt-0">
                             <div className="flex items-center justify-center lg:justify-start gap-3">
@@ -449,7 +465,6 @@ export default function DashboardHome() {
                             </h1>
                         </div>
 
-                        {/* Right: Sign Circles (The Identity Badges) */}
                         <div className="flex justify-center lg:justify-end gap-3 sm:gap-6 lg:gap-8 shrink-0 overflow-x-auto no-scrollbar py-2">
                             {[
                                 { label: t('dashboard.moonSign'), data: moonSign, color: "text-blue-400" },
@@ -492,7 +507,6 @@ export default function DashboardHome() {
                         </div>
                     </div>
 
-                    {/* INTERACTIVE HUB: Full Width Ribbon Row */}
                     <div className="w-full mt-8 mb-2">
                         <div className="w-full h-[100px] relative group">
                             <div className="absolute inset-0 bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
@@ -504,29 +518,25 @@ export default function DashboardHome() {
 
                 {/* ZONE 2: HERO DASHBOARD */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                    
-                    {/* Horoscope Hero */}
                     <div className="lg:col-span-8">
                         <DailyHoroscopeCard userLoading={userLoading} onSendMessage={handleSendMessage} />
                     </div>
 
-                    {/* Sidebar: Unified Unified Tabbed Card */}
                     <div className="lg:col-span-4 flex flex-col min-h-0">
                         <Card padding="none" className="!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-full min-h-0">
-                            {/* Tab Switcher */}
                             <div className="p-2 border-b border-white/5 flex items-center gap-1 shrink-0">
                                 {[
-                                    { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-4 h-4" /> },
-                                    { id: 'history', label: 'History', icon: <Users className="w-4 h-4" /> },
-                                    { id: 'cosmic', label: 'Cosmic', icon: <Orbit className="w-4 h-4" /> }
+                                    { id: 'chat' as const, label: 'Chat', icon: <MessageSquare className="w-4 h-4" /> },
+                                    { id: 'history' as const, label: 'History', icon: <Users className="w-4 h-4" /> },
+                                    { id: 'cosmic' as const, label: 'Cosmic', icon: <Orbit className="w-4 h-4" /> }
                                 ].map((tab) => (
                                     <button 
                                         key={tab.id}
-                                        onClick={() => setSidebarTab(tab.id as any)}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[20px] text-[11px] font-bold uppercase tracking-widest transition-all ${
+                                        onClick={() => setSidebarTab(tab.id)}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all ${
                                             sidebarTab === tab.id 
                                             ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-inner' 
-                                            : 'text-foreground/40 hover:text-foreground/60 hover:bg-white/5'
+                                            : 'text-foreground/40 hover:text-foreground hover:bg-white/5'
                                         }`}
                                     >
                                         {tab.icon}
@@ -545,31 +555,29 @@ export default function DashboardHome() {
                                             exit={{ opacity: 0, x: -20 }}
                                             className="absolute inset-0 flex flex-col"
                                         >
-                                            {/* Header with New Chat Button */}
                                             {activeChat && activeChat.messages.length > 0 && (
-                                                <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between shrink-0 bg-surface/50">
+                                                <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between shrink-0 bg-surface/50">
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                                                         <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">{t('dashboard.liveSession')}</span>
                                                     </div>
                                                     <button 
-                                                        onClick={() => resetChat()}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all text-[10px] font-bold uppercase tracking-widest border border-secondary/20"
+                                                        onClick={resetChat}
+                                                        className="text-[9px] font-bold text-secondary hover:text-secondary/80 uppercase tracking-widest flex items-center gap-1.5 transition-colors"
                                                     >
-                                                        <Plus className="w-3.5 h-3.5" /> {t('dashboard.newConsultation')}
+                                                        <Plus className="w-3 h-3" /> {t('dashboard.newConsultation')}
                                                     </button>
                                                 </div>
                                             )}
 
-                                            {/* Messages Area */}
-                                            <div className="flex-1 p-4 space-y-3 overflow-y-auto scrollbar-hide min-h-0">
+                                            <div className="flex-1 p-4 space-y-4 overflow-y-auto scrollbar-hide min-h-0">
                                                 {(!activeChat || activeChat.messages.length === 0) ? (
-                                                    <div className="flex flex-col items-center text-center space-y-2 pt-2 pb-1">
-                                                        <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary relative">
-                                                            <Sparkles className="w-5 h-5" />
+                                                    <div className="flex flex-col items-center text-center space-y-4 pt-4">
+                                                        <div className="w-12 h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary relative mb-2">
+                                                            <Sparkles className="w-6 h-6" />
                                                             <div className="absolute inset-0 rounded-full border border-secondary/20 animate-ping opacity-20" />
                                                         </div>
-                                                        <div className="space-y-1.5 mb-1">
+                                                        <div className="space-y-1.5 mb-2">
                                                             <h3 className="text-xl font-headline font-bold text-foreground tracking-tight">{t('dashboard.consultNaviAi')}</h3>
                                                             <p className="text-xs text-foreground/40 leading-relaxed font-medium max-w-[280px] mx-auto">
                                                                 {t('dashboard.vedicWisdomPowered')}
@@ -577,49 +585,20 @@ export default function DashboardHome() {
                                                         </div>
 
                                                         <div className="w-full px-1">
-                                                            <div className="flex items-center gap-3 mb-1.5">
+                                                            <div className="flex items-center gap-3 mb-3">
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
                                                                 <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.askAbout')}</span>
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
                                                             </div>
-                                                            {/* Topic Suggestions Grid */}
-                                                            <div className="grid grid-cols-2 gap-1.5 w-full">
+                                                            <div className="grid grid-cols-2 gap-2 w-full">
                                                                 {topicPills.map((topic, i) => (
                                                                     <button 
                                                                         key={i} 
                                                                         onClick={() => handleSendMessage(topic.label)}
-                                                                        className="flex items-center gap-2 py-2 px-3 rounded-xl bg-surface-variant/20 border border-white/5 text-xs font-bold text-foreground/70 hover:text-secondary hover:border-secondary/30 hover:bg-surface-variant/40 transition-all text-left group"
+                                                                        className="flex items-center gap-2 py-2 px-3 rounded-xl bg-surface-variant/20 border border-white/5 text-[11px] font-bold text-foreground/70 hover:text-secondary hover:border-secondary/30 hover:bg-surface-variant/40 transition-all text-left group"
                                                                     >
                                                                         <span className="text-base shrink-0 group-hover:scale-110 transition-transform">{topic.icon}</span>
                                                                         <span className="leading-tight truncate">{topic.label}</span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div className="w-full px-1 mt-1.5">
-                                                            <div className="flex items-center gap-3 mb-2">
-                                                                <div className="h-[1px] flex-1 bg-white/5" />
-                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.deepDive')}</span>
-                                                                <div className="h-[1px] flex-1 bg-white/5" />
-                                                            </div>
-                                                            <div className="flex flex-col gap-1.5 w-full">
-                                                                {[
-                                                                    { q: "Analyze my weekly forecast in detail", icon: <Sparkles className="w-3.5 h-3.5" /> },
-                                                                    { q: "Why is my career score at its current level today?", icon: <Briefcase className="w-3.5 h-3.5" /> },
-                                                                    { q: "Give me a quick remedy to boost my daily health score", icon: <Activity className="w-3.5 h-3.5" /> }
-                                                                ].map((item, i) => (
-                                                                    <button 
-                                                                        key={i}
-                                                                        onClick={() => handleSendMessage(item.q)}
-                                                                        className="flex items-center gap-3 p-3 rounded-xl bg-surface-variant/10 border border-white/5 hover:bg-secondary/[0.08] hover:border-secondary/20 transition-all text-left group/dive"
-                                                                    >
-                                                                        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0 group-hover/dive:scale-110 transition-transform">
-                                                                            {item.icon}
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <p className="text-xs text-foreground/80 leading-relaxed font-bold group-hover/dive:text-foreground">{item.q}</p>
-                                                                        </div>
                                                                     </button>
                                                                 ))}
                                                             </div>
@@ -654,7 +633,6 @@ export default function DashboardHome() {
                                                 )}
                                             </div>
 
-                                            {/* Chat Input Area */}
                                             <div className="px-4 pb-4 pt-2 shrink-0 border-t border-white/5 bg-surface/50 backdrop-blur-sm">
                                                 <div className="relative group mb-3">
                                                     <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary/20 to-amber-500/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
@@ -666,7 +644,6 @@ export default function DashboardHome() {
                                                                 if (e.key === 'Enter' && !e.shiftKey) {
                                                                     e.preventDefault();
                                                                     if (inputText.trim()) handleSendMessage(inputText);
-                                                                    setInputText('');
                                                                 }
                                                             }}
                                                             placeholder="Ask Navi anything..."
@@ -676,7 +653,6 @@ export default function DashboardHome() {
                                                         <button 
                                                             onClick={() => {
                                                                 if (inputText.trim()) handleSendMessage(inputText);
-                                                                setInputText('');
                                                             }}
                                                             disabled={!inputText.trim() || isSending}
                                                             className="shrink-0 w-7 h-7 rounded-xl bg-secondary text-background flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
@@ -704,7 +680,7 @@ export default function DashboardHome() {
                                             className="p-4 space-y-2.5"
                                         >
                                             {recentChats.length > 0 ? (
-                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                                <div className="space-y-2.5">
                                                     <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
                                                         {t('dashboard.recentConsultations')}
                                                     </div>
@@ -727,14 +703,14 @@ export default function DashboardHome() {
                                                         </button>
                                                     ))}
                                                     <Link href="/chat" className="block text-center mt-6 text-[10px] font-bold text-secondary uppercase tracking-[0.3em] hover:text-amber-500 transition-colors">{t('dashboard.viewAllConversations')}</Link>
-                                                </motion.div>
+                                                </div>
                                             ) : (
                                                 <div className="py-20 flex flex-col items-center text-center px-6">
                                                     <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
                                                         <Users className="w-8 h-8 text-foreground/10" />
                                                     </div>
                                                     <p className="text-sm font-headline font-bold text-foreground/60 mb-1">{t('dashboard.noHistoryYet')}</p>
-                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Start your first conversation with Navi to see it here.</p>
+                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Your cosmic journey starts here. Consult with Navi to see it here.</p>
                                                     <Button onClick={() => setSidebarTab('chat')} variant="secondary" size="sm" className="mt-6 rounded-full text-[10px] font-bold uppercase tracking-widest">{t('dashboard.startChatting')}</Button>
                                                 </div>
                                             )}
@@ -754,7 +730,7 @@ export default function DashboardHome() {
                                                     {[1,2,3,4].map(i => <Skeleton key={i} height={70} className="w-full rounded-[24px]" />)}
                                                 </div>
                                             ) : kundliStats ? (
-                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+                                                <div className="space-y-3">
                                                     <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
                                                         {t('dashboard.currentTransitsDasha')}
                                                     </div>
@@ -770,8 +746,6 @@ export default function DashboardHome() {
                                                                         fill
                                                                         className="object-cover"
                                                                         onError={(e) => {
-                                                                            // Fallback to hidden if image doesn't exist, 
-                                                                            // the parent bg-secondary/10 will still show
                                                                             (e.target as HTMLImageElement).style.opacity = '0';
                                                                         }}
                                                                     />
@@ -805,7 +779,7 @@ export default function DashboardHome() {
                                                             <ChevronRight className="w-3.5 h-3.5 text-secondary group-hover:translate-x-1 transition-transform" />
                                                         </Link>
                                                     </div>
-                                                </motion.div>
+                                                </div>
                                             ) : (
                                                 <div className="py-20 flex flex-col items-center text-center px-6">
                                                     <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
@@ -826,7 +800,7 @@ export default function DashboardHome() {
                     </div>
                 </div>
 
-                {/* ZONE 3: COSMIC PORTALS (Solid SaaS Style) */}
+                {/* ZONE 3: COSMIC PORTALS */}
                 <div className="mt-28">
                     <div className="text-center mb-16">
                         <div className="flex items-center justify-center gap-3 mb-4">
@@ -837,19 +811,15 @@ export default function DashboardHome() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {/* 1. CONSULT NAVI */}
                         <Link href="/chat" className="group">
                             <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-secondary/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-secondary/10 transition-colors" />
-                                
                                 <div className="p-10 flex flex-col h-full relative z-10">
                                     <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-10 text-secondary group-hover:scale-110 transition-transform duration-500">
                                         <MessageSquare className="w-7 h-7" />
                                     </div>
-                                    
                                     <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-secondary transition-colors">{t('landing.chatNaviTitle')}</h3>
                                     <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('landing.chatNaviDesc')}</p>
-                                    
                                     <div className="space-y-3 mb-10 opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="h-1 w-full bg-secondary/10 rounded-full overflow-hidden">
                                             <div className="h-full bg-secondary w-3/4" />
@@ -859,7 +829,6 @@ export default function DashboardHome() {
                                             <span>85% {t('dashboard.neuralSync')}</span>
                                         </div>
                                     </div>
-
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-secondary uppercase tracking-widest group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.consultAi')} <ChevronRight className="w-4 h-4" />
@@ -869,19 +838,15 @@ export default function DashboardHome() {
                             </Card>
                         </Link>
 
-                        {/* 2. MY KUNDLI */}
                         <Link href="/kundli" className="group">
                             <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-blue-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-blue-500/10 transition-colors" />
-                                
                                 <div className="p-10 flex flex-col h-full relative z-10">
                                     <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-10 text-blue-400 group-hover:scale-110 transition-transform duration-500">
                                         <Globe className="w-7 h-7" />
                                     </div>
-                                    
                                     <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-blue-400 transition-colors">{t('dashboard.janamKundli')}</h3>
                                     <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.janamKundliDesc')}</p>
-                                    
                                     <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 mb-10">
                                         <div className="flex items-center justify-between">
                                             <div>
@@ -899,7 +864,6 @@ export default function DashboardHome() {
                                             </div>
                                         </div>
                                     </div>
-
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-blue-400 uppercase tracking-widest group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.openChart')} <ChevronRight className="w-4 h-4" />
@@ -909,19 +873,15 @@ export default function DashboardHome() {
                             </Card>
                         </Link>
 
-                        {/* 3. SOULMATE SYNC */}
                         <Link href="/kundli/match" className="group">
                             <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-rose-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-rose-500/10 transition-colors" />
-                                
                                 <div className="p-10 flex flex-col h-full relative z-10">
                                     <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-10 text-rose-400 group-hover:scale-110 transition-transform duration-500">
                                         <Heart className="w-7 h-7" />
                                     </div>
-                                    
                                     <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-rose-400 transition-colors">{t('dashboard.soulmateSync')}</h3>
                                     <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.soulmateSyncDesc')}</p>
-                                    
                                     <div className="flex items-center justify-center gap-6 mb-10">
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-primary">28</div>
@@ -933,7 +893,6 @@ export default function DashboardHome() {
                                             <div className="w-10 h-10 rounded-full border border-pink-500/30 bg-pink-500/10 flex items-center justify-center"><Users className="w-5 h-5 text-pink-400" /></div>
                                         </div>
                                     </div>
-
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-rose-400 uppercase tracking-widest group-hover:bg-rose-500/10 group-hover:border-rose-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.analyzeMatch')} <ChevronRight className="w-4 h-4" />
@@ -943,19 +902,15 @@ export default function DashboardHome() {
                             </Card>
                         </Link>
 
-                        {/* 4. DAILY PANCHANG */}
                         <Link href="/chat" className="group">
                             <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-emerald-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-emerald-500/10 transition-colors" />
-                                
                                 <div className="p-10 flex flex-col h-full relative z-10">
                                     <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-10 text-emerald-400 group-hover:scale-110 transition-transform duration-500">
                                         <Sun className="w-7 h-7" />
                                     </div>
-                                    
                                     <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-emerald-400 transition-colors">{t('dashboard.dailyPulse')}</h3>
                                     <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.realTimeTithi')}</p>
-                                    
                                     <div className="grid grid-cols-2 gap-4 mb-10">
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
                                             <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">Tithi</div>
@@ -966,7 +921,6 @@ export default function DashboardHome() {
                                             <div className="text-xs font-bold text-primary truncate">Siddha</div>
                                         </div>
                                     </div>
-
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-emerald-400 uppercase tracking-widest group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.checkPulse')} <ChevronRight className="w-4 h-4" />
@@ -977,23 +931,17 @@ export default function DashboardHome() {
                         </Link>
                     </div>
 
-                    {/* Bottom Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                         <div className="hidden lg:block" />
-                        
-                        {/* 5. RASHI LIBRARY */}
                         <Link href="/rashis" className="group">
                             <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-purple-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-purple-500/10 transition-colors" />
-                                
                                 <div className="p-10 flex flex-col h-full relative z-10">
                                     <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-10 text-purple-400 group-hover:scale-110 transition-transform duration-500">
                                         <Orbit className="w-7 h-7" />
                                     </div>
-                                    
                                     <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-purple-400 transition-colors">{t('dashboard.rashiLib')}</h3>
                                     <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.rashiLibDesc')}</p>
-                                    
                                     <div className="grid grid-cols-4 gap-2 mb-10 opacity-40 group-hover:opacity-100 transition-opacity">
                                         {['aries', 'leo', 'sagittarius', 'scorpio'].map((s, idx) => (
                                             <div key={idx} className="aspect-square rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
@@ -1001,7 +949,6 @@ export default function DashboardHome() {
                                             </div>
                                         ))}
                                     </div>
-
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-purple-400 uppercase tracking-widest group-hover:bg-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.openLibrary')} <ChevronRight className="w-4 h-4" />
@@ -1011,26 +958,21 @@ export default function DashboardHome() {
                             </Card>
                         </Link>
 
-                        {/* 6. GUIDED READING */}
                         <Link href="/consult" className="group">
                             <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-amber-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-amber-500/10 transition-colors" />
-                                
                                 <div className="p-10 flex flex-col h-full relative z-10">
                                     <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-10 text-amber-400 group-hover:scale-110 transition-transform duration-500">
                                         <Sparkles className="w-7 h-7" />
                                     </div>
-                                    
                                     <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-amber-400 transition-colors">{t('dashboard.sessions')}</h3>
                                     <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.sessionsDesc')}</p>
-                                    
                                     <div className="space-y-4 mb-10">
                                         <div className="flex items-center gap-2">
                                             {[1,2,3,4].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${s <= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-white/10'}`} />)}
                                         </div>
                                         <div className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest text-center">{t('dashboard.inProgress')}</div>
                                     </div>
-
                                     <div className="mt-auto">
                                         <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-amber-400 uppercase tracking-widest group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.joinSession')} <ChevronRight className="w-4 h-4" />
@@ -1039,11 +981,9 @@ export default function DashboardHome() {
                                 </div>
                             </Card>
                         </Link>
-
                         <div className="hidden lg:block" />
                     </div>
                 </div>
-
             </div>
         </div>
     );

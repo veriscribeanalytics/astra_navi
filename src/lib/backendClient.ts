@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * AstraNavi Backend API Client
  * 

@@ -5,11 +5,9 @@ import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
-    Gem, ArrowLeft, User, DollarSign, MessageSquare, Home, 
+    ArrowLeft, User, DollarSign, MessageSquare, Home, 
     Lightbulb, Shield, Heart, Eye, Compass, Briefcase, 
-    TrendingUp, Sparkles, ChevronRight, Info, 
-    Scale, Activity, Lock, Target, Map, Dna, Zap, BookOpen,
-    CheckCircle2, AlertCircle
+    TrendingUp, Sparkles, Activity, Lock, Dna, Zap, BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';

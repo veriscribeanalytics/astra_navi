@@ -2,6 +2,7 @@
  * Setup Database Indexes and Migrate to Optimized Structure
  */
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { MongoClient } = require('mongodb');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/astra-navi-database';
@@ -27,25 +28,21 @@ async function setupDatabase() {
         try {
             await users.createIndex({ email: 1 }, { unique: true });
             console.log('  ✅ Created unique index on email');
-        } catch (err) {
-            if (err.code === 85) {
-                console.log('  ℹ️  Email index already exists');
-            } else {
-                console.log('  ⚠️  Email index:', err.message);
-            }
+        } catch {
+            console.log('  ℹ️  Email index already exists or error occurred');
         }
 
         try {
             await users.createIndex({ moonSign: 1 });
             console.log('  ✅ Created index on moonSign');
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  Moon sign index already exists');
         }
 
         try {
             await users.createIndex({ sunSign: 1 });
             console.log('  ✅ Created index on sunSign');
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  Sun sign index already exists');
         }
 
@@ -116,11 +113,12 @@ async function setupDatabase() {
                 { unique: true }
             );
             console.log('  ✅ Created unique compound index on sign + date');
-        } catch (err) {
-            if (err.code === 85) {
+        } catch (err: unknown) {
+            const error = err as { code?: number; message: string };
+            if (error.code === 85) {
                 console.log('  ℹ️  Sign+date index already exists');
             } else {
-                console.log('  ⚠️  Sign+date index:', err.message);
+                console.log('  ⚠️  Sign+date index:', error.message);
             }
         }
 
@@ -130,11 +128,12 @@ async function setupDatabase() {
                 { expireAfterSeconds: 2592000 } // 30 days
             );
             console.log('  ✅ Created TTL index (30 days auto-cleanup)');
-        } catch (err) {
-            if (err.code === 85) {
+        } catch (err: unknown) {
+            const error = err as { code?: number; message: string };
+            if (error.code === 85) {
                 console.log('  ℹ️  TTL index already exists');
             } else {
-                console.log('  ⚠️  TTL index:', err.message);
+                console.log('  ⚠️  TTL index:', error.message);
             }
         }
 
@@ -147,14 +146,14 @@ async function setupDatabase() {
         try {
             await chats.createIndex({ userEmail: 1, updatedAt: -1 });
             console.log('  ✅ Created compound index on userEmail + updatedAt');
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  UserEmail+updatedAt index already exists');
         }
 
         try {
             await chats.createIndex({ userEmail: 1, _id: -1 });
             console.log('  ✅ Created compound index on userEmail + _id');
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  UserEmail+_id index already exists');
         }
 
@@ -167,14 +166,14 @@ async function setupDatabase() {
         try {
             await analytics.createIndex({ email: 1 });
             console.log('  ✅ Created index on email');
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  Email index already exists');
         }
 
         try {
             await analytics.createIndex({ chatId: 1 });
             console.log('  ✅ Created index on chatId');
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  ChatId index already exists');
         }
 

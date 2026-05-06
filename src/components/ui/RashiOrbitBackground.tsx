@@ -1,7 +1,8 @@
 'use client';
 
-import { memo, useEffect, useRef, useState, useMemo } from 'react';
+import { memo, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
+import { useMounted } from '@/hooks/useMounted';
 
 const rashiData = [
   { image: '/icons/rashi/aries.png' },
@@ -18,7 +19,7 @@ const rashiData = [
   { image: '/icons/rashi/pisces.png' },
 ];
 
-const BouncingIcon = ({ image, id, paused }: { image: string; id: number; paused: boolean }) => {
+const BouncingIcon = ({ image, paused }: { image: string; paused: boolean }) => {
   const iconRef = useRef<HTMLDivElement>(null);
   const startTime = useRef(0);
   
@@ -126,12 +127,8 @@ const RashiOrbitBackground = memo(function RashiOrbitBackground({
   iconCount?: number;
   pauseOnScroll?: boolean;
 }) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const visibleRashiData = useMemo(() => {
     return rashiData.filter((_, index) => {
       if (iconCount >= 12) return true;
@@ -149,7 +146,6 @@ const RashiOrbitBackground = memo(function RashiOrbitBackground({
           <BouncingIcon 
             key={`${index}-${rashi.image}`} 
             image={rashi.image} 
-            id={index}
             paused={pauseOnScroll}
           />
         ))}

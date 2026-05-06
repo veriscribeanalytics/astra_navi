@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
@@ -97,6 +97,7 @@ const TAG_SECTION_LABELS: Record<number, string> = {
 const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
   onClose,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   messageId,
   initialRating,
   onSubmit,
@@ -105,14 +106,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [hoverRating, setHoverRating] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setRating(initialRating);
-      setSelectedTags([]);
-      setComment('');
-    }
-  }, [isOpen, initialRating]);
 
   if (!isOpen) return null;
 
@@ -207,7 +200,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           {/* Disclaimer */}
           <div className="bg-on-surface/5 rounded-2xl p-4">
              <p className="text-xs text-on-surface-variant/60 leading-relaxed">
-              ✦ Your feedback helps Navi refine its Vedic wisdom. All responses are anonymous and used solely to improve AstraNavi's celestial guidance.
+              ✦ Your feedback helps Navi refine its Vedic wisdom. All responses are anonymous and used solely to improve AstraNavi&apos;s celestial guidance.
              </p>
           </div>
         </div>

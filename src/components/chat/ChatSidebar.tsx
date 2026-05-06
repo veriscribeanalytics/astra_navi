@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import { clientFetch } from '@/lib/apiClient';

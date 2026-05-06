@@ -170,13 +170,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const selectChat = useCallback(async (chatId: string) => {
     if (!chatId || isGuest) return;
+    console.log('[selectChat] Loading chat:', chatId);
     setActiveChatId(chatId);
     setIsLoadingMessages(true);
     try {
       const res = await clientFetch(`/api/chat/${chatId}`);
+      console.log('[selectChat] Response status:', res.status, res.ok);
       const data = await res.json();
+      console.log('[selectChat] Response data keys:', Object.keys(data), 'has chat?', !!data.chat, 'has messages?', !!data.chat?.messages?.length);
       if (!res.ok) throw new Error(data.error || 'Failed to load chat');
       if (data.chat) setActiveChat(data.chat);
+      else console.error('[selectChat] No chat object in response! Data:', JSON.stringify(data).slice(0, 500));
     } catch (err: unknown) {
       console.error('Failed to load chat:', err);
     } finally {

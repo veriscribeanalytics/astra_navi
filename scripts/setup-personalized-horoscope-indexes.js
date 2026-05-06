@@ -51,8 +51,8 @@ try {
     print('✅ Created TTL index (30 days auto-cleanup)');
     print('   → Automatically deletes horoscopes older than 30 days');
     
-} catch (e) {
-    print('⚠️  Personalized horoscopes indexes: ' + e.message);
+} catch {
+    print('⚠️  Personalized horoscopes indexes already exist or error occurred');
 }
 
 // ============================================
@@ -80,7 +80,7 @@ try {
     print(`  Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
     print(`  Indexes: ${stats.nindexes}`);
     print(`  Index Size: ${(stats.totalIndexSize / 1024 / 1024).toFixed(2)} MB\n`);
-} catch (e) {
+} catch {
     print(`personalized_daily_horoscopes: Collection not found (will be created on first insert)\n`);
 }
 

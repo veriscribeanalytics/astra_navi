@@ -7,10 +7,21 @@ import Card from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
 import { clientFetch } from '@/lib/apiClient';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, BookOpen, Moon, Star, Activity, Compass, Flame, Leaf, Wind, Droplets, Mountain, Sparkles, Briefcase, Heart, Zap, TrendingUp, Info, Users } from 'lucide-react';
+import { ArrowLeft, BookOpen, Moon, Star, Activity, Compass, Sparkles, Users, Leaf } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { rashiData } from '@/data/rashiData';
 import { Skeleton } from '@/components/ui/Skeleton';
+
+interface HoroscopeData {
+    mood?: string;
+    lucky_color?: string;
+    lucky_number?: number;
+    career?: string;
+    love?: string;
+    health?: string;
+    finance?: string;
+    tip?: string;
+}
 
 export default function RashisClient() {
     const { isLoggedIn } = useAuth();
@@ -28,7 +39,7 @@ export default function RashisClient() {
     const [viewMode, setViewMode] = React.useState<'encyclopedia' | 'rashi'>(initialMode);
     const [selectedRashi, setSelectedRashi] = React.useState(initialRashi);
 
-    const [horoscopeData, setHoroscopeData] = React.useState<any>(null);
+    const [horoscopeData, setHoroscopeData] = React.useState<HoroscopeData | null>(null);
     const [horoscopeLoading, setHoroscopeLoading] = React.useState(false);
 
     // Sync state FROM URL to handle deep-linking and back/forward navigation
@@ -370,7 +381,7 @@ export default function RashisClient() {
                                             {/* Row 6: Mantra */}
                                             <div className="p-4 shrink-0 flex items-center justify-between bg-surface/5">
                                                 <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.15em]">Seed Mantra</span>
-                                                <span className="text-sm font-bold text-foreground/80 italic">"{selectedRashi.mantra}"</span>
+                                                <span className="text-sm font-bold text-foreground/80 italic">&quot;{selectedRashi.mantra}&quot;</span>
                                             </div>
                                         </div>
 
@@ -443,7 +454,7 @@ export default function RashisClient() {
                                                             <Skeleton height={18} width={200} />
                                                         ) : (
                                                             <p className="text-[15px] font-bold text-foreground italic max-w-sm">
-                                                                "{horoscopeData?.tip || 'Follow the cosmic flow today.'}"
+                                                                &quot;{horoscopeData?.tip || 'Follow the cosmic flow today.'}&quot;
                                                             </p>
                                                         )}
                                                     </div>

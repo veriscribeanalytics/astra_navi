@@ -20,7 +20,7 @@ export async function POST(req: Request) {
                 error: validation.error.issues[0].message
             }, { status: 400 });
         }
-        const { email, password, name, dob, tob, pob, phoneNumber } = validation.data;
+        const { email, password } = validation.data;
 
         // 2. Rate limiting (Upstash Redis)
         const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
@@ -38,12 +38,7 @@ export async function POST(req: Request) {
             method: 'POST',
             body: JSON.stringify({
                 email,
-                password,
-                name,
-                dob,
-                tob,
-                pob,
-                phoneNumber
+                password
             })
         });
 

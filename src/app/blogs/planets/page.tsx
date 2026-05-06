@@ -4,9 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
 import { 
-    ArrowLeft, ChevronRight, Info, Shield, Scale, Activity,
+    ArrowLeft, Shield, Scale, Activity, Info,
     Lock, CheckCircle2, AlertCircle, Sparkles, Zap, Dna, BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';

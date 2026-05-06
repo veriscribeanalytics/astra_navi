@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import KundliClient from './KundliClient';
 import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
-import { BookOpen, Sparkles, Compass, Star } from 'lucide-react';
+import { BookOpen, Compass, Star } from 'lucide-react';
 
 function KundliContent() {
     const { isLoggedIn } = useAuth();

@@ -6,8 +6,7 @@ import { signIn } from 'next-auth/react';
 import { useToast, useTranslation } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import {
-    Mail, Lock, User, Calendar, MapPin,
-    Clock, ArrowRight, Eye,
+    Mail, Lock, ArrowRight, Eye,
     Sparkles, ShieldCheck, Orbit
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -33,10 +32,6 @@ const LoginContent = () => {
 
     // Form states
     const [email, setEmail] = useState('');
-    const [name, setName] = useState('');
-    const [dob, setDob] = useState('');
-    const [tob, setTob] = useState('');
-    const [pob, setPob] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -68,6 +63,7 @@ const LoginContent = () => {
                 'OAuthAccountNotLinked': 'To confirm your identity, please sign in with the same account you used originally.',
                 'EmailSignin': 'Check your email address.',
                 'CredentialsSignin': t('login.invalidCredentials'),
+                'Configuration': t('login.networkError'),
                 'SessionRequired': 'Please sign in to access this page.',
                 'SessionExpired': 'Your session has expired. Please sign in again.',
                 'default': 'An error occurred. Please try again.'
@@ -95,7 +91,7 @@ const LoginContent = () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email, password, name, dob, tob, pob
+                        email, password
                     }),
                 });
 
@@ -114,7 +110,9 @@ const LoginContent = () => {
                 if (result?.error) {
                     throw new Error(result.error === 'CredentialsSignin'
                         ? t('login.invalidCredentials')
-                        : result.error);
+                        : result.error === 'Configuration'
+                            ? t('login.networkError')
+                            : result.error);
                 }
 
                 showLoading(t('login.signingYouIn'), 1500);
@@ -250,12 +248,6 @@ const LoginContent = () => {
                                             exit={{ opacity: 0 }}
                                             className="space-y-3"
                                         >
-                                            <Input placeholder={t('login.fullName')} icon={<User size={14} className="text-secondary" />} value={name} onChange={(e) => setName(e.target.value)} required />
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <Input type="date" icon={<Calendar size={14} className="text-secondary" />} value={dob} onChange={(e) => setDob(e.target.value)} required />
-                                                <Input type="time" icon={<Clock size={14} className="text-secondary" />} value={tob} onChange={(e) => setTob(e.target.value)} required />
-                                            </div>
-                                            <Input placeholder={t('login.pob')} icon={<MapPin size={14} className="text-secondary" />} value={pob} onChange={(e) => setPob(e.target.value)} required />
                                             <Input type="email" placeholder={t('login.email')} icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
                                             <div className="relative">
                                                 <Input type={showPassword ? "text" : "password"} placeholder={t('login.password')} icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />

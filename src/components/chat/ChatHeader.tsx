@@ -3,11 +3,9 @@
 import React from 'react';
 import { useChat } from '@/context/ChatContext';
 import { useRouter } from 'next/navigation';
-import { Menu, Info, History, X } from 'lucide-react';
+import { Info, History, X } from 'lucide-react';
 
-interface ChatHeaderProps { }
-
-const ChatHeader: React.FC<ChatHeaderProps> = () => {
+const ChatHeader: React.FC = () => {
   const { setIsMobileMenuOpen, setIsRightPanelOpen } = useChat();
   const router = useRouter();
 

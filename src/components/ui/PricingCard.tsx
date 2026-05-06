@@ -23,7 +23,6 @@ const PricingCard: React.FC<PricingCardProps> = ({
   features,
   isRecommended = false,
   buttonText = 'Subscribe Now',
-  variant = 'secondary',
   onSubscribe
 }) => {
   return (

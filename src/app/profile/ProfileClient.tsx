@@ -10,14 +10,14 @@ import { useToast } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
 import { 
     User, Calendar, Clock, MapPin, 
-    Save, ArrowLeft, RotateCcw
+    Save, ArrowLeft, RotateCcw, Sparkles
 } from 'lucide-react';
 
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, isLoggedIn, refreshUser } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const isNewRegistration = searchParams?.get('registered') === 'true';
+    const isOnboarding = searchParams?.get('onboarding') === 'true';
     const { ToastContainer, success, error } = useToast();
     const [formData, setFormData] = useState({
         name: '',
@@ -128,10 +128,18 @@ export default function ProfileSettingsPage() {
         const newErrors = {
             name: validateField('name', formData.name),
             dob: validateField('dob', formData.dob),
-            tob: '',
+            tob: formData.tob ? '' : 'Time of birth is required',
             pob: validateField('pob', formData.pob),
             phoneNumber: ''
         };
+
+        // In onboarding mode, name/dob/tob/pob are all required
+        if (isOnboarding) {
+            if (!formData.name.trim()) newErrors.name = 'Name is required';
+            if (!formData.dob) newErrors.dob = 'Date of birth is required';
+            if (!formData.tob) newErrors.tob = 'Time of birth is required';
+            if (!formData.pob.trim()) newErrors.pob = 'Place of birth is required';
+        }
 
         setErrors(newErrors);
         setTouched({ name: true, dob: true, tob: true, pob: true, phoneNumber: true });
@@ -207,13 +215,13 @@ export default function ProfileSettingsPage() {
 
             setTimeout(() => {
                 showLoading("", 0);
-                if (isNewRegistration) {
+                if (isOnboarding) {
                     router.push('/');
                 }
             }, 500);
 
-        } catch (err: any) {
-            error(err.message);
+        } catch (err: unknown) {
+            error(err instanceof Error ? err.message : String(err));
             showLoading("", 0);
         }
     };
@@ -242,6 +250,14 @@ export default function ProfileSettingsPage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
             <div className="w-full max-w-xl relative z-10">
+                {isOnboarding && (
+                    <div className="text-center mb-6 p-4 bg-secondary/10 border border-secondary/20 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-500">
+                        <p className="text-sm font-medium text-secondary flex items-center justify-center gap-2">
+                            <Sparkles className="w-4 h-4" /> Let&apos;s set up your profile to unlock personalized readings!
+                        </p>
+                    </div>
+                )}
+
                 <div className="text-center mb-10 mt-8">
                     <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 mb-4 sm:mb-6 cosmic-glow">
                         <User className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
@@ -413,7 +429,7 @@ export default function ProfileSettingsPage() {
                                 loading={isLoading}
                                 leftIcon={!isLoading ? <Save className="w-4 h-4" /> : undefined}
                             >
-                                {isLoading ? 'Updating...' : (isNewRegistration ? 'Save & Continue to Dashboard' : 'Save Changes')}
+                                {isLoading ? 'Updating...' : (isOnboarding ? 'Save & Continue to Dashboard' : 'Save Changes')}
                             </Button>
                             {hasChanges && (
                                 <Button 

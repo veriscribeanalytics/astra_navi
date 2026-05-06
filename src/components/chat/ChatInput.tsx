@@ -1,83 +1,17 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useChat, ChatMessage } from '@/context/ChatContext';
+import { useChat } from '@/context/ChatContext';
 import { 
-    Plus, Mic, MicOff, RotateCcw, 
-    ArrowUp, Paperclip, Sparkles 
+    Mic, MicOff, RotateCcw, 
+    ArrowUp, Sparkles 
 } from 'lucide-react';
-import { useToast } from '@/hooks';
+import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from '@/hooks';
 
-// Generate contextual follow-up questions based on chat history
-const getContextualSuggestions = (messages: ChatMessage[]): string[] => {
-  if (!messages || messages.length === 0) return [];
-  
-  const lastMessages = messages.slice(-3);
-  const lastUserMessage = lastMessages.reverse().find(m => m.type === 'user')?.text?.toLowerCase() || '';
-  
-  // Context-aware suggestions based on conversation topics
-  const suggestionSets: Record<string, string[]> = {
-    career: [
-      "Analyze my 10th house for career growth",
-      "When is the most auspicious time for a job change?",
-      "Does my chart support success in entrepreneurship?",
-      "Identify the key planetary significators for my wealth"
-    ],
-    relationship: [
-      "What does my 7th house reveal about my life partner?",
-      "Analyze compatibility through Vedic synastry",
-      "When are the most favorable periods for marriage?",
-      "Identify any Mangal Dosha or related factors"
-    ],
-    wealth: [
-      "Analyze the Dhana Yogas in my birth chart",
-      "When will my financial situation significantly improve?",
-      "Identify the best investment sectors for my sign",
-      "What is the role of Jupiter in my wealth creation?"
-    ],
-    health: [
-      "What health precautions does my 6th house suggest?",
-      "Which Ayurvedic remedies align with my planetary chart?",
-      "Identify periods requiring heightened physical care",
-      "Does my chart indicate strength for recovery?"
-    ],
-    mahadasha: [
-      "Provide a deep dive into my current Mahadasha",
-      "How will the upcoming Antardasha affect my status?",
-      "Identify remedies for my current planetary period",
-      "Explain the long-term impact of my active Dasha"
-    ],
-    default: [
-      "What are the most impactful transits for me right now?",
-      "Analyze my current planetary period (Dasha)",
-      "What are the most effective remedies for my chart?",
-      "Provide a high-level overview of my career prospects"
-    ]
-  };
-
-  // Detect topic from last user message
-  let topic = 'default';
-  if (lastUserMessage.match(/career|job|work|profession|business/i)) topic = 'career';
-  else if (lastUserMessage.match(/love|marriage|partner|relationship|spouse/i)) topic = 'relationship';
-  else if (lastUserMessage.match(/money|wealth|finance|income|property/i)) topic = 'wealth';
-  else if (lastUserMessage.match(/health|disease|illness|medical/i)) topic = 'health';
-  else if (lastUserMessage.match(/mahadasha|dasha|period|antardasha/i)) topic = 'mahadasha';
-
-  // Return 2 random suggestions from the relevant set
-  const suggestions = suggestionSets[topic];
-  const shuffled = [...suggestions].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 2);
-};
-
-// Define interfaces for Web Speech API
+// Type definitions for Web Speech API
 interface SpeechRecognitionEvent extends Event {
-  results: {
-    [index: number]: {
-      [index: number]: {
-        transcript: string;
-      };
-    };
-  };
+  results: SpeechRecognitionResultList;
 }
 
 interface SpeechRecognitionErrorEvent extends Event {
@@ -87,6 +21,7 @@ interface SpeechRecognitionErrorEvent extends Event {
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
+  lang: string;
   onresult: (event: SpeechRecognitionEvent) => void;
   onerror: (event: SpeechRecognitionErrorEvent) => void;
   onend: () => void;
@@ -95,57 +30,34 @@ interface SpeechRecognition extends EventTarget {
 }
 
 const ChatInput: React.FC = () => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendMessage, isSending, activeChat, inputText, setInputText } = useChat();
-  const { error, warning, ToastContainer } = useToast();
+  const { 
+    inputText, setInputText, sendMessage, 
+    isSending, activeChatId, createNewChat
+  } = useChat();
+  const { t } = useTranslation();
+  
   const [isListening, setIsListening] = useState(false);
-  const [charCount, setCharCount] = useState(0);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const MAX_CHARS = 2000;
-
-  // Auto-resize textarea (debounced for performance)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
-      }
-    }, 50);
-    
-    return () => clearTimeout(timeoutId);
-  }, [inputText]);
-
-  // Update character count
-  useEffect(() => {
-    setCharCount(inputText.length);
-  }, [inputText]);
-
-  const handleSend = async () => {
-    if (!inputText.trim() || isSending || charCount > MAX_CHARS) return;
-    const text = inputText;
-    setInputText('');
-    await sendMessage(text);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const MAX_CHARS = 1000;
+  const charCount = inputText.length;
+  const isOverLimit = charCount > MAX_CHARS;
 
   useEffect(() => {
     // Initialize Web Speech API
-    const WindowSpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = window as unknown as { SpeechRecognition?: new() => SpeechRecognition; webkitSpeechRecognition?: new() => SpeechRecognition };
+    const WindowSpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (WindowSpeechRecognition) {
-      recognitionRef.current = new WindowSpeechRecognition() as SpeechRecognition;
+      recognitionRef.current = new WindowSpeechRecognition();
       const recognition = recognitionRef.current;
       recognition.continuous = false;
       recognition.interimResults = false;
+      recognition.lang = 'en-US';
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
-        setInputText((prev) => {
+        setInputText(prev => {
           const newText = prev ? `${prev} ${transcript}` : transcript;
           return newText.slice(0, MAX_CHARS);
         });
@@ -154,9 +66,9 @@ const ChatInput: React.FC = () => {
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         if (event.error === 'not-allowed') {
-          error('Microphone permission denied. Please allow microphone access in your browser settings.');
+          console.warn('Microphone permission denied.');
         } else if (event.error !== 'no-speech') {
-          error(`Voice input error: ${event.error}. Please try again.`);
+          console.warn(`Voice input error: ${event.error}`);
         }
         setIsListening(false);
       };
@@ -168,107 +80,139 @@ const ChatInput: React.FC = () => {
   }, [setInputText]);
 
   const toggleListening = () => {
-    if (!recognitionRef.current) {
-        warning('Voice input is not supported in your browser.');
-        return;
-    }
+    if (!recognitionRef.current) return;
 
     if (isListening) {
       recognitionRef.current.stop();
+      setIsListening(false);
     } else {
-      setIsListening(true);
-      recognitionRef.current.start();
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Speech recognition error:", err);
+      }
     }
   };
 
-  // Don't show input if no active chat
-  if (!activeChat) return null;
+  const handleSend = () => {
+    if (!inputText.trim() || isSending || isOverLimit) return;
+    
+    if (activeChatId) {
+      sendMessage(inputText.trim());
+    } else {
+      createNewChat(inputText.trim());
+    }
+    setInputText('');
+  };
 
-  const isOverLimit = charCount > MAX_CHARS;
-  const isNearLimit = charCount > MAX_CHARS * 0.9;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [inputText]);
 
   return (
-    <div className="shrink-0 bg-background min-w-0 w-full overflow-hidden">
-      {ToastContainer}
-      {/* Suggested Questions - Context-aware */}
-      {activeChat && activeChat.messages.length > 0 && !isSending && (
-        <div className="px-3 sm:px-4 md:px-5 pt-2 pb-2 min-w-0 w-full">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide min-w-0 w-full">
-            {getContextualSuggestions(activeChat.messages).map((suggestion, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setInputText(suggestion);
-                  textareaRef.current?.focus();
-                }}
-                className="shrink-0 px-3.5 py-2 text-[13px] font-medium text-on-surface-variant/70 bg-surface border border-outline-variant/30 rounded-full hover:bg-surface-variant hover:border-secondary/40 hover:text-secondary transition-all whitespace-nowrap flex items-center gap-2 group/chip"
-              >
-                <Sparkles className="w-3.5 h-3.5 opacity-30 group-hover/chip:opacity-100 group-hover/chip:scale-110 transition-all text-secondary" />
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Input Area */}
-      <div className="px-3 sm:px-4 md:px-5 pb-2 sm:pb-3">
-        <div className={`chat-input-container transition-all ${isOverLimit ? '!border-red-500/50' : ''}`}>
-          <textarea
-            ref={textareaRef}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value.slice(0, MAX_CHARS))}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask anything..."
-            rows={1}
-            disabled={isSending}
-            aria-label="Chat message input"
-            className="flex-1 bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 focus:ring-0 focus:outline-none focus:border-none text-on-surface text-[14px] font-body resize-none leading-relaxed min-h-[22px] max-h-[120px] placeholder:text-on-surface-variant/50 disabled:opacity-50 py-0.5 ml-1"
-          />
+    <div className="w-full max-w-4xl mx-auto px-4 pb-4 sm:pb-6 relative z-20">
+      <div className="relative group">
+        {/* Glow Effect */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-secondary/10 via-amber-500/5 to-secondary/10 rounded-[32px] blur-xl opacity-0 group-focus-within:opacity-100 transition duration-700" />
+        
+        <div className="relative flex flex-col bg-surface/80 backdrop-blur-2xl border border-outline-variant/20 rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.12)] group-focus-within:border-secondary/40 transition-all duration-500">
           
-          {/* Right side buttons */}
-          <div className="flex items-center gap-1 shrink-0">
-            <button 
-              className={`chat-input-icon-btn relative transition-all ${isListening ? '!text-red-500 !bg-red-500/10 !opacity-100' : ''}`} 
-              onClick={toggleListening}
-              title={isListening ? "Stop listening" : "Voice input"}
-              aria-label={isListening ? "Stop voice input" : "Start voice input"}
-              aria-pressed={isListening}
-            >
-              {isListening && (
-                <span className="absolute inset-0 bg-red-500/20 rounded-lg animate-ping" />
-              )}
-              {isListening ? <MicOff className="w-4.5 h-4.5 relative z-10" /> : <Mic className="w-4.5 h-4.5 relative z-10" />}
-            </button>
-            
-            {inputText.trim() ? (
-              <button
-                className="chat-send-btn"
-                disabled={isSending || isOverLimit}
-                onClick={handleSend}
-                title={isSending ? "Sending..." : isOverLimit ? "Message too long" : "Send message"}
-                aria-label="Send message"
+          <div className="flex items-end p-2 sm:p-3">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 pb-1.5 sm:pb-2">
+              <button 
+                onClick={() => setInputText('')}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center text-foreground/30 hover:text-secondary hover:bg-secondary/10 transition-all active:scale-90"
+                title="Clear input"
               >
-                {isSending ? (
-                  <RotateCcw className="w-4.5 h-4.5 animate-spin" />
-                ) : (
-                  <ArrowUp className="w-4.5 h-4.5" />
-                )}
+                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-            ) : null}
-          </div>
-        </div>
+              <button 
+                onClick={toggleListening}
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center transition-all active:scale-90 ${
+                  isListening 
+                  ? 'bg-red-500/20 text-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]' 
+                  : 'text-foreground/30 hover:text-secondary hover:bg-secondary/10'
+                }`}
+                title={isListening ? "Stop listening" : "Voice input"}
+              >
+                {isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+              </button>
+            </div>
 
-        {/* Compact disclaimer with character count */}
-        <div className="flex items-center justify-center gap-2 mt-1 px-1">
-          <p className="text-[9px] text-on-surface-variant/35 leading-tight font-medium text-center">
-            AI guidance • Entertainment only
-            {(isNearLimit || isOverLimit) && (
-              <span className={`ml-2 font-bold ${isOverLimit ? 'text-red-500' : 'text-yellow-500'}`}>
-                {charCount}/{MAX_CHARS}
-              </span>
+            {/* Input Area */}
+            <div className="flex-1 min-h-[48px] sm:min-h-[56px] flex items-center px-1 sm:px-2">
+              <textarea
+                ref={textareaRef}
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={t('horoscope.askNaviAboutToday') + "..."}
+                className="w-full bg-transparent border-none outline-none text-[13px] sm:text-[15px] font-medium text-foreground placeholder:text-foreground/25 resize-none py-3 px-1 max-h-[120px] scrollbar-hide"
+                rows={1}
+              />
+            </div>
+
+            {/* Send Button */}
+            <div className="px-1 sm:px-2 pb-1.5 sm:pb-2">
+              <button 
+                onClick={handleSend}
+                disabled={!inputText.trim() || isSending || isOverLimit}
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group/send ${
+                  !inputText.trim() || isSending || isOverLimit
+                  ? 'bg-surface-variant/50 text-foreground/10 cursor-not-allowed'
+                  : 'bg-secondary text-background shadow-lg shadow-secondary/20 hover:scale-105 active:scale-95'
+                }`}
+              >
+                <AnimatePresence mode="wait">
+                  {isSending ? (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="send"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="flex items-center justify-center"
+                    >
+                      <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover/send:-translate-y-0.5" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+            </div>
+          </div>
+
+          {/* Footer Info */}
+          <div className="px-6 py-2 bg-black/5 flex items-center justify-between border-t border-white/5">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+              <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">Navi is online</p>
+            </div>
+            {charCount > 0 && (
+              <p className={`text-[9px] font-bold uppercase tracking-widest ${isOverLimit ? 'text-red-500' : 'text-foreground/20'}`}>
+                {charCount} / {MAX_CHARS}
+              </p>
             )}
-          </p>
+          </div>
         </div>
       </div>
     </div>

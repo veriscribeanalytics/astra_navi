@@ -50,8 +50,9 @@ export function ThemeProvider({
     // Sync theme across tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
-        setThemeState(e.newValue as Theme);
-        applyThemeWithOptimization(e.newValue as Theme, deviceTier);
+        const newTheme = e.newValue as Theme;
+        setThemeState(newTheme);
+        applyThemeWithOptimization(newTheme, tier);
       }
     };
 

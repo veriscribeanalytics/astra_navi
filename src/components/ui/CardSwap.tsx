@@ -70,7 +70,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
     activeIndex,
     children
 }) => {
-    const config =
+    const config = useMemo(() => (
         easing === 'elastic'
             ? {
                 ease: 'elastic.out(0.6,0.9)',
@@ -87,7 +87,8 @@ const CardSwap: React.FC<CardSwapProps> = ({
                 durReturn: 0.8,
                 promoteOverlap: 0.45,
                 returnDelay: 0.2
-            };
+            }
+    ), [easing]);
 
     const childArr = useMemo(() => Children.toArray(children), [children]);
     const refs = useMemo(
@@ -265,7 +266,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
 
     const rendered = childArr.map((child, i) => {
         if (!isValidElement(child)) return child;
-        const element = child as React.ReactElement<any>;
+        const element = child as React.ReactElement<{ style?: React.CSSProperties; onClick?: (e: React.MouseEvent) => void }>;
         return cloneElement(element, {
             key: i,
             ref: refs[i],
@@ -274,7 +275,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
                 element.props.onClick?.(e);
                 onCardClick?.(i);
             }
-        });
+        } as React.Attributes & { style: React.CSSProperties; onClick: (e: React.MouseEvent) => void });
     });
 
     return (

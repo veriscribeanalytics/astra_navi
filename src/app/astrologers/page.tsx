@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'motion/react';
-import { Star, Shield, Clock, MessageSquare, Phone, Filter, ChevronRight, CheckCircle, Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Star, Shield, Clock, Filter, CheckCircle, Sparkles } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 

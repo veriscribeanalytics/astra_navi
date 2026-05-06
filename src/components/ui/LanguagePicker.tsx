@@ -47,7 +47,7 @@ const LanguagePicker: React.FC = () => {
                 <button
                   key={lang.code}
                   onClick={() => {
-                    setLanguage(lang.code as any);
+                    setLanguage(lang.code);
                     setIsOpen(false);
                   }}
                   className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all ${

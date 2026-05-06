@@ -3,6 +3,7 @@
  * Checks MongoDB connection and analyzes collections
  */
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { MongoClient } = require('mongodb');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/astra-navi-database';
@@ -66,9 +67,9 @@ async function checkDatabase() {
                     const sample = await collection.findOne();
                     console.log('  Sample Document Keys:', Object.keys(sample).join(', '));
                 }
-            } catch (err) {
+            } catch {
                 console.log(`\n📦 Collection: ${collName}`);
-                console.log(`  ⚠️  Not found or error: ${err.message}`);
+                console.log(`  ⚠️  Not found or error occurred`);
             }
         }
 
@@ -88,7 +89,7 @@ async function checkDatabase() {
             } else {
                 console.log(`  ✅ Using optimized collection (daily_horoscopes_by_sign): ${newCount} documents`);
             }
-        } catch (err) {
+        } catch {
             console.log(`  ℹ️  No old horoscope data found`);
         }
 
@@ -116,8 +117,8 @@ async function checkDatabase() {
                     console.log(`    ${sign._id}: ${sign.count} users`);
                 });
             }
-        } catch (err) {
-            console.log(`  ⚠️  Error analyzing users: ${err.message}`);
+        } catch {
+            console.log(`  ⚠️  Error analyzing users`);
         }
 
         // Check today's horoscopes
@@ -134,8 +135,8 @@ async function checkDatabase() {
                 console.log(`  ℹ️  No horoscopes cached yet for today (${today})`);
                 console.log('  💡 Horoscopes will be fetched when users login');
             }
-        } catch (err) {
-            console.log(`  ⚠️  Error checking horoscopes: ${err.message}`);
+        } catch {
+            console.log(`  ⚠️  Error checking horoscopes`);
         }
 
         // Recommendations
@@ -169,7 +170,7 @@ async function checkDatabase() {
             if (hasEmailIndex && hasSignDateIndex && hasTTL) {
                 console.log('  ✅ All critical indexes are in place!');
             }
-        } catch (err) {
+        } catch {
             console.log('  ℹ️  Horoscope collection not found - will be created on first use');
         }
 

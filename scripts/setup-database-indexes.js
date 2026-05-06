@@ -32,8 +32,8 @@ try {
     db.users.createIndex({ sunSign: 1 });
     print('✅ Created index on sunSign');
     
-} catch (e) {
-    print('⚠️  Users indexes: ' + e.message);
+} catch {
+    print('⚠️  Users indexes error');
 }
 
 // ============================================
@@ -62,8 +62,8 @@ try {
     );
     print('✅ Created TTL index (30 days auto-cleanup)');
     
-} catch (e) {
-    print('⚠️  Personalized horoscopes indexes: ' + e.message);
+} catch {
+    print('⚠️  Personalized horoscopes indexes error');
 }
 
 // ============================================
@@ -110,8 +110,8 @@ try {
     db.chats.createIndex({ email: 1, title: 'text' });
     print('✅ Created text index on title');
     
-} catch (e) {
-    print('⚠️  Chats indexes: ' + e.message);
+} catch {
+    print('⚠️  Chats indexes error');
 }
 
 // ============================================
@@ -132,8 +132,8 @@ try {
     db.chat_analytics.createIndex({ email: 1, createdAt: -1 });
     print('✅ Created compound index on email + createdAt');
     
-} catch (e) {
-    print('⚠️  Analytics indexes: ' + e.message);
+} catch {
+    print('⚠️  Analytics indexes error');
 }
 
 // ============================================
@@ -190,8 +190,8 @@ try {
     } else {
         print('✅ No old horoscope data found');
     }
-} catch (e) {
-    print('⚠️  Migration: ' + e.message);
+} catch {
+    print('⚠️  Migration error');
 }
 
 // ============================================
@@ -242,7 +242,7 @@ collections.forEach(collName => {
         print(`  Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
         print(`  Indexes: ${stats.nindexes}`);
         print(`  Index Size: ${(stats.totalIndexSize / 1024 / 1024).toFixed(2)} MB\n`);
-    } catch (e) {
+    } catch {
         print(`${collName}: Collection not found\n`);
     }
 });

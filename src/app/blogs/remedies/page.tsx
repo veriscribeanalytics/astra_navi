@@ -5,8 +5,8 @@ import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
-    Heart, ArrowLeft, ChevronRight, Info, Scale, 
-    Activity, Lock, Zap, Dna, Sparkles, Gem, Music, Flame, Stars, Target, Shield
+    Heart, ArrowLeft, ChevronRight, 
+    Activity, Zap, Dna, Sparkles, Gem, Music, Flame, Stars, Target, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';

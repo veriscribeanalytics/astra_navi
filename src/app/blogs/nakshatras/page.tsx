@@ -5,9 +5,9 @@ import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
-    Star, ArrowLeft, ChevronRight, Compass, Info, Scale, 
-    Activity, Lock, Zap, Dna, Moon, Sparkles, Target, Shield,
-    BookOpen, CheckCircle2, AlertCircle
+    ArrowLeft, Compass, Scale, 
+    Activity, Lock, Zap, Sparkles, Target,
+    BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';

@@ -6,9 +6,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { 
     Brain, ArrowLeft, Crown, DollarSign, Sparkles, 
-    TrendingUp, Zap, Eye, ChevronRight, Info, 
-    Scale, Activity, Lock, Target, Flame, Star, Dna, Shield, BookOpen,
-    CheckCircle2, AlertCircle
+    TrendingUp, Zap, 
+    Shield, Activity, Lock, Dna, BookOpen, Target
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';

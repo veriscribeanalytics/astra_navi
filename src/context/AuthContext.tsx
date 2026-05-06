@@ -26,6 +26,8 @@ interface AuthContextType {
     isLoggedIn: boolean;
     isLoading: boolean;
     user: User | null;
+    profileComplete: boolean;
+    profileFetched: boolean;
     login: (email?: string, profile?: Partial<User>) => void;
     logout: (callbackUrl?: string) => Promise<void>;
     showLoading: (message?: string, duration?: number) => void;
@@ -48,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isLoggedIn = status === 'authenticated';
     const isSessionLoading = status === 'loading';
+    const profileComplete = !!(user?.name && user?.dob && user?.tob && user?.pob);
 
     // Track how many consecutive times we've seen RefreshAccessTokenError
     // Only sign out after seeing it persist across multiple session updates
@@ -150,6 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             profileRetryCount.current = 0;
             refreshErrorCount.current = 0;
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, status, profileFetched]); // Removed user from dependencies
 
     const login = useCallback((email?: string, profile?: Partial<User>) => {
@@ -198,6 +202,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isLoggedIn, 
             isLoading: isLoading || isSessionLoading, 
             user, 
+            profileComplete,
+            profileFetched,
             login, 
             logout, 
             showLoading, 

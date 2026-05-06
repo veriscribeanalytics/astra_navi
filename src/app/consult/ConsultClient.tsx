@@ -91,7 +91,7 @@ const ConsultClient: React.FC = () => {
       } else {
         throw new Error("Could not fetch the consultation options.");
       }
-    } catch (_) {
+    } catch {
       error("The analysis is currently unavailable. Please try again later.");
     } finally {
       setIsLoadingTree(false);
@@ -153,7 +153,7 @@ const ConsultClient: React.FC = () => {
                 } else if (data.error) {
                   throw new Error(data.error);
                 }
-              } catch (e) { /* partial json */ }
+              } catch { /* partial json */ }
             }
           }
         }

@@ -1,12 +1,11 @@
 'use client';
 
-import { Suspense, lazy, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useDeviceCapability } from '@/hooks/useDeviceCapability';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
+import { useMounted } from '@/hooks/useMounted';
 import Particles from './Particles';
 import SunFlares from './SunFlares';
-import RashiOrbitBackground from './RashiOrbitBackground';
 
 /**
  * Optimized background manager
@@ -18,11 +17,7 @@ export default function OptimizedBackgrounds() {
   const device = useDeviceCapability();
   const isScrolling = useScrollDetection(150);
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   // Don't render until mounted (avoid hydration issues)
   if (!mounted) {

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import TopicPill from '@/components/ui/TopicPill';
 import { useAuth } from '@/context/AuthContext';
@@ -64,7 +63,7 @@ const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
   const { 
     activeChat, activeChatId, inputText, setInputText, 
-    setIsRightPanelOpen, createNewChat, sendMessage, isGuest 
+    setIsRightPanelOpen, createNewChat, isGuest 
   } = useChat();
 
   // Profile fields from DB — show "—" if missing
@@ -113,7 +112,7 @@ const ChatDetailPanel: React.FC = () => {
           <KundliGraphic />
           <div className="flex items-center justify-between mb-2">
             <p className="text-[11px] font-bold text-on-surface">
-              {user?.name || user?.email || '—'}
+              {user?.name || user?.email?.split('@')[0] || '—'}
             </p>
             <span className="text-[10px] text-secondary cursor-pointer hover:underline">Edit</span>
           </div>

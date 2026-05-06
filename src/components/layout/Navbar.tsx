@@ -8,7 +8,6 @@ import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "../ui/LanguagePicker";
 import { useAuth } from "@/context/AuthContext";
-import { useChat } from "@/context/ChatContext";
 import { useToast, useTranslation } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
@@ -256,41 +255,17 @@ const Navbar: React.FC = () => {
     const desktopUserDropdownRef = useRef<HTMLDivElement>(null);
     const mobileUserDropdownRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLElement>(null);
+    
+    // Reset states on route change
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsMenuOpen(false);
+        setIsUserDropdownOpen(false);
+        setHoveredSection(null);
+    }, [pathname]);
 
     const isChatPage = pathname?.startsWith('/chat');
     const navSections = getNavSections(isLoggedIn, t);
-
-    useEffect(() => {
-        const nav = navRef.current;
-        if (!nav) return;
-        const setHeight = () => {
-            document.documentElement.style.setProperty('--navbar-height', `${nav.offsetHeight}px`);
-        };
-        setHeight();
-        const observer = new ResizeObserver(setHeight);
-        observer.observe(nav);
-        return () => observer.disconnect();
-    }, []);
-    
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            const target = event.target as Node;
-            const isOutsideDesktop = !desktopUserDropdownRef.current || !desktopUserDropdownRef.current.contains(target);
-            const isOutsideMobile = !mobileUserDropdownRef.current || !mobileUserDropdownRef.current.contains(target);
-            
-            if (isOutsideDesktop && isOutsideMobile) {
-                setIsUserDropdownOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-        setIsMenuOpen(prev => prev ? false : prev);
-        setIsUserDropdownOpen(prev => prev ? false : prev);
-        setHoveredSection(prev => prev !== null ? null : prev);
-    }, [pathname]);
 
     const handleLogout = async () => {
         setIsUserDropdownOpen(false);
@@ -319,28 +294,34 @@ const Navbar: React.FC = () => {
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start">
-                    <Link href="/" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
-                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
+                    <Link href="/" aria-label="Astra Navi Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
+                        <Image src="/icons/logo.jpeg" alt="" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
                         Astra Navi
                     </Link>
                 </div>
 
                 {/* Center: Navigation Dropdowns */}
-                <div className="flex items-center justify-center space-x-1 lg:space-x-3">
+                <div className="flex items-center justify-center space-x-1 lg:space-x-3" role="menubar">
                     {navSections.map((section) => (
                         <div 
                             key={section.id}
                             className="relative"
                             onMouseEnter={() => setHoveredSection(section.id)}
                             onMouseLeave={() => setHoveredSection(null)}
+                            role="none"
                         >
-                            <button className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-full transition-all duration-300 font-body font-bold text-[11px] lg:text-[12px] tracking-widest uppercase whitespace-nowrap ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}>
+                            <button 
+                                role="menuitem"
+                                aria-haspopup="true"
+                                aria-expanded={hoveredSection === section.id}
+                                className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-full transition-all duration-300 font-body font-bold text-[11px] lg:text-[12px] tracking-widest uppercase whitespace-nowrap ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}
+                            >
                                 {section.label}
                                 <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${hoveredSection === section.id ? 'rotate-180 text-secondary' : 'opacity-30'}`} />
                             </button>
 
                             {/* Mega Dropdown Bridge */}
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`}>
+                            <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`} role="menu">
                                 {/* Hover Bridge Pseudo-element */}
                                 <div className="absolute top-0 left-0 w-full h-4 -translate-y-full" />
                                 
@@ -352,6 +333,7 @@ const Navbar: React.FC = () => {
                                                     key={idx} 
                                                     href={item.href}
                                                     role="menuitem"
+                                                    aria-label={`${item.label}: ${item.desc}`}
                                                     className={`group flex items-start gap-4 p-3 rounded-2xl transition-all duration-200 ${isActive(item.href) ? 'bg-secondary/10' : 'hover:bg-secondary/5'}`}
                                                 >
                                                     <div className={`mt-0.5 w-10 h-10 shrink-0 rounded-xl flex items-center justify-center border transition-all duration-300 ${isActive(item.href) ? 'bg-secondary text-white border-secondary' : 'bg-secondary/5 text-secondary border-secondary/10 group-hover:bg-secondary/10 group-hover:border-secondary/30'}`}>
@@ -396,7 +378,7 @@ const Navbar: React.FC = () => {
                                 <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
-                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "User"}</p>
+                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || "User"}</p>
                                     </div>
                                     <div className="space-y-0.5">
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
@@ -450,7 +432,7 @@ const Navbar: React.FC = () => {
                                 <div className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
-                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email || "User"}</p>
+                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || "User"}</p>
                                     </div>
                                     <div className="space-y-0.5">
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
@@ -480,7 +462,7 @@ const Navbar: React.FC = () => {
                                     return (
                                         <Link key={idx} href={item.href} onClick={() => setIsMenuOpen(false)} className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all active:scale-[0.98] ${isActive(item.href) ? 'bg-secondary/10' : 'hover:bg-primary/5'}`}>
                                             <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition-colors ${isActive(item.href) ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary'}`}>
-                                                {cloneElement(item.icon as React.ReactElement<any>, { size: 18 })}
+                                                {cloneElement(item.icon as React.ReactElement<Record<string, unknown>>, { size: 18 })}
                                             </div>
                                             <div className="flex flex-col min-w-0">
                                                 <span className={`text-[13px] font-bold tracking-tight ${isActive(item.href) ? 'text-secondary' : 'text-primary'}`}>
