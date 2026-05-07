@@ -314,16 +314,27 @@ button:focus-visible:not(.chat-input-icon-btn),
     --transition-duration: 0ms !important;
   }
   
-  body, nav, main, button, input, textarea, select,
-  [role="main"], [role="navigation"], [role="button"] {
+  /* Kill ALL transitions on mobile — prevents visible theme-switch lag
+     on cards, strips, text, etc. Computed once at page load (cheap),
+     unlike .disable-transitions which forces a full recalc per toggle.
+     Particle/glow elements are exempted below. */
+  *,
+  *::before,
+  *::after {
     transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
   
   .particle-container,
   .rashi-orbit-container,
   [class*="orbit"],
-  [class*="particle"] {
+  [class*="particle"],
+  [class*="flare"],
+  [class*="glow"] {
     transition: opacity 300ms ease 50ms !important;
+    animation-duration: 400ms !important;
+    animation-iteration-count: infinite !important;
   }
 }
 
