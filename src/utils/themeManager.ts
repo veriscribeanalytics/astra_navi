@@ -125,11 +125,15 @@ export function applyThemeWithOptimization(theme: Theme, deviceTier: DeviceTier)
   
   // PHASE 2: Re-enable transitions for decorative elements only
   // This allows particles, glows, etc. to fade in gradually without blocking UI
+  // On mobile viewports, skip the stagger class entirely to avoid the 600ms setTimeout overhead
+  // since mobile CSS already disables most transitions via @media (max-width: 768px)
+  const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+  
   requestAnimationFrame(() => {
     document.documentElement.classList.remove('disable-transitions');
     
-    // On low-end devices or reduced motion, skip decorative transitions entirely
-    const shouldSkipDecorativeTransitions = prefersReducedMotion() || deviceTier === 'low';
+    // On low-end devices, reduced motion, or mobile viewports — skip decorative transitions entirely
+    const shouldSkipDecorativeTransitions = prefersReducedMotion() || deviceTier === 'low' || isMobileViewport;
     if (!shouldSkipDecorativeTransitions) {
       document.documentElement.classList.add('theme-transition-stagger');
       

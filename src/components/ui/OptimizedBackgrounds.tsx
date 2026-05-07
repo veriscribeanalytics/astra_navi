@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useDeviceCapability } from '@/hooks/useDeviceCapability';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
 import { useMounted } from '@/hooks/useMounted';
+import { useTheme } from '@/hooks/useTheme';
 import Particles from './Particles';
 import SunFlares from './SunFlares';
 
@@ -12,12 +13,18 @@ import SunFlares from './SunFlares';
  * Adaptively adjusts quality based on device capability
  * Pauses animations during scroll for better performance
  * Keeps all visual elements but optimizes their settings
+ * 
+ * Uses a SINGLE Particles instance with darkMode prop to avoid
+ * WebGL context creation/destruction on theme toggle — the #1 cause
+ * of the ~1s delay on mobile when switching themes.
  */
 export default function OptimizedBackgrounds() {
   const device = useDeviceCapability();
   const isScrolling = useScrollDetection(150);
   const pathname = usePathname();
   const mounted = useMounted();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   // Don't render until mounted (avoid hydration issues)
   if (!mounted) {
@@ -48,30 +55,18 @@ export default function OptimizedBackgrounds() {
 
       {/* Rashi Orbit Background removed as requested */}
 
-      {/* Particles - Dark Mode */}
-      <div className="fixed inset-0 z-[-5] pointer-events-none hidden dark:block">
+      {/* Single Particles instance — color buffer updates in-place on theme change */}
+      <div className="fixed inset-0 z-[-5] pointer-events-none">
         <Particles
-          particleColors={["var(--secondary)", "var(--flare-gold)", "var(--foreground)"]}
+          lightParticleColors={["var(--outline-variant)", "var(--accent)", "var(--secondary)"]}
+          darkParticleColors={["var(--secondary)", "var(--flare-gold)", "var(--foreground)"]}
+          darkMode={isDark}
           particleCount={device.particleCount}
           particleSpread={particleSpread}
           speed={isPaused ? 0 : particleSpeed}
           particleBaseSize={device.particleSize}
           moveParticlesOnHover={(device.isDesktop || !isChatPage) && device.enableComplexAnimations}
-          alphaParticles={false}
-          disableRotation={(isChatPage && !device.isDesktop) || !device.enableComplexAnimations}
-        />
-      </div>
-
-      {/* Particles - Light Mode */}
-      <div className="fixed inset-0 z-[-5] pointer-events-none block dark:hidden">
-        <Particles
-          particleColors={["var(--outline-variant)", "var(--accent)", "var(--secondary)"]}
-          particleCount={device.particleCount}
-          particleSpread={particleSpread + 2}
-          speed={isPaused ? 0 : particleSpeed * 0.8}
-          particleBaseSize={device.particleSize - 20}
-          moveParticlesOnHover={(device.isDesktop || !isChatPage) && device.enableComplexAnimations}
-          alphaParticles={true}
+          alphaParticles={!isDark}
           disableRotation={(isChatPage && !device.isDesktop) || !device.enableComplexAnimations}
         />
       </div>

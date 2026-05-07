@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Renderer, Camera, Geometry, Program, Mesh } from 'ogl';
 
-import { colorToRgb } from '@/utils/colorUtils';
+import { colorToRgb, resolveCSSColor } from '@/utils/colorUtils';
 
 const defaultColors = ['#ffffff', '#ffffff', '#ffffff'];
 
@@ -77,6 +77,12 @@ interface ParticlesProps {
   particleSpread?: number;
   speed?: number;
   particleColors?: string[];
+  /** Light-mode colors — used when darkMode is false */
+  lightParticleColors?: string[];
+  /** Dark-mode colors — used when darkMode is true */
+  darkParticleColors?: string[];
+  /** Whether the app is in dark mode — triggers in-place color buffer update */
+  darkMode?: boolean;
   moveParticlesOnHover?: boolean;
   particleHoverFactor?: number;
   alphaParticles?: boolean;
@@ -93,6 +99,9 @@ const Particles: React.FC<ParticlesProps> = ({
   particleSpread = 10,
   speed = 0.1,
   particleColors,
+  lightParticleColors,
+  darkParticleColors,
+  darkMode = false,
   moveParticlesOnHover = false,
   particleHoverFactor = 1,
   alphaParticles = false,
@@ -106,6 +115,35 @@ const Particles: React.FC<ParticlesProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const isVisibleRef = useRef(true); // Track if visible on screen
+  const geometryRef = useRef<Geometry | null>(null);
+  const glRef = useRef<WebGLRenderingContext | null>(null);
+  const countRef = useRef(0);
+
+  // Resolve a palette of CSS-variable-based colors to an RGB Float32Array
+  const resolvePalette = (palette: string[]): Float32Array => {
+    const count = countRef.current;
+    const colors = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const col = colorToRgb(palette[Math.floor(Math.random() * palette.length)] || '#ffffff');
+      colors.set(new Float32Array(col), i * 3);
+    }
+    return colors;
+  };
+
+  // In-place color buffer update when darkMode changes — avoids WebGL context teardown
+  useEffect(() => {
+    const geometry = geometryRef.current;
+    if (!geometry || countRef.current === 0) return;
+
+    // Determine which palette to use
+    const palette = darkMode
+      ? (darkParticleColors && darkParticleColors.length > 0 ? darkParticleColors : particleColors || defaultColors)
+      : (lightParticleColors && lightParticleColors.length > 0 ? lightParticleColors : particleColors || defaultColors);
+
+    const colors = resolvePalette(palette);
+    geometry.attributes.color.data = colors;
+    geometry.attributes.color.needsUpdate = true;
+  }, [darkMode, particleColors, lightParticleColors, darkParticleColors]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -115,6 +153,7 @@ const Particles: React.FC<ParticlesProps> = ({
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
       || window.innerWidth < 768;
     const optimizedParticleCount = isMobile ? 70 : particleCount; // 70 on mobile, full count on desktop
+    countRef.current = optimizedParticleCount;
 
     // --- Optimization 1: Visibility Observer ---
     // This stops the animation entirely when the user scrolls away
@@ -134,6 +173,7 @@ const Particles: React.FC<ParticlesProps> = ({
     });
 
     const gl = renderer.gl;
+    glRef.current = gl;
     container.appendChild(gl.canvas);
     gl.clearColor(0, 0, 0, 0);
 
@@ -169,8 +209,12 @@ const Particles: React.FC<ParticlesProps> = ({
     const count = optimizedParticleCount; // Use optimized count
     const positions = new Float32Array(count * 3);
     const randoms = new Float32Array(count * 4);
+    // Determine initial palette based on current darkMode
+    const initialPalette = darkMode
+      ? (darkParticleColors && darkParticleColors.length > 0 ? darkParticleColors : particleColors || defaultColors)
+      : (lightParticleColors && lightParticleColors.length > 0 ? lightParticleColors : particleColors || defaultColors);
     const colors = new Float32Array(count * 3);
-    const palette = particleColors && particleColors.length > 0 ? particleColors : defaultColors;
+    const palette = initialPalette;
 
     for (let i = 0; i < count; i++) {
       let x, y, z, len;
@@ -192,6 +236,7 @@ const Particles: React.FC<ParticlesProps> = ({
       random: { size: 4, data: randoms },
       color: { size: 3, data: colors }
     });
+    geometryRef.current = geometry;
 
     const program = new Program(gl, {
       vertex,
@@ -252,6 +297,8 @@ const Particles: React.FC<ParticlesProps> = ({
       if (container.contains(gl.canvas)) {
         container.removeChild(gl.canvas);
       }
+      geometryRef.current = null;
+      glRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
