@@ -121,25 +121,25 @@ export default function HealthForecastPanel() {
                 {data && (
                     <Card padding="none" className="!rounded-[24px] overflow-hidden border-green-500/15">
                         {/* Summary Header */}
-                        <div className="px-5 py-4 bg-gradient-to-r from-green-500/8 to-emerald-500/5 border-b border-green-500/10">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="px-4 sm:px-5 py-3 sm:py-4 bg-gradient-to-r from-green-500/8 to-emerald-500/5 border-b border-green-500/10">
+                            <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                                 <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Activity className="w-4 h-4 text-green-400" />
-                                        <h3 className="text-[12px] font-bold text-green-400 uppercase tracking-[0.2em]">7-Day Health Overview</h3>
+                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                        <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
+                                        <h3 className="text-[10px] sm:text-[12px] font-bold text-green-400 uppercase tracking-[0.15em] sm:tracking-[0.2em]">7-Day Health Overview</h3>
                                     </div>
-                                    <p className="text-[11px] text-foreground/35 font-medium">
+                                    <p className="text-[9px] sm:text-[11px] text-foreground/35 font-medium">
                                         {data.moon_sign} Moon · {data.lagna_sign} Ascendant · {data.active_dasha}
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 sm:gap-4">
                                     <div className="text-center">
-                                        <span className="text-2xl font-headline font-bold text-green-400 leading-none">{data.summary.average_score}</span>
-                                        <p className="text-[9px] text-foreground/25 font-bold uppercase tracking-widest">Avg Score</p>
+                                        <span className="text-lg sm:text-2xl font-headline font-bold text-green-400 leading-none">{data.summary.average_score}</span>
+                                        <p className="text-[7px] sm:text-[9px] text-foreground/25 font-bold uppercase tracking-widest">Avg Score</p>
                                     </div>
                                     <div className="text-center">
-                                        <span className="text-lg leading-none">{getTrendIcon(data.summary.trend)}</span>
-                                        <p className="text-[9px] text-foreground/25 font-bold uppercase tracking-widest capitalize">{data.summary.trend}</p>
+                                        <span className="text-sm sm:text-lg leading-none">{getTrendIcon(data.summary.trend)}</span>
+                                        <p className="text-[7px] sm:text-[9px] text-foreground/25 font-bold uppercase tracking-widest capitalize">{data.summary.trend}</p>
                                     </div>
                                     <button onClick={() => setIsOpen(false)} className="w-7 h-7 rounded-full bg-surface flex items-center justify-center text-foreground/30 hover:text-foreground/60 transition-colors">
                                         <X className="w-3.5 h-3.5" />
@@ -149,8 +149,8 @@ export default function HealthForecastPanel() {
                         </div>
 
                         {/* Score Timeline - Line Graph */}
-                        <div className="px-5 pt-12 pb-14 border-b border-outline-variant/10 relative overflow-hidden bg-[#0a0c10]">
-                            <div className="relative h-[130px] w-full flex">
+                        <div className="px-3 sm:px-5 pt-8 sm:pt-12 pb-10 sm:pb-14 border-b border-outline-variant/10 relative overflow-hidden bg-[#0a0c10]">
+                            <div className="relative h-[100px] sm:h-[130px] w-full flex">
                                 {/* SVG Line Chart Area */}
                                 <div className="flex-1 relative">
                                     <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
@@ -262,16 +262,16 @@ export default function HealthForecastPanel() {
                             </div>
 
                             {/* Best / Worst Day Badges */}
-                            <div className="flex flex-wrap items-center gap-3 mt-14 pt-4 border-t border-outline-variant/8">
-                                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-400/5 border border-cyan-400/10">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(79,209,237,0.5)]" />
-                                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Aura Peak:</span>
-                                    <span className="text-[10px] font-bold text-cyan-400">{formatDate(data.summary.best_day)}</span>
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-8 sm:mt-14 pt-3 sm:pt-4 border-t border-outline-variant/8">
+                                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-cyan-400/5 border border-cyan-400/10">
+                                    <div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(79,209,237,0.5)]" />
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Aura Peak:</span>
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-cyan-400">{formatDate(data.summary.best_day)}</span>
                                 </div>
-                                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/5 border border-amber-400/10">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(251,191,36,0.5)]" />
-                                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Veda Lull:</span>
-                                    <span className="text-[10px] font-bold text-amber-400">{formatDate(data.summary.worst_day)}</span>
+                                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-amber-400/5 border border-amber-400/10">
+                                    <div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(251,191,36,0.5)]" />
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Veda Lull:</span>
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">{formatDate(data.summary.worst_day)}</span>
                                 </div>
                             </div>
                         </div>
@@ -282,24 +282,24 @@ export default function HealthForecastPanel() {
                             if (!day) return null;
                             const colors = getScoreColor(day.score);
                             return (
-                                <div className="px-5 py-4 border-b border-outline-variant/10 bg-surface">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className={`w-8 h-8 rounded-xl ${colors.bg} flex items-center justify-center`}>
-                                                <span className={`text-sm font-bold ${colors.text}`}>{day.score}</span>
+                                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-outline-variant/10 bg-surface">
+                                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                        <div className="flex items-center gap-2 sm:gap-2.5">
+                                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl ${colors.bg} flex items-center justify-center`}>
+                                                <span className={`text-xs sm:text-sm font-bold ${colors.text}`}>{day.score}</span>
                                             </div>
                                             <div>
-                                                <h5 className="text-[13px] font-bold text-foreground leading-tight">
-                                                    {formatDate(day.date)} {day.is_today && <span className="text-green-400 text-[10px] ml-1">· TODAY</span>}
+                                                <h5 className="text-[11px] sm:text-[13px] font-bold text-foreground leading-tight">
+                                                    {formatDate(day.date)} {day.is_today && <span className="text-green-400 text-[9px] sm:text-[10px] ml-1">· TODAY</span>}
                                                 </h5>
-                                                <p className="text-[10px] text-foreground/30">Dominant: {day.dominant_planet}</p>
+                                                <p className="text-[9px] sm:text-[10px] text-foreground/30">Dominant: {day.dominant_planet}</p>
                                             </div>
                                         </div>
                                         <button onClick={() => setExpandedDay(null)} className="text-foreground/20 hover:text-foreground/40">
                                             <X className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <p className="text-[13px] text-foreground/60 font-medium leading-relaxed mb-3">{day.text}</p>
+                                    <p className="text-[11px] sm:text-[13px] text-foreground/60 font-medium leading-relaxed mb-2 sm:mb-3">{day.text}</p>
                                     
                                     {/* Alerts */}
                                     {day.personalized_alerts.length > 0 && (
@@ -329,10 +329,10 @@ export default function HealthForecastPanel() {
 
                                     {/* Transit Grid */}
                                     <div className="mt-2">
-                                        <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-[0.2em] mb-2">Planetary Transits</p>
-                                        <div className="flex flex-wrap gap-1.5">
+                                        <p className="text-[8px] sm:text-[9px] font-bold text-foreground/20 uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-1.5 sm:mb-2">Planetary Transits</p>
+                                        <div className="flex flex-wrap gap-1 sm:gap-1.5">
                                             {Object.entries(day.transits).map(([planet, transit]) => (
-                                                <span key={planet} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-surface border border-outline-variant/8">
+                                                <span key={planet} className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-surface border border-outline-variant/8">
                                                     <span className="text-foreground/50">{planet}</span>
                                                     <span className="text-foreground/20">·</span>
                                                     <span className="text-secondary/70">{transit.sign}</span>

@@ -159,7 +159,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
 
     return (
         <div 
-            className="w-full h-full px-8 flex items-center justify-between cursor-default group"
+            className="w-full h-full px-4 sm:px-8 flex items-center justify-between cursor-default group"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -171,31 +171,31 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="flex items-center gap-10 w-full"
+                        className="flex items-center gap-4 sm:gap-10 w-full"
                     >
                         {current.type === 'feature' ? (
                             <>
-                                <div className={`w-14 h-14 rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+                                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
                                     {current.icon}
                                 </div>
-                                <div className="flex flex-col min-w-0 pr-6">
-                                    <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${current.color} leading-none mb-3`}>{current.label}</span>
-                                    <p className="text-[17px] font-bold text-foreground leading-tight tracking-tight">{current.desc}</p>
+                                <div className="flex flex-col min-w-0 pr-2 sm:pr-6">
+                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none mb-1.5 sm:mb-3`}>{current.label}</span>
+                                    <p className="text-[13px] sm:text-[17px] font-bold text-foreground leading-tight tracking-tight line-clamp-2">{current.desc}</p>
                                 </div>
                             </>
                         ) : (
                             <div className="flex flex-col w-full">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Sparkles className={`w-4 h-4 ${current.color}`} />
-                                    <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${current.color} leading-none`}>{current.label}</span>
-                                    <p className="text-[13px] font-bold text-foreground/40 ml-2">{current.desc}</p>
+                                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                                    <Sparkles className={`w-3 h-3 sm:w-4 sm:h-4 ${current.color}`} />
+                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none`}>{current.label}</span>
+                                    <p className="text-[11px] sm:text-[13px] font-bold text-foreground/40 ml-1 sm:ml-2 hidden sm:block">{current.desc}</p>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                     {current.questions?.map((q, i) => (
                                         <button 
                                             key={i}
                                             onClick={() => onQuestion(q)}
-                                            className="px-4 py-2 rounded-xl bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 text-[11px] font-bold text-foreground/70 hover:text-secondary transition-all"
+                                            className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 text-[10px] sm:text-[11px] font-bold text-foreground/70 hover:text-secondary transition-all"
                                         >
                                             {q}
                                         </button>
@@ -215,13 +215,13 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                             initial={{ opacity: 0, x: 10 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 10 }}
-                            className="pl-6 border-l border-white/5"
+                            className="pl-4 sm:pl-6 border-l border-white/5 hidden sm:block"
                         >
                             <Link 
                                 href={current.href!}
-                                className="px-6 py-2.5 rounded-2xl bg-secondary text-background text-[11px] font-black uppercase tracking-[0.2em] hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
+                                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-secondary text-background text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
                             >
-                                {t('dashboard.explore')} <ChevronRight className="w-4 h-4" />
+                                {t('dashboard.explore')} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </Link>
                         </motion.div>
                     )}
@@ -229,11 +229,11 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
             )}
 
             {/* Progress Indicators */}
-            <div className="absolute bottom-2 left-8 flex gap-1.5">
+            <div className="absolute bottom-1.5 sm:bottom-2 left-4 sm:left-8 flex gap-1 sm:gap-1.5">
                 {features.map((_, i) => (
                     <div 
                         key={i} 
-                        className={`h-0.5 rounded-full transition-all duration-500 ${i === idx ? 'w-6 bg-secondary' : 'w-2 bg-white/10'}`} 
+                        className={`h-0.5 rounded-full transition-all duration-500 ${i === idx ? 'w-4 sm:w-6 bg-secondary' : 'w-1.5 sm:w-2 bg-white/10'}`} 
                     />
                 ))}
             </div>
@@ -514,8 +514,8 @@ export default function DashboardHome() {
                         </div>
                     </div>
 
-                    <div className="w-full mt-8 mb-2">
-                        <div className="w-full h-[100px] relative group">
+                    <div className="w-full mt-4 sm:mt-8 mb-2">
+                        <div className="w-full h-[80px] sm:h-[100px] relative group">
                             <div className="absolute inset-0 bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
                                 <FeatureSlider onQuestion={handleSendMessage} t={t} />
                             </div>
@@ -524,13 +524,13 @@ export default function DashboardHome() {
                 </motion.div>
 
                 {/* ZONE 2: HERO DASHBOARD */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     <div className="lg:col-span-8">
                         <DailyHoroscopeCard userLoading={userLoading} onSendMessage={handleSendMessage} />
                     </div>
 
                     <div className="lg:col-span-4 flex flex-col min-h-0">
-                        <Card padding="none" className="!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-full min-h-0">
+                        <Card padding="none" className="!rounded-[24px] sm:!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-[500px] sm:h-full min-h-0">
                             <div className="p-2 border-b border-white/5 flex items-center gap-1 shrink-0">
                                 {[
                                     { id: 'chat' as const, label: 'Chat', icon: <MessageSquare className="w-4 h-4" /> },
@@ -841,25 +841,25 @@ export default function DashboardHome() {
                 </div>
 
                 {/* ZONE 3: COSMIC PORTALS */}
-                <div className="mt-28">
-                    <div className="text-center mb-16">
-                        <div className="flex items-center justify-center gap-3 mb-4">
-                            <div className="w-1 h-8 bg-gradient-to-b from-secondary to-transparent rounded-full" />
-                            <span className="text-xs font-bold text-secondary uppercase tracking-[0.6em]">{t('dashboard.systemHub')}</span>
+                <div className="mt-12 sm:mt-28">
+                    <div className="text-center mb-8 sm:mb-16">
+                        <div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
+                            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-secondary to-transparent rounded-full" />
+                            <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.4em] sm:tracking-[0.6em]">{t('dashboard.systemHub')}</span>
                         </div>
-                        <h2 className="text-4xl font-headline font-bold text-primary tracking-tight">{t('dashboard.cosmicPortals')}</h2>
+                        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight">{t('dashboard.cosmicPortals')}</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         <Link href="/chat" className="group">
-                            <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-secondary/40 !p-0" padding="none">
+                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-secondary/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-secondary/10 transition-colors" />
-                                <div className="p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-10 text-secondary group-hover:scale-110 transition-transform duration-500">
-                                        <MessageSquare className="w-7 h-7" />
+                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
+                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-6 sm:mb-10 text-secondary group-hover:scale-110 transition-transform duration-500">
+                                        <MessageSquare className="w-5 h-5 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-secondary transition-colors">{t('landing.chatNaviTitle')}</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('landing.chatNaviDesc')}</p>
+                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">{t('landing.chatNaviTitle')}</h3>
+                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('landing.chatNaviDesc')}</p>
                                     <div className="space-y-3 mb-10 opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="h-1 w-full bg-secondary/10 rounded-full overflow-hidden">
                                             <div className="h-full bg-secondary w-3/4" />
@@ -870,7 +870,7 @@ export default function DashboardHome() {
                                         </div>
                                     </div>
                                     <div className="mt-auto">
-                                        <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-secondary uppercase tracking-widest group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-all duration-300 shadow-sm">
+                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-widest group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.consultAi')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
@@ -879,15 +879,15 @@ export default function DashboardHome() {
                         </Link>
 
                         <Link href="/kundli" className="group">
-                            <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-blue-500/40 !p-0" padding="none">
+                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-blue-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-blue-500/10 transition-colors" />
-                                <div className="p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-10 text-blue-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Globe className="w-7 h-7" />
+                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
+                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 sm:mb-10 text-blue-400 group-hover:scale-110 transition-transform duration-500">
+                                        <Globe className="w-5 h-5 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-blue-400 transition-colors">{t('dashboard.janamKundli')}</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.janamKundliDesc')}</p>
-                                    <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 mb-10">
+                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-blue-400 transition-colors">{t('dashboard.janamKundli')}</h3>
+                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.janamKundliDesc')}</p>
+                                    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 mb-6 sm:mb-10">
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">{t('dashboard.currentDasha')}</div>
@@ -905,7 +905,7 @@ export default function DashboardHome() {
                                         </div>
                                     </div>
                                     <div className="mt-auto">
-                                        <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-blue-400 uppercase tracking-widest group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-300 shadow-sm">
+                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-blue-400 uppercase tracking-widest group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.openChart')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
@@ -914,17 +914,17 @@ export default function DashboardHome() {
                         </Link>
 
                         <Link href="/kundli/match" className="group">
-                            <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-rose-500/40 !p-0" padding="none">
+                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-rose-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-rose-500/10 transition-colors" />
-                                <div className="p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-10 text-rose-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Heart className="w-7 h-7" />
+                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
+                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6 sm:mb-10 text-rose-400 group-hover:scale-110 transition-transform duration-500">
+                                        <Heart className="w-5 h-5 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-rose-400 transition-colors">{t('dashboard.soulmateSync')}</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.soulmateSyncDesc')}</p>
-                                    <div className="flex items-center justify-center gap-6 mb-10">
+                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-rose-400 transition-colors">{t('dashboard.soulmateSync')}</h3>
+                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.soulmateSyncDesc')}</p>
+                                    <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-10">
                                         <div className="text-center">
-                                            <div className="text-2xl font-bold text-primary">28</div>
+                                            <div className="text-xl sm:text-2xl font-bold text-primary">28</div>
                                             <div className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Match</div>
                                         </div>
                                         <div className="w-px h-10 bg-white/10" />
@@ -934,7 +934,7 @@ export default function DashboardHome() {
                                         </div>
                                     </div>
                                     <div className="mt-auto">
-                                        <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-rose-400 uppercase tracking-widest group-hover:bg-rose-500/10 group-hover:border-rose-500/20 transition-all duration-300 shadow-sm">
+                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-rose-400 uppercase tracking-widest group-hover:bg-rose-500/10 group-hover:border-rose-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.analyzeMatch')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
@@ -943,15 +943,15 @@ export default function DashboardHome() {
                         </Link>
 
                         <Link href="/chat" className="group">
-                            <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-emerald-500/40 !p-0" padding="none">
+                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-emerald-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-emerald-500/10 transition-colors" />
-                                <div className="p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-10 text-emerald-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Sun className="w-7 h-7" />
+                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
+                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 sm:mb-10 text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                                        <Sun className="w-5 h-5 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-emerald-400 transition-colors">{t('dashboard.dailyPulse')}</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.realTimeTithi')}</p>
-                                    <div className="grid grid-cols-2 gap-4 mb-10">
+                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-emerald-400 transition-colors">{t('dashboard.dailyPulse')}</h3>
+                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.realTimeTithi')}</p>
+                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-10">
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
                                             <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">Tithi</div>
                                             <div className="text-xs font-bold text-primary truncate">Pratipada</div>
@@ -962,7 +962,7 @@ export default function DashboardHome() {
                                         </div>
                                     </div>
                                     <div className="mt-auto">
-                                        <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-emerald-400 uppercase tracking-widest group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all duration-300 shadow-sm">
+                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-emerald-400 uppercase tracking-widest group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.checkPulse')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
@@ -971,18 +971,18 @@ export default function DashboardHome() {
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
                         <div className="hidden lg:block" />
                         <Link href="/rashis" className="group">
-                            <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-purple-500/40 !p-0" padding="none">
+                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-purple-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-purple-500/10 transition-colors" />
-                                <div className="p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-10 text-purple-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Orbit className="w-7 h-7" />
+                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
+                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 sm:mb-10 text-purple-400 group-hover:scale-110 transition-transform duration-500">
+                                        <Orbit className="w-5 h-5 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-purple-400 transition-colors">{t('dashboard.rashiLib')}</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.rashiLibDesc')}</p>
-                                    <div className="grid grid-cols-4 gap-2 mb-10 opacity-40 group-hover:opacity-100 transition-opacity">
+                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-purple-400 transition-colors">{t('dashboard.rashiLib')}</h3>
+                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.rashiLibDesc')}</p>
+                                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-6 sm:mb-10 opacity-40 group-hover:opacity-100 transition-opacity">
                                         {['aries', 'leo', 'sagittarius', 'scorpio'].map((s, idx) => (
                                             <div key={idx} className="aspect-square rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
                                                 <Image src={`/icons/rashi/${s}.png`} alt={s} width={20} height={20} className="w-5 h-5 opacity-60" />
@@ -990,7 +990,7 @@ export default function DashboardHome() {
                                         ))}
                                     </div>
                                     <div className="mt-auto">
-                                        <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-purple-400 uppercase tracking-widest group-hover:bg-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 shadow-sm">
+                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-purple-400 uppercase tracking-widest group-hover:bg-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.openLibrary')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
@@ -999,22 +999,22 @@ export default function DashboardHome() {
                         </Link>
 
                         <Link href="/consult" className="group">
-                            <Card className="h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-amber-500/40 !p-0" padding="none">
+                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-amber-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-amber-500/10 transition-colors" />
-                                <div className="p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-10 text-amber-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Sparkles className="w-7 h-7" />
+                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
+                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6 sm:mb-10 text-amber-400 group-hover:scale-110 transition-transform duration-500">
+                                        <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" />
                                     </div>
-                                    <h3 className="text-2xl font-headline font-bold text-primary mb-3 group-hover:text-amber-400 transition-colors">{t('dashboard.sessions')}</h3>
-                                    <p className="text-sm font-medium text-foreground/40 leading-relaxed mb-10">{t('dashboard.sessionsDesc')}</p>
-                                    <div className="space-y-4 mb-10">
+                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-amber-400 transition-colors">{t('dashboard.sessions')}</h3>
+                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.sessionsDesc')}</p>
+                                    <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-10">
                                         <div className="flex items-center gap-2">
                                             {[1,2,3,4].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${s <= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-white/10'}`} />)}
                                         </div>
                                         <div className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest text-center">{t('dashboard.inProgress')}</div>
                                     </div>
                                     <div className="mt-auto">
-                                        <div className="h-14 w-full rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-3 text-xs font-bold text-amber-400 uppercase tracking-widest group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all duration-300 shadow-sm">
+                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-widest group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.joinSession')} <ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>

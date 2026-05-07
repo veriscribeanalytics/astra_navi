@@ -372,7 +372,7 @@ export default function DailyHoroscopeCard({
     const highlightMetric = [...metrics].sort((a,b) => b.score - a.score)[0];
 
     return (
-        <Card padding="none" className="!rounded-[32px] sm:!rounded-[40px] overflow-hidden relative bg-surface border-secondary/10 flex flex-col h-full min-h-[600px]">
+        <Card padding="none" className="!rounded-[24px] sm:!rounded-[40px] overflow-hidden relative bg-surface border-secondary/10 flex flex-col h-full min-h-[400px] sm:min-h-[600px]">
             {loading || userLoading ? (
                 <DailyHoroscopeCardSkeleton />
             ) : (
@@ -399,7 +399,7 @@ export default function DailyHoroscopeCard({
                             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 shadow-[0_4px_12px_rgba(200,136,10,0.1)]">
                                 <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-secondary" />
                             </div>
-                            <div className="flex-1 min-w-0 flex flex-col justify-center relative h-[120px]">
+                            <div className="flex-1 min-w-0 flex flex-col justify-center relative min-h-[80px] sm:h-[120px]">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="text-[12px] sm:text-[13px] font-bold text-secondary uppercase tracking-[0.2em]">{t('horoscope.yourDayToday')}</span>
                                     {horoscope?.alerts?.secondary && horoscope.alerts.secondary.length > 0 && (
@@ -484,7 +484,7 @@ export default function DailyHoroscopeCard({
                     </div>
 
                     {/* UNIFIED HEADER & STATS */}
-                    <div className="px-6 sm:px-8 py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+                    <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 items-stretch">
                         {/* LEFT: Sign & Cramped Stats */}
                         <div className="md:col-span-2 flex flex-col justify-between">
                             <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.user?.sign || horoscope?.sign || sign} characteristics and what they mean for me.`)}>
@@ -537,20 +537,20 @@ export default function DailyHoroscopeCard({
 
                         {/* RIGHT: Tip of the Day (Spans Height) */}
                         <button onClick={() => handleConsult("Tip")}
-                                className="md:col-span-2 p-6 sm:p-8 flex items-center gap-6 group hover:bg-secondary/[0.04] transition-all duration-500 relative overflow-hidden bg-secondary/[0.02] rounded-[24px] border border-secondary/10">
+                                className="md:col-span-2 p-4 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 group hover:bg-secondary/[0.04] transition-all duration-500 relative overflow-hidden bg-secondary/[0.02] rounded-[16px] sm:rounded-[24px] border border-secondary/10">
                                 <div className="absolute inset-0 border-l-4 border-transparent group-hover:border-secondary transition-all duration-500" />
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 relative z-10">
-                                    <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-secondary" />
+                                <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 relative z-10">
+                                    <Sparkles className="w-6 h-6 sm:w-10 sm:h-10 text-secondary" />
                                 </div>
                                 <div className="flex-1 relative z-10 text-left">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h4 className="text-[12px] font-black text-secondary uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                                        <h4 className="text-[10px] sm:text-[12px] font-black text-secondary uppercase tracking-[0.2em] sm:tracking-[0.3em] flex items-center gap-2">
                                             {t('horoscope.tipOfTheDay')}
                                         </h4>
-                                        <div className="h-[1px] flex-1 bg-secondary/10" />
-                                        <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">{t('horoscope.askNavi')} ΓåÆ</span>
+                                        <div className="h-[1px] flex-1 bg-secondary/10 hidden sm:block" />
+                                        <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">{t('horoscope.askNavi')} →</span>
                                     </div>
-                                    <p className="text-[17px] sm:text-[20px] font-body font-medium italic leading-relaxed text-foreground/90 pr-4 group-hover:text-foreground transition-colors">
+                                    <p className="text-[14px] sm:text-[20px] font-body font-medium italic leading-relaxed text-foreground/90 pr-0 sm:pr-4 group-hover:text-foreground transition-colors">
                                         &quot;{(typeof horoscope?.tip === 'object' ? horoscope.tip?.text : horoscope?.tip) || t('horoscope.alignmentNeutral')}&quot;
                                     </p>
                                 </div>
@@ -613,14 +613,14 @@ export default function DailyHoroscopeCard({
                     <div className={`transition-all duration-700 ease-out flex-1 flex flex-col ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">
                             {metrics.map((item, i) => (
-                                <div key={i} className={`flex items-center text-left gap-6 p-6 sm:p-8 h-full transition-all duration-500 hover:bg-secondary/[0.05] relative group ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
+                                <div key={i} className={`flex items-center text-left gap-3 sm:gap-6 p-4 sm:p-8 h-full transition-all duration-500 hover:bg-secondary/[0.05] relative group ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
                                     
                                     {/* Subtle Gradient Background on Hover */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-secondary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                                     
                                     {/* Icon: Smaller (10% reduction) and stays visible */}
-                                    <div className={`w-[72px] h-[72px] sm:w-[86px] sm:h-[86px] rounded-[28px] ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 group-hover:scale-95 transition-all duration-500 relative z-10`}>
-                                        {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, { className: "w-8 h-8 sm:w-10 sm:h-10" })}
+                                    <div className={`w-[56px] h-[56px] sm:w-[86px] sm:h-[86px] rounded-[20px] sm:rounded-[28px] ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 group-hover:scale-95 transition-all duration-500 relative z-10`}>
+                                        {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, { className: "w-6 h-6 sm:w-10 sm:h-10" })}
                                     </div>
 
                                     <div className="flex-1 min-w-0 relative z-10">
@@ -670,7 +670,7 @@ export default function DailyHoroscopeCard({
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 10 }}
                             transition={{ type: "spring", damping: 30, stiffness: 300 }} onClick={e => e.stopPropagation()}
-                            className="relative w-full max-w-6xl h-full max-h-[92dvh] sm:max-h-[85vh] bg-surface rounded-[24px] sm:rounded-[32px] border border-outline-variant/20 shadow-2xl overflow-hidden flex flex-col">
+                            className="relative w-full max-w-6xl h-full max-h-[92dvh] sm:max-h-[85vh] bg-surface rounded-[16px] sm:rounded-[32px] border border-outline-variant/20 shadow-2xl overflow-hidden flex flex-col">
 
                             {/* Close */}
                             <button onClick={() => setActiveModal(null)} className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-variant/30 flex items-center justify-center hover:bg-surface-variant/50 transition-colors z-[100] group">
@@ -706,34 +706,34 @@ export default function DailyHoroscopeCard({
                                     
                                     return (
                                         <>
-                                            <div className="w-full lg:w-[35%] lg:shrink-0 p-6 sm:p-8 lg:p-10 flex flex-col relative overflow-y-auto scrollbar-hide lg:border-r border-outline-variant/10 max-h-[40%] lg:max-h-full">
+                                            <div className="w-full lg:w-[35%] lg:shrink-0 p-4 sm:p-8 lg:p-10 flex flex-col relative overflow-y-auto scrollbar-hide lg:border-r border-outline-variant/10 max-h-[35%] lg:max-h-full">
                                                 <div className="absolute top-0 left-0 w-[150%] h-64 blur-[100px] opacity-10 pointer-events-none" style={{ backgroundColor: activeModal.colorHex }} />
                                                 <div className="relative z-10 flex flex-col h-full">
-                                                    <div className="flex items-center gap-4 mb-4 sm:mb-6">
-                                                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${activeModal.bg} flex items-center justify-center shrink-0 shadow-lg shadow-black/20`} style={{ color: activeModal.colorHex }}>
+                                                    <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-6">
+                                                        <div className={`w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl ${activeModal.bg} flex items-center justify-center shrink-0 shadow-lg shadow-black/20`} style={{ color: activeModal.colorHex }}>
                                                             {activeModal.icon}
                                                         </div>
                                                         <div>
-                                                            <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
-                                                                <h3 className="text-[10px] sm:text-[12px] font-bold text-foreground/40 uppercase tracking-[0.3em]">{activeModal.label}</h3>
+                                                            <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                                                <h3 className="text-[9px] sm:text-[12px] font-bold text-foreground/40 uppercase tracking-[0.2em] sm:tracking-[0.3em]">{activeModal.label}</h3>
                                                                 <span className="text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-variant/20 border border-outline-variant/5 text-foreground/30 uppercase tracking-tighter">
                                                                     {activeDay.is_today ? t('horoscope.today') : fmtDay(activeDay.date)}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-baseline gap-2">
-                                                                <span className="text-3xl sm:text-5xl font-headline font-bold leading-none" style={{ color: activeModal.colorHex }}>{activeDay.score}%</span>
+                                                                <span className="text-2xl sm:text-5xl font-headline font-bold leading-none" style={{ color: activeModal.colorHex }}>{activeDay.score}%</span>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <p className="text-xs sm:text-sm font-body leading-relaxed text-foreground/80 mb-4 sm:mb-8">{activeModal.info}</p>
                                                     {activeDay.personalized_alerts?.length > 0 && (
-                                                        <div className="mb-4 sm:mb-auto p-4 sm:p-5 rounded-2xl bg-surface-variant/10 border border-outline-variant/10 shadow-inner">
-                                                            <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-outline-variant/10">
-                                                                <div className="flex items-center gap-2">
-                                                                    <Info className="w-3.5 h-3.5" style={{ color: activeModal.colorHex }} />
-                                                                    <span className="text-[10px] sm:text-[11px] font-bold text-foreground/50 uppercase tracking-widest">{activeDay.is_today ? t('horoscope.today') : fmtDay(activeDay.date)}&apos;s Alerts</span>
+                                                        <div className="mb-3 sm:mb-auto p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-surface-variant/10 border border-outline-variant/10 shadow-inner">
+                                                            <div className="flex items-center justify-between mb-2 sm:mb-4 pb-1.5 sm:pb-3 border-b border-outline-variant/10">
+                                                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                                                    <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5" style={{ color: activeModal.colorHex }} />
+                                                                    <span className="text-[9px] sm:text-[11px] font-bold text-foreground/50 uppercase tracking-widest">{activeDay.is_today ? t('horoscope.today') : fmtDay(activeDay.date)}&apos;s Alerts</span>
                                                                 </div>
-                                                                <span className="text-[9px] sm:text-[10px] font-bold text-foreground/30 px-1.5 py-0.5 rounded-md bg-surface-variant/20 border border-outline-variant/5">≡ƒ¬É {activeDay.dominant_planet}</span>
+                                                                <span className="text-[8px] sm:text-[10px] font-bold text-foreground/30 px-1 py-0.5 rounded-md bg-surface-variant/20 border border-outline-variant/5">🪐 {activeDay.dominant_planet}</span>
                                                             </div>
                                                             <div className="space-y-2 sm:space-y-3">
                                                                 {activeDay.personalized_alerts.slice(0, 4).map((alert, i) => {
@@ -754,13 +754,13 @@ export default function DailyHoroscopeCard({
                                                             </div>
                                                         </div>
                                                     )}
-                                                    <button onClick={() => handleConsult(activeModal.label)} className="w-full mt-4 sm:mt-8 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-secondary text-background font-bold text-sm sm:text-base hover:bg-secondary/90 transition-all duration-300 hover:shadow-xl hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0">
+                                                    <button onClick={() => handleConsult(activeModal.label)} className="w-full mt-3 sm:mt-8 flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-secondary text-background font-bold text-xs sm:text-base hover:bg-secondary/90 transition-all duration-300 hover:shadow-xl hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0">
                                                         <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> {t('horoscope.askNavi')} <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                                     </button>
                                                 </div>
                                             </div>
                                             <div className="w-full lg:w-[65%] flex-1 lg:shrink-0 bg-surface-variant/5 flex flex-col min-h-0 relative overflow-hidden">
-                                                <div className="p-4 sm:p-8 pb-2 sm:pb-4 shrink-0">
+                                                <div className="p-3 sm:p-8 pb-2 sm:pb-4 shrink-0">
                                                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                                                         <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4" style={{ color: activeModal.colorHex }} /> 7-Day Trajectory</span>
                                                         <div className="flex gap-2 sm:gap-3">
@@ -768,12 +768,12 @@ export default function DailyHoroscopeCard({
                                                             <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-outline-variant/10 text-[9px] sm:text-[10px] font-bold bg-surface"><span className="text-foreground/40">{t('horoscope.trendLabel')}:</span><span className="text-foreground/70 capitalize">{forecast.summary.trend === 'improving' ? '📈' : forecast.summary.trend === 'declining' ? '📉' : '➡️'} {forecast.summary.trend}</span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="h-20 sm:h-28 w-full relative px-4 sm:px-8"><MiniChart days={forecast.days} colorHex={activeModal.colorHex} activeDate={activeDay.date} /></div>
+                                                    <div className="h-16 sm:h-28 w-full relative px-2 sm:px-8"><MiniChart days={forecast.days} colorHex={activeModal.colorHex} activeDate={activeDay.date} /></div>
                                                 </div>
                                                 <div className="px-8 h-[1px] bg-outline-variant/5 shrink-0" />
                                                 <div className="flex flex-col flex-1 min-h-0 p-4 sm:p-10 pt-2 sm:pt-4">
-                                                    <div className="flex items-center justify-between mb-4 sm:mb-6 px-2"><span className="text-[10px] sm:text-[11px] font-black text-foreground/20 uppercase tracking-[0.25em]">{t('horoscope.interactiveTimeline')}</span><div className="flex gap-4"><div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-green-500/50" /><span className="text-[9px] font-bold text-foreground/30 uppercase">{t('horoscope.high')}</span></div><div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-orange-500/50" /><span className="text-[9px] font-bold text-foreground/30 uppercase">{t('horoscope.lowLabel')}</span></div></div></div>
-                                                    <div className="grid grid-cols-7 gap-2 sm:gap-3 mb-6 sm:mb-10 shrink-0">
+                                                    <div className="flex items-center justify-between mb-3 sm:mb-6 px-1 sm:px-2"><span className="text-[8px] sm:text-[11px] font-black text-foreground/20 uppercase tracking-[0.15em] sm:tracking-[0.25em]">{t('horoscope.interactiveTimeline')}</span><div className="flex gap-2 sm:gap-4"><div className="flex items-center gap-1 sm:gap-1.5"><div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-green-500/50" /><span className="text-[7px] sm:text-[9px] font-bold text-foreground/30 uppercase">{t('horoscope.high')}</span></div><div className="flex items-center gap-1 sm:gap-1.5"><div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-orange-500/50" /><span className="text-[7px] sm:text-[9px] font-bold text-foreground/30 uppercase">{t('horoscope.lowLabel')}</span></div></div></div>
+                                                    <div className="grid grid-cols-7 gap-1 sm:gap-3 mb-4 sm:mb-10 shrink-0">
                                                         {forecast.days.map(day => {
                                                             const isSelected = activeDay.date === day.date;
                                                             const dateObj = new Date(day.date + 'T00:00:00');
@@ -781,10 +781,10 @@ export default function DailyHoroscopeCard({
                                                             const isHigh = day.score >= 75;
                                                             const isLow = day.score <= 45;
                                                             return (
-                                                                <motion.button key={day.date} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setExpandedDay(day.date)} className={`relative group flex flex-col items-center p-2 sm:p-4 rounded-[16px] sm:rounded-[20px] border transition-all duration-500 cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-30' : 'bg-surface/30 border-white/5 hover:border-white/20 z-10'}`} style={{ borderColor: isSelected ? activeModal.colorHex + '40' : undefined, boxShadow: isSelected ? `0 10px 30px -10px ${activeModal.colorHex}20` : undefined }}>
+                                                                <motion.button key={day.date} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setExpandedDay(day.date)} className={`relative group flex flex-col items-center p-1 sm:p-4 rounded-[12px] sm:rounded-[20px] border transition-all duration-500 cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-30' : 'bg-surface/30 border-white/5 hover:border-white/20 z-10'}`} style={{ borderColor: isSelected ? activeModal.colorHex + '40' : undefined, boxShadow: isSelected ? `0 10px 30px -10px ${activeModal.colorHex}20` : undefined }}>
                                                                     {isSelected && <motion.div layoutId="activeDayBg" className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.03] pointer-events-none" />}
-                                                                    <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-1 sm:mb-2 transition-colors ${isSelected ? '' : 'text-foreground/30 group-hover:text-foreground/60'}`} style={{ color: isSelected ? activeModal.colorHex : undefined }}>{day.is_today ? 'TODAY' : fmtDay(day.date)}</span>
-                                                                    <span className={`text-lg sm:text-2xl font-headline font-bold mb-1 sm:mb-2 transition-all ${isSelected ? 'scale-110 text-foreground' : 'text-foreground/40'}`}>{dayNum}</span>
+                                                                    <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-0.5 sm:mb-2 transition-colors ${isSelected ? '' : 'text-foreground/30 group-hover:text-foreground/60'}`} style={{ color: isSelected ? activeModal.colorHex : undefined }}>{day.is_today ? 'TOD' : fmtDay(day.date)}</span>
+                                                                    <span className={`text-sm sm:text-2xl font-headline font-bold mb-0.5 sm:mb-2 transition-all ${isSelected ? 'scale-110 text-foreground' : 'text-foreground/40'}`}>{dayNum}</span>
                                                                     <div className={`w-full h-1 rounded-full overflow-hidden bg-white/5 mt-auto relative`}><motion.div initial={{ width: 0 }} animate={{ width: `${day.score}%` }} className="absolute inset-0 rounded-full" style={{ backgroundColor: isSelected ? activeModal.colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }} /></div>
                                                                     {isSelected && <motion.div layoutId="bottomIndicator" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full" style={{ backgroundColor: activeModal.colorHex }} />}
                                                                 </motion.button>
@@ -793,23 +793,23 @@ export default function DailyHoroscopeCard({
                                                     </div>
                                                     <motion.div key={activeDay.date} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 min-h-0 flex flex-col relative">
                                                         <div className="absolute -inset-6 bg-gradient-to-br from-secondary/5 to-transparent blur-3xl opacity-20 pointer-events-none rounded-[40px]" />
-                                                        <div className="relative flex-1 flex flex-col p-6 sm:p-10 rounded-[28px] sm:rounded-[36px] bg-surface/40 backdrop-blur-sm border border-white/5 shadow-2xl overflow-hidden group">
+                                                        <div className="relative flex-1 flex flex-col p-4 sm:p-10 rounded-[20px] sm:rounded-[36px] bg-surface/40 backdrop-blur-sm border border-white/5 shadow-2xl overflow-hidden group">
                                                             <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 blur-[80px] rounded-full -mr-32 -mt-32 transition-transform duration-1000 group-hover:scale-110" />
                                                             <div className="relative z-10 flex flex-col h-full">
-                                                                <div className="flex items-center justify-between mb-6 sm:mb-8">
-                                                                    <div className="flex flex-col"><span className="text-[10px] sm:text-[11px] font-black text-secondary uppercase tracking-[0.3em] mb-1">{t('horoscope.detailedInsight')}</span><h4 className="text-xl sm:text-2xl font-headline font-bold text-foreground">{fmtDate(activeDay.date)}</h4></div>
-                                                                    <div className="flex items-center gap-3"><div className="px-4 py-2 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-3"><div className="flex flex-col items-end"><span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">{t('horoscope.dominantForce')}</span><span className="text-xs font-bold text-foreground/80">{activeDay.dominant_planet}</span></div><div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center"><Sparkles className="w-5 h-5 text-secondary" /></div></div></div>
+                                                                <div className="flex items-center justify-between mb-4 sm:mb-8">
+                                                                    <div className="flex flex-col"><span className="text-[9px] sm:text-[11px] font-black text-secondary uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-0.5 sm:mb-1">{t('horoscope.detailedInsight')}</span><h4 className="text-base sm:text-2xl font-headline font-bold text-foreground">{fmtDate(activeDay.date)}</h4></div>
+                                                                    <div className="flex items-center gap-2 sm:gap-3"><div className="px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-2xl bg-white/5 border border-white/5 flex items-center gap-2 sm:gap-3"><div className="flex flex-col items-end"><span className="text-[7px] sm:text-[8px] font-bold text-foreground/30 uppercase tracking-widest">{t('horoscope.dominantForce')}</span><span className="text-[10px] sm:text-xs font-bold text-foreground/80">{activeDay.dominant_planet}</span></div><div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-secondary/10 flex items-center justify-center"><Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-secondary" /></div></div></div>
                                                                 </div>
                                                                 <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide pr-2">
                                                                     <p className="text-sm sm:text-lg text-foreground/90 leading-relaxed font-medium mb-8 sm:mb-10 selection:bg-secondary/30">&ldquo;{activeDay.text}&rdquo;</p>
                                                                     {activeDay.transits && (
                                                                         <div className="space-y-4 sm:space-y-6">
                                                                             <div className="flex items-center gap-4"><span className="text-[10px] sm:text-[11px] font-black text-foreground/20 uppercase tracking-[0.4em] whitespace-nowrap">{t('horoscope.planetaryAlignment')}</span><div className="h-[1px] w-full bg-white/5" /></div>
-                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
                                                                                 {Object.entries(activeDay.transits).map(([planet, tObj]) => (
-                                                                                    <motion.div key={planet} whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.05)' }} className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-white/[0.02] border border-white/5 transition-colors">
-                                                                                        <div className="flex flex-col"><span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest mb-0.5">{planet}</span><span className="text-xs font-bold text-secondary">{(tObj as { sign: string }).sign}</span></div>
-                                                                                        <div className="flex flex-col items-end"><span className="text-[8px] font-bold text-foreground/20 uppercase">{t('horoscope.house')}</span><span className="text-xs font-headline font-bold text-foreground/60">{ (tObj as { house_from_lagna: number }).house_from_lagna }</span></div>
+                                                                                    <motion.div key={planet} whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.05)' }} className="flex items-center justify-between p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 transition-colors">
+                                                                                        <div className="flex flex-col"><span className="text-[8px] sm:text-[10px] font-black text-foreground/40 uppercase tracking-widest mb-0.5">{planet}</span><span className="text-[10px] sm:text-xs font-bold text-secondary">{(tObj as { sign: string }).sign}</span></div>
+                                                                                        <div className="flex flex-col items-end"><span className="text-[7px] sm:text-[8px] font-bold text-foreground/20 uppercase">{t('horoscope.house')}</span><span className="text-[10px] sm:text-xs font-headline font-bold text-foreground/60">{ (tObj as { house_from_lagna: number }).house_from_lagna }</span></div>
                                                                                     </motion.div>
                                                                                 ))}
                                                                             </div>
