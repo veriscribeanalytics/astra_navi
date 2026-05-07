@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { ShieldCheck, Lock, LogOut, AlertTriangle, ArrowLeft, Eye } from 'lucide-react';
+import { clientFetch } from '@/lib/apiClient';
 
 export default function SecuritySettingsPage() {
     const { logout, isLoggedIn, isLoading } = useAuth();
@@ -51,7 +52,7 @@ export default function SecuritySettingsPage() {
         setIsChangingPassword(true);
 
         try {
-            const res = await fetch('/api/user/profile', {
+            const res = await clientFetch('/api/user/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: newPassword }),
@@ -84,7 +85,7 @@ export default function SecuritySettingsPage() {
 
         setIsLoggingOutAll(true);
         try {
-            const res = await fetch('/api/auth/logout-all', {
+            const res = await clientFetch('/api/auth/logout-all', {
                 method: 'POST'
             });
 
@@ -109,7 +110,7 @@ export default function SecuritySettingsPage() {
 
         setIsDeleting(true);
         try {
-            const res = await fetch('/api/auth/account', {
+            const res = await clientFetch('/api/auth/account', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: deletePassword }),

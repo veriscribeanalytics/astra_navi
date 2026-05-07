@@ -61,11 +61,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isSessionLoading = status === 'loading';
     const profileComplete = !!(user?.name && user?.dob && user?.tob && user?.pob);
 
-    // Track how many consecutive times we've seen RefreshAccessTokenError
-    // Only sign out after seeing it persist across multiple session updates
-    const refreshErrorCount = useRef(0);
-    const REFRESH_ERROR_THRESHOLD = 3;
-
     useEffect(() => {
         if (session?.user) {
             const sessionUser = session.user;
@@ -78,18 +73,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 signOut({ callbackUrl: '/login?error=SessionExpired' });
                 return;
             } else if (sessionUser.error === "RefreshAccessTokenError") {
-                refreshErrorCount.current++;
-                console.warn(`[AuthContext] RefreshAccessTokenError seen (${refreshErrorCount.current}/${REFRESH_ERROR_THRESHOLD})`);
-                
-                if (refreshErrorCount.current >= REFRESH_ERROR_THRESHOLD) {
-                    console.error("[AuthContext] Refresh token is truly invalid. Signing out.");
-                    signOut({ callbackUrl: '/login?error=SessionExpired' });
-                    return;
-                }
-                // Don't sign out yet — let the next session check try again
+                console.error("[AuthContext] Refresh token is invalid or network error occurred. Signing out.");
+                signOut({ callbackUrl: '/login?error=SessionExpired' });
+                return;
             } else {
-                // Reset counter when there's no error
-                refreshErrorCount.current = 0;
+                // Reset user if needed? (No error)
             }
             
             // Initial set from session
@@ -164,7 +152,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             fetchInProgressRef.current = false;
             prevEmailRef.current = null;
             profileRetryCount.current = 0;
-            refreshErrorCount.current = 0;
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, status, profileFetched]); // Removed user from dependencies

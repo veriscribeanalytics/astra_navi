@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { clientFetch } from '@/lib/apiClient'; // Not this, we need server side
 import { backendFetch } from '@/lib/backendClient';
 import { auth } from '@/lib/auth';
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
     try {
         const session = await auth();
         if (!session?.user?.accessToken) {

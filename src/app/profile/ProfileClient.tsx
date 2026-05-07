@@ -7,16 +7,17 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useToast, useTranslation } from '@/hooks';
+import { LanguageCode } from '@/locales';
 import { clientFetch } from '@/lib/apiClient';
 import { 
     User, Calendar, Clock, MapPin, 
     Save, ArrowLeft, RotateCcw, Sparkles,
-    Globe, Bell, Phone, Briefcase, Heart, Mail
+    Globe, Bell, Phone, Mail
 } from 'lucide-react';
 
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, isLoggedIn, refreshUser } = useAuth();
-    const { t, language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
+    const { language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
     const router = useRouter();
     const searchParams = useSearchParams();
     const isOnboarding = searchParams?.get('onboarding') === 'true';
@@ -187,7 +188,7 @@ export default function ProfileSettingsPage() {
             // Update local context
             login(user?.email || '', formData);
             if (formData.language !== contextLanguage) {
-                setLanguage(formData.language as any);
+                setLanguage(formData.language as LanguageCode);
             }
             success('Profile updated successfully!');
             setHasChanges(false);

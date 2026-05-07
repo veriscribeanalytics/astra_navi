@@ -7,7 +7,6 @@ import { z } from "zod";
  */
 
 const emptyToUndefined = z.literal("").transform(() => undefined);
-const optionalString = z.string().optional().or(emptyToUndefined);
 
 const genderEnum = z.enum(["male", "female", "other", "Not Specified"]).optional().or(emptyToUndefined);
 const maritalStatusEnum = z.enum([
@@ -52,7 +51,7 @@ export const LoginSchema = z.object({
 });
 
 export const ProfileUpdateSchema = z.object({
-  name: z.string().min(2, "Name is required").max(100),
+  name: z.string().min(2, "Name is required").max(100).optional(),
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
   pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
@@ -65,6 +64,7 @@ export const ProfileUpdateSchema = z.object({
     horoscope: z.boolean().optional(),
     notifications: z.boolean().optional(),
   }).optional(),
+  password: z.string().min(10, "Password must be at least 10 cycles (characters)").optional(),
 });
 
 // --- CHAT ---

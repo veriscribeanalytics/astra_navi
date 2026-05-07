@@ -12,7 +12,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { calculateAge } from "@/utils/personalizedQuestions";
 import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import { clientFetch } from "@/lib/apiClient";

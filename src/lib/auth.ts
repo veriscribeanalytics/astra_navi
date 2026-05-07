@@ -29,7 +29,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 
     if (!response.ok) {
       console.error("[Auth] Refresh failed:", response.status, refreshedTokens);
-      throw refreshedTokens;
+      throw { ...refreshedTokens, status: response.status };
     }
 
     // Guard: if expiresIn is missing or invalid, default to 1 hour
@@ -40,17 +40,24 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
     return {
       ...token,
       accessToken: refreshedTokens.accessToken,
-      refreshToken: refreshedTokens.refreshToken ?? token.refreshToken, // Fallback to old refresh token
+      refreshToken: refreshedTokens.refreshToken, // ALWAYS replace with new refresh token from backend
       accessTokenExpires: Date.now() + expiresIn * 1000,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Auth] RefreshAccessToken error:", error);
     
-    const isTokenReuse = error?.error === "Token reuse detected" || error?.detail === "Token reuse detected" || error?.message === "Token reuse detected";
+    const err = error as Record<string, unknown>;
+    const errorCode = err?.code || (err?.error as Record<string, unknown>)?.code;
+    const isFatal = ["token_reuse_detected", "token_expired", "token_invalid"].includes(errorCode as string) || 
+                    err?.error === "Token reuse detected" || 
+                    err?.detail === "Token reuse detected" || 
+                    err?.message === "Token reuse detected" ||
+                    err?.status === 401 ||
+                    err?.status === 429;
 
     return {
       ...token,
-      error: isTokenReuse ? "TokenReuseError" : "RefreshAccessTokenError",
+      error: isFatal ? "TokenReuseError" : "RefreshAccessTokenError",
     };
   }
 }

@@ -4,12 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useToast, useTranslation } from '@/hooks';
+import { LanguageCode } from '@/locales';
 import { useAuth } from '@/context/AuthContext';
 import {
     Mail, Lock, ArrowRight, Eye,
     Sparkles, ShieldCheck, Orbit,
     User as UserIcon, Calendar, Clock, MapPin, 
-    Globe, Bell, ArrowLeft, Phone, Heart, Briefcase
+    Bell, ArrowLeft, Phone
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -23,7 +24,7 @@ const LoginContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { success, error: showError, ToastContainer } = useToast();
-    const { showLoading, refreshUser } = useAuth();
+    const { showLoading } = useAuth();
     const { t, language: currentLanguage, setLanguage, availableLanguages } = useTranslation();
     const [isRegister, setIsRegister] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -162,7 +163,7 @@ const LoginContent = () => {
 
         try {
             if (isRegister) {
-                const { confirmPassword, ...submitData } = registerData;
+                const { confirmPassword: _confirmPassword, ...submitData } = registerData;
                 const res = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -240,7 +241,7 @@ const LoginContent = () => {
                             const url = new URL(callbackUrl, window.location.origin);
                             url.searchParams.delete('callbackUrl');
                             callbackUrl = url.pathname + url.search + url.hash;
-                        } catch (e) {
+                        } catch (_) {
                             // Fallback if URL parsing fails
                             callbackUrl = callbackUrl.split('?')[0];
                         }
@@ -553,7 +554,7 @@ const LoginContent = () => {
                                                                     key={lang.code}
                                                                     type="button"
                                                                     onClick={() => {
-                                                                        setLanguage(lang.code as any);
+                                                                        setLanguage(lang.code as LanguageCode);
                                                                         setRegisterData({...registerData, language: lang.code});
                                                                     }}
                                                                     className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-all ${
