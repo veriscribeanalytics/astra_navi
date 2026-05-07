@@ -126,8 +126,15 @@ export function applyThemeWithOptimization(theme: Theme, deviceTier: DeviceTier)
   }
   
   // PHASE 1: Instant theme class swap (critical visual feedback)
-  // Add disable-transitions to prevent visible transitions during class change
-  document.documentElement.classList.add('disable-transitions');
+  // On mobile viewports, skip the disable-transitions class entirely —
+  // the @media (max-width: 768px) rule already forces transition: none,
+  // and adding disable-transitions triggers a full style recalc of every
+  // element via the * selector (~100ms on low-end devices).
+  const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+  
+  if (!isMobileViewport) {
+    document.documentElement.classList.add('disable-transitions');
+  }
   
   // Apply theme class — browser batches DOM mutations within the same
   // microtask, so disable-transitions is guaranteed to be active before
@@ -137,26 +144,28 @@ export function applyThemeWithOptimization(theme: Theme, deviceTier: DeviceTier)
   
   // PHASE 2: Re-enable transitions for decorative elements only
   // This allows particles, glows, etc. to fade in gradually without blocking UI
-  // On mobile viewports, skip the stagger class entirely to avoid the 600ms setTimeout overhead
-  // since mobile CSS already disables most transitions via @media (max-width: 768px)
-  const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
-  
-  pendingRafId = requestAnimationFrame(() => {
-    pendingRafId = null;
-    document.documentElement.classList.remove('disable-transitions');
-    
-    // On low-end devices, reduced motion, or mobile viewports — skip decorative transitions entirely
-    const shouldSkipDecorativeTransitions = prefersReducedMotion() || deviceTier === 'low' || isMobileViewport;
-    if (!shouldSkipDecorativeTransitions) {
-      document.documentElement.classList.add('theme-transition-stagger');
+  // On mobile viewports, skip entirely — no stagger class, no rAF callback needed
+  if (isMobileViewport) {
+    // Mobile: DOM is already correct, nothing more to do
+    // No disable-transitions to remove, no stagger to add
+  } else {
+    pendingRafId = requestAnimationFrame(() => {
+      pendingRafId = null;
+      document.documentElement.classList.remove('disable-transitions');
       
-      // Remove stagger class after decorative elements finish transitioning
-      pendingTimeoutId = setTimeout(() => {
-        pendingTimeoutId = null;
-        document.documentElement.classList.remove('theme-transition-stagger');
-      }, 600);
-    }
-  });
+      // On low-end devices or reduced motion — skip decorative transitions entirely
+      const shouldSkipDecorativeTransitions = prefersReducedMotion() || deviceTier === 'low';
+      if (!shouldSkipDecorativeTransitions) {
+        document.documentElement.classList.add('theme-transition-stagger');
+        
+        // Remove stagger class after decorative elements finish transitioning
+        pendingTimeoutId = setTimeout(() => {
+          pendingTimeoutId = null;
+          document.documentElement.classList.remove('theme-transition-stagger');
+        }, 600);
+      }
+    });
+  }
   
   // Persist preference
   setStoredTheme(theme);
