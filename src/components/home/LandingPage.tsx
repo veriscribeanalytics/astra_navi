@@ -461,7 +461,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Hero Slider Indicators - Centered at bottom */}
-                <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex justify-center gap-1.5 z-30">
+                <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex justify-center gap-2 sm:gap-1.5 z-30">
                     {slides.map((_, idx) => (
                         <button 
                             key={idx}
@@ -469,7 +469,7 @@ export default function LandingPage() {
                                 setActiveSlide(idx);
                                 setInteractionTick(prev => prev + 1);
                             }}
-                            className={`h-1 rounded-full transition-all duration-300 ${activeSlide === idx ? 'w-6 bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'w-1.5 bg-secondary/20 hover:bg-secondary/40'}`}
+                            className={`h-2 sm:h-1 rounded-full transition-all duration-300 ${activeSlide === idx ? 'w-8 sm:w-6 bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'w-2 sm:w-1.5 bg-secondary/20 hover:bg-secondary/40'}`}
                             aria-label={`Go to slide ${idx + 1}`}
                         />
                     ))}
