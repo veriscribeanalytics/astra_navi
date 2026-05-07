@@ -3,63 +3,64 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/auth.config";
 import { JWT } from "next-auth/jwt";
 
-/**
- * NextAuth Configuration (PostgreSQL/JWT Mode)
- * 
- * MongoDB dependency has been removed. All user data now lives 
- * in the PostgreSQL backend. The authorize() callback proxies 
- * login requests to the FastAPI backend.
- * 
- * Updated to support Access/Refresh Token architecture.
- */
+let refreshPromise: Promise<JWT> | null = null;
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
-  try {
-    const backendUrl = process.env.AI_BACKEND_URL;
-    const response = await fetch(`${backendUrl}/api/auth/refresh`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "X-API-Key": process.env.AI_BACKEND_API_KEY || '',
-      },
-      body: JSON.stringify({ refreshToken: token.refreshToken }),
-    });
-
-    const refreshedTokens = await response.json();
-
-    if (!response.ok) {
-      console.error("[Auth] Refresh failed:", response.status, refreshedTokens);
-      throw { ...refreshedTokens, status: response.status };
-    }
-
-    // Guard: if expiresIn is missing or invalid, default to 1 hour
-    const expiresIn = (typeof refreshedTokens.expiresIn === 'number' && refreshedTokens.expiresIn > 0) 
-      ? refreshedTokens.expiresIn 
-      : 3600;
-    
-    return {
-      ...token,
-      accessToken: refreshedTokens.accessToken,
-      refreshToken: refreshedTokens.refreshToken, // ALWAYS replace with new refresh token from backend
-      accessTokenExpires: Date.now() + expiresIn * 1000,
-    };
-  } catch (error: unknown) {
-    console.error("[Auth] RefreshAccessToken error:", error);
-    
-    const err = error as Record<string, unknown>;
-    const errorCode = err?.code || (err?.error as Record<string, unknown>)?.code;
-    const isFatal = ["token_reuse_detected", "token_expired", "token_invalid"].includes(errorCode as string) || 
-                    err?.error === "Token reuse detected" || 
-                    err?.detail === "Token reuse detected" || 
-                    err?.message === "Token reuse detected" ||
-                    err?.status === 401 ||
-                    err?.status === 429;
-
-    return {
-      ...token,
-      error: isFatal ? "TokenReuseError" : "RefreshAccessTokenError",
-    };
+  if (refreshPromise) {
+    return refreshPromise;
   }
+
+  refreshPromise = (async () => {
+    try {
+      const backendUrl = process.env.AI_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/auth/refresh`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-API-Key": process.env.AI_BACKEND_API_KEY || '',
+        },
+        body: JSON.stringify({ refreshToken: token.refreshToken }),
+      });
+
+      const refreshedTokens = await response.json();
+
+      if (!response.ok) {
+        console.error("[Auth] Refresh failed:", response.status, refreshedTokens);
+        throw { ...refreshedTokens, status: response.status };
+      }
+
+      const expiresIn = (typeof refreshedTokens.expiresIn === 'number' && refreshedTokens.expiresIn > 0) 
+        ? refreshedTokens.expiresIn 
+        : 3600;
+      
+      return {
+        ...token,
+        accessToken: refreshedTokens.accessToken,
+        refreshToken: refreshedTokens.refreshToken,
+        accessTokenExpires: Date.now() + expiresIn * 1000,
+      };
+    } catch (error: unknown) {
+      console.error("[Auth] RefreshAccessToken error:", error);
+      
+      const err = error as Record<string, unknown>;
+      const errorCode = err?.code || (err?.error as Record<string, unknown>)?.code;
+      const isFatal = ["token_reuse_detected", "token_expired", "token_invalid"].includes(errorCode as string) || 
+                      err?.error === "Token reuse detected" || 
+                      err?.detail === "Token reuse detected" || 
+                      err?.message === "Token reuse detected" ||
+                      err?.status === 401 ||
+                      err?.status === 429;
+
+      return {
+        ...token,
+        error: isFatal ? "TokenReuseError" : "RefreshAccessTokenError",
+      };
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -167,7 +168,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, account }) {
-      // Initial sign in
       if (user && account) {
         return {
           ...token,
@@ -178,7 +178,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
       }
 
-      // Return previous token if the access token has not expired yet
+      if (token.error) {
+        return token;
+      }
+
       const expiresAt = token.accessTokenExpires as number;
       const now = Date.now();
       
@@ -186,7 +189,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return token;
       }
 
-      // Access token has expired, try to update it
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
