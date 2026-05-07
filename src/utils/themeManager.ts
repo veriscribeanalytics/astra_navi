@@ -8,6 +8,10 @@ import { DeviceTier } from './deviceTier';
 
 const STORAGE_KEY = 'theme';
 
+// Track pending Phase 2 callbacks so rapid toggles cancel previous ones
+let pendingRafId: number | null = null;
+let pendingTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
 /**
  * Reads theme from localStorage with validation
  * @returns Theme value or null if invalid/unavailable
@@ -85,10 +89,8 @@ export function disableTransitionsTemporarily(callback: () => void): void {
   // Add disable-transitions class
   document.documentElement.classList.add('disable-transitions');
   
-  // Force reflow to ensure class is applied
-  void document.documentElement.offsetHeight;
-  
-  // Execute callback
+  // Execute callback — browser batches DOM mutations within the same
+  // microtask so disable-transitions is active before paint
   callback();
   
   // Re-enable transitions on next frame
@@ -100,6 +102,7 @@ export function disableTransitionsTemporarily(callback: () => void): void {
 /**
  * Applies theme with performance optimization based on device tier
  * Uses two-phase approach: instant background, delayed decorative elements
+ * Cancels pending Phase 2 callbacks on rapid toggle to prevent pile-up
  * @param theme - Theme to apply
  * @param deviceTier - Device tier classification
  */
@@ -112,14 +115,23 @@ export function applyThemeWithOptimization(theme: Theme, deviceTier: DeviceTier)
     return;
   }
   
-  // PHASE 1: Instant background color change (critical visual feedback)
-  // This happens immediately with no transitions
+  // Cancel any pending Phase 2 callbacks from a previous toggle
+  if (pendingRafId !== null) {
+    cancelAnimationFrame(pendingRafId);
+    pendingRafId = null;
+  }
+  if (pendingTimeoutId !== null) {
+    clearTimeout(pendingTimeoutId);
+    pendingTimeoutId = null;
+  }
+  
+  // PHASE 1: Instant theme class swap (critical visual feedback)
+  // Add disable-transitions to prevent visible transitions during class change
   document.documentElement.classList.add('disable-transitions');
   
-  // Force reflow to ensure class is applied
-  void document.documentElement.offsetHeight;
-  
-  // Apply theme class
+  // Apply theme class — browser batches DOM mutations within the same
+  // microtask, so disable-transitions is guaranteed to be active before
+  // the theme class change paints. No forced reflow needed.
   document.documentElement.classList.remove('light', 'dark');
   document.documentElement.classList.add(theme);
   
@@ -129,7 +141,8 @@ export function applyThemeWithOptimization(theme: Theme, deviceTier: DeviceTier)
   // since mobile CSS already disables most transitions via @media (max-width: 768px)
   const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
   
-  requestAnimationFrame(() => {
+  pendingRafId = requestAnimationFrame(() => {
+    pendingRafId = null;
     document.documentElement.classList.remove('disable-transitions');
     
     // On low-end devices, reduced motion, or mobile viewports — skip decorative transitions entirely
@@ -138,7 +151,8 @@ export function applyThemeWithOptimization(theme: Theme, deviceTier: DeviceTier)
       document.documentElement.classList.add('theme-transition-stagger');
       
       // Remove stagger class after decorative elements finish transitioning
-      setTimeout(() => {
+      pendingTimeoutId = setTimeout(() => {
+        pendingTimeoutId = null;
         document.documentElement.classList.remove('theme-transition-stagger');
       }, 600);
     }

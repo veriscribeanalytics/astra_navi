@@ -3,9 +3,10 @@
 /**
  * ThemeToggle Component (Optimized)
  * Accessible theme toggle button with performance optimization
+ * Debounced to prevent rapid-fire clicks from overwhelming the main thread
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useTheme } from '@/hooks/useTheme';
 import { useMounted } from '@/hooks/useMounted';
 import { Sun, Moon } from 'lucide-react';
@@ -19,15 +20,29 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
   const { theme, toggleTheme } = useTheme();
   const mounted = useMounted();
   const [announcement, setAnnouncement] = useState('');
+  const lastToggleRef = useRef(0);
+  const announcementTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
+    // Debounce: ignore clicks within 200ms of the last one
+    const now = Date.now();
+    if (now - lastToggleRef.current < 200) return;
+    lastToggleRef.current = now;
+
     const newTheme = theme === 'light' ? 'dark' : 'light';
     toggleTheme();
     
-    // Announce theme change to screen readers
+    // Announce theme change to screen readers — cancel previous timeout
+    // to prevent stacking stale announcements
+    if (announcementTimeoutRef.current !== null) {
+      clearTimeout(announcementTimeoutRef.current);
+    }
     setAnnouncement(`Switched to ${newTheme} mode`);
-    setTimeout(() => setAnnouncement(''), 1000);
-  };
+    announcementTimeoutRef.current = setTimeout(() => {
+      announcementTimeoutRef.current = null;
+      setAnnouncement('');
+    }, 1000);
+  }, [theme, toggleTheme]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
