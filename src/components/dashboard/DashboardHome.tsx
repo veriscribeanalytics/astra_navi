@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { 
     Sparkles, MessageSquare, Globe, Heart, 
     ChevronRight, Orbit, TrendingUp,
-    Users, Sun, ArrowUp, Plus
+    Users, Sun, ArrowUp, Plus, Briefcase, Activity
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -385,7 +385,6 @@ export default function DashboardHome() {
                 if (typeof moonPhase === 'string') stats.moonPhase = moonPhase;
                 
                 if (Object.keys(stats).length > 0) {
-                    // eslint-disable-next-line react-hooks/set-state-in-effect
                     setKundliStats(stats);
                     return;
                 }
@@ -611,6 +610,33 @@ export default function DashboardHome() {
                                                                 ))}
                                                             </div>
                                                         </div>
+                                                        <div className="w-full px-1 mt-1.5">
+                                                            <div className="flex items-center gap-3 mb-2">
+                                                                <div className="h-[1px] flex-1 bg-white/5" />
+                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.deepDive')}</span>
+                                                                <div className="h-[1px] flex-1 bg-white/5" />
+                                                            </div>
+                                                            <div className="flex flex-col gap-1.5 w-full">
+                                                                {[
+                                                                    { q: "Analyze my weekly forecast in detail", icon: <Sparkles className="w-3.5 h-3.5" /> },
+                                                                    { q: "Why is my career score at its current level today?", icon: <Briefcase className="w-3.5 h-3.5" /> },
+                                                                    { q: "Give me a quick remedy to boost my daily health score", icon: <Activity className="w-3.5 h-3.5" /> }
+                                                                ].map((item, i) => (
+                                                                    <button 
+                                                                        key={i}
+                                                                        onClick={() => handleSendMessage(item.q)}
+                                                                        className="flex items-center gap-3 p-3 rounded-xl bg-surface-variant/10 border border-white/5 hover:bg-secondary/[0.08] hover:border-secondary/20 transition-all text-left group/dive"
+                                                                    >
+                                                                        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0 group-hover/dive:scale-110 transition-transform">
+                                                                            {item.icon}
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="text-xs text-foreground/80 leading-relaxed font-bold group-hover/dive:text-foreground">{item.q}</p>
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-4">
@@ -651,7 +677,10 @@ export default function DashboardHome() {
                                                             onKeyDown={(e) => {
                                                                 if (e.key === 'Enter' && !e.shiftKey) {
                                                                     e.preventDefault();
-                                                                    if (inputText.trim()) handleSendMessage(inputText);
+                                                                    if (inputText.trim()) {
+                                                                        handleSendMessage(inputText);
+                                                                        setInputText('');
+                                                                    }
                                                                 }
                                                             }}
                                                             placeholder="Ask Navi anything..."
@@ -660,7 +689,10 @@ export default function DashboardHome() {
                                                         />
                                                         <button 
                                                             onClick={() => {
-                                                                if (inputText.trim()) handleSendMessage(inputText);
+                                                                if (inputText.trim()) {
+                                                                    handleSendMessage(inputText);
+                                                                    setInputText('');
+                                                                }
                                                             }}
                                                             disabled={!inputText.trim() || isSending}
                                                             className="shrink-0 w-7 h-7 rounded-xl bg-secondary text-background flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50"

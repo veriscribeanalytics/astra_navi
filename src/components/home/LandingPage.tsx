@@ -112,6 +112,7 @@ export default function LandingPage() {
 
     // Form State
     const [formData, setFormData] = useState({ name: '', dob: '', tob: '', pob: '' });
+    const [errors, setErrors] = useState({ name: '', dob: '', tob: '', pob: '' });
     const [matchData, setMatchData] = useState({ name1: '', name2: '' });
     const [isCalculating, setIsCalculating] = useState(false);
 
@@ -144,6 +145,46 @@ export default function LandingPage() {
             setIsCalculating(false);
             setTeaserMode({ type, active: true });
         }, 2000);
+    };
+
+    const validateField = (field: keyof typeof formData, value: string) => {
+        let error = '';
+        switch (field) {
+            case 'name':
+                if (value.trim().length < 2) error = 'Name must be at least 2 characters';
+                else if (!/^[a-zA-Z\s]+$/.test(value)) error = 'Name can only contain letters';
+                break;
+            case 'dob':
+                if (value) {
+                    const dob = new Date(value);
+                    if (dob > new Date()) error = 'Birth date cannot be in the future';
+                }
+                break;
+            case 'pob':
+                if (value.trim().length < 2) error = 'Please enter a valid place';
+                break;
+        }
+        return error;
+    };
+
+    const validateForm = () => {
+        const newErrors = {
+            name: validateField('name', formData.name),
+            dob: validateField('dob', formData.dob),
+            tob: '',
+            pob: validateField('pob', formData.pob)
+        };
+        setErrors(newErrors);
+        return !Object.values(newErrors).some(error => error !== '');
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('astranavi_pending_birth_details', JSON.stringify(formData));
+        }
+        router.push('/chat');
     };
 
     const toggleFAQ = (index: number) => {
@@ -550,13 +591,16 @@ export default function LandingPage() {
                                     <BookOpen className="text-secondary w-10 h-10 mb-4" />
                                     <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('landing.janamKundliTitle')}</h3>
                                     <p className="text-sm text-on-surface-variant/70 mb-6">{t('landing.janamKundliDesc')}</p>
-                                    <form onSubmit={(e) => { e.preventDefault(); handleGenerateTeaser('kundli'); }} className="space-y-2 w-full">
-                                        <Input placeholder="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required className="h-9 text-xs" />
+                                    <form onSubmit={handleSubmit} className="space-y-2 w-full">
+                                        <Input placeholder="Full Name" value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setErrors({...errors, name: validateField('name', e.target.value)}); }} required className="h-9 text-xs" />
+                                        {errors.name && <p className="text-[10px] text-red-400 text-left">{errors.name}</p>}
                                         <div className="grid grid-cols-2 gap-2">
-                                            <Input type="date" value={formData.dob} onChange={(e) => setFormData({...formData, dob: e.target.value})} required className="h-9 text-xs" />
+                                            <Input type="date" value={formData.dob} onChange={(e) => { setFormData({...formData, dob: e.target.value}); setErrors({...errors, dob: validateField('dob', e.target.value)}); }} required className="h-9 text-xs" />
                                             <Input type="time" value={formData.tob} onChange={(e) => setFormData({...formData, tob: e.target.value})} required className="h-9 text-xs" />
                                         </div>
-                                        <Input placeholder="Place of Birth" value={formData.pob} onChange={(e) => setFormData({...formData, pob: e.target.value})} required className="h-9 text-xs" />
+                                        {errors.dob && <p className="text-[10px] text-red-400 text-left">{errors.dob}</p>}
+                                        <Input placeholder="Place of Birth" value={formData.pob} onChange={(e) => { setFormData({...formData, pob: e.target.value}); setErrors({...errors, pob: validateField('pob', e.target.value)}); }} required className="h-9 text-xs" />
+                                        {errors.pob && <p className="text-[10px] text-red-400 text-left">{errors.pob}</p>}
                                         <Button type="submit" fullWidth size="sm" className="h-9 text-xs mt-2">{t('landing.calculateKundli')}</Button>
                                     </form>
                                 </motion.div>

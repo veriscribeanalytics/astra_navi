@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-import { playfair, dmSans, ALL_FONT_VARIABLES } from "@/lib/fonts";
-import FontLoader from "@/components/layout/FontLoader";
+import { ALL_FONT_VARIABLES } from "@/lib/fonts";
 import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
@@ -27,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${ALL_FONT_VARIABLES} h-full antialiased`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
@@ -59,9 +58,6 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* We define all font variables in the head so they are available to FontLoader, 
-            but we don't apply the non-latin ones to the <html> tag initially to avoid preloading them all. */}
-        <style dangerouslySetInnerHTML={{ __html: `:root { /* Font variables defined by next/font */ }` }} />
       </head>
       <body 
         className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-full flex flex-col relative h-full"
@@ -70,7 +66,6 @@ export default function RootLayout({
         <ErrorBoundary>
           <SessionProvider>
             <LanguageProvider>
-              <FontLoader />
               <AuthProvider>
                 <ChatProvider>
                   <ThemeProvider>
@@ -92,9 +87,6 @@ export default function RootLayout({
             </LanguageProvider>
           </SessionProvider>
         </ErrorBoundary>
-        {/* This invisible div ensures Next.js includes all font variables in the CSS bundle 
-            without preloading the actual font files until their classes are used. */}
-        <div className={ALL_FONT_VARIABLES} style={{ display: 'none' }} aria-hidden="true" />
       </body>
     </html>
   );

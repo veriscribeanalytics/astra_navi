@@ -33,7 +33,6 @@ export function ThemeProvider({
   useEffect(() => {
     // Detect device tier
     const tier = detectDeviceTier();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDeviceTier(tier);
     
     // Set device tier as data attribute for CSS

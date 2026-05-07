@@ -256,12 +256,40 @@ const Navbar: React.FC = () => {
     const mobileUserDropdownRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLElement>(null);
     
-    // Reset states on route change
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setIsMenuOpen(false);
-        setIsUserDropdownOpen(false);
-        setHoveredSection(null);
+        const nav = navRef.current;
+        if (!nav) return;
+        const setHeight = () => {
+            document.documentElement.style.setProperty('--navbar-height', `${nav.offsetHeight}px`);
+        };
+        setHeight();
+        const observer = new ResizeObserver(setHeight);
+        observer.observe(nav);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node;
+            const isOutsideDesktop = !desktopUserDropdownRef.current || !desktopUserDropdownRef.current.contains(target);
+            const isOutsideMobile = !mobileUserDropdownRef.current || !mobileUserDropdownRef.current.contains(target);
+            
+            if (isOutsideDesktop && isOutsideMobile) {
+                setIsUserDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+    
+    const prevPathnameRef = useRef(pathname);
+    useEffect(() => {
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            setIsMenuOpen(false);
+            setIsUserDropdownOpen(false);
+            setHoveredSection(null);
+        }
     }, [pathname]);
 
     const isChatPage = pathname?.startsWith('/chat');
