@@ -117,14 +117,19 @@ const Particles: React.FC<ParticlesProps> = ({
   const isVisibleRef = useRef(true); // Track if visible on screen
   const geometryRef = useRef<Geometry | null>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
+  const programRef = useRef<Program | null>(null);
   const countRef = useRef(0);
+  const paletteIndicesRef = useRef<Uint8Array | null>(null);
 
-  // Resolve a palette of CSS-variable-based colors to an RGB Float32Array
-  const resolvePalette = (palette: string[]): Float32Array => {
+  // Resolve a palette of colors to an RGB Float32Array using STORED indices
+  // (no re-randomization — each particle keeps its original palette slot)
+  const resolvePaletteDeterministic = (palette: string[]): Float32Array => {
     const count = countRef.current;
+    const indices = paletteIndicesRef.current;
     const colors = new Float32Array(count * 3);
+    if (!indices) return colors;
     for (let i = 0; i < count; i++) {
-      const col = colorToRgb(palette[Math.floor(Math.random() * palette.length)] || '#ffffff');
+      const col = colorToRgb(palette[indices[i]] || '#ffffff');
       colors.set(new Float32Array(col), i * 3);
     }
     return colors;
@@ -140,7 +145,7 @@ const Particles: React.FC<ParticlesProps> = ({
       ? (darkParticleColors && darkParticleColors.length > 0 ? darkParticleColors : particleColors || defaultColors)
       : (lightParticleColors && lightParticleColors.length > 0 ? lightParticleColors : particleColors || defaultColors);
 
-    const colors = resolvePalette(palette);
+    const colors = resolvePaletteDeterministic(palette);
     geometry.attributes.color.data = colors;
     geometry.attributes.color.needsUpdate = true;
   }, [darkMode, particleColors, lightParticleColors, darkParticleColors]);
@@ -231,6 +236,13 @@ const Particles: React.FC<ParticlesProps> = ({
       colors.set(new Float32Array(col), i * 3);
     }
 
+    // Store palette indices so theme changes use the same assignments (no re-randomization)
+    const paletteIndices = new Uint8Array(count);
+    for (let i = 0; i < count; i++) {
+      paletteIndices[i] = Math.floor(Math.random() * palette.length);
+    }
+    paletteIndicesRef.current = paletteIndices;
+
     const geometry = new Geometry(gl, {
       position: { size: 3, data: positions },
       random: { size: 4, data: randoms },
@@ -251,6 +263,7 @@ const Particles: React.FC<ParticlesProps> = ({
       transparent: true,
       depthTest: false
     });
+    programRef.current = program;
 
     const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
 
@@ -299,6 +312,8 @@ const Particles: React.FC<ParticlesProps> = ({
       }
       geometryRef.current = null;
       glRef.current = null;
+      programRef.current = null;
+      paletteIndicesRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -307,13 +322,19 @@ const Particles: React.FC<ParticlesProps> = ({
     speed,
     moveParticlesOnHover,
     particleHoverFactor,
-    alphaParticles,
     particleBaseSize,
     sizeRandomness,
     cameraDistance,
     disableRotation,
     pixelRatio
   ]);
+
+  // In-place alphaParticles uniform update — avoids full WebGL teardown on theme toggle
+  useEffect(() => {
+    const program = programRef.current;
+    if (!program) return;
+    program.uniforms.uAlphaParticles.value = alphaParticles ? 1 : 0;
+  }, [alphaParticles]);
 
   return <div ref={containerRef} className={`relative w-full h-full overflow-hidden ${className}`} />;
 };
