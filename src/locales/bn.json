@@ -85,5 +85,20 @@
     "capricorn": "মকর",
     "aquarius": "কুম্ভ",
     "pisces": "মীন"
+  },
+  "login": {
+    "stepAccount": "আপনার অ্যাকাউন্ট তৈরি করুন",
+    "stepPersonal": "আপনার সম্পর্কে আমাদের বলুন",
+    "stepBirth": "আপনার মহাজাগতিক ব্লুপ্রিন্ট",
+    "stepPreferences": "আপনার অভিজ্ঞতা ব্যক্তিগতকৃত করুন",
+    "next": "এগিয়ে যান",
+    "back": "পিছনে",
+    "fullName": "পুরো নাম",
+    "dob": "জন্ম তারিখ",
+    "tob": "জন্মের সময়",
+    "pob": "জন্মস্থান",
+    "preferredLanguage": "পছন্দের ভাষা",
+    "receiveHoroscope": "দৈনিক রাশিফল পান",
+    "enableNotifications": "নোটিফিকেশন চালু করুন"
   }
 }

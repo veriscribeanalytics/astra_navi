@@ -118,7 +118,10 @@ const LoginContent = () => {
                 const dob = new Date(registerData.dob);
                 if (dob > new Date()) return "Date of birth cannot be in the future.";
             }
-            if (registerData.pob && registerData.pob.length < 2) return "Place name is too long.";
+            if (registerData.tob && !/^\d{2}:\d{2}$/.test(registerData.tob)) {
+                return "Time format must be HH:MM.";
+            }
+            if (registerData.pob && registerData.pob.length < 2) return "Place name must be at least 2 characters.";
         }
         return null;
     };
@@ -485,7 +488,7 @@ const LoginContent = () => {
                                                                     className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-all ${
                                                                         registerData.language === lang.code 
                                                                             ? 'bg-secondary/10 border-secondary text-secondary' 
-                                                                            : 'bg-white/5 border-white/10 text-primary/40 hover:bg-white/10'
+                                                                            : 'bg-surface-variant/20 border-outline-variant/10 text-primary/40 hover:bg-surface-variant/40'
                                                                     }`}
                                                                 >
                                                                     {lang.nativeName}
@@ -503,7 +506,7 @@ const LoginContent = () => {
                                                                     ...registerData, 
                                                                     preferences: { ...registerData.preferences, horoscope: !registerData.preferences.horoscope }
                                                                 })}
-                                                                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                                                                className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all"
                                                             >
                                                                 <div className="flex items-center gap-3">
                                                                     <div className={`p-1.5 rounded-lg ${registerData.preferences.horoscope ? 'bg-secondary/20 text-secondary' : 'bg-white/10 text-primary/40'}`}>
@@ -511,7 +514,7 @@ const LoginContent = () => {
                                                                     </div>
                                                                     <span className="text-xs font-medium text-primary/70">{t('login.receiveHoroscope') || "Receive daily horoscope"}</span>
                                                                 </div>
-                                                                <div className={`w-8 h-4 rounded-full relative transition-colors ${registerData.preferences.horoscope ? 'bg-secondary' : 'bg-white/20'}`}>
+                                                                <div className={`w-8 h-4 rounded-full relative transition-colors ${registerData.preferences.horoscope ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
                                                                     <div className={`absolute top-1 w-2 h-2 rounded-full bg-white transition-all ${registerData.preferences.horoscope ? 'left-5' : 'left-1'}`} />
                                                                 </div>
                                                             </button>
@@ -522,7 +525,7 @@ const LoginContent = () => {
                                                                     ...registerData, 
                                                                     preferences: { ...registerData.preferences, notifications: !registerData.preferences.notifications }
                                                                 })}
-                                                                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                                                                className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all"
                                                             >
                                                                 <div className="flex items-center gap-3">
                                                                     <div className={`p-1.5 rounded-lg ${registerData.preferences.notifications ? 'bg-secondary/20 text-secondary' : 'bg-white/10 text-primary/40'}`}>
@@ -530,7 +533,7 @@ const LoginContent = () => {
                                                                     </div>
                                                                     <span className="text-xs font-medium text-primary/70">{t('login.enableNotifications') || "Enable notifications"}</span>
                                                                 </div>
-                                                                <div className={`w-8 h-4 rounded-full relative transition-colors ${registerData.preferences.notifications ? 'bg-secondary' : 'bg-white/20'}`}>
+                                                                <div className={`w-8 h-4 rounded-full relative transition-colors ${registerData.preferences.notifications ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
                                                                     <div className={`absolute top-1 w-2 h-2 rounded-full bg-white transition-all ${registerData.preferences.notifications ? 'left-5' : 'left-1'}`} />
                                                                 </div>
                                                             </button>

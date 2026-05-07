@@ -85,5 +85,20 @@
     "capricorn": "मकर",
     "aquarius": "कुंभ",
     "pisces": "मीन"
+  },
+  "login": {
+    "stepAccount": "तुमचे खाते तयार करा",
+    "stepPersonal": "आम्हाला तुमच्याबद्दल सांगा",
+    "stepBirth": "तुमचा कॉस्मिक ब्लूप्रिंट",
+    "stepPreferences": "तुमचा अनुभव वैयक्तिकृत करा",
+    "next": "पुढ चालू ठेवा",
+    "back": "मागे",
+    "fullName": "पूर्ण नाव",
+    "dob": "जन्म तारीख",
+    "tob": "जन्माची वेळ",
+    "pob": "जन्माचे ठिकाण",
+    "preferredLanguage": "पसंतीची भाषा",
+    "receiveHoroscope": "दैनिक राशिभविष्य मिळवा",
+    "enableNotifications": "सूचना सक्षम करा"
   }
 }
