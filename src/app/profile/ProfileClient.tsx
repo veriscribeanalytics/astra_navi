@@ -6,15 +6,17 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks';
+import { useToast, useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
 import { 
     User, Calendar, Clock, MapPin, 
-    Save, ArrowLeft, RotateCcw, Sparkles
+    Save, ArrowLeft, RotateCcw, Sparkles,
+    Globe, Bell, Phone, Briefcase, Heart
 } from 'lucide-react';
 
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, isLoggedIn, refreshUser } = useAuth();
+    const { t, language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
     const router = useRouter();
     const searchParams = useSearchParams();
     const isOnboarding = searchParams?.get('onboarding') === 'true';
@@ -27,7 +29,9 @@ export default function ProfileSettingsPage() {
         phoneNumber: '',
         gender: '',
         maritalStatus: '',
-        occupation: ''
+        occupation: '',
+        language: '',
+        preferences: { horoscope: true, notifications: false }
     });
     const [errors, setErrors] = useState({
         name: '',
@@ -56,11 +60,16 @@ export default function ProfileSettingsPage() {
                 phoneNumber: user.phoneNumber || '',
                 gender: user.gender || '',
                 maritalStatus: user.maritalStatus || '',
-                occupation: user.occupation || ''
+                occupation: user.occupation || '',
+                language: user.language || contextLanguage || 'en',
+                preferences: {
+                    horoscope: user.preferences?.horoscope ?? true,
+                    notifications: user.preferences?.notifications ?? false
+                }
             };
             setFormData(initialData);
         }
-    }, [user]);
+    }, [user, contextLanguage]);
 
     // Track changes
     useEffect(() => {
@@ -73,15 +82,19 @@ export default function ProfileSettingsPage() {
                 formData.phoneNumber !== (user.phoneNumber || '') ||
                 formData.gender !== (user.gender || '') ||
                 formData.maritalStatus !== (user.maritalStatus || '') ||
-                formData.occupation !== (user.occupation || '');
+                formData.occupation !== (user.occupation || '') ||
+                formData.language !== (user.language || contextLanguage || 'en') ||
+                formData.preferences.horoscope !== (user.preferences?.horoscope ?? true) ||
+                formData.preferences.notifications !== (user.preferences?.notifications ?? false);
             setHasChanges(changed);
         }
-    }, [formData, user]);
+    }, [formData, user, contextLanguage]);
 
     // Only redirect if NOT logged in
     useEffect(() => {
         if (!isLoading && !isLoggedIn) {
-            router.push('/login');
+            const currentUrl = window.location.pathname + window.location.search;
+            router.push(`/login?callbackUrl=${encodeURIComponent(currentUrl)}`);
         }
     }, [isLoggedIn, isLoading, router]);
 
@@ -216,7 +229,8 @@ export default function ProfileSettingsPage() {
             setTimeout(() => {
                 showLoading("", 0);
                 if (isOnboarding) {
-                    router.push('/');
+                    const returnUrl = searchParams?.get('return') || '/';
+                    router.push(returnUrl);
                 }
             }, 500);
 
@@ -236,7 +250,12 @@ export default function ProfileSettingsPage() {
                 phoneNumber: user.phoneNumber || '',
                 gender: user.gender || '',
                 maritalStatus: user.maritalStatus || '',
-                occupation: user.occupation || ''
+                occupation: user.occupation || '',
+                language: user.language || contextLanguage || 'en',
+                preferences: {
+                    horoscope: user.preferences?.horoscope ?? true,
+                    notifications: user.preferences?.notifications ?? false
+                }
             });
             setErrors({ name: '', dob: '', tob: '', pob: '', phoneNumber: '' });
             setTouched({ name: false, dob: false, tob: false, pob: false, phoneNumber: false });
@@ -416,6 +435,86 @@ export default function ProfileSettingsPage() {
                                     <option value="Retired" className="bg-surface text-on-surface">Retired</option>
                                     <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        {/* Language & Preferences Section */}
+                        <div className="space-y-8 pt-4 border-t border-outline-variant/10">
+                            <div className="space-y-4">
+                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 block px-1 flex items-center gap-2">
+                                    <Globe className="w-4 h-4 text-secondary" /> Preferred Language
+                                </label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                                    {availableLanguages.map((lang) => (
+                                        <button
+                                            key={lang.code}
+                                            type="button"
+                                            onClick={() => {
+                                                setLanguage(lang.code as any);
+                                                setFormData({...formData, language: lang.code});
+                                            }}
+                                            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all gap-1 ${
+                                                formData.language === lang.code 
+                                                    ? 'bg-secondary/10 border-secondary text-secondary' 
+                                                    : 'bg-surface-variant/20 border-outline-variant/10 text-primary/40 hover:bg-surface-variant/40'
+                                            }`}
+                                        >
+                                            <span className="text-[12px] normal-case">{lang.nativeName}</span>
+                                            <span className="opacity-50 text-[8px]">{lang.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 block px-1 flex items-center gap-2">
+                                    <Bell className="w-4 h-4 text-secondary" /> Cosmic Preferences
+                                </label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({
+                                            ...formData, 
+                                            preferences: { ...formData.preferences, horoscope: !formData.preferences.horoscope }
+                                        })}
+                                        className="flex items-center justify-between p-4 rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-xl transition-colors ${formData.preferences.horoscope ? 'bg-secondary/20 text-secondary' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>
+                                                <Sparkles size={18} />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold text-primary">Daily Horoscope</p>
+                                                <p className="text-[10px] text-on-surface-variant/60">Receive daily cosmic insights</p>
+                                            </div>
+                                        </div>
+                                        <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.preferences.horoscope ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
+                                            <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all shadow-sm ${formData.preferences.horoscope ? 'left-6' : 'left-1'}`} />
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({
+                                            ...formData, 
+                                            preferences: { ...formData.preferences, notifications: !formData.preferences.notifications }
+                                        })}
+                                        className="flex items-center justify-between p-4 rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-xl transition-colors ${formData.preferences.notifications ? 'bg-secondary/20 text-secondary' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>
+                                                <Bell size={18} />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold text-primary">Notifications</p>
+                                                <p className="text-[10px] text-on-surface-variant/60">Alerts for planetary transits</p>
+                                            </div>
+                                        </div>
+                                        <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.preferences.notifications ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
+                                            <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all shadow-sm ${formData.preferences.notifications ? 'left-6' : 'left-1'}`} />
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         

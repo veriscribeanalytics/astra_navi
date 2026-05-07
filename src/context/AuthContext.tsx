@@ -20,6 +20,12 @@ interface User {
     sunSign?: string;
     lagnaSign?: string;
     astrologyData?: Record<string, unknown>;
+    language?: string;
+    preferences?: {
+        horoscope?: boolean;
+        notifications?: boolean;
+        [key: string]: unknown;
+    };
 }
 
 interface AuthContextType {

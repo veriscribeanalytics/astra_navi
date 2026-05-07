@@ -11,7 +11,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { calculateAge } from "@/utils/personalizedQuestions";
 import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
@@ -251,6 +251,7 @@ export default function DashboardHome() {
         inputText, setInputText, chats 
     } = useChat();
     const router = useRouter();
+    const pathname = usePathname();
     const { t, language } = useTranslation();
     
     // States
@@ -260,6 +261,7 @@ export default function DashboardHome() {
     const greetingKey = useGreeting();
     const greeting = t(greetingKey);
     const hasAnalyzedRef = useRef<string | null>(null);
+    const redirectedRef = useRef(false);
 
     // Memos
     
@@ -399,9 +401,16 @@ export default function DashboardHome() {
         if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
         
         // Redirect to onboarding if profile is incomplete
-        if (profileFetched && !profileComplete && !userLoading) {
-            router.push('/profile?onboarding=true');
-            return;
+        // Bug 1 Fix: Add redirect guard and return URL
+        if (profileFetched && !profileComplete && !userLoading && !redirectedRef.current && pathname !== '/profile') {
+            const timer = setTimeout(() => {
+                // Re-check after delay to allow state to settle
+                if (!profileComplete && !redirectedRef.current) {
+                    redirectedRef.current = true;
+                    router.push(`/profile?onboarding=true&return=${encodeURIComponent(pathname || '/')}`);
+                }
+            }, 1000); // 1s delay to allow AuthContext to settle
+            return () => clearTimeout(timer);
         }
 
         const hasBirthDetails = user.dob && user.tob && user.pob;
@@ -432,7 +441,7 @@ export default function DashboardHome() {
                 console.warn('[Dashboard] Auto analyze-full failed:', err);
             });
         }
-    }, [user?.email, user?.dob, user?.tob, user?.pob, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshUser, profileComplete, profileFetched]);
+    }, [user?.email, user?.dob, user?.tob, user?.pob, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshUser, profileComplete, profileFetched, router, pathname]);
 
     const currentDate = new Date().toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 

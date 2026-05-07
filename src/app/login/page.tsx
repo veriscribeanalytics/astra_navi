@@ -7,7 +7,9 @@ import { useToast, useTranslation } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import {
     Mail, Lock, ArrowRight, Eye,
-    Sparkles, ShieldCheck, Orbit
+    Sparkles, ShieldCheck, Orbit,
+    User as UserIcon, Calendar, Clock, MapPin, 
+    Globe, Bell, ArrowLeft, Phone, Heart, Briefcase
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -20,9 +22,9 @@ import { Suspense } from 'react';
 const LoginContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { success, error, ToastContainer } = useToast();
-    const { showLoading } = useAuth();
-    const { t } = useTranslation();
+    const { success, error: showError, ToastContainer } = useToast();
+    const { showLoading, refreshUser } = useAuth();
+    const { t, language: currentLanguage, setLanguage, availableLanguages } = useTranslation();
     const [isRegister, setIsRegister] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -30,10 +32,27 @@ const LoginContent = () => {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Form states
+    // Registration Steps State
+    const [registerStep, setRegisterStep] = useState(0); // 0: Account, 1: Personal, 2: Birth, 3: Preferences
+    const [registerData, setRegisterData] = useState({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        name: '',
+        gender: '',
+        phoneNumber: '',
+        maritalStatus: '',
+        occupation: '',
+        dob: '',
+        tob: '',
+        pob: '',
+        language: currentLanguage || 'en',
+        preferences: { horoscope: true, notifications: false },
+    });
+
+    // Login states
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -48,6 +67,11 @@ const LoginContent = () => {
         window.addEventListener('mousemove', handleMouseMove);
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
+
+    // Update registerData language when context language changes
+    useEffect(() => {
+        setRegisterData(prev => ({ ...prev, language: currentLanguage }));
+    }, [currentLanguage]);
 
     // Handle NextAuth errors from query params
     useEffect(() => {
@@ -71,35 +95,81 @@ const LoginContent = () => {
 
             const message = errorMessages[authError] || authError;
             const timer = setTimeout(() => {
-                error(message);
+                showError(message);
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [searchParams, error, t]);
+    }, [searchParams, showError, t]);
+
+    const validateRegisterStep = () => {
+        if (registerStep === 0) {
+            if (!registerData.email.includes('@')) return "Invalid email address.";
+            if (registerData.password.length < 10) return "Password must be at least 10 characters.";
+            if (registerData.password !== registerData.confirmPassword) return "Passwords do not match.";
+            // Password complexity check
+            if (!/[A-Z]/.test(registerData.password)) return "Must contain at least one uppercase letter.";
+            if (!/[a-z]/.test(registerData.password)) return "Must contain at least one lowercase letter.";
+            if (!/[0-9]/.test(registerData.password)) return "Must contain at least one number.";
+            if (!/[^A-Za-z0-9]/.test(registerData.password)) return "Must contain at least one special character.";
+        } else if (registerStep === 1) {
+            if (registerData.name && registerData.name.length < 2) return "Name must be at least 2 characters.";
+        } else if (registerStep === 2) {
+            if (registerData.dob) {
+                const dob = new Date(registerData.dob);
+                if (dob > new Date()) return "Date of birth cannot be in the future.";
+            }
+            if (registerData.pob && registerData.pob.length < 2) return "Place name is too long.";
+        }
+        return null;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isRegister && registerStep < 3) {
+            const error = validateRegisterStep();
+            if (error) {
+                showError(error);
+                return;
+            }
+            setRegisterStep(prev => prev + 1);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
             if (isRegister) {
-                if (password !== confirmPassword) {
-                    throw new Error("The passwords do not match.");
-                }
-
+                const { confirmPassword, ...submitData } = registerData;
                 const res = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email, password
-                    }),
+                    body: JSON.stringify(submitData),
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || t('login.registrationFailed'));
+                if (!res.ok) {
+                    const errorMsg = data.error || data.detail || t('login.registrationFailed');
+                    throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+                }
 
                 success(t('login.accountCreated'));
-                setIsRegister(false);
+                
+                // Auto-login after registration
+                const result = await signIn('credentials', {
+                    redirect: false,
+                    email: registerData.email,
+                    password: registerData.password,
+                });
+
+                if (result?.error) throw new Error(result.error);
+
+                showLoading(t('login.signingYouIn'), 1500);
+                setTimeout(() => {
+                    // Skip onboarding if birth details provided
+                    const hasBirthDetails = registerData.dob && registerData.tob && registerData.pob;
+                    router.push(hasBirthDetails ? '/?login=success' : '/profile?onboarding=true');
+                }, 1500);
             } else {
                 const result = await signIn('credentials', {
                     redirect: false,
@@ -108,22 +178,37 @@ const LoginContent = () => {
                 });
 
                 if (result?.error) {
-                    throw new Error(result.error === 'CredentialsSignin'
+                    const errorMsg = result.error === 'CredentialsSignin'
                         ? t('login.invalidCredentials')
                         : result.error === 'Configuration'
                             ? t('login.networkError')
-                            : result.error);
+                            : result.error;
+                    throw new Error(errorMsg);
                 }
 
                 showLoading(t('login.signingYouIn'), 1500);
                 setTimeout(() => {
-                    const callbackUrl = searchParams.get('callbackUrl') || '/?login=success';
+                    let callbackUrl = searchParams.get('callbackUrl') || '/?login=success';
+                    
+                    // Bug 2 Fix: Strip callbackUrl from the destination if it exists
+                    if (callbackUrl.includes('callbackUrl=')) {
+                        try {
+                            const url = new URL(callbackUrl, window.location.origin);
+                            url.searchParams.delete('callbackUrl');
+                            callbackUrl = url.pathname + url.search + url.hash;
+                        } catch (e) {
+                            // Fallback if URL parsing fails
+                            callbackUrl = callbackUrl.split('?')[0];
+                        }
+                    }
+                    
                     router.push(callbackUrl);
                 }, 1500);
             }
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "An unexpected cosmic error occurred.";
-            error(message);
+            console.error("Auth error:", err);
+            const message = err instanceof Error ? err.message : String(err);
+            showError(message || "An unexpected cosmic error occurred.");
             setIsLoading(false);
         }
     };
@@ -142,6 +227,13 @@ const LoginContent = () => {
         }, 5000);
         return () => clearInterval(interval);
     }, [quotes.length]);
+
+    const stepTitles = [
+        t('login.stepAccount') || "Create Your Account",
+        t('login.stepPersonal') || "Tell Us About Yourself",
+        t('login.stepBirth') || "Your Cosmic Blueprint",
+        t('login.stepPreferences') || "Personalize Your Experience"
+    ];
 
     return (
         <div ref={containerRef} className="min-h-[calc(100dvh-var(--navbar-height,64px))] w-full flex items-center justify-center relative overflow-hidden font-body bg-transparent">
@@ -228,35 +320,224 @@ const LoginContent = () => {
                         </div>
 
                         <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5">
-                            {isRegister ? t('login.inscribeIdentity') : t('login.signIn')}
+                            {isRegister ? stepTitles[registerStep] : t('login.signIn')}
                         </h1>
                         <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium">
                             {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
                         </p>
+                        
+                        {isRegister && (
+                            <div className="flex gap-1.5 mt-4">
+                                {[0, 1, 2, 3].map((s) => (
+                                    <div 
+                                        key={s} 
+                                        className={`h-1 rounded-full transition-all duration-300 ${s === registerStep ? 'w-8 bg-secondary' : 'w-2 bg-outline-variant/30'}`} 
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Form Body - Only internal card changes */}
                     <div className="flex-1 p-4 sm:p-6 pt-0 overflow-hidden flex flex-col justify-center">
                         <div className="bg-surface/5 dark:bg-white/[0.01] backdrop-blur-md rounded-[28px] border border-outline-variant/20 dark:border-white/5 p-5 sm:p-7 shadow-2xl">
-                            <form onSubmit={handleSubmit} className={isRegister ? "space-y-3" : "space-y-5"}>
+                            <form onSubmit={handleSubmit} className={isRegister ? "space-y-4" : "space-y-5"}>
                                 <AnimatePresence mode="wait">
                                     {isRegister ? (
                                         <motion.div
-                                            key="register-fields"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="space-y-3"
+                                            key={`register-step-${registerStep}`}
+                                            initial={{ opacity: 0, x: 10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -10 }}
+                                            className="space-y-4"
                                         >
-                                            <Input type="email" placeholder={t('login.email')} icon={<Mail size={14} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
-                                            <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder={t('login.password')} icon={<Lock size={14} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
-                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
-                                            </div>
-                                            <div className="relative">
-                                                <Input type={showConfirmPassword ? "text" : "password"} placeholder={t('login.confirmPassword')} icon={<ShieldCheck size={14} className="text-secondary" />} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-                                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
-                                            </div>
+                                            {registerStep === 0 && (
+                                                <>
+                                                    <Input 
+                                                        type="email" 
+                                                        placeholder={t('login.email')} 
+                                                        icon={<Mail size={14} className="text-secondary" />} 
+                                                        value={registerData.email} 
+                                                        onChange={(e) => setRegisterData({...registerData, email: e.target.value})} 
+                                                        required 
+                                                    />
+                                                    <div className="relative">
+                                                        <Input 
+                                                            type={showPassword ? "text" : "password"} 
+                                                            placeholder={t('login.password')} 
+                                                            icon={<Lock size={14} className="text-secondary" />} 
+                                                            value={registerData.password} 
+                                                            onChange={(e) => setRegisterData({...registerData, password: e.target.value})} 
+                                                            required 
+                                                        />
+                                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
+                                                    </div>
+                                                    <div className="relative">
+                                                        <Input 
+                                                            type={showConfirmPassword ? "text" : "password"} 
+                                                            placeholder={t('login.confirmPassword')} 
+                                                            icon={<ShieldCheck size={14} className="text-secondary" />} 
+                                                            value={registerData.confirmPassword} 
+                                                            onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})} 
+                                                            required 
+                                                        />
+                                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={14} /></button>
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {registerStep === 1 && (
+                                                <>
+                                                    <Input 
+                                                        placeholder={t('login.fullName') || "Full Name"} 
+                                                        icon={<UserIcon size={14} className="text-secondary" />} 
+                                                        value={registerData.name} 
+                                                        onChange={(e) => setRegisterData({...registerData, name: e.target.value})} 
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">Gender</label>
+                                                            <select 
+                                                                className="w-full h-11 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-sm text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
+                                                                value={registerData.gender}
+                                                                onChange={(e) => setRegisterData({...registerData, gender: e.target.value})}
+                                                            >
+                                                                <option value="">Select</option>
+                                                                <option value="male">Male</option>
+                                                                <option value="female">Female</option>
+                                                                <option value="other">Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">Status</label>
+                                                            <select 
+                                                                className="w-full h-11 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-sm text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
+                                                                value={registerData.maritalStatus}
+                                                                onChange={(e) => setRegisterData({...registerData, maritalStatus: e.target.value})}
+                                                            >
+                                                                <option value="">Select</option>
+                                                                <option value="Single">Single</option>
+                                                                <option value="Married">Married</option>
+                                                                <option value="Divorced">Divorced</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <Input 
+                                                        placeholder="Phone Number" 
+                                                        icon={<Phone size={14} className="text-secondary" />} 
+                                                        value={registerData.phoneNumber} 
+                                                        onChange={(e) => setRegisterData({...registerData, phoneNumber: e.target.value})} 
+                                                    />
+                                                    <Input 
+                                                        placeholder="Occupation" 
+                                                        icon={<Briefcase size={14} className="text-secondary" />} 
+                                                        value={registerData.occupation} 
+                                                        onChange={(e) => setRegisterData({...registerData, occupation: e.target.value})} 
+                                                    />
+                                                </>
+                                            )}
+
+                                            {registerStep === 2 && (
+                                                <>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">{t('login.dob') || "Date of Birth"}</label>
+                                                        <Input 
+                                                            type="date" 
+                                                            icon={<Calendar size={14} className="text-secondary" />} 
+                                                            value={registerData.dob} 
+                                                            onChange={(e) => setRegisterData({...registerData, dob: e.target.value})} 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">{t('login.tob') || "Time of Birth"}</label>
+                                                        <Input 
+                                                            type="time" 
+                                                            icon={<Clock size={14} className="text-secondary" />} 
+                                                            value={registerData.tob} 
+                                                            onChange={(e) => setRegisterData({...registerData, tob: e.target.value})} 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">{t('login.pob') || "Place of Birth"}</label>
+                                                        <Input 
+                                                            placeholder="City, Country" 
+                                                            icon={<MapPin size={14} className="text-secondary" />} 
+                                                            value={registerData.pob} 
+                                                            onChange={(e) => setRegisterData({...registerData, pob: e.target.value})} 
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {registerStep === 3 && (
+                                                <div className="space-y-6 py-2">
+                                                    <div className="space-y-3">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">{t('login.preferredLanguage') || "Preferred Language"}</label>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            {availableLanguages.map((lang) => (
+                                                                <button
+                                                                    key={lang.code}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setLanguage(lang.code as any);
+                                                                        setRegisterData({...registerData, language: lang.code});
+                                                                    }}
+                                                                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-all ${
+                                                                        registerData.language === lang.code 
+                                                                            ? 'bg-secondary/10 border-secondary text-secondary' 
+                                                                            : 'bg-white/5 border-white/10 text-primary/40 hover:bg-white/10'
+                                                                    }`}
+                                                                >
+                                                                    {lang.nativeName}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-3">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">Preferences</label>
+                                                        <div className="space-y-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setRegisterData({
+                                                                    ...registerData, 
+                                                                    preferences: { ...registerData.preferences, horoscope: !registerData.preferences.horoscope }
+                                                                })}
+                                                                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`p-1.5 rounded-lg ${registerData.preferences.horoscope ? 'bg-secondary/20 text-secondary' : 'bg-white/10 text-primary/40'}`}>
+                                                                        <Sparkles size={14} />
+                                                                    </div>
+                                                                    <span className="text-xs font-medium text-primary/70">{t('login.receiveHoroscope') || "Receive daily horoscope"}</span>
+                                                                </div>
+                                                                <div className={`w-8 h-4 rounded-full relative transition-colors ${registerData.preferences.horoscope ? 'bg-secondary' : 'bg-white/20'}`}>
+                                                                    <div className={`absolute top-1 w-2 h-2 rounded-full bg-white transition-all ${registerData.preferences.horoscope ? 'left-5' : 'left-1'}`} />
+                                                                </div>
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setRegisterData({
+                                                                    ...registerData, 
+                                                                    preferences: { ...registerData.preferences, notifications: !registerData.preferences.notifications }
+                                                                })}
+                                                                className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`p-1.5 rounded-lg ${registerData.preferences.notifications ? 'bg-secondary/20 text-secondary' : 'bg-white/10 text-primary/40'}`}>
+                                                                        <Bell size={14} />
+                                                                    </div>
+                                                                    <span className="text-xs font-medium text-primary/70">{t('login.enableNotifications') || "Enable notifications"}</span>
+                                                                </div>
+                                                                <div className={`w-8 h-4 rounded-full relative transition-colors ${registerData.preferences.notifications ? 'bg-secondary' : 'bg-white/20'}`}>
+                                                                    <div className={`absolute top-1 w-2 h-2 rounded-full bg-white transition-all ${registerData.preferences.notifications ? 'left-5' : 'left-1'}`} />
+                                                                </div>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </motion.div>
                                     ) : (
                                         <motion.div
@@ -266,25 +547,53 @@ const LoginContent = () => {
                                             exit={{ opacity: 0 }}
                                             className="space-y-5"
                                         >
-                                            <Input type="email" placeholder={t('login.email')} icon={<Mail size={16} className="text-secondary" />} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                            <Input 
+                                                type="email" 
+                                                placeholder={t('login.email')} 
+                                                icon={<Mail size={16} className="text-secondary" />} 
+                                                value={email} 
+                                                onChange={(e) => setEmail(e.target.value)} 
+                                                required 
+                                            />
                                             <div className="relative">
-                                                <Input type={showPassword ? "text" : "password"} placeholder={t('login.password')} icon={<Lock size={16} className="text-secondary" />} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                                <Input 
+                                                    type={showPassword ? "text" : "password"} 
+                                                    placeholder={t('login.password')} 
+                                                    icon={<Lock size={16} className="text-secondary" />} 
+                                                    value={password} 
+                                                    onChange={(e) => setPassword(e.target.value)} 
+                                                    required 
+                                                />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                                             </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
 
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    size={isRegister ? "md" : "lg"}
-                                    loading={isLoading}
-                                    className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg mt-2"
-                                >
-                                    {isRegister ? t('login.createAccount') : t('login.accessDashboard')}
-                                    {!isLoading && <ArrowRight size={14} />}
-                                </Button>
+                                <div className="flex gap-3">
+                                    {isRegister && registerStep > 0 && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => setRegisterStep(prev => prev - 1)}
+                                            className="!rounded-xl px-4 border border-outline-variant/20"
+                                        >
+                                            <ArrowLeft size={16} />
+                                        </Button>
+                                    )}
+                                    <Button
+                                        type="submit"
+                                        fullWidth
+                                        size={isRegister ? "md" : "lg"}
+                                        loading={isLoading}
+                                        className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
+                                    >
+                                        {isRegister 
+                                            ? (registerStep === 3 ? t('login.createAccount') : t('login.next') || "Continue") 
+                                            : t('login.accessDashboard')}
+                                        {!isLoading && <ArrowRight size={14} />}
+                                    </Button>
+                                </div>
                             </form>
 
                             <div className="flex items-center gap-4 py-3">
@@ -317,8 +626,9 @@ const LoginContent = () => {
                                     type="button"
                                     onClick={() => {
                                         setIsRegister(!isRegister);
+                                        setRegisterStep(0);
+                                        setEmail('');
                                         setPassword('');
-                                        setConfirmPassword('');
                                         setShowPassword(false);
                                         setShowConfirmPassword(false);
                                     }}

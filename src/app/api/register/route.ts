@@ -20,7 +20,7 @@ export async function POST(req: Request) {
                 error: validation.error.issues[0].message
             }, { status: 400 });
         }
-        const { email, password } = validation.data;
+        const payload = validation.data;
 
         // 2. Rate limiting (Upstash Redis)
         const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
@@ -36,10 +36,7 @@ export async function POST(req: Request) {
         // 3. Proxy to AI Backend (PostgreSQL)
         const response = await backendFetch('/api/register', {
             method: 'POST',
-            body: JSON.stringify({
-                email,
-                password
-            })
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();

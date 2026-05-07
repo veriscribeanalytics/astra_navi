@@ -20,10 +20,19 @@ export const RegisterSchema = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  name: z.string().min(2, "Name is required").max(100).optional().or(emptyToUndefined),
+  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
+  tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
+  pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
   phoneNumber: optionalString,
   gender: optionalString,
   maritalStatus: optionalString,
   occupation: optionalString,
+  language: z.string().max(20).optional().default("en"),
+  preferences: z.object({
+    horoscope: z.boolean().optional().default(true),
+    notifications: z.boolean().optional().default(false),
+  }).optional().default({ horoscope: true, notifications: false }),
 });
 
 export const LoginSchema = z.object({
@@ -40,6 +49,11 @@ export const ProfileUpdateSchema = z.object({
   gender: optionalString,
   maritalStatus: optionalString,
   occupation: optionalString,
+  language: z.string().max(20).optional().or(emptyToUndefined),
+  preferences: z.object({
+    horoscope: z.boolean().optional(),
+    notifications: z.boolean().optional(),
+  }).optional(),
 });
 
 // --- CHAT ---
