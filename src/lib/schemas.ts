@@ -10,11 +10,10 @@ const emptyToUndefined = z.literal("").transform(() => undefined);
 
 const genderEnum = z.enum(["male", "female", "other", "Not Specified"]).optional().or(emptyToUndefined);
 const maritalStatusEnum = z.enum([
-  "single", "married", "divorced", "unmarried", "not married", "wed", "separated", 
-  "widowed", "widow", "widower", "engaged", "relationship", "in relationship"
+  "single", "married", "divorced", "widowed", "separated", "Not Specified"
 ]).optional().or(emptyToUndefined);
 const occupationEnum = z.enum([
-  "student", "studying", "business", "employed", "homemaker", "retired", "jobseeker", "other"
+  "student", "business", "employed", "homemaker", "retired", "unemployed", "Not Specified"
 ]).optional().or(emptyToUndefined);
 const languageEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa"]).default("en");
 const languageOptionalEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa"]).optional().or(emptyToUndefined);

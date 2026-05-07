@@ -423,16 +423,9 @@ export default function ProfileSettingsPage() {
                                     <option value="single" className="bg-surface text-on-surface">Single</option>
                                     <option value="married" className="bg-surface text-on-surface">Married</option>
                                     <option value="divorced" className="bg-surface text-on-surface">Divorced</option>
-                                    <option value="unmarried" className="bg-surface text-on-surface">Unmarried</option>
-                                    <option value="not married" className="bg-surface text-on-surface">Not Married</option>
-                                    <option value="wed" className="bg-surface text-on-surface">Wed</option>
-                                    <option value="separated" className="bg-surface text-on-surface">Separated</option>
                                     <option value="widowed" className="bg-surface text-on-surface">Widowed</option>
-                                    <option value="widow" className="bg-surface text-on-surface">Widow</option>
-                                    <option value="widower" className="bg-surface text-on-surface">Widower</option>
-                                    <option value="engaged" className="bg-surface text-on-surface">Engaged</option>
-                                    <option value="relationship" className="bg-surface text-on-surface">Relationship</option>
-                                    <option value="in relationship" className="bg-surface text-on-surface">In Relationship</option>
+                                    <option value="separated" className="bg-surface text-on-surface">Separated</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Prefer not to say</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
@@ -447,13 +440,12 @@ export default function ProfileSettingsPage() {
                                 >
                                     <option value="" disabled className="bg-surface text-on-surface">Select Occupation</option>
                                     <option value="student" className="bg-surface text-on-surface">Student</option>
-                                    <option value="studying" className="bg-surface text-on-surface">Studying</option>
-                                    <option value="business" className="bg-surface text-on-surface">Business</option>
-                                    <option value="employed" className="bg-surface text-on-surface">Employed</option>
+                                    <option value="business" className="bg-surface text-on-surface">Business Owner</option>
+                                    <option value="employed" className="bg-surface text-on-surface">Employed / Salaried</option>
                                     <option value="homemaker" className="bg-surface text-on-surface">Homemaker</option>
                                     <option value="retired" className="bg-surface text-on-surface">Retired</option>
-                                    <option value="jobseeker" className="bg-surface text-on-surface">Jobseeker</option>
-                                    <option value="other" className="bg-surface text-on-surface">Other</option>
+                                    <option value="unemployed" className="bg-surface text-on-surface">Unemployed</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">Prefer not to say</option>
                                 </select>
                             </div>
                         </div>

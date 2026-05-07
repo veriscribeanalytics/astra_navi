@@ -472,16 +472,9 @@ const LoginContent = () => {
                                                                 <option value="single">Single</option>
                                                                 <option value="married">Married</option>
                                                                 <option value="divorced">Divorced</option>
-                                                                <option value="unmarried">Unmarried</option>
-                                                                <option value="not married">Not Married</option>
-                                                                <option value="wed">Wed</option>
-                                                                <option value="separated">Separated</option>
                                                                 <option value="widowed">Widowed</option>
-                                                                <option value="widow">Widow</option>
-                                                                <option value="widower">Widower</option>
-                                                                <option value="engaged">Engaged</option>
-                                                                <option value="relationship">Relationship</option>
-                                                                <option value="in relationship">In Relationship</option>
+                                                                <option value="separated">Separated</option>
+                                                                <option value="Not Specified">Prefer not to say</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -500,13 +493,12 @@ const LoginContent = () => {
                                                         >
                                                             <option value="">Select</option>
                                                             <option value="student">Student</option>
-                                                            <option value="studying">Studying</option>
-                                                            <option value="business">Business</option>
-                                                            <option value="employed">Employed</option>
+                                                            <option value="business">Business Owner</option>
+                                                            <option value="employed">Employed / Salaried</option>
                                                             <option value="homemaker">Homemaker</option>
                                                             <option value="retired">Retired</option>
-                                                            <option value="jobseeker">Job Seeker</option>
-                                                            <option value="other">Other</option>
+                                                            <option value="unemployed">Unemployed</option>
+                                                            <option value="Not Specified">Prefer not to say</option>
                                                         </select>
                                                     </div>
                                                 </>
