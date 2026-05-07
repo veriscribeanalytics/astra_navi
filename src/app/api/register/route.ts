@@ -47,7 +47,11 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             message: "Your account has been created.",
-            user: data.user
+            user: data.user,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            expiresIn: data.expiresIn,
+            profileComplete: data.profileComplete
         }, { status: 201 });
 
     } catch (error) {

@@ -20,6 +20,9 @@ interface User {
     sunSign?: string;
     lagnaSign?: string;
     astrologyData?: Record<string, unknown>;
+    chartContext?: string;
+    tier?: string;
+    image?: string | null;
     language?: string;
     preferences?: {
         horoscope?: boolean;
@@ -70,7 +73,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Handle NextAuth refresh errors — but don't sign out immediately.
             // A single refresh failure could be a transient network issue.
             // Only sign out if the error persists across multiple session checks.
-            if (sessionUser.error === "RefreshAccessTokenError") {
+            if (sessionUser.error === "TokenReuseError") {
+                console.error("[AuthContext] Token reuse detected. Security risk. Signing out immediately.");
+                signOut({ callbackUrl: '/login?error=SessionExpired' });
+                return;
+            } else if (sessionUser.error === "RefreshAccessTokenError") {
                 refreshErrorCount.current++;
                 console.warn(`[AuthContext] RefreshAccessTokenError seen (${refreshErrorCount.current}/${REFRESH_ERROR_THRESHOLD})`);
                 

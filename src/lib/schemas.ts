@@ -9,6 +9,17 @@ import { z } from "zod";
 const emptyToUndefined = z.literal("").transform(() => undefined);
 const optionalString = z.string().optional().or(emptyToUndefined);
 
+const genderEnum = z.enum(["male", "female", "other", "Not Specified"]).optional().or(emptyToUndefined);
+const maritalStatusEnum = z.enum([
+  "single", "married", "divorced", "unmarried", "not married", "wed", "separated", 
+  "widowed", "widow", "widower", "engaged", "relationship", "in relationship"
+]).optional().or(emptyToUndefined);
+const occupationEnum = z.enum([
+  "student", "studying", "business", "employed", "homemaker", "retired", "jobseeker", "other"
+]).optional().or(emptyToUndefined);
+const languageEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa"]).default("en");
+const languageOptionalEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa"]).optional().or(emptyToUndefined);
+
 // --- USER & AUTH ---
 
 export const RegisterSchema = z.object({
@@ -24,11 +35,11 @@ export const RegisterSchema = z.object({
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
   pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
-  phoneNumber: optionalString,
-  gender: optionalString,
-  maritalStatus: optionalString,
-  occupation: optionalString,
-  language: z.string().max(20).optional().default("en"),
+  phoneNumber: z.string().max(20).optional().or(emptyToUndefined),
+  gender: genderEnum,
+  maritalStatus: maritalStatusEnum,
+  occupation: occupationEnum,
+  language: languageEnum,
   preferences: z.object({
     horoscope: z.boolean().optional().default(true),
     notifications: z.boolean().optional().default(false),
@@ -46,10 +57,10 @@ export const ProfileUpdateSchema = z.object({
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
   pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
   phoneNumber: z.string().max(20).optional().or(emptyToUndefined),
-  gender: optionalString,
-  maritalStatus: optionalString,
-  occupation: optionalString,
-  language: z.string().max(20).optional().or(emptyToUndefined),
+  gender: genderEnum,
+  maritalStatus: maritalStatusEnum,
+  occupation: occupationEnum,
+  language: languageOptionalEnum,
   preferences: z.object({
     horoscope: z.boolean().optional(),
     notifications: z.boolean().optional(),

@@ -43,11 +43,14 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       refreshToken: refreshedTokens.refreshToken ?? token.refreshToken, // Fallback to old refresh token
       accessTokenExpires: Date.now() + expiresIn * 1000,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("[Auth] RefreshAccessToken error:", error);
+    
+    const isTokenReuse = error?.error === "Token reuse detected" || error?.detail === "Token reuse detected" || error?.message === "Token reuse detected";
+
     return {
       ...token,
-      error: "RefreshAccessTokenError",
+      error: isTokenReuse ? "TokenReuseError" : "RefreshAccessTokenError",
     };
   }
 }
@@ -61,8 +64,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        isRegistration: { type: "hidden" },
+        id: { type: "hidden" },
+        name: { type: "hidden" },
+        accessToken: { type: "hidden" },
+        refreshToken: { type: "hidden" },
+        expiresIn: { type: "hidden" },
       },
       async authorize(credentials) {
+        if (credentials?.isRegistration === "true") {
+           return {
+              id: credentials.id as string,
+              email: credentials.email as string,
+              name: credentials.name as string,
+              accessToken: credentials.accessToken as string,
+              refreshToken: credentials.refreshToken as string,
+              accessTokenExpires: Date.now() + parseInt(credentials.expiresIn as string) * 1000,
+           };
+        }
+
         if (!credentials?.email || !credentials?.password) {
           return null;
         }

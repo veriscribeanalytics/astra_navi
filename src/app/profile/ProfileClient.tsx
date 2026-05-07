@@ -11,7 +11,7 @@ import { clientFetch } from '@/lib/apiClient';
 import { 
     User, Calendar, Clock, MapPin, 
     Save, ArrowLeft, RotateCcw, Sparkles,
-    Globe, Bell, Phone, Briefcase, Heart
+    Globe, Bell, Phone, Briefcase, Heart, Mail
 } from 'lucide-react';
 
 export default function ProfileSettingsPage() {
@@ -105,10 +105,8 @@ export default function ProfileSettingsPage() {
             case 'name':
                 if (value.trim().length < 2) {
                     error = 'Name must be at least 2 characters';
-                } else if (value.trim().length > 50) {
+                } else if (value.trim().length > 100) {
                     error = 'Name is too long';
-                } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-                    error = 'Name can only contain letters';
                 }
                 break;
             case 'dob':
@@ -116,7 +114,7 @@ export default function ProfileSettingsPage() {
                     const dob = new Date(value);
                     const today = new Date();
                     const hundredYearsAgo = new Date();
-                    hundredYearsAgo.setFullYear(today.getFullYear() - 120);
+                    hundredYearsAgo.setFullYear(today.getFullYear() - 150);
 
                     if (dob > today) {
                         error = 'Birth date cannot be in the future';
@@ -188,6 +186,9 @@ export default function ProfileSettingsPage() {
 
             // Update local context
             login(user?.email || '', formData);
+            if (formData.language !== contextLanguage) {
+                setLanguage(formData.language as any);
+            }
             success('Profile updated successfully!');
             setHasChanges(false);
             
@@ -197,7 +198,7 @@ export default function ProfileSettingsPage() {
             // After analyze-full completes, the backend auto-saves signs to the DB.
             // We then re-fetch the profile to get the updated sign data.
             const hasBirthDetails = formData.dob && formData.tob && formData.pob;
-            if (hasBirthDetails) {
+            if (hasBirthDetails && data.requiresReanalysis) {
                 clientFetch('/api/analyze-full', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -291,6 +292,15 @@ export default function ProfileSettingsPage() {
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="grid grid-cols-1 gap-6">
                             <Input 
+                                label="Email Address"
+                                type="email"
+                                icon={<Mail className="w-4 h-4" />}
+                                value={user?.email || ''}
+                                readOnly
+                                disabled
+                                helperText="Your email cannot be changed"
+                            />
+                            <Input 
                                 label="Full Name"
                                 placeholder="Enter your full name" 
                                 type="text"
@@ -371,7 +381,7 @@ export default function ProfileSettingsPage() {
                             label="Phone Number"
                             placeholder="+1234567890" 
                             type="tel"
-                            icon={<MapPin className="w-4 h-4 opacity-0" />} 
+                            icon={<Phone className="w-4 h-4" />} 
                             value={formData.phoneNumber}
                             onChange={(e) => {
                                 const value = e.target.value;
@@ -409,11 +419,19 @@ export default function ProfileSettingsPage() {
                                     onChange={(e) => setFormData({...formData, maritalStatus: e.target.value})}
                                 >
                                     <option value="" disabled className="bg-surface text-on-surface">Select Status</option>
-                                    <option value="Single" className="bg-surface text-on-surface">Single</option>
-                                    <option value="Married" className="bg-surface text-on-surface">Married</option>
-                                    <option value="Divorced" className="bg-surface text-on-surface">Divorced</option>
-                                    <option value="Widowed" className="bg-surface text-on-surface">Widowed</option>
-                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
+                                    <option value="single" className="bg-surface text-on-surface">Single</option>
+                                    <option value="married" className="bg-surface text-on-surface">Married</option>
+                                    <option value="divorced" className="bg-surface text-on-surface">Divorced</option>
+                                    <option value="unmarried" className="bg-surface text-on-surface">Unmarried</option>
+                                    <option value="not married" className="bg-surface text-on-surface">Not Married</option>
+                                    <option value="wed" className="bg-surface text-on-surface">Wed</option>
+                                    <option value="separated" className="bg-surface text-on-surface">Separated</option>
+                                    <option value="widowed" className="bg-surface text-on-surface">Widowed</option>
+                                    <option value="widow" className="bg-surface text-on-surface">Widow</option>
+                                    <option value="widower" className="bg-surface text-on-surface">Widower</option>
+                                    <option value="engaged" className="bg-surface text-on-surface">Engaged</option>
+                                    <option value="relationship" className="bg-surface text-on-surface">Relationship</option>
+                                    <option value="in relationship" className="bg-surface text-on-surface">In Relationship</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
@@ -427,13 +445,14 @@ export default function ProfileSettingsPage() {
                                     onChange={(e) => setFormData({...formData, occupation: e.target.value})}
                                 >
                                     <option value="" disabled className="bg-surface text-on-surface">Select Occupation</option>
-                                    <option value="Student" className="bg-surface text-on-surface">Student</option>
-                                    <option value="Business" className="bg-surface text-on-surface">Business</option>
-                                    <option value="Employee" className="bg-surface text-on-surface">Employee</option>
-                                    <option value="Jobseeker" className="bg-surface text-on-surface">Jobseeker</option>
-                                    <option value="Housewife" className="bg-surface text-on-surface">Housewife</option>
-                                    <option value="Retired" className="bg-surface text-on-surface">Retired</option>
-                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
+                                    <option value="student" className="bg-surface text-on-surface">Student</option>
+                                    <option value="studying" className="bg-surface text-on-surface">Studying</option>
+                                    <option value="business" className="bg-surface text-on-surface">Business</option>
+                                    <option value="employed" className="bg-surface text-on-surface">Employed</option>
+                                    <option value="homemaker" className="bg-surface text-on-surface">Homemaker</option>
+                                    <option value="retired" className="bg-surface text-on-surface">Retired</option>
+                                    <option value="jobseeker" className="bg-surface text-on-surface">Jobseeker</option>
+                                    <option value="other" className="bg-surface text-on-surface">Other</option>
                                 </select>
                             </div>
                         </div>
@@ -450,7 +469,6 @@ export default function ProfileSettingsPage() {
                                             key={lang.code}
                                             type="button"
                                             onClick={() => {
-                                                setLanguage(lang.code as any);
                                                 setFormData({...formData, language: lang.code});
                                             }}
                                             className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all gap-1 ${
@@ -517,7 +535,6 @@ export default function ProfileSettingsPage() {
                                 </div>
                             </div>
                         </div>
-                        
                         <div className="pt-4 flex flex-col sm:flex-row gap-4">
                             <Button 
                                 type="submit" 
@@ -558,6 +575,28 @@ export default function ProfileSettingsPage() {
                         </div>
                     </form>
                 </Card>
+
+                {!isOnboarding && (
+                    <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 mt-8" hoverable={false}>
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-xl font-headline font-bold text-primary mb-2">Security Settings</h3>
+                                <p className="text-sm text-on-surface-variant">Manage your password and active sessions.</p>
+                            </div>
+                            
+                            <div className="pt-4 border-t border-outline-variant/10 space-y-4">
+                                <Button 
+                                    type="button" 
+                                    variant="ghost"
+                                    fullWidth
+                                    onClick={() => router.push('/profile/security')}
+                                >
+                                    Manage Security Settings
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+                )}
             </div>
         </main>
     );
