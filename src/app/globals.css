@@ -331,7 +331,12 @@ button:focus-visible:not(.chat-input-icon-btn),
   [class*="orbit"],
   [class*="particle"],
   [class*="flare"],
-  [class*="glow"] {
+  [class*="glow"],
+  .logoloop__track,
+  .logoloop,
+  [class*="shimmer"],
+  [class*="marquee"],
+  [class*="spin"] {
     transition: opacity 300ms ease 50ms !important;
     animation-duration: 400ms !important;
     animation-iteration-count: infinite !important;
