@@ -84,14 +84,14 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
 
     return (
         <div className="relative">
-            <svg viewBox={`-24 -10 ${w + 34} ${h + 40}`} className="w-full h-auto overflow-visible">
+            <svg viewBox={`-24 -14 ${w + 34} ${h + 20}`} className="w-full h-auto overflow-visible">
                 <defs>
                     <linearGradient id={`area-${colorHex.replace('#','')}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor={colorHex} stopOpacity="0.25" />
-                        <stop offset="100%" stopColor={colorHex} stopOpacity="0.03" />
+                        <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
+                        <stop offset="100%" stopColor={colorHex} stopOpacity="0.01" />
                     </linearGradient>
                     <clipPath id={`reveal-${colorHex.replace('#','')}`}>
-                        <rect x="-24" y="-10" width="0" height={h + 50}>
+                        <rect x="-24" y="-14" width="0" height={h + 30}>
                             <animate attributeName="width" from="0" to={w + 40} dur="1.2s" fill="freeze" begin="0.3s" />
                         </rect>
                     </clipPath>
@@ -112,59 +112,74 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
                 <rect x="0" y="0" width={todayX} height={h} fill="currentColor" fillOpacity="0.02" />
                 <rect x={todayX} y="0" width={w - todayX} height={h} fill="currentColor" fillOpacity="0.01" />
                 <line x1={todayX} y1="0" x2={todayX} y2={h} stroke="currentColor" strokeOpacity="0.15" strokeDasharray="2 2" strokeWidth="0.5" />
-                <text x={todayX - 2} y="-2" textAnchor="end" fontSize="5" fill="currentColor" fillOpacity="0.3">Past</text>
-                <text x={todayX + 2} y="-2" textAnchor="start" fontSize="5" fill="currentColor" fillOpacity="0.3">Forecast</text>
+                <text x={todayX - 4} y="-4" textAnchor="end" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">PAST</text>
+                <text x={todayX + 4} y="-4" textAnchor="start" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">FORECAST</text>
 
                 <g clipPath={`url(#reveal-${colorHex.replace('#','')})`}>
                     <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
                     <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    {points.map((p, i) => {
-                        const d = days[i];
-                        const isSelected = activeDate === d.date;
-                        const isToday = d.is_today;
-                        const isBest = p === bestPoint;
-                        const isWorst = p === worstPoint;
-                        const showLabel = isSelected || isToday || isBest || isWorst;
-                        
-                        let labelY = p.y - 10;
-                        // Basic collision avoidance
-                        if (showLabel) {
-                            points.forEach((otherP, j) => {
-                                if (i !== j && Math.abs(otherP.x - p.x) < 25) {
-                                    const otherD = days[j];
-                                    const otherShow = (activeDate === otherD.date) || otherD.is_today || otherP === bestPoint || otherP === worstPoint;
-                                    if (otherShow && p.y > otherP.y) {
-                                        labelY += 15; // move down if it's the lower point
-                                    }
-                                }
-                            });
+                    {(() => {
+                        // Pre-compute which labels are visible (priority: selected > today > best > worst)
+                        // and suppress labels that would collide with a higher-priority label
+                        const labelPriority = (idx: number) => {
+                            const d = days[idx];
+                            const p = points[idx];
+                            if (activeDate === d.date) return 4;
+                            if (d.is_today) return 3;
+                            if (p === bestPoint) return 2;
+                            if (p === worstPoint) return 1;
+                            return 0;
+                        };
+                        const labeledIndices = points
+                            .map((_, i) => i)
+                            .filter(i => labelPriority(i) > 0);
+
+                        // For each labeled point, check if a higher-priority neighbor is too close
+                        const visibleLabels = new Set<number>();
+                        const MIN_DIST_X = 22;
+                        const MIN_DIST_Y = 10;
+                        // Sort by priority descending so higher-priority wins
+                        const sorted = [...labeledIndices].sort((a, b) => labelPriority(b) - labelPriority(a));
+                        const placed: { x: number; y: number; idx: number }[] = [];
+                        for (const idx of sorted) {
+                            const p = points[idx];
+                            const labelY = p.y - 10;
+                            const collides = placed.some(pl => 
+                                Math.abs(pl.x - p.x) < MIN_DIST_X && Math.abs(pl.y - labelY) < MIN_DIST_Y
+                            );
+                            if (!collides) {
+                                visibleLabels.add(idx);
+                                placed.push({ x: p.x, y: labelY, idx });
+                            }
                         }
 
-                        return (
-                            <g key={i}>
-                                {/* Static Point Representation */}
-                                {(d.is_today || isSelected) && <circle cx={p.x} cy={p.y} r="5" fill={colorHex} opacity={isSelected ? 0.15 : 0.08} />}
-                                <circle cx={p.x} cy={p.y} r={d.is_today ? 3 : 1.5} 
-                                    fill={d.is_today || isSelected ? colorHex : 'transparent'} 
-                                    stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
-                                
-                                {showLabel && (
-                                    <text x={p.x} y={labelY} textAnchor="middle" 
-                                        fill={isSelected ? colorHex : 'var(--color-foreground)'} 
-                                        fillOpacity={isSelected ? 1 : 0.4} 
-                                        fontSize="7" fontWeight="bold">{d.score}</text>
-                                )}
-                                
-                                {/* X-Axis Day Labels */}
-                                <text x={p.x} y={h + 18} textAnchor="middle" 
-                                    fill="var(--color-foreground)" 
-                                    fillOpacity={isToday ? 0.6 : 0.25} 
-                                    fontSize="6">{isToday ? 'Today' : new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' })}</text>
+                        return points.map((p, i) => {
+                            const d = days[i];
+                            const isSelected = activeDate === d.date;
+                            const isToday = d.is_today;
+                            const isBest = p === bestPoint;
+                            const isWorst = p === worstPoint;
 
-                                {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 50} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
-                            </g>
-                        );
-                    })}
+                            return (
+                                <g key={i}>
+                                    {/* Static Point Representation */}
+                                    {(d.is_today || isSelected) && <circle cx={p.x} cy={p.y} r="5" fill={colorHex} opacity={isSelected ? 0.15 : 0.08} />}
+                                    <circle cx={p.x} cy={p.y} r={d.is_today ? 3 : 1.5} 
+                                        fill={d.is_today || isSelected ? colorHex : 'transparent'} 
+                                        stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
+                                    
+                                    {visibleLabels.has(i) && (
+                                        <text x={p.x} y={p.y - 10} textAnchor="middle" 
+                                            fill={isSelected ? colorHex : 'var(--color-foreground)'} 
+                                            fillOpacity={isSelected ? 1 : 0.4} 
+                                            fontSize="7" fontWeight="bold">{d.score}</text>
+                                    )}
+
+                                    {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 20} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
+                                </g>
+                            );
+                        });
+                    })()}
                 </g>
             </svg>
             
@@ -838,7 +853,7 @@ export default function DailyHoroscopeCard({
                                                             <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-outline-variant/10 text-[9px] sm:text-[10px] font-bold bg-surface"><span className="text-foreground/40">{t('horoscope.trendLabel')}:</span><span className="text-foreground/70 capitalize">{forecast.summary.trend === 'improving' ? '📈' : forecast.summary.trend === 'declining' ? '📉' : '➡️'} {forecast.summary.trend}</span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="h-16 sm:h-28 w-full relative px-2 sm:px-8"><MiniChart days={forecast.days} colorHex={activeModal.colorHex} activeDate={activeDay.date} /></div>
+                                                    <div className="h-24 sm:h-36 w-full relative px-2 sm:px-8"><MiniChart days={forecast.days} colorHex={activeModal.colorHex} activeDate={activeDay.date} /></div>
                                                 </div>
                                                 <div className="px-8 h-[1px] bg-outline-variant/5 shrink-0" />
                                                 <div className="flex flex-col flex-1 min-h-0 p-4 sm:p-10 pt-2 sm:pt-4">
