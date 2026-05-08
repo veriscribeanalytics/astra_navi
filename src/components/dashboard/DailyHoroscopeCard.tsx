@@ -286,7 +286,7 @@ export default function DailyHoroscopeCard({
     const [activeAlertIdx, setActiveAlertIdx] = useState(0);
     
     // Optimization Refs
-    const currentSign = horoscope?.sign || sign || 'Aries';
+    const currentSign = horoscope?.user?.sign || sign || 'Aries';
     
     const translatedSign = t(`signs.${currentSign.toLowerCase()}`);
 
@@ -557,7 +557,7 @@ export default function DailyHoroscopeCard({
                     <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 items-stretch">
                         {/* LEFT: Sign & Cramped Stats */}
                         <div className="md:col-span-2 flex flex-col justify-between">
-                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.user?.sign || horoscope?.sign || sign} characteristics and what they mean for me.`)}>
+                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.user?.sign || sign || currentSign} characteristics and what they mean for me.`)}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <TrendingUp className="w-4 h-4 text-secondary" />
                                     <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">{t('horoscope.personalizedForecast')}</span>
@@ -641,7 +641,7 @@ export default function DailyHoroscopeCard({
                                         <div className="space-y-3">
                                             {horoscope.time_triggers.map((trigger, i) => (
                                                 <div key={i} className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
-                                                    <div className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${trigger.type === 'growth' ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                                                    <div className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${trigger.type === 'growth' ? 'bg-green-500/10 text-green-500' : trigger.type === 'emotional' ? 'bg-violet-500/10 text-violet-400' : 'bg-orange-500/10 text-orange-500'}`}>
                                                         {trigger.start} - {trigger.end}
                                                     </div>
                                                     <div className="min-w-0">

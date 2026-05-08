@@ -17,7 +17,7 @@ const ChatPageClient: React.FC = () => {
   const router = useRouter();
   const { 
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
-    createNewChat, selectChat, isGuest, enableGuestMode 
+    createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode 
     } = useChat();
 
     React.useEffect(() => {
@@ -56,9 +56,14 @@ const ChatPageClient: React.FC = () => {
     <div className="chat-layout relative overflow-hidden">
       {/* Guest Banner */}
       {isGuest && (
-        <div className="absolute top-0 left-0 right-0 z-[100] h-10 bg-amber-500/90 backdrop-blur-md flex items-center justify-center gap-4 shadow-lg border-b border-white/10">
+        <div className={`absolute top-0 left-0 right-0 z-[100] h-10 flex items-center justify-center gap-4 shadow-lg border-b border-white/10 ${isGuestExpired ? 'bg-red-500/90' : 'bg-amber-500/90'} backdrop-blur-md`}>
           <div className="text-white text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-             Preview Mode ✦ Identity Required for Vedic Analysis
+             {isGuestExpired ? '⚠ Preview Expired' : '✦ Preview Mode — Identity Required for Vedic Analysis'}
+             {!isGuestExpired && (
+               <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-[10px] font-mono tabular-nums">
+                 {Math.floor(guestTimeRemaining / 60)}:{String(guestTimeRemaining % 60).padStart(2, '0')}
+               </span>
+             )}
           </div>
           <a href="/login" className="px-3 py-1 bg-white text-amber-600 rounded-full text-[10px] font-bold hover:bg-gray-100 transition-colors shadow-sm">Login Now</a>
         </div>

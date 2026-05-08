@@ -6,7 +6,8 @@ import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import TopicPill from '@/components/ui/TopicPill';
 import { useAuth } from '@/context/AuthContext';
 import { useChat } from '@/context/ChatContext';
-import { X, Lock } from 'lucide-react';
+import { X, Lock, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { topicPills } from '@/data/topicPills';
 
@@ -20,10 +21,10 @@ const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
 
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex gap-px text-secondary text-xs">
-        {Array(fullStars).fill(0).map((_, i) => <span key={`f${i}`}>★</span>)}
-        {hasHalf && <span>★</span>}
-        {Array(emptyStars).fill(0).map((_, i) => <span key={`e${i}`} className="opacity-25">★</span>)}
+      <div className="flex gap-px text-secondary">
+        {Array(fullStars).fill(0).map((_, i) => <Star key={`f${i}`} size={14} className="fill-secondary text-secondary" />)}
+        {hasHalf && <Star size={14} className="fill-secondary/50 text-secondary" />}
+        {Array(emptyStars).fill(0).map((_, i) => <Star key={`e${i}`} size={14} className="text-on-surface-variant/20 fill-transparent" />)}
       </div>
       <span className="text-[10px] text-on-surface-variant/60 font-semibold">{rating.toFixed(1)}/5</span>
     </div>
@@ -61,6 +62,7 @@ const KundliGraphic: React.FC = () => (
 
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const { 
     activeChat, activeChatId, inputText, setInputText, 
     setIsRightPanelOpen, createNewChat, isGuest 
@@ -114,7 +116,7 @@ const ChatDetailPanel: React.FC = () => {
             <p className="text-[11px] font-bold text-on-surface">
               {user?.name || user?.email?.split('@')[0] || '—'}
             </p>
-            <span className="text-[10px] text-secondary cursor-pointer hover:underline">Edit</span>
+            <span className="text-[10px] text-secondary cursor-pointer hover:underline" onClick={() => router.push('/profile')}>Edit</span>
           </div>
           {profileFields.map(([label, value]) => (
             <div key={label} className="flex justify-between py-0.5 border-b border-outline-variant/10 last:border-b-0">

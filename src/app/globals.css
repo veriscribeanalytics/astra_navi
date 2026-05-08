@@ -473,7 +473,18 @@ html:has(.chat-layout) main {
 
 @media (max-width: 1200px) {
   .chat-layout { grid-template-columns: 240px 1fr 0px; }
-  .chat-right-sidebar { display: none !important; }
+  .chat-right-sidebar {
+    display: flex !important;
+    position: fixed !important;
+    top: 0; bottom: 0;
+    right: -300px; width: 300px;
+    z-index: 999 !important;
+    flex-direction: column;
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.3);
+    transition: right 0.3s ease;
+    pointer-events: none;
+  }
+  .chat-right-sidebar.mobile-open { right: 0; pointer-events: auto; }
 }
 
 /* CONSOLIDATED (Task #18) */
@@ -481,11 +492,12 @@ html:has(.chat-layout) main {
   .chat-layout { grid-template-columns: 1fr; }
   
   .chat-left-sidebar, .chat-right-sidebar {
-    display: none;
+    display: flex !important;
     position: fixed !important;
     top: 0; bottom: 0;
     z-index: 999 !important;
     transform: none !important;
+    flex-direction: column;
   }
   
   .chat-left-sidebar {
@@ -493,16 +505,19 @@ html:has(.chat-layout) main {
     border-top-right-radius: 20px;
     border-right: 1px solid var(--outline-variant);
     transition: left 0.3s ease;
+    pointer-events: none;
   }
   
-  .chat-left-sidebar.mobile-open { left: 0; display: flex; }
+  .chat-left-sidebar.mobile-open { left: 0; display: flex; pointer-events: auto; }
   
   .chat-right-sidebar {
     right: -300px; width: 300px;
     box-shadow: -20px 0 50px rgba(0, 0, 0, 0.3);
+    transition: right 0.3s ease;
+    pointer-events: none;
   }
   
-  .chat-right-sidebar.mobile-open { right: 0; display: flex; }
+  .chat-right-sidebar.mobile-open { right: 0; display: flex; pointer-events: auto; }
 }
 
 @media (max-width: 768px) {
@@ -566,22 +581,31 @@ html:has(.chat-layout) main {
 
 /* Bubbles & Input */
 .chat-ai-bubble {
-  background: linear-gradient(135deg, 
-    var(--surface-variant), 
-    var(--surface)
-  );
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid color-mix(in srgb, var(--secondary) 25%, var(--outline-variant));
-  border-radius: 4px 24px 24px 24px; 
+  background: rgba(35, 25, 66, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(200, 136, 10, 0.12);
+  border-left: 2px solid var(--secondary);
+  border-radius: 8px 20px 20px 20px; 
   padding: 18px 22px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 15px color-mix(in srgb, var(--secondary) 5%, transparent);
 }
 
+:root:not(.dark) .chat-ai-bubble {
+  background: rgba(230, 216, 224, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(200, 136, 10, 0.12);
+  border-left: 2px solid var(--secondary);
+}
+
 .chat-user-bubble {
-  background: color-mix(in srgb, var(--secondary) 15%, var(--surface-variant));
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--secondary) 20%, var(--surface-variant)),
+    color-mix(in srgb, var(--secondary) 30%, var(--surface-variant))
+  );
   border: 1px solid color-mix(in srgb, var(--secondary) 30%, transparent);
-  border-radius: 24px 24px 4px 24px; padding: 14px 22px;
+  border-radius: 20px 20px 4px 20px; padding: 14px 22px;
   color: var(--on-surface); 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

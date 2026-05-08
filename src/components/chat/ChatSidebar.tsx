@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Button from '@/components/ui/Button';
 import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
 import { clientFetch } from '@/lib/apiClient';
@@ -25,6 +25,9 @@ const ChatSidebar: React.FC = () => {
   } = useChat();
   const { t } = useTranslation();
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [menuFlipUp, setMenuFlipUp] = useState(false);
+  const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [deleteModalChat, setDeleteModalChat] = useState<ChatSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -132,7 +135,7 @@ const ChatSidebar: React.FC = () => {
         <div className="px-3.5 mb-1 shrink-0 flex items-center justify-between">
           <SidebarSectionLabel>RECENT CHATS</SidebarSectionLabel>
         </div>
-        <div className="flex-1 overflow-y-auto px-3.5 pb-2">
+        <div className="flex-1 overflow-y-auto px-3.5 pb-2" ref={scrollContainerRef}>
           {isLoadingChats && chats.length === 0 ? (
             <div className="flex flex-col gap-2">
               {[...Array(8)].map((_, i) => (
@@ -211,10 +214,19 @@ const ChatSidebar: React.FC = () => {
                         }`}
                       >
                           <button 
+                              ref={menuBtnRef}
                               onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              setMenuOpenId(prev => prev === chat.id ? null : chat.id);
+                              const nextId = menuOpenId === chat.id ? null : chat.id;
+                              setMenuOpenId(nextId);
+                              // Measure if button is in bottom half of scroll container
+                              if (nextId && menuBtnRef.current && scrollContainerRef.current) {
+                                const btnRect = menuBtnRef.current.getBoundingClientRect();
+                                const containerRect = scrollContainerRef.current.getBoundingClientRect();
+                                const relativePos = btnRect.top - containerRect.top;
+                                setMenuFlipUp(relativePos > containerRect.height * 0.6);
+                              }
                               }}
                               className="chat-menu-btn text-on-surface-variant/40 hover:text-on-surface-variant hover:bg-surface-variant/50 w-7 h-7 flex items-center justify-center !min-w-0 !min-h-0 !p-1 rounded transition-colors cursor-pointer"
                           >
@@ -222,7 +234,7 @@ const ChatSidebar: React.FC = () => {
                           </button>
                           
                           {menuOpenId === chat.id && (
-                            <div className="chat-menu-dropdown absolute top-full right-0 mt-1 w-32 bg-background border border-outline-variant/20 rounded-xl shadow-xl z-50 py-1.5 animate-in fade-in zoom-in-95 duration-100">
+                            <div className={`chat-menu-dropdown absolute right-0 w-32 bg-background border border-outline-variant/20 rounded-xl shadow-xl z-50 py-1.5 animate-in fade-in zoom-in-95 duration-100 ${menuFlipUp ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();

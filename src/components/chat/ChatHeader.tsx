@@ -39,10 +39,11 @@ const ChatHeader: React.FC = () => {
       </div>
 
       <div className="flex gap-1.5 sm:gap-2 items-center">
-        {/* Info Toggle for Right Sidebar - HIDDEN ON MOBILE AS REQUESTED */}
+        {/* Info Toggle for Right Sidebar */}
         <button 
           onClick={() => setIsRightPanelOpen(true)}
-          className="hidden xl:flex p-1.5 text-secondary/70 hover:text-secondary transition-colors"
+          className="p-1.5 text-secondary/70 hover:text-secondary transition-colors"
+          aria-label="View birth chart details"
         >
           <Info className="w-5 h-5" />
         </button>

@@ -20,9 +20,9 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   const isAi = type === 'ai';
 
   return (
-    <div className={`flex gap-2.5 items-start ${isAi ? 'max-w-[85%]' : 'justify-end w-full'}`}>
+    <div className={`flex gap-2.5 items-start ${isAi ? 'max-w-[720px]' : 'justify-end w-full'}`}>
       {isAi && (
-        <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant/30 flex items-center justify-center text-secondary text-sm shrink-0 mt-0.5">
+        <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant/30 flex items-center justify-center text-secondary text-sm shrink-0 mt-0.5 shadow-[0_0_12px_rgba(200,136,10,0.2)]">
           {avatar || '✦'}
         </div>
       )}
@@ -35,7 +35,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             </p>
           )}
           <div 
-            className="text-[12px] sm:text-[13px] leading-relaxed break-words" 
+            className="text-[13px] sm:text-[14px] leading-relaxed break-words" 
             style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
           >
             {children}
@@ -48,6 +48,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
           </div>
         )}
       </div>
+
+      {!isAi && avatar && (
+        <div className="w-8 h-8 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary text-xs font-bold shrink-0 mt-0.5">
+          {avatar}
+        </div>
+      )}
     </div>
   );
 };

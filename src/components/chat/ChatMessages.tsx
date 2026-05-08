@@ -10,7 +10,8 @@ import { useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
-import { Volume2, Copy, ChevronRight, Sparkles } from 'lucide-react';
+import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
+import { Volume2, Copy, ChevronRight, Sparkles, ChevronDown, RefreshCw } from 'lucide-react';
 import KundliSvg from '@/components/ui/astrology/KundliSvg';
 
 /* ---------- Sub-components ---------- */
@@ -79,24 +80,49 @@ const LoadingSkeleton: React.FC = () => (
   </div>
 );
 
+const quickReplyOptions = [
+  'Tell me more',
+  'What remedies?',
+  'How long will this last?',
+  'Next question',
+];
+
+const thinkingStatuses = [
+  '✦ Reading your chart...',
+  '✦ Consulting the stars...',
+  '✦ Interpreting transits...',
+  '✦ Aligning planetary data...',
+];
+
 const ThinkingIndicator: React.FC = () => {
+  const [statusIdx, setStatusIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStatusIdx(prev => (prev + 1) % thinkingStatuses.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex gap-2.5 items-start max-w-[85%] mb-2 mt-4">
-      <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant/30 flex items-center justify-center text-secondary text-sm shrink-0 mt-0.5">
+    <div className="flex gap-2.5 items-start max-w-[720px] mb-2 mt-4">
+      <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant/30 flex items-center justify-center text-secondary text-sm shrink-0 mt-0.5 shadow-[0_0_12px_rgba(200,136,10,0.2)]">
         <span>✦</span>
       </div>
       <div className="chat-ai-bubble relative overflow-hidden">
-        <p className="text-[13px] text-secondary font-bold tracking-wider mb-2 uppercase flex items-center gap-1.5">
+        <p className="text-[10px] text-secondary font-bold tracking-wider mb-2 uppercase flex items-center gap-1.5">
           <span>NAVI · AI ASTROLOGER</span>
-          <span className="flex gap-0.5">
-            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
-            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
-            <span className="w-0.5 h-0.5 rounded-full bg-secondary/80" />
-          </span>
         </p>
         
-        <div className="flex items-center gap-2 text-[15px] text-on-surface-variant/70 font-medium italic">
-          Navi is typing...
+        <div className="flex items-center gap-3">
+          <span className="flex gap-1 items-center">
+            <span className="w-2 h-2 bg-secondary rounded-full animate-bounce [animation-delay:0ms]" />
+            <span className="w-2 h-2 bg-secondary rounded-full animate-bounce [animation-delay:150ms]" />
+            <span className="w-2 h-2 bg-secondary rounded-full animate-bounce [animation-delay:300ms]" />
+          </span>
+          <span className="text-[15px] text-on-surface-variant/70 font-medium italic transition-all duration-500">
+            {thinkingStatuses[statusIdx]}
+          </span>
         </div>
       </div>
     </div>
@@ -106,13 +132,16 @@ const ThinkingIndicator: React.FC = () => {
 /* ---------- Main Component ---------- */
 const ChatMessages: React.FC = () => {
   const { user } = useAuth();
-  const { activeChat, isLoadingMessages, isSending, createNewChat, rateMessage } = useChat();
+  const { activeChat, isLoadingMessages, isSending, createNewChat, rateMessage, sendMessage, activeChatId } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean; messageId: string; initialRating: number }>({
     isOpen: false,
     messageId: '',
     initialRating: 0
   });
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
 
   // Calculate age and get personalized questions
   const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
@@ -133,6 +162,20 @@ const ChatMessages: React.FC = () => {
 
   const handleFeedbackSubmit = (rating: number, tags: string[], comment: string) => {
     rateMessage(feedbackModal.messageId, rating, tags, comment);
+  };
+
+  // Detect when user scrolls up from the bottom
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    // Show button when more than 150px from bottom
+    setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 150);
+  };
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    }
   };
 
   // Auto-scroll to bottom when messages or isSending change (debounced for performance)
@@ -159,18 +202,24 @@ const ChatMessages: React.FC = () => {
     return <LoadingSkeleton />;
   }
 
+  const userInitial = user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U';
+
   const messages = activeChat?.messages || [];
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 min-w-0 w-full"
-    >
+    <div className="relative flex-1 min-h-0">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4 pb-2 flex flex-col gap-3 sm:gap-4 min-w-0 w-full h-full"
+      >
       <AnimatePresence mode="popLayout">
       {messages.map((msg, i) => {
         if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;
 
         const isAi = msg.type === 'ai';
+        // Check if this is the last AI message in the conversation
+        const isLastAiMsg = isAi && i === messages.length - 1;
 
         // --- NEW: Parsing thinking tags ---
         let mainText = msg.text;
@@ -188,31 +237,62 @@ const ChatMessages: React.FC = () => {
           }
         }
 
+        const isSpeaking = speakingId === msg.id;
+
         const handleSpeak = (text: string) => {
-          // Remove HTML tags if present (though dangerouslySetInnerHTML is used)
+          if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            setSpeakingId(null);
+            return;
+          }
           const cleanText = text.replace(/<[^>]*>/g, '');
           const utterance = new SpeechSynthesisUtterance(cleanText);
-          
+          utterance.onend = () => setSpeakingId(null);
+          utterance.onerror = () => setSpeakingId(null);
           window.speechSynthesis.cancel(); 
           window.speechSynthesis.speak(utterance);
+          setSpeakingId(msg.id);
         };
 
         const copyAction = isAi ? (
           <div className="flex items-center gap-1">
             <button
               onClick={() => handleSpeak(mainText)}
-              className="group/speak flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface-variant rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1"
-              title="Speak Message"
+              className={`group/speak flex items-center justify-center rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1 ${isSpeaking ? 'text-secondary bg-secondary/10' : 'text-on-surface-variant/40 hover:text-on-surface-variant'}`}
+              title={isSpeaking ? "Stop speaking" : "Speak Message"}
             >
-              <Volume2 className="w-4 h-4 group-active/speak:scale-90 transition-transform" />
+              <Volume2 className={`w-4 h-4 group-active/speak:scale-90 transition-transform ${isSpeaking ? 'animate-pulse' : ''}`} />
             </button>
             <button
-              onClick={() => navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''))}
-              className="group/copy flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface-variant rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1"
+              onClick={() => {
+                navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''));
+                setCopiedId(msg.id);
+                setTimeout(() => setCopiedId(null), 2000);
+              }}
+              className="group/copy flex items-center justify-center rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1 text-on-surface-variant/40 hover:text-on-surface-variant"
               title="Copy Message"
             >
-              <Copy className="w-4 h-4 group-active/copy:scale-90 transition-transform" />
+              {copiedId === msg.id ? (
+                <span className="text-secondary text-[10px] font-bold">✓</span>
+              ) : (
+                <Copy className="w-4 h-4 group-active/copy:scale-90 transition-transform" />
+              )}
             </button>
+            {isLastAiMsg && !isSending && (
+              <button
+                onClick={() => {
+                  // Re-send the user message that preceded this AI response
+                  const prevUserMsg = [...messages].reverse().find(m => m.type === 'user' && messages.indexOf(m) < i);
+                  if (prevUserMsg && activeChatId) {
+                    sendMessage(prevUserMsg.text);
+                  }
+                }}
+                className="group/regen flex items-center justify-center rounded-md transition-colors cursor-pointer w-7 h-7 !min-w-0 !min-h-0 !p-1 text-on-surface-variant/40 hover:text-secondary"
+                title="Regenerate response"
+              >
+                <RefreshCw className="w-4 h-4 group-active/regen:scale-90 transition-transform" />
+              </button>
+            )}
           </div>
         ) : null;
 
@@ -222,13 +302,14 @@ const ChatMessages: React.FC = () => {
           <motion.div 
             key={msg.id || i} 
             className="group/msg relative"
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 12, scale: 0.98, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <ChatBubble
               type={isAi ? 'ai' : 'user'}
               label={isAi ? 'NAVI · AI ASTROLOGER' : undefined}
+              avatar={isAi ? undefined : userInitial}
             >
               {isAi ? (
                 <>
@@ -246,7 +327,7 @@ const ChatMessages: React.FC = () => {
                   )}
 
                   <div
-                    className="text-on-surface-variant text-[14px] sm:text-[15px] leading-[1.6] [&_strong]:text-secondary [&_strong]:font-semibold"
+                    className="text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.75] [&_strong]:text-secondary [&_strong]:font-semibold [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:mb-1"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mainText) }}
                   />
 
@@ -299,9 +380,16 @@ const ChatMessages: React.FC = () => {
               )}
             </ChatBubble>
 
-            {/* Rating meter & Copy below every AI message - Only visible on hover */}
+            {/* Message Timestamp */}
+            {msg.createdAt && (
+              <p className={`text-[10px] text-on-surface-variant/30 mt-1 ${isAi ? 'ml-10' : 'text-right mr-1'}`} title={formatDisplayDateTime(msg.createdAt)}>
+                {formatRelativeTime(msg.createdAt)}
+              </p>
+            )}
+
+            {/* Rating meter & Copy below every AI message - Always visible on mobile, hover-reveal on desktop */}
             {isAi && msg.id && (
-              <div className="flex items-center justify-between w-full mt-1.5 px-2 mb-2 opacity-0 group-hover/msg:opacity-100 transition-all duration-300">
+              <div className="flex items-center justify-between w-full mt-1.5 px-2 mb-2 opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 transition-all duration-300">
                 <span className="text-[11px] font-bold text-on-surface-variant/30 tracking-widest uppercase">
                   Quality check
                 </span>
@@ -314,6 +402,27 @@ const ChatMessages: React.FC = () => {
                   <div className="w-[1px] h-3 bg-outline-variant/40 ml-0.5 mr-0.5" />
                   {copyAction}
                 </div>
+              </div>
+            )}
+
+            {/* Quick-reply chips after the last AI message */}
+            {isAi && isLastAiMsg && !isSending && (
+              <div className="flex flex-wrap gap-2 mt-1 ml-10">
+                {quickReplyOptions.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      if (activeChatId) {
+                        sendMessage(option);
+                      } else {
+                        createNewChat(option);
+                      }
+                    }}
+                    className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-on-surface-variant/70 bg-surface-variant/30 border border-outline-variant/15 hover:border-secondary/30 hover:bg-secondary/10 hover:text-secondary transition-all active:scale-95"
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
             )}
           </motion.div>
@@ -332,6 +441,24 @@ const ChatMessages: React.FC = () => {
         initialRating={feedbackModal.initialRating}
         onSubmit={handleFeedbackSubmit}
       />
+    </div>
+
+      {/* Scroll to Bottom FAB */}
+      <AnimatePresence>
+        {showScrollBtn && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            transition={{ duration: 0.2 }}
+            onClick={scrollToBottom}
+            className="absolute bottom-4 right-4 sm:right-6 w-10 h-10 rounded-full bg-surface border border-outline-variant/30 shadow-lg flex items-center justify-center text-secondary hover:bg-surface-variant hover:scale-105 active:scale-95 transition-all z-30"
+            aria-label="Scroll to latest message"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

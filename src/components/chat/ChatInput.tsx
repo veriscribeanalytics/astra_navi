@@ -3,11 +3,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { 
-    Mic, MicOff, RotateCcw, 
+    Mic, MicOff, 
     ArrowUp, Sparkles 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/hooks';
+
+// Rotating placeholder texts
+const placeholderTexts = [
+  'Ask about your career this month...',
+  'What does Mercury retrograde mean for you?',
+  'Tell me about my love prospects...',
+  'How are the planets affecting my health?',
+  'What remedies can improve my finances?',
+  'When is the best time for a new venture?',
+];
 
 // Type definitions for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -37,12 +47,23 @@ const ChatInput: React.FC = () => {
   const { t } = useTranslation();
   
   const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(true);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const MAX_CHARS = 1000;
   const charCount = inputText.length;
   const isOverLimit = charCount > MAX_CHARS;
+
+  // Rotate placeholder every 5 seconds when input is empty
+  useEffect(() => {
+    if (inputText.length > 0) return;
+    const interval = setInterval(() => {
+      setPlaceholderIdx(prev => (prev + 1) % placeholderTexts.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [inputText.length]);
 
   useEffect(() => {
     // Initialize Web Speech API
@@ -76,6 +97,8 @@ const ChatInput: React.FC = () => {
       recognition.onend = () => {
         setIsListening(false);
       };
+    } else {
+      setSpeechSupported(false);
     }
   }, [setInputText]);
 
@@ -132,22 +155,18 @@ const ChatInput: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 pb-1.5 sm:pb-2">
               <button 
-                onClick={() => setInputText('')}
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center text-foreground/30 hover:text-secondary hover:bg-secondary/10 transition-all active:scale-90"
-                title="Clear input"
-              >
-                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-              <button 
                 onClick={toggleListening}
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center transition-all active:scale-90 ${
-                  isListening 
-                  ? 'bg-red-500/20 text-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]' 
-                  : 'text-foreground/30 hover:text-secondary hover:bg-secondary/10'
+                disabled={!speechSupported}
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  !speechSupported
+                  ? 'text-foreground/10 cursor-not-allowed'
+                  : isListening 
+                  ? 'bg-red-500/20 text-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)] active:scale-90' 
+                  : 'text-foreground/30 hover:text-secondary hover:bg-secondary/10 active:scale-90'
                 }`}
-                title={isListening ? "Stop listening" : "Voice input"}
+                title={!speechSupported ? "Voice input not supported in this browser" : isListening ? "Stop listening" : "Voice input"}
               >
-                {isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+                {!speechSupported ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
             </div>
 
@@ -158,7 +177,7 @@ const ChatInput: React.FC = () => {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={t('horoscope.askNaviAboutToday') + "..."}
+                placeholder={inputText.length > 0 ? '' : placeholderTexts[placeholderIdx]}
                 className="w-full bg-transparent border-none outline-none text-[13px] sm:text-[15px] font-medium text-foreground placeholder:text-foreground/25 resize-none py-3 px-1 max-h-[120px] scrollbar-hide"
                 rows={1}
               />
@@ -169,10 +188,10 @@ const ChatInput: React.FC = () => {
               <button 
                 onClick={handleSend}
                 disabled={!inputText.trim() || isSending || isOverLimit}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group/send ${
+                className={`h-10 sm:h-12 rounded-2xl flex items-center justify-center gap-1.5 transition-all duration-500 group/send ${
                   !inputText.trim() || isSending || isOverLimit
-                  ? 'bg-surface-variant/50 text-foreground/10 cursor-not-allowed'
-                  : 'bg-secondary text-background shadow-lg shadow-secondary/20 hover:scale-105 active:scale-95'
+                  ? 'bg-surface-variant/50 text-foreground/10 cursor-not-allowed w-10 sm:w-12'
+                  : 'bg-secondary text-background shadow-lg shadow-secondary/20 hover:scale-105 active:scale-95 w-10 sm:w-14'
                 }`}
               >
                 <AnimatePresence mode="wait">
@@ -191,9 +210,10 @@ const ChatInput: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className="flex items-center justify-center"
+                      className="flex items-center justify-center gap-1"
                     >
-                      <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover/send:-translate-y-0.5" />
+                      <ArrowUp className="w-5 h-5 sm:w-5 sm:h-5 transition-transform group-hover/send:-translate-y-0.5" />
+                      <span className="hidden sm:inline text-[13px] font-bold">Ask</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -205,10 +225,10 @@ const ChatInput: React.FC = () => {
           <div className="px-6 py-2 bg-black/5 flex items-center justify-between border-t border-white/5">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-              <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">Navi is online</p>
+              <p className="text-[10px] sm:text-[11px] font-bold text-foreground/25 uppercase tracking-widest">Navi is online</p>
             </div>
             {charCount > 0 && (
-              <p className={`text-[9px] font-bold uppercase tracking-widest ${isOverLimit ? 'text-red-500' : 'text-foreground/20'}`}>
+              <p className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-widest ${isOverLimit ? 'text-red-500' : 'text-foreground/25'}`}>
                 {charCount} / {MAX_CHARS}
               </p>
             )}
