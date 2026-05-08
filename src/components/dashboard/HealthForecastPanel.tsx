@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import { Activity, ChevronDown, AlertTriangle, X, Info } from 'lucide-react';
 import { clientFetch } from '@/lib/apiClient';
+import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
 
 interface DayForecast {
     date: string;
@@ -149,106 +150,124 @@ export default function HealthForecastPanel() {
                         </div>
 
                         {/* Score Timeline - Line Graph */}
-                        <div className="px-3 sm:px-5 pt-8 sm:pt-12 pb-10 sm:pb-14 border-b border-outline-variant/10 relative overflow-hidden bg-[#0a0c10]">
+                        <div className="px-3 sm:px-5 pt-8 sm:pt-12 pb-10 sm:pb-14 border-b border-outline-variant/10 relative bg-[#0a0c10]">
                             <div className="relative h-[100px] sm:h-[130px] w-full flex">
                                 {/* SVG Line Chart Area */}
                                 <div className="flex-1 relative">
-                                    <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                    <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 100 100">
                                         <defs>
                                             <linearGradient id="lineAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stopColor="rgba(79, 209, 237, 0.2)" />
-                                                <stop offset="100%" stopColor="rgba(10, 12, 16, 0.1)" />
+                                                <stop offset="0%" stopColor="rgba(79, 209, 237, 0.3)" />
+                                                <stop offset="100%" stopColor="rgba(10, 12, 16, 0.05)" />
                                             </linearGradient>
                                         </defs>
 
-                                        {/* Horizontal Grid Lines */}
-                                        {[25, 50, 75, 100].map((level) => (
-                                            <line 
-                                                key={level} 
-                                                x1="0" y1={100 - level} x2="100" y2={100 - level} 
-                                                stroke="rgba(255, 255, 255, 0.03)" 
-                                                strokeWidth="0.5" 
-                                            />
-                                        ))}
+                                        {(() => {
+                                            const points = data.days.map((d, i) => ({ x: (i / (data.days.length - 1)) * 100, y: 100 - d.score }));
+                                            const pathD = catmullRomToBezier(points);
+                                            const areaD = catmullRomArea(points, 100);
 
-                                        {/* Area Fill */}
-                                        <path
-                                            d={`M 0 100 ${data.days.map((day, i) => `L ${(i / (data.days.length - 1)) * 100} ${100 - day.score}`).join(' ')} L 100 100 Z`}
-                                            fill="url(#lineAreaGradient)"
-                                            className="transition-all duration-1000 ease-in-out"
-                                        />
+                                            const todayIndex = data.days.findIndex(d => d.is_today);
+                                            const todayX = todayIndex !== -1 ? points[todayIndex].x : 50;
 
-                                        {/* Main Cyan Path */}
-                                        <path
-                                            d={data.days.map((day, i) => `${i === 0 ? 'M' : 'L'} ${(i / (data.days.length - 1)) * 100} ${100 - day.score}`).join(' ')}
-                                            fill="none"
-                                            stroke="#4fd1ed"
-                                            strokeWidth="2.5"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="transition-all duration-[1200ms]"
-                                        />
-                                    </svg>
-
-                                    {/* HTML Overlay for Points, Labels, and Vertical Guides */}
-                                    <div className="absolute inset-0 w-full h-full pointer-events-none">
-                                        {data.days.map((day, i) => {
-                                            const left = `${(i / (data.days.length - 1)) * 100}%`;
-                                            const top = `${100 - day.score}%`;
-                                            const isExpanded = expandedDay === day.date;
                                             return (
-                                                <div 
-                                                    key={day.date} 
-                                                    className="absolute top-0 bottom-0 pointer-events-none flex flex-col items-center"
-                                                    style={{ left, width: '0px' }}
-                                                >
-                                                    {/* Vertical Guide Line */}
-                                                    <div className={`absolute top-0 bottom-0 w-px ${day.is_today ? 'bg-cyan-400/20' : 'bg-white/5'}`} />
+                                                <g>
+                                                    {/* Horizontal Grid Lines */}
+                                                    {[25, 50, 75, 100].map((level) => (
+                                                        <line 
+                                                            key={level} 
+                                                            x1="0" y1={100 - level} x2="100" y2={100 - level} 
+                                                            stroke="rgba(255, 255, 255, 0.03)" 
+                                                            strokeWidth="0.5" 
+                                                        />
+                                                    ))}
 
-                                                    {/* Data Point Wrapper */}
-                                                    <div 
-                                                        className="absolute flex flex-col items-center justify-center pointer-events-auto group cursor-pointer z-20"
-                                                        style={{ 
-                                                            top, 
-                                                            left: '0px',
-                                                            transform: 'translate(-50%, -50%)',
-                                                            width: '48px',
-                                                            height: '48px'
-                                                        }}
-                                                        onClick={() => setExpandedDay(isExpanded ? null : day.date)}
-                                                    >
-                                                        {/* Score Label above point */}
-                                                        <span className={`absolute -top-1 text-[12px] font-bold transition-colors ${day.is_today ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(79,209,237,0.8)]' : 'text-foreground/50 group-hover:text-foreground/80'}`}>
-                                                            {day.score}
-                                                        </span>
+                                                    {/* Past / Future Demarcation */}
+                                                    <rect x="0" y="0" width={todayX} height="100" fill="#4fd1ed" fillOpacity="0.02" />
+                                                    <rect x={todayX} y="0" width={100 - todayX} height="100" fill="#4fd1ed" fillOpacity="0.01" />
+                                                    <line x1={todayX} y1="0" x2={todayX} y2="100" stroke="#4fd1ed" strokeOpacity="0.15" strokeDasharray="2 2" strokeWidth="0.5" />
+                                                    
+                                                    {/* Tiny demarc labels (placed slightly below to avoid cluttering top) */}
+                                                    <text x={todayX - 2} y="15" textAnchor="end" fontSize="4" fill="#4fd1ed" fillOpacity="0.3">Past</text>
+                                                    <text x={todayX + 2} y="15" textAnchor="start" fontSize="4" fill="#4fd1ed" fillOpacity="0.3">Forecast</text>
 
-                                                        {/* Dot Container */}
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            {/* Outer Aura */}
-                                                            <div className={`absolute w-8 h-8 rounded-full bg-cyan-400/15 transition-all ${day.is_today ? 'opacity-100 scale-100 animate-pulse' : 'opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-100'}`} />
 
-                                                            {/* Main Point Ring */}
-                                                            <div 
-                                                                className={`relative rounded-full transition-all duration-300 ${
-                                                                    day.is_today 
-                                                                        ? 'w-3.5 h-3.5 bg-cyan-400 shadow-[0_0_12px_rgba(79,209,237,1)] ring-[2px] ring-white/40' 
-                                                                        : 'w-2.5 h-2.5 bg-[#0a0c10] border-[2px] border-cyan-400/80 group-hover:border-cyan-300 group-hover:bg-cyan-400 group-hover:scale-[1.3]'
-                                                                }`}
-                                                            />
-                                                        </div>
-                                                    </div>
+                                                    {/* Area Fill */}
+                                                    <path
+                                                        d={areaD}
+                                                        fill="url(#lineAreaGradient)"
+                                                    />
 
-                                                    {/* Bottom X-Axis Date Label */}
-                                                    <div className="absolute -bottom-[36px] w-[60px] flex flex-col items-center text-center transform translate-x-[-50%]">
-                                                        <div className={`text-[10px] font-bold ${day.is_today ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(79,209,237,0.5)]' : 'text-foreground/40'} uppercase tracking-tight`}>
-                                                            {day.is_today ? 'Today' : new Date(day.date + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' })}
-                                                        </div>
-                                                        <div className="text-[9px] text-foreground/25 font-medium">{new Date(day.date + 'T00:00:00').getDate()}</div>
-                                                    </div>
-                                                </div>
+                                                    {/* Main Cyan Path */}
+                                                    <path
+                                                        d={pathD}
+                                                        fill="none"
+                                                        stroke="#4fd1ed"
+                                                        strokeWidth="2.5"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    />
+
+                                                    {/* Data Points, Labels, and Interactivity */}
+                                                    {data.days.map((day, i) => {
+                                                        const p = points[i];
+                                                        const isExpanded = expandedDay === day.date;
+                                                        
+                                                        return (
+                                                            <g key={day.date} 
+                                                               className="cursor-pointer group outline-none" 
+                                                               onClick={() => setExpandedDay(isExpanded ? null : day.date)}
+                                                               role="button"
+                                                               tabIndex={0}
+                                                            >
+                                                                {/* Invisible Hit Area (approx 44x44 proportional to viewBox) */}
+                                                                <rect x={p.x - 10} y={p.y - 10} width="20" height="20" fill="transparent" />
+
+                                                                {/* Vertical Guide Line */}
+                                                                <line x1={p.x} y1="0" x2={p.x} y2="100" stroke={day.is_today ? "rgba(79, 209, 237, 0.2)" : "rgba(255, 255, 255, 0.05)"} strokeWidth="0.5" />
+
+                                                                {/* Score Label above point */}
+                                                                <text x={p.x} y={p.y - 4} textAnchor="middle" 
+                                                                    fontSize="7" fontWeight="bold"
+                                                                    fill={day.is_today ? '#4fd1ed' : 'currentColor'}
+                                                                    fillOpacity={day.is_today ? 1 : 0.5}
+                                                                    className={`transition-all ${!day.is_today && 'group-hover:fill-opacity-80'}`}
+                                                                >
+                                                                    {day.score}
+                                                                </text>
+
+                                                                {/* Point Circles */}
+                                                                {day.is_today && <circle cx={p.x} cy={p.y} r="5" fill="rgba(79,209,237,0.15)" className="animate-pulse" />}
+                                                                <circle 
+                                                                    cx={p.x} cy={p.y} 
+                                                                    r={day.is_today ? 2 : 1}
+                                                                    fill={day.is_today ? "#4fd1ed" : "#0a0c10"}
+                                                                    stroke="#4fd1ed"
+                                                                    strokeWidth={day.is_today ? 0 : 0.8}
+                                                                    className={`transition-all ${!day.is_today && 'group-hover:fill-[#4fd1ed] group-hover:r-[1.5]'}`}
+                                                                />
+
+                                                                {/* Bottom X-Axis Date Label */}
+                                                                <text x={p.x} y="112" textAnchor="middle" 
+                                                                    fontSize="6" fontWeight="bold"
+                                                                    fill={day.is_today ? '#4fd1ed' : 'currentColor'}
+                                                                    fillOpacity={day.is_today ? 1 : 0.4}
+                                                                >
+                                                                    {day.is_today ? 'Today' : new Date(day.date + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' })}
+                                                                </text>
+                                                                <text x={p.x} y="120" textAnchor="middle" 
+                                                                    fontSize="5" fontWeight="normal"
+                                                                    fill="currentColor" fillOpacity="0.25"
+                                                                >
+                                                                    {new Date(day.date + 'T00:00:00').getDate()}
+                                                                </text>
+                                                            </g>
+                                                        );
+                                                    })}
+                                                </g>
                                             );
-                                        })}
-                                    </div>
+                                        })()}
+                                    </svg>
                                 </div>
 
                                 {/* Right Y-Axis Score Labels */}

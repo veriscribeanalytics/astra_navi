@@ -39,9 +39,9 @@ export const RegisterSchema = z.object({
   occupation: occupationEnum,
   language: languageEnum,
   preferences: z.object({
-    horoscope: z.boolean().optional().default(true),
-    notifications: z.boolean().optional().default(false),
-  }).optional().default({ horoscope: true, notifications: false }),
+    horoscope_enabled: z.boolean().optional().default(true),
+    notifications_enabled: z.boolean().optional().default(false),
+  }).optional().default({ horoscope_enabled: true, notifications_enabled: false }),
 });
 
 export const LoginSchema = z.object({

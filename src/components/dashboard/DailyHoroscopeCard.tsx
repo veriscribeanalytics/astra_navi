@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/hooks';
+import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
 
 interface HoroscopeData {
     user?: { sign: string; name: string };
@@ -72,43 +73,112 @@ interface ModalData {
 function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorHex: string; activeDate?: string }) {
     const h = 60, w = 220;
     const points = days.map((d, i) => ({ x: (i / (days.length - 1)) * w, y: h - (d.score / 100) * h }));
-    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-    const areaD = `M 0 ${h} ${points.map(p => `L ${p.x} ${p.y}`).join(' ')} L ${w} ${h} Z`;
+    const pathD = catmullRomToBezier(points);
+    const areaD = catmullRomArea(points, h);
+
+    const todayIndex = days.findIndex(d => d.is_today);
+    const todayX = todayIndex !== -1 ? points[todayIndex].x : w / 2;
+
+    const bestPoint = points[days.reduce((bestIdx, d, i) => d.score > days[bestIdx].score ? i : bestIdx, 0)];
+    const worstPoint = points[days.reduce((worstIdx, d, i) => d.score < days[worstIdx].score ? i : worstIdx, 0)];
 
     return (
-        <svg viewBox={`-10 -10 ${w + 20} ${h + 40}`} className="w-full h-auto overflow-visible">
-            <defs>
-                <linearGradient id={`area-${colorHex.replace('#','')}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
-                    <stop offset="100%" stopColor={colorHex} stopOpacity="0.02" />
-                </linearGradient>
-            </defs>
-            {[25, 50, 75].map(v => (
-                <line key={v} x1="0" y1={h - (v / 100) * h} x2={w} y2={h - (v / 100) * h} stroke="var(--color-foreground)" strokeOpacity="0.1" strokeWidth="0.5" />
-            ))}
-            <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
-            <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            {points.map((p, i) => {
-                const d = days[i];
-                const isSelected = activeDate === d.date;
-                return (
-                    <g key={i}>
-                        {/* Static Point Representation */}
-                        {(d.is_today || isSelected) && <circle cx={p.x} cy={p.y} r="5" fill={colorHex} opacity={isSelected ? 0.15 : 0.08} />}
-                        <circle cx={p.x} cy={p.y} r={d.is_today ? 3 : 1.5} 
-                            fill={d.is_today || isSelected ? colorHex : 'transparent'} 
-                            stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
+        <div className="relative">
+            <svg viewBox={`-24 -10 ${w + 34} ${h + 40}`} className="w-full h-auto overflow-visible">
+                <defs>
+                    <linearGradient id={`area-${colorHex.replace('#','')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor={colorHex} stopOpacity="0.25" />
+                        <stop offset="100%" stopColor={colorHex} stopOpacity="0.03" />
+                    </linearGradient>
+                    <clipPath id={`reveal-${colorHex.replace('#','')}`}>
+                        <rect x="-24" y="-10" width="0" height={h + 50}>
+                            <animate attributeName="width" from="0" to={w + 40} dur="1.2s" fill="freeze" begin="0.3s" />
+                        </rect>
+                    </clipPath>
+                </defs>
+
+                {/* Y-Axis Labels & Grid */}
+                {[25, 50, 75].map(v => {
+                    const gridY = h - (v / 100) * h;
+                    return (
+                        <g key={v}>
+                            <line x1="0" y1={gridY} x2={w} y2={gridY} stroke="var(--color-foreground)" strokeOpacity="0.1" strokeWidth="0.5" />
+                            <text x="-8" y={gridY + 2} textAnchor="end" fontSize="5" fill="var(--color-foreground)" fillOpacity="0.2">{v}</text>
+                        </g>
+                    );
+                })}
+
+                {/* Past / Future Demarcation */}
+                <rect x="0" y="0" width={todayX} height={h} fill="currentColor" fillOpacity="0.02" />
+                <rect x={todayX} y="0" width={w - todayX} height={h} fill="currentColor" fillOpacity="0.01" />
+                <line x1={todayX} y1="0" x2={todayX} y2={h} stroke="currentColor" strokeOpacity="0.15" strokeDasharray="2 2" strokeWidth="0.5" />
+                <text x={todayX - 2} y="-2" textAnchor="end" fontSize="5" fill="currentColor" fillOpacity="0.3">Past</text>
+                <text x={todayX + 2} y="-2" textAnchor="start" fontSize="5" fill="currentColor" fillOpacity="0.3">Forecast</text>
+
+                <g clipPath={`url(#reveal-${colorHex.replace('#','')})`}>
+                    <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
+                    <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    {points.map((p, i) => {
+                        const d = days[i];
+                        const isSelected = activeDate === d.date;
+                        const isToday = d.is_today;
+                        const isBest = p === bestPoint;
+                        const isWorst = p === worstPoint;
+                        const showLabel = isSelected || isToday || isBest || isWorst;
                         
-                        <text x={p.x} y={p.y - 10} textAnchor="middle" 
-                            fill={isSelected ? colorHex : 'var(--color-foreground)'} 
-                            fillOpacity={isSelected ? 1 : 0.4} 
-                            fontSize="7" fontWeight="bold">{d.score}</text>
-                        
-                        {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 50} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
-                    </g>
-                );
-            })}
-        </svg>
+                        let labelY = p.y - 10;
+                        // Basic collision avoidance
+                        if (showLabel) {
+                            points.forEach((otherP, j) => {
+                                if (i !== j && Math.abs(otherP.x - p.x) < 25) {
+                                    const otherD = days[j];
+                                    const otherShow = (activeDate === otherD.date) || otherD.is_today || otherP === bestPoint || otherP === worstPoint;
+                                    if (otherShow && p.y > otherP.y) {
+                                        labelY += 15; // move down if it's the lower point
+                                    }
+                                }
+                            });
+                        }
+
+                        return (
+                            <g key={i}>
+                                {/* Static Point Representation */}
+                                {(d.is_today || isSelected) && <circle cx={p.x} cy={p.y} r="5" fill={colorHex} opacity={isSelected ? 0.15 : 0.08} />}
+                                <circle cx={p.x} cy={p.y} r={d.is_today ? 3 : 1.5} 
+                                    fill={d.is_today || isSelected ? colorHex : 'transparent'} 
+                                    stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
+                                
+                                {showLabel && (
+                                    <text x={p.x} y={labelY} textAnchor="middle" 
+                                        fill={isSelected ? colorHex : 'var(--color-foreground)'} 
+                                        fillOpacity={isSelected ? 1 : 0.4} 
+                                        fontSize="7" fontWeight="bold">{d.score}</text>
+                                )}
+                                
+                                {/* X-Axis Day Labels */}
+                                <text x={p.x} y={h + 18} textAnchor="middle" 
+                                    fill="var(--color-foreground)" 
+                                    fillOpacity={isToday ? 0.6 : 0.25} 
+                                    fontSize="6">{isToday ? 'Today' : new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' })}</text>
+
+                                {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 50} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
+                            </g>
+                        );
+                    })}
+                </g>
+            </svg>
+            
+            {/* Timeline connection bridge indicator */}
+            <div className="relative h-1 mt-0.5 mx-2 sm:mx-8">
+                {activeDate && (
+                    <div className="absolute w-1 h-1 rounded-full -top-0.5 -translate-x-1/2 transition-all duration-300"
+                         style={{ 
+                             left: `${(days.findIndex(d => d.date === activeDate) / (days.length - 1)) * 100}%`, 
+                             backgroundColor: colorHex 
+                         }} />
+                )}
+            </div>
+        </div>
     );
 }
 
@@ -773,7 +843,7 @@ export default function DailyHoroscopeCard({
                                                 <div className="px-8 h-[1px] bg-outline-variant/5 shrink-0" />
                                                 <div className="flex flex-col flex-1 min-h-0 p-4 sm:p-10 pt-2 sm:pt-4">
                                                     <div className="flex items-center justify-between mb-3 sm:mb-6 px-1 sm:px-2"><span className="text-[8px] sm:text-[11px] font-black text-foreground/20 uppercase tracking-[0.15em] sm:tracking-[0.25em]">{t('horoscope.interactiveTimeline')}</span><div className="flex gap-2 sm:gap-4"><div className="flex items-center gap-1 sm:gap-1.5"><div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-green-500/50" /><span className="text-[7px] sm:text-[9px] font-bold text-foreground/30 uppercase">{t('horoscope.high')}</span></div><div className="flex items-center gap-1 sm:gap-1.5"><div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-orange-500/50" /><span className="text-[7px] sm:text-[9px] font-bold text-foreground/30 uppercase">{t('horoscope.lowLabel')}</span></div></div></div>
-                                                    <div className="grid grid-cols-7 gap-1 sm:gap-3 mb-4 sm:mb-10 shrink-0">
+                                                    <div className="flex gap-2 sm:gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 sm:pb-0 sm:grid sm:grid-cols-7 sm:overflow-visible mb-4 sm:mb-10 shrink-0">
                                                         {forecast.days.map(day => {
                                                             const isSelected = activeDay.date === day.date;
                                                             const dateObj = new Date(day.date + 'T00:00:00');
@@ -781,11 +851,12 @@ export default function DailyHoroscopeCard({
                                                             const isHigh = day.score >= 75;
                                                             const isLow = day.score <= 45;
                                                             return (
-                                                                <motion.button key={day.date} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setExpandedDay(day.date)} className={`relative group flex flex-col items-center p-1 sm:p-4 rounded-[12px] sm:rounded-[20px] border transition-all duration-500 cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-30' : 'bg-surface/30 border-white/5 hover:border-white/20 z-10'}`} style={{ borderColor: isSelected ? activeModal.colorHex + '40' : undefined, boxShadow: isSelected ? `0 10px 30px -10px ${activeModal.colorHex}20` : undefined }}>
+                                                                <motion.button key={day.date} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setExpandedDay(day.date)} className={`relative group flex flex-col items-center snap-center shrink-0 w-[72px] sm:w-auto p-1 sm:p-4 rounded-[12px] sm:rounded-[20px] border transition-all duration-500 cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-30' : 'bg-surface/30 border-white/5 hover:border-white/20 z-10'}`} style={{ borderColor: isSelected ? activeModal.colorHex + '40' : undefined, boxShadow: isSelected ? `0 10px 30px -10px ${activeModal.colorHex}20` : undefined }}>
                                                                     {isSelected && <motion.div layoutId="activeDayBg" className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.03] pointer-events-none" />}
                                                                     <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-0.5 sm:mb-2 transition-colors ${isSelected ? '' : 'text-foreground/30 group-hover:text-foreground/60'}`} style={{ color: isSelected ? activeModal.colorHex : undefined }}>{day.is_today ? 'TOD' : fmtDay(day.date)}</span>
                                                                     <span className={`text-sm sm:text-2xl font-headline font-bold mb-0.5 sm:mb-2 transition-all ${isSelected ? 'scale-110 text-foreground' : 'text-foreground/40'}`}>{dayNum}</span>
-                                                                    <div className={`w-full h-1 rounded-full overflow-hidden bg-white/5 mt-auto relative`}><motion.div initial={{ width: 0 }} animate={{ width: `${day.score}%` }} className="absolute inset-0 rounded-full" style={{ backgroundColor: isSelected ? activeModal.colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }} /></div>
+                                                                    <div className={`w-full h-1.5 sm:h-2 rounded-full overflow-hidden bg-white/5 mt-auto relative`}><motion.div initial={{ width: 0 }} animate={{ width: `${day.score}%` }} className="absolute inset-0 rounded-full" style={{ backgroundColor: isSelected ? activeModal.colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }} /></div>
+                                                                    <span className="text-[8px] font-bold text-foreground/30 mt-0.5 sm:hidden">{day.score}</span>
                                                                     {isSelected && <motion.div layoutId="bottomIndicator" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full" style={{ backgroundColor: activeModal.colorHex }} />}
                                                                 </motion.button>
                                                             );

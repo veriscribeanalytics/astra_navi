@@ -491,7 +491,7 @@ export default function ProfileSettingsPage() {
                                         className="flex items-center justify-between p-4 rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-xl transition-colors ${formData.preferences.horoscope ? 'bg-secondary/20 text-secondary' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>
+                                            <div className={`p-2 rounded-xl transition-colors ${formData.preferences.horoscope_enabled ? 'bg-secondary/20 text-secondary' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>
                                                 <Sparkles size={18} />
                                             </div>
                                             <div className="text-left">
@@ -499,8 +499,8 @@ export default function ProfileSettingsPage() {
                                                 <p className="text-[10px] text-on-surface-variant/60">Receive daily cosmic insights</p>
                                             </div>
                                         </div>
-                                        <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.preferences.horoscope ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
-                                            <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all shadow-sm ${formData.preferences.horoscope ? 'left-6' : 'left-1'}`} />
+                                        <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.preferences.horoscope_enabled ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
+                                            <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all shadow-sm ${formData.preferences.horoscope_enabled ? 'left-6' : 'left-1'}`} />
                                         </div>
                                     </button>
 
