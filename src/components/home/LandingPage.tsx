@@ -461,7 +461,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Hero Slider Indicators - Centered at bottom */}
-                <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex justify-center gap-1.5 sm:gap-1 z-30">
+                <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex justify-center gap-0 sm:gap-0 z-30">
                     {slides.map((_, idx) => (
                         <button 
                             key={idx}
@@ -469,9 +469,16 @@ export default function LandingPage() {
                                 setActiveSlide(idx);
                                 setInteractionTick(prev => prev + 1);
                             }}
-                            className={`rounded-full transition-all duration-300 ${activeSlide === idx ? 'w-4 h-1.5 sm:w-5 sm:h-1 bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'w-1.5 h-1.5 sm:w-1 sm:h-1 bg-secondary/20 hover:bg-secondary/40'}`}
+                            className="flex items-center justify-center w-[44px] h-[44px] bg-transparent"
                             aria-label={`Go to slide ${idx + 1}`}
-                        />
+                        >
+                            <span 
+                                className={`block rounded-full ${activeSlide === idx 
+                                    ? 'w-5 h-[6px] bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' 
+                                    : 'w-[6px] h-[6px] bg-secondary/20 hover:bg-secondary/40'
+                                }`} 
+                            />
+                        </button>
                     ))}
                 </div>
             </section>
