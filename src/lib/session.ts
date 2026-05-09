@@ -108,12 +108,7 @@ export async function getAuthContext(req: Request | NextRequest) {
   
   if (!JWT_SECRET) {
     console.error("[getAuthContext] CRITICAL: No AUTH_SECRET or NEXTAUTH_SECRET env var set! Cannot decrypt JWT cookie. All authenticated API calls will fail with 401.");
-    return {
-      session,
-      token: null,
-      user: session.user,
-      accessToken: undefined,
-    };
+    return null;
   }
 
   // Find the session token from the request cookies
@@ -121,12 +116,8 @@ export async function getAuthContext(req: Request | NextRequest) {
   
   if (!sessionToken) {
     console.error("[getAuthContext] No session cookie found in request. Tried:", SESSION_COOKIE_NAMES.join(', '));
-    return {
-      session,
-      token: null,
-      user: session.user,
-      accessToken: undefined,
-    };
+    // Return null so API routes return 401 early instead of making backend calls without accessToken
+    return null;
   }
 
   // Decode the JWT using the correct salt (= cookie name, as per Auth.js convention)
@@ -138,8 +129,11 @@ export async function getAuthContext(req: Request | NextRequest) {
   
   if (!token) {
     console.error("[getAuthContext] JWT decode returned null! Cookie found as:", sessionToken.cookieName, "but decryption failed. AUTH_SECRET may not match the one used to encrypt the cookie.");
+    return null;
   } else if (!token.accessToken) {
     console.error("[getAuthContext] JWT decoded but accessToken is missing! Token keys:", Object.keys(token));
+    // Return null so API routes return 401 early instead of making backend calls without accessToken
+    return null;
   }
   
   return {

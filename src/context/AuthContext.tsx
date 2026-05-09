@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import { clientFetch } from '@/lib/apiClient';
+import { clientFetch, resetAuthGrace } from '@/lib/apiClient';
 
 interface User {
     id?: string;
@@ -152,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             fetchInProgressRef.current = false;
             prevEmailRef.current = null;
             profileRetryCount.current = 0;
+            resetAuthGrace();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, status, profileFetched]); // Removed user from dependencies

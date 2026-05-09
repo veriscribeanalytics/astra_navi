@@ -132,30 +132,44 @@ const ConsultClient: React.FC = () => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
+      let buffer = '';
 
       if (reader) {
+        let streamDone = false;
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
           
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const dataStr = line.slice(6).trim();
-              if (dataStr === '[DONE]') break;
-              try {
-                const data = JSON.parse(dataStr);
-                if (data.token) {
-                  fullText += data.token;
-                  setReadingText(fullText);
-                } else if (data.error) {
-                  throw new Error(data.error);
-                }
-              } catch { /* partial json */ }
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            
+            const dataStr = trimmed.slice(6);
+            if (dataStr === '[DONE]') {
+              streamDone = true;
+              break;
+            }
+            
+            let data;
+            try {
+              data = JSON.parse(dataStr);
+            } catch {
+              continue;
+            }
+            
+            if (data.token) {
+              fullText += data.token;
+              setReadingText(fullText);
+            } else if (data.error) {
+              throw new Error(data.error);
             }
           }
+          
+          if (streamDone) break;
         }
       }
     } catch (err: unknown) {

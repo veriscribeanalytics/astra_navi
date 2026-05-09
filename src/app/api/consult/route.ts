@@ -39,9 +39,8 @@ export async function POST(req: NextRequest) {
     // Pass through SSE stream
     return new Response(response.body, {
       headers: {
-        'Content-Type': 'text/event-stream',
+        'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
       },
     });
   } catch (error) {

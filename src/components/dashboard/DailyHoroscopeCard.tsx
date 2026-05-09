@@ -119,37 +119,46 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
                     <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
                     <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     {(() => {
-                        // Pre-compute which labels are visible (priority: selected > today > best > worst)
-                        // and suppress labels that would collide with a higher-priority label
+                        // Pre-compute which labels are visible (priority: selected > today > best > worst > normal)
+                        // and reposition labels that would collide with a higher-priority label
                         const labelPriority = (idx: number) => {
                             const d = days[idx];
                             const p = points[idx];
-                            if (activeDate === d.date) return 4;
-                            if (d.is_today) return 3;
-                            if (p === bestPoint) return 2;
-                            if (p === worstPoint) return 1;
-                            return 0;
+                            if (activeDate === d.date) return 5;
+                            if (d.is_today) return 4;
+                            if (p === bestPoint) return 3;
+                            if (p === worstPoint) return 2;
+                            return 1; // All points are label-eligible
                         };
-                        const labeledIndices = points
-                            .map((_, i) => i)
-                            .filter(i => labelPriority(i) > 0);
 
-                        // For each labeled point, check if a higher-priority neighbor is too close
-                        const visibleLabels = new Set<number>();
-                        const MIN_DIST_X = 22;
-                        const MIN_DIST_Y = 10;
-                        // Sort by priority descending so higher-priority wins
-                        const sorted = [...labeledIndices].sort((a, b) => labelPriority(b) - labelPriority(a));
+                        // Compute label position for each point: default above, flip below on collision
+                        const LABEL_OFFSET = 10;
+                        const MIN_DIST_X = 16;
+                        const MIN_DIST_Y = 7;
+                        const sorted = points
+                            .map((_, i) => i)
+                            .sort((a, b) => labelPriority(b) - labelPriority(a));
                         const placed: { x: number; y: number; idx: number }[] = [];
+                        const labelPositions = new Map<number, number>(); // idx → labelY
                         for (const idx of sorted) {
                             const p = points[idx];
-                            const labelY = p.y - 10;
-                            const collides = placed.some(pl => 
-                                Math.abs(pl.x - p.x) < MIN_DIST_X && Math.abs(pl.y - labelY) < MIN_DIST_Y
+                            const aboveY = p.y - LABEL_OFFSET;
+                            const belowY = p.y + LABEL_OFFSET + 4;
+                            const collidesAbove = placed.some(pl =>
+                                Math.abs(pl.x - p.x) < MIN_DIST_X && Math.abs(pl.y - aboveY) < MIN_DIST_Y
                             );
-                            if (!collides) {
-                                visibleLabels.add(idx);
-                                placed.push({ x: p.x, y: labelY, idx });
+                            if (!collidesAbove) {
+                                labelPositions.set(idx, aboveY);
+                                placed.push({ x: p.x, y: aboveY, idx });
+                            } else {
+                                const collidesBelow = placed.some(pl =>
+                                    Math.abs(pl.x - p.x) < MIN_DIST_X && Math.abs(pl.y - belowY) < MIN_DIST_Y
+                                );
+                                if (!collidesBelow) {
+                                    labelPositions.set(idx, belowY);
+                                    placed.push({ x: p.x, y: belowY, idx });
+                                }
+                                // If both above and below collide, skip this label
                             }
                         }
 
@@ -159,6 +168,7 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
                             const isToday = d.is_today;
                             const isBest = p === bestPoint;
                             const isWorst = p === worstPoint;
+                            const labelY = labelPositions.get(i);
 
                             return (
                                 <g key={i}>
@@ -168,10 +178,10 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
                                         fill={d.is_today || isSelected ? colorHex : 'transparent'} 
                                         stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
                                     
-                                    {visibleLabels.has(i) && (
-                                        <text x={p.x} y={p.y - 10} textAnchor="middle" 
+                                    {labelY !== undefined && (
+                                        <text x={p.x} y={labelY} textAnchor="middle" 
                                             fill={isSelected ? colorHex : 'var(--color-foreground)'} 
-                                            fillOpacity={isSelected ? 1 : 0.4} 
+                                            fillOpacity={isSelected ? 1 : isToday || isBest || isWorst ? 0.5 : 0.35} 
                                             fontSize="7" fontWeight="bold">{d.score}</text>
                                     )}
 
@@ -183,16 +193,8 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
                 </g>
             </svg>
             
-            {/* Timeline connection bridge indicator */}
-            <div className="relative h-1 mt-0.5 mx-2 sm:mx-8">
-                {activeDate && (
-                    <div className="absolute w-1 h-1 rounded-full -top-0.5 -translate-x-1/2 transition-all duration-300"
-                         style={{ 
-                             left: `${(days.findIndex(d => d.date === activeDate) / (days.length - 1)) * 100}%`, 
-                             backgroundColor: colorHex 
-                         }} />
-                )}
-            </div>
+            {/* Timeline connection bridge */}
+            <div className="relative h-1 mt-0.5 mx-2 sm:mx-8" />
         </div>
     );
 }
@@ -872,7 +874,7 @@ export default function DailyHoroscopeCard({
                                                                     <span className={`text-sm sm:text-2xl font-headline font-bold mb-0.5 sm:mb-2 transition-all ${isSelected ? 'scale-110 text-foreground' : 'text-foreground/40'}`}>{dayNum}</span>
                                                                     <div className={`w-full h-1.5 sm:h-2 rounded-full overflow-hidden bg-white/5 mt-auto relative`}><motion.div initial={{ width: 0 }} animate={{ width: `${day.score}%` }} className="absolute inset-0 rounded-full" style={{ backgroundColor: isSelected ? activeModal.colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }} /></div>
                                                                     <span className="text-[8px] font-bold text-foreground/30 mt-0.5 sm:hidden">{day.score}</span>
-                                                                    {isSelected && <motion.div layoutId="bottomIndicator" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full" style={{ backgroundColor: activeModal.colorHex }} />}
+
                                                                 </motion.button>
                                                             );
                                                         })}
