@@ -322,7 +322,24 @@
     "qWeekly": "साप्ताहिक पूर्वानुमान?",
     "qLove": "प्रेम अनुकूलता?",
     "qWealth": "धन का समय?",
-    "qSecret": "एक रहस्य पूछें"
+    "qSecret": "एक रहस्य पूछें",
+    "tabChat": "चैट",
+    "tabHistory": "इतिहास",
+    "tabCosmic": "कॉस्मिक",
+    "deepQ1": "मेरे साप्ताहिक पूर्वानुमान का विस्तृत विश्लेषण करें",
+    "deepQ2": "आज मेरा करियर स्कोर वर्तमान स्तर पर क्यों है?",
+    "deepQ3": "मेरे दैनिक स्वास्थ्य स्कोर को बढ़ाने के लिए एक त्वरित उपाय दें",
+    "askNaviPlaceholder": "नवी से कुछ भी पूछें...",
+    "poweredByVedicAi": "वैदिक एआई द्वारा संचालित",
+    "cosmicNakshatra": "नक्षत्र",
+    "cosmicLord": "स्वामी",
+    "cosmicActiveDasha": "सक्रिय दशा",
+    "cosmicLagna": "लग्न",
+    "defaultDasha": "शनि",
+    "soulmateMatch": "मिलान",
+    "tithi": "तिथि",
+    "yoga": "योग",
+    "startJourneyDesc": "आपकी ब्रह्मांडीय यात्रा यहीं से शुरू होती है। यहाँ देखने के लिए नवी से परामर्श करें।"
   },
   "horoscope": {
     "yourDayToday": "आपका आज का दिन",
@@ -358,7 +375,18 @@
     "peakLabel": "शीर्ष",
     "trendLabel": "प्रवृत्ति",
     "high": "उच्च",
-    "lowLabel": "कम"
+    "lowLabel": "कम",
+    "categoryCareer": "करियर",
+    "categoryHealth": "स्वास्थ्य",
+    "categoryLove": "प्रेम",
+    "categoryFinance": "वित्त",
+    "categoryGeneral": "सामान्य",
+    "weeklyForecast": "साप्ताहिक पूर्वानुमान",
+    "past": "पिछला",
+    "forecast": "पूर्वानुमान",
+    "serviceUnavailable": "सेवा अस्थायी रूप से अनुपलब्ध",
+    "todaysHighlightMsg": "आपका {label} स्कोर प्रभावशाली {score}% है",
+    "7DayTrajectory": "7-दिन का प्रक्षेपपथ"
   },
   "login": {
     "inscribeIdentity": "पहचान दर्ज करें",
@@ -429,6 +457,32 @@
     "deleteError": "बातचीत हटाने में विफल। कृपया पुनः प्रयास करें।",
     "workInProgressTitle": "प्रगति पर कार्य",
     "workInProgressDesc": "यह सुविधा अभी विकास के अधीन है। हम आपको एक अद्भुत अनुभव प्रदान करने के लिए कड़ी मेहनत कर रहे हैं!"
+  },
+  "healthForecast": {
+    "title": "स्वास्थ्य पूर्वानुमान",
+    "subtitle": "पिछले 3 दिनों की तुलना करें · आज · अगले 3 दिन",
+    "overviewTitle": "7-दिन का स्वास्थ्य अवलोकन",
+    "avgScore": "औसत स्कोर",
+    "past": "पिछला",
+    "forecast": "पूर्वानुमान",
+    "today": "आज",
+    "auraPeak": "आभा शिखर:",
+    "vedaLull": "वेद शांति:",
+    "todayLabel": "· आज",
+    "dominant": "प्रमुख:",
+    "planetaryTransits": "ग्रह गोचर",
+    "loadError": "स्वास्थ्य पूर्वानुमान लोड करने में विफल",
+    "retry": "पुनः प्रयास"
+  },
+  "topicPills": {
+    "careerFinance": "करियर और वित्त",
+    "loveMarriage": "प्रेम और विवाह",
+    "propertyHome": "संपत्ति और घर",
+    "healthWellness": "स्वास्थ्य और कल्याण",
+    "travelRelocation": "यात्रा और पुनर्वास",
+    "remediesMantras": "उपाय और मंत्र",
+    "muhuratTiming": "मुहूर्त और समय",
+    "currentTransits": "वर्तमान गोचर"
   },
   "signs": {
     "aries": "मेष",

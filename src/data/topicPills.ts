@@ -1,15 +1,15 @@
 export interface TopicPill {
   icon: string;
-  label: string;
+  labelKey: string;
 }
 
 export const topicPills: TopicPill[] = [
-  { icon: '💼', label: 'Career & Finance' },
-  { icon: '💑', label: 'Love & Marriage' },
-  { icon: '🏠', label: 'Property & Home' },
-  { icon: '🌿', label: 'Health & Wellness' },
-  { icon: '✈️', label: 'Travel & Relocation' },
-  { icon: '📿', label: 'Remedies & Mantras' },
-  { icon: '📅', label: 'Muhurat & Timing' },
-  { icon: '🪐', label: 'Current Transits' },
+  { icon: '💼', labelKey: 'topicPills.careerFinance' },
+  { icon: '💑', labelKey: 'topicPills.loveMarriage' },
+  { icon: '🏠', labelKey: 'topicPills.propertyHome' },
+  { icon: '🌿', labelKey: 'topicPills.healthWellness' },
+  { icon: '✈️', labelKey: 'topicPills.travelRelocation' },
+  { icon: '📿', labelKey: 'topicPills.remediesMantras' },
+  { icon: '📅', labelKey: 'topicPills.muhuratTiming' },
+  { icon: '🪐', labelKey: 'topicPills.currentTransits' },
 ];

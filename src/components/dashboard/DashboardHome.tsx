@@ -22,18 +22,18 @@ import { useTranslation } from "@/hooks";
 import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 import { topicPills } from '@/data/topicPills';
 
-function formatRelativeTime(date: Date, t: (key: string) => string) {
+function formatRelativeTime(date: Date, t: (key: string) => string, language?: string) {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
     if (diffInSeconds < 60) return t('dashboard.justNow');
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}${t('dashboard.minutesAgo')}`;
+    if (diffInMinutes < 60) return `${diffInMinutes} ${t('dashboard.minutesAgo')}`;
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}${t('dashboard.hoursAgo')}`;
+    if (diffInHours < 24) return `${diffInHours} ${t('dashboard.hoursAgo')}`;
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}${t('dashboard.daysAgo')}`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diffInDays < 7) return `${diffInDays} ${t('dashboard.daysAgo')}`;
+    return date.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { month: 'short', day: 'numeric' });
 }
 
 // ─── Data Interfaces ─────────────────────────────
@@ -373,10 +373,10 @@ export default function DashboardHome() {
                         }
 
                         if (dashaName && typeof dashaName === 'object') {
-                            dashaName = dashaName.planet || dashaName.name || dashaName.value || "Saturn";
+                            dashaName = dashaName.planet || dashaName.name || dashaName.value || t('dashboard.defaultDasha');
                         }
 
-                        stats.activeDasha = typeof dashaName === 'string' ? dashaName : (dashaName ? String(dashaName) : "Saturn");
+                        stats.activeDasha = typeof dashaName === 'string' ? dashaName : (dashaName ? String(dashaName) : t('dashboard.defaultDasha'));
                         stats.dashaRemaining = typeof dashaRemaining === 'string' ? dashaRemaining : (dashaRemaining ? String(dashaRemaining) : undefined);
                     }
                 }
@@ -392,7 +392,7 @@ export default function DashboardHome() {
                 console.error("Error setting kundli stats from user object:", error);
             }
         }
-    }, [user?.email, user?.astrologyData]);
+    }, [user?.email, user?.astrologyData, t]);
 
     // Auto-trigger sign calculation if user has birth details but no signs.
     useEffect(() => {
@@ -533,9 +533,9 @@ export default function DashboardHome() {
                         <Card padding="none" className="!rounded-[24px] sm:!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-[500px] sm:h-full min-h-0">
                             <div className="p-2 border-b border-white/5 flex items-center gap-1 shrink-0">
                                 {[
-                                    { id: 'chat' as const, label: 'Chat', icon: <MessageSquare className="w-4 h-4" /> },
-                                    { id: 'history' as const, label: 'History', icon: <Users className="w-4 h-4" /> },
-                                    { id: 'cosmic' as const, label: 'Cosmic', icon: <Orbit className="w-4 h-4" /> }
+                                    { id: 'chat' as const, label: t('dashboard.tabChat'), icon: <MessageSquare className="w-4 h-4" /> },
+                                    { id: 'history' as const, label: t('dashboard.tabHistory'), icon: <Users className="w-4 h-4" /> },
+                                    { id: 'cosmic' as const, label: t('dashboard.tabCosmic'), icon: <Orbit className="w-4 h-4" /> }
                                 ].map((tab) => (
                                     <button 
                                         key={tab.id}
@@ -601,11 +601,11 @@ export default function DashboardHome() {
                                                                 {topicPills.map((topic, i) => (
                                                                     <button 
                                                                         key={i} 
-                                                                        onClick={() => handleSendMessage(topic.label)}
+                                                                        onClick={() => handleSendMessage(t(topic.labelKey))}
                                                                         className="flex items-center gap-2 py-2 px-3 rounded-xl bg-surface-variant/20 border border-white/5 text-[11px] font-bold text-foreground/70 hover:text-secondary hover:border-secondary/30 hover:bg-surface-variant/40 transition-all text-left group"
                                                                     >
                                                                         <span className="text-base shrink-0 group-hover:scale-110 transition-transform">{topic.icon}</span>
-                                                                        <span className="leading-tight truncate">{topic.label}</span>
+                                                                        <span className="leading-tight truncate">{t(topic.labelKey)}</span>
                                                                     </button>
                                                                 ))}
                                                             </div>
@@ -618,9 +618,9 @@ export default function DashboardHome() {
                                                             </div>
                                                             <div className="flex flex-col gap-1.5 w-full">
                                                                 {[
-                                                                    { q: "Analyze my weekly forecast in detail", icon: <Sparkles className="w-3.5 h-3.5" /> },
-                                                                    { q: "Why is my career score at its current level today?", icon: <Briefcase className="w-3.5 h-3.5" /> },
-                                                                    { q: "Give me a quick remedy to boost my daily health score", icon: <Activity className="w-3.5 h-3.5" /> }
+                                                                    { q: t('dashboard.deepQ1'), icon: <Sparkles className="w-3.5 h-3.5" /> },
+                                                                    { q: t('dashboard.deepQ2'), icon: <Briefcase className="w-3.5 h-3.5" /> },
+                                                                    { q: t('dashboard.deepQ3'), icon: <Activity className="w-3.5 h-3.5" /> }
                                                                 ].map((item, i) => (
                                                                     <button 
                                                                         key={i}
@@ -683,7 +683,7 @@ export default function DashboardHome() {
                                                                     }
                                                                 }
                                                             }}
-                                                            placeholder="Ask Navi anything..."
+                                                            placeholder={t('dashboard.askNaviPlaceholder')}
                                                             className="flex-1 bg-transparent border-none outline-none text-[12px] font-medium text-foreground placeholder:text-foreground/20 resize-none min-h-[20px] max-h-[70px] py-1 pl-1"
                                                             rows={1}
                                                         />
@@ -702,7 +702,7 @@ export default function DashboardHome() {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center justify-between px-1">
-                                                    <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">Powered by Vedic AI</p>
+                                                    <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">{t('dashboard.poweredByVedicAi')}</p>
                                                     <Link href={activeChat ? `/chat?id=${activeChat.id}` : "/chat"} className="text-[11px] font-bold text-secondary uppercase tracking-widest hover:text-amber-500 transition-colors flex items-center gap-1 group">
                                                         {t('dashboard.fullInterface')} <ChevronRight className="w-3 h-3 text-secondary group-hover:translate-x-0.5 transition-transform" />
                                                     </Link>
@@ -736,7 +736,7 @@ export default function DashboardHome() {
                                                             <div className="flex justify-between items-start gap-4">
                                                                 <div className="flex-1 min-w-0">
                                                                     <p className="text-[13px] font-bold text-foreground/80 group-hover:text-foreground truncate mb-1">{chat.title || t('dashboard.newConsultation')}</p>
-                                                                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{formatRelativeTime(new Date(chat.updatedAt), t)}</p>
+                                                                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{formatRelativeTime(new Date(chat.updatedAt), t, language)}</p>
                                                                 </div>
                                                                 <ChevronRight className="w-3.5 h-3.5 text-foreground/20 group-hover:text-secondary mt-1" />
                                                             </div>
@@ -750,7 +750,7 @@ export default function DashboardHome() {
                                                         <Users className="w-8 h-8 text-foreground/10" />
                                                     </div>
                                                     <p className="text-sm font-headline font-bold text-foreground/60 mb-1">{t('dashboard.noHistoryYet')}</p>
-                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">Your cosmic journey starts here. Consult with Navi to see it here.</p>
+                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">{t('dashboard.startJourneyDesc')}</p>
                                                     <Button onClick={() => setSidebarTab('chat')} variant="secondary" size="sm" className="mt-6 rounded-full text-[10px] font-bold uppercase tracking-widest">{t('dashboard.startChatting')}</Button>
                                                 </div>
                                             )}
@@ -776,7 +776,7 @@ export default function DashboardHome() {
                                                     </div>
                                                     {[
                                                         { 
-                                                            l: "Nakshatra", 
+                                                            l: t('dashboard.cosmicNakshatra'), 
                                                             v: kundliStats.nakshatra, 
                                                             icon: kundliStats.nakshatra ? (
                                                                 <div className="relative w-full h-full overflow-hidden rounded-lg">
@@ -792,9 +792,9 @@ export default function DashboardHome() {
                                                                 </div>
                                                             ) : <Sparkles className="w-3.5 h-3.5" />
                                                         },
-                                                        { l: "Lord", v: kundliStats.nakshatraLord, icon: <Orbit className="w-3.5 h-3.5" /> },
-                                                        { l: "Active Dasha", v: kundliStats.activeDasha, icon: <TrendingUp className="w-3.5 h-3.5" />, sub: kundliStats.dashaRemaining },
-                                                        { l: "Lagna", v: kundliStats.lagnaSign, icon: <Globe className="w-3.5 h-3.5" /> }
+                                                        { l: t('dashboard.cosmicLord'), v: kundliStats.nakshatraLord, icon: <Orbit className="w-3.5 h-3.5" /> },
+                                                        { l: t('dashboard.cosmicActiveDasha'), v: kundliStats.activeDasha, icon: <TrendingUp className="w-3.5 h-3.5" />, sub: kundliStats.dashaRemaining },
+                                                        { l: t('dashboard.cosmicLagna'), v: kundliStats.lagnaSign, icon: <Globe className="w-3.5 h-3.5" /> }
                                                     ].map((s, i) => s.v && (
                                                         <div key={i} className="flex items-center gap-4 p-4 rounded-[24px] bg-surface-variant/20 border border-white/5">
                                                             <div className="w-10 h-10 rounded-xl bg-transparent flex items-center justify-center text-secondary shrink-0 overflow-hidden">
@@ -895,7 +895,7 @@ export default function DashboardHome() {
                                                     {kundliLoading ? (
                                                         <Skeleton height={24} width={80} className="mt-1" />
                                                     ) : (
-                                                        (typeof kundliStats?.activeDasha === 'string' ? kundliStats.activeDasha.split('-')[0] : (kundliStats?.activeDasha || "Saturn"))
+                                                        (typeof kundliStats?.activeDasha === 'string' ? kundliStats.activeDasha.split('-')[0] : (kundliStats?.activeDasha || t('dashboard.defaultDasha')))
                                                     )}
                                                 </div>
                                             </div>
@@ -925,7 +925,7 @@ export default function DashboardHome() {
                                     <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-10">
                                         <div className="text-center">
                                             <div className="text-xl sm:text-2xl font-bold text-primary">28</div>
-                                            <div className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Match</div>
+                                            <div className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">{t('dashboard.soulmateMatch')}</div>
                                         </div>
                                         <div className="w-px h-10 bg-white/10" />
                                         <div className="flex -space-x-3">
@@ -953,11 +953,11 @@ export default function DashboardHome() {
                                     <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.realTimeTithi')}</p>
                                     <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-10">
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                            <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">Tithi</div>
+                                            <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">{t('dashboard.tithi')}</div>
                                             <div className="text-xs font-bold text-primary truncate">Pratipada</div>
                                         </div>
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                            <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">Yoga</div>
+                                            <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">{t('dashboard.yoga')}</div>
                                             <div className="text-xs font-bold text-primary truncate">Siddha</div>
                                         </div>
                                     </div>

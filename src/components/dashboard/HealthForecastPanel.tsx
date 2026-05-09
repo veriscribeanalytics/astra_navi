@@ -5,6 +5,7 @@ import Card from '@/components/ui/Card';
 import { Activity, ChevronDown, AlertTriangle, X, Info } from 'lucide-react';
 import { clientFetch } from '@/lib/apiClient';
 import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
+import { useTranslation } from '@/hooks';
 
 interface DayForecast {
     date: string;
@@ -32,10 +33,10 @@ interface HealthForecastData {
     };
 }
 
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string, language?: string) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
-    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
 const getScoreColor = (score: number) => {
@@ -51,6 +52,7 @@ const getTrendIcon = (trend: string) => {
 };
 
 export default function HealthForecastPanel() {
+    const { t, language } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [data, setData] = useState<HealthForecastData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -102,8 +104,8 @@ export default function HealthForecastPanel() {
                         <Activity className={`w-4.5 h-4.5 ${isOpen ? 'text-green-400' : 'text-foreground/40'}`} />
                     </div>
                     <div className="text-left">
-                        <h4 className="text-[13px] font-bold text-foreground leading-tight">Health Forecast</h4>
-                        <p className="text-[10px] text-foreground/30 font-medium">Compare last 3 days · Today · Next 3 days</p>
+                        <h4 className="text-[13px] font-bold text-foreground leading-tight">{t('healthForecast.title')}</h4>
+                        <p className="text-[10px] text-foreground/30 font-medium">{t('healthForecast.subtitle')}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -127,7 +129,7 @@ export default function HealthForecastPanel() {
                                 <div>
                                     <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
                                         <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
-                                        <h3 className="text-[10px] sm:text-[12px] font-bold text-green-400 uppercase tracking-[0.15em] sm:tracking-[0.2em]">7-Day Health Overview</h3>
+                                        <h3 className="text-[10px] sm:text-[12px] font-bold text-green-400 uppercase tracking-[0.15em] sm:tracking-[0.2em]">{t('healthForecast.overviewTitle')}</h3>
                                     </div>
                                     <p className="text-[9px] sm:text-[11px] text-foreground/35 font-medium">
                                         {data.moon_sign} Moon · {data.lagna_sign} Ascendant · {data.active_dasha}
@@ -136,7 +138,7 @@ export default function HealthForecastPanel() {
                                 <div className="flex items-center gap-2 sm:gap-4">
                                     <div className="text-center">
                                         <span className="text-lg sm:text-2xl font-headline font-bold text-green-400 leading-none">{data.summary.average_score}</span>
-                                        <p className="text-[7px] sm:text-[9px] text-foreground/25 font-bold uppercase tracking-widest">Avg Score</p>
+                                        <p className="text-[7px] sm:text-[9px] text-foreground/25 font-bold uppercase tracking-widest">{t('healthForecast.avgScore')}</p>
                                     </div>
                                     <div className="text-center">
                                         <span className="text-sm sm:text-lg leading-none">{getTrendIcon(data.summary.trend)}</span>
@@ -188,8 +190,8 @@ export default function HealthForecastPanel() {
                                                     <line x1={todayX} y1="0" x2={todayX} y2="100" stroke="#4fd1ed" strokeOpacity="0.15" strokeDasharray="2 2" strokeWidth="0.5" />
                                                     
                                                     {/* Tiny demarc labels (placed slightly below to avoid cluttering top) */}
-                                                    <text x={todayX - 2} y="15" textAnchor="end" fontSize="4" fill="#4fd1ed" fillOpacity="0.3">Past</text>
-                                                    <text x={todayX + 2} y="15" textAnchor="start" fontSize="4" fill="#4fd1ed" fillOpacity="0.3">Forecast</text>
+                                                    <text x={todayX - 2} y="15" textAnchor="end" fontSize="4" fill="#4fd1ed" fillOpacity="0.3">{t('healthForecast.past')}</text>
+                                                    <text x={todayX + 2} y="15" textAnchor="start" fontSize="4" fill="#4fd1ed" fillOpacity="0.3">{t('healthForecast.forecast')}</text>
 
 
                                                     {/* Area Fill */}
@@ -253,7 +255,7 @@ export default function HealthForecastPanel() {
                                                                     fill={day.is_today ? '#4fd1ed' : 'currentColor'}
                                                                     fillOpacity={day.is_today ? 1 : 0.4}
                                                                 >
-                                                                    {day.is_today ? 'Today' : new Date(day.date + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' })}
+                                                                    {day.is_today ? t('healthForecast.today') : new Date(day.date + 'T00:00:00').toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en', { weekday: 'short' })}
                                                                 </text>
                                                                 <text x={p.x} y="120" textAnchor="middle" 
                                                                     fontSize="5" fontWeight="normal"
@@ -284,13 +286,13 @@ export default function HealthForecastPanel() {
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-8 sm:mt-14 pt-3 sm:pt-4 border-t border-outline-variant/8">
                                 <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-cyan-400/5 border border-cyan-400/10">
                                     <div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(79,209,237,0.5)]" />
-                                    <span className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Aura Peak:</span>
-                                    <span className="text-[8px] sm:text-[10px] font-bold text-cyan-400">{formatDate(data.summary.best_day)}</span>
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{t('healthForecast.auraPeak')}</span>
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-cyan-400">{formatDate(data.summary.best_day, language)}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-amber-400/5 border border-amber-400/10">
                                     <div className="w-1 sm:w-1.5 sm:h-1.5 h-1 rounded-full bg-amber-400 shadow-[0_0_5px_rgba(251,191,36,0.5)]" />
-                                    <span className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Veda Lull:</span>
-                                    <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">{formatDate(data.summary.worst_day)}</span>
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{t('healthForecast.vedaLull')}</span>
+                                    <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">{formatDate(data.summary.worst_day, language)}</span>
                                 </div>
                             </div>
                         </div>
@@ -309,9 +311,9 @@ export default function HealthForecastPanel() {
                                             </div>
                                             <div>
                                                 <h5 className="text-[11px] sm:text-[13px] font-bold text-foreground leading-tight">
-                                                    {formatDate(day.date)} {day.is_today && <span className="text-green-400 text-[9px] sm:text-[10px] ml-1">· TODAY</span>}
+                                                    {formatDate(day.date, language)} {day.is_today && <span className="text-green-400 text-[9px] sm:text-[10px] ml-1">{t('healthForecast.todayLabel')}</span>}
                                                 </h5>
-                                                <p className="text-[9px] sm:text-[10px] text-foreground/30">Dominant: {day.dominant_planet}</p>
+                                                <p className="text-[9px] sm:text-[10px] text-foreground/30">{t('healthForecast.dominant')} {day.dominant_planet}</p>
                                             </div>
                                         </div>
                                         <button onClick={() => setExpandedDay(null)} className="text-foreground/20 hover:text-foreground/40">
@@ -348,7 +350,7 @@ export default function HealthForecastPanel() {
 
                                     {/* Transit Grid */}
                                     <div className="mt-2">
-                                        <p className="text-[8px] sm:text-[9px] font-bold text-foreground/20 uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-1.5 sm:mb-2">Planetary Transits</p>
+                                        <p className="text-[8px] sm:text-[9px] font-bold text-foreground/20 uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-1.5 sm:mb-2">{t('healthForecast.planetaryTransits')}</p>
                                         <div className="flex flex-wrap gap-1 sm:gap-1.5">
                                             {Object.entries(day.transits).map(([planet, transit]) => (
                                                 <span key={planet} className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-surface border border-outline-variant/8">
@@ -371,10 +373,10 @@ export default function HealthForecastPanel() {
                         <div className="flex items-center gap-3">
                             <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
                             <div>
-                                <p className="text-[12px] font-bold text-red-400">Failed to load health forecast</p>
+                                <p className="text-[12px] font-bold text-red-400">{t('healthForecast.loadError')}</p>
                                 <p className="text-[11px] text-foreground/40">{error}</p>
                             </div>
-                            <button onClick={fetchForecast} className="ml-auto text-[10px] font-bold text-secondary uppercase tracking-widest hover:text-white transition-colors">Retry</button>
+                            <button onClick={fetchForecast} className="ml-auto text-[10px] font-bold text-secondary uppercase tracking-widest hover:text-white transition-colors">{t('healthForecast.retry')}</button>
                         </div>
                     </Card>
                 )}

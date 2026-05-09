@@ -322,7 +322,24 @@
     "qWeekly": "Weekly forecast?",
     "qLove": "Love compatibility?",
     "qWealth": "Wealth timing?",
-    "qSecret": "Ask a secret"
+    "qSecret": "Ask a secret",
+    "tabChat": "Chat",
+    "tabHistory": "History",
+    "tabCosmic": "Cosmic",
+    "deepQ1": "Analyze my weekly forecast in detail",
+    "deepQ2": "Why is my career score at its current level today?",
+    "deepQ3": "Give me a quick remedy to boost my daily health score",
+    "askNaviPlaceholder": "Ask Navi anything...",
+    "poweredByVedicAi": "Powered by Vedic AI",
+    "cosmicNakshatra": "Nakshatra",
+    "cosmicLord": "Lord",
+    "cosmicActiveDasha": "Active Dasha",
+    "cosmicLagna": "Lagna",
+    "defaultDasha": "Saturn",
+    "soulmateMatch": "Match",
+    "tithi": "Tithi",
+    "yoga": "Yoga",
+    "startJourneyDesc": "Your cosmic journey starts here. Consult with Navi to see it here."
   },
   "horoscope": {
     "yourDayToday": "Your Day Today",
@@ -358,7 +375,18 @@
     "peakLabel": "Peak",
     "trendLabel": "Trend",
     "high": "High",
-    "lowLabel": "Low"
+    "lowLabel": "Low",
+    "categoryCareer": "Career",
+    "categoryHealth": "Health",
+    "categoryLove": "Love",
+    "categoryFinance": "Finance",
+    "categoryGeneral": "General",
+    "weeklyForecast": "Weekly Forecast",
+    "past": "PAST",
+    "forecast": "FORECAST",
+    "serviceUnavailable": "Service Temporarily Unavailable",
+    "todaysHighlightMsg": "Your {label} score is at an impressive {score}%",
+    "7DayTrajectory": "7-Day Trajectory"
   },
   "login": {
     "inscribeIdentity": "Inscribe Identity",
@@ -433,6 +461,32 @@
     "deleteError": "Failed to delete conversation. Please try again.",
     "workInProgressTitle": "Work in Progress",
     "workInProgressDesc": "This feature is currently under development. We're working hard to bring you an amazing experience!"
+  },
+  "healthForecast": {
+    "title": "Health Forecast",
+    "subtitle": "Compare last 3 days · Today · Next 3 days",
+    "overviewTitle": "7-Day Health Overview",
+    "avgScore": "Avg Score",
+    "past": "Past",
+    "forecast": "Forecast",
+    "today": "Today",
+    "auraPeak": "Aura Peak:",
+    "vedaLull": "Veda Lull:",
+    "todayLabel": "· TODAY",
+    "dominant": "Dominant:",
+    "planetaryTransits": "Planetary Transits",
+    "loadError": "Failed to load health forecast",
+    "retry": "Retry"
+  },
+  "topicPills": {
+    "careerFinance": "Career & Finance",
+    "loveMarriage": "Love & Marriage",
+    "propertyHome": "Property & Home",
+    "healthWellness": "Health & Wellness",
+    "travelRelocation": "Travel & Relocation",
+    "remediesMantras": "Remedies & Mantras",
+    "muhuratTiming": "Muhurat & Timing",
+    "currentTransits": "Current Transits"
   },
   "signs": {
     "aries": "Aries",

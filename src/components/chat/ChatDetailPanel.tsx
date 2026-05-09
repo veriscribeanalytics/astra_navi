@@ -10,6 +10,7 @@ import { X, Lock, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { topicPills } from '@/data/topicPills';
+import { useTranslation } from '@/hooks';
 
 /* ---------- Chart Rating Display ---------- */
 const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
@@ -63,6 +64,7 @@ const KundliGraphic: React.FC = () => (
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
   const { 
     activeChat, activeChatId, inputText, setInputText, 
     setIsRightPanelOpen, createNewChat, isGuest 
@@ -155,15 +157,18 @@ const ChatDetailPanel: React.FC = () => {
         <div className="px-0 pt-2">
           <SidebarSectionLabel variant="gold" className="font-headline">ASK ABOUT</SidebarSectionLabel>
           <div className="grid grid-cols-2 gap-1 gap-x-2">
-            {topicPills.map((topic) => (
-              <TopicPill
-                key={topic.label}
-                icon={topic.icon}
-                label={topic.label}
-                active={inputText === topic.label}
-                onClick={() => handleTopicClick(topic.label)}
-              />
-            ))}
+            {topicPills.map((topic) => {
+              const label = t(topic.labelKey);
+              return (
+                <TopicPill
+                  key={topic.labelKey}
+                  icon={topic.icon}
+                  label={label}
+                  active={inputText === label}
+                  onClick={() => handleTopicClick(label)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

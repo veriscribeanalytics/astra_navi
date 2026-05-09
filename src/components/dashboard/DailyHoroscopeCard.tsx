@@ -71,6 +71,7 @@ interface ModalData {
 
 // Mini sparkline SVG
 function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorHex: string; activeDate?: string }) {
+    const { t } = useTranslation();
     const h = 60, w = 220;
     const points = days.map((d, i) => ({ x: (i / (days.length - 1)) * w, y: h - (d.score / 100) * h }));
     const pathD = catmullRomToBezier(points);
@@ -112,8 +113,8 @@ function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorH
                 <rect x="0" y="0" width={todayX} height={h} fill="currentColor" fillOpacity="0.02" />
                 <rect x={todayX} y="0" width={w - todayX} height={h} fill="currentColor" fillOpacity="0.01" />
                 <line x1={todayX} y1="0" x2={todayX} y2={h} stroke="currentColor" strokeOpacity="0.15" strokeDasharray="2 2" strokeWidth="0.5" />
-                <text x={todayX - 4} y="-4" textAnchor="end" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">PAST</text>
-                <text x={todayX + 4} y="-4" textAnchor="start" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">FORECAST</text>
+                <text x={todayX - 4} y="-4" textAnchor="end" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">{t('horoscope.past')}</text>
+                <text x={todayX + 4} y="-4" textAnchor="start" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">{t('horoscope.forecast')}</text>
 
                 <g clipPath={`url(#reveal-${colorHex.replace('#','')})`}>
                     <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
@@ -393,10 +394,10 @@ export default function DailyHoroscopeCard({
         };
         
         return [
-            { label: "Career", score: areas.career?.value ?? 0, info: areasText.career?.insight || '---', icon: <Trophy className="w-5 h-5" />, area: "career" },
-            { label: "Health", score: areas.health?.value ?? 0, info: areasText.health?.insight || '---', icon: <Sun className="w-5 h-5" />, area: "health" },
-            { label: "Love", score: areas.love?.value ?? 0, info: areasText.love?.insight || '---', icon: <Heart className="w-5 h-5" />, area: "love" },
-            { label: "Finance", score: areas.finance?.value ?? 0, info: areasText.finance?.insight || '---', icon: <Gem className="w-5 h-5" />, area: "finance" },
+            { label: t('horoscope.categoryCareer'), score: areas.career?.value ?? 0, info: areasText.career?.insight || '---', icon: <Trophy className="w-5 h-5" />, area: "career" },
+            { label: t('horoscope.categoryHealth'), score: areas.health?.value ?? 0, info: areasText.health?.insight || '---', icon: <Sun className="w-5 h-5" />, area: "health" },
+            { label: t('horoscope.categoryLove'), score: areas.love?.value ?? 0, info: areasText.love?.insight || '---', icon: <Heart className="w-5 h-5" />, area: "love" },
+            { label: t('horoscope.categoryFinance'), score: areas.finance?.value ?? 0, info: areasText.finance?.insight || '---', icon: <Gem className="w-5 h-5" />, area: "finance" },
         ].map(item => {
             const scoreStyle = getScoreStyle(item.score);
             const theme = CATEGORY_THEMES[item.area as keyof typeof CATEGORY_THEMES];
@@ -410,7 +411,7 @@ export default function DailyHoroscopeCard({
                 scoreHex: scoreStyle.hex
             };
         });
-    }, [horoscope, getScoreStyle]);
+    }, [horoscope, getScoreStyle, t]);
 
     const luckyColorHex = useMemo(() => {
         const lc = (horoscope?.lucky?.color || horoscope?.lucky_color || '').toLowerCase();
@@ -452,7 +453,7 @@ export default function DailyHoroscopeCard({
         return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short' });
     };
 
-    if (error && !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">Service Temporarily Unavailable</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
+    if (error && !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">{t('horoscope.serviceUnavailable')}</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
 
     const _displayDate = horoscope?.meta?.date_display || horoscope?.date_display || dateString;
     
@@ -474,7 +475,7 @@ export default function DailyHoroscopeCard({
                         <div className={`${highlightMetric.iconBg} border-b border-white/5 px-6 py-2 flex items-center gap-2.5`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${highlightMetric.iconColor} animate-pulse`} />
                             <span className={`text-[10px] font-bold ${highlightMetric.scoreColor} uppercase tracking-[0.2em]`}>
-                                Γ¡É {t('horoscope.todaysHighlight')}: Your {highlightMetric.label} score is at an impressive {highlightMetric.score}%
+                                Γ¡É {t('horoscope.todaysHighlight')}: {t('horoscope.todaysHighlightMsg').replace('{label}', highlightMetric.label).replace('{score}', String(highlightMetric.score))}
                             </span>
                         </div>
                     )}
@@ -545,7 +546,7 @@ export default function DailyHoroscopeCard({
                                     className="absolute inset-[-15%] rounded-full bg-secondary/15 blur-[30px]" 
                                 />
                                 
-                                <button onClick={() => openModal({ label: "General", score, info: (typeof horoscope?.tip === 'object' ? horoscope.tip?.text : horoscope?.tip) || t('horoscope.alignmentNeutral'), icon: <Sparkles className="w-5 h-5" />, color: currentScoreStyle.color, bg: currentScoreStyle.bg, colorHex: scoreHex, area: "general" })}
+                                <button onClick={() => openModal({ label: t('horoscope.categoryGeneral'), score, info: (typeof horoscope?.tip === 'object' ? horoscope.tip?.text : horoscope?.tip) || t('horoscope.alignmentNeutral'), icon: <Sparkles className="w-5 h-5" />, color: currentScoreStyle.color, bg: currentScoreStyle.bg, colorHex: scoreHex, area: "general" })}
                                     className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 cursor-pointer hover:scale-105 transition-all duration-500">
                                     <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(200,136,10,0.15)]" viewBox="0 0 72 72">
                                         <circle cx="36" cy="36" r="32" fill="none" stroke="currentColor" strokeWidth="5" className="text-surface-variant/20" />
@@ -554,14 +555,14 @@ export default function DailyHoroscopeCard({
                                     
                                     <div className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 group-hover/score:opacity-0 group-hover/score:scale-95">
                                         <span className={`text-3xl sm:text-4xl font-bold leading-none ${currentScoreStyle.color}`}>{score}</span>
-                                        <span className="text-[10px] text-foreground/30 font-bold uppercase tracking-wider mt-1">General</span>
+                                        <span className="text-[10px] text-foreground/30 font-bold uppercase tracking-wider mt-1">{t('horoscope.categoryGeneral')}</span>
                                     </div>
 
                                     <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 scale-110 group-hover/score:opacity-100 group-hover/score:scale-100 transition-all duration-500">
                                         <div className="bg-secondary/10 border border-secondary/20 p-3 rounded-full mb-1">
                                             <TrendingUp className="w-5 h-5 text-secondary" />
                                         </div>
-                                        <span className="text-[9px] font-black text-secondary uppercase tracking-[0.2em] text-center leading-tight">Weekly<br/>Forecast</span>
+                                        <span className="text-[9px] font-black text-secondary uppercase tracking-[0.2em] text-center leading-tight">{t('horoscope.weeklyForecast').split(' ').map((w, i) => i === 0 ? w : <br key={i} />)}</span>
                                     </div>
 
                                     <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover/score:border-secondary/30 transition-colors" />
@@ -849,7 +850,7 @@ export default function DailyHoroscopeCard({
                                             <div className="w-full lg:w-[65%] flex-1 lg:shrink-0 bg-surface-variant/5 flex flex-col min-h-0 relative overflow-hidden">
                                                 <div className="p-3 sm:p-8 pb-2 sm:pb-4 shrink-0">
                                                     <div className="flex items-center justify-between mb-2 sm:mb-4">
-                                                        <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4" style={{ color: activeModal.colorHex }} /> 7-Day Trajectory</span>
+                                                        <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4" style={{ color: activeModal.colorHex }} /> {t('horoscope.7DayTrajectory')}</span>
                                                         <div className="flex gap-2 sm:gap-3">
                                                             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/10 text-[10px] font-bold bg-surface"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeModal.colorHex }} /><span className="text-foreground/40">{t('horoscope.peakLabel')}:</span><span style={{ color: activeModal.colorHex }}>{fmtDate(forecast.summary.best_day)}</span></div>
                                                             <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-outline-variant/10 text-[9px] sm:text-[10px] font-bold bg-surface"><span className="text-foreground/40">{t('horoscope.trendLabel')}:</span><span className="text-foreground/70 capitalize">{forecast.summary.trend === 'improving' ? '📈' : forecast.summary.trend === 'declining' ? '📉' : '➡️'} {forecast.summary.trend}</span></div>
