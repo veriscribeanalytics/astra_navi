@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { 
     Sparkles, MessageSquare, Globe, Heart, 
     ChevronRight, Orbit, TrendingUp,
-    Users, Sun, ArrowUp, Plus, Briefcase, Activity
+    Users, Sun, ArrowUp, Plus, Briefcase, Activity, ArrowRight
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -1025,6 +1025,13 @@ export default function DashboardHome() {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile-only "Ask Navi" Floating Action Button */}
+            <Link href="/chat" className="fixed bottom-6 right-5 z-[1000] md:hidden flex items-center gap-2 py-3.5 px-5 rounded-full bg-[#c8991f] text-white font-semibold text-[15px] shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:scale-95 transition-transform">
+                <MessageSquare size={18} />
+                Ask Navi
+                <ArrowRight size={16} />
+            </Link>
         </div>
     );
 }
