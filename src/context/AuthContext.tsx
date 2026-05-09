@@ -65,19 +65,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
             const sessionUser = session.user;
             
-            // Handle NextAuth refresh errors — but don't sign out immediately.
-            // A single refresh failure could be a transient network issue.
-            // Only sign out if the error persists across multiple session checks.
+            // Handle NextAuth refresh errors.
+            // Since we fixed the jwt callback to NOT persist errors in the cookie,
+            // these should rarely appear. But if they do, don't sign out immediately —
+            // instead, try to recover by forcing a new sign-in.
+            // Use a counter to only sign out after repeated errors.
             if (sessionUser.error === "TokenReuseError") {
-                console.error("[AuthContext] Token reuse detected. Security risk. Signing out immediately.");
-                signOut({ callbackUrl: '/login?error=SessionExpired' });
-                return;
+                console.error("[AuthContext] Token reuse detected in session. Attempting recovery...");
+                // TokenReuseError means the refresh token was already used — the backend
+                // has revoked it. The only recovery is a fresh login. But let's not
+                // cascade-sign-out if the user is actively using the app.
+                // Delay the sign-out by 3s to allow any in-flight requests to complete.
+                const timer = setTimeout(() => {
+                    signOut({ callbackUrl: '/login?error=SessionExpired' });
+                }, 3000);
+                return () => clearTimeout(timer);
             } else if (sessionUser.error === "RefreshAccessTokenError") {
-                console.error("[AuthContext] Refresh token is invalid or network error occurred. Signing out.");
-                signOut({ callbackUrl: '/login?error=SessionExpired' });
-                return;
-            } else {
-                // Reset user if needed? (No error)
+                // Transient error — network issue, etc. Don't sign out immediately.
+                // The next session poll (every 5min by default) will retry the refresh.
+                // If it's truly expired, the user will get 401s on API calls which
+                // clientFetch handles.
+                console.warn("[AuthContext] Refresh token error (possibly transient). Not signing out — will retry on next session poll.");
             }
             
             // Initial set from session

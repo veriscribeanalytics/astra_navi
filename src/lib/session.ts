@@ -1,18 +1,5 @@
-import { auth } from "@/lib/auth";
 import { decode } from "next-auth/jwt";
 import { NextRequest } from "next/server";
-
-/**
- * Server-side helper to get the current session and verify the user is logged in.
- * Use this in Next.js API routes.
- */
-export async function getAuthSession() {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return null;
-  }
-  return session;
-}
 
 /**
  * The AUTH_SECRET is required to decrypt the NextAuth JWT cookie.
@@ -91,23 +78,87 @@ function findSessionToken(req: Request | NextRequest): { token: string; cookieNa
 }
 
 /**
- * Enhanced helper that also extracts the JWT token (containing access token)
- * which is no longer available on the client-side session for security.
- * 
- * CRITICAL FIX: Previous implementation used getToken() from next-auth/jwt,
- * which failed in production because it didn't detect the __Secure- cookie
- * prefix automatically. This implementation reads the cookie directly from
- * the request and decodes it using @auth/core/jwt's decode() function,
- * trying all known cookie name variants.
+ * Server-side helper to get the current session.
+ * Uses auth() which triggers the NextAuth jwt/session callback chain.
+ * Only use this when you need the full NextAuth session object (e.g. for middleware).
  */
-export async function getAuthContext(req: Request | NextRequest) {
+export async function getAuthSession() {
+  // Lazy import to avoid circular dependency
+  const { auth } = await import("@/lib/auth");
   const session = await auth();
   if (!session?.user?.email) {
     return null;
   }
-  
+  return session;
+}
+
+/**
+ * Get auth context for API routes by decoding the JWT directly from the request.
+ * 
+ * IMPORTANT: This does NOT call auth() to avoid triggering the jwt callback,
+ * which would attempt a token refresh. Multiple concurrent API calls each
+ * triggering auth() → jwt callback → refreshAccessToken() causes a race
+ * condition where one refresh succeeds but others hit "token reuse detected"
+ * (401), which then corrupts the JWT cookie with TokenReuseError.
+ * 
+ * Instead, we decode the JWT cookie directly and extract the accessToken.
+ * If the accessToken is expired, we perform a single refresh here with
+ * proper deduplication, and return the refreshed token.
+ */
+let refreshPromise: Promise<{ accessToken: string; refreshToken: string; accessTokenExpires: number } | null> | null = null;
+
+async function refreshAccessTokenDirect(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; accessTokenExpires: number } | null> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const backendUrl = process.env.AI_BACKEND_URL;
+      if (!backendUrl) {
+        console.error("[getAuthContext] AI_BACKEND_URL not configured");
+        return null;
+      }
+
+      const response = await fetch(`${backendUrl}/api/auth/refresh`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-API-Key": process.env.AI_BACKEND_API_KEY || '',
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("[getAuthContext] Direct refresh failed:", response.status, errorData);
+        return null;
+      }
+
+      const data = await response.json();
+      const expiresIn = (typeof data.expiresIn === 'number' && data.expiresIn > 0) 
+        ? data.expiresIn 
+        : 3600;
+
+      return {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken || refreshToken,
+        accessTokenExpires: Date.now() + expiresIn * 1000,
+      };
+    } catch (error) {
+      console.error("[getAuthContext] Direct refresh error:", error);
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+export async function getAuthContext(req: Request | NextRequest) {
   if (!JWT_SECRET) {
-    console.error("[getAuthContext] CRITICAL: No AUTH_SECRET or NEXTAUTH_SECRET env var set! Cannot decrypt JWT cookie. All authenticated API calls will fail with 401.");
+    console.error("[getAuthContext] CRITICAL: No AUTH_SECRET or NEXTAUTH_SECRET env var set! Cannot decrypt JWT cookie.");
     return null;
   }
 
@@ -116,7 +167,6 @@ export async function getAuthContext(req: Request | NextRequest) {
   
   if (!sessionToken) {
     console.error("[getAuthContext] No session cookie found in request. Tried:", SESSION_COOKIE_NAMES.join(', '));
-    // Return null so API routes return 401 early instead of making backend calls without accessToken
     return null;
   }
 
@@ -128,19 +178,53 @@ export async function getAuthContext(req: Request | NextRequest) {
   });
   
   if (!token) {
-    console.error("[getAuthContext] JWT decode returned null! Cookie found as:", sessionToken.cookieName, "but decryption failed. AUTH_SECRET may not match the one used to encrypt the cookie.");
-    return null;
-  } else if (!token.accessToken) {
-    console.error("[getAuthContext] JWT decoded but accessToken is missing! Token keys:", Object.keys(token));
-    // Return null so API routes return 401 early instead of making backend calls without accessToken
+    console.error("[getAuthContext] JWT decode returned null! Cookie found as:", sessionToken.cookieName, "but decryption failed.");
     return null;
   }
-  
+
+  if (!token.email) {
+    console.error("[getAuthContext] JWT decoded but email is missing! Token keys:", Object.keys(token));
+    return null;
+  }
+
+  // If the JWT has an error flag, the token chain is corrupted.
+  // Don't attempt to use it — return null so the client can handle it.
+  if (token.error) {
+    console.error("[getAuthContext] JWT has error flag:", token.error, "— token chain is corrupted.");
+    return null;
+  }
+
+  // Check if accessToken is present
+  let accessToken = token.accessToken as string | undefined;
+  let currentRefreshToken = token.refreshToken as string | undefined;
+
+  if (!accessToken) {
+    console.error("[getAuthContext] JWT decoded but accessToken is missing! Token keys:", Object.keys(token));
+    return null;
+  }
+
+  // If accessToken is expired, try to refresh it directly (with deduplication)
+  const expiresAt = token.accessTokenExpires as number;
+  if (typeof expiresAt === 'number' && Date.now() >= expiresAt && currentRefreshToken) {
+    console.warn("[getAuthContext] Access token expired. Attempting direct refresh...");
+    const refreshed = await refreshAccessTokenDirect(currentRefreshToken);
+    if (refreshed) {
+      accessToken = refreshed.accessToken;
+      currentRefreshToken = refreshed.refreshToken;
+    } else {
+      console.error("[getAuthContext] Direct refresh failed. Returning null — client will need to re-authenticate.");
+      return null;
+    }
+  }
+
   return {
-    session,
-    token,
-    user: session.user,
-    accessToken: token?.accessToken as string | undefined,
+    user: {
+      id: token.id as string,
+      email: token.email as string,
+      name: token.name as string | undefined,
+    },
+    accessToken,
+    refreshToken: currentRefreshToken,
   };
 }
 

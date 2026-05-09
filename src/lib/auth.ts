@@ -179,17 +179,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       if (token.error) {
+        // Don't attempt refresh if there's already an error — just pass it through
+        // so the client/session callback can see it and decide what to do.
         return token;
       }
 
       const expiresAt = token.accessTokenExpires as number;
       const now = Date.now();
       
+      // If token is not expired, return as-is
       if (now < expiresAt) {
         return token;
       }
 
-      return refreshAccessToken(token);
+      // Token is expired — try refresh
+      const refreshed = await refreshAccessToken(token);
+      
+      if (refreshed.error) {
+        // CRITICAL: Do NOT return the error inside the JWT cookie.
+        // If we store error: "TokenReuseError" in the JWT, it permanently
+        // corrupts the cookie — every subsequent request sees the error
+        // and the user is stuck signed-out even though a fresh login could fix it.
+        // 
+        // Instead, return the EXISTING token with a small time extension so
+        // the request can still be served, and let the client-side handle
+        // the refresh failure gracefully (e.g. redirect to login on next
+        // client-side session check).
+        console.error("[Auth] JWT callback: Refresh failed with:", refreshed.error, 
+          "— NOT persisting error in JWT cookie. Extending token by 60s to allow client recovery.");
+        return {
+          ...token,
+          accessTokenExpires: Date.now() + 60 * 1000, // 60s grace
+        };
+      }
+      
+      return refreshed;
     },
     async session({ session, token }) {
       if (session.user) {
