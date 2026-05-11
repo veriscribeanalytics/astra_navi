@@ -146,98 +146,160 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
     const features = useMemo(() => getFeatures(t), [t]);
     const [idx, setIdx] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const touchStartX = useRef<number | null>(null);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const resetTimer = useCallback(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+            setIdx((prev) => (prev + 1) % features.length);
+        }, 8000);
+    }, [features.length]);
 
     useEffect(() => {
-        if (isHovered) return;
-        const timer = setInterval(() => {
-            setIdx((prev) => (prev + 1) % features.length);
-        }, 6000);
-        return () => clearInterval(timer);
-    }, [isHovered, features.length]);
+        if (isHovered) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            return;
+        }
+        resetTimer();
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, [isHovered, resetTimer]);
+
+    const goToSlide = useCallback((i: number) => {
+        setIdx(i);
+        resetTimer();
+    }, [resetTimer]);
+
+    const nextSlide = useCallback(() => {
+        setIdx(prev => (prev + 1) % features.length);
+        resetTimer();
+    }, [features.length, resetTimer]);
+
+    const prevSlide = useCallback(() => {
+        setIdx(prev => (prev - 1 + features.length) % features.length);
+        resetTimer();
+    }, [features.length, resetTimer]);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchStartX.current === null) return;
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (diff > 50) nextSlide();
+        else if (diff < -50) prevSlide();
+        touchStartX.current = null;
+    };
 
     const current = features[idx];
 
-    return (
-        <div 
-            className="w-full h-full px-4 sm:px-8 flex items-center justify-between cursor-default group"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <div className="flex-1 min-w-0">
-                <AnimatePresence mode="wait">
-                    <motion.div 
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="flex items-center gap-4 sm:gap-10 w-full"
-                    >
-                        {current.type === 'feature' ? (
-                            <>
-                                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
-                                    {current.icon}
-                                </div>
-                                <div className="flex flex-col min-w-0 pr-2 sm:pr-6">
-                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none mb-1.5 sm:mb-3`}>{current.label}</span>
-                                    <p className="text-[13px] sm:text-[17px] font-bold text-foreground leading-tight tracking-tight line-clamp-2">{current.desc}</p>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex flex-col w-full">
-                                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                                    <Sparkles className={`w-3 h-3 sm:w-4 sm:h-4 ${current.color}`} />
-                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none`}>{current.label}</span>
-                                    <p className="text-[11px] sm:text-[13px] font-bold text-foreground/40 ml-1 sm:ml-2 hidden sm:block">{current.desc}</p>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                                    {current.questions?.map((q, i) => (
-                                        <button 
-                                            key={i}
-                                            onClick={() => onQuestion(q)}
-                                            className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 text-[10px] sm:text-[11px] font-bold text-foreground/70 hover:text-secondary transition-all"
-                                        >
-                                            {q}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-
-            {/* Hover Action for Features */}
-            {current.type === 'feature' && (
-                <AnimatePresence>
-                    {isHovered && (
-                        <motion.div
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
-                            className="pl-4 sm:pl-6 border-l border-white/5 hidden sm:block"
-                        >
-                            <Link 
-                                href={current.href!}
-                                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-secondary text-background text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
-                            >
-                                {t('dashboard.explore')} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </Link>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            )}
-
-            {/* Progress Indicators */}
-            <div className="absolute bottom-1.5 sm:bottom-2 left-4 sm:left-8 flex gap-1 sm:gap-1.5">
-                {features.map((_, i) => (
-                    <div 
-                        key={i} 
-                        className={`h-0.5 rounded-full transition-all duration-500 ${i === idx ? 'w-4 sm:w-6 bg-secondary' : 'w-1.5 sm:w-2 bg-white/10'}`} 
-                    />
-                ))}
-            </div>
+    const dots = (
+        <div className="flex justify-center gap-2">
+            {features.map((_, i) => (
+                <button 
+                    key={i} 
+                    onClick={() => goToSlide(i)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? 'w-5 sm:w-7 bg-[#c8991f]' : 'w-1.5 sm:w-2 bg-white/15 hover:bg-white/30'}`}
+                    aria-label={`Go to slide ${i + 1}`}
+                />
+            ))}
         </div>
+    );
+
+    return (
+        <>
+            <div 
+                className="w-full h-full px-4 sm:px-8 flex items-center justify-between cursor-default group"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
+                <div className="flex-1 min-w-0">
+                    <AnimatePresence mode="wait">
+                        <motion.div 
+                            key={idx}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ duration: 0.5, ease: "easeInOut" }}
+                            className="flex items-center gap-4 sm:gap-10 w-full"
+                        >
+                            {current.type === 'feature' ? (
+                                <>
+                                    <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+                                        {current.icon}
+                                    </div>
+                                    <div className="flex flex-col min-w-0 pr-2 sm:pr-6">
+                                        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none mb-1.5 sm:mb-3`}>{current.label}</span>
+                                        <p className="text-[13px] sm:text-[17px] font-bold text-foreground leading-tight tracking-tight line-clamp-2">{current.desc}</p>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
+                                    <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm`}>
+                                        <Sparkles className={`w-5 h-5 sm:w-7 sm:h-7 ${current.color}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none block mb-1.5 sm:mb-2`}>{current.label}</span>
+                                        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
+                                            {current.questions?.map((q, i) => (
+                                                <button 
+                                                    key={i}
+                                                    onClick={() => onQuestion(q)}
+                                                    className="px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 text-[10px] sm:text-[11px] font-bold text-foreground/70 hover:text-secondary transition-all whitespace-nowrap shrink-0"
+                                                >
+                                                    {q}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+
+                {/* Hover Action for Features */}
+                {current.type === 'feature' && (
+                    <AnimatePresence>
+                        {isHovered && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 10 }}
+                                className="pl-4 sm:pl-6 border-l border-white/5 hidden sm:block"
+                            >
+                                <Link 
+                                    href={current.href!}
+                                    className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-secondary text-background text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
+                                >
+                                    {t('dashboard.explore')} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                </Link>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                )}
+
+                {/* Desktop dots — inside the card at bottom */}
+                <div className="hidden sm:flex absolute bottom-2 left-8 gap-2">
+                    {features.map((_, i) => (
+                        <button 
+                            key={i} 
+                            onClick={() => goToSlide(i)}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? 'w-7 bg-[#c8991f]' : 'w-2 bg-white/15 hover:bg-white/30'}`}
+                            aria-label={`Go to slide ${i + 1}`}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Mobile dots — outside the card, below it */}
+            <div className="sm:hidden mt-2">
+                {dots}
+            </div>
+        </>
     );
 }
 
@@ -515,8 +577,8 @@ export default function DashboardHome() {
                     </div>
 
                     <div className="w-full mt-4 sm:mt-8 mb-2">
-                        <div className="w-full h-[80px] sm:h-[100px] relative group">
-                            <div className="absolute inset-0 bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
+                        <div className="w-full relative group">
+                            <div className="w-full h-[80px] sm:h-[100px] bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
                                 <FeatureSlider onQuestion={handleSendMessage} t={t} />
                             </div>
                         </div>
@@ -610,7 +672,7 @@ export default function DashboardHome() {
                                                                 ))}
                                                             </div>
                                                         </div>
-                                                        <div className="w-full px-1 mt-1.5">
+                                                        <div className="hidden sm:block w-full px-1 mt-1.5">
                                                             <div className="flex items-center gap-3 mb-2">
                                                                 <div className="h-[1px] flex-1 bg-white/5" />
                                                                 <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.deepDive')}</span>
@@ -667,10 +729,10 @@ export default function DashboardHome() {
                                                 )}
                                             </div>
 
-                                            <div className="px-4 pb-4 pt-2 shrink-0 border-t border-white/5 bg-surface/50 backdrop-blur-sm">
+                                            <div className="px-4 pb-4 pt-2 shrink-0 sticky bottom-0 z-10 border-t border-white/5 bg-surface backdrop-blur-sm">
                                                 <div className="relative group mb-3">
-                                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary/20 to-amber-500/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
-                                                    <div className="relative flex items-end gap-2 p-2.5 rounded-2xl bg-surface-variant/40 border border-white/10 group-focus-within:border-secondary/40 transition-all">
+                                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary/20 to-amber-500/20 rounded-full blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+                                                    <div className="relative flex items-center gap-2 p-2 rounded-full bg-surface-variant/40 border border-white/10 group-focus-within:border-secondary/40 transition-all">
                                                         <textarea 
                                                             value={inputText}
                                                             onChange={(e) => setInputText(e.target.value)}
@@ -684,7 +746,7 @@ export default function DashboardHome() {
                                                                 }
                                                             }}
                                                             placeholder={t('dashboard.askNaviPlaceholder')}
-                                                            className="flex-1 bg-transparent border-none outline-none text-[12px] font-medium text-foreground placeholder:text-foreground/20 resize-none min-h-[20px] max-h-[70px] py-1 pl-1"
+                                                            className="flex-1 bg-transparent border-none outline-none text-[15px] font-medium text-foreground placeholder:text-foreground/20 resize-none min-h-[20px] max-h-[70px] py-1 pl-2"
                                                             rows={1}
                                                         />
                                                         <button 
@@ -695,15 +757,15 @@ export default function DashboardHome() {
                                                                 }
                                                             }}
                                                             disabled={!inputText.trim() || isSending}
-                                                            className="shrink-0 w-7 h-7 rounded-xl bg-secondary text-background flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                                                            className="shrink-0 w-10 h-10 min-w-[40px] rounded-full bg-secondary text-background flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                                                         >
-                                                            <ArrowUp className="w-4 h-4" />
+                                                            <ArrowUp className="w-5 h-5" />
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center justify-between px-1">
-                                                    <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">{t('dashboard.poweredByVedicAi')}</p>
-                                                    <Link href={activeChat ? `/chat?id=${activeChat.id}` : "/chat"} className="text-[11px] font-bold text-secondary uppercase tracking-widest hover:text-amber-500 transition-colors flex items-center gap-1 group">
+                                                <div className="flex items-center justify-between px-2 pt-1">
+                                                    <p className="text-[11px] font-bold text-foreground/20 uppercase tracking-[0.05em]">{t('dashboard.poweredByVedicAi')}</p>
+                                                    <Link href={activeChat ? `/chat?id=${activeChat.id}` : "/chat"} className="text-[11px] font-bold text-secondary uppercase tracking-[0.04em] hover:text-amber-500 transition-colors flex items-center gap-1 group">
                                                         {t('dashboard.fullInterface')} <ChevronRight className="w-3 h-3 text-secondary group-hover:translate-x-0.5 transition-transform" />
                                                     </Link>
                                                 </div>

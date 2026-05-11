@@ -102,60 +102,9 @@ export async function getAuthSession() {
  * (401), which then corrupts the JWT cookie with TokenReuseError.
  * 
  * Instead, we decode the JWT cookie directly and extract the accessToken.
- * If the accessToken is expired, we perform a single refresh here with
- * proper deduplication, and return the refreshed token.
+ * If the accessToken is expired, we return null, allowing the client-side
+ * to handle the 401 and properly refresh the token through NextAuth.
  */
-let refreshPromise: Promise<{ accessToken: string; refreshToken: string; accessTokenExpires: number } | null> | null = null;
-
-async function refreshAccessTokenDirect(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; accessTokenExpires: number } | null> {
-  if (refreshPromise) {
-    return refreshPromise;
-  }
-
-  refreshPromise = (async () => {
-    try {
-      const backendUrl = process.env.AI_BACKEND_URL;
-      if (!backendUrl) {
-        console.error("[getAuthContext] AI_BACKEND_URL not configured");
-        return null;
-      }
-
-      const response = await fetch(`${backendUrl}/api/auth/refresh`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.AI_BACKEND_API_KEY || '',
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("[getAuthContext] Direct refresh failed:", response.status, errorData);
-        return null;
-      }
-
-      const data = await response.json();
-      const expiresIn = (typeof data.expiresIn === 'number' && data.expiresIn > 0) 
-        ? data.expiresIn 
-        : 3600;
-
-      return {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken || refreshToken,
-        accessTokenExpires: Date.now() + expiresIn * 1000,
-      };
-    } catch (error) {
-      console.error("[getAuthContext] Direct refresh error:", error);
-      return null;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
 export async function getAuthContext(req: Request | NextRequest) {
   if (!JWT_SECRET) {
     console.error("[getAuthContext] CRITICAL: No AUTH_SECRET or NEXTAUTH_SECRET env var set! Cannot decrypt JWT cookie.");
@@ -203,18 +152,20 @@ export async function getAuthContext(req: Request | NextRequest) {
     return null;
   }
 
-  // If accessToken is expired, try to refresh it directly (with deduplication)
+  // If accessToken is expired, return null to trigger a 401 response.
+  // The client-side clientFetch will catch the 401, call getSession() 
+  // (which triggers NextAuth's JWT callback to properly refresh and 
+  // update the session cookie), and retry the request.
+  // 
+  // Do NOT refresh here — refreshing in an API route consumes the 
+  // refresh token but can't update the browser's cookie, causing a 
+  // desync where the browser holds an invalidated refresh token.
+  // The next NextAuth refresh attempt then triggers "token reuse 
+  // detected" → forced logout.
   const expiresAt = token.accessTokenExpires as number;
-  if (typeof expiresAt === 'number' && Date.now() >= expiresAt && currentRefreshToken) {
-    console.warn("[getAuthContext] Access token expired. Attempting direct refresh...");
-    const refreshed = await refreshAccessTokenDirect(currentRefreshToken);
-    if (refreshed) {
-      accessToken = refreshed.accessToken;
-      currentRefreshToken = refreshed.refreshToken;
-    } else {
-      console.error("[getAuthContext] Direct refresh failed. Returning null — client will need to re-authenticate.");
-      return null;
-    }
+  if (typeof expiresAt === 'number' && Date.now() >= expiresAt) {
+    console.warn("[getAuthContext] Access token expired. Returning null to trigger client-side refresh flow.");
+    return null;
   }
 
   return {

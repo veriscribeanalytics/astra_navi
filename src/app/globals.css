@@ -404,7 +404,7 @@ body {
 
 @utility celestial-silk {
   background-image:
-    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--secondary) 15%, transparent) 1px, transparent 0),
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--secondary) calc(var(--pattern-opacity) * 60%), transparent) 1px, transparent 0),
     radial-gradient(at 0% 0%, color-mix(in srgb, #EDE0E8 calc(var(--pattern-opacity) * 100%), transparent) 0px, transparent 50%),
     radial-gradient(at 100% 100%, color-mix(in srgb, #E6D8E0 calc(var(--pattern-opacity) * 100%), transparent) 0px, transparent 50%),
     radial-gradient(at 50% 50%, color-mix(in srgb, #EDE0E8 calc(var(--pattern-opacity) * 50%), transparent) 0px, transparent 80%);

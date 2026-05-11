@@ -64,7 +64,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ErrorBoundary>
-          <SessionProvider>
+          <SessionProvider refetchInterval={5 * 60}>
             <LanguageProvider>
               <AuthProvider>
                 <ChatProvider>
