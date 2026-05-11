@@ -64,13 +64,13 @@ export default function KundliSvg({ className = '', style = 'north' }: KundliSvg
     return (
         <div 
             className={`w-full h-auto flex items-center justify-center 
-            [&_svg]:!w-full [&_svg]:!h-full [&_svg]:!max-w-full [&_svg]:!max-h-full
-            [&_rect]:!fill-transparent
-            [&_line]:!stroke-[var(--secondary)] 
-            [&_polygon]:!stroke-[var(--secondary)] [&_polygon]:!fill-transparent
-            [&_path]:!stroke-[var(--secondary)] [&_path]:!fill-transparent
-            [&_circle]:!stroke-[var(--secondary)] [&_circle]:!fill-transparent
-            [&_text]:!fill-[var(--foreground)]
+            [&_svg]:w-full [&_svg]:h-auto [&_svg]:max-w-full [&_svg]:max-h-full
+            [&_rect]:fill-transparent
+            [&_line]:stroke-[var(--secondary)] 
+            [&_polygon]:stroke-[var(--secondary)] [&_polygon]:fill-transparent
+            [&_path]:stroke-[var(--secondary)] [&_path]:fill-transparent
+            [&_circle]:stroke-[var(--secondary)] [&_circle]:fill-transparent
+            [&_text]:fill-[var(--foreground)] [&_text]:!font-sans
             ${className}`}
             dangerouslySetInnerHTML={{ __html: svgData }}
         />
