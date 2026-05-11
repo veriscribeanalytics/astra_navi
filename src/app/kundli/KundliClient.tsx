@@ -119,6 +119,22 @@ export default function KundliPage() {
                     areas: (h.areas as string[]) || []
                 }));
 
+                // Normalizing dasha data - backend sometimes sends it under planetary.active_dasha
+                // or as a raw string. We ensure it fits the DashaData interface.
+                if (!payload.dasha && (payload as any).planetary?.active_dasha) {
+                    const ad = (payload as any).planetary.active_dasha;
+                    payload.dasha = typeof ad === 'string' ? { current: ad, explanation: [] } : ad;
+                }
+                
+                if (payload.dasha) {
+                    if (typeof payload.dasha === 'string') {
+                        payload.dasha = { current: payload.dasha, explanation: [] };
+                    }
+                    if (!payload.dasha.explanation) {
+                        payload.dasha.explanation = [];
+                    }
+                }
+
                 setData(payload); 
                 setError(null); 
             }
