@@ -9,11 +9,12 @@ import { useAuth } from '@/context/AuthContext';
 import {
     Mail, Lock, ArrowRight, Eye,
     Sparkles, ShieldCheck, Orbit,
-    User as UserIcon, Calendar, Clock, MapPin, 
+    User as UserIcon, Calendar, Clock,
     Bell, ArrowLeft, Phone
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import LocationSearch, { LocationResult } from '@/components/ui/LocationSearch';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 
@@ -49,9 +50,14 @@ const LoginContent = () => {
         dob: '',
         tob: '',
         pob: '',
+        birthPlaceName: '',
+        birthLatitude: undefined as number | undefined,
+        birthLongitude: undefined as number | undefined,
+        birthTimezoneName: '',
         language: currentLanguage || 'en',
         preferences: { horoscope: true, notifications: false },
     });
+    const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
 
     // Login states
     const [email, setEmail] = useState('');
@@ -526,11 +532,35 @@ const LoginContent = () => {
                                                     </div>
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 px-1">{t('login.pob') || "Place of Birth"}</label>
-                                                        <Input 
-                                                            placeholder="City, Country" 
-                                                            icon={<MapPin size={14} className="text-secondary" />} 
-                                                            value={registerData.pob} 
-                                                            onChange={(e) => setRegisterData({...registerData, pob: e.target.value})} 
+                                                        <LocationSearch 
+                                                            placeholder="Search city, e.g. Delhi" 
+                                                            value={registerData.pob || registerData.birthPlaceName}
+                                                            onSelect={(location: LocationResult) => {
+                                                                setRegisterData({
+                                                                    ...registerData,
+                                                                    pob: location.name,
+                                                                    birthPlaceName: location.name,
+                                                                    birthLatitude: location.lat,
+                                                                    birthLongitude: location.lon,
+                                                                    birthTimezoneName: location.timezone,
+                                                                });
+                                                                setSelectedLocation(location);
+                                                            }}
+                                                            onChange={(text: string) => {
+                                                                setRegisterData({
+                                                                    ...registerData,
+                                                                    pob: text,
+                                                                    birthPlaceName: selectedLocation?.name === text ? selectedLocation.name : '',
+                                                                    birthLatitude: selectedLocation?.name === text ? selectedLocation.lat : undefined,
+                                                                    birthLongitude: selectedLocation?.name === text ? selectedLocation.lon : undefined,
+                                                                    birthTimezoneName: selectedLocation?.name === text ? selectedLocation.timezone : '',
+                                                                });
+                                                                if (!selectedLocation || selectedLocation.name !== text) {
+                                                                    setSelectedLocation(null);
+                                                                }
+                                                            }}
+                                                            confirmedLocation={selectedLocation}
+                                                            helperText="Search and select your exact birth location"
                                                         />
                                                     </div>
                                                 </>

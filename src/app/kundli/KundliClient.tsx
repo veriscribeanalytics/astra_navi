@@ -42,21 +42,11 @@ export default function KundliPage() {
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
-    const [planetDetails, setPlanetDetails] = useState<PlanetData | null>(null);
-    const [planetLoading, setPlanetLoading] = useState(false);
     const [houseFilter, setHouseFilter] = useState<'active' | 'all'>('active');
 
-    const handlePlanetClick = async (planet: PlanetData) => {
-        if (selectedPlanet?.planet === planet.planet) { setSelectedPlanet(null); setPlanetDetails(null); return; }
+    const handlePlanetClick = (planet: PlanetData) => {
+        if (selectedPlanet?.planet === planet.planet) { setSelectedPlanet(null); return; }
         setSelectedPlanet(planet);
-        setPlanetDetails(null);
-        setPlanetLoading(true);
-        try {
-            const res = await clientFetch(`/api/planets/${planet.planet}`);
-            const result = await res.json();
-            if (result.success && result.details) setPlanetDetails(result.details);
-        } catch (err) { console.error("Failed to fetch planet details", err); }
-        finally { setPlanetLoading(false); }
     };
 
     const fetchAnalysis = useCallback(async (forceRefresh = false) => {
@@ -119,20 +109,69 @@ export default function KundliPage() {
                     areas: (h.areas as string[]) || []
                 }));
 
-                // Normalizing dasha data - backend sometimes sends it under planetary.active_dasha
-                // or as a raw string. We ensure it fits the DashaData interface.
-                if (!payload.dasha && (payload as any).planetary?.active_dasha) {
-                    const ad = (payload as any).planetary.active_dasha;
-                    payload.dasha = typeof ad === 'string' ? { current: ad, explanation: [] } : ad;
-                }
-                
-                if (payload.dasha) {
-                    if (typeof payload.dasha === 'string') {
-                        payload.dasha = { current: payload.dasha, explanation: [] };
+                // Normalize dasha: backend returns nested { current: { mahadasha, antardasha, pratyantardasha } }
+                // but frontend expects flat { active[], currentMahaDasha, remaining, explanation[] }
+                if (payload.dasha && typeof payload.dasha === 'object') {
+                    const rawDasha = payload.dasha as Record<string, unknown>;
+                    const normalized: Record<string, unknown> = { ...rawDasha };
+
+                    if (!rawDasha.active && !rawDasha.rows) {
+                        const current = rawDasha.current as Record<string, Record<string, unknown>> | undefined;
+                        if (current && typeof current === 'object' && (current.mahadasha || current.antardasha)) {
+                            const activeArr: { type: string; planet: string; start: string; end: string }[] = [];
+                            const explanations: (string | { technical: string; simple: string })[] = [];
+
+                            if (current.mahadasha) {
+                                const md = current.mahadasha;
+                                activeArr.push({
+                                    type: 'Mahadasha',
+                                    planet: (md.planet as string) || '',
+                                    start: (md.start as string) || '',
+                                    end: (md.end as string) || ''
+                                });
+                                if (md.interpretation) {
+                                    explanations.push(typeof md.interpretation === 'string'
+                                        ? { technical: md.interpretation as string, simple: md.interpretation as string }
+                                        : md.interpretation as { technical: string; simple: string });
+                                }
+                            }
+
+                            if (current.antardasha) {
+                                const ad = current.antardasha;
+                                activeArr.push({
+                                    type: 'Antardasha',
+                                    planet: (ad.planet as string) || '',
+                                    start: (ad.start as string) || '',
+                                    end: (ad.end as string) || ''
+                                });
+                                if (ad.interpretation) {
+                                    explanations.push(typeof ad.interpretation === 'string'
+                                        ? { technical: ad.interpretation as string, simple: ad.interpretation as string }
+                                        : ad.interpretation as { technical: string; simple: string });
+                                }
+                            }
+
+                            normalized.active = activeArr;
+                            normalized.currentMahaDasha = current.mahadasha?.planet || '';
+                            normalized.current = current.antardasha?.planet || current.mahadasha?.planet || '';
+                            normalized.remaining = '';
+
+                            if (current.antardasha?.end) {
+                                const endDate = new Date(current.antardasha.end as string);
+                                const nowMs = Date.now();
+                                const remDays = Math.max(0, Math.ceil((endDate.getTime() - nowMs) / 86400000));
+                                normalized.remaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
+                            }
+
+                            normalized.explanation = (rawDasha.explanation as (string | { technical: string; simple: string })[]) || explanations;
+                        }
                     }
-                    if (!payload.dasha.explanation) {
-                        payload.dasha.explanation = [];
+
+                    if (!normalized.explanation) {
+                        normalized.explanation = [];
                     }
+
+                    payload.dasha = normalized as unknown as DashaData;
                 }
 
                 setData(payload); 
@@ -506,7 +545,7 @@ export default function KundliPage() {
                             {/* ── HEADER — always visible ── */}
                             <div className="flex items-center gap-2 mb-2 shrink-0">
                                 {selectedPlanet ? (
-                                    <button onClick={() => { setSelectedPlanet(null); setPlanetDetails(null); }}
+                                    <button onClick={() => { setSelectedPlanet(null); }}
                                         className="flex items-center gap-1.5 text-[11px] font-bold text-foreground/30 uppercase tracking-widest hover:text-secondary transition-colors">
                                         <ChevronLeft className="w-4 h-4" /> Back
                                     </button>
@@ -660,14 +699,8 @@ export default function KundliPage() {
                                                 <h4 className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
                                                     <Info className="w-3.5 h-3.5" /> Cosmic Interpretation
                                                 </h4>
-                                                {planetLoading ? (
-                                                    <div className="space-y-3 animate-pulse">
-                                                        <div className="h-4 bg-surface-variant/20 rounded w-full" />
-                                                        <div className="h-4 bg-surface-variant/20 rounded w-4/5" />
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-3">
-                                                        {(planetDetails?.interpretation || selectedPlanet.interpretation).map((item, i: number) => {
+                                                <div className="space-y-3">
+                                                        {selectedPlanet.interpretation.map((item, i: number) => {
                                                             const isObject = typeof item === 'object' && item !== null;
                                                             const simpleText = isObject ? item.simple : item;
                                                             const techText = isObject ? item.technical : null;
@@ -686,16 +719,15 @@ export default function KundliPage() {
                                                             );
                                                         })}
                                                     </div>
-                                                )}
                                             </div>
 
-                                            {((planetDetails?.yogas?.length ?? 0) > 0 || (selectedPlanet.yogas?.length ?? 0) > 0) && (
+                                            {(selectedPlanet.yogas?.length ?? 0) > 0 && (
                                                 <div>
                                                     <h4 className="text-[11px] font-bold text-amber-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
                                                         <Sparkles className="w-3.5 h-3.5" /> Active Yogas
                                                     </h4>
                                                     <div className="space-y-2">
-                                                        {(planetDetails?.yogas || selectedPlanet.yogas).map((yoga: Yoga, i: number) => (
+                                                        {selectedPlanet.yogas.map((yoga: Yoga, i: number) => (
                                                             <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.06 }}
                                                                 className="bg-amber-500/[0.04] border border-amber-500/15 rounded-[14px] p-3">
                                                                 <h5 className="text-[12px] font-bold text-amber-400 mb-1">{yoga.name}</h5>

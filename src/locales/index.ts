@@ -39,3 +39,30 @@ export const languages = [
 ] as const;
 
 export const defaultLanguage = 'en' as const;
+
+/**
+ * Map short ISO 639-1 language codes to full English names.
+ * Used by API proxy routes to convert frontend language codes
+ * to the format the FastAPI backend expects (e.g. "hi" → "Hindi").
+ */
+export const LANGUAGE_CODE_TO_NAME: Record<string, string> = {
+  en: 'English',
+  hi: 'Hindi',
+  ta: 'Tamil',
+  te: 'Telugu',
+  kn: 'Kannada',
+  bn: 'Bengali',
+  mr: 'Marathi',
+  gu: 'Gujarati',
+  ml: 'Malayalam',
+  pa: 'Punjabi',
+};
+
+/**
+ * Convert a language code to its full English name for backend API calls.
+ * Falls back to "English" for unknown codes.
+ */
+export function languageCodeToName(code: string | null | undefined): string {
+  if (!code) return 'English';
+  return LANGUAGE_CODE_TO_NAME[code] || 'English';
+}

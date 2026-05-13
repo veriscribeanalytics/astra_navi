@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/hooks/useTheme';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { clientFetch } from '@/lib/apiClient';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface KundliSvgProps {
     className?: string;
@@ -60,6 +61,12 @@ export default function KundliSvg({ className = '', style = 'north' }: KundliSvg
         );
     }
 
+    const cleanSvg = DOMPurify.sanitize(svgData, {
+        USE_PROFILES: { svg: true },
+        FORBID_TAGS: ['script', 'foreignObject'],
+        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+    });
+
     // Return the injected SVG
     return (
         <div 
@@ -72,7 +79,7 @@ export default function KundliSvg({ className = '', style = 'north' }: KundliSvg
             [&_circle]:stroke-[var(--secondary)] [&_circle]:fill-transparent
             [&_text]:fill-[var(--foreground)] [&_text]:!font-sans
             ${className}`}
-            dangerouslySetInnerHTML={{ __html: svgData }}
+            dangerouslySetInnerHTML={{ __html: cleanSvg }}
         />
     );
 }

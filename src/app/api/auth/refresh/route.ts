@@ -30,7 +30,11 @@ export async function POST(req: NextRequest) {
       }, { status: response.status });
     }
 
-    return NextResponse.json(data);
+    // Pass through profileComplete if backend provides it
+    return NextResponse.json({
+      ...data,
+      ...(data.profileComplete !== undefined ? { profileComplete: data.profileComplete } : {}),
+    });
   } catch (error) {
     console.error('Refresh token error:', error);
     return NextResponse.json({ error: 'Failed to refresh celestial session' }, { status: 500 });

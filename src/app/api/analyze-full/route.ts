@@ -8,6 +8,7 @@ import { backendFetch } from '@/lib/backendClient';
  * 
  * Proxies interpretation requests to FastAPI backend.
  * Backend handles PostgreSQL storage of structured insights.
+ * Language field is now forwarded via AnalyzeFullSchema.
  */
 export async function POST(req: Request) {
     try {

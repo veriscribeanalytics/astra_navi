@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Renderer, Camera, Geometry, Program, Mesh } from 'ogl';
 
-import { colorToRgb, resolveCSSColor } from '@/utils/colorUtils';
+import { colorToRgb } from '@/utils/colorUtils';
 
 const defaultColors = ['#ffffff', '#ffffff', '#ffffff'];
 

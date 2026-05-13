@@ -45,6 +45,7 @@ export function setStoredTheme(theme: Theme): void {
   
   try {
     localStorage.setItem(STORAGE_KEY, theme);
+    document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
   } catch (e) {
     console.warn('Failed to persist theme:', e);
   }

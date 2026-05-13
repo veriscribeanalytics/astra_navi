@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext } from '@/lib/session';
 import { MatchRequestSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
+import { languageCodeToName } from '@/locales';
 
 /**
  * Kundli Matching API Route (Proxy Mode)
@@ -26,9 +27,11 @@ export async function POST(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const narrative = searchParams.get('narrative') === 'true';
+    const lang = searchParams.get('lang') || null;
+    const fullLangName = languageCodeToName(lang);
 
     // Forward to backend
-    const response = await backendFetch(`/api/match?narrative=${narrative}`, {
+    const response = await backendFetch(`/api/match?narrative=${narrative}&lang=${encodeURIComponent(fullLangName)}`, {
       method: 'POST',
       body: JSON.stringify(validation.data),
       userEmail: (email as string) || undefined,

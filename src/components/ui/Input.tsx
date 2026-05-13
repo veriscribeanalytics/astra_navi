@@ -56,7 +56,7 @@ const Input: React.FC<InputProps> = ({ icon, label, error, helperText, className
                         text-sm sm:text-base
                         ${error 
                             ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500' 
-                            : 'border-outline-variant/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary'
+                            : 'border-outline-variant/30 hover:border-secondary/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary'
                         }
                         disabled:opacity-50 disabled:cursor-not-allowed
                         ${className}

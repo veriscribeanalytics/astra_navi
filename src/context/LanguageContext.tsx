@@ -12,24 +12,70 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<LanguageCode>(() => {
-    if (typeof window === 'undefined') return defaultLanguage;
+interface LanguageProviderProps {
+  children: React.ReactNode;
+  /** Initial language from server (read from NEXT_LOCALE cookie).
+   *  Eliminates hydration mismatch: server renders in this language,
+   *  client first render matches, then syncs with localStorage. */
+  initialLanguage?: string;
+}
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children, initialLanguage }) => {
+  // Use server-provided language for initial state → eliminates hydration mismatch.
+  // If no server value, use defaultLanguage (matches what server would render).
+  const serverLang = (initialLanguage && locales[initialLanguage as LanguageCode])
+    ? (initialLanguage as LanguageCode)
+    : defaultLanguage;
+
+  const [language, setLanguageState] = useState<LanguageCode>(serverLang);
+
+  // After hydration, sync with localStorage — this may differ from serverLang
+  // if the user changed language in another tab or the cookie wasn't set yet,
+  // but since it runs AFTER hydration, it won't cause a mismatch.
+  useEffect(() => {
     const saved = localStorage.getItem('language') as LanguageCode;
-    return saved && locales[saved] ? saved : defaultLanguage;
-  });
+    if (saved && locales[saved] && saved !== language) {
+      setLanguageState(saved);
+    }
+    document.documentElement.lang = language;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentional: run once after mount
+
+  // Keep <html lang> in sync with language changes after initial mount
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const setLanguage = useCallback((code: LanguageCode) => {
     if (locales[code]) {
       setLanguageState(code);
       localStorage.setItem('language', code);
       document.documentElement.lang = code;
+
+      // Set NEXT_LOCALE cookie so the server can read it on next request
+      // (eliminates hydration mismatch on subsequent page loads).
+      // max-age = 1 year, SameSite=Lax, Path=/ (accessible to all routes)
+      document.cookie = `NEXT_LOCALE=${code};path=/;max-age=${365 * 24 * 60 * 60};samesite=lax`;
+
+      // Fire-and-forget: persist language to backend profile for logged-in users.
+      // Uses raw fetch (not clientFetch) to avoid the 401→signOut cascade.
+      // If the user is not authenticated, the PUT will fail silently — that's fine,
+      // localStorage + cookie already hold the preference for guests.
+      fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: code }),
+        credentials: 'same-origin',
+      }).then(res => {
+        if (res.ok) {
+          console.log('[LanguageContext] Language persisted to backend profile:', code);
+        } else {
+          console.log('[LanguageContext] Backend profile PUT returned', res.status, '(user likely not authenticated — language saved to localStorage + cookie only)');
+        }
+      }).catch(() => {
+        // Network error or not authenticated — silently ignore
+      });
     }
   }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
 
   const t = useCallback((key: string): string => {
     const keys = key.split('.');

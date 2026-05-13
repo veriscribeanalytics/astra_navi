@@ -386,7 +386,9 @@
     "forecast": "FORECAST",
     "serviceUnavailable": "Service Temporarily Unavailable",
     "todaysHighlightMsg": "Your {label} score is at an impressive {score}%",
-    "7DayTrajectory": "7-Day Trajectory"
+    "7DayTrajectory": "7-Day Trajectory",
+    "locationRequired": "Exact Birth Location Required",
+    "updateLocation": "Confirm Birth Location"
   },
   "login": {
     "inscribeIdentity": "Inscribe Identity",

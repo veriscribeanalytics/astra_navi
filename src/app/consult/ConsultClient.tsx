@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
 import { 
   calculateAge, 
@@ -35,6 +36,7 @@ const stepLabels: Record<Step, string> = {
 const ConsultClient: React.FC = () => {
   const { user } = useAuth();
   const { error } = useToast();
+  const { language, setLanguage, availableLanguages } = useTranslation();
   const router = useRouter();
 
   // Wizard State
@@ -48,7 +50,6 @@ const ConsultClient: React.FC = () => {
   const [birthDate, setBirthDate] = useState(user?.dob || '');
   const [birthTime, setBirthTime] = useState(user?.tob || '');
   const [birthPlace, setBirthPlace] = useState(user?.pob || '');
-  const [language, setLanguage] = useState('english');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategory | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState('');
@@ -335,10 +336,11 @@ const ConsultClient: React.FC = () => {
                   <select 
                     className="w-full h-10 bg-background/60 border border-outline-variant/40 rounded-xl px-3 focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all outline-none text-sm"
                     value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
+                    onChange={(e) => setLanguage(e.target.value as typeof language)}
                   >
-                    <option value="english">English</option>
-                    <option value="hindi">Hindi</option>
+                    {availableLanguages.map((lang) => (
+                      <option key={lang.code} value={lang.code}>{lang.nativeName} ({lang.name})</option>
+                    ))}
                   </select>
                 </div>
 

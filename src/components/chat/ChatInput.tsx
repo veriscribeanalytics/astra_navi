@@ -7,7 +7,6 @@ import {
     ArrowUp, Sparkles 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useTranslation } from '@/hooks';
 
 // Rotating placeholder texts
 const placeholderTexts = [
@@ -44,7 +43,6 @@ const ChatInput: React.FC = () => {
     inputText, setInputText, sendMessage, 
     isSending, activeChatId, createNewChat
   } = useChat();
-  const { t } = useTranslation();
   
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);

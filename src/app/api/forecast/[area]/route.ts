@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
+import { languageCodeToName } from '@/locales';
 
 /**
  * Generic Forecast API Route (Proxy Mode)
@@ -27,8 +28,10 @@ export async function GET(
         const { searchParams } = new URL(req.url);
         const daysBack = searchParams.get('days_back') || '3';
         const daysForward = searchParams.get('days_forward') || '3';
+        const lang = searchParams.get('lang') || null;
+        const fullLangName = languageCodeToName(lang);
 
-        const url = `/api/forecast/${area}?days_back=${daysBack}&days_forward=${daysForward}`;
+        const url = `/api/forecast/${area}?days_back=${daysBack}&days_forward=${daysForward}&lang=${encodeURIComponent(fullLangName)}`;
 
         const response = await backendFetch(url, {
             userEmail: email as string,

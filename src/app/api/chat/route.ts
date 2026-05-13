@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
  * 
  * Proxies creation requests to the FastAPI backend.
  * Prevents duplicate empty chats logic now lives in the backend.
+ * Language field is now forwarded via CreateChatSchema.
  */
 export async function POST(req: NextRequest) {
   try {

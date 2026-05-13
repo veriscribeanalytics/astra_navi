@@ -30,7 +30,11 @@ export async function GET(req: Request) {
 
         const data = await response.json();
 
-        return NextResponse.json(data);
+        // Pass through backend's profileComplete flag if present
+        return NextResponse.json({
+            ...data,
+            ...(data.profileComplete !== undefined ? { profileComplete: data.profileComplete } : {}),
+        });
     } catch (error) {
         console.error("Profile fetch error:", error);
         return NextResponse.json({ error: "Failed to fetch profile." }, { status: 500 });
@@ -47,8 +51,10 @@ export async function PUT(req: Request) {
         const body = await req.json();
         const validation = ProfileUpdateSchema.safeParse(body);
         if (!validation.success) {
+            console.error("[Profile PUT] Zod validation failed:", JSON.stringify(validation.error.issues));
             return NextResponse.json({
-                error: validation.error.issues[0].message
+                error: validation.error.issues[0].message,
+                ...(process.env.NODE_ENV !== "production" ? { issues: validation.error.issues.map(i => ({ path: i.path.join("."), message: i.message })) } : {}),
             }, { status: 400 });
         }
 
@@ -62,12 +68,20 @@ export async function PUT(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.detail || "Profile update failed." }, { status: response.status });
+            // Pass through the backend status code (including 409 for DST conflicts)
+            // and include all error detail fields
+            return NextResponse.json({ 
+                error: data.error || data.detail || "Profile update failed.",
+                ...(data.dst_conflict ? { dst_conflict: data.dst_conflict } : {}),
+                ...(data.message ? { message: data.message } : {}),
+            }, { status: response.status });
         }
 
         return NextResponse.json({ 
             message: "Profile successfully aligned with the stars!",
-            user: data.user
+            user: data.user,
+            ...(data.profileComplete !== undefined ? { profileComplete: data.profileComplete } : {}),
+            ...(data.requiresReanalysis !== undefined ? { requiresReanalysis: data.requiresReanalysis } : {}),
         });
 
     } catch (error) {

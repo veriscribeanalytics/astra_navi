@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
 import { clientFetch } from '@/lib/apiClient';
+import { useTranslation } from '@/hooks';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, BookOpen, Moon, Star, Activity, Compass, Sparkles, Users, Leaf } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -25,6 +26,7 @@ interface HoroscopeData {
 
 export default function RashisClient() {
     const { isLoggedIn } = useAuth();
+    const { language } = useTranslation();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -41,6 +43,7 @@ export default function RashisClient() {
 
     const [horoscopeData, setHoroscopeData] = React.useState<HoroscopeData | null>(null);
     const [horoscopeLoading, setHoroscopeLoading] = React.useState(false);
+    const [horoscopeError, setHoroscopeError] = React.useState<string | null>(null);
 
     // Sync state FROM URL to handle deep-linking and back/forward navigation
     React.useEffect(() => {
@@ -75,27 +78,130 @@ export default function RashisClient() {
         }
     }, [viewMode, selectedRashi.id, router]);
 
-    // Only fetch horoscope when we're actually viewing a specific rashi
-    React.useEffect(() => {
-        if (viewMode !== 'rashi') return;
+// Only fetch horoscope when we're actually viewing a specific rashi
+        React.useEffect(() => {
+            if (viewMode !== 'rashi') return;
 
-        const fetchHoroscope = async () => {
-            setHoroscopeLoading(true);
-            try {
-                const response = await clientFetch(`/api/horoscope-general?sign=${encodeURIComponent(selectedRashi.nameEn)}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setHoroscopeData(data);
+            let cancelled = false;
+
+            /**
+             * Unwrap a backend "typed primitive" wrapper.
+             *
+             * The FastAPI backend sometimes returns values wrapped as:
+             *   { value: "Social", type: "positive" }   → extract .value
+             *   { text: "Be cautious...", type: "warning" } → extract .text
+             *   { value: 59 }                            → extract .value
+             *
+             * Legitimate nested objects (like lucky: {color, number}) are left intact.
+             */
+            const unwrapPrimitive = (v: unknown): unknown => {
+                if (v === null || v === undefined) return v;
+                if (typeof v !== 'object' || Array.isArray(v)) return v;
+
+                const obj = v as Record<string, unknown>;
+                const keys = Object.keys(obj);
+
+                // {value, type} wrapper → extract .value
+                if (keys.length === 2 && 'value' in obj && 'type' in obj) {
+                    console.log('[RashisClient] Unwrapping {value,type}:', v);
+                    return unwrapPrimitive(obj.value);
                 }
-            } catch (err) {
-                console.error("Failed to fetch general horoscope:", err);
-            } finally {
-                setHoroscopeLoading(false);
-            }
-        };
+                // {text, type} wrapper → extract .text
+                if (keys.length === 2 && 'text' in obj && 'type' in obj) {
+                    console.log('[RashisClient] Unwrapping {text,type}:', v);
+                    return unwrapPrimitive(obj.text);
+                }
+                // {value} single-key wrapper → extract .value
+                if (keys.length === 1 && 'value' in obj) {
+                    console.log('[RashisClient] Unwrapping {value}:', v);
+                    return unwrapPrimitive(obj.value);
+                }
+                // Anything else is a legitimate nested object — keep it
+                return v;
+            };
 
-        fetchHoroscope();
-    }, [selectedRashi.nameEn, viewMode]);
+            /**
+             * Map the backend response to the flat HoroscopeData interface.
+             *
+             * Backend structure:
+             *   mood: {value, type}        → mood (string)
+             *   lucky: {color, number}     → lucky_color, lucky_number
+             *   tip: {text, type}          → tip (string)
+             *   areas_text.love.insight    → love (string)
+             *   areas_text.career.insight  → career (string)
+             *   areas_text.health.insight  → health (string)
+             *   areas_text.finance.insight → finance (string)
+             *
+             * Each extracted value is also run through unwrapPrimitive as a safety net.
+             */
+            const mapBackendToHoroscopeData = (raw: Record<string, unknown>): HoroscopeData => {
+                const mood = unwrapPrimitive(raw.mood);
+                const lucky = raw.lucky as Record<string, unknown> | undefined;
+                const tip = unwrapPrimitive(raw.tip);
+                const areasText = raw.areas_text as Record<string, Record<string, unknown>> | undefined;
+
+                const data: HoroscopeData = {
+                    mood: typeof mood === 'string' ? mood : undefined,
+                    lucky_color: typeof lucky?.color === 'string' ? String(unwrapPrimitive(lucky.color)) : undefined,
+                    lucky_number: typeof lucky?.number === 'number' ? lucky.number : undefined,
+                    tip: typeof tip === 'string' ? tip : undefined,
+                    career: typeof areasText?.career?.insight === 'string' ? String(unwrapPrimitive(areasText.career.insight)) : undefined,
+                    love: typeof areasText?.love?.insight === 'string' ? String(unwrapPrimitive(areasText.love.insight)) : undefined,
+                    health: typeof areasText?.health?.insight === 'string' ? String(unwrapPrimitive(areasText.health.insight)) : undefined,
+                    finance: typeof areasText?.finance?.insight === 'string' ? String(unwrapPrimitive(areasText.finance.insight)) : undefined,
+                };
+
+                console.log('[RashisClient] Mapped horoscope data:', data);
+                return data;
+            };
+
+            const fetchHoroscope = async () => {
+                setHoroscopeLoading(true);
+                setHoroscopeError(null);
+                try {
+                    const url = `/api/horoscope-general?sign=${encodeURIComponent(selectedRashi.nameEn)}&lang=${encodeURIComponent(language)}`;
+                    console.log('[RashisClient] Fetching horoscope:', url);
+                    const response = await clientFetch(url);
+                    console.log('[RashisClient] Horoscope response status:', response.status, 'ok:', response.ok);
+                    if (response.ok) {
+                        const raw = await response.json();
+                        console.log('[RashisClient] Horoscope raw keys:', Object.keys(raw));
+                        const data = mapBackendToHoroscopeData(raw as Record<string, unknown>);
+                        if (!cancelled) {
+                            setHoroscopeData(data);
+                        }
+                    } else {
+                        // Parse the error body for a user-friendly message
+                        let errorMsg = 'Unable to load horoscope at this time.';
+                        try {
+                            const errData = await response.json();
+                            if (errData?.error) errorMsg = errData.error;
+                        } catch { /* body not JSON — keep default */ }
+                        console.warn('[RashisClient] Horoscope fetch returned', response.status, ':', errorMsg);
+                        if (!cancelled) {
+                            setHoroscopeError(errorMsg);
+                        }
+                    }
+                } catch (err: unknown) {
+                    // clientFetch only throws for 401/429 signOut flows — if we reach
+                    // here the signOut has already been initiated or the error was
+                    // caught before the redirect.  Still log and show gracefully.
+                    const msg = err instanceof Error ? err.message : 'Network error';
+                    console.error('[RashisClient] Horoscope fetch threw:', msg);
+                    if (!cancelled) {
+                        setHoroscopeError('Could not reach the horoscope service. Please try again.');
+                    }
+                } finally {
+                    if (!cancelled) {
+                        setHoroscopeLoading(false);
+                    }
+                }
+            };
+
+            fetchHoroscope();
+
+            return () => { cancelled = true; };
+        }, [selectedRashi.nameEn, viewMode, language]);
 
     return (
         <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
@@ -416,6 +522,8 @@ export default function RashisClient() {
                                                                 <div className="h-5 flex items-center justify-center w-full px-2">
                                                                     {horoscopeLoading ? (
                                                                         <Skeleton height={14} width="100%" />
+                                                                    ) : horoscopeError ? (
+                                                                        <span className="text-xs text-rose-400 font-bold truncate w-full">Error</span>
                                                                     ) : (
                                                                         <span className="text-sm font-bold text-foreground/90 truncate w-full">
                                                                             {stat.val || '—'}
@@ -425,6 +533,13 @@ export default function RashisClient() {
                                                             </div>
                                                         ))}
                                                     </div>
+
+                                                    {/* Error banner for horoscope fetch failures */}
+                                                    {horoscopeError && !horoscopeLoading && (
+                                                        <div className="px-5 py-3 border-b border-outline-variant/20 bg-rose-500/5">
+                                                            <p className="text-xs text-rose-400 leading-relaxed text-center">{horoscopeError}</p>
+                                                        </div>
+                                                    )}
 
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 lg:divide-y-0 lg:grid-cols-1 xl:grid-cols-2 xl:divide-y-0 divide-outline-variant/10">
                                                         {[
@@ -442,6 +557,8 @@ export default function RashisClient() {
                                                                         <Skeleton height={12} width="100%" />
                                                                         <Skeleton height={12} width="80%" />
                                                                     </div>
+                                                                ) : horoscopeError ? (
+                                                                    <p className="text-xs text-rose-400/70 leading-relaxed italic">{horoscopeError}</p>
                                                                 ) : (
                                                                     <p className="text-sm text-foreground/70 leading-relaxed">{item.val || 'Cosmic energy is aligning...'}</p>
                                                                 )}
@@ -452,6 +569,10 @@ export default function RashisClient() {
                                                     <div className="p-5 bg-surface/5 border-t border-outline-variant/20 flex flex-col items-center justify-center text-center shrink-0 h-[100px]">
                                                         {horoscopeLoading ? (
                                                             <Skeleton height={18} width={200} />
+                                                        ) : horoscopeError ? (
+                                                            <p className="text-[13px] font-medium text-rose-400/50 italic max-w-sm">
+                                                                Retry to receive cosmic guidance.
+                                                            </p>
                                                         ) : (
                                                             <p className="text-[15px] font-bold text-foreground italic max-w-sm">
                                                                 &quot;{horoscopeData?.tip || 'Follow the cosmic flow today.'}&quot;

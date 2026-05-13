@@ -8,6 +8,7 @@ import { backendFetch } from '@/lib/backendClient';
  * 
  * Proxies message requests to FastAPI backend.
  * Streams the response through to the frontend.
+ * Language field is now forwarded via SendMessageSchema.
  */
 export async function POST(
   req: NextRequest,

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ALL_FONT_VARIABLES } from "@/lib/fonts";
@@ -18,15 +19,22 @@ export const metadata: Metadata = {
   description: "Bridging ancient Vedic wisdom with modern AI precision.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get("theme")?.value;
+  const theme = themeCookie === "dark" ? "dark" : "light";
+  // Read language cookie so server renders in the user's preferred language,
+  // eliminating hydration mismatches between SSR and client.
+  const languageCookie = cookieStore.get("NEXT_LOCALE")?.value || "en";
+
   return (
     <html
-      lang="en"
-      className={`${ALL_FONT_VARIABLES} h-full antialiased`}
+      lang={languageCookie}
+      className={`${ALL_FONT_VARIABLES} h-full antialiased ${theme}`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
@@ -36,28 +44,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <AsyncStylesheet href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const storageTheme = localStorage.getItem('theme');
-                  let theme = 'light';
-                  if (storageTheme === 'dark' || storageTheme === 'light') {
-                    theme = storageTheme;
-                  } else if (storageTheme) {
-                    localStorage.removeItem('theme');
-                  }
-                  document.documentElement.classList.remove('light', 'dark');
-                  document.documentElement.classList.add(theme);
-                } catch (e) {
-                  console.warn('Theme initialization failed:', e);
-                  document.documentElement.classList.add('light');
-                }
-              })();
-            `,
-          }}
-        />
       </head>
       <body 
         className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-full flex flex-col relative h-full"
@@ -65,7 +51,7 @@ export default function RootLayout({
       >
         <ErrorBoundary>
           <SessionProvider refetchInterval={5 * 60}>
-            <LanguageProvider>
+            <LanguageProvider initialLanguage={languageCookie}>
               <AuthProvider>
                 <ChatProvider>
                   <ThemeProvider>

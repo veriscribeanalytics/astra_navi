@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '@/components/ui/Card';
 import { Activity, ChevronDown, AlertTriangle, X, Info } from 'lucide-react';
 import { clientFetch } from '@/lib/apiClient';
@@ -59,6 +59,12 @@ export default function HealthForecastPanel() {
     const [error, setError] = useState<string | null>(null);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
+    // Invalidate cached data when language changes so next toggle refetches
+    useEffect(() => {
+        setData(null);
+        setError(null);
+    }, [language]);
+
     const fetchForecast = async () => {
         if (data) {
             setIsOpen(true);
@@ -67,7 +73,7 @@ export default function HealthForecastPanel() {
         setLoading(true);
         setError(null);
         try {
-            const res = await clientFetch(`/api/forecast-health?days_back=3&days_forward=3`);
+            const res = await clientFetch(`/api/forecast-health?days_back=3&days_forward=3&lang=${language}`);
             if (!res.ok) throw new Error('Failed to fetch health forecast');
             const result = await res.json();
             setData(result);

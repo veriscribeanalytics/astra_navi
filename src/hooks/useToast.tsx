@@ -35,30 +35,29 @@ const removeGlobalToast = (id: number) => {
 };
 
 export const Toaster = () => {
-  const [toasts, setToasts] = useState<ToastItem[]>(() => {
+  const [toasts, setToasts] = useState<ToastItem[]>(() => globalToasts);
+
+  useEffect(() => {
     // Restore toasts from previous hard session (e.g. after logout refresh)
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('astraNaviToasts');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            // Keep toasts that haven't timed out drastically (in case of stale data)
-            const valid = (parsed as ToastItem[]).filter((t) => Date.now() - t.id < 10000);
-            if (valid.length > 0) {
-              globalToasts = valid;
-              return valid;
-            }
+    const stored = sessionStorage.getItem('astraNaviToasts');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Keep toasts that haven't timed out drastically (in case of stale data)
+          const valid = (parsed as ToastItem[]).filter((t) => Date.now() - t.id < 10000);
+          if (valid.length > 0) {
+            globalToasts = valid;
+            setToasts(valid);
           }
-        } catch {
-          // Ignore parse errors
-        } finally {
-          sessionStorage.removeItem('astraNaviToasts');
         }
+      } catch {
+        // Ignore parse errors
+      } finally {
+        sessionStorage.removeItem('astraNaviToasts');
       }
     }
-    return globalToasts;
-  });
+  }, []);
 
   useEffect(() => {
     listeners.add(setToasts);

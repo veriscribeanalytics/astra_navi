@@ -305,7 +305,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
 
 // ─── Main Component ─────────────────────────────
 export default function DashboardHome() {
-    const { user, refreshUser, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
+    const { user, refreshProfile, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
     const { 
         activeChat, activeChatId,
         sendMessage, createNewChat, selectChat, resetChat, isSending, 
@@ -461,19 +461,28 @@ export default function DashboardHome() {
         if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
         
         // Redirect to onboarding if profile is incomplete
-        // Bug 1 Fix: Add redirect guard and return URL
+        // (profileComplete now uses backend flag which considers birth location fields)
         if (profileFetched && !profileComplete && !userLoading && !redirectedRef.current && pathname !== '/profile') {
             const timer = setTimeout(() => {
                 // Re-check after delay to allow state to settle
                 if (!profileComplete && !redirectedRef.current) {
                     redirectedRef.current = true;
+                    // --- DIAGNOSTIC LOG ---
+                    console.log('[DashboardHome] profileComplete is FALSE — redirecting to /profile onboarding');
+                    console.log('[DashboardHome] profileComplete:', profileComplete, 'profileFetched:', profileFetched);
+                    console.log('[DashboardHome] user birth fields:', {
+                        name: !!user?.name, dob: !!user?.dob, tob: !!user?.tob, pob: !!user?.pob,
+                        birthLatitude: user?.birthLatitude, birthLongitude: user?.birthLongitude,
+                        birthTimezoneName: !!user?.birthTimezoneName,
+                    });
                     router.push(`/profile?onboarding=true&return=${encodeURIComponent(pathname || '/')}`);
                 }
             }, 1000); // 1s delay to allow AuthContext to settle
             return () => clearTimeout(timer);
         }
 
-        const hasBirthDetails = user.dob && user.tob && user.pob;
+        const hasBirthDetails = user.dob && user.tob && user.pob &&
+            typeof user.birthLatitude === 'number' && typeof user.birthLongitude === 'number';
         const hasSigns = user.moonSign || user.sunSign || user.lagnaSign;
         const hasAstrologyData = !!user.astrologyData;
         if (hasBirthDetails && !hasSigns && !hasAstrologyData) {
@@ -484,24 +493,13 @@ export default function DashboardHome() {
                 body: JSON.stringify({ force_refresh: false })
             }).then(async (res) => {
                 if (res.ok) {
-                    const profileRes = await clientFetch(`/api/user/profile?email=${encodeURIComponent(user.email!)}`);
-                    if (profileRes.ok) {
-                        const profileData = await profileRes.json();
-                        if (profileData.user) {
-                            refreshUser({
-                                moonSign: profileData.user.moonSign,
-                                sunSign: profileData.user.sunSign,
-                                lagnaSign: profileData.user.lagnaSign,
-                                astrologyData: profileData.user.astrologyData,
-                            });
-                        }
-                    }
+                    await refreshProfile();
                 }
             }).catch(err => {
                 console.warn('[Dashboard] Auto analyze-full failed:', err);
             });
         }
-    }, [user?.email, user?.dob, user?.tob, user?.pob, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshUser, profileComplete, profileFetched, router, pathname]);
+    }, [user?.email, user?.name, user?.dob, user?.tob, user?.pob, user?.birthLatitude, user?.birthLongitude, user?.birthTimezoneName, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshProfile, profileComplete, profileFetched, router, pathname]);
 
     const currentDate = new Date().toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 

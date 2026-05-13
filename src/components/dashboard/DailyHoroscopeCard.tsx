@@ -4,10 +4,12 @@ import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation';
 import { clientFetch } from '@/lib/apiClient';
 import Card from '@/components/ui/Card';
-import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, ChevronRight } from 'lucide-react';
+import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, ChevronRight, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/hooks';
-import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
+import { getRashiData } from '@/lib/astrology';
+import MiniChart, { ForecastDay } from './MiniChart';
+import DailyHoroscopeCardSkeleton from './DailyHoroscopeCardSkeleton';
 
 interface HoroscopeData {
     user?: { sign: string; name: string };
@@ -41,6 +43,10 @@ interface HoroscopeData {
         items: Array<{ technical: string; simple: string; importance: string }>;
     };
     system?: { is_personalized: boolean; language: string };
+    // Profile-location-required error flags
+    calculation_unavailable?: boolean;
+    profile_location_required?: boolean;
+    message?: string;
     // Compatibility fields (optional, if any old code still needs them)
     sign?: string;
     date_display?: string;
@@ -52,13 +58,6 @@ interface HoroscopeData {
     today_scores?: Record<string, number>;
 }
 
-interface ForecastDay {
-    date: string; is_today: boolean; score: number; text: string;
-    dominant_planet: string; 
-    personalized_alerts: (string | { technical: string; simple: string })[];
-    transits?: Record<string, { sign: string; house_from_moon: number; house_from_lagna: number }>;
-}
-
 interface ForecastData {
     area: string; days: ForecastDay[];
     summary: { best_day: string; worst_day: string; average_score: number; trend: string; };
@@ -68,216 +67,6 @@ interface ModalData {
     label: string; score: number; info: string; icon: React.ReactNode;
     color: string; bg: string; colorHex: string; area: string;
 }
-
-// Mini sparkline SVG
-function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorHex: string; activeDate?: string }) {
-    const { t } = useTranslation();
-    const h = 60, w = 220;
-    const points = days.map((d, i) => ({ x: (i / (days.length - 1)) * w, y: h - (d.score / 100) * h }));
-    const pathD = catmullRomToBezier(points);
-    const areaD = catmullRomArea(points, h);
-
-    const todayIndex = days.findIndex(d => d.is_today);
-    const todayX = todayIndex !== -1 ? points[todayIndex].x : w / 2;
-
-    const bestPoint = points[days.reduce((bestIdx, d, i) => d.score > days[bestIdx].score ? i : bestIdx, 0)];
-    const worstPoint = points[days.reduce((worstIdx, d, i) => d.score < days[worstIdx].score ? i : worstIdx, 0)];
-
-    return (
-        <div className="relative">
-            <svg viewBox={`-24 -14 ${w + 34} ${h + 20}`} className="w-full h-auto overflow-visible">
-                <defs>
-                    <linearGradient id={`area-${colorHex.replace('#','')}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
-                        <stop offset="100%" stopColor={colorHex} stopOpacity="0.01" />
-                    </linearGradient>
-                    <clipPath id={`reveal-${colorHex.replace('#','')}`}>
-                        <rect x="-24" y="-14" width="0" height={h + 30}>
-                            <animate attributeName="width" from="0" to={w + 40} dur="1.2s" fill="freeze" begin="0.3s" />
-                        </rect>
-                    </clipPath>
-                </defs>
-
-                {/* Y-Axis Labels & Grid */}
-                {[25, 50, 75].map(v => {
-                    const gridY = h - (v / 100) * h;
-                    return (
-                        <g key={v}>
-                            <line x1="0" y1={gridY} x2={w} y2={gridY} stroke="var(--color-foreground)" strokeOpacity="0.1" strokeWidth="0.5" />
-                            <text x="-8" y={gridY + 2} textAnchor="end" fontSize="5" fill="var(--color-foreground)" fillOpacity="0.2">{v}</text>
-                        </g>
-                    );
-                })}
-
-                {/* Past / Future Demarcation */}
-                <rect x="0" y="0" width={todayX} height={h} fill="currentColor" fillOpacity="0.02" />
-                <rect x={todayX} y="0" width={w - todayX} height={h} fill="currentColor" fillOpacity="0.01" />
-                <line x1={todayX} y1="0" x2={todayX} y2={h} stroke="currentColor" strokeOpacity="0.15" strokeDasharray="2 2" strokeWidth="0.5" />
-                <text x={todayX - 4} y="-4" textAnchor="end" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">{t('horoscope.past')}</text>
-                <text x={todayX + 4} y="-4" textAnchor="start" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">{t('horoscope.forecast')}</text>
-
-                <g clipPath={`url(#reveal-${colorHex.replace('#','')})`}>
-                    <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
-                    <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    {(() => {
-                        // Pre-compute which labels are visible (priority: selected > today > best > worst > normal)
-                        // and reposition labels that would collide with a higher-priority label
-                        const labelPriority = (idx: number) => {
-                            const d = days[idx];
-                            const p = points[idx];
-                            if (activeDate === d.date) return 5;
-                            if (d.is_today) return 4;
-                            if (p === bestPoint) return 3;
-                            if (p === worstPoint) return 2;
-                            return 1; // All points are label-eligible
-                        };
-
-                        // Compute label position for each point: default above, flip below on collision
-                        const LABEL_OFFSET = 10;
-                        const MIN_DIST_X = 16;
-                        const MIN_DIST_Y = 7;
-                        const sorted = points
-                            .map((_, i) => i)
-                            .sort((a, b) => labelPriority(b) - labelPriority(a));
-                        const placed: { x: number; y: number; idx: number }[] = [];
-                        const labelPositions = new Map<number, number>(); // idx → labelY
-                        for (const idx of sorted) {
-                            const p = points[idx];
-                            const aboveY = p.y - LABEL_OFFSET;
-                            const belowY = p.y + LABEL_OFFSET + 4;
-                            const collidesAbove = placed.some(pl =>
-                                Math.abs(pl.x - p.x) < MIN_DIST_X && Math.abs(pl.y - aboveY) < MIN_DIST_Y
-                            );
-                            if (!collidesAbove) {
-                                labelPositions.set(idx, aboveY);
-                                placed.push({ x: p.x, y: aboveY, idx });
-                            } else {
-                                const collidesBelow = placed.some(pl =>
-                                    Math.abs(pl.x - p.x) < MIN_DIST_X && Math.abs(pl.y - belowY) < MIN_DIST_Y
-                                );
-                                if (!collidesBelow) {
-                                    labelPositions.set(idx, belowY);
-                                    placed.push({ x: p.x, y: belowY, idx });
-                                }
-                                // If both above and below collide, skip this label
-                            }
-                        }
-
-                        return points.map((p, i) => {
-                            const d = days[i];
-                            const isSelected = activeDate === d.date;
-                            const isToday = d.is_today;
-                            const isBest = p === bestPoint;
-                            const isWorst = p === worstPoint;
-                            const labelY = labelPositions.get(i);
-
-                            return (
-                                <g key={i}>
-                                    {/* Static Point Representation */}
-                                    {(d.is_today || isSelected) && <circle cx={p.x} cy={p.y} r="5" fill={colorHex} opacity={isSelected ? 0.15 : 0.08} />}
-                                    <circle cx={p.x} cy={p.y} r={d.is_today ? 3 : 1.5} 
-                                        fill={d.is_today || isSelected ? colorHex : 'transparent'} 
-                                        stroke={colorHex} strokeWidth={d.is_today || isSelected ? 0 : 1} />
-                                    
-                                    {labelY !== undefined && (
-                                        <text x={p.x} y={labelY} textAnchor="middle" 
-                                            fill={isSelected ? colorHex : 'var(--color-foreground)'} 
-                                            fillOpacity={isSelected ? 1 : isToday || isBest || isWorst ? 0.5 : 0.35} 
-                                            fontSize="7" fontWeight="bold">{d.score}</text>
-                                    )}
-
-                                    {isSelected && <line x1={p.x} y1={p.y + 4} x2={p.x} y2={h + 20} stroke={colorHex} strokeWidth="1" strokeDasharray="3 3" opacity="0.2" />}
-                                </g>
-                            );
-                        });
-                    })()}
-                </g>
-            </svg>
-            
-            {/* Timeline connection bridge */}
-            <div className="relative h-1 mt-0.5 mx-2 sm:mx-8" />
-        </div>
-    );
-}
-
-// ΓöÇΓöÇΓöÇ Skeleton Sub-component ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-import { Skeleton, SkeletonCircle, SkeletonBlock, SkeletonText } from '@/components/ui/Skeleton';
-
-function DailyHoroscopeCardSkeleton() {
-    return (
-        <div className="flex flex-col h-full">
-            {/* Highlight Banner Skeleton */}
-            <div className="bg-secondary/5 border-b border-secondary/10 px-6 py-2">
-                <Skeleton height={14} className="w-2/3 mx-auto sm:mx-0" />
-            </div>
-
-            {/* HERO SECTION Skeleton */}
-            <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-secondary/[0.03] border-b border-white/5">
-                <div className="lg:col-span-8 flex items-center gap-5">
-                    <SkeletonBlock height={64} className="w-16 h-16 rounded-2xl shrink-0" />
-                    <div className="flex-1 space-y-3">
-                        <Skeleton height={14} width={120} />
-                        <SkeletonText lines={2} className="text-xl" />
-                    </div>
-                </div>
-                <div className="lg:col-span-4 flex items-center justify-center lg:justify-end gap-6 lg:border-l border-white/5 lg:pl-8">
-                    <div className="relative">
-                        <SkeletonCircle size={96} className="sm:w-24 sm:h-24" />
-                        <div className="absolute inset-[-10%] rounded-full bg-secondary/5 blur-xl animate-pulse" />
-                    </div>
-                    <div className="hidden lg:flex flex-col gap-2">
-                        <SkeletonBlock height={40} className="w-32 rounded-xl" />
-                    </div>
-                </div>
-            </div>
-
-            {/* HEADER & STATS Skeleton (Unified) */}
-            <div className="px-6 sm:px-8 py-5 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="md:col-span-2 flex flex-col justify-between">
-                    <div>
-                        <Skeleton height={12} width={140} className="mb-2" />
-                        <Skeleton height={32} width={200} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-white/5">
-                        <div className="space-y-2">
-                            <Skeleton height={10} width={40} />
-                            <Skeleton height={16} width={80} />
-                        </div>
-                        <div className="space-y-2">
-                            <Skeleton height={10} width={40} />
-                            <Skeleton height={16} width={80} />
-                        </div>
-                        <div className="space-y-2">
-                            <Skeleton height={10} width={40} />
-                            <Skeleton height={16} width={80} />
-                        </div>
-                        <div className="space-y-2">
-                            <Skeleton height={10} width={40} />
-                            <Skeleton height={16} width={80} />
-                        </div>
-                    </div>
-                </div>
-                <div className="md:col-span-2">
-                    <SkeletonBlock height={140} className="w-full rounded-[20px]" />
-                </div>
-            </div>
-
-            {/* CATEGORY SCORES Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">
-                {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex items-center gap-5 p-5 sm:p-7 border-outline-variant/10 border-b md:border-r last:border-r-0">
-                        <SkeletonBlock height={80} className="w-20 rounded-[28px] shrink-0" />
-                        <div className="flex-1 space-y-3">
-                            <Skeleton height={32} width={80} />
-                            <SkeletonText lines={2} />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
 
 export default function DailyHoroscopeCard({ 
     sign, 
@@ -295,6 +84,8 @@ export default function DailyHoroscopeCard({
     const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [profileLocationRequired, setProfileLocationRequired] = useState(false);
+    const [profileLocationMessage, setProfileLocationMessage] = useState<string>('');
     const [showContent, setShowContent] = useState(false);
     const [animatedScore, setAnimatedScore] = useState(0);
     const [activeModal, setActiveModal] = useState<ModalData | null>(null);
@@ -305,8 +96,9 @@ export default function DailyHoroscopeCard({
     
     // Optimization Refs
     const currentSign = horoscope?.user?.sign || sign || 'Aries';
-    
-    const translatedSign = t(`signs.${currentSign.toLowerCase()}`);
+    // Normalize sign name to English ID for t() lookup — backend may return Hindi (e.g. "सिंह") or Sanskrit ("Simha")
+    const normalizedSignId = getRashiData(currentSign)?.id || currentSign.toLowerCase();
+    const translatedSign = t(`signs.${normalizedSignId}`);
 
     const _fetchedAreasRef = useRef<Set<string>>(new Set());
     const forecastDataCacheRef = useRef<Map<string, ForecastData>>(new Map());
@@ -321,17 +113,43 @@ export default function DailyHoroscopeCard({
 
         (async () => {
             try {
-                let url = isGeneral ? '/api/horoscope-general' : '/api/daily-horoscope';
-                if (sign) url += `?sign=${encodeURIComponent(sign)}`;
+                const params = new URLSearchParams();
+                if (sign) params.set('sign', sign);
+                params.set('lang', language);
+                let url = isGeneral ? '/api/horoscope-general?' : '/api/daily-horoscope?';
+                url += params.toString();
                 
                 // Prevent duplicate fetches for same URL
                 if (url === lastFetchedUrlRef.current && horoscope) return;
                 lastFetchedUrlRef.current = url;
 
                 setLoading(true);
+                setProfileLocationRequired(false);
                 const res = await clientFetch(url);
-                if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Failed'); }
+                
+                if (!res.ok) { 
+                    const ed = await res.json().catch(() => ({}));
+                    // Check for profile-location-required error
+                    if (ed.profile_location_required || ed.calculation_unavailable) {
+                        setProfileLocationRequired(true);
+                        setProfileLocationMessage(ed.message || 'Please confirm your exact birth location and timezone in your profile.');
+                        setError(null);
+                        setLoading(false);
+                        return;
+                    }
+                    throw new Error(ed.error || 'Failed'); 
+                }
                 const data = await res.json();
+                
+                // Also check for profile_location_required in a successful response
+                // (some backends may return 200 with these flags)
+                if (data.calculation_unavailable || data.profile_location_required) {
+                    setProfileLocationRequired(true);
+                    setProfileLocationMessage(data.message || 'Please confirm your exact birth location and timezone in your profile.');
+                    setError(null);
+                    setLoading(false);
+                    return;
+                }
                 
                 if (sign !== lastSignRef.current) {
                     lastSignRef.current = sign;
@@ -346,7 +164,7 @@ export default function DailyHoroscopeCard({
             }
             finally { setLoading(false); }
         })();
-    }, [sign, isGeneral, userLoading]);
+    }, [sign, isGeneral, userLoading, language]);
 
     // Rotation for personalized alerts
     useEffect(() => {
@@ -357,7 +175,7 @@ export default function DailyHoroscopeCard({
             setActiveAlertIdx(prev => (prev + 1) % allAlertsCount);
         }, 5000);
         return () => clearInterval(int);
-    }, [horoscope?.alerts]);
+    }, [horoscope]);
 
     // Initial content show and score animation
     useEffect(() => {
@@ -430,7 +248,7 @@ export default function DailyHoroscopeCard({
             return;
         }
         setForecastLoading(true);
-        clientFetch(`/api/forecast/${item.area}?days_back=3&days_forward=3`)
+        clientFetch(`/api/forecast/${item.area}?days_back=3&days_forward=3&lang=${language}`)
             .then(r => r.ok ? r.json() : null)
             .then(d => { if (d) setForecast(d); })
             .catch(() => {})
@@ -453,7 +271,25 @@ export default function DailyHoroscopeCard({
         return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short' });
     };
 
-    if (error && !horoscope) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">{t('horoscope.serviceUnavailable')}</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
+    if (profileLocationRequired && !horoscope) return (
+        <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]">
+            <div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6">
+                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/20">
+                    <MapPin className="w-8 h-8 text-secondary" />
+                </div>
+                <h3 className="text-lg font-headline font-bold text-foreground mb-2">{t('horoscope.locationRequired') || 'Exact Birth Location Required'}</h3>
+                <p className="text-sm text-foreground/60 leading-relaxed">{profileLocationMessage || 'Please confirm your exact birth location and timezone in your profile for personalized horoscope calculations.'}</p>
+                <button 
+                    onClick={() => router.push('/profile?onboarding=true&return=/')}
+                    className="px-6 py-3 rounded-2xl bg-secondary text-background font-bold text-xs uppercase tracking-widest hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
+                >
+                    <MapPin className="w-4 h-4" /> {t('horoscope.updateLocation') || 'Confirm Birth Location'} <ArrowRight className="w-4 h-4" />
+                </button>
+            </div>
+        </Card>
+    );
+
+    if (error && !horoscope && !profileLocationRequired) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">{t('horoscope.serviceUnavailable')}</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
 
     const _displayDate = horoscope?.meta?.date_display || horoscope?.date_display || dateString;
     
@@ -575,7 +411,7 @@ export default function DailyHoroscopeCard({
                     <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 items-stretch">
                         {/* LEFT: Sign & Cramped Stats */}
                         <div className="md:col-span-2 flex flex-col justify-between">
-                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${horoscope?.user?.sign || sign || currentSign} characteristics and what they mean for me.`)}>
+                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${normalizedSignId} characteristics and what they mean for me.`)}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <TrendingUp className="w-4 h-4 text-secondary" />
                                     <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">{t('horoscope.personalizedForecast')}</span>

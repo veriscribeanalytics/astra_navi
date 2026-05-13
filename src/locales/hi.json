@@ -386,7 +386,9 @@
     "forecast": "पूर्वानुमान",
     "serviceUnavailable": "सेवा अस्थायी रूप से अनुपलब्ध",
     "todaysHighlightMsg": "आपका {label} स्कोर प्रभावशाली {score}% है",
-    "7DayTrajectory": "7-दिन का प्रक्षेपपथ"
+    "7DayTrajectory": "7-दिन का प्रक्षेपपथ",
+    "locationRequired": "सटीक जन्म स्थान आवश्यक",
+    "updateLocation": "जन्म स्थान पुष्टि करें"
   },
   "login": {
     "inscribeIdentity": "पहचान दर्ज करें",

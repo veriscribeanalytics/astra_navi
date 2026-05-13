@@ -25,6 +25,36 @@ export const PLANET_TO_ICON: Record<string, string> = {
     'Venus': '/icons/planets/venus.png',
 };
 
+/**
+ * Normalize a localized planet name (Hindi, Sanskrit, transliterated, etc.)
+ * to its canonical English key used by PLANET_TO_ICON, PLANET_COLORS, PLANET_GLYPHS.
+ * Falls back to the raw input if no match is found.
+ */
+export function normalizePlanetName(name: string): string {
+    if (!name) return name;
+    const s = name.toLowerCase().trim();
+    // Sun: सूर्य (Surya), सूरज (Suraj), Ravi
+    if (s === 'sun' || s.includes('सूर्य') || s.includes('सूरज') || s.includes('surya') || s.includes('suraj') || s.includes('ravi')) return 'Sun';
+    // Moon: चंद्रमा (Chandrama), चन्द्र (Chandra), सोम (Soma)
+    if (s === 'moon' || s.includes('चंद्रमा') || s.includes('चन्द्र') || s.includes('chandra') || s.includes('chandrama') || s.includes('सोम') || s.includes('soma')) return 'Moon';
+    // Mars: मंगल (Mangal), मङ्गल, Kuja
+    if (s === 'mars' || s.includes('मंगल') || s.includes('मङ्गल') || s.includes('mangal') || s.includes('kuja')) return 'Mars';
+    // Mercury: बुध (Budh)
+    if (s === 'mercury' || s.includes('बुध') || s.includes('budh')) return 'Mercury';
+    // Jupiter: गुरु (Guru), बृहस्पति (Brihaspati)
+    if (s === 'jupiter' || s.includes('गुरु') || s.includes('बृहस्पति') || s.includes('brihaspati') || s.includes('guru')) return 'Jupiter';
+    // Venus: शुक्र (Shukra)
+    if (s === 'venus' || s.includes('शुक्र') || s.includes('shukra')) return 'Venus';
+    // Saturn: शनि (Shani)
+    if (s === 'saturn' || s.includes('शनि') || s.includes('shani')) return 'Saturn';
+    // Rahu: राहु (Rahu)
+    if (s === 'rahu' || s.includes('राहु')) return 'Rahu';
+    // Ketu: केतु (Ketu)
+    if (s === 'ketu' || s.includes('केतु')) return 'Ketu';
+    // No match — return raw name as-is (might already be English)
+    return name;
+}
+
 export const getDignityStyle = (dignity: string) => {
     if (dignity === 'Exalted') return { text: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', label: 'Exalted', dot: 'bg-emerald-400' };
     if (dignity === 'Debilitated') return { text: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/30', label: 'Debilitated', dot: 'bg-red-400' };

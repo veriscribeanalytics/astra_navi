@@ -144,8 +144,8 @@ export async function getAuthContext(req: Request | NextRequest) {
   }
 
   // Check if accessToken is present
-  let accessToken = token.accessToken as string | undefined;
-  let currentRefreshToken = token.refreshToken as string | undefined;
+  const accessToken = token.accessToken as string | undefined;
+  const currentRefreshToken = token.refreshToken as string | undefined;
 
   if (!accessToken) {
     console.error("[getAuthContext] JWT decoded but accessToken is missing! Token keys:", Object.keys(token));

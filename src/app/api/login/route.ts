@@ -49,7 +49,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             message: "Welcome back.",
-            user: data.user
+            user: data.user,
+            profileComplete: data.profileComplete
         });
 
     } catch (error) {

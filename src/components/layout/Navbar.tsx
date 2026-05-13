@@ -312,6 +312,60 @@ const Navbar: React.FC = () => {
         }, 1500);
     };
     
+    const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        const target = e.target as HTMLElement;
+        const isMenuButton = target.getAttribute('role') === 'menuitem' && target.tagName === 'BUTTON';
+        const isMenuLink = target.getAttribute('role') === 'menuitem' && target.tagName === 'A';
+        
+        if (!isMenuButton && !isMenuLink) return;
+
+        const menubar = e.currentTarget;
+        const allButtons = Array.from(menubar.querySelectorAll('button[role="menuitem"]'));
+        
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            if (isMenuButton) {
+                const idx = allButtons.indexOf(target);
+                let nextIdx = e.key === 'ArrowRight' ? idx + 1 : idx - 1;
+                if (nextIdx >= allButtons.length) nextIdx = 0;
+                if (nextIdx < 0) nextIdx = allButtons.length - 1;
+                (allButtons[nextIdx] as HTMLElement).focus();
+            }
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (isMenuButton && e.key === 'ArrowDown') {
+                const sectionId = navSections[allButtons.indexOf(target)]?.id;
+                if (hoveredSection !== sectionId) {
+                    setHoveredSection(sectionId);
+                    setTimeout(() => {
+                        const firstLink = menubar.querySelector(`#menu-${sectionId} a[role="menuitem"]`) as HTMLElement;
+                        firstLink?.focus();
+                    }, 50);
+                } else {
+                    const firstLink = menubar.querySelector(`#menu-${sectionId} a[role="menuitem"]`) as HTMLElement;
+                    firstLink?.focus();
+                }
+            } else if (isMenuLink) {
+                const menu = target.closest('[role="menu"]');
+                if (menu) {
+                    const links = Array.from(menu.querySelectorAll('a[role="menuitem"]'));
+                    const idx = links.indexOf(target);
+                    let nextIdx = e.key === 'ArrowDown' ? idx + 1 : idx - 1;
+                    if (nextIdx >= links.length) nextIdx = 0;
+                    if (nextIdx < 0) nextIdx = links.length - 1;
+                    (links[nextIdx] as HTMLElement).focus();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            setHoveredSection(null);
+            if (isMenuLink) {
+                const menu = target.closest('[role="menu"]');
+                const sectionId = menu?.id.replace('menu-', '');
+                const parentBtn = allButtons.find(b => b.getAttribute('aria-controls') === `menu-${sectionId}`);
+                (parentBtn as HTMLElement)?.focus();
+            }
+        }
+    };
+
     const isActive = (path:string) => pathname == path;
 
     return(
@@ -329,19 +383,30 @@ const Navbar: React.FC = () => {
                 </div>
 
                 {/* Center: Navigation Dropdowns */}
-                <div className="flex items-center justify-center space-x-1 lg:space-x-3" role="menubar">
+                <div className="flex items-center justify-center space-x-1 lg:space-x-3" role="menubar" onKeyDown={handleMenuKeyDown}>
                     {navSections.map((section) => (
                         <div 
                             key={section.id}
                             className="relative"
                             onMouseEnter={() => setHoveredSection(section.id)}
                             onMouseLeave={() => setHoveredSection(null)}
+                            onFocus={() => setHoveredSection(section.id)}
+                            onBlur={(e) => {
+                                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                    setHoveredSection(null);
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') setHoveredSection(null);
+                            }}
                             role="none"
                         >
                             <button 
                                 role="menuitem"
                                 aria-haspopup="true"
                                 aria-expanded={hoveredSection === section.id}
+                                aria-controls={`menu-${section.id}`}
+                                onClick={() => setHoveredSection(hoveredSection === section.id ? null : section.id)}
                                 className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-full transition-all duration-300 font-body font-bold text-[11px] lg:text-[12px] tracking-widest uppercase whitespace-nowrap ${hoveredSection === section.id ? 'text-secondary bg-secondary/5' : 'text-primary/70 hover:text-primary'}`}
                             >
                                 {section.label}
@@ -349,7 +414,7 @@ const Navbar: React.FC = () => {
                             </button>
 
                             {/* Mega Dropdown Bridge */}
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`} role="menu">
+                            <div id={`menu-${section.id}`} className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 transform ${hoveredSection === section.id ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible pointer-events-none'}`} role="menu">
                                 {/* Hover Bridge Pseudo-element */}
                                 <div className="absolute top-0 left-0 w-full h-4 -translate-y-full" />
                                 
@@ -452,10 +517,10 @@ const Navbar: React.FC = () => {
                         </Link>
                     ) : (
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
-                            <div className="profile-ring-glow !w-8 !h-8 cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
+                            <button className="profile-ring-glow !w-8 !h-8 cursor-pointer border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 p-0" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label="User menu" aria-expanded={isUserDropdownOpen}>
                                 <div className="profile-comet-dot"></div>
                                 <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
-                            </div>
+                            </button>
                             {isUserDropdownOpen && (
                                 <div className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">

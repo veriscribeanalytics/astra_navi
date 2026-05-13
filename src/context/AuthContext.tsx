@@ -12,6 +12,11 @@ interface User {
     dob?: string;
     tob?: string;
     pob?: string;
+    birthPlaceName?: string;
+    birthLatitude?: number;
+    birthLongitude?: number;
+    birthTimezoneName?: string;
+    birthTimezoneOffsetAtBirth?: number;
     phoneNumber?: string;
     gender?: string;
     maritalStatus?: string;
@@ -42,6 +47,7 @@ interface AuthContextType {
     showLoading: (message?: string, duration?: number) => void;
     setLoadingState: (state: boolean) => void;
     refreshUser: (updates: Partial<User>) => void;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,9 +55,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data: session, status } = useSession();
     const [user, setUser] = useState<User | null>(null);
+    const [profileComplete, setProfileComplete] = useState(false);
     const [profileFetched, setProfileFetched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState<string | undefined>(undefined);
+    const signOutInitiatedRef = useRef(false);
     const fetchInProgressRef = useRef(false);
     const prevEmailRef = useRef<string | null>(null);
     const profileRetryCount = useRef(0);
@@ -59,34 +67,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isLoggedIn = status === 'authenticated';
     const isSessionLoading = status === 'loading';
-    const profileComplete = !!(user?.name && user?.dob && user?.tob && user?.pob);
 
     useEffect(() => {
         if (session?.user) {
             const sessionUser = session.user;
             
-            // Handle NextAuth refresh errors.
-            // Since we fixed the jwt callback to NOT persist errors in the cookie,
-            // these should rarely appear. But if they do, don't sign out immediately —
-            // instead, try to recover by forcing a new sign-in.
-            // Use a counter to only sign out after repeated errors.
+// Handle NextAuth refresh errors.
+            // TokenReuseError and RefreshAccessTokenError are now persisted in the
+            // JWT cookie by the JWT callback so the middleware (auth.config.ts) can
+            // detect them and redirect to /login before the page loads.
             if (sessionUser.error === "TokenReuseError") {
-                console.error("[AuthContext] Token reuse detected in session. Attempting recovery...");
-                // TokenReuseError means the refresh token was already used — the backend
-                // has revoked it. The only recovery is a fresh login. But let's not
-                // cascade-sign-out if the user is actively using the app.
-                // Delay the sign-out by 3s to allow any in-flight requests to complete.
-                const timer = setTimeout(() => {
-                    signOut({ callbackUrl: '/login?error=SessionExpired' });
-                }, 3000);
-                return () => clearTimeout(timer);
+                console.error("[AuthContext] Token reuse detected in session. Signing out immediately.");
+                // TokenReuseError is unrecoverable — the refresh token has been
+                // revoked by the backend.  Sign out & clear the poisoned cookie
+                // immediately; don't wait (the old 3s delay allowed in-flight
+                // requests but the middleware already redirects to /login now).
+                if (!signOutInitiatedRef.current) {
+                  signOutInitiatedRef.current = true;
+                  signOut({ callbackUrl: '/login?error=SessionExpired' });
+                }
+                return;
             } else if (sessionUser.error === "RefreshAccessTokenError") {
-                // Transient error — network issue, etc. Don't sign out immediately.
-                // The next session poll (every 5min by default) will retry the refresh.
-                // If it's truly expired, the user will get 401s on API calls which
-                // clientFetch handles.
+                // Transient error — network issue, etc. The middleware will redirect
+                // to /login, but if the user manages to stay on a page, don't sign
+                // them out aggressively.  The next session poll will retry the
+                // refresh.  If truly expired, clientFetch handles 401s.
                 console.warn("[AuthContext] Refresh token error (possibly transient). Not signing out — will retry on next session poll.");
-            }
+}
             
             // Initial set from session
             if (sessionUser.email) {
@@ -125,17 +132,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             if (data?.user) {
                                 setUser(prev => {
                                     if (!prev) return data.user;
-                                    
-                                    const isSame = 
-                                        prev.email === data.user.email && 
-                                        prev.moonSign === data.user.moonSign &&
-                                        prev.sunSign === data.user.sunSign &&
-                                        prev.lagnaSign === data.user.lagnaSign &&
-                                        prev.name === data.user.name &&
-                                        JSON.stringify(prev.astrologyData) === JSON.stringify(data.user.astrologyData);
-                                    
-                                    return isSame ? prev : { ...prev, ...data.user };
+                                    const merged = { ...prev, ...data.user };
+                                    return JSON.stringify(prev) === JSON.stringify(merged) ? prev : merged;
                                 });
+                                // Use backend's profileComplete flag if provided,
+                                // otherwise fall back to checking required fields
+                                const backendProfileComplete = data.profileComplete;
+                                if (typeof backendProfileComplete === 'boolean') {
+                                    setProfileComplete(backendProfileComplete);
+                                } else {
+                                    // Fallback: profile is complete when all location fields are present
+                                    const u = data.user;
+                                    setProfileComplete(
+                                        !!u.name && !!u.dob && !!u.tob && !!u.pob &&
+                                        typeof u.birthLatitude === 'number' &&
+                                        typeof u.birthLongitude === 'number' &&
+                                        !!u.birthTimezoneName
+                                    );
+                                }
                             } else {
                                 console.warn('[AuthContext] Profile fetch returned no user object. Data keys:', Object.keys(data || {}));
                             }
@@ -156,8 +170,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         } else if (status === 'unauthenticated') {
             setUser(null);
+            setProfileComplete(false);
             setProfileFetched(false);
             fetchInProgressRef.current = false;
+            signOutInitiatedRef.current = false;
             prevEmailRef.current = null;
             profileRetryCount.current = 0;
             resetAuthGrace();
@@ -206,6 +222,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, []);
 
+    const refreshProfile = useCallback(async () => {
+        if (!user?.email) return;
+        try {
+            const res = await clientFetch(`/api/user/profile?email=${encodeURIComponent(user.email)}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data?.user) {
+                setUser(prev => prev ? { ...prev, ...data.user } : data.user);
+                if (typeof data.profileComplete === 'boolean') {
+                    setProfileComplete(data.profileComplete);
+                } else {
+                    const u = data.user;
+                    setProfileComplete(
+                        !!u.name && !!u.dob && !!u.tob && !!u.pob &&
+                        typeof u.birthLatitude === 'number' &&
+                        typeof u.birthLongitude === 'number' &&
+                        !!u.birthTimezoneName
+                    );
+                }
+            }
+        } catch (err) {
+            console.error('[AuthContext] refreshProfile failed:', err);
+        }
+    }, [user?.email]);
+
     return (
         <AuthContext.Provider value={{ 
             isLoggedIn, 
@@ -217,7 +258,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             logout, 
             showLoading, 
             setLoadingState, 
-            refreshUser 
+            refreshUser,
+            refreshProfile 
         }}>
             {children}
             <LoadingOverlay isVisible={isLoading} message={loadingMessage} />

@@ -3,14 +3,21 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/auth.config";
 import { JWT } from "next-auth/jwt";
 
-let refreshPromise: Promise<JWT> | null = null;
+const refreshPromises = new Map<string, Promise<JWT>>();
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
-  if (refreshPromise) {
-    return refreshPromise;
+  const tokenKey = (token.refreshToken as string) || (token.sub as string) || 'default';
+  
+  // Deduplicate concurrent refresh attempts with the SAME old refresh token.
+  // If a refresh is already in-flight, return the shared promise.
+  // If a refresh SUCCEEDED recently, the cached (resolved) promise prevents
+  // sending the already-revoked old refresh token a second time.
+  if (refreshPromises.has(tokenKey)) {
+    return refreshPromises.get(tokenKey)!;
   }
 
-  refreshPromise = (async () => {
+  const promise = (async () => {
+    let refreshFailed = false;
     try {
       const backendUrl = process.env.AI_BACKEND_URL;
       const response = await fetch(`${backendUrl}/api/auth/refresh`, {
@@ -25,6 +32,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       const refreshedTokens = await response.json();
 
       if (!response.ok) {
+        // Refresh failed — backend says the token is invalid/revoked/expired.
         console.error("[Auth] Refresh failed:", response.status, refreshedTokens);
         throw { ...refreshedTokens, status: response.status };
       }
@@ -40,6 +48,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         accessTokenExpires: Date.now() + expiresIn * 1000,
       };
     } catch (error: unknown) {
+      refreshFailed = true;
       console.error("[Auth] RefreshAccessToken error:", error);
       
       const err = error as Record<string, unknown>;
@@ -56,11 +65,23 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         error: isFatal ? "TokenReuseError" : "RefreshAccessTokenError",
       };
     } finally {
-      refreshPromise = null;
+      if (refreshFailed) {
+        // FAILURE: delete immediately so a future JWT callback can retry.
+        refreshPromises.delete(tokenKey);
+      } else {
+        // SUCCESS: keep cached for 10 seconds so concurrent requests with the
+        //   same old refreshToken (from before the JWT cookie propagated) share
+        //   the successful result instead of sending the now-revoked token again.
+        //   Scheduled cleanup prevents memory leaks from stale entries.
+        setTimeout(() => {
+          refreshPromises.delete(tokenKey);
+        }, 10_000);
+      }
     }
   })();
 
-  return refreshPromise;
+  refreshPromises.set(tokenKey, promise);
+  return promise;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -197,19 +218,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const refreshed = await refreshAccessToken(token);
       
       if (refreshed.error) {
-        // CRITICAL: Do NOT return the error inside the JWT cookie.
-        // If we store error: "TokenReuseError" in the JWT, it permanently
-        // corrupts the cookie — every subsequent request sees the error
-        // and the user is stuck signed-out even though a fresh login could fix it.
-        // 
-        // Instead, return the EXISTING token with a small time extension so
-        // the request can still be served, and let the client-side handle
-        // the refresh failure gracefully (e.g. redirect to login on next
-        // client-side session check).
-        console.error("[Auth] JWT callback: Refresh failed with:", refreshed.error, 
-          "— NOT persisting error in JWT cookie. Extending token by 60s to allow client recovery.");
+        if (refreshed.error === "TokenReuseError") {
+          // TokenReuseError is UNRECOVERABLE — the refresh token was already
+          // used and revoked by the backend. No retry can succeed.
+          // Persist the error in the JWT cookie so the session callback
+          // propagates it to the client, which will initiate sign-out.
+          console.error("[Auth] JWT callback: TokenReuseError — token was reused/revoked. "
+            + "Persisting error so client can sign out.");
+          return refreshed;
+        }
+        // RefreshAccessTokenError is TRANSIENT (network issue, etc.).
+        // Persist the error so the middleware (auth.config.ts) can detect
+        // and redirect the user to /login before the page loads.  Extend
+        // expiry by 60s so the current response still has a usable token.
+        console.error("[Auth] JWT callback: Refresh failed with:", refreshed.error,
+          "— Persisting error in JWT cookie. Extending token by 60s to serve current request.");
         return {
           ...token,
+          error: "RefreshAccessTokenError",
           accessTokenExpires: Date.now() + 60 * 1000, // 60s grace
         };
       }

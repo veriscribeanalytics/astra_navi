@@ -33,6 +33,10 @@ export const RegisterSchema = z.object({
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
   pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
+  birthPlaceName: z.string().min(2).max(200).optional().or(emptyToUndefined),
+  birthLatitude: z.number().nullable().optional(),
+  birthLongitude: z.number().nullable().optional(),
+  birthTimezoneName: z.string().max(100).optional().or(emptyToUndefined),
   phoneNumber: z.string().max(20).optional().or(emptyToUndefined),
   gender: genderEnum,
   maritalStatus: maritalStatusEnum,
@@ -54,6 +58,12 @@ export const ProfileUpdateSchema = z.object({
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
   pob: z.string().min(2).max(200).optional().or(emptyToUndefined),
+  birthPlaceName: z.string().min(2).max(200).optional().or(emptyToUndefined),
+  birthLatitude: z.number().nullable().optional(),
+  birthLongitude: z.number().nullable().optional(),
+  birthTimezoneName: z.string().max(100).optional().or(emptyToUndefined),
+  birthTimezoneOffsetAtBirth: z.number().nullable().optional(),
+  birthTimeFold: z.number().int().min(0).max(1).nullable().optional(),
   phoneNumber: z.string().max(20).optional().or(emptyToUndefined),
   gender: genderEnum,
   maritalStatus: maritalStatusEnum,
@@ -70,10 +80,12 @@ export const ProfileUpdateSchema = z.object({
 
 export const CreateChatSchema = z.object({
   title: z.string().max(100).optional().or(emptyToUndefined),
+  language: languageOptionalEnum,
 });
 
 export const SendMessageSchema = z.object({
   text: z.string().min(1, "Message cannot be empty").max(2000, "Message exceeds celestial capacity"),
+  language: languageOptionalEnum,
 });
 
 export const RateMessageSchema = z.object({
@@ -94,6 +106,7 @@ export const DailyHoroscopeSchema = z.object({
 export const AnalyzeFullSchema = z.object({
   chart_context: z.string().optional().or(emptyToUndefined),
   force_refresh: z.boolean().optional().default(false),
+  language: languageOptionalEnum,
 });
 
 export const ChartRequestSchema = z.object({
