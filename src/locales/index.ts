@@ -8,6 +8,7 @@ import mr from './mr.json';
 import gu from './gu.json';
 import ml from './ml.json';
 import pa from './pa.json';
+import ko from './ko.json';
 
 export const locales = {
   en,
@@ -20,6 +21,7 @@ export const locales = {
   gu,
   ml,
   pa,
+  ko,
 };
 
 export type LocaleType = typeof en;
@@ -36,6 +38,7 @@ export const languages = [
   { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી' },
   { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം' },
   { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어' },
 ] as const;
 
 export const defaultLanguage = 'en' as const;
@@ -56,6 +59,7 @@ export const LANGUAGE_CODE_TO_NAME: Record<string, string> = {
   gu: 'Gujarati',
   ml: 'Malayalam',
   pa: 'Punjabi',
+  ko: 'Korean',
 };
 
 /**
@@ -66,3 +70,17 @@ export function languageCodeToName(code: string | null | undefined): string {
   if (!code) return 'English';
   return LANGUAGE_CODE_TO_NAME[code] || 'English';
 }
+
+export const LOCALE_BY_LANGUAGE: Record<string, string> = {
+  en: 'en-IN',
+  hi: 'hi-IN',
+  ta: 'ta-IN',
+  te: 'te-IN',
+  kn: 'kn-IN',
+  bn: 'bn-IN',
+  mr: 'mr-IN',
+  gu: 'gu-IN',
+  ml: 'ml-IN',
+  pa: 'pa-IN',
+  ko: 'ko-KR',
+};

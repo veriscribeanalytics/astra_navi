@@ -6,6 +6,10 @@ import { locales, LanguageCode, languages, defaultLanguage } from '@/locales';
 interface LanguageContextType {
   language: LanguageCode;
   setLanguage: (code: LanguageCode) => void;
+  /** Sync frontend language FROM a backend profile value.
+   *  Updates state, localStorage, NEXT_LOCALE cookie, and <html lang>
+   *  but does NOT PUT to /api/user/profile — avoids sync loops. */
+  syncLanguageFromProfile: (code: LanguageCode) => void;
   t: (key: string) => string;
   availableLanguages: typeof languages;
 }
@@ -45,37 +49,66 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children, in
     document.documentElement.lang = language;
   }, [language]);
 
-  const setLanguage = useCallback((code: LanguageCode) => {
-    if (locales[code]) {
-      setLanguageState(code);
-      localStorage.setItem('language', code);
-      document.documentElement.lang = code;
-
-      // Set NEXT_LOCALE cookie so the server can read it on next request
-      // (eliminates hydration mismatch on subsequent page loads).
-      // max-age = 1 year, SameSite=Lax, Path=/ (accessible to all routes)
-      document.cookie = `NEXT_LOCALE=${code};path=/;max-age=${365 * 24 * 60 * 60};samesite=lax`;
-
-      // Fire-and-forget: persist language to backend profile for logged-in users.
-      // Uses raw fetch (not clientFetch) to avoid the 401→signOut cascade.
-      // If the user is not authenticated, the PUT will fail silently — that's fine,
-      // localStorage + cookie already hold the preference for guests.
-      fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language: code }),
-        credentials: 'same-origin',
-      }).then(res => {
-        if (res.ok) {
-          console.log('[LanguageContext] Language persisted to backend profile:', code);
-        } else {
-          console.log('[LanguageContext] Backend profile PUT returned', res.status, '(user likely not authenticated — language saved to localStorage + cookie only)');
-        }
-      }).catch(() => {
-        // Network error or not authenticated — silently ignore
-      });
-    }
+  const applyLanguageLocally = useCallback((code: LanguageCode) => {
+    if (!locales[code]) return;
+    setLanguageState(code);
+    localStorage.setItem('language', code);
+    document.documentElement.lang = code;
+    // Set NEXT_LOCALE cookie so the server can read it on next request
+    // (eliminates hydration mismatch on subsequent page loads).
+    // max-age = 1 year, SameSite=Lax, Path=/ (accessible to all routes)
+    document.cookie = `NEXT_LOCALE=${code};path=/;max-age=${365 * 24 * 60 * 60};samesite=lax`;
   }, []);
+
+  /**
+   * Full language change from a manual user action.
+   * Persists to backend profile for logged-in users and dispatches a
+   * custom event so AuthContext can update user.language locally.
+   */
+  const setLanguage = useCallback((code: LanguageCode) => {
+    if (!locales[code]) return;
+
+    applyLanguageLocally(code);
+
+    // Fire-and-forget: persist language to backend profile for logged-in users.
+    // Uses raw fetch (not clientFetch) to avoid the 401→signOut cascade.
+    // If the user is not authenticated, the PUT will fail silently — that's fine,
+    // localStorage + cookie already hold the preference for guests.
+    fetch('/api/user/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ language: code }),
+      credentials: 'same-origin',
+    }).then(res => {
+      if (res.ok) {
+        console.log('[LanguageContext] Language persisted to backend profile:', code);
+      } else {
+        console.log('[LanguageContext] Backend profile PUT returned', res.status, '(user likely not authenticated — language saved to localStorage + cookie only)');
+      }
+    }).catch(() => {
+      // Network error or not authenticated — silently ignore
+    });
+
+    // Notify AuthContext so it can update user.language locally without a
+    // round-trip to the backend.
+    window.dispatchEvent(new CustomEvent('user-language-changed', { detail: { code } }));
+  }, [applyLanguageLocally]);
+
+  /**
+   * Sync frontend language FROM a backend profile value (e.g. on login or
+   * after AuthContext fetches /api/user/profile).  Updates state, localStorage,
+   * cookie, and <html lang> but does NOT PUT back to the backend — that would
+   * cause an infinite loop.
+   */
+  const syncLanguageFromProfile = useCallback((code: LanguageCode) => {
+    if (!locales[code]) return;
+    // Avoid unnecessary state updates if the language already matches
+    if (code === language) return;
+    console.log('[LanguageContext] syncLanguageFromProfile: syncing frontend language to', code);
+    applyLanguageLocally(code);
+    // Note: no window.dispatchEvent here — this is a profile→frontend sync,
+    // not a user-initiated change.  AuthContext already has the correct value.
+  }, [applyLanguageLocally, language]);
 
   const t = useCallback((key: string): string => {
     const keys = key.split('.');
@@ -98,7 +131,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children, in
   }, [language]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, availableLanguages: languages }}>
+    <LanguageContext.Provider value={{ language, setLanguage, syncLanguageFromProfile, t, availableLanguages: languages }}>
       {children}
     </LanguageContext.Provider>
   );

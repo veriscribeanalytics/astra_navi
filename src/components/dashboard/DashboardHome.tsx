@@ -19,6 +19,7 @@ import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
+import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 import { topicPills } from '@/data/topicPills';
 
@@ -33,7 +34,7 @@ function formatRelativeTime(date: Date, t: (key: string) => string, language?: s
     if (diffInHours < 24) return `${diffInHours} ${t('dashboard.hoursAgo')}`;
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays} ${t('dashboard.daysAgo')}`;
-    return date.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en-IN', { month: 'short', day: 'numeric' });
 }
 
 // ─── Data Interfaces ─────────────────────────────
@@ -501,7 +502,7 @@ export default function DashboardHome() {
         }
     }, [user?.email, user?.name, user?.dob, user?.tob, user?.pob, user?.birthLatitude, user?.birthLongitude, user?.birthTimezoneName, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshProfile, profileComplete, profileFetched, router, pathname]);
 
-    const currentDate = new Date().toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+    const currentDate = new Date().toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
     return (
         <div className="w-full flex-grow bg-[var(--bg)] min-h-[calc(100dvh-var(--navbar-height,64px))]">

@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, ChevronRight, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/hooks';
+import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { getRashiData } from '@/lib/astrology';
 import MiniChart, { ForecastDay } from './MiniChart';
 import DailyHoroscopeCardSkeleton from './DailyHoroscopeCardSkeleton';
@@ -106,7 +107,7 @@ export default function DailyHoroscopeCard({
     const lastFetchedUrlRef = useRef<string>('');
 
     const today = new Date();
-    const dateString = today.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'long' });
+    const dateString = today.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { day: 'numeric', month: 'long' });
 
     useEffect(() => {
         if (userLoading) return;
@@ -263,12 +264,12 @@ export default function DailyHoroscopeCard({
     const fmtDate = (ds: string) => {
         if (!ds) return 'ΓÇö';
         const d = new Date(ds.includes('T') ? ds : ds + 'T00:00:00');
-        return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+        return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
     };
     const fmtDay = (ds: string) => {
         if (!ds) return 'ΓÇö';
         const d = new Date(ds.includes('T') ? ds : ds + 'T00:00:00');
-        return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short' });
+        return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { weekday: 'short' });
     };
 
     if (profileLocationRequired && !horoscope) return (

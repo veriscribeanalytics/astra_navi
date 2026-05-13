@@ -6,6 +6,7 @@ import { Activity, ChevronDown, AlertTriangle, X, Info } from 'lucide-react';
 import { clientFetch } from '@/lib/apiClient';
 import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
 import { useTranslation } from '@/hooks';
+import { LOCALE_BY_LANGUAGE } from '@/locales';
 
 interface DayForecast {
     date: string;
@@ -36,7 +37,7 @@ interface HealthForecastData {
 const formatDate = (dateStr: string, language?: string) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
-    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
 const getScoreColor = (score: number) => {
@@ -261,7 +262,7 @@ export default function HealthForecastPanel() {
                                                                     fill={day.is_today ? '#4fd1ed' : 'currentColor'}
                                                                     fillOpacity={day.is_today ? 1 : 0.4}
                                                                 >
-                                                                    {day.is_today ? t('healthForecast.today') : new Date(day.date + 'T00:00:00').toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en', { weekday: 'short' })}
+                                                                    {day.is_today ? t('healthForecast.today') : new Date(day.date + 'T00:00:00').toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en', { weekday: 'short' })}
                                                                 </text>
                                                                 <text x={p.x} y="120" textAnchor="middle" 
                                                                     fontSize="5" fontWeight="normal"

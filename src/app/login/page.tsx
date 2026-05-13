@@ -102,6 +102,23 @@ const LoginContent = () => {
     // Handle NextAuth errors from query params
     useEffect(() => {
         const authError = searchParams.get('error');
+
+        // SessionExpired: call clear-session API to purge all Auth.js session
+        // cookies (belt-and-suspenders with middleware's Set-Cookie headers),
+        // then redirect to /login?sessionCleared=1 to break reload loops from
+        // poisoned production cookies.
+        if (authError === 'SessionExpired') {
+            const alreadyCleared = searchParams.get('sessionCleared') === '1';
+            if (!alreadyCleared) {
+                fetch('/api/auth/clear-session', { method: 'POST' })
+                    .finally(() => {
+                        router.replace('/login?sessionCleared=1');
+                    });
+                return; // Don't show error — we're clearing and redirecting
+            }
+            // sessionCleared=1 — show the message normally
+        }
+
         if (authError) {
             const errorMessages: Record<string, string> = {
                 'Signin': 'Try signing in with a different account.',
@@ -125,7 +142,7 @@ const LoginContent = () => {
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [searchParams, showError, t]);
+    }, [searchParams, showError, t, router]);
 
     const validateRegisterStep = () => {
         if (registerStep === 0) {

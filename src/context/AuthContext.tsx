@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useSession, signOut } from 'next-auth/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { clientFetch, resetAuthGrace } from '@/lib/apiClient';
+import { useTranslation } from '@/hooks';
+import { LanguageCode, locales } from '@/locales';
 
 interface User {
     id?: string;
@@ -64,6 +66,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const prevEmailRef = useRef<string | null>(null);
     const profileRetryCount = useRef(0);
     const MAX_PROFILE_RETRIES = 2;
+
+    // Language sync: useTranslation gives us syncLanguageFromProfile (no backend PUT)
+    // and the current frontend language.  We store them in refs to avoid adding
+    // them as deps to the main session/profile useEffect (which would cause
+    // unnecessary re-fetches).
+    const { syncLanguageFromProfile, language: contextLanguage } = useTranslation();
+    const syncLangRef = useRef(syncLanguageFromProfile);
+    syncLangRef.current = syncLanguageFromProfile;
+    const contextLanguageRef = useRef(contextLanguage);
+    contextLanguageRef.current = contextLanguage;
 
     const isLoggedIn = status === 'authenticated';
     const isSessionLoading = status === 'loading';
@@ -128,13 +140,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             }
                             return res.json();
                         })
-                        .then(data => {
+.then(data => {
                             if (data?.user) {
                                 setUser(prev => {
                                     if (!prev) return data.user;
                                     const merged = { ...prev, ...data.user };
                                     return JSON.stringify(prev) === JSON.stringify(merged) ? prev : merged;
                                 });
+
+                                // Sync frontend language from backend profile.
+                                // If the profile has a different language than the current
+                                // frontend language, update the UI to match the source of
+                                // truth (backend profile).  Uses syncLanguageFromProfile
+                                // which does NOT PUT back to the backend — avoids loops.
+                                const profileLanguage = data.user.language;
+                                if (profileLanguage &&
+                                    locales[profileLanguage as LanguageCode] &&
+                                    profileLanguage !== contextLanguageRef.current) {
+                                    syncLangRef.current(profileLanguage as LanguageCode);
+                                }
+
                                 // Use backend's profileComplete flag if provided,
                                 // otherwise fall back to checking required fields
                                 const backendProfileComplete = data.profileComplete;
@@ -246,6 +271,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('[AuthContext] refreshProfile failed:', err);
         }
     }, [user?.email]);
+
+    // Listen for language changes from LanguageContext.setLanguage().
+    // When a user manually changes their language via the language picker,
+    // LanguageContext dispatches a 'user-language-changed' custom event.
+    // We update user.language here so AuthContext stays in sync without
+    // needing a round-trip to the backend.
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const { code } = (e as CustomEvent<{ code: string }>).detail;
+            if (code && typeof code === 'string' && locales[code as LanguageCode]) {
+                refreshUser({ language: code });
+            }
+        };
+        window.addEventListener('user-language-changed', handler);
+        return () => window.removeEventListener('user-language-changed', handler);
+    }, [refreshUser]);
 
     return (
         <AuthContext.Provider value={{ 

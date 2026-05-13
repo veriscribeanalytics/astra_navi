@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/context/ChatContext';
+import { LOCALE_BY_LANGUAGE } from '@/locales';
+import { useTranslation } from '@/hooks';
 import { 
     Mic, MicOff, 
     ArrowUp, Sparkles 
@@ -43,6 +45,7 @@ const ChatInput: React.FC = () => {
     inputText, setInputText, sendMessage, 
     isSending, activeChatId, createNewChat
   } = useChat();
+  const { language } = useTranslation();
   
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
@@ -72,7 +75,7 @@ const ChatInput: React.FC = () => {
       const recognition = recognitionRef.current;
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      recognition.lang = LOCALE_BY_LANGUAGE[language] || 'en-US';
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;

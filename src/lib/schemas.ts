@@ -15,8 +15,8 @@ const maritalStatusEnum = z.enum([
 const occupationEnum = z.enum([
   "student", "business", "employed", "homemaker", "retired", "unemployed", "Not Specified"
 ]).optional().or(emptyToUndefined);
-const languageEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa"]).default("en");
-const languageOptionalEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa"]).optional().or(emptyToUndefined);
+const languageEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa", "ko"]).default("en");
+const languageOptionalEnum = z.enum(["en", "hi", "ta", "te", "kn", "bn", "mr", "gu", "ml", "pa", "ko"]).optional().or(emptyToUndefined);
 
 // --- USER & AUTH ---
 
