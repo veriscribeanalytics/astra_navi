@@ -4,7 +4,7 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self'${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://api.veriscribeanalytics.com https://lh3.googleusercontent.com",
