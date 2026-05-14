@@ -36,12 +36,50 @@ const CountryFlag: React.FC<{ code: string; className?: string }> = ({ code, cla
       </svg>
     ),
 
-    // 🇰🇷 South Korea — simplified Taegukgi
+    // South Korea - Taegeukgi with taegeuk and four trigrams.
     KR: (
-      <svg viewBox={`0 0 ${size} ${h}`} width={size} height={h} className={className} aria-label="Korea">
-        <rect width={size} height={h} fill="#FFFFFF" rx="1" />
-        <circle cx={size / 2} cy={h / 2} r={3.5} fill="#C60C30" />
-        <path d={`M${size / 2},${h / 2 - 3.5} A3.5,3.5 0 0,1 ${size / 2},${h / 2 + 3.5}`} fill="#003478" />
+      <svg viewBox="0 0 72 48" width="21" height={h} className={className} aria-label="South Korea">
+        <rect width="72" height="48" fill="#FFFFFF" rx="2" />
+
+        <g transform="translate(36 24) rotate(18)">
+          <circle r="12" fill="#CD2E3A" />
+          <path
+            fill="#0047A0"
+            d="M-12 0C-12 6.627-6.627 12 0 12C6.627 12 12 6.627 12 0C12-3.314 9.314-6 6-6C2.686-6 0-3.314 0 0C0 3.314-2.686 6-6 6C-9.314 6-12 3.314-12 0Z"
+          />
+        </g>
+
+        <g fill="#000000">
+          <g transform="translate(18 12) rotate(-33.6900675)">
+            <rect x="-7" y="-4" width="14" height="2" />
+            <rect x="-7" y="-1" width="14" height="2" />
+            <rect x="-7" y="2" width="14" height="2" />
+          </g>
+
+          <g transform="translate(54 12) rotate(33.6900675)">
+            <rect x="-7" y="-4" width="5.5" height="2" />
+            <rect x="1.5" y="-4" width="5.5" height="2" />
+            <rect x="-7" y="-1" width="14" height="2" />
+            <rect x="-7" y="2" width="5.5" height="2" />
+            <rect x="1.5" y="2" width="5.5" height="2" />
+          </g>
+
+          <g transform="translate(18 36) rotate(33.6900675)">
+            <rect x="-7" y="-4" width="14" height="2" />
+            <rect x="-7" y="-1" width="5.5" height="2" />
+            <rect x="1.5" y="-1" width="5.5" height="2" />
+            <rect x="-7" y="2" width="14" height="2" />
+          </g>
+
+          <g transform="translate(54 36) rotate(-33.6900675)">
+            <rect x="-7" y="-4" width="5.5" height="2" />
+            <rect x="1.5" y="-4" width="5.5" height="2" />
+            <rect x="-7" y="-1" width="5.5" height="2" />
+            <rect x="1.5" y="-1" width="5.5" height="2" />
+            <rect x="-7" y="2" width="5.5" height="2" />
+            <rect x="1.5" y="2" width="5.5" height="2" />
+          </g>
+        </g>
       </svg>
     ),
   };
