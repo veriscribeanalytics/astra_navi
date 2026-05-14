@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/hooks';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { getRashiData } from '@/lib/astrology';
+import { PaywallData } from '@/types/paywall';
+import PaywallCard from '@/components/paywall/PaywallCard';
 import MiniChart, { ForecastDay } from './MiniChart';
 import DailyHoroscopeCardSkeleton from './DailyHoroscopeCardSkeleton';
 
@@ -48,6 +50,8 @@ interface HoroscopeData {
     calculation_unavailable?: boolean;
     profile_location_required?: boolean;
     message?: string;
+    // Paywall data — if backend returns paywall info inline
+    paywall?: PaywallData;
     // Compatibility fields (optional, if any old code still needs them)
     sign?: string;
     date_display?: string;
@@ -94,6 +98,7 @@ export default function DailyHoroscopeCard({
     const [forecastLoading, setForecastLoading] = useState(false);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
     const [activeAlertIdx, setActiveAlertIdx] = useState(0);
+    const [paywallData, setPaywallData] = useState<PaywallData | null>(null);
     
     // Optimization Refs
     const currentSign = horoscope?.user?.sign || sign || 'Aries';
@@ -128,6 +133,28 @@ export default function DailyHoroscopeCard({
                 setProfileLocationRequired(false);
                 const res = await clientFetch(url);
                 
+                // ── 402 Paywall detection ──
+                // If backend returns 402, parse paywall data.
+                // Soft paywall: we still render basic score/tip but lock premium sections.
+                // Hard paywall: we block the feature entirely and show PaywallCard inline.
+                if (res.status === 402) {
+                    const ed = await res.json().catch(() => ({}));
+                    if (ed.paywall) {
+                        setPaywallData(ed.paywall as PaywallData);
+                        // For soft paywall, still try to render any partial data
+                        if (ed.paywall.isSoft && ed.partial_data) {
+                            setHoroscope(ed.partial_data);
+                        }
+                        setError(null);
+                        setLoading(false);
+                        return;
+                    }
+                    // Hard paywall without paywall field — treat as error
+                    setError('This feature requires an upgrade.');
+                    setLoading(false);
+                    return;
+                }
+
                 if (!res.ok) { 
                     const ed = await res.json().catch(() => ({}));
                     // Check for profile-location-required error
@@ -141,6 +168,20 @@ export default function DailyHoroscopeCard({
                     throw new Error(ed.error || 'Failed'); 
                 }
                 const data = await res.json();
+                
+                // Check for inline paywall field in successful response
+                if (data.paywall) {
+                    setPaywallData(data.paywall as PaywallData);
+                    // Soft paywall may include partial_data alongside paywall
+                    if (data.paywall.isSoft && data.partial_data) {
+                        setHoroscope(data.partial_data);
+                    } else if (!data.paywall.isSoft) {
+                        // Hard paywall — don't render horoscope content
+                        setError(null);
+                        setLoading(false);
+                        return;
+                    }
+                }
                 
                 // Also check for profile_location_required in a successful response
                 // (some backends may return 200 with these flags)
@@ -291,6 +332,11 @@ export default function DailyHoroscopeCard({
     );
 
     if (error && !horoscope && !profileLocationRequired) return <Card padding="md" className="!rounded-[24px] sm:!rounded-[32px]"><div className="h-64 flex flex-col items-center justify-center gap-4 text-center px-6"><div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500" /></div><h3 className="text-lg font-headline font-bold text-foreground mb-2">{t('horoscope.serviceUnavailable')}</h3><p className="text-sm text-foreground/60">{error || 'Unable to load forecast.'}</p></div></Card>;
+
+    // ── Hard paywall: feature fully blocked, show PaywallCard inline ──
+    if (paywallData && !paywallData.isSoft && !horoscope) {
+        return <PaywallCard paywall={paywallData} variant="inline" />;
+    }
 
     const _displayDate = horoscope?.meta?.date_display || horoscope?.date_display || dateString;
     
@@ -482,9 +528,12 @@ export default function DailyHoroscopeCard({
                         </button>
                     </div>
 
-                    {/* NEW SECTION: Cosmic Timing & Explanations */}
+                    {/* NEW SECTION: Cosmic Timing & Explanations — locked on soft paywall */}
                     {(horoscope?.time_triggers || horoscope?.astro_explanations?.items) && (
-                        <div className="px-6 sm:px-8 py-6 border-b border-white/5 bg-secondary/[0.01]">
+                        <div className="px-6 sm:px-8 py-6 border-b border-white/5 bg-secondary/[0.01] relative">
+                            {paywallData?.isSoft ? (
+                                <PaywallCard paywall={paywallData} variant="overlay" />
+                            ) : (
                             <div className="flex flex-col lg:flex-row gap-8">
                                 {/* Time Triggers */}
                                 {horoscope?.time_triggers && horoscope.time_triggers.length > 0 && (
@@ -532,10 +581,15 @@ export default function DailyHoroscopeCard({
                                     </div>
                                 )}
                             </div>
+                            )}
                         </div>
                     )}
 
                     <div className={`transition-all duration-700 ease-out flex-1 flex flex-col ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                        {/* Soft paywall overlay on premium metrics (area insights) */}
+                        {paywallData?.isSoft ? (
+                            <PaywallCard paywall={paywallData} variant="overlay" />
+                        ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">
                             {metrics.map((item, i) => (
                                 <div key={i} className={`flex items-center text-left gap-3 sm:gap-6 p-4 sm:p-8 h-full transition-all duration-500 hover:bg-secondary/[0.05] relative group ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
@@ -583,6 +637,7 @@ export default function DailyHoroscopeCard({
                                 </div>
                             ))}
                         </div>
+                        )}
                     </div>
                 </motion.div>
             )}

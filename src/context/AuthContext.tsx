@@ -6,6 +6,7 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { clientFetch, resetAuthGrace } from '@/lib/apiClient';
 import { useTranslation } from '@/hooks';
 import { LanguageCode, locales } from '@/locales';
+import { isProfileComplete, normalizeProfileUser, resolveProfileComplete } from '@/lib/profileCompleteness';
 
 interface User {
     id?: string;
@@ -142,9 +143,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         })
 .then(data => {
                             if (data?.user) {
+                                const normalizedUser = normalizeProfileUser(data.user);
                                 setUser(prev => {
-                                    if (!prev) return data.user;
-                                    const merged = { ...prev, ...data.user };
+                                    if (!prev) return normalizedUser;
+                                    const merged = { ...prev, ...normalizedUser };
                                     return JSON.stringify(prev) === JSON.stringify(merged) ? prev : merged;
                                 });
 
@@ -153,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 // frontend language, update the UI to match the source of
                                 // truth (backend profile).  Uses syncLanguageFromProfile
                                 // which does NOT PUT back to the backend — avoids loops.
-                                const profileLanguage = data.user.language;
+                                const profileLanguage = normalizedUser.language;
                                 if (profileLanguage &&
                                     locales[profileLanguage as LanguageCode] &&
                                     profileLanguage !== contextLanguageRef.current) {
@@ -162,19 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                                 // Use backend's profileComplete flag if provided,
                                 // otherwise fall back to checking required fields
-                                const backendProfileComplete = data.profileComplete;
-                                if (typeof backendProfileComplete === 'boolean') {
-                                    setProfileComplete(backendProfileComplete);
-                                } else {
-                                    // Fallback: profile is complete when all location fields are present
-                                    const u = data.user;
-                                    setProfileComplete(
-                                        !!u.name && !!u.dob && !!u.tob && !!u.pob &&
-                                        typeof u.birthLatitude === 'number' &&
-                                        typeof u.birthLongitude === 'number' &&
-                                        !!u.birthTimezoneName
-                                    );
-                                }
+                                setProfileComplete(resolveProfileComplete(data.profileComplete, normalizedUser));
                             } else {
                                 console.warn('[AuthContext] Profile fetch returned no user object. Data keys:', Object.keys(data || {}));
                             }
@@ -209,10 +199,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = useCallback((email?: string, profile?: Partial<User>) => {
         if (email) {
             setUser(prev => {
-                if (!prev) return { email, ...profile } as User;
+                if (!prev) {
+                    const nextUser = { email, ...profile } as User;
+                    if (isProfileComplete(nextUser)) setProfileComplete(true);
+                    return nextUser;
+                }
                 const isSame = prev.email === email && 
                     Object.keys(profile || {}).every(k => prev[k as keyof User] === (profile as Record<string, unknown>)[k]);
-                return isSame ? prev : { ...prev, email, ...profile };
+                const nextUser = isSame ? prev : { ...prev, email, ...profile };
+                if (isProfileComplete(nextUser)) setProfileComplete(true);
+                return nextUser;
             });
         }
     }, []);
@@ -254,18 +250,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!res.ok) return;
             const data = await res.json();
             if (data?.user) {
-                setUser(prev => prev ? { ...prev, ...data.user } : data.user);
-                if (typeof data.profileComplete === 'boolean') {
-                    setProfileComplete(data.profileComplete);
-                } else {
-                    const u = data.user;
-                    setProfileComplete(
-                        !!u.name && !!u.dob && !!u.tob && !!u.pob &&
-                        typeof u.birthLatitude === 'number' &&
-                        typeof u.birthLongitude === 'number' &&
-                        !!u.birthTimezoneName
-                    );
-                }
+                const normalizedUser = normalizeProfileUser(data.user);
+                setUser(prev => prev ? { ...prev, ...normalizedUser } : normalizedUser);
+                setProfileComplete(resolveProfileComplete(data.profileComplete, normalizedUser));
             }
         } catch (err) {
             console.error('[AuthContext] refreshProfile failed:', err);

@@ -114,6 +114,12 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
     return response;
   }
 
+  // 402 = Payment Required — paywall/entitlement block.
+  // This is NOT an auth failure. Do NOT sign out the user.
+  // The calling code should handle 402 by parsing the paywall data
+  // and showing a PaywallCard.
+  // We let it pass through as a normal response so callers can detect it.
+
   if (response.status === 429 && !init?._retry) {
       console.error("[clientFetch] Rate limited (429). Redirecting to login to clear invalid state.");
       await performSignOut("/login?error=RateLimited", "Rate limit exceeded. Please log in again.");

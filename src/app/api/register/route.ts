@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
 import { RegisterSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
+import { normalizeProfileUser, resolveProfileComplete } from '@/lib/profileCompleteness';
 
 /**
  * Registration API Route (Proxy Mode)
@@ -45,13 +46,70 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: data.error || data.detail || "Registration failed. Please try again." }, { status: response.status });
         }
 
+        let user = normalizeProfileUser({
+            ...payload,
+            ...(data.user || {}),
+            email: data.user?.email || payload.email,
+        });
+        let profileComplete = resolveProfileComplete(data.profileComplete, user);
+
+        // Some backend register handlers only create credentials and return
+        // tokens. When the signup form already collected birth/profile fields,
+        // persist them immediately with the fresh access token so the dashboard
+        // does not bounce the user back to onboarding.
+        if (data.accessToken && user.email) {
+            const profileSyncPayload = Object.fromEntries(Object.entries({
+                name: payload.name,
+                dob: payload.dob,
+                tob: payload.tob,
+                pob: payload.pob || payload.birthPlaceName,
+                birthPlaceName: payload.birthPlaceName || payload.pob,
+                birthLatitude: payload.birthLatitude,
+                birthLongitude: payload.birthLongitude,
+                birthTimezoneName: payload.birthTimezoneName,
+                phoneNumber: payload.phoneNumber,
+                gender: payload.gender,
+                maritalStatus: payload.maritalStatus,
+                occupation: payload.occupation,
+                language: payload.language,
+                preferences: {
+                    horoscope: payload.preferences?.horoscope_enabled ?? true,
+                    notifications: payload.preferences?.notifications_enabled ?? false,
+                },
+            }).filter(([, value]) => value !== undefined && value !== ''));
+
+            if (Object.keys(profileSyncPayload).length > 0) {
+                try {
+                    const profileResponse = await backendFetch('/api/user/profile', {
+                        method: 'PUT',
+                        userEmail: user.email,
+                        accessToken: data.accessToken,
+                        body: JSON.stringify(profileSyncPayload),
+                    });
+                    const profileData = await profileResponse.json().catch(() => ({}));
+
+                    if (profileResponse.ok) {
+                        user = normalizeProfileUser({
+                            ...user,
+                            ...(profileData.user || {}),
+                        });
+                        profileComplete = resolveProfileComplete(profileData.profileComplete ?? data.profileComplete, user);
+                    } else {
+                        console.warn('[Register] Profile sync after registration failed:', profileResponse.status, profileData);
+                    }
+                } catch (syncError) {
+                    console.warn('[Register] Profile sync after registration failed:', syncError);
+                }
+            }
+        }
+
         return NextResponse.json({
             message: "Your account has been created.",
-            user: data.user,
+            user,
             accessToken: data.accessToken,
             refreshToken: data.refreshToken,
             expiresIn: data.expiresIn,
-            profileComplete: data.profileComplete
+            profileComplete
         }, { status: 201 });
 
     } catch (error) {

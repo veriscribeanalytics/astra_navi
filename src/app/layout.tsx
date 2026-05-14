@@ -10,6 +10,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { PaywallProvider } from "@/context/PaywallContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/hooks/useToast";
 import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
@@ -54,6 +55,7 @@ export default async function RootLayout({
             <LanguageProvider initialLanguage={languageCookie}>
               <AuthProvider>
                 <ChatProvider>
+                  <PaywallProvider>
                   <ThemeProvider>
                     <a href="#main-content" className="skip-to-content">
                       Skip to main content
@@ -68,6 +70,7 @@ export default async function RootLayout({
                     </main>
                     <ConditionalFooter />
                   </ThemeProvider>
+                  </PaywallProvider>
                 </ChatProvider>
               </AuthProvider>
             </LanguageProvider>

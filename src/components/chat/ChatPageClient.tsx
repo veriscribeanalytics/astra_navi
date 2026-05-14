@@ -8,6 +8,7 @@ import ChatHeader from '@/components/chat/ChatHeader';
 import ChatMessages from '@/components/chat/ChatMessages';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
+import PaywallCard from '@/components/paywall/PaywallCard';
 
 import { useAuth } from '@/context/AuthContext';
 
@@ -17,7 +18,8 @@ const ChatPageClient: React.FC = () => {
   const router = useRouter();
   const { 
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
-    createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode 
+    createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
+    paywall, clearPaywall
     } = useChat();
 
     React.useEffect(() => {
@@ -95,6 +97,11 @@ const ChatPageClient: React.FC = () => {
         <ChatMessages />
         <ChatInput />
       </div>
+
+      {/* Paywall Modal — shown when chat is hard-blocked (402) */}
+      {paywall && !paywall.isSoft && (
+        <PaywallCard paywall={paywall} variant="modal" onClose={clearPaywall} />
+      )}
 
       {/* Right Sidebar — User Details & Rating */}
       <div className={`chat-right-sidebar ${isRightPanelOpen ? 'mobile-open' : ''}`}>

@@ -12,6 +12,17 @@ import { join } from 'path';
 import { encode } from 'next-auth/jwt';
 
 const TEST_AUTH_SECRET = 'b6b3b5514f7b5f54320e6e76839352e0081d50c2688f7b7b1d9601d9f8c6ebf2';
+
+/** All paywall feature keys — used to build mock responses. */
+const ALL_FEATURE_KEYS = [
+  'chat_message',
+  'full_daily_horoscope',
+  'tomorrow_horoscope',
+  'guided_consult',
+  'match_report',
+  'kundli_premium',
+];
+
 let cachedAuthSecret: string | null = null;
 
 function readEnvFileSecret(): string | null {
@@ -117,10 +128,172 @@ export async function mockDashboardApis(page: Page) {
   }
 }
 
+/**
+ * Mock paywall API routes with correct backend shape.
+ *
+ * The batch /features endpoint MUST return { features: [...] } (array),
+ * not {} or a Record map. Without this mock, the catch-all mockAllApis
+ * returns {} for paywall routes, causing the defensive warning:
+ *   "[usePaywall] checkAllFeatures: features is not an array {}"
+ *
+ * Default: all features accessible (simulates Pro user).
+ * Pass overrides to customize individual feature states.
+ */
+export interface MockPaywallOverrides {
+  /** Feature keys to mark as accessible=false (blocked). */
+  blockedFeatures?: string[];
+  /** Paywall data to attach to blocked features. */
+  paywallData?: Record<string, Record<string, unknown>>;
+  /** User tier for the batch response. */
+  tier?: string;
+  /** Total credits for the batch response. */
+  totalCredits?: number;
+}
+
+export async function mockPaywallApi(page: Page, overrides: MockPaywallOverrides = {}) {
+  const blockedSet = new Set(overrides.blockedFeatures ?? []);
+  const features = ALL_FEATURE_KEYS.map((key) => {
+    const accessible = !blockedSet.has(key);
+    const item: Record<string, unknown> = { accessible, feature_key: key };
+    if (accessible) {
+      item.current_tier = overrides.tier ?? 'pro';
+      item.available_credits = overrides.totalCredits ?? 300;
+    } else {
+      item.reason = 'insufficient_tier';
+      item.min_tier = 'pro';
+      if (overrides.paywallData?.[key]) {
+        item.paywall = overrides.paywallData[key];
+      } else {
+        item.paywall = {
+          featureKey: key,
+          title: `Premium ${key}`,
+          isSoft: key !== 'chat_message',
+          suggestedProducts: [
+            {
+              productId: 'pro_monthly',
+              productType: 'subscription',
+              nameEn: 'Pro Monthly',
+              nameHi: 'प्रो मासिक',
+              credits: 300,
+              tier: 'pro',
+              priceInr: 199.00,
+              priceUsd: 2.49,
+              currency: 'INR',
+              icon: 'pro',
+              color: '#7C3AED',
+            },
+          ],
+        };
+      }
+    }
+    return item;
+  });
+
+  const batchResponse = {
+    features,
+    tier: overrides.tier ?? 'pro',
+    totalCredits: overrides.totalCredits ?? 300,
+  };
+
+  // Batch features endpoint — returns { features: [...] } array
+  await page.route('**/api/entitlements/paywall/features', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(batchResponse) });
+  });
+
+  // Single-feature check endpoint — returns PaywallCheck shape
+  await page.route('**/api/entitlements/paywall**', async (route) => {
+    const url = route.request().url();
+    const featureMatch = url.match(/feature=([^&]+)/);
+    const featureKey = featureMatch ? featureMatch[1] : 'chat_message';
+    const isBlocked = blockedSet.has(featureKey);
+
+    if (isBlocked) {
+      await route.fulfill({
+        status: 402,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: 'paywall_blocked',
+          featureKey,
+          reason: 'insufficient_tier',
+          requiredCredits: 1,
+          availableCredits: 0,
+          minTier: 'pro',
+          isSoft: featureKey !== 'chat_message',
+          message: `Upgrade to access ${featureKey}.`,
+          paywall: overrides.paywallData?.[featureKey] ?? {
+            featureKey,
+            title: `Premium ${featureKey}`,
+            isSoft: featureKey !== 'chat_message',
+            suggestedProducts: [
+              {
+                productId: 'pro_monthly',
+                productType: 'subscription',
+                nameEn: 'Pro Monthly',
+                credits: 300,
+                tier: 'pro',
+                priceInr: 199.00,
+                priceUsd: 2.49,
+                currency: 'INR',
+                icon: 'pro',
+                color: '#7C3AED',
+              },
+            ],
+          },
+        }),
+      });
+    } else {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ accessible: true, feature_key: featureKey, current_tier: overrides.tier ?? 'pro' }),
+      });
+    }
+  });
+}
+
 /** Catch-all: return 200 for any /api/* not explicitly mocked, preventing 401s. */
 export async function mockAllApis(page: Page) {
-  // Must be registered LAST so explicit mocks take priority
+  // Default paywall batch response — all features accessible (Pro user).
+  // This is critical: the catch-all must return { features: [...] } for paywall URLs
+  // because usePaywall.normalization requires an array, and {} triggers the warning:
+  //   "[usePaywall] checkAllFeatures: features is not an array {}"
+  const PAYWALL_BATCH_DEFAULT = {
+    features: ALL_FEATURE_KEYS.map((key) => ({
+      accessible: true,
+      feature_key: key,
+      current_tier: 'pro',
+      available_credits: 300,
+    })),
+    tier: 'pro',
+    totalCredits: 300,
+  };
+
   await page.route('**/api/**', async (route) => {
+    const url = route.request().url();
+
+    // Paywall batch endpoint — must return { features: [...] } array
+    if (url.includes('/api/entitlements/paywall/features')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(PAYWALL_BATCH_DEFAULT),
+      });
+      return;
+    }
+
+    // Paywall single-feature check — return accessible: true (Pro user default)
+    if (url.includes('/api/entitlements/paywall')) {
+      const featureMatch = url.match(/feature=([^&]+)/);
+      const featureKey = featureMatch ? featureMatch[1] : 'chat_message';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ accessible: true, feature_key: featureKey, current_tier: 'pro' }),
+      });
+      return;
+    }
+
+    // All other /api/* — return empty object
     await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
   });
 }

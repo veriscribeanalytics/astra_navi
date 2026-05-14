@@ -24,3 +24,5 @@ export { useToast } from './useToast';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { useRealTime } from './useRealTime';
 export { useTranslation } from './useTranslation';
+export { usePaywall } from './usePaywall';
+export { usePaywallContext } from '@/context/PaywallContext';

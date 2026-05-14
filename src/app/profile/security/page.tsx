@@ -7,6 +7,7 @@ import { useToast } from '@/hooks';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { ShieldCheck, Lock, LogOut, AlertTriangle, ArrowLeft, Eye } from 'lucide-react';
 import { clientFetch } from '@/lib/apiClient';
 
@@ -24,6 +25,7 @@ export default function SecuritySettingsPage() {
 
     // Logout All Devices State
     const [isLoggingOutAll, setIsLoggingOutAll] = useState(false);
+    const [showLogoutAllDialog, setShowLogoutAllDialog] = useState(false);
 
     // Delete Account State
     const [deletePassword, setDeletePassword] = useState('');
@@ -79,10 +81,6 @@ export default function SecuritySettingsPage() {
     };
 
     const handleLogoutAll = async () => {
-        if (!confirm("Are you sure you want to log out from all other devices?")) {
-            return;
-        }
-
         setIsLoggingOutAll(true);
         try {
             const res = await clientFetch('/api/auth/logout-all', {
@@ -99,6 +97,7 @@ export default function SecuritySettingsPage() {
             error(err instanceof Error ? err.message : String(err));
         } finally {
             setIsLoggingOutAll(false);
+            setShowLogoutAllDialog(false);
         }
     };
 
@@ -214,9 +213,8 @@ export default function SecuritySettingsPage() {
                         </p>
                         <Button 
                             type="button" 
-                            variant="ghost" 
-                            onClick={handleLogoutAll} 
-                            loading={isLoggingOutAll}
+                            variant="ghost"
+                            onClick={() => setShowLogoutAllDialog(true)}
                             className="border-secondary/30 hover:bg-secondary/10"
                         >
                             Log Out All Other Devices
@@ -288,6 +286,19 @@ export default function SecuritySettingsPage() {
                     </div>
                 </div>
             )}
+
+            {/* ConfirmDialog: Logout All Devices */}
+            <ConfirmDialog
+                isOpen={showLogoutAllDialog}
+                onClose={() => setShowLogoutAllDialog(false)}
+                onConfirm={handleLogoutAll}
+                title="Log Out All Devices?"
+                message="This will sign out your account from all other devices. Your current session will remain active."
+                confirmText="Log Out Others"
+                cancelText="Cancel"
+                variant="warning"
+                isLoading={isLoggingOutAll}
+            />
         </main>
     );
 }

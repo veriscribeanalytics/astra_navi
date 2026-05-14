@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { clientFetch } from "@/lib/apiClient";
+import { PaywallData } from "@/types/paywall";
+import PaywallCard from "@/components/paywall/PaywallCard";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -43,6 +45,10 @@ export default function KundliPage() {
     const [refreshing, setRefreshing] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
     const [houseFilter, setHouseFilter] = useState<'active' | 'all'>('active');
+    const [paywallData, setPaywallData] = useState<PaywallData | null>(null);
+
+    // Set of locked section keys — populated when backend returns locked sections
+    const [lockedSections, setLockedSections] = useState<Set<string>>(new Set());
 
     const handlePlanetClick = (planet: PlanetData) => {
         if (selectedPlanet?.planet === planet.planet) { setSelectedPlanet(null); return; }
@@ -57,6 +63,27 @@ export default function KundliPage() {
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ force_refresh: forceRefresh }) 
             });
+
+            // ── 402 Paywall detection ──
+            if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.paywall) {
+                    setPaywallData(errData.paywall as PaywallData);
+                    // If partial data is provided alongside the paywall, still render it
+                    if (errData.partial_data) {
+                        const partialPayload = errData.partial_data;
+                        if (partialPayload && typeof partialPayload === 'object' && partialPayload.houses) {
+                            if (!partialPayload.planets) partialPayload.planets = [];
+                            setData(partialPayload);
+                            setError(null);
+                        }
+                    }
+                }
+                setLoading(false);
+                setRefreshing(false);
+                return;
+            }
+
             if (!res.ok) { 
                 const errData = await res.json().catch(() => ({})); 
                 throw new Error(errData.error || errData.detail || 'The stars are temporarily obscured.'); 
@@ -176,6 +203,32 @@ export default function KundliPage() {
 
                 setData(payload); 
                 setError(null); 
+
+                // ── Detect locked premium sections ──
+                // Backend may return sections with { locked: true, message: "..." }
+                // These indicate premium-only content that should render locked placeholders.
+                const locked: Set<string> = new Set();
+                const premiumKeys = ['dasha', 'ashtakavarga', 'planet_strength_ranking', 'transits', 'key_themes'];
+                for (const key of premiumKeys) {
+                    const section = (payload as Record<string, unknown>)[key];
+                    if (section && typeof section === 'object' && (section as Record<string, unknown>).locked === true) {
+                        locked.add(key);
+                    }
+                }
+                // If the dasha section is locked, show PaywallCard instead of dasha content
+                if (locked.has('dasha') && payload.dasha) {
+                    // Extract the paywall message from the locked section
+                    const dashaLocked = payload.dasha as Record<string, unknown>;
+                    const message = (dashaLocked.message as string) || 'Dasha analysis requires a premium subscription.';
+                    setPaywallData({
+                        featureKey: 'kundli_premium',
+                        isSoft: true,
+                        title: 'Premium Dasha Analysis',
+                        description: message,
+                        badge: 'Premium',
+                    });
+                }
+                setLockedSections(locked); 
             }
             else {
                 console.error("[Kundli] Invalid payload format. Keys found:", Object.keys(result));
@@ -328,6 +381,11 @@ export default function KundliPage() {
             className="h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] flex flex-col overflow-hidden"
         >            <div className="flex-1 max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] w-full mx-auto px-3 py-2 flex flex-col gap-2 min-h-0">
 
+                {/* Paywall Modal — shown when Kundli is hard-blocked (402) */}
+                {paywallData && !paywallData.isSoft && !data && (
+                    <PaywallCard paywall={paywallData} variant="modal" onClose={() => setPaywallData(null)} />
+                )}
+
                 {/* ═══ HEADER ═══ */}
                 <div className="flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2.5">
@@ -385,6 +443,16 @@ export default function KundliPage() {
                                 <div className="w-1 h-4 rounded-full bg-secondary" />
                                 <h2 className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">Current Dasha</h2>
                             </div>
+                            {lockedSections.has('dasha') ? (
+                                // ── Locked: show PaywallCard inline ──
+                                <PaywallCard paywall={paywallData || {
+                                    featureKey: 'kundli_premium',
+                                    isSoft: true,
+                                    title: 'Premium Dasha Analysis',
+                                    description: (data.dasha as unknown as Record<string, unknown>)?.message as string || 'Dasha timing analysis requires a premium subscription.',
+                                    badge: 'Premium',
+                                }} variant="inline" />
+                            ) : (
                             <Card padding="sm" variant="default" hoverable={false} className="!rounded-[20px]">
                                 { ((data.dasha?.active?.length || 0) > 0) || ((data.dasha?.rows?.length || 0) > 0) || data.dasha?.current || data.dasha?.currentMahaDasha ? (
                                     <>
@@ -500,6 +568,7 @@ export default function KundliPage() {
                                     </div>
                                 )}
                             </Card>
+                            )}
                         </div>
 
                         {/* ── Cosmic Strengths (Yogas) — Grouped ── */}
@@ -535,6 +604,71 @@ export default function KundliPage() {
                                 </Card>
                             </div>
                         )}
+                            {/* ── Locked Premium Sections (Ashtakavarga, Strengths, Transits, Key Themes) ── */}
+                            {lockedSections.has('ashtakavarga') && (
+                                <PaywallCard
+                                    paywall={{
+                                        featureKey: 'kundli_premium',
+                                        isSoft: true,
+                                        title: 'Ashtakavarga Analysis',
+                                        titleHi: 'अष्टकवर्ग विश्लेषण',
+                                        description: typeof ((data as unknown as Record<string, unknown>)?.ashtakavarga) === 'object'
+                                            ? ((data as unknown as Record<string, Record<string, unknown>>).ashtakavarga?.message as string) || 'Unlock Ashtakavarga binding scores with a Pro plan.'
+                                            : 'Unlock Ashtakavarga binding scores with a Pro plan.',
+                                        icon: '🪐',
+                                        badge: 'Pro',
+                                    }}
+                                    variant="inline"
+                                />
+                            )}
+                            {lockedSections.has('planet_strength_ranking') && (
+                                <PaywallCard
+                                    paywall={{
+                                        featureKey: 'kundli_premium',
+                                        isSoft: true,
+                                        title: 'Planet Strength Ranking',
+                                        titleHi: 'ग्रह बल रैंकिंग',
+                                        description: typeof ((data as unknown as Record<string, unknown>)?.planet_strength_ranking) === 'object'
+                                            ? ((data as unknown as Record<string, Record<string, unknown>>).planet_strength_ranking?.message as string) || 'Unlock detailed planet strength rankings with a Pro plan.'
+                                            : 'Unlock detailed planet strength rankings with a Pro plan.',
+                                        icon: '💪',
+                                        badge: 'Pro',
+                                    }}
+                                    variant="inline"
+                                />
+                            )}
+                            {lockedSections.has('transits') && (
+                                <PaywallCard
+                                    paywall={{
+                                        featureKey: 'kundli_premium',
+                                        isSoft: true,
+                                        title: 'Current Transits',
+                                        titleHi: 'वर्तमान गोचर',
+                                        description: typeof ((data as unknown as Record<string, unknown>)?.transits) === 'object'
+                                            ? ((data as unknown as Record<string, Record<string, unknown>>).transits?.message as string) || 'Unlock current planetary transit analysis with a Pro plan.'
+                                            : 'Unlock current planetary transit analysis with a Pro plan.',
+                                        icon: '🔄',
+                                        badge: 'Pro',
+                                    }}
+                                    variant="inline"
+                                />
+                            )}
+                            {lockedSections.has('key_themes') && (
+                                <PaywallCard
+                                    paywall={{
+                                        featureKey: 'kundli_premium',
+                                        isSoft: true,
+                                        title: 'Key Life Themes',
+                                        titleHi: 'मुख्य जीवन विषय',
+                                        description: typeof ((data as unknown as Record<string, unknown>)?.key_themes) === 'object'
+                                            ? ((data as unknown as Record<string, Record<string, unknown>>).key_themes?.message as string) || 'Unlock key life theme insights with a Pro plan.'
+                                            : 'Unlock key life theme insights with a Pro plan.',
+                                        icon: '🎯',
+                                        badge: 'Pro',
+                                    }}
+                                    variant="inline"
+                                />
+                            )}
                     </div>
 
                     {/* ─── RIGHT MAIN ─── */}
@@ -826,10 +960,10 @@ export default function KundliPage() {
                                         </div>
                                     </div>
                                 )}
-                            </div>
+</div>
 
-                        </Card>
-                    </div>
+</Card>
+                        </div>
                 </div>
             </div>
         </motion.div>

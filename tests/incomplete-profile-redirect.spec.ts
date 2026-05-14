@@ -24,4 +24,27 @@ test.describe('Incomplete Profile Redirect', () => {
     await page.waitForTimeout(2000);
     expect(page.url()).not.toContain('login?error=SessionExpired');
   });
+
+  test('stays on dashboard when fields are complete even if backend flag is stale false', async ({ page, context }) => {
+    await mockAllApis(page);
+    await mockSession(page, context, { id: 'u3', email: 'stale@t.com', name: 'Stale Flag' });
+    await mockProfileApi(page, {
+      id: 'u3',
+      email: 'stale@t.com',
+      name: 'Stale Flag',
+      dob: '1990-01-15',
+      tob: '06:30',
+      pob: 'Mumbai',
+      birthLatitude: 19.076,
+      birthLongitude: 72.8777,
+      birthTimezoneName: 'Asia/Kolkata',
+      birthTimezoneOffsetAtBirth: 5.5,
+      moonSign: 'Aries',
+    }, false);
+    await mockHoroscopeApi(page, { sign: 'Aries', date: '2026-05-13', areas: {} });
+
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2500);
+    expect(page.url()).not.toContain('/profile?onboarding=true');
+  });
 });

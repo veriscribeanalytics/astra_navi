@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { ProfileUpdateSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
+import { normalizeProfileUser, resolveProfileComplete } from '@/lib/profileCompleteness';
 
 /**
  * User Profile API Route (Proxy Mode)
@@ -30,10 +31,12 @@ export async function GET(req: Request) {
 
         const data = await response.json();
 
-        // Pass through backend's profileComplete flag if present
+        const normalizedUser = data.user ? normalizeProfileUser(data.user) : data.user;
+
         return NextResponse.json({
             ...data,
-            ...(data.profileComplete !== undefined ? { profileComplete: data.profileComplete } : {}),
+            ...(normalizedUser ? { user: normalizedUser } : {}),
+            profileComplete: resolveProfileComplete(data.profileComplete, normalizedUser),
         });
     } catch (error) {
         console.error("Profile fetch error:", error);
@@ -77,10 +80,12 @@ export async function PUT(req: Request) {
             }, { status: response.status });
         }
 
+        const normalizedUser = data.user ? normalizeProfileUser(data.user) : data.user;
+
         return NextResponse.json({ 
             message: "Profile successfully aligned with the stars!",
-            user: data.user,
-            ...(data.profileComplete !== undefined ? { profileComplete: data.profileComplete } : {}),
+            user: normalizedUser,
+            profileComplete: resolveProfileComplete(data.profileComplete, normalizedUser),
             ...(data.requiresReanalysis !== undefined ? { requiresReanalysis: data.requiresReanalysis } : {}),
         });
 

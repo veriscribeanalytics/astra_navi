@@ -7,13 +7,16 @@ import Image from "next/image";
 import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "../ui/LanguagePicker";
+import ConfirmDialog from "../ui/ConfirmDialog";
 import { useAuth } from "@/context/AuthContext";
 import { useToast, useTranslation } from "@/hooks";
 import { 
     User, LogOut, Menu, X, ChevronDown, Sparkles, 
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
-    Gem, ShieldQuestion, Brain, Globe
+    Gem, ShieldQuestion, Brain, Globe, Wallet
 } from "lucide-react";
+import { usePaywallContext } from "@/context/PaywallContext";
+import { getTierLabel } from "@/types/billing";
 
 // Navigation structure based on auth state
 const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
@@ -246,12 +249,15 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
 const Navbar: React.FC = () => {
     const pathname = usePathname();
     const router = useRouter();
-    const { isLoggedIn, logout, showLoading, user } = useAuth();
-    const { success, ToastContainer } = useToast();
+    const { isLoggedIn, logout, user } = useAuth();
+    const { ToastContainer } = useToast();
     const { t } = useTranslation();
+    const { tier, totalCredits, isLoaded } = usePaywallContext();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const desktopUserDropdownRef = useRef<HTMLDivElement>(null);
     const mobileUserDropdownRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLElement>(null);
@@ -295,21 +301,23 @@ const Navbar: React.FC = () => {
     const isChatPage = pathname?.startsWith('/chat');
     const navSections = getNavSections(isLoggedIn, t);
 
-    const handleLogout = async () => {
+    const handleLogout = () => {
         setIsUserDropdownOpen(false);
         setIsMenuOpen(false);
-        
-        showLoading("Logging you out...", 2000);
-        
-        setTimeout(async () => {
-            try {
-                success("Signed out successfully.");
-                await logout('/');
-            } catch (err) {
-                console.error('Logout failed:', err);
-                router.replace('/');
-            }
-        }, 1500);
+        setShowLogoutDialog(true);
+    };
+
+    const confirmLogout = async () => {
+        setIsLoggingOut(true);
+        try {
+            await logout('/?logout=success');
+        } catch (err) {
+            console.error('Logout failed:', err);
+            router.replace('/');
+        } finally {
+            setIsLoggingOut(false);
+            setShowLogoutDialog(false);
+        }
     };
     
     const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -371,6 +379,17 @@ const Navbar: React.FC = () => {
     return(
         <>
             {ToastContainer}
+            <ConfirmDialog
+                isOpen={showLogoutDialog}
+                onClose={() => setShowLogoutDialog(false)}
+                onConfirm={confirmLogout}
+                title="Sign out of AstraNavi?"
+                message="You will be signed out of your account and redirected to the homepage."
+                confirmText="Sign Out"
+                cancelText="Cancel"
+                variant="warning"
+                isLoading={isLoggingOut}
+            />
             <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
@@ -473,7 +492,19 @@ const Navbar: React.FC = () => {
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || "User"}</p>
                                     </div>
+                                    {/* Credit Balance */}
+                                    {isLoggedIn && isLoaded && (
+                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center gap-2.5">
+                                            <Wallet className="w-3.5 h-3.5 text-secondary" />
+                                            <span className="text-[10px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
+                                            <span className="text-[9px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
+                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{getTierLabel(tier || 'free')}</span>
+                                        </div>
+                                    )}
                                     <div className="space-y-0.5">
+                                        <Link href="/plans" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
+                                            <Sparkles className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.astraNaviPremium')}
+                                        </Link>
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
                                             <User className="w-4 h-4 mr-3.5 opacity-60" /> User Profile
                                         </Link>
@@ -527,7 +558,19 @@ const Navbar: React.FC = () => {
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || "User"}</p>
                                     </div>
+                                    {/* Credit Balance */}
+                                    {isLoggedIn && isLoaded && (
+                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center gap-2.5">
+                                            <Wallet className="w-3.5 h-3.5 text-secondary" />
+                                            <span className="text-[10px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
+                                            <span className="text-[9px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
+                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{getTierLabel(tier || 'free')}</span>
+                                        </div>
+                                    )}
                                     <div className="space-y-0.5">
+                                        <Link href="/plans" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
+                                            <Sparkles className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.astraNaviPremium')}
+                                        </Link>
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
                                             <User className="w-4 h-4 mr-3.5 opacity-60" /> User Profile
                                         </Link>

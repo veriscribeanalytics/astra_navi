@@ -51,7 +51,10 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/plans") ||
         nextUrl.pathname.startsWith("/kundli") ||
         nextUrl.pathname.startsWith("/chat") ||
-        nextUrl.pathname.startsWith("/consult");
+        nextUrl.pathname.startsWith("/consult") ||
+        nextUrl.pathname.startsWith("/forgot-password") ||
+        nextUrl.pathname.startsWith("/reset-password") ||
+        nextUrl.pathname.startsWith("/logout");
 
       // Allow auth routes (login/register).  If the session has an error,
       // treat the user as not logged in so they stay on /login instead of

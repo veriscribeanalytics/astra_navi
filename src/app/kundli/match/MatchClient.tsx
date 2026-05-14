@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
 import { clientFetch } from '@/lib/apiClient';
 import { useToast } from '@/hooks';
+import { PaywallData } from '@/types/paywall';
+import PaywallCard from '@/components/paywall/PaywallCard';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -92,6 +94,8 @@ export default function MatchClient() {
   const [isSubmitting, setIsSending] = useState(false);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing profiles...");
+
+  const [paywall, setPaywall] = useState<PaywallData | null>(null);
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -226,6 +230,18 @@ export default function MatchClient() {
         body: JSON.stringify({ person1, person2 }),
       });
 
+      // ── 402 Paywall detection ──
+      // If the backend returns 402, the match feature is blocked.
+      if (res.status === 402) {
+        const data = await res.json();
+        if (data.paywall) {
+          setPaywall(data.paywall as PaywallData);
+          setPhase('input'); // Stay on input step so user can go back
+        }
+        setIsSending(false);
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -287,6 +303,11 @@ export default function MatchClient() {
   return (
     <div className="max-w-6xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] mx-auto px-4 pt-12">
       {ToastContainer}
+
+      {/* Paywall Modal — shown when match is hard-blocked (402) */}
+      {paywall && (
+        <PaywallCard paywall={paywall} variant="modal" onClose={() => setPaywall(null)} />
+      )}
       {/* Tab Switcher */}
       <div className="flex justify-center mb-10">
         <div className="inline-flex p-1 bg-surface border border-outline-variant/10 rounded-2xl">

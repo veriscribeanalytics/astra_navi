@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Card from './Card';
 import Button from './Button';
 import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
@@ -28,6 +28,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   variant = 'info',
   isLoading = false,
 }) => {
+  const overflowModifiedRef = useRef(false);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen && !isLoading) {
@@ -38,11 +40,15 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      overflowModifiedRef.current = true;
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      if (overflowModifiedRef.current) {
+        document.body.style.overflow = '';
+        overflowModifiedRef.current = false;
+      }
     };
   }, [isOpen, onClose, isLoading]);
 

@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import LocationSearch, { LocationResult } from '@/components/ui/LocationSearch';
 import DstConflictDialog from '@/components/ui/DstConflictDialog';
 import { useAuth } from '@/context/AuthContext';
+import { usePaywallContext } from '@/context/PaywallContext';
 import { useToast, useTranslation } from '@/hooks';
 import { LanguageCode } from '@/locales';
 import { clientFetch } from '@/lib/apiClient';
@@ -15,7 +16,7 @@ import {
     User, Calendar, Clock,
     Save, ArrowLeft, RotateCcw, Sparkles,
     Globe, Bell, Phone, Mail, CheckCircle2,
-    ArrowRight, ChevronDown, Circle
+    ArrowRight, ChevronDown, Circle, Wallet
 } from 'lucide-react';
 
 const VALID_GENDERS = new Set(["male", "female", "other", "Not Specified"]);
@@ -30,7 +31,8 @@ const nullToUndef = <T,>(val: T | null | undefined): T | undefined =>
 
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, refreshProfile } = useAuth();
-    const { language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
+    const { tier, totalCredits, isLoaded: paywallLoaded } = usePaywallContext();
+    const { language: contextLanguage, setLanguage, availableLanguages, t } = useTranslation();
     const router = useRouter();
     const searchParams = useSearchParams();
     const isOnboarding = searchParams?.get('onboarding') === 'true';
@@ -435,7 +437,7 @@ export default function ProfileSettingsPage() {
     };
 
     return (
-        <main className="min-h-[calc(100dvh-var(--navbar-height,64px))] pb-12 px-4 flex flex-col items-center justify-center relative overflow-x-hidden bg-[var(--bg)]">
+        <main className="min-h-[calc(100dvh-var(--navbar-height,64px))] py-6 sm:py-10 px-4 flex flex-col items-center justify-start relative overflow-x-hidden bg-[var(--bg)]">
             {ToastContainer}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
@@ -607,6 +609,17 @@ export default function ProfileSettingsPage() {
                     <p className={`font-body text-on-surface-variant max-w-md mx-auto ${isOnboarding ? 'text-xs sm:text-sm' : 'text-sm'}`}>
                         Manage your birth details to ensure your personalized readings are always accurate.
                     </p>
+                    {/* Credit Balance — only shown when NOT in onboarding */}
+                    {!isOnboarding && paywallLoaded && (
+                        <div className="flex items-center justify-center gap-2 mt-3">
+                            <a href="/plans" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/15 hover:bg-secondary/15 hover:border-secondary/25 transition-all">
+                                <Wallet className="w-4 h-4 text-secondary" />
+                                <span className="text-[11px] font-bold text-secondary tabular-nums">{totalCredits ?? 0} {t('plans.naviCredits')}</span>
+                                <span className="text-[8px] font-bold text-secondary/50 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{tier?.toUpperCase() || 'FREE'}</span>
+                                <ArrowRight className="w-3 h-3 text-secondary/40" />
+                            </a>
+                        </div>
+                    )}
                 </div>
 
                 <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>

@@ -204,9 +204,9 @@ export default function RashisClient() {
         }, [selectedRashi.nameEn, viewMode, language]);
 
     return (
-        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center">
+        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center justify-center">
 
-            <div className="max-w-[1500px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] w-full mx-auto relative z-10 flex flex-col xl:flex-row gap-5">
+            <div className="max-w-[1350px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-6 lg:gap-10 justify-center">
 
                 {/* Master: Sidebar (Left) */}
                 <div className="lg:w-[260px] flex-shrink-0 flex flex-col">
@@ -393,7 +393,7 @@ export default function RashisClient() {
                                 transition={{ duration: 0.3 }}
                                 className="flex flex-col"
                             >
-                                <Card padding="none" className="max-w-5xl !rounded-[32px] sm:!rounded-[40px] border-outline-variant/30 flex flex-col overflow-hidden">
+                                <Card padding="none" className="w-full !rounded-[32px] sm:!rounded-[40px] border-outline-variant/30 flex flex-col overflow-hidden">
                                     <div className="grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-outline-variant/20">
 
                                         {/* LEFT PANE: Rashi Identity */}

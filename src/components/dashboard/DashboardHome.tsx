@@ -1,10 +1,12 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { usePaywallContext } from "@/context/PaywallContext";
+import { getTierLabel } from "@/types/billing";
 import { 
     Sparkles, MessageSquare, Globe, Heart, 
     ChevronRight, Orbit, TrendingUp,
-    Users, Sun, ArrowUp, Plus, Briefcase, Activity, ArrowRight
+    Users, Sun, ArrowUp, Plus, Briefcase, Activity, ArrowRight, Wallet
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -16,12 +18,14 @@ import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import { clientFetch } from "@/lib/apiClient";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
+import TomorrowHoroscopeCard from "@/components/dashboard/TomorrowHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 import { topicPills } from '@/data/topicPills';
+import { isProfileComplete } from "@/lib/profileCompleteness";
 
 function formatRelativeTime(date: Date, t: (key: string) => string, language?: string) {
     const now = new Date();
@@ -307,6 +311,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
 // ─── Main Component ─────────────────────────────
 export default function DashboardHome() {
     const { user, refreshProfile, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
+    const { tier, totalCredits, isLoaded: paywallLoaded } = usePaywallContext();
     const { 
         activeChat, activeChatId,
         sendMessage, createNewChat, selectChat, resetChat, isSending, 
@@ -324,6 +329,15 @@ export default function DashboardHome() {
     const greeting = t(greetingKey);
     const hasAnalyzedRef = useRef<string | null>(null);
     const redirectedRef = useRef(false);
+    const profileCompleteFromFields = isProfileComplete({
+        name: user?.name,
+        dob: user?.dob,
+        tob: user?.tob,
+        pob: user?.pob,
+        birthLatitude: user?.birthLatitude,
+        birthLongitude: user?.birthLongitude,
+        birthTimezoneName: user?.birthTimezoneName,
+    });
 
     // Memos
     
@@ -463,10 +477,10 @@ export default function DashboardHome() {
         
         // Redirect to onboarding if profile is incomplete
         // (profileComplete now uses backend flag which considers birth location fields)
-        if (profileFetched && !profileComplete && !userLoading && !redirectedRef.current && pathname !== '/profile') {
+        if (profileFetched && !profileComplete && !profileCompleteFromFields && !userLoading && !redirectedRef.current && pathname !== '/profile') {
             const timer = setTimeout(() => {
                 // Re-check after delay to allow state to settle
-                if (!profileComplete && !redirectedRef.current) {
+                if (!profileComplete && !profileCompleteFromFields && !redirectedRef.current) {
                     redirectedRef.current = true;
                     // --- DIAGNOSTIC LOG ---
                     console.log('[DashboardHome] profileComplete is FALSE — redirecting to /profile onboarding');
@@ -500,7 +514,7 @@ export default function DashboardHome() {
                 console.warn('[Dashboard] Auto analyze-full failed:', err);
             });
         }
-    }, [user?.email, user?.name, user?.dob, user?.tob, user?.pob, user?.birthLatitude, user?.birthLongitude, user?.birthTimezoneName, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshProfile, profileComplete, profileFetched, router, pathname]);
+    }, [user?.email, user?.name, user?.dob, user?.tob, user?.pob, user?.birthLatitude, user?.birthLongitude, user?.birthTimezoneName, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshProfile, profileComplete, profileCompleteFromFields, profileFetched, router, pathname]);
 
     const currentDate = new Date().toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
@@ -520,6 +534,15 @@ export default function DashboardHome() {
                             <div className="flex items-center justify-center lg:justify-start gap-3">
                                 <div className="hidden sm:block h-[1px] w-8 bg-secondary/30" />
                                 <p className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-[0.3em]">{currentDate}</p>
+                                {/* Credit Balance Badge */}
+                                {paywallLoaded && (
+                                    <Link href="/plans" className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/10 border border-secondary/15 hover:bg-secondary/15 hover:border-secondary/25 transition-all">
+                                        <Wallet className="w-3 h-3 text-secondary" />
+                                        <span className="text-[9px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
+                                        <span className="text-[8px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
+                                        <span className="text-[7px] font-bold text-secondary/50 uppercase tracking-wider">{getTierLabel(tier || 'free')}</span>
+                                    </Link>
+                                )}
                             </div>
                             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-headline font-bold tracking-tight leading-tight flex flex-wrap items-center justify-center lg:justify-start gap-x-3">
                                 {greeting}, 
@@ -586,8 +609,9 @@ export default function DashboardHome() {
 
                 {/* ZONE 2: HERO DASHBOARD */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="lg:col-span-8">
+                    <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
                         <DailyHoroscopeCard userLoading={userLoading} onSendMessage={handleSendMessage} />
+                        <TomorrowHoroscopeCard userLoading={userLoading} />
                     </div>
 
                     <div className="lg:col-span-4 flex flex-col min-h-0">

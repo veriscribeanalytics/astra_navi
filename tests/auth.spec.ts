@@ -1,0 +1,162 @@
+// auth.spec.ts — Playwright tests for auth pages and logout behavior
+// Related to the auth UI refactor plan
+
+import { test, expect } from '@playwright/test';
+import { mockSession, mockAllApis } from './auth-helpers';
+
+test.describe('Login Page', () => {
+  test('renders login form with email, password, and sign in button', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.locator('label:has-text("Email")').first()).toBeVisible();
+    await expect(page.locator('label:has-text("Password")').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Sign In/i })).toBeVisible();
+  });
+
+  test('shows "Forgot Password?" link', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByText('Forgot Password?')).toBeVisible();
+  });
+
+  test('toggle between sign-in and register via button', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/login');
+    // Verify toggle button exists with "Don't have" text
+    const toggleBtn = page.locator('button').filter({ hasText: /Don'?t have/ }).first();
+    await expect(toggleBtn).toBeVisible();
+    // Scroll into view to ensure the click lands on the element (not clipped by overflow)
+    await toggleBtn.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await toggleBtn.click();
+    await page.waitForTimeout(400);
+    // After toggle, the form should change — the "Forgot Password?" link (only in SignInForm) should be gone
+    await expect(page.getByText('Forgot Password?')).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('mobile layout does not overflow horizontally', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/login');
+    const body = page.locator('body');
+    const scrollWidth = await body.evaluate((el) => el.scrollWidth);
+    const clientWidth = await body.evaluate((el) => el.clientWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
+    await expect(page.locator('label:has-text("Email")').first()).toBeVisible();
+  });
+});
+
+test.describe('Forgot Password Page', () => {
+  test('renders email form and send reset link button', async ({ page }) => {
+    await page.goto('/forgot-password');
+    await expect(page.locator('label:has-text("Email")').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Send Reset Link/i })).toBeVisible();
+    await expect(page.getByText('Back to Login')).toBeVisible();
+  });
+
+  test('submit button is disabled when email is empty', async ({ page }) => {
+    await page.goto('/forgot-password');
+    const button = page.getByRole('button', { name: /Send Reset Link/i });
+    await expect(button).toBeDisabled();
+  });
+});
+
+test.describe('Reset Password Page', () => {
+  test('shows missing-token state when no token provided', async ({ page }) => {
+    await page.goto('/reset-password');
+    const button = page.getByRole('button', { name: /Reset Password/i });
+    await expect(button).toBeDisabled();
+  });
+
+  test('shows password fields when valid token provided', async ({ page }) => {
+    await page.goto('/reset-password?token=test-token-123');
+    await expect(page.locator('label:has-text("New Password")').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('label:has-text("Confirm Password")').first()).toBeVisible();
+    const btn = page.getByRole('button', { name: /Reset Password/i });
+    await expect(btn).toBeDisabled();
+  });
+});
+
+test.describe('Logout Flow', () => {
+  test('logout confirmation modal opens from navbar', async ({ page, context }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await mockSession(page, context);
+    await mockAllApis(page);
+    await page.goto('/');
+
+    // Desktop avatar button with profile-ring-glow class
+    const avatarBtn = page.locator('nav .profile-ring-glow').first();
+    await expect(avatarBtn).toBeVisible({ timeout: 5000 });
+    await avatarBtn.click();
+    await page.waitForTimeout(400);
+
+    // The user dropdown should have "Sign Out" button
+    const signOutBtn = page.getByRole('button', { name: /Sign Out/i });
+    await expect(signOutBtn).toBeVisible({ timeout: 3000 });
+    await signOutBtn.click();
+
+    // ConfirmDialog opens
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 3000 });
+    await expect(dialog.getByText(/Sign out of AstraNavi/i)).toBeVisible();
+
+    // Dismiss with Cancel
+    await dialog.getByRole('button', { name: /Cancel/i }).click();
+    await expect(dialog).not.toBeVisible();
+  });
+});
+
+test.describe('Logout Page', () => {
+  test('/logout page renders confirmation screen with cancel and sign out buttons', async ({ page }) => {
+    await page.goto('/logout');
+    await expect(page.locator('h1:has-text("Sign Out")')).toBeVisible();
+    await expect(page.getByText(/Are you sure/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Cancel/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Sign Out/i })).toBeVisible();
+  });
+});
+
+test.describe('Mobile Auth Layout', () => {
+  test('login page does not overflow on small screens', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto('/login');
+    const body = page.locator('body');
+    const overflowX = await body.evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(overflowX).toBeLessThanOrEqual(5);
+  });
+
+  test('register toggle visible on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/login');
+    const toggleBtn = page.locator('button').filter({ hasText: /Don'?t have/ }).first();
+    await expect(toggleBtn).toBeVisible();
+    await toggleBtn.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await toggleBtn.click();
+    await page.waitForTimeout(400);
+    // "Forgot Password?" should disappear after toggle (only present in sign-in)
+    await expect(page.getByText('Forgot Password?')).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('forgot password page is centered on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto('/forgot-password');
+    await expect(page.locator('label:has-text("Email")').first()).toBeVisible();
+    await expect(page.getByText('Back to Login')).toBeVisible();
+  });
+});
+
+test.describe('Accessibility', () => {
+  test('password toggle has accessible label and aria-pressed on login form', async ({ page }) => {
+    await page.goto('/login');
+    const toggleBtn = page.locator('button[aria-label="Show password"]').first();
+    await expect(toggleBtn).toBeVisible();
+    expect(await toggleBtn.getAttribute('aria-pressed')).toBe('false');
+    // The existence of aria-label alone confirms the accessible pattern
+  });
+
+  test('form inputs have associated labels', async ({ page }) => {
+    await page.goto('/login');
+    const emailLabel = page.locator('label').filter({ hasText: /Email/i }).first();
+    await expect(emailLabel).toBeVisible();
+    const passwordLabel = page.locator('label').filter({ hasText: /Password/i }).first();
+    await expect(passwordLabel).toBeVisible();
+  });
+});

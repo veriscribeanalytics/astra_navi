@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
+import { PaywallData } from '@/types/paywall';
+import PaywallCard from '@/components/paywall/PaywallCard';
 import { 
   calculateAge, 
   getAgeGroup, 
@@ -61,6 +63,9 @@ const ConsultClient: React.FC = () => {
   const [isReading, setIsReading] = useState(false);
   const [readingText, setReadingText] = useState('');
   const readingEndRef = useRef<HTMLDivElement>(null);
+
+  // Paywall State
+  const [paywall, setPaywall] = useState<PaywallData | null>(null);
 
   // Sync with user profile if available
   useEffect(() => {
@@ -124,6 +129,19 @@ const ConsultClient: React.FC = () => {
           optional_note: note || undefined
         }),
       });
+
+      // ── 402 Paywall detection ──
+      // If the backend returns 402, the consult feature is blocked.
+      // Show PaywallCard instead of streaming.
+      if (response.status === 402) {
+        const data = await response.json();
+        if (data.paywall) {
+          setPaywall(data.paywall as PaywallData);
+          setStep('questions'); // Stay on the question step so user can go back
+        }
+        setIsReading(false);
+        return;
+      }
 
       if (!response.ok) {
         const errData = await response.json();
@@ -201,6 +219,11 @@ const ConsultClient: React.FC = () => {
 
   return (
     <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] mx-auto relative px-4 sm:px-6 h-screen overflow-hidden flex flex-col pb-8">
+
+      {/* Paywall Modal — shown when consult is hard-blocked (402) */}
+      {paywall && (
+        <PaywallCard paywall={paywall} variant="modal" onClose={() => setPaywall(null)} />
+      )}
       
       {/* Global Back Button (Top Left) */}
       {step !== 'birth' && step !== 'reading' && (

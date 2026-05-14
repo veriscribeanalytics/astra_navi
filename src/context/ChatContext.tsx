@@ -6,6 +6,7 @@ import { generateUUID } from '@/lib/uuid';
 import { clientFetch } from '@/lib/apiClient';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/hooks';
+import { PaywallData } from '@/types/paywall';
 
 /* ---------- Types ---------- */
 export interface ChatMessage {
@@ -64,6 +65,8 @@ interface ChatContextType {
   isRightPanelOpen: boolean;
   setIsRightPanelOpen: (isOpen: boolean) => void;
   resetChat: () => void;
+  paywall: PaywallData | null;
+  clearPaywall: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -83,6 +86,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [paywall, setPaywall] = useState<PaywallData | null>(null);
   const initialLoadDone = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -251,6 +255,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signal: abortController.signal,
       });
 
+      // ── 402 Paywall detection ──
+      // If the backend returns 402, the feature is blocked.
+      // Parse the paywall data and show PaywallCard instead of streaming.
+      if (res.status === 402) {
+        const data = await res.json();
+        if (data.paywall) {
+          setPaywall(data.paywall as PaywallData);
+          // Replace the AI placeholder with a paywall indicator
+          setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: '⚠️ This feature requires an upgrade.' } : m) } : null);
+        }
+        setIsSending(false);
+        return;
+      }
+
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
@@ -366,6 +384,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetChat = useCallback(() => {
     setActiveChat(null);
     setActiveChatId(null);
+    setPaywall(null);
+  }, []);
+
+  const clearPaywall = useCallback(() => {
+    setPaywall(null);
   }, []);
 
   useEffect(() => {
@@ -380,7 +403,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, hasMoreChats,
       isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
       loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat, resetChat,
-      inputText, setInputText, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen
+      inputText, setInputText, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
+      paywall, clearPaywall
     }}>
       {children}
     </ChatContext.Provider>
