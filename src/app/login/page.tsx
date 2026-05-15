@@ -51,13 +51,10 @@ const LoginContent = () => {
     const authError = searchParams.get('error');
 
     if (authError === 'SessionExpired') {
-      const alreadyCleared = searchParams.get('sessionCleared') === '1';
-      if (!alreadyCleared) {
-        fetch('/api/auth/clear-session', { method: 'POST' }).finally(() => {
-          router.replace('/login?sessionCleared=1');
-        });
-        return;
-      }
+      fetch('/api/auth/clear-session', { method: 'POST' })
+        .catch(err => console.warn('[Login] Session clear failed:', err));
+      router.replace('/login?sessionCleared=1');
+      return;
     }
 
     if (authError) {

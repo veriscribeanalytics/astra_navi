@@ -41,6 +41,46 @@ test.describe('Login Page', () => {
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
     await expect(page.locator('label:has-text("Email")').first()).toBeVisible();
   });
+
+  test('session-expired recovery clears once and stays on stable login page', async ({ page }) => {
+    let clearSessionCalls = 0;
+    await page.route('**/api/auth/clear-session', async (route) => {
+      clearSessionCalls++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' });
+    });
+
+    await page.goto('/login?error=SessionExpired&sessionCleared=1');
+    await page.waitForURL('**/login?sessionCleared=1', { timeout: 5000 });
+    await page.waitForTimeout(500);
+
+    expect(clearSessionCalls).toBe(1);
+    expect(page.url()).toContain('/login?sessionCleared=1');
+    expect(page.url()).not.toContain('error=SessionExpired');
+  });
+});
+
+test.describe('Session Recovery', () => {
+  test('landing page does not redirect-loop when session cookie has refresh error', async ({ page, context }) => {
+    await mockSession(page, context, {
+      id: 'expired-user',
+      email: 'expired@test.com',
+      name: 'Expired User',
+      error: 'TokenReuseError',
+    });
+    await mockAllApis(page);
+
+    const urls: string[] = [];
+    page.on('framenavigated', (frame) => {
+      if (frame === page.mainFrame()) urls.push(frame.url());
+    });
+
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+
+    expect(page.url()).not.toContain('/login?error=SessionExpired');
+    expect(page.url()).not.toContain('/chat');
+    expect(urls.filter((url) => url.includes('/login') || url.includes('/chat')).length).toBe(0);
+  });
 });
 
 test.describe('Forgot Password Page', () => {

@@ -1,5 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 
+const SESSION_COOKIE_CHUNK_LIMIT = 20;
+
 function redirectToLoginAndClearSession(nextUrl: URL) {
   const loginUrl = new URL("/login", nextUrl);
   loginUrl.searchParams.set("error", "SessionExpired");
@@ -10,8 +12,8 @@ function redirectToLoginAndClearSession(nextUrl: URL) {
 }
 
 function appendSessionClearCookies(response: Response) {
-  const expiredCookie = "Max-Age=0; Path=/; HttpOnly; SameSite=Lax";
-  const expiredSecureCookie = "Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax";
+  const expiredCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax";
+  const expiredSecureCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; Secure; SameSite=Lax";
 
   for (const name of [
     "authjs.session-token",
@@ -21,7 +23,7 @@ function appendSessionClearCookies(response: Response) {
   ]) {
     response.headers.append("Set-Cookie", `${name}=; ${expiredCookie}`);
     response.headers.append("Set-Cookie", `${name}=; ${expiredSecureCookie}`);
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < SESSION_COOKIE_CHUNK_LIMIT; i += 1) {
       response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredCookie}`);
       response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredSecureCookie}`);
     }
@@ -41,6 +43,9 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user && !hasSessionError;
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isAuthRoute = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
+      const isSessionRecoveryRoute =
+        nextUrl.searchParams.get("error") === "SessionExpired" ||
+        nextUrl.searchParams.get("sessionCleared") === "1";
       const isPublicRoute = 
         nextUrl.pathname === "/" || 
         nextUrl.pathname.startsWith("/blogs") || 
@@ -66,7 +71,7 @@ export const authConfig = {
           }
           return redirectToLoginAndClearSession(nextUrl);
         }
-        if (isLoggedIn) {
+        if (isLoggedIn && !isSessionRecoveryRoute) {
           return Response.redirect(new URL("/chat", nextUrl));
         }
         return true;
@@ -74,7 +79,7 @@ export const authConfig = {
 
       // Session has a fatal error — redirect all non-API pages to login
       // so the poisoned cookie doesn't trap the user in a redirect loop.
-      if (hasSessionError && !isApiRoute) {
+      if (hasSessionError && !isApiRoute && !isPublicRoute) {
         return redirectToLoginAndClearSession(nextUrl);
       }
 

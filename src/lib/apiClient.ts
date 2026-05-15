@@ -11,6 +11,8 @@ const AUTH_GRACE_MS = 5000; // 5 seconds grace period after session is first det
 // Deduplicate sign-out calls so multiple concurrent 401s don't each trigger signOut
 let signOutPromise: Promise<void> | null = null;
 
+const SESSION_RECOVERY_URL = "/login?error=SessionExpired&sessionCleared=1";
+
 async function getRefreshedSession() {
   if (sessionRefreshPromise) {
     return sessionRefreshPromise;
@@ -44,11 +46,20 @@ function isWithinAuthGrace(): boolean {
  */
 async function performSignOut(callbackUrl: string, errorMessage: string): Promise<never> {
   if (!signOutPromise) {
-    signOutPromise = signOut({ callbackUrl }).catch(err => {
-      console.error("[clientFetch] signOut failed:", err);
-    }).finally(() => {
-      signOutPromise = null;
-    });
+    signOutPromise = (async () => {
+      try {
+        await fetch("/api/auth/clear-session", { method: "POST" });
+      } catch (err) {
+        console.warn("[clientFetch] session clear failed before signOut:", err);
+      }
+      await signOut({ redirectTo: callbackUrl });
+    })()
+      .catch(err => {
+        console.error("[clientFetch] signOut failed:", err);
+      })
+      .finally(() => {
+        signOutPromise = null;
+      });
   }
   await signOutPromise;
   throw new Error(errorMessage);
@@ -80,13 +91,13 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
           // Still 401 after grace retry — fall through to sign out
         }
       }
-      await performSignOut("/login?error=SessionExpired", "Session expired. Please log in again.");
+      await performSignOut(SESSION_RECOVERY_URL, "Session expired. Please log in again.");
     }
     
     // Session exists at this point — check for refresh errors
     if (session?.user?.error === "RefreshAccessTokenError" || session?.user?.error === "TokenReuseError") {
       console.error("[clientFetch] Refresh failed with fatal error. Signing out immediately.");
-      await performSignOut("/login?error=SessionExpired", "Session expired. Please log in again.");
+      await performSignOut(SESSION_RECOVERY_URL, "Session expired. Please log in again.");
     }
 
     // If we're in the grace period, wait a bit before retrying to give the cookie time to propagate
@@ -108,7 +119,7 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
     
     if (response.status === 401) {
        console.error("[clientFetch] Retry also failed with 401. Tokens are out of sync. Forcing logout.");
-       await performSignOut("/login?error=SessionExpired", "Session expired. Please log in again.");
+       await performSignOut(SESSION_RECOVERY_URL, "Session expired. Please log in again.");
     }
     
     return response;

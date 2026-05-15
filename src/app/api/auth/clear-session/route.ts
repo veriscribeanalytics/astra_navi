@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const SESSION_COOKIE_CHUNK_LIMIT = 20;
+
 /**
  * Dedicated route to clear ALL Auth.js / NextAuth session cookies and chunked
  * cookies.  Called from the login page when ?error=SessionExpired is detected
@@ -11,8 +13,8 @@ import { NextResponse } from "next/server";
 export async function POST() {
   const response = NextResponse.json({ success: true });
 
-  const expiredCookie = "Max-Age=0; Path=/; HttpOnly; SameSite=Lax";
-  const expiredSecureCookie = "Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax";
+  const expiredCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax";
+  const expiredSecureCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; Secure; SameSite=Lax";
 
   // Clear all known Auth.js/NextAuth session cookie names and their chunked
   // variants (up to 5 chunks).  Chunked cookies are used for large JWT tokens
@@ -25,7 +27,7 @@ export async function POST() {
   ]) {
     response.headers.append("Set-Cookie", `${name}=; ${expiredCookie}`);
     response.headers.append("Set-Cookie", `${name}=; ${expiredSecureCookie}`);
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < SESSION_COOKIE_CHUNK_LIMIT; i += 1) {
       response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredCookie}`);
       response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredSecureCookie}`);
     }

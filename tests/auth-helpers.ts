@@ -56,7 +56,11 @@ function csrfCookieValue(): string {
 
 export interface TestUser { id: string; email: string; name: string; }
 
-export async function mockSession(page: Page, context: BrowserContext, user: TestUser = { id: 'test-user', email: 'test@test.com', name: 'Test User' }) {
+export async function mockSession(
+  page: Page,
+  context: BrowserContext,
+  user: TestUser & { error?: string } = { id: 'test-user', email: 'test@test.com', name: 'Test User' }
+) {
   const cookieVal = csrfCookieValue();
   const sessionToken = await encode({
     secret: getAuthSecret(),
@@ -69,6 +73,7 @@ export async function mockSession(page: Page, context: BrowserContext, user: Tes
       accessToken: `test-access-token-${user.id}`,
       refreshToken: `test-refresh-token-${user.id}`,
       accessTokenExpires: Date.now() + 60 * 60 * 1000,
+      error: user.error,
     },
     maxAge: 24 * 60 * 60,
   });
@@ -83,14 +88,15 @@ export async function mockSession(page: Page, context: BrowserContext, user: Tes
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        user: {
-          ...user,
-          accessToken: `test-access-token-${user.id}`,
-          refreshToken: `test-refresh-token-${user.id}`,
-          accessTokenExpires: Date.now() + 60 * 60 * 1000,
-        },
-        expires: new Date(Date.now() + 86400000).toISOString()
-      })
+      user: {
+        ...user,
+        accessToken: `test-access-token-${user.id}`,
+        refreshToken: `test-refresh-token-${user.id}`,
+        accessTokenExpires: Date.now() + 60 * 60 * 1000,
+        error: user.error,
+      },
+      expires: new Date(Date.now() + 86400000).toISOString()
+    })
     });
   });
   await page.route('**/api/auth/csrf', async (route) => {

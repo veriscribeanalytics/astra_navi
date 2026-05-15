@@ -55,6 +55,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const SESSION_RECOVERY_URL = '/login?error=SessionExpired&sessionCleared=1';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data: session, status } = useSession();
     const [user, setUser] = useState<User | null>(null);
@@ -78,7 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const contextLanguageRef = useRef(contextLanguage);
     contextLanguageRef.current = contextLanguage;
 
-    const isLoggedIn = status === 'authenticated';
+    const hasSessionError =
+        session?.user?.error === "TokenReuseError" ||
+        session?.user?.error === "RefreshAccessTokenError";
+    const isLoggedIn = status === 'authenticated' && !hasSessionError;
     const isSessionLoading = status === 'loading';
 
     useEffect(() => {
@@ -90,6 +95,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // JWT cookie by the JWT callback so the middleware (auth.config.ts) can
             // detect them and redirect to /login before the page loads.
             if (sessionUser.error === "TokenReuseError") {
+                setUser(null);
+                setProfileComplete(false);
+                setProfileFetched(false);
+                fetchInProgressRef.current = false;
                 console.error("[AuthContext] Token reuse detected in session. Signing out immediately.");
                 // TokenReuseError is unrecoverable — the refresh token has been
                 // revoked by the backend.  Sign out & clear the poisoned cookie
@@ -97,7 +106,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // requests but the middleware already redirects to /login now).
                 if (!signOutInitiatedRef.current) {
                   signOutInitiatedRef.current = true;
-                  signOut({ callbackUrl: '/login?error=SessionExpired' });
+                  fetch('/api/auth/clear-session', { method: 'POST' })
+                    .catch(err => console.warn('[AuthContext] Session clear failed:', err))
+                    .finally(() => {
+                      signOut({ redirectTo: SESSION_RECOVERY_URL });
+                    });
                 }
                 return;
             } else if (sessionUser.error === "RefreshAccessTokenError") {
@@ -106,8 +119,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // them out aggressively.  The next session poll will retry the
                 // refresh.  If truly expired, clientFetch handles 401s.
                 console.warn("[AuthContext] Refresh token error (possibly transient). Not signing out — will retry on next session poll.");
-}
-            
+                setUser(null);
+                setProfileComplete(false);
+                setProfileFetched(false);
+                fetchInProgressRef.current = false;
+                return;
+            }
+
             // Initial set from session
             if (sessionUser.email) {
                 // If it's a different user, reset profile state
