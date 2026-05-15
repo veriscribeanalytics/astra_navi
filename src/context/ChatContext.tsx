@@ -18,6 +18,16 @@ export interface ChatMessage {
   feedbackComment?: string;
   insights?: { label: string; value: string }[];
   dasha?: { title: string; rows: { planet: string; fill: string; fillColor?: string; dates: string; active?: boolean }[] };
+  suggestedQuestions?: string[];
+  topic?: "career" | "love" | "study" | "finance" | "health" | "timing" | "remedy" | "general";
+  intent?: "greeting" | "yes_no" | "timing" | "comparison" | "advice" | "topic_overview" | "deep_analysis" | "emotional_support" | "remedy_request" | "explanation" | "general";
+  answerStyle?: string;
+  mode?: "quick" | "normal" | "deep";
+  creditsRemaining?: number | null;
+  finishReason?: string | null;
+  retryUsed?: boolean;
+  qualityRewriteUsed?: boolean;
+  quality?: { score?: number; issues?: string[]; passed?: boolean; [key: string]: unknown };
   createdAt: string;
 }
 
@@ -46,6 +56,7 @@ interface ChatContextType {
   isLoadingChats: boolean;
   isLoadingMessages: boolean;
   isSending: boolean;
+  isFinalizing: boolean;
   hasMoreChats: boolean;
   isGuest: boolean;
   guestTimeRemaining: number;
@@ -57,9 +68,12 @@ interface ChatContextType {
   createNewChat: (initialMessage?: string) => Promise<string | null>;
   sendMessage: (text: string, overrideChatId?: string) => Promise<void>;
   rateMessage: (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => Promise<void>;
+  regenerateMessage: (messageId: string) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
   inputText: string;
   setInputText: React.Dispatch<React.SetStateAction<string>>;
+  mode: "quick" | "normal" | "deep";
+  setMode: React.Dispatch<React.SetStateAction<"quick" | "normal" | "deep">>;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   isRightPanelOpen: boolean;
@@ -81,12 +95,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallData | null>(null);
+  const [mode, setMode] = useState<"quick" | "normal" | "deep">("normal");
   const initialLoadDone = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -251,7 +267,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await clientFetch(`/api/chat/${targetId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, language }),
+        body: JSON.stringify({ text, language, mode }),
         signal: abortController.signal,
       });
 
@@ -260,11 +276,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Parse the paywall data and show PaywallCard instead of streaming.
       if (res.status === 402) {
         const data = await res.json();
-        if (data.paywall) {
-          setPaywall(data.paywall as PaywallData);
-          // Replace the AI placeholder with a paywall indicator
-          setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: '⚠️ This feature requires an upgrade.' } : m) } : null);
-        }
+        const paywallData = data.paywall || data.detail?.paywall || data;
+        setPaywall(paywallData as PaywallData);
+        setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: '⚠️ This feature requires an upgrade.' } : m) } : null);
         setIsSending(false);
         return;
       }
@@ -273,17 +287,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const decoder = new TextDecoder();
       let fullText = '';
       let buffer = '';
-      
-      // Phase 6.3: Debounce re-renders during streaming
+      let currentEventName = '';
+      let streamDone = false;
+      let persistedAiMsgId: string | null = null;
+
       let lastUpdate = 0;
-      const updateInterval = 50; // ms
+      const updateInterval = 50;
 
       if (reader) {
-        while (true) {
+        while (!streamDone) {
           const { done, value } = await reader.read();
           if (done) {
-            // Final update to ensure everything is rendered
-            setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: fullText } : m) } : null);
+            setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
             break;
           }
           
@@ -292,25 +307,100 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           buffer = lines.pop() || '';
           
           for (const line of lines) {
-            if (!line.trim().startsWith('data: ')) continue;
-            const dataStr = line.trim().slice(6);
-            if (dataStr === '[DONE]') break;
+            if (streamDone) break;
+            const trimmed = line.trim();
+            if (trimmed.startsWith('event: ')) {
+              currentEventName = trimmed.slice(7);
+              continue;
+            }
+            if (!trimmed.startsWith('data: ')) continue;
+            const dataStr = trimmed.slice(6);
+            if (dataStr === '[DONE]') {
+              setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
+              streamDone = true;
+              break;
+            }
             
             try {
               const data = JSON.parse(dataStr);
-              if (data.token) {
+              if (currentEventName === 'metadata') {
+                if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
+                  persistedAiMsgId = data.aiMessageId;
+                }
+                setActiveChat(prev => prev ? {
+                  ...prev,
+                  messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? {
+                    ...m,
+                    id: persistedAiMsgId ?? m.id,
+                    suggestedQuestions: data.suggestedQuestions ?? m.suggestedQuestions,
+                    topic: data.topic ?? m.topic,
+                    intent: data.intent ?? m.intent,
+                    answerStyle: data.answerStyle ?? m.answerStyle,
+                    mode: data.mode ?? m.mode,
+                    creditsRemaining: data.creditsRemaining ?? m.creditsRemaining,
+                    finishReason: data.finishReason ?? m.finishReason,
+                    retryUsed: data.retryUsed ?? m.retryUsed,
+                    qualityRewriteUsed: data.qualityRewriteUsed ?? m.qualityRewriteUsed,
+                    quality: data.quality ?? m.quality,
+                  } : m)
+                } : null);
+              } else if (data.token) {
                 fullText += data.token;
-                
                 const now = Date.now();
                 if (now - lastUpdate > updateInterval) {
-                  setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: fullText } : m) } : null);
+                  setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
                   lastUpdate = now;
                 }
               }
+              currentEventName = '';
             } catch (e) {
               console.warn('Failed to parse stream token:', dataStr, e);
+              currentEventName = '';
             }
           }
+        }
+      }
+
+      if (targetId && !targetId.startsWith('temp-')) {
+        setIsFinalizing(true);
+        try {
+          const chatRes = await clientFetch(`/api/chat/${targetId}`);
+          const chatData = await chatRes.json();
+          if (chatRes.ok && chatData.chat) {
+            const backendChat = chatData.chat as Chat;
+            setActiveChat(prev => {
+              if (!prev) return backendChat;
+              const localAiMsg = prev.messages.find(m => m.id === persistedAiMsgId || m.id === aiMsgId);
+              if (!localAiMsg) return backendChat;
+              const backendAiMsg = backendChat.messages.find(m => m.id === persistedAiMsgId) ?? backendChat.messages.find(m => m.type === 'ai' && m.text === localAiMsg.text);
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.mode || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality)) {
+                const merged = backendChat.messages.map(m => {
+                  if (m.id === backendAiMsg.id) {
+                    return {
+                      ...m,
+                      suggestedQuestions: localAiMsg.suggestedQuestions ?? m.suggestedQuestions,
+                      topic: localAiMsg.topic ?? m.topic,
+                      intent: localAiMsg.intent ?? m.intent,
+                      answerStyle: localAiMsg.answerStyle ?? m.answerStyle,
+                      mode: localAiMsg.mode ?? m.mode,
+                      creditsRemaining: localAiMsg.creditsRemaining ?? m.creditsRemaining,
+                      finishReason: localAiMsg.finishReason ?? m.finishReason,
+                      retryUsed: localAiMsg.retryUsed ?? m.retryUsed,
+                      qualityRewriteUsed: localAiMsg.qualityRewriteUsed ?? m.qualityRewriteUsed,
+                      quality: localAiMsg.quality ?? m.quality,
+                    };
+                  }
+                  return m;
+                });
+                return { ...backendChat, messages: merged };
+              }
+              return backendChat;
+            });
+          }
+        } catch (e) {
+          console.warn('Post-stream chat refetch failed:', e);
+        } finally {
+          setIsFinalizing(false);
         }
       }
       loadChats();
@@ -320,7 +410,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode]);
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (isGuest) return 'guest-session';
@@ -363,6 +453,48 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeChatId, isGuest, success, toastError, t]);
 
+  const regenerateMessage = useCallback(async (messageId: string) => {
+    if (isGuest || !activeChatId || activeChatId.startsWith('temp-') || isSending) return;
+    setIsSending(true);
+    setActiveChat(prev => prev ? {
+      ...prev,
+      messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null } : m),
+    } : null);
+    try {
+      const res = await clientFetch(`/api/chat/${activeChatId}/message/${messageId}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language, mode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.detail || 'Regenerate failed');
+      const metadata = data.metadata || {};
+      setActiveChat(prev => prev ? {
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? {
+          ...m,
+          ...data.message,
+          suggestedQuestions: metadata.suggestedQuestions ?? m.suggestedQuestions,
+          topic: metadata.topic ?? m.topic,
+          intent: metadata.intent ?? m.intent,
+          answerStyle: metadata.answerStyle ?? m.answerStyle,
+          mode: metadata.mode ?? m.mode,
+          creditsRemaining: metadata.creditsRemaining ?? m.creditsRemaining,
+          finishReason: metadata.finishReason ?? m.finishReason,
+          retryUsed: metadata.retryUsed ?? m.retryUsed,
+          qualityRewriteUsed: metadata.qualityRewriteUsed ?? m.qualityRewriteUsed,
+          quality: metadata.quality ?? m.quality,
+        } : m),
+      } : null);
+      loadChats();
+    } catch (e) {
+      console.error('Regenerate message error:', e);
+      toastError(t('chat.errorSending'));
+    } finally {
+      setIsSending(false);
+    }
+  }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t]);
+
   const deleteChat = useCallback(async (chatId: string) => {
     if (isGuest) return;
     try {
@@ -400,10 +532,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <ChatContext.Provider value={{
-      chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, hasMoreChats,
+      chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, isFinalizing, hasMoreChats,
       isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
-      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, deleteChat, resetChat,
-      inputText, setInputText, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
+      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, regenerateMessage, deleteChat, resetChat,
+      inputText, setInputText, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall
     }}>
       {children}

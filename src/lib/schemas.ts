@@ -84,8 +84,14 @@ export const CreateChatSchema = z.object({
 });
 
 export const SendMessageSchema = z.object({
-  text: z.string().min(1, "Message cannot be empty").max(2000, "Message exceeds celestial capacity"),
+  text: z.string().min(1, "Message cannot be empty").max(3000, "Message exceeds celestial capacity"),
   language: languageOptionalEnum,
+  mode: z.enum(["quick", "normal", "deep"]).optional().default("normal"),
+});
+
+export const RegenerateMessageSchema = z.object({
+  language: languageOptionalEnum,
+  mode: z.enum(["quick", "normal", "deep"]).optional().default("normal"),
 });
 
 export const RateMessageSchema = z.object({

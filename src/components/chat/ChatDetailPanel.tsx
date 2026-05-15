@@ -1,177 +1,166 @@
 'use client';
 
-import React from 'react';
-import Card from '@/components/ui/Card';
-import SidebarSectionLabel from '@/components/ui/SidebarSectionLabel';
-import TopicPill from '@/components/ui/TopicPill';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useChat } from '@/context/ChatContext';
-import { X, Lock, Star } from 'lucide-react';
+import { X, Lock, Star, Pencil, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-import { topicPills } from '@/data/topicPills';
-import { useTranslation } from '@/hooks';
-
-/* ---------- Chart Rating Display ---------- */
-const ChatRatingDisplay: React.FC<{ rating: number | null }> = ({ rating }) => {
-  if (rating == null) return null;
-
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating - fullStars >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex gap-px text-secondary">
-        {Array(fullStars).fill(0).map((_, i) => <Star key={`f${i}`} size={14} className="fill-secondary text-secondary" />)}
-        {hasHalf && <Star size={14} className="fill-secondary/50 text-secondary" />}
-        {Array(emptyStars).fill(0).map((_, i) => <Star key={`e${i}`} size={14} className="text-on-surface-variant/20 fill-transparent" />)}
-      </div>
-      <span className="text-[10px] text-on-surface-variant/60 font-semibold">{rating.toFixed(1)}/5</span>
-    </div>
-  );
-};
-
-/* ---------- Visual Kundli Graphic ---------- */
-const KundliGraphic: React.FC = () => (
-  <div className="w-full aspect-square relative mb-3 group/kundli">
-    {/* Geometric Grid */}
-    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_rgba(200,136,10,0.2)]">
-      {/* Outer Border */}
-      <rect x="2" y="2" width="96" height="96" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-secondary/30" />
-      
-      {/* Diagonals */}
-      <line x1="2" y1="2" x2="98" y2="98" stroke="currentColor" strokeWidth="0.5" className="text-secondary/30" />
-      <line x1="98" y1="2" x2="2" y2="98" stroke="currentColor" strokeWidth="0.5" className="text-secondary/30" />
-      
-      {/* Diamond Inner Grid */}
-      <path d="M50 2 L98 50 L50 98 L2 50 Z" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-secondary/60" />
-      
-      {/* Center ✦ */}
-      <text x="50" y="53" textAnchor="middle" fontSize="6" className="fill-secondary/80 font-bold">✦</text>
-      
-      {/* Decorative Orbs */}
-      <circle cx="50" cy="50" r="12" fill="none" stroke="currentColor" strokeWidth="0.3" strokeDasharray="1 2" className="text-secondary/20 animate-[spin_20s_linear_infinite]" />
-    </svg>
-    
-    {/* Floating Particles/Stars */}
-    <div className="absolute top-2 left-2 w-1 h-1 bg-secondary/40 rounded-full animate-pulse" />
-    <div className="absolute bottom-4 right-6 w-0.5 h-0.5 bg-secondary/30 rounded-full animate-pulse delay-700" />
-    <div className="absolute top-1/2 right-2 w-1 h-1 bg-secondary/20 rounded-full animate-pulse delay-1000" />
-  </div>
-);
+import KundliSvg from '@/components/ui/astrology/KundliSvg';
 
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
   const router = useRouter();
-  const { t } = useTranslation();
   const { 
-    activeChat, activeChatId, inputText, setInputText, 
-    setIsRightPanelOpen, createNewChat, isGuest 
+    activeChat, setIsRightPanelOpen, isGuest 
   } = useChat();
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
-  // Profile fields from DB — show "—" if missing
   const profileFields: [string, string][] = [
-    ['Name', user?.name || '—'],
-    ['Date of Birth', user?.dob || '—'],
-    ['Time of Birth', user?.tob || '—'],
-    ['Place of Birth', user?.pob || '—'],
-    ['Marital Status', user?.maritalStatus || '—'],
-    ['Occupation', user?.occupation || '—'],
-    ['Moon Sign', user?.moonSign || '—'],
-    ['Sun Sign', user?.sunSign || '—'],
+    ['Moon Sign', user?.moonSign || 'Not set'],
+    ['Sun Sign', user?.sunSign || 'Not set'],
+    ['Lagna', user?.lagnaSign || 'Not set'],
+    ['Birth Date', user?.dob || 'Not set'],
+    ['Birth Time', user?.tob || 'Not set'],
+    ['Birth Place', user?.pob || 'Not set'],
   ];
 
-  const handleTopicClick = async (topicLabel: string) => {
-    if (isGuest) return; // Prevent guest from using topic pills for new chats
-    // Set the input text
-    setInputText(topicLabel);
-    
-    // If no active chat, create a new one with this topic as the first message
-    if (!activeChatId || activeChatId.startsWith('temp-')) {
-      await createNewChat(topicLabel);
-    }
-  };
+  useEffect(() => {
+    if (!isChartModalOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsChartModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isChartModalOpen]);
 
   return (
     <>
-      {/* My Birth Chart Panel — Data from DB */}
-      <div className="mb-1 relative">
+      <div className="relative">
         {isGuest && (
           <div className="absolute inset-0 z-50 backdrop-blur-[2px] bg-surface/40 flex flex-col items-center justify-center p-4 text-center rounded-xl">
-             <Lock className="w-8 h-8 text-secondary/40 mb-2" />
-             <p className="text-[10px] font-bold text-primary">Identity Required</p>
+            <Lock className="w-8 h-8 text-secondary/40 mb-2" />
+            <p className="text-[10px] font-bold text-primary">Identity Required</p>
           </div>
         )}
-        <div className="flex items-center justify-between mb-2">
-          <SidebarSectionLabel variant="gold" className="font-headline">MY BIRTH CHART</SidebarSectionLabel>
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-[12px] font-bold text-secondary uppercase tracking-[0.18em]">Chart Context</p>
           <button 
             onClick={() => setIsRightPanelOpen(false)}
-            className="xl:hidden p-1.5 text-on-surface-variant/50 hover:text-on-surface transition-colors -mt-2"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant/45 hover:bg-surface-variant/30 hover:text-on-surface transition-colors"
+            aria-label="Close chart context"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3">
-          <KundliGraphic />
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[11px] font-bold text-on-surface">
-              {user?.name || user?.email?.split('@')[0] || '—'}
-            </p>
-            <span className="text-[10px] text-secondary cursor-pointer hover:underline" onClick={() => router.push('/profile')}>Edit</span>
-          </div>
+
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-[18px] font-bold text-foreground/85">
+            {user?.name || user?.email?.split('@')[0] || 'Not set'}
+          </p>
+          <button 
+            onClick={() => router.push('/profile')}
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-[12px] font-semibold text-secondary/70 hover:bg-secondary/10 hover:text-secondary transition-colors cursor-pointer"
+          >
+            <Pencil className="w-3.5 h-3.5" /> Edit
+          </button>
+        </div>
+
+        <div className="mb-7 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsChartModalOpen(true)}
+            className="group relative flex aspect-square w-full max-w-[260px] items-center justify-center rounded-2xl border border-secondary/15 bg-background/25 shadow-[0_0_28px_rgba(200,136,10,0.08)] transition-all hover:border-secondary/35 hover:bg-secondary/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary"
+            aria-label="Open larger birth chart"
+          >
+            <div className="absolute inset-0 rounded-2xl bg-secondary/[0.03]" />
+            <KundliSvg className="relative h-full w-full text-secondary opacity-80 brightness-125 contrast-125" />
+            <span className="absolute bottom-3 rounded-full border border-secondary/20 bg-background/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-secondary/80 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+              View
+            </span>
+          </button>
+        </div>
+
+        <div className="space-y-1">
           {profileFields.map(([label, value]) => (
-            <div key={label} className="flex justify-between py-0.5 border-b border-outline-variant/10 last:border-b-0">
-              <span className="text-[10px] text-on-surface-variant/60">{label}</span>
-              <span className={`text-[10px] font-semibold ${value === '—' ? 'text-on-surface-variant/25' : 'text-on-surface-variant'}`}>
+            <div key={label} className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3 border-b border-outline-variant/7 py-2.5 last:border-b-0">
+              <span className="text-[13px] font-medium text-foreground/35">{label}</span>
+              <span className={`min-w-0 text-right text-[13px] font-bold leading-snug break-words ${value === 'Not set' ? 'text-foreground/20' : 'text-foreground/75'}`}>
                 {value}
               </span>
             </div>
           ))}
-        </Card>
+        </div>
       </div>
 
-      {/* Chat Rating Summary */}
       {activeChat && (
-        <div className="mb-1">
-          <SidebarSectionLabel variant="gold" className="font-headline">CHAT RATING</SidebarSectionLabel>
-          <Card variant="bordered" padding="sm" hoverable={false} className="!rounded-xl !border-outline-variant/20 !p-3">
-            {activeChat.averageRating != null ? (
-              <div className="flex flex-col items-center gap-1.5 py-1">
-                <ChatRatingDisplay rating={activeChat.averageRating} />
-                <p className="text-[10px] text-on-surface-variant/40">
-                  Average across {activeChat.messages.filter(m => m.type === 'ai' && m.rating != null).length} rated responses
-                </p>
-              </div>
-            ) : (
-              <p className="text-[10px] text-on-surface-variant/30 text-center py-2">
-                Rate AI responses to see average here
-              </p>
-            )}
-          </Card>
+        <div className="mt-8 border-t border-outline-variant/10 pt-5">
+          <p className="mb-4 text-[12px] font-bold text-secondary uppercase tracking-[0.18em]">Chat Rating</p>
+          {activeChat.averageRating != null ? (
+            <div className="flex items-center justify-center gap-1">
+              {Array(Math.floor(activeChat.averageRating)).fill(0).map((_, i) => (
+                <Star key={i} size={12} className="fill-secondary text-secondary" />
+              ))}
+              {activeChat.averageRating - Math.floor(activeChat.averageRating) >= 0.5 && (
+                <Star size={12} className="fill-secondary/50 text-secondary" />
+              )}
+              {Array(5 - Math.ceil(activeChat.averageRating)).fill(0).map((_, i) => (
+                <Star key={i} size={12} className="text-foreground/10 fill-transparent" />
+              ))}
+              <span className="text-[10px] text-foreground/30 ml-1">{activeChat.averageRating.toFixed(1)}/5</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-outline-variant/10 bg-background/20 px-4 py-5 text-center">
+              <Sparkles className="h-4 w-4 text-secondary/50" />
+              <p className="text-[12px] text-foreground/30">Rate responses to see average here</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Topic Pills */}
-      <div className="shrink-0 pt-1 border-t border-outline-variant/10">
-        <div className="px-0 pt-2">
-          <SidebarSectionLabel variant="gold" className="font-headline">ASK ABOUT</SidebarSectionLabel>
-          <div className="grid grid-cols-2 gap-1 gap-x-2">
-            {topicPills.map((topic) => {
-              const label = t(topic.labelKey);
-              return (
-                <TopicPill
-                  key={topic.labelKey}
-                  icon={topic.icon}
-                  label={label}
-                  active={inputText === label}
-                  onClick={() => handleTopicClick(label)}
-                />
-              );
-            })}
+      {isChartModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Expanded birth chart"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsChartModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative flex max-h-[92dvh] w-full max-w-[min(92vw,820px)] flex-col rounded-2xl border border-secondary/20 bg-background shadow-2xl shadow-black/50">
+            <div className="flex items-center justify-between gap-4 border-b border-outline-variant/15 px-4 py-3 sm:px-5">
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">Birth Chart</p>
+                <p className="truncate text-[15px] font-bold text-foreground/80">
+                  {user?.name || user?.email?.split('@')[0] || 'Chart'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsChartModalOpen(false)}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-on-surface-variant/55 hover:bg-surface-variant/30 hover:text-on-surface transition-colors"
+                aria-label="Close expanded chart"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex min-h-0 flex-1 items-center justify-center p-3 sm:p-6">
+              <div className="flex aspect-square w-full max-w-[min(84vw,680px,76dvh)] items-center justify-center rounded-2xl border border-secondary/15 bg-surface/20 p-2">
+                <KundliSvg className="h-full w-full text-secondary opacity-95 brightness-125 contrast-125" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 };

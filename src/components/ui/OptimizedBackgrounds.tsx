@@ -40,12 +40,19 @@ export default function OptimizedBackgrounds() {
   const isPaused = (isChatPage && (device.isMobile || device.isTablet)) || (shouldPauseOnScroll && isScrolling);
 
   // Adjust particle speed based on device
-  const particleSpeed = device.isMobile ? 0.1 : device.isTablet ? 0.12 : 0.15;
-  const particleSpread = device.isMobile ? 10 : device.isTablet ? 11 : 12;
+  const particleSpeed = isChatPage
+    ? (device.isMobile ? 0 : device.isTablet ? 0.04 : 0.06)
+    : (device.isMobile ? 0.1 : device.isTablet ? 0.12 : 0.15);
+  const particleSpread = isChatPage
+    ? (device.isMobile ? 8 : device.isTablet ? 9 : 10)
+    : (device.isMobile ? 10 : device.isTablet ? 11 : 12);
+  const particleCount = isChatPage
+    ? (device.isMobile ? 35 : device.isTablet ? 70 : Math.min(device.particleCount, 180))
+    : device.particleCount;
 
   // On the chat page, reduce the background opacity so text pops, but keep it visible on desktop
   const visualOpacity = isChatPage 
-    ? (device.isDesktop ? 'opacity-30' : 'opacity-10') 
+    ? (device.isDesktop ? 'opacity-[0.08]' : 'opacity-[0.04]') 
     : 'opacity-100';
 
   return (
@@ -61,11 +68,11 @@ export default function OptimizedBackgrounds() {
           lightParticleColors={["var(--outline-variant)", "var(--accent)", "var(--secondary)"]}
           darkParticleColors={["var(--secondary)", "var(--flare-gold)", "var(--foreground)"]}
           darkMode={isDark}
-          particleCount={device.particleCount}
+          particleCount={particleCount}
           particleSpread={particleSpread}
           speed={isPaused ? 0 : particleSpeed}
-          particleBaseSize={device.particleSize}
-          moveParticlesOnHover={(device.isDesktop || !isChatPage) && device.enableComplexAnimations}
+          particleBaseSize={isChatPage ? Math.min(device.particleSize, 86) : device.particleSize}
+          moveParticlesOnHover={!isChatPage && (device.isDesktop || !isChatPage) && device.enableComplexAnimations}
           alphaParticles={!isDark}
           disableRotation={(isChatPage && !device.isDesktop) || !device.enableComplexAnimations}
         />

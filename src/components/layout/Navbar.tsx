@@ -390,7 +390,7 @@ const Navbar: React.FC = () => {
                 variant="warning"
                 isLoading={isLoggingOut}
             />
-            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden md:block' : ''}`}>
+            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}

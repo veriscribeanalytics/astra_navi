@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { Sparkles, Star, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface FeedbackModalProps {
@@ -71,19 +71,19 @@ const FEEDBACK_TAGS_BY_RATING: Record<number, string[]> = {
 };
 
 const PLACEHOLDERS: Record<number, string> = {
-  1: 'The stars were completely misaligned here — what felt wrong?',
+  1: 'The stars were completely misaligned here - what felt wrong?',
   2: 'Which part of the reading missed the mark?',
   3: 'What celestial insight was missing from this reading?',
-  4: 'Almost aligned — what would make this reading perfect?',
+  4: 'Almost aligned - what would make this reading perfect?',
   5: 'What resonated most with your cosmic journey?',
 };
 
 const RATING_LABELS: Record<number, string> = {
-  1: '☄️ Misaligned',
-  2: '🌑 Needs Work',
-  3: '🌗 Partial Clarity',
-  4: '🌕 Nearly There',
-  5: '✨ Cosmically Aligned',
+  1: 'Misaligned',
+  2: 'Needs Work',
+  3: 'Partial Clarity',
+  4: 'Nearly There',
+  5: 'Cosmically Aligned',
 };
 
 const TAG_SECTION_LABELS: Record<number, string> = {
@@ -150,11 +150,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                     key={star}
                     onMouseEnter={() => setHoverRating(star)}
                     onClick={() => { setRating(star); setSelectedTags([]); }}
-                    className={`text-2xl transition-transform hover:scale-110 active:scale-95 ${
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110 active:scale-95 ${
                       isFilled ? 'text-secondary' : 'text-on-surface-variant/20'
                     }`}
                   >
-                    {isFilled ? '★' : '☆'}
+                    <Star className={`h-6 w-6 ${isFilled ? 'fill-current' : ''}`} />
                   </button>
                 );
               })}
@@ -199,8 +199,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
           {/* Disclaimer */}
           <div className="bg-on-surface/5 rounded-2xl p-4">
-             <p className="text-xs text-on-surface-variant/60 leading-relaxed">
-              ✦ Your feedback helps Navi refine its Vedic wisdom. All responses are anonymous and used solely to improve AstraNavi&apos;s celestial guidance.
+             <p className="flex gap-2 text-xs text-on-surface-variant/60 leading-relaxed">
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
+              <span>Your feedback helps Navi refine its Vedic wisdom. All responses are anonymous and used solely to improve AstraNavi&apos;s celestial guidance.</span>
              </p>
           </div>
         </div>
