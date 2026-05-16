@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { motion } from 'motion/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useChat } from '@/context/ChatContext';
 import ChatSidebar from '@/components/chat/ChatSidebar';
@@ -10,12 +11,14 @@ import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { Sparkles } from 'lucide-react';
+import { useTranslation } from '@/hooks';
 
 import { useAuth } from '@/context/AuthContext';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
 
 const ChatPageClient: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { 
@@ -50,6 +53,17 @@ const ChatPageClient: React.FC = () => {
     }
   }, [user, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading]);
 
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        createNewChat();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [createNewChat]);
+
   const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
   const ageBracket = useMemo(() => getAgeBracket(age), [age]);
   const suggestedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
@@ -72,14 +86,14 @@ const ChatPageClient: React.FC = () => {
       {isGuest && (
         <div className={`absolute top-0 left-0 right-0 z-[100] min-h-10 px-3 py-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 shadow-lg border-b border-white/10 ${isGuestExpired ? 'bg-red-500/90' : 'bg-amber-500/90'} backdrop-blur-md`}>
           <div className="text-white text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] flex items-center gap-2 text-center">
-            {isGuestExpired ? 'Preview expired' : 'Preview mode - identity required for Vedic analysis'}
+            {isGuestExpired ? t('chat.guestExpired') : t('chat.guestPreviewMode')}
             {!isGuestExpired && (
               <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-[10px] font-mono tabular-nums">
                 {Math.floor(guestTimeRemaining / 60)}:{String(guestTimeRemaining % 60).padStart(2, '0')}
               </span>
             )}
           </div>
-          <a href="/login" className="px-3 py-1 bg-white text-amber-600 rounded-full text-[10px] font-bold hover:bg-gray-100 transition-colors shadow-sm">Login Now</a>
+          <a href="/login" className="px-3 py-1 bg-white text-amber-600 rounded-full text-[10px] font-bold hover:bg-gray-100 transition-colors shadow-sm">{t('chat.guestLoginNow')}</a>
         </div>
       )}
 
@@ -100,18 +114,22 @@ const ChatPageClient: React.FC = () => {
                 <Sparkles className="w-5 h-5" />
               </div>
               <h2 className="chat-empty-greeting text-xl sm:text-2xl 3xl:text-[28px] font-headline font-bold text-on-surface/80 tracking-tight text-center">
-                What can I help you understand?
+                {t('chat.emptyGreeting')}
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 3xl:grid-cols-2 gap-3 w-full mb-6">
               {suggestedQuestions.slice(0, 4).map((question, idx) => (
-                <button
+                <motion.button
                   key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: idx * 0.1 }}
                   onClick={() => handleQuestionClick(question)}
-                  className="text-left text-[14px] 3xl:text-[16px] text-on-surface-variant/70 bg-surface/60 border border-outline-variant/20 px-5 py-3.5 rounded-xl hover:border-secondary/30 hover:text-secondary hover:bg-surface/90 transition-all"
+                  className="ripple-btn text-left text-[14px] 3xl:text-[16px] text-on-surface-variant/70 bg-surface/60 border border-outline-variant/20 px-5 py-3.5 rounded-xl hover:border-secondary/30 hover:text-secondary hover:bg-surface/90 transition-all"
+                  aria-label={`Ask: ${question}`}
                 >
                   {question}
-                </button>
+                </motion.button>
               ))}
             </div>
             <div className="w-full">

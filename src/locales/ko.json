@@ -453,6 +453,7 @@
     "naviWelcome": "나마스테 ✦ 저는 Navi입니다. 무엇이든 물어보세요.",
     "newConversation": "새 대화",
     "errorSending": "메시지를 보내지 못했습니다. 다시 시도해 주세요.",
+    "networkError": "네트워크 연결이 끊어졌습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.",
     "ratingSuccess": "평가가 저장되었습니다. 피드백을 주셔서 감사합니다!",
     "ratingError": "평가를 저장하지 못했습니다. 다시 시도해 주세요.",
     "deleteSuccess": "대화가 삭제되었습니다.",

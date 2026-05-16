@@ -7,7 +7,7 @@ import { Lock, Sparkles, X, CreditCard, ArrowRight, Shield, Star, Clock } from '
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { PaywallData, SuggestedProduct } from '@/types/paywall';
-import { useTranslation } from '@/hooks';
+import { useTranslation, useFocusTrap } from '@/hooks';
 
 interface PaywallCardProps {
   paywall: PaywallData;
@@ -32,6 +32,7 @@ interface PaywallCardProps {
  */
 export default function PaywallCard({ paywall, variant = 'inline', onClose }: PaywallCardProps) {
   const { t, language } = useTranslation();
+  const modalRef = useFocusTrap<HTMLDivElement>(variant === 'modal');
 
   // Pick title/description based on language
   const isHindi = language === 'hi';
@@ -272,6 +273,7 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
 
           <motion.div
+            ref={modalRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}

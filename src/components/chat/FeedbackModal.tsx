@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Star, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useFocusTrap } from '@/hooks';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -106,6 +107,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen);
 
   if (!isOpen) return null;
 
@@ -127,7 +129,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-lg bg-surface border border-outline-variant/30 rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+      <div ref={modalRef} className="relative w-full max-w-lg bg-surface border border-outline-variant/30 rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-5 flex items-center justify-between border-b border-outline-variant/10 flex-shrink-0">
           <h3 className="text-lg font-headline font-bold text-on-surface">Share feedback</h3>

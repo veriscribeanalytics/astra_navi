@@ -226,6 +226,7 @@ export default function HealthForecastPanel() {
                                                             <g key={day.date} 
                                                                className="cursor-pointer group outline-none" 
                                                                onClick={() => setExpandedDay(isExpanded ? null : day.date)}
+                                                               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedDay(isExpanded ? null : day.date); }}}
                                                                role="button"
                                                                tabIndex={0}
                                                             >

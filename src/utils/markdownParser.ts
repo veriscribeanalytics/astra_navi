@@ -1,52 +1,55 @@
-/**
- * Simple markdown parser for AI responses
- * Converts markdown formatting to HTML
- */
+import hljs from 'highlight.js/lib/common';
 
 export function parseMarkdown(text: string): string {
   if (!text) return '';
 
   let html = text;
 
-  // Bold: **text** or __text__
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
+    let highlighted: string;
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        highlighted = hljs.highlight(code, { language: lang }).value;
+      } else {
+        highlighted = hljs.highlightAuto(code).value;
+      }
+    } catch {
+      highlighted = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    const langLabel = lang ? `<span class="code-lang">${lang}</span>` : '';
+    const copyBtn = '<button class="code-copy-btn" data-action="copy-code">Copy</button>';
+    return `<div class="code-block-wrapper">${langLabel}${copyBtn}<pre class="code-block"><code class="hljs language-${lang || 'plaintext'}">${highlighted}</code></pre></div>`;
+  });
+
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
 
-  // Italic: *text* or _text_ (but not inside words)
   html = html.replace(/(?<!\w)\*(.+?)\*(?!\w)/g, '<em>$1</em>');
   html = html.replace(/(?<!\w)_(.+?)_(?!\w)/g, '<em>$1</em>');
 
-  // Code: `code`
-  html = html.replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 bg-surface-variant/40 rounded text-secondary text-sm font-mono">$1</code>');
+  html = html.replace(/`(.+?)`/g, '<code class="inline-code">$1</code>');
 
-  // Line breaks: Convert \n to <br>
-  html = html.replace(/\n/g, '<br>');
-
-  // Lists: - item or * item
-  html = html.replace(/^[\-\*]\s+(.+)$/gm, '<li class="ml-4">$1</li>');
-  
-  // Wrap consecutive <li> in <ul>
-  html = html.replace(/(<li[^>]*>.*<\/li>\s*)+/g, '<ul class="list-disc list-inside space-y-1 my-2">$&</ul>');
-
-  // Numbered lists: 1. item
-  html = html.replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4">$1</li>');
-  
-  // Wrap consecutive numbered <li> in <ol>
-  html = html.replace(/(<li[^>]*>.*<\/li>\s*)+/g, (match) => {
-    if (match.includes('list-disc')) return match; // Already wrapped as <ul>
-    return `<ol class="list-decimal list-inside space-y-1 my-2">${match}</ol>`;
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, linkText, url) => {
+    const isExternal = url.startsWith('http');
+    const icon = isExternal ? ' <svg class="md-link-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' : '';
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="md-link">${linkText}${icon}</a>`;
   });
 
-  // Headers: ## Header
-  html = html.replace(/^###\s+(.+)$/gm, '<h3 class="text-base font-bold text-secondary mt-3 mb-1">$1</h3>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h2 class="text-lg font-bold text-secondary mt-4 mb-2">$1</h2>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h1 class="text-xl font-bold text-secondary mt-4 mb-2">$1</h1>');
+  html = html.replace(/\n/g, '<br>');
 
-  // Blockquotes: > text
-  html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="border-l-2 border-secondary/30 pl-3 italic text-on-surface-variant/70 my-2">$1</blockquote>');
+  html = html.replace(/^[\-\*]\s+(.+)$/gm, '<li class="md-li">$1</li>');
+  html = html.replace(/(<li[^>]*>.*<\/li>\s*(?:<br>)?)+/g, '<ul class="md-ul">$&</ul>');
 
-  // Horizontal rule: --- or ***
-  html = html.replace(/^(---|\*\*\*)$/gm, '<hr class="border-t border-outline-variant/20 my-3">');
+  html = html.replace(/^\d+\.\s+(.+)$/gm, '<li class="md-li-ordered">$1</li>');
+  html = html.replace(/(<li[^>]*class="md-li-ordered"[^>]*>.*<\/li>\s*(?:<br>)?)+/g, '<ol class="md-ol">$&</ol>');
+
+  html = html.replace(/^###\s+(.+)$/gm, '<h3 class="md-h3">$1</h3>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h2 class="md-h2">$1</h2>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h1 class="md-h1">$1</h1>');
+
+  html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="md-blockquote">$1</blockquote>');
+
+  html = html.replace(/^(---|\*\*\*)$/gm, '<hr class="md-hr">');
 
   return html;
 }

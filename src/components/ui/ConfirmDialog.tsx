@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import Card from './Card';
 import Button from './Button';
 import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import { useFocusTrap } from '@/hooks';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isLoading = false,
 }) => {
   const overflowModifiedRef = useRef(false);
+  const dialogRef = useFocusTrap<HTMLDivElement>(isOpen);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -65,6 +67,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <div 
+      ref={dialogRef}
       className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isLoading) {

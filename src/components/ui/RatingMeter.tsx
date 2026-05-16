@@ -33,6 +33,7 @@ const RatingMeter: React.FC<RatingMeterProps> = ({ rating, onRate, size = 'sm' }
               onMouseEnter={() => setHoverRating(star)}
               onClick={() => onRate(star)}
               title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+              aria-label={`Rate ${star} out of 5 stars`}
             >
               <Star
                 size={iconSize}

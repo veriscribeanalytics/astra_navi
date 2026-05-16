@@ -9,10 +9,20 @@ import { useToast } from '@/hooks';
 import { PaywallData } from '@/types/paywall';
 
 /* ---------- Types ---------- */
+export interface FileAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url?: string;
+  preview?: string;
+}
+
 export interface ChatMessage {
   id: string;
   type: 'system' | 'ai' | 'user';
   text: string;
+  attachments?: FileAttachment[];
   rating?: number | null;
   feedbackTags?: string[];
   feedbackComment?: string;
@@ -28,6 +38,11 @@ export interface ChatMessage {
   retryUsed?: boolean;
   qualityRewriteUsed?: boolean;
   quality?: { score?: number; issues?: string[]; passed?: boolean; [key: string]: unknown };
+  error?: boolean;
+  errorMessage?: string;
+  pinned?: boolean;
+  edited?: boolean;
+  originalText?: string;
   createdAt: string;
 }
 
@@ -69,9 +84,13 @@ interface ChatContextType {
   sendMessage: (text: string, overrideChatId?: string) => Promise<void>;
   rateMessage: (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => Promise<void>;
   regenerateMessage: (messageId: string) => Promise<void>;
+  retryMessage: (messageId: string) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
   inputText: string;
   setInputText: React.Dispatch<React.SetStateAction<string>>;
+  attachments: FileAttachment[];
+  addAttachment: (file: File) => void;
+  removeAttachment: (id: string) => void;
   mode: "quick" | "normal" | "deep";
   setMode: React.Dispatch<React.SetStateAction<"quick" | "normal" | "deep">>;
   isMobileMenuOpen: boolean;
@@ -81,6 +100,9 @@ interface ChatContextType {
   resetChat: () => void;
   paywall: PaywallData | null;
   clearPaywall: () => void;
+  editMessage: (messageId: string, newText: string) => Promise<void>;
+  deleteMessage: (messageId: string) => void;
+  togglePin: (messageId: string) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -97,6 +119,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isSending, setIsSending] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [hasMoreChats, setHasMoreChats] = useState(false);
@@ -240,7 +263,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userMsgId = generateUUID();
     const aiMsgId = generateUUID();
     
-    const userMessage: ChatMessage = { id: userMsgId, type: 'user', text: text.trim(), createdAt: now };
+    const userMessage: ChatMessage = { id: userMsgId, type: 'user', text: text.trim(), attachments: attachments.length > 0 ? [...attachments] : undefined, createdAt: now };
     const aiPlaceholder: ChatMessage = { id: aiMsgId, type: 'ai', text: '', createdAt: now };
 
     setActiveChat(prev => prev ? { ...prev, messages: [...prev.messages, userMessage, aiPlaceholder] } : prev);
@@ -404,13 +427,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
       loadChats();
+      setAttachments([]);
     } catch (err) {
       console.error(err);
-      toastError(t('chat.errorSending'));
+      const isNetworkError = err instanceof TypeError && (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('fetch'));
+      const displayMsg = isNetworkError ? t('chat.networkError') : t('chat.errorSending');
+      setActiveChat(prev => prev ? {
+        ...prev,
+        messages: prev.messages.map(m => m.id === aiMsgId ? { ...m, text: '', error: true, errorMessage: displayMsg } : m)
+      } : null);
+      toastError(displayMsg);
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode, attachments]);
 
   const createNewChat = useCallback(async (initialMessage?: string) => {
     if (isGuest) return 'guest-session';
@@ -495,6 +525,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t]);
 
+  const retryMessage = useCallback(async (messageId: string) => {
+    if (isGuest || isSending) return;
+    setActiveChat(prev => prev ? {
+      ...prev,
+      messages: prev.messages.map(m => m.id === messageId ? { ...m, error: false, errorMessage: undefined } : m)
+    } : null);
+    await regenerateMessage(messageId);
+  }, [isGuest, isSending, regenerateMessage]);
+
   const deleteChat = useCallback(async (chatId: string) => {
     if (isGuest) return;
     try {
@@ -513,6 +552,27 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isGuest, activeChatId, success, toastError, t]);
 
+  const addAttachment = useCallback((file: File) => {
+    const attachment: FileAttachment = {
+      id: generateUUID(),
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    };
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAttachments(prev => prev.map(a => a.id === attachment.id ? { ...a, preview: e.target?.result as string } : a));
+      };
+      reader.readAsDataURL(file);
+    }
+    setAttachments(prev => [...prev, attachment]);
+  }, []);
+
+  const removeAttachment = useCallback((id: string) => {
+    setAttachments(prev => prev.filter(a => a.id !== id));
+  }, []);
+
   const resetChat = useCallback(() => {
     setActiveChat(null);
     setActiveChatId(null);
@@ -521,6 +581,60 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearPaywall = useCallback(() => {
     setPaywall(null);
+  }, []);
+
+  const editMessage = useCallback(async (messageId: string, newText: string) => {
+    if (isGuest || !activeChatId || isSending) return;
+    if (!newText.trim()) return;
+
+    setActiveChat(prev => {
+      if (!prev) return null;
+      const msgIdx = prev.messages.findIndex(m => m.id === messageId);
+      if (msgIdx === -1) return prev;
+      const original = prev.messages[msgIdx];
+      const updatedMessages = prev.messages.map((m, idx) => {
+        if (idx === msgIdx) {
+          return { ...m, text: newText.trim(), edited: true, originalText: original.originalText || original.text };
+        }
+        if (idx === msgIdx + 1 && m.type === 'ai') {
+          return { ...m, text: '', error: false, errorMessage: undefined };
+        }
+        return m;
+      });
+      return { ...prev, messages: updatedMessages };
+    });
+
+    try {
+      await sendMessage(newText.trim());
+    } catch (e) {
+      console.error('Edit message failed:', e);
+      toastError(t('chat.errorSending'));
+    }
+  }, [activeChatId, isGuest, isSending, sendMessage, toastError, t]);
+
+  const deleteMessage = useCallback((messageId: string) => {
+    setActiveChat(prev => {
+      if (!prev) return null;
+      const msgIdx = prev.messages.findIndex(m => m.id === messageId);
+      if (msgIdx === -1) return prev;
+      const msg = prev.messages[msgIdx];
+      const updatedMessages = prev.messages.filter((m, idx) => {
+        if (idx === msgIdx) return false;
+        if (idx === msgIdx + 1 && msg.type === 'user' && m.type === 'ai' && !m.pinned) return false;
+        return true;
+      });
+      return { ...prev, messages: updatedMessages };
+    });
+  }, []);
+
+  const togglePin = useCallback((messageId: string) => {
+    setActiveChat(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, pinned: !m.pinned } : m),
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -534,8 +648,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <ChatContext.Provider value={{
       chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, isFinalizing, hasMoreChats,
       isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
-      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, regenerateMessage, deleteChat, resetChat,
-      inputText, setInputText, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
+      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, regenerateMessage, retryMessage, deleteChat, resetChat,
+      editMessage, deleteMessage, togglePin,
+      inputText, setInputText, attachments, addAttachment, removeAttachment, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall
     }}>
       {children}

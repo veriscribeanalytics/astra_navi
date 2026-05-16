@@ -10,23 +10,23 @@ import {
 } from 'lucide-react';
 import { formatChatTimestamp } from '@/lib/datetime';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useTranslation } from '@/hooks';
+import { useTranslation, useFocusTrap } from '@/hooks';
 
 function formatChatDate(dateStr: string, t: (key: string) => string): string {
   return formatChatTimestamp(dateStr, t('dashboard.yesterday') || undefined);
 }
 
-function groupChatsByDate(chats: ChatSummary[]): { label: string; chats: ChatSummary[] }[] {
+function groupChatsByDate(chats: ChatSummary[], t: (key: string) => string): { label: string; chats: ChatSummary[] }[] {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today.getTime() - 86400000);
   const weekAgo = new Date(today.getTime() - 7 * 86400000);
 
   const groups: { label: string; chats: ChatSummary[] }[] = [
-    { label: 'Today', chats: [] },
-    { label: 'Yesterday', chats: [] },
-    { label: 'Previous 7 Days', chats: [] },
-    { label: 'Older', chats: [] },
+    { label: t('chat.sidebar.today'), chats: [] },
+    { label: t('chat.sidebar.yesterday'), chats: [] },
+    { label: t('chat.sidebar.previous7Days'), chats: [] },
+    { label: t('chat.sidebar.older'), chats: [] },
   ];
 
   for (const chat of chats) {
@@ -54,6 +54,7 @@ const ChatSidebar: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!deleteModalChat);
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
@@ -61,7 +62,7 @@ const ChatSidebar: React.FC = () => {
     return chats.filter(c => c.title.toLowerCase().includes(q));
   }, [chats, searchQuery]);
 
-  const grouped = useMemo(() => groupChatsByDate(filteredChats), [filteredChats]);
+  const grouped = useMemo(() => groupChatsByDate(filteredChats, t), [filteredChats, t]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -106,6 +107,46 @@ const ChatSidebar: React.FC = () => {
     }
   };
 
+  const handleDownloadJSON = async (chatId: string, title: string) => {
+    setIsDownloading(true);
+    try {
+      const res = await clientFetch(`/api/chat/${chatId}`);
+      const data = await res.json();
+      if (data.chat) {
+        const exportData = {
+          title: data.chat.title,
+          createdAt: data.chat.createdAt,
+          updatedAt: data.chat.updatedAt,
+          averageRating: data.chat.averageRating,
+          messages: data.chat.messages.map((m: ChatMessage) => ({
+            id: m.id,
+            type: m.type,
+            text: m.text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' '),
+            createdAt: m.createdAt,
+            rating: m.rating,
+            ...(m.insights ? { insights: m.insights } : {}),
+            ...(m.suggestedQuestions ? { suggestedQuestions: m.suggestedQuestions } : {}),
+            ...(m.pinned ? { pinned: m.pinned } : {}),
+            ...(m.edited ? { edited: m.edited } : {}),
+          })),
+        };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Astranavi_Chat_${title.replace(/\s+/g, '_')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('Failed to download chat as JSON', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!deleteModalChat) return;
     setIsDeleting(true);
@@ -128,7 +169,7 @@ const ChatSidebar: React.FC = () => {
             setIsMobileMenuOpen(false);
           }}
         >
-          <Plus className="w-3 h-3" /> New Chat
+          <Plus className="w-3 h-3" /> {t('chat.sidebar.newChat')}
         </Button>
         <button 
           onClick={() => setIsMobileMenuOpen(false)}
@@ -146,7 +187,7 @@ const ChatSidebar: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search chats..."
+            placeholder={t('chat.sidebar.searchPlaceholder')}
             className="w-full bg-transparent border-none outline-none text-[13px] text-foreground placeholder:text-foreground/40"
           />
           {searchQuery && (
@@ -161,9 +202,9 @@ const ChatSidebar: React.FC = () => {
         {isGuest && (
           <div className="absolute inset-0 z-50 backdrop-blur-[2px] bg-surface/40 flex flex-col items-center justify-center p-4 text-center">
             <Lock className="w-8 h-8 text-secondary/40 mb-3" />
-            <p className="text-xs font-bold text-primary mb-1.5">History Locked</p>
-            <p className="text-[10px] text-on-surface-variant/50 mb-5 leading-relaxed">Login to save your conversations.</p>
-            <Button href="/login" size="sm" className="gold-gradient w-full !text-[11px]">Login to Unlock</Button>
+            <p className="text-xs font-bold text-primary mb-1.5">{t('chat.sidebar.historyLocked')}</p>
+            <p className="text-[10px] text-on-surface-variant/50 mb-5 leading-relaxed">{t('chat.sidebar.loginToSave')}</p>
+            <Button href="/login" size="sm" className="gold-gradient w-full !text-[11px]">{t('chat.sidebar.loginToUnlock')}</Button>
           </div>
         )}
 
@@ -182,9 +223,9 @@ const ChatSidebar: React.FC = () => {
               <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                 <MessageSquare className="text-secondary opacity-40 w-4 h-4" />
               </div>
-              <p className="text-[12px] font-semibold text-on-surface-variant/40">{searchQuery ? 'No matching chats' : 'No chats yet'}</p>
+              <p className="text-[12px] font-semibold text-on-surface-variant/40">{searchQuery ? t('chat.sidebar.noMatchingChats') : t('chat.sidebar.noChatsYet')}</p>
               <p className="text-[11px] text-on-surface-variant/25 mt-1.5 leading-relaxed">
-                {searchQuery ? 'Try a different search term.' : 'Start a new conversation above.'}
+                {searchQuery ? t('chat.sidebar.tryDifferentSearch') : t('chat.sidebar.startNewConversation')}
               </p>
             </div>
           ) : (
@@ -198,17 +239,10 @@ const ChatSidebar: React.FC = () => {
                     {group.chats.map((chat) => {
                       const isActive = chat.id === activeChatId;
                       return (
-                        <div
+                        <button
                           key={chat.id}
-                          role="button"
-                          tabIndex={0}
                           onClick={() => { selectChat(chat.id); setIsMobileMenuOpen(false); }}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectChat(chat.id); setIsMobileMenuOpen(false); }}}
-                          className={`group relative px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${
-                            isActive
-                              ? 'bg-secondary/15 text-secondary font-semibold border border-secondary/20'
-                              : 'hover:bg-surface-variant/30 border border-transparent'
-                          }`}
+                          className={`group relative ${isActive ? 'sidebar-chat-active' : 'sidebar-chat-item'} cursor-pointer text-left w-full`}
                         >
                           <div className="flex items-center justify-between gap-1.5">
                             <p className={`text-[13px] leading-tight truncate flex-1 ${isActive ? 'text-secondary font-semibold' : 'text-foreground/80'}`}>
@@ -241,18 +275,25 @@ const ChatSidebar: React.FC = () => {
                                 onClick={(e) => { e.stopPropagation(); setMenuOpenId(null); handleDownload(chat.id, chat.title); }}
                                 className="w-full text-left px-2 py-1.5 text-[12px] text-foreground/60 hover:bg-surface-variant/30 flex items-center gap-1.5 cursor-pointer"
                               >
-                                <Download size={11} /> Download
+                                <Download size={11} /> {t('chat.sidebar.downloadTxt')}
+                              </button>
+                              <div className="h-px bg-outline-variant/10 mx-1.5" />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setMenuOpenId(null); handleDownloadJSON(chat.id, chat.title); }}
+                                className="w-full text-left px-2 py-1.5 text-[12px] text-foreground/60 hover:bg-surface-variant/30 flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Download size={11} /> {t('chat.sidebar.downloadJson')}
                               </button>
                               <div className="h-px bg-outline-variant/10 mx-1.5" />
                               <button
                                 onClick={(e) => { e.stopPropagation(); setMenuOpenId(null); setDeleteModalChat(chat); }}
                                 className="w-full text-left px-2 py-1.5 text-[12px] text-red-400 hover:bg-red-400/10 flex items-center gap-1.5 cursor-pointer"
                               >
-                                <Trash2 size={11} /> Delete
+                                <Trash2 size={11} /> {t('chat.sidebar.delete')}
                               </button>
                             </div>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -265,7 +306,7 @@ const ChatSidebar: React.FC = () => {
                   disabled={isLoadingChats}
                   className="w-full mt-1.5 py-1.5 text-[11px] font-semibold text-secondary/60 hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {isLoadingChats ? 'Loading...' : 'Load More'}
+                  {isLoadingChats ? t('chat.sidebar.loading') : t('chat.sidebar.loadMore')}
                 </button>
               )}
             </>
@@ -275,7 +316,7 @@ const ChatSidebar: React.FC = () => {
 
       {deleteModalChat && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40">
-          <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 w-[90%] max-w-[400px] shadow-2xl relative">
+          <div ref={deleteModalRef} className="bg-surface border border-outline-variant/20 rounded-2xl p-6 w-[90%] max-w-[400px] shadow-2xl relative">
             <button 
               className="absolute top-4 right-4 text-on-surface-variant/40 hover:text-on-surface-variant bg-surface-variant/30 hover:bg-surface-variant/60 rounded-full p-1 transition-all cursor-pointer"
               onClick={() => setDeleteModalChat(null)}
@@ -287,13 +328,13 @@ const ChatSidebar: React.FC = () => {
               <div className="w-12 h-12 bg-red-400/10 text-red-400 flex items-center justify-center rounded-full mb-4 ring-4 ring-red-400/5">
                 <AlertTriangle size={24} />
               </div>
-              <h3 className="text-lg font-bold text-on-surface mb-2">Delete Chat Forever?</h3>
+              <h3 className="text-lg font-bold text-on-surface mb-2">{t('chat.sidebar.deleteChatForever')}</h3>
               <p className="text-[14px] text-on-surface-variant/70 leading-relaxed mb-4">
-                This will permanently delete <strong>&quot;{deleteModalChat.title}&quot;</strong>.
+                {t('chat.sidebar.deletePermanentWarning')} <strong>&quot;{deleteModalChat.title}&quot;</strong>.
               </p>
               
               <div className="w-full bg-surface-variant/30 border border-outline-variant/10 rounded-lg p-3 mb-2">
-                <p className="text-[13px] text-foreground/60 mb-2">Want a backup first?</p>
+                <p className="text-[13px] text-foreground/60 mb-2">{t('chat.sidebar.wantBackupFirst')}</p>
                 <Button 
                   variant="secondary" 
                   size="sm" 
@@ -303,17 +344,17 @@ const ChatSidebar: React.FC = () => {
                   disabled={isDownloading}
                 >
                   <Download size={14} />
-                  {isDownloading ? 'Downloading...' : 'Save & Download'}
+                  {isDownloading ? t('chat.sidebar.downloading') : t('chat.sidebar.saveAndDownload')}
                 </Button>
               </div>
             </div>
 
             <div className="flex gap-3">
               <Button className="flex-1 !bg-surface-variant !text-on-surface hover:!bg-surface-variant/80" onClick={() => setDeleteModalChat(null)}>
-                Cancel
+                {t('chat.sidebar.cancel')}
               </Button>
               <Button className="flex-1 !bg-red-500/90 !text-white hover:!bg-red-500 border-none" onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? t('chat.sidebar.deleting') : t('chat.sidebar.deleteConfirm')}
               </Button>
             </div>
           </div>
