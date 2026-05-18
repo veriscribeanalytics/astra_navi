@@ -11,7 +11,7 @@ import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { Sparkles } from 'lucide-react';
-import { useTranslation } from '@/hooks';
+import { useTranslation, useTransitsToday, useSwipeDrawer } from '@/hooks';
 
 import { useAuth } from '@/context/AuthContext';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
@@ -19,6 +19,7 @@ import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/p
 const ChatPageClient: React.FC = () => {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation();
+  const { data: transitsData, isLoading: isTransitsLoading } = useTransitsToday();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { 
@@ -26,6 +27,13 @@ const ChatPageClient: React.FC = () => {
     activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
     paywall, clearPaywall
     } = useChat();
+
+  const { bindGestures } = useSwipeDrawer({
+    onOpenLeft: () => setIsMobileMenuOpen(true),
+    onOpenRight: () => setIsRightPanelOpen(true),
+    onCloseLeft: () => setIsMobileMenuOpen(false),
+    onCloseRight: () => setIsRightPanelOpen(false),
+  });
 
   React.useEffect(() => {
     if (isLoading) return;
@@ -66,7 +74,11 @@ const ChatPageClient: React.FC = () => {
 
   const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
   const ageBracket = useMemo(() => getAgeBracket(age), [age]);
-  const suggestedQuestions = useMemo(() => getPersonalizedQuestions(ageBracket), [ageBracket]);
+  const suggestedQuestions = useMemo(() => {
+    const transitQuestions = transitsData?.suggestedQuestions;
+    if (transitQuestions && transitQuestions.length >= 4) return transitQuestions.slice(0, 4);
+    return getPersonalizedQuestions(ageBracket);
+  }, [ageBracket, transitsData?.suggestedQuestions]);
 
   const handleQuestionClick = (question: string) => {
     createNewChat(question);
@@ -105,19 +117,27 @@ const ChatPageClient: React.FC = () => {
         <ChatSidebar />
       </div>
 
-      <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`}>
+      <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`} {...bindGestures}>
         <ChatHeader />
         {isEmptyChat ? (
           <div className="chat-empty-center">
-            <div className="flex flex-col items-center w-full gap-6 mb-4">
-              <div className="chat-empty-icon w-12 h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl">
+            <div className="flex flex-col items-center w-full gap-4 sm:gap-6 mb-4">
+              <div className="chat-empty-icon w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <h2 className="chat-empty-greeting text-xl sm:text-2xl 3xl:text-[28px] font-headline font-bold text-on-surface/80 tracking-tight text-center">
+              <h2 className="chat-empty-greeting text-lg sm:text-xl 3xl:text-[28px] font-headline font-bold text-on-surface/80 tracking-tight text-center">
                 {t('chat.emptyGreeting')}
               </h2>
+              {transitsData?.todayEnergy && (
+                <p className="text-center text-[13px] text-on-surface-variant/40 max-w-[32ch] leading-relaxed italic">
+                  {transitsData.todayEnergy}
+                </p>
+              )}
+              {isTransitsLoading && !transitsData && (
+                <p className="text-center text-[13px] text-on-surface-variant/30 italic">{t('chat.detail.todayEnergyLoading')}</p>
+              )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 3xl:grid-cols-2 gap-3 w-full mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 3xl:grid-cols-2 gap-3 w-full mb-4 sm:mb-6">
               {suggestedQuestions.slice(0, 4).map((question, idx) => (
                 <motion.button
                   key={idx}
@@ -125,7 +145,7 @@ const ChatPageClient: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: idx * 0.1 }}
                   onClick={() => handleQuestionClick(question)}
-                  className="ripple-btn text-left text-[14px] 3xl:text-[16px] text-on-surface-variant/70 bg-surface/60 border border-outline-variant/20 px-5 py-3.5 rounded-xl hover:border-secondary/30 hover:text-secondary hover:bg-surface/90 transition-all"
+                  className="ripple-btn text-left text-[14px] 3xl:text-[16px] text-on-surface-variant/70 bg-surface/60 border border-outline-variant/20 px-4 py-3 sm:px-5 sm:py-3.5 rounded-xl hover:border-secondary/30 hover:text-secondary hover:bg-surface/90 transition-all"
                   aria-label={`Ask: ${question}`}
                 >
                   {question}

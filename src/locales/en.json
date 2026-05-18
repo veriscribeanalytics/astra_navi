@@ -497,6 +497,14 @@
     "thinkingConsultingStars": "Consulting the stars...",
     "thinkingInterpretingTransits": "Interpreting transits...",
     "thinkingAligningPlanetaryData": "Aligning planetary data...",
+    "thinkingCareer": "Analyzing your career prospects...",
+    "thinkingLove": "Exploring your relationship insights...",
+    "thinkingStudy": "Reviewing your study and learning path...",
+    "thinkingFinance": "Examining your financial indicators...",
+    "thinkingHealth": "Assessing your health and vitality...",
+    "thinkingTiming": "Calculating the optimal timing...",
+    "thinkingRemedy": "Preparing remedies for you...",
+    "thinkingGeneral": "Consulting your cosmic blueprint...",
     "thoughtProcess": "Thought process",
     "chartFactors": "Chart factors for this reading",
     "retry": "Retry",
@@ -567,7 +575,15 @@
       "closeChartContext": "Close chart context",
       "openLargerBirthChart": "Open larger birth chart",
       "expandedBirthChart": "Expanded birth chart",
-      "closeExpandedChart": "Close expanded chart"
+      "closeExpandedChart": "Close expanded chart",
+      "chatSummary": "Chat Summary",
+      "summaryLoading": "Generating summary...",
+      "noSummaryYet": "Send a few messages to generate a summary.",
+      "todayEnergy": "Today's Energy",
+      "todayEnergyLoading": "Loading today's energy...",
+      "transitPlanets": "Active Planets",
+      "transitPanchanga": "Panchanga",
+      "notableTransits": "Notable Transits"
     }
   },
   "healthForecast": {

@@ -305,7 +305,7 @@ const ChatMessages: React.FC = () => {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-2 min-w-0 w-full h-full"
+        className="flex-1 overflow-y-auto chat-messages-scroll px-4 sm:px-6 py-4 pb-2 min-w-0 w-full h-full"
       >
         <AnimatePresence>
           {showSearch && (
@@ -345,7 +345,7 @@ const ChatMessages: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="flex min-h-full flex-col justify-end gap-5 sm:gap-6">
+        <div className="chat-msg-list flex min-h-full flex-col justify-end gap-4 sm:gap-5 3xl:gap-6">
         <AnimatePresence mode="popLayout">
         {messages.map((msg, i) => {
         if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;
@@ -510,28 +510,28 @@ onClick={() => { haptic(); retryMessage(msg.id); }}
               )}
 
               {isAi && msg.id && !isFinalizing && (
-                <div className="flex items-center gap-3 mt-1 ml-10 opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center gap-1.5 sm:gap-3 mt-1 ml-10 opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200 msg-action-row">
                   <RatingMeter
                     rating={msg.rating}
                     onRate={(rating) => handleRateAction(msg.id, rating)}
                     size="sm"
                   />
                   <div className="w-[1px] h-3 bg-outline-variant/30" />
-                  <button
+<button
                     onClick={() => handleSpeak(mainText)}
-                    className={`flex items-center justify-center rounded-md transition-colors cursor-pointer w-6 h-6 !min-w-0 !min-h-0 !p-0.5 ripple-btn ${isSpeaking ? 'text-secondary' : 'text-on-surface-variant/30 hover:text-on-surface-variant'}`}
+                    className={`msg-action-btn ripple-btn ${isSpeaking ? 'text-secondary' : 'text-on-surface-variant/30 hover:text-on-surface-variant'}`}
                     title={isSpeaking ? t('chat.stop') : t('chat.speak')}
                   >
                     <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'animate-pulse' : ''}`} />
                   </button>
                   <button
-onClick={() => {
-navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''));
+ onClick={() => {
+ navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''));
                         setCopiedId(msg.id);
                         toastSuccess(t('chat.copiedToClipboard'));
                        setTimeout(() => setCopiedId(null), 2000);
-                     }}
-                    className="flex items-center justify-center rounded-md transition-colors cursor-pointer w-6 h-6 !min-w-0 !min-h-0 !p-0.5 ripple-btn text-on-surface-variant/30 hover:text-on-surface-variant"
+                      }}
+                    className="msg-action-btn ripple-btn text-on-surface-variant/30 hover:text-on-surface-variant"
                     title={t('chat.copy')}
                   >
                     {copiedId === msg.id ? (
@@ -542,7 +542,7 @@ navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''));
                   </button>
                   <button
                     onClick={() => { togglePin(msg.id); }}
-                    className={`flex items-center justify-center rounded-md transition-colors cursor-pointer w-6 h-6 !min-w-0 !min-h-0 !p-0.5 ripple-btn ${msg.pinned ? 'text-secondary' : 'text-on-surface-variant/30 hover:text-on-surface-variant'}`}
+                    className={`msg-action-btn ripple-btn ${msg.pinned ? 'text-secondary' : 'text-on-surface-variant/30 hover:text-on-surface-variant'}`}
                     title={msg.pinned ? t('chat.unpin') : t('chat.pin')}
                     aria-label={msg.pinned ? t('chat.unpinMessage') : t('chat.pinMessage')}
                   >
@@ -551,7 +551,7 @@ navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''));
                   {isLastAiMsg && !isSending && (
                     <button
                       onClick={() => { haptic(); regenerateMessage(msg.id); }}
-                      className="flex items-center justify-center rounded-md transition-colors cursor-pointer w-6 h-6 !min-w-0 !min-h-0 !p-0.5 ripple-btn text-on-surface-variant/30 hover:text-secondary"
+                      className="msg-action-btn ripple-btn text-on-surface-variant/30 hover:text-secondary"
                       title={t('chat.regenerate')}
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
@@ -561,7 +561,7 @@ navigator.clipboard.writeText(mainText.replace(/<[^>]*>/g, ''));
               )}
 
               {isAi && isLastAiMsg && !isSending && (
-                <div className="flex flex-wrap gap-1.5 mt-2 ml-10">
+                <div className="flex flex-nowrap overflow-x-auto gap-1.5 mt-2 ml-10 msg-suggestion-pills">
                   {(msg.suggestedQuestions?.slice(0, 3) || getSmartSuggestions(msg)).map((option, qIdx) => (
                     <motion.button
                       key={option}

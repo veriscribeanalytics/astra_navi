@@ -162,7 +162,7 @@ const ChatSidebar: React.FC = () => {
           variant="secondary"
           size="sm"
           fullWidth
-          className="!border-secondary/20 !text-secondary font-semibold !py-1 gap-1 !text-[11px]"
+          className="!border-secondary/20 !text-secondary font-semibold !py-1.5 gap-1 !text-[11px]"
           disabled={isGuest}
           onClick={() => {
             createNewChat();
@@ -173,7 +173,7 @@ const ChatSidebar: React.FC = () => {
         </Button>
         <button 
           onClick={() => setIsMobileMenuOpen(false)}
-          className="lg:hidden p-1.5 text-on-surface-variant/50 hover:text-secondary rounded-lg transition-all shrink-0 !min-w-0 !min-h-0"
+          className="lg:hidden chat-sidebar-close-btn text-on-surface-variant/50 hover:text-secondary rounded-lg transition-all shrink-0 flex items-center justify-center"
           aria-label="Close sidebar"
         >
           <X size={18} />
@@ -191,7 +191,7 @@ const ChatSidebar: React.FC = () => {
             className="w-full bg-transparent border-none outline-none text-[13px] text-foreground placeholder:text-foreground/40"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="text-foreground/30 hover:text-foreground !min-w-0 !min-h-0 !p-0">
+            <button onClick={() => setSearchQuery('')} className="text-foreground/30 hover:text-foreground lg:!min-w-0 lg:!min-h-0 lg:!p-0 w-9 h-9 flex items-center justify-center rounded-md lg:w-auto lg:h-auto lg:p-0">
               <X size={14} />
             </button>
           )}
@@ -262,7 +262,7 @@ const ChatSidebar: React.FC = () => {
                                     setMenuFlipUp((btnRect.top - containerRect.top) > containerRect.height * 0.6);
                                   }
                                 }}
-                                className="chat-menu-btn text-foreground/25 hover:text-foreground/50 w-7 h-7 md:w-5 md:h-5 flex items-center justify-center !min-w-0 !min-h-0 !p-0 rounded transition-colors cursor-pointer md:opacity-0 md:group-hover:opacity-100"
+                                className="chat-sidebar-menu-btn chat-menu-btn text-foreground/25 hover:text-foreground/50 lg:w-5 lg:h-5 flex items-center justify-center !p-0 rounded transition-colors cursor-pointer md:opacity-0 md:group-hover:opacity-100"
                               >
                                 <MoreVertical size={12} />
                               </button>

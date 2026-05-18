@@ -18,7 +18,6 @@ import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import { clientFetch } from "@/lib/apiClient";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
-import TomorrowHoroscopeCard from "@/components/dashboard/TomorrowHoroscopeCard";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
@@ -232,7 +231,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                             className="flex items-center gap-4 sm:gap-10 w-full"
                         >
                             {current.type === 'feature' ? (
-                                <>
+                                <Link href={current.href!} className="flex items-center gap-4 sm:gap-10 w-full sm:pointer-events-none">
                                     <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
                                         {current.icon}
                                     </div>
@@ -240,7 +239,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                                         <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none mb-1.5 sm:mb-3`}>{current.label}</span>
                                         <p className="text-[13px] sm:text-[17px] font-bold text-foreground leading-tight tracking-tight line-clamp-2">{current.desc}</p>
                                     </div>
-                                </>
+                                </Link>
                             ) : (
                                 <div className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
                                     <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm`}>
@@ -611,7 +610,6 @@ export default function DashboardHome() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
                         <DailyHoroscopeCard userLoading={userLoading} onSendMessage={handleSendMessage} />
-                        <TomorrowHoroscopeCard userLoading={userLoading} />
                     </div>
 
                     <div className="lg:col-span-4 flex flex-col min-h-0">

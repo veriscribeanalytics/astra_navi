@@ -4,10 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useChat } from '@/context/ChatContext';
-import { X, Lock, Star, Pencil, Sparkles, MessageSquare, User, Hash } from 'lucide-react';
+import { X, Lock, Star, Pencil, Sparkles, MessageSquare, User, Hash, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import KundliSvg from '@/components/ui/astrology/KundliSvg';
-import { useFocusTrap, useTranslation } from '@/hooks';
+import { useFocusTrap, useTranslation, useChatSummary } from '@/hooks';
 
 const ChatDetailPanel: React.FC = () => {
   const { user } = useAuth();
@@ -15,6 +15,7 @@ const ChatDetailPanel: React.FC = () => {
   const { 
     activeChat, setIsRightPanelOpen, isGuest 
   } = useChat();
+  const { data: summaryData, isLoading: isSummaryLoading } = useChatSummary(activeChat?.id ?? null);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const chartModalRef = useFocusTrap<HTMLDivElement>(isChartModalOpen);
   const { t } = useTranslation();
@@ -163,6 +164,31 @@ const ChatDetailPanel: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {activeChat && activeChat.messages.length > 1 && (
+        <div className="mt-6 border-t border-outline-variant/10 pt-5">
+          <p className="mb-3 text-[12px] font-bold text-secondary uppercase tracking-[0.18em] flex items-center gap-1.5">
+            <BookOpen className="w-3.5 h-3.5" />
+            {t('chat.detail.chatSummary')}
+          </p>
+          {isSummaryLoading ? (
+            <p className="text-[12px] text-foreground/30 italic">{t('chat.detail.summaryLoading')}</p>
+          ) : summaryData ? (
+            <div className="rounded-xl border border-outline-variant/10 bg-background/20 px-3 py-2.5">
+              <p className="text-[13px] text-foreground/60 leading-relaxed">{summaryData.summary}</p>
+              {summaryData.topicsDiscussed.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {summaryData.topicsDiscussed.slice(0, 4).map(topic => (
+                    <span key={topic} className="px-2 py-0.5 bg-secondary/10 text-secondary rounded-full text-[10px] font-medium capitalize">{topic}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-[12px] text-foreground/30">{t('chat.detail.noSummaryYet')}</p>
+          )}
         </div>
       )}
 

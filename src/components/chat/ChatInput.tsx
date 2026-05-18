@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
-import { useTranslation } from '@/hooks';
+import { useTranslation, useIsMobile } from '@/hooks';
 import { 
     Mic, MicOff, 
     ArrowUp, Zap, Sparkles, Gem,
@@ -39,6 +39,14 @@ interface SpeechRecognition extends EventTarget {
   stop: () => void;
 }
 
+const modeCycleOrder: Array<'quick' | 'normal' | 'deep'> = ['quick', 'normal', 'deep'];
+
+const modeOptionMap: Record<string, { label: string; Icon: React.FC<{ className?: string }> }> = {
+  quick: { label: 'Quick', Icon: Zap },
+  normal: { label: 'Normal', Icon: Sparkles },
+  deep: { label: 'Deep', Icon: Gem },
+};
+
 const ChatInput: React.FC = () => {
   const { 
     inputText, setInputText, sendMessage, 
@@ -46,6 +54,7 @@ const ChatInput: React.FC = () => {
     mode, setMode, attachments, addAttachment, removeAttachment
   } = useChat();
   const { language } = useTranslation();
+  const isMobile = useIsMobile();
   
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
@@ -55,6 +64,7 @@ const ChatInput: React.FC = () => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const MAX_CHARS = 3000;
   const MAX_ATTACHMENTS = 5;
@@ -62,6 +72,45 @@ const ChatInput: React.FC = () => {
   const charCount = inputText.length;
   const isOverLimit = charCount > MAX_CHARS;
   const showCharCount = charCount > MAX_CHARS * 0.8;
+
+  const cycleMode = useCallback(() => {
+    const currentIdx = modeCycleOrder.indexOf(mode);
+    const nextIdx = (currentIdx + 1) % modeCycleOrder.length;
+    setMode(modeCycleOrder[nextIdx]);
+  }, [mode, setMode]);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv || !isMobile) return;
+    const el = containerRef.current;
+
+    const handleResize = () => {
+      const keyboardHeight = window.innerHeight - vv.height;
+      document.documentElement.style.setProperty(
+        '--keyboard-height',
+        keyboardHeight > 0 ? `${keyboardHeight}px` : '0px'
+      );
+    };
+
+    const handleScroll = () => {
+      if (el) {
+        el.style.transform = `translateY(${vv.offsetTop}px)`;
+      }
+    };
+
+    vv.addEventListener('resize', handleResize);
+    vv.addEventListener('scroll', handleScroll);
+    handleResize();
+
+    return () => {
+      vv.removeEventListener('resize', handleResize);
+      vv.removeEventListener('scroll', handleScroll);
+      document.documentElement.style.removeProperty('--keyboard-height');
+      if (el) {
+        el.style.transform = '';
+      }
+    };
+  }, [isMobile]);
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
@@ -213,8 +262,12 @@ const ChatInput: React.FC = () => {
     }
   }, [inputText]);
 
-return (
-    <div className="w-full px-3 sm:px-5 3xl:px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 relative z-20 shrink-0"
+  const currentModeOpt = modeOptionMap[mode];
+  const CycleIcon = currentModeOpt?.Icon || Sparkles;
+  const cycleLabel = currentModeOpt?.label || 'Normal';
+
+ return (
+    <div ref={containerRef} className="w-full px-3 sm:px-5 3xl:px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -262,7 +315,7 @@ return (
             </div>
           </div>
         )}
-        <div className="flex items-end gap-2 px-3.5 py-2.5">
+        <div className="flex items-end gap-1.5 sm:gap-2 px-3.5 py-3 sm:py-2.5">
           <input
             ref={fileInputRef}
             type="file"
@@ -305,14 +358,14 @@ return (
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={inputText.length > 0 ? '' : placeholderTexts[placeholderIdx]}
-            className="w-full bg-transparent border-none outline-none text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2.5 px-1 max-h-[150px] no-scrollbar"
+            className="w-full bg-transparent border-none outline-none text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2.5 px-1 max-h-[150px] min-h-[44px] sm:min-h-0 no-scrollbar"
             rows={1}
           />
 
           {inputText.length > 0 && (
             <button
               onClick={() => setShowPreview(prev => !prev)}
-              className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors text-foreground/40 hover:text-secondary hover:bg-secondary/10"
+              className={`chat-preview-toggle-mobile w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors text-foreground/40 hover:text-secondary hover:bg-secondary/10`}
               title={showPreview ? "Hide preview" : "Show preview"}
             >
               {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -342,22 +395,33 @@ return (
           </button>
         </div>
 
-        <div className="flex flex-col gap-2 px-3.5 py-2 border-t border-outline-variant/15 bg-background/50 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 px-3.5 py-2.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
-            {modeOptions.map(({ value: m, label, Icon }) => (
+            {isMobile ? (
               <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-[12px] 3xl:text-[14px] font-bold uppercase tracking-wider transition-all ${
-                  mode === m
-                    ? 'bg-secondary/20 text-secondary border border-secondary/30 shadow-sm shadow-secondary/10'
-                    : 'text-foreground/40 hover:text-foreground/60 hover:bg-surface-variant/30 border border-transparent'
-                }`}
+                onClick={cycleMode}
+                className={`chat-mode-cycle-btn bg-secondary/20 text-secondary border border-secondary/30 shadow-sm shadow-secondary/10`}
+                title={`Mode: ${cycleLabel} — tap to cycle`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
+                <CycleIcon className="w-3.5 h-3.5" />
+                {cycleLabel}
               </button>
-            ))}
+            ) : (
+              modeOptions.map(({ value: m, label, Icon }) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-[12px] 3xl:text-[14px] font-bold uppercase tracking-wider transition-all ${
+                    mode === m
+                      ? 'bg-secondary/20 text-secondary border border-secondary/30 shadow-sm shadow-secondary/10'
+                      : 'text-foreground/40 hover:text-foreground/60 hover:bg-surface-variant/30 border border-transparent'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </button>
+              ))
+            )}
             <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden sm:inline ml-1">Navi uses your birth chart</span>
           </div>
           {showCharCount && (

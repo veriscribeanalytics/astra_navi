@@ -492,6 +492,14 @@
     "thinkingConsultingStars": "सितारों से परामर्श कर रहा है...",
     "thinkingInterpretingTransits": "गोचर की व्याख्या कर रहा है...",
     "thinkingAligningPlanetaryData": "ग्रह डेटा संरेखित कर रहा है...",
+    "thinkingCareer": "आपके करियर की संभावनाओं का विश्लेषण कर रहा है...",
+    "thinkingLove": "आपके रिश्ते की जानकारी का अन्वेषण कर रहा है...",
+    "thinkingStudy": "आपके अध्ययन और शिक्षा पथ की समीक्षा कर रहा है...",
+    "thinkingFinance": "आपके वित्तीय संकेतों की जांच कर रहा है...",
+    "thinkingHealth": "आपके स्वास्थ्य और प्राणशक्ति का मूल्यांकन कर रहा है...",
+    "thinkingTiming": "सर्वोत्तम समय की गणना कर रहा है...",
+    "thinkingRemedy": "आपके लिए उपाय तैयार कर रहा है...",
+    "thinkingGeneral": "आपकी खगोलीय नक्शा का परामर्श कर रहा है...",
     "thoughtProcess": "विचार प्रक्रिया",
     "chartFactors": "इस पठन के चार्ट कारक",
     "retry": "पुनः प्रयास",
@@ -562,7 +570,13 @@
       "closeChartContext": "चार्ट संदर्भ बंद करें",
       "openLargerBirthChart": "बड़ी जन्म कुंडली देखें",
       "expandedBirthChart": "विस्तृत जन्म कुंडली",
-      "closeExpandedChart": "विस्तृत कुंडली बंद करें"
+      "closeExpandedChart": "विस्तृत कुंडली बंद करें",
+      "chatSummary": "चैट सारांश",
+      "summaryLoading": "सारांश तैयार कर रहा है...",
+      "noSummaryYet": "सारांश तैयार करने के लिए कुछ संदेश भेजें।",
+      "todayEnergy": "आज की ऊर्जा",
+      "todayEnergyLoading": "आज की ऊर्जा लोड कर रहा है...",
+      "notableTransits": "उल्लेखनीय गोचर"
     }
   },
   "healthForecast": {

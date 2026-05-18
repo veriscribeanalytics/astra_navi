@@ -433,7 +433,11 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
     min-height: 44px; font-size: 16px;
   }
   
-  * { -webkit-tap-highlight-color: rgba(200, 136, 10, 0.1); }
+  * { -webkit-tap-highlight-color: transparent; }
+  
+  button, [type='button'], [type='reset'], [type='submit'], [role='button'], a[role='button'] {
+    touch-action: manipulation;
+  }
 }
 
 ::selection { background-color: var(--secondary); color: var(--on-primary); }
@@ -1012,6 +1016,140 @@ html:has(.chat-layout) body {
 
 @media (max-width: 768px) {
   .chat-input-container { border-radius: 16px; }
+}
+
+@media (max-width: 1024px) {
+  .msg-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .chat-search-bar button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-msg-list {
+    gap: 1.5rem;
+  }
+
+  .chat-center-column > div:first-child,
+  .chat-messages-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .swipe-hint {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 48px;
+    background: color-mix(in srgb, var(--secondary) 25%, transparent);
+    border-radius: 0 4px 4px 0;
+    z-index: 50;
+    opacity: 0.6;
+  }
+
+  .swipe-hint-right {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 48px;
+    background: color-mix(in srgb, var(--secondary) 25%, transparent);
+    border-radius: 4px 0 0 4px;
+    z-index: 50;
+    opacity: 0.6;
+  }
+
+  .chat-header-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-sidebar-close-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-sidebar-menu-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sidebar-chat-active,
+  .sidebar-chat-item {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-preview-toggle-mobile {
+    display: none !important;
+  }
+
+  .chat-mode-cycle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .msg-action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .ai-bubble-container {
+    padding: 14px 16px;
+  }
+
+  .ai-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chat-main-header {
+    min-height: 48px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  .msg-suggestion-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .msg-suggestion-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .msg-action-row::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: color-mix(in srgb, var(--outline-variant) 20%, transparent);
+    margin-top: 4px;
+  }
+
+  .suggestion-pill {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 /* Sidebar Utilities */

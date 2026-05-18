@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 import { useToast, useTranslation } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -51,10 +51,22 @@ const LoginContent = () => {
     const authError = searchParams.get('error');
 
     if (authError === 'SessionExpired') {
-      fetch('/api/auth/clear-session', { method: 'POST' })
-        .catch(err => console.warn('[Login] Session clear failed:', err));
-      router.replace('/login?sessionCleared=1');
+      const attempts = parseInt(sessionStorage.getItem('auth_recovery_attempts') || '0', 10);
+      if (attempts >= 2) {
+        sessionStorage.removeItem('auth_recovery_attempts');
+        return; // stop looping — show the form so user can sign in manually
+      }
+      sessionStorage.setItem('auth_recovery_attempts', String(attempts + 1));
+      (async () => {
+        try { await fetch('/api/auth/clear-session', { method: 'POST' }); } catch { /* ignore */ }
+        await signOut({ redirect: false });
+        router.replace('/login?sessionCleared=1');
+      })();
       return;
+    }
+    // Clear the counter once the user lands on a clean login page
+    if (!authError) {
+      sessionStorage.removeItem('auth_recovery_attempts');
     }
 
     if (authError) {

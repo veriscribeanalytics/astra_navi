@@ -1,35 +1,57 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const SESSION_COOKIE_CHUNK_LIMIT = 20;
+
+const SESSION_COOKIE_NAMES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+];
 
 /**
  * Dedicated route to clear ALL Auth.js / NextAuth session cookies and chunked
  * cookies.  Called from the login page when ?error=SessionExpired is detected
  * to prevent login-page reload loops from poisoned production cookies.
  *
- * This mirrors the cookie-clearing logic in auth.config.ts
- * (redirectToLoginAndClearSession / appendSessionClearCookies).
+ * Uses NextResponse.cookies.delete() which inherits the correct Domain/Path
+ * attributes from the request, ensuring cookies are cleared in production
+ * (where cookies may be set with Domain=.yourdomain.com).
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
   const response = NextResponse.json({ success: true });
 
-  const expiredCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax";
-  const expiredSecureCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; Secure; SameSite=Lax";
+  const host = request.headers.get("host") || "";
+  const hostParts = host.split(":")[0].split(".");
+  const parentDomain = hostParts.length >= 2
+    ? "." + hostParts.slice(-2).join(".")
+    : undefined;
 
-  // Clear all known Auth.js/NextAuth session cookie names and their chunked
-  // variants (up to 5 chunks).  Chunked cookies are used for large JWT tokens
-  // that exceed the 4096-byte browser cookie limit.
-  for (const name of [
-    "authjs.session-token",
-    "__Secure-authjs.session-token",
-    "next-auth.session-token",
-    "__Secure-next-auth.session-token",
-  ]) {
-    response.headers.append("Set-Cookie", `${name}=; ${expiredCookie}`);
-    response.headers.append("Set-Cookie", `${name}=; ${expiredSecureCookie}`);
+  for (const name of SESSION_COOKIE_NAMES) {
+    response.cookies.delete(name);
+    if (parentDomain) {
+      response.cookies.set(name, "", {
+        maxAge: 0,
+        path: "/",
+        domain: parentDomain,
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+    }
     for (let i = 0; i < SESSION_COOKIE_CHUNK_LIMIT; i += 1) {
-      response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredCookie}`);
-      response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredSecureCookie}`);
+      const chunkedName = `${name}.${i}`;
+      response.cookies.delete(chunkedName);
+      if (parentDomain) {
+        response.cookies.set(chunkedName, "", {
+          maxAge: 0,
+          path: "/",
+          domain: parentDomain,
+          httpOnly: true,
+          secure: true,
+          sameSite: "lax",
+        });
+      }
     }
   }
 

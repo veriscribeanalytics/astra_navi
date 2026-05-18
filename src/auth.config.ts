@@ -2,30 +2,44 @@ import type { NextAuthConfig } from "next-auth";
 
 const SESSION_COOKIE_CHUNK_LIMIT = 20;
 
+const SESSION_COOKIE_NAMES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+];
+
 function redirectToLoginAndClearSession(nextUrl: URL) {
   const loginUrl = new URL("/login", nextUrl);
   loginUrl.searchParams.set("error", "SessionExpired");
   loginUrl.searchParams.set("sessionCleared", "1");
   const response = Response.redirect(loginUrl);
-  appendSessionClearCookies(response);
+  appendSessionClearCookies(response, nextUrl.hostname);
   return response;
 }
 
-function appendSessionClearCookies(response: Response) {
-  const expiredCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax";
-  const expiredSecureCookie = "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; Secure; SameSite=Lax";
+function appendSessionClearCookies(response: Response, hostname: string) {
+  const hostParts = hostname.split(".");
+  const parentDomain = hostParts.length >= 2 ? "." + hostParts.slice(-2).join(".") : undefined;
 
-  for (const name of [
-    "authjs.session-token",
-    "__Secure-authjs.session-token",
-    "next-auth.session-token",
-    "__Secure-next-auth.session-token",
-  ]) {
-    response.headers.append("Set-Cookie", `${name}=; ${expiredCookie}`);
-    response.headers.append("Set-Cookie", `${name}=; ${expiredSecureCookie}`);
+  // Emit deletion for both host-only (dev) and domain-scoped (prod) variants
+  const variants = [
+    "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax",
+    "Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; Secure; SameSite=Lax",
+    ...(parentDomain ? [
+      `Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; Domain=${parentDomain}; HttpOnly; SameSite=Lax`,
+      `Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; Domain=${parentDomain}; HttpOnly; Secure; SameSite=Lax`,
+    ] : []),
+  ];
+
+  for (const name of SESSION_COOKIE_NAMES) {
+    for (const attrs of variants) {
+      response.headers.append("Set-Cookie", `${name}=; ${attrs}`);
+    }
     for (let i = 0; i < SESSION_COOKIE_CHUNK_LIMIT; i += 1) {
-      response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredCookie}`);
-      response.headers.append("Set-Cookie", `${name}.${i}=; ${expiredSecureCookie}`);
+      for (const attrs of variants) {
+        response.headers.append("Set-Cookie", `${name}.${i}=; ${attrs}`);
+      }
     }
   }
 }
@@ -55,7 +69,6 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/careers") ||
         nextUrl.pathname.startsWith("/plans") ||
         nextUrl.pathname.startsWith("/kundli") ||
-        nextUrl.pathname.startsWith("/chat") ||
         nextUrl.pathname.startsWith("/consult") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||

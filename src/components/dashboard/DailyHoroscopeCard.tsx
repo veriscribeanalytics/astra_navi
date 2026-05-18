@@ -592,7 +592,7 @@ export default function DailyHoroscopeCard({
                         ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1">
                             {metrics.map((item, i) => (
-                                <div key={i} className={`flex items-center text-left gap-3 sm:gap-6 p-4 sm:p-8 h-full transition-all duration-500 hover:bg-secondary/[0.05] relative group ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
+                                <div key={i} onClick={() => openModal({ label: item.label, score: item.score, info: item.info, icon: item.icon, color: item.iconColor, bg: item.iconBg, colorHex: item.scoreHex, area: item.area })} className={`flex items-center text-left gap-3 sm:gap-6 p-4 sm:p-8 h-full transition-all duration-500 hover:bg-secondary/[0.05] relative group cursor-pointer ${i % 2 === 0 ? 'md:border-r border-outline-variant/10' : ''} ${i < 2 ? 'border-b border-outline-variant/10' : (i < 3 ? 'border-b md:border-b-0 border-outline-variant/10' : '')}`}>
                                     
                                     {/* Subtle Gradient Background on Hover */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-secondary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -610,26 +610,24 @@ export default function DailyHoroscopeCard({
                                             </div>
                                         </div>
 
-                                        <div className="relative h-[60px]">
-                                            {/* Original Info - Slides up and out on hover */}
-                                            <p className="text-[15px] sm:text-[17px] text-foreground/60 leading-relaxed line-clamp-2 font-medium transition-all duration-500 group-hover:-translate-y-4 group-hover:opacity-0">
+                                        <div className="relative h-[60px] sm:h-[60px]">
+                                            <p className="hidden sm:block text-[15px] sm:text-[17px] text-foreground/60 leading-relaxed line-clamp-2 font-medium transition-all duration-500 group-hover:-translate-y-4 group-hover:opacity-0">
                                                 {item.info}
                                             </p>
 
-                                            {/* Hover Actions: ONLY THESE ARE CLICKABLE */}
-                                            <div className="absolute inset-0 flex items-center gap-4 opacity-0 translate-y-4 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                                            <div className="absolute inset-0 flex items-center gap-1 sm:gap-4 translate-y-4 sm:translate-y-4 group-hover:translate-y-0 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-auto sm:pointer-events-none group-hover:pointer-events-auto">
                                                 <button 
                                                     onClick={() => openModal({ label: item.label, score: item.score, info: item.info, icon: item.icon, color: item.iconColor, bg: item.iconBg, colorHex: item.scoreHex, area: item.area })}
-                                                    className="flex-1 px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground font-black text-[11px] uppercase tracking-wider hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                                                    className="flex-1 px-2 sm:px-4 py-2 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-foreground font-black text-[9px] sm:text-[11px] uppercase tracking-wider hover:bg-white/10 transition-all flex items-center justify-center gap-1 sm:gap-2"
                                                 >
-                                                    {t('horoscope.detailedForecast')} <ChevronRight className="w-3.5 h-3.5" />
+                                                    {t('horoscope.detailedForecast')} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 </button>
                                                 
                                                 <button 
                                                     onClick={() => onSendMessage?.(`${t('horoscope.askNaviAboutToday')} ${item.label}`)}
-                                                    className="flex-[1.5] px-6 py-3.5 rounded-2xl bg-secondary text-background font-black text-[11px] uppercase tracking-widest hover:scale-105 hover:bg-amber-500 transition-all flex items-center justify-center gap-2"
+                                                    className="flex-[1.5] px-3 sm:px-6 py-2 sm:py-3.5 rounded-xl sm:rounded-2xl bg-secondary text-background font-black text-[9px] sm:text-[11px] uppercase tracking-widest hover:scale-105 hover:bg-amber-500 transition-all flex items-center justify-center gap-1 sm:gap-2"
                                                 >
-                                                    {t('horoscope.askNaviAboutToday')} {item.label} <MessageSquare className="w-4 h-4" />
+                                                    {t('horoscope.askNaviAboutToday')} {item.label} <MessageSquare className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
                                         </div>

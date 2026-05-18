@@ -64,6 +64,14 @@ export interface ChatSummary {
   averageRating: number | null;
 }
 
+export interface ThinkingData {
+  topic?: ChatMessage['topic'];
+  intent?: ChatMessage['intent'];
+  mode?: ChatMessage['mode'];
+  model?: string;
+  answerStyle?: string;
+}
+
 interface ChatContextType {
   chats: ChatSummary[];
   activeChat: Chat | null;
@@ -103,6 +111,7 @@ interface ChatContextType {
   editMessage: (messageId: string, newText: string) => Promise<void>;
   deleteMessage: (messageId: string) => void;
   togglePin: (messageId: string) => void;
+  thinkingData: ThinkingData | null;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -126,6 +135,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallData | null>(null);
   const [mode, setMode] = useState<"quick" | "normal" | "deep">("normal");
+  const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
   const initialLoadDone = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -322,6 +332,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const { done, value } = await reader.read();
           if (done) {
             setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
+            setThinkingData(null);
             break;
           }
           
@@ -340,13 +351,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const dataStr = trimmed.slice(6);
             if (dataStr === '[DONE]') {
               setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
+              setThinkingData(null);
               streamDone = true;
               break;
             }
             
             try {
               const data = JSON.parse(dataStr);
-              if (currentEventName === 'metadata') {
+              if (currentEventName === 'thinking') {
+                setThinkingData({
+                  topic: data.topic ?? undefined,
+                  intent: data.intent ?? undefined,
+                  mode: data.mode ?? undefined,
+                  model: data.model ?? undefined,
+                  answerStyle: data.answerStyle ?? undefined,
+                });
+              } else if (currentEventName === 'metadata') {
                 if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
                   persistedAiMsgId = data.aiMessageId;
                 }
@@ -439,6 +459,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toastError(displayMsg);
     } finally {
       setIsSending(false);
+      setThinkingData(null);
     }
   }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode, attachments]);
 
@@ -651,7 +672,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, regenerateMessage, retryMessage, deleteChat, resetChat,
       editMessage, deleteMessage, togglePin,
       inputText, setInputText, attachments, addAttachment, removeAttachment, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
-      paywall, clearPaywall
+      paywall, clearPaywall,
+      thinkingData
     }}>
       {children}
     </ChatContext.Provider>
