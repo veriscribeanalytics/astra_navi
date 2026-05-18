@@ -10,10 +10,10 @@ import LanguagePicker from "../ui/LanguagePicker";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { useAuth } from "@/context/AuthContext";
 import { useToast, useTranslation } from "@/hooks";
-import { 
-    User, LogOut, Menu, X, ChevronDown, Sparkles, 
-    BookOpen, MessageSquare, Heart, Compass, LayoutDashboard, 
-    Gem, ShieldQuestion, Brain, Globe, Wallet
+import {
+    User, LogOut, Menu, X, ChevronDown, Sparkles,
+    BookOpen, MessageSquare, Heart, Compass, LayoutDashboard,
+    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp
 } from "lucide-react";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { getTierLabel } from "@/types/billing";
@@ -43,6 +43,12 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                         href: "/kundli/match",
                         icon: <Heart className="w-4 h-4" />,
                         desc: t('nav.chartMatchingDesc')
+                    },
+                    {
+                        label: t('nav.forecast'),
+                        href: "/horoscope/forecast",
+                        icon: <TrendingUp className="w-4 h-4" />,
+                        desc: t('nav.forecastDesc')
                     },
                 ]
             },

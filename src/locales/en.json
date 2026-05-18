@@ -23,6 +23,8 @@
     "myKundliDesc": "Deep-dive into your chart details.",
     "chartMatching": "Chart Matching",
     "chartMatchingDesc": "Vedic compatibility and relationship analysis.",
+    "forecast": "Forecast",
+    "forecastDesc": "Monthly and yearly astrological predictions.",
     "consultNavi": "Consult Navi",
     "guidedSessions": "Guided Sessions",
     "guidedSessionsDesc": "Step-by-step personalized life readings.",
@@ -648,6 +650,17 @@
       "a": "Yes. AstraNavi displays traditional Vedic formats (North Indian, South Indian diamond charts) and Western circular charts. The underlying calculations remain Vedic—sidereal zodiac, Lahiri ayanamsa—but you can choose your preferred visual style."
     }
   ],
+  "forecast": {
+    "title": "Forecast",
+    "heading": "Your Cosmic Forecast",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "loading": "Calculating planetary positions...",
+    "best": "Best",
+    "worst": "Challenging",
+    "avg": "Average",
+    "trend": "Trend"
+  },
   "plans": {
     "title": "Unlock Your Cosmic Potential",
     "subtitle": "Choose the plan that matches your journey. From daily insights to deep kundli analysis — Navi credits power every feature.",

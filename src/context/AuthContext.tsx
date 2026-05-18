@@ -87,6 +87,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session?.user?.error === "RefreshAccessTokenError";
     const isLoggedIn = status === 'authenticated' && !hasSessionError;
     const isSessionLoading = status === 'loading';
+    const sessionUserFallback: User | null =
+        isLoggedIn && session?.user?.email
+            ? {
+                id: session.user.id,
+                email: session.user.email,
+                name: session.user.name || undefined,
+                image: session.user.image ?? null,
+            }
+            : null;
+    const effectiveUser = user ?? sessionUserFallback;
+    const effectiveEmail = effectiveUser?.email;
 
     useEffect(() => {
         if (session?.user) {
@@ -261,9 +272,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const refreshProfile = useCallback(async () => {
-        if (!user?.email) return;
+        if (!effectiveEmail) return;
         try {
-            const res = await clientFetch(`/api/user/profile?email=${encodeURIComponent(user.email)}`);
+            const res = await clientFetch(`/api/user/profile?email=${encodeURIComponent(effectiveEmail)}`);
             if (!res.ok) return;
             const data = await res.json();
             if (data?.user) {
@@ -274,7 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
             console.error('[AuthContext] refreshProfile failed:', err);
         }
-    }, [user?.email]);
+    }, [effectiveEmail]);
 
     // Listen for language changes from LanguageContext.setLanguage().
     // When a user manually changes their language via the language picker,
@@ -296,7 +307,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{ 
             isLoggedIn, 
             isLoading: isLoading || isSessionLoading, 
-            user, 
+            user: effectiveUser, 
             profileComplete,
             profileFetched,
             login, 

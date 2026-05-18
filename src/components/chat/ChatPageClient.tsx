@@ -17,7 +17,7 @@ import { useAuth } from '@/context/AuthContext';
 import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
 
 const ChatPageClient: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isLoggedIn } = useAuth();
   const { t } = useTranslation();
   const { data: transitsData, isLoading: isTransitsLoading } = useTransitsToday();
   const searchParams = useSearchParams();
@@ -38,7 +38,7 @@ const ChatPageClient: React.FC = () => {
   React.useEffect(() => {
     if (isLoading) return;
 
-    if (!user?.email) {
+    if (!isLoggedIn) {
       const mode = searchParams.get('mode');
       if (mode === 'guest') {
         enableGuestMode();
@@ -47,6 +47,8 @@ const ChatPageClient: React.FC = () => {
       router.push('/login?callbackUrl=/chat');
       return;
     }
+
+    if (!user?.email) return;
 
     const chatId = searchParams.get('id');
     if (chatId) {
@@ -59,7 +61,7 @@ const ChatPageClient: React.FC = () => {
       localStorage.removeItem('astranavi_pending_message');
       createNewChat(pendingMsg);
     }
-  }, [user, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading]);
+  }, [user, isLoggedIn, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading]);
 
   React.useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {

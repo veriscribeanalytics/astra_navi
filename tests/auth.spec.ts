@@ -61,13 +61,13 @@ test.describe('Login Page', () => {
 
 test.describe('Session Recovery', () => {
   test('landing page does not redirect-loop when session cookie has refresh error', async ({ page, context }) => {
+    await mockAllApis(page);
     await mockSession(page, context, {
       id: 'expired-user',
       email: 'expired@test.com',
       name: 'Expired User',
       error: 'TokenReuseError',
     });
-    await mockAllApis(page);
 
     const urls: string[] = [];
     page.on('framenavigated', (frame) => {
@@ -80,6 +80,41 @@ test.describe('Session Recovery', () => {
     expect(page.url()).not.toContain('/login?error=SessionExpired');
     expect(page.url()).not.toContain('/chat');
     expect(urls.filter((url) => url.includes('/login') || url.includes('/chat')).length).toBe(0);
+  });
+
+  test('authenticated chat load does not bounce to login while profile hydrates', async ({ page, context }) => {
+    await mockAllApis(page);
+    await mockSession(page, context, {
+      id: 'hydrating-user',
+      email: 'hydrating@test.com',
+      name: 'Hydrating User',
+    });
+    await page.route('**/api/user/profile*', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: {
+            id: 'hydrating-user',
+            email: 'hydrating@test.com',
+            name: 'Hydrating User',
+          },
+          profileComplete: true,
+        }),
+      });
+    });
+
+    const urls: string[] = [];
+    page.on('framenavigated', (frame) => {
+      if (frame === page.mainFrame()) urls.push(frame.url());
+    });
+
+    await page.goto('/chat', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(700);
+
+    expect(page.url()).toContain('/chat');
+    expect(urls.some((url) => url.includes('/login?callbackUrl=/chat'))).toBe(false);
   });
 });
 
@@ -117,8 +152,8 @@ test.describe('Reset Password Page', () => {
 test.describe('Logout Flow', () => {
   test('logout confirmation modal opens from navbar', async ({ page, context }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await mockSession(page, context);
     await mockAllApis(page);
+    await mockSession(page, context);
     await page.goto('/');
 
     // Desktop avatar button with profile-ring-glow class
