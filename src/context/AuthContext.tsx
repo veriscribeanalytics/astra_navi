@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { clientFetch, resetAuthGrace } from '@/lib/apiClient';
 import { useTranslation } from '@/hooks';
@@ -59,6 +60,7 @@ const SESSION_RECOVERY_URL = '/login?error=SessionExpired&sessionCleared=1';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data: session, status } = useSession();
+    const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
     const [profileComplete, setProfileComplete] = useState(false);
     const [profileFetched, setProfileFetched] = useState(false);
@@ -99,11 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setProfileComplete(false);
                 setProfileFetched(false);
                 fetchInProgressRef.current = false;
+                // If we're already on the login page, the login page's own handler
+                // will clear the session. Don't compete with it.
+                if (pathname === '/login') return;
                 console.error("[AuthContext] Token reuse detected in session. Signing out immediately.");
-                // TokenReuseError is unrecoverable — the refresh token has been
-                // revoked by the backend.  Sign out & clear the poisoned cookie
-                // immediately; don't wait (the old 3s delay allowed in-flight
-                // requests but the middleware already redirects to /login now).
                 if (!signOutInitiatedRef.current) {
                   signOutInitiatedRef.current = true;
                   fetch('/api/auth/clear-session', { method: 'POST' })
@@ -114,15 +115,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
                 return;
             } else if (sessionUser.error === "RefreshAccessTokenError") {
-                // Transient error — network issue, etc. The middleware will redirect
-                // to /login, but if the user manages to stay on a page, don't sign
-                // them out aggressively.  The next session poll will retry the
-                // refresh.  If truly expired, clientFetch handles 401s.
                 console.warn("[AuthContext] Refresh token error (possibly transient). Not signing out — will retry on next session poll.");
                 setUser(null);
                 setProfileComplete(false);
                 setProfileFetched(false);
                 fetchInProgressRef.current = false;
+                // If already on login page, let the login page handle recovery
+                if (pathname === '/login') return;
                 return;
             }
 

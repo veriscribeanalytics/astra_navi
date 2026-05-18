@@ -94,6 +94,7 @@ export default function DailyHoroscopeCard({
     const [showContent, setShowContent] = useState(false);
     const [animatedScore, setAnimatedScore] = useState(0);
     const [activeModal, setActiveModal] = useState<ModalData | null>(null);
+    const [mobileTab, setMobileTab] = useState<'summary' | 'forecast'>('summary');
     const [forecast, setForecast] = useState<ForecastData | null>(null);
     const [forecastLoading, setForecastLoading] = useState(false);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -282,7 +283,7 @@ export default function DailyHoroscopeCard({
     }, [horoscope?.lucky?.color, horoscope?.lucky_color]);
 
     const openModal = (item: ModalData) => {
-        setActiveModal(item); setForecast(null); setExpandedDay(null);
+        setActiveModal(item); setForecast(null); setExpandedDay(null); setMobileTab('summary');
         
         const cached = forecastDataCacheRef.current.get(item.area);
         if (cached) {
@@ -656,6 +657,15 @@ export default function DailyHoroscopeCard({
                             </button>
 
                             <div className="flex flex-col lg:flex-row w-full h-full min-h-0">
+                                {/* Mobile tab bar */}
+                                <div className="flex lg:hidden border-b border-white/5 shrink-0">
+                                    {(['summary', 'forecast'] as const).map(tab => (
+                                        <button key={tab} onClick={() => setMobileTab(tab)}
+                                            className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest transition-colors ${mobileTab === tab ? 'text-secondary border-b-2 border-secondary' : 'text-foreground/30'}`}>
+                                            {tab === 'summary' ? activeModal.label : '7-Day Forecast'}
+                                        </button>
+                                    ))}
+                                </div>
                                 {forecastLoading ? (
                                     <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-br from-surface via-surface-variant/5 to-surface pointer-events-none" />
@@ -684,7 +694,7 @@ export default function DailyHoroscopeCard({
                                     
                                     return (
                                         <>
-                                            <div className="w-full lg:w-[35%] lg:shrink-0 p-4 sm:p-8 lg:p-10 flex flex-col relative overflow-y-auto scrollbar-hide lg:border-r border-outline-variant/10 max-h-[35%] lg:max-h-full">
+                                            <div className={`w-full lg:w-[35%] lg:shrink-0 p-4 sm:p-8 lg:p-10 flex flex-col relative overflow-y-auto scrollbar-hide lg:border-r border-outline-variant/10 lg:max-h-full ${mobileTab !== 'summary' ? 'hidden lg:flex' : 'flex'}`}>
                                                 <div className="absolute top-0 left-0 w-[150%] h-64 blur-[100px] opacity-10 pointer-events-none" style={{ backgroundColor: activeModal.colorHex }} />
                                                 <div className="relative z-10 flex flex-col h-full">
                                                     <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-6">
@@ -737,7 +747,7 @@ export default function DailyHoroscopeCard({
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="w-full lg:w-[65%] flex-1 lg:shrink-0 bg-surface-variant/5 flex flex-col min-h-0 relative overflow-hidden">
+                                            <div className={`w-full lg:w-[65%] flex-1 lg:shrink-0 bg-surface-variant/5 flex flex-col min-h-0 relative overflow-y-auto ${mobileTab !== 'forecast' ? 'hidden lg:flex' : 'flex'}`}>
                                                 <div className="p-3 sm:p-8 pb-2 sm:pb-4 shrink-0">
                                                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                                                         <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4" style={{ color: activeModal.colorHex }} /> {t('horoscope.7DayTrajectory')}</span>
@@ -759,11 +769,11 @@ export default function DailyHoroscopeCard({
                                                             const isHigh = day.score >= 75;
                                                             const isLow = day.score <= 45;
                                                             return (
-                                                                <motion.button key={day.date} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setExpandedDay(day.date)} className={`relative group flex flex-col items-center snap-center shrink-0 w-[72px] sm:w-auto p-1 sm:p-4 rounded-[12px] sm:rounded-[20px] border transition-all duration-500 cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-30' : 'bg-surface/30 border-white/5 hover:border-white/20 z-10'}`} style={{ borderColor: isSelected ? activeModal.colorHex + '40' : undefined, boxShadow: isSelected ? `0 10px 30px -10px ${activeModal.colorHex}20` : undefined }}>
+                                                                <motion.button key={day.date} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={() => setExpandedDay(day.date)} className={`relative group flex flex-col items-center snap-center shrink-0 w-[52px] sm:w-auto p-1 sm:p-4 rounded-[12px] sm:rounded-[20px] border transition-all duration-500 cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-30' : 'bg-surface/30 border-white/5 hover:border-white/20 z-10'}`} style={{ borderColor: isSelected ? activeModal.colorHex + '40' : undefined, boxShadow: isSelected ? `0 10px 30px -10px ${activeModal.colorHex}20` : undefined }}>
                                                                     {isSelected && <motion.div layoutId="activeDayBg" className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.03] pointer-events-none" />}
                                                                     <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-0.5 sm:mb-2 transition-colors ${isSelected ? '' : 'text-foreground/30 group-hover:text-foreground/60'}`} style={{ color: isSelected ? activeModal.colorHex : undefined }}>{day.is_today ? 'TOD' : fmtDay(day.date)}</span>
                                                                     <span className={`text-sm sm:text-2xl font-headline font-bold mb-0.5 sm:mb-2 transition-all ${isSelected ? 'scale-110 text-foreground' : 'text-foreground/40'}`}>{dayNum}</span>
-                                                                    <div className={`w-full h-1.5 sm:h-2 rounded-full overflow-hidden bg-white/5 mt-auto relative`}><motion.div initial={{ width: 0 }} animate={{ width: `${day.score}%` }} className="absolute inset-0 rounded-full" style={{ backgroundColor: isSelected ? activeModal.colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }} /></div>
+                                                                    <div className={`w-full h-1 sm:h-2 rounded-full overflow-hidden bg-white/5 mt-auto relative`}><motion.div initial={{ width: 0 }} animate={{ width: `${day.score}%` }} className="absolute inset-0 rounded-full" style={{ backgroundColor: isSelected ? activeModal.colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }} /></div>
                                                                     <span className="text-[8px] font-bold text-foreground/30 mt-0.5 sm:hidden">{day.score}</span>
 
                                                                 </motion.button>
