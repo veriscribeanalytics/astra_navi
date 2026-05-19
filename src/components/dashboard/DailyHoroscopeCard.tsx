@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { clientFetch } from '@/lib/apiClient';
 import Card from '@/components/ui/Card';
 import { Sparkles, Heart, Trophy, Sun, Gem, X, MessageSquare, ArrowRight, TrendingUp, Info, Orbit, ChevronRight, MapPin } from 'lucide-react';
@@ -757,10 +758,13 @@ export default function DailyHoroscopeCard({
                                                 <div className="p-4 sm:p-8 pb-3 sm:pb-4 shrink-0">
                                                     <div className="flex items-center justify-between mb-3 sm:mb-4">
                                                         <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4" style={{ color: activeModal.colorHex }} /> {t('horoscope.7DayTrajectory')}</span>
-                                                        <div className="flex gap-2 sm:gap-3">
-                                                            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/10 text-[10px] font-bold bg-surface"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeModal.colorHex }} /><span className="text-foreground/40">{t('horoscope.peakLabel')}:</span><span style={{ color: activeModal.colorHex }}>{fmtDate(forecast.summary.best_day)}</span></div>
-                                                            <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-outline-variant/10 text-[9px] sm:text-[10px] font-bold bg-surface"><span className="text-foreground/40">{t('horoscope.trendLabel')}:</span><span className="text-foreground/70 capitalize">{forecast.summary.trend === 'improving' ? '📈' : forecast.summary.trend === 'declining' ? '📉' : '➡️'} {forecast.summary.trend}</span></div>
-                                                        </div>
+                                                        <Link href={`/horoscope/forecast?area=${activeModal.area}&range=monthly`} onClick={() => setActiveModal(null)} className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:gap-1.5 transition-all" style={{ color: activeModal.colorHex }}>
+                                                            {t('horoscope.viewFullForecast')} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                        </Link>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 sm:gap-3 mb-3 sm:mb-4">
+                                                        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/10 text-[10px] font-bold bg-surface"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeModal.colorHex }} /><span className="text-foreground/40">{t('horoscope.peakLabel')}:</span><span style={{ color: activeModal.colorHex }}>{fmtDate(forecast.summary.best_day)}</span></div>
+                                                        <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-outline-variant/10 text-[9px] sm:text-[10px] font-bold bg-surface"><span className="text-foreground/40">{t('horoscope.trendLabel')}:</span><span className="text-foreground/70 capitalize">{forecast.summary.trend === 'improving' ? '📈' : forecast.summary.trend === 'declining' ? '📉' : '➡️'} {forecast.summary.trend}</span></div>
                                                     </div>
                                                     <div className="h-20 sm:h-36 w-full relative px-1 sm:px-8"><MiniChart days={forecast.days} colorHex={activeModal.colorHex} activeDate={activeDay.date} /></div>
                                                 </div>

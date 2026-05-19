@@ -40,7 +40,10 @@ export async function GET(
         }
 
         return NextResponse.json(data, {
-            headers: { 'Cache-Control': 'public, s-maxage=21600, max-age=21600' }
+            headers: {
+                'Cache-Control': 'private, no-store, no-cache, must-revalidate, proxy-revalidate',
+                'Vary': 'Cookie',
+            }
         });
 
     } catch (error) {

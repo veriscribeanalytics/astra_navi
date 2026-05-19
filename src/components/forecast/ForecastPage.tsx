@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import ForecastChart, { ChartPoint } from './ForecastChart';
 import MonthGrid, { MonthData } from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
+import ForecastSnapshot from './ForecastSnapshot';
 import { TrendingUp, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -29,11 +30,21 @@ interface WeeklyResponse {
 
 export default function ForecastPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { t, language } = useTranslation();
 
-  const [area, setArea] = useState<ForecastArea>('career');
-  const [range, setRange] = useState<TimeRange>('monthly');
+  const initialArea: ForecastArea = useMemo(() => {
+    const a = searchParams.get('area');
+    return (AREA_LIST as string[]).includes(a || '') ? (a as ForecastArea) : 'career';
+  }, [searchParams]);
+  const initialRange: TimeRange = useMemo(() => {
+    const r = searchParams.get('range');
+    return r === '7d' || r === 'yearly' ? r : 'monthly';
+  }, [searchParams]);
+
+  const [area, setArea] = useState<ForecastArea>(initialArea);
+  const [range, setRange] = useState<TimeRange>(initialRange);
   const [loading, setLoading] = useState(true);
   const [yearlyData, setYearlyData] = useState<YearlyResponse | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyResponse | null>(null);
@@ -58,7 +69,7 @@ export default function ForecastPage() {
           setSelectedDay(today?.date || data.days?.[0]?.date || null);
         }
       } else {
-        const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`);
+        const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setYearlyData(data);
@@ -125,14 +136,14 @@ export default function ForecastPage() {
 
   return (
     <div className="w-full min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-[1360px] 3xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 3xl:py-16">
         {/* Header */}
-        <div className="mb-6 sm:mb-10">
+        <div className="mb-6 sm:mb-10 lg:mb-12">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-secondary" />
+            <TrendingUp className="w-5 h-5 text-secondary animate-pulse" />
             <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.3em]">{t('forecast.title')}</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-headline font-bold text-foreground">{t('forecast.heading')}</h1>
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl 3xl:text-6xl font-headline font-black tracking-tight text-foreground">{t('forecast.heading')}</h1>
         </div>
 
         {/* Area pills */}
@@ -143,8 +154,8 @@ export default function ForecastPage() {
             const active = area === a;
             return (
               <button key={a} onClick={() => setArea(a)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all shrink-0 ${active ? `${th.bg} ${th.color} border border-current/20` : 'bg-surface border border-white/5 text-foreground/40 hover:text-foreground/70'}`}>
-                <Icon className="w-4 h-4" />
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all shrink-0 cursor-pointer ${active ? `${th.bg} ${th.color} border border-current/20` : 'bg-surface border border-white/5 text-foreground/40 hover:text-foreground/70'}`}>
+                <Icon className="w-4 h-4 animate-pulse" />
                 {t(`horoscope.category${a.charAt(0).toUpperCase() + a.slice(1)}`)}
               </button>
             );
@@ -155,7 +166,7 @@ export default function ForecastPage() {
         <div className="flex gap-1 p-1 rounded-xl bg-surface border border-white/5 w-fit mb-6 sm:mb-8">
           {([['7d', '7D'], ['monthly', t('forecast.monthly')], ['yearly', t('forecast.yearly')]] as [TimeRange, string][]).map(([key, label]) => (
             <button key={key} onClick={() => setRange(key)}
-              className={`px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/30 hover:text-foreground/60'}`}>
+              className={`px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/30 hover:text-foreground/60'}`}>
               {label}
             </button>
           ))}
@@ -164,59 +175,74 @@ export default function ForecastPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}>
-              <Sparkles className="w-8 h-8 text-secondary/40" />
+              <Sparkles className="w-8 h-8 text-secondary/40 animate-pulse" />
             </motion.div>
             <p className="text-xs font-bold text-foreground/30 uppercase tracking-widest">{t('forecast.loading')}</p>
           </div>
         ) : (
-          <>
-            {/* Chart */}
-            <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] mb-4 sm:mb-6 overflow-hidden border-white/5">
-              <div className="p-4 sm:p-8">
-                <div className="h-28 sm:h-40 w-full">
-                  <ForecastChart points={chartPoints} colorHex={theme.hex} activeLabel={activeLabel || undefined} />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column: Observatory & Selection & Insight */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              {/* Chart */}
+              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/20">
+                <div className="p-4 sm:p-8">
+                  <div className="h-44 sm:h-56 lg:h-64 w-full">
+                    <ForecastChart points={chartPoints} colorHex={theme.hex} activeLabel={activeLabel || undefined} />
+                  </div>
                 </div>
-              </div>
-              {summary && (
-                <div className="px-4 sm:px-8 pb-4 sm:pb-6 flex flex-wrap gap-3 sm:gap-6 text-[10px] sm:text-[11px] font-bold">
-                  <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500" /><span className="text-foreground/40">{t('forecast.best')}:</span><span className="text-foreground/70">{range === '7d' ? (summary as WeeklyResponse['summary']).best_day : (summary as YearlyResponse['summary']).best_month}</span></div>
-                  <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-foreground/40">{t('forecast.worst')}:</span><span className="text-foreground/70">{range === '7d' ? (summary as WeeklyResponse['summary']).worst_day : (summary as YearlyResponse['summary']).worst_month}</span></div>
-                  <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.avg')}:</span><span style={{ color: theme.hex }}>{summary.average_score}</span></div>
-                  <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.trend')}:</span><span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span></div>
+                {summary && (
+                  <div className="px-4 sm:px-8 pb-4 sm:pb-6 flex flex-wrap gap-3 sm:gap-6 text-[10px] sm:text-[11px] font-bold border-t border-white/5 pt-4">
+                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.best')}:</span><span className="text-foreground/70">{range === '7d' ? (summary as WeeklyResponse['summary']).best_day : (summary as YearlyResponse['summary']).best_month}</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.worst')}:</span><span className="text-foreground/70">{range === '7d' ? (summary as WeeklyResponse['summary']).worst_day : (summary as YearlyResponse['summary']).worst_month}</span></div>
+                    <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.avg')}:</span><span style={{ color: theme.hex }}>{summary.average_score}</span></div>
+                    <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.trend')}:</span><span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span></div>
+                  </div>
+                )}
+              </Card>
+
+              {/* Grid selector */}
+              {range !== '7d' && yearlyData?.months && (
+                <MonthGrid months={yearlyData.months} colorHex={theme.hex} selectedMonth={selectedMonth} onSelect={setSelectedMonth} />
+              )}
+
+              {range === '7d' && weeklyData?.days && (
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
+                  {weeklyData.days.map(day => {
+                    const isSelected = selectedDay === day.date;
+                    const dateObj = new Date(day.date + 'T00:00:00');
+                    return (
+                      <button key={day.date} onClick={() => setSelectedDay(day.date)}
+                        className={`flex flex-col items-center p-1.5 sm:p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 border-white/5 hover:border-white/10'}`}
+                        style={{ 
+                          borderColor: isSelected ? theme.hex + '50' : undefined,
+                          boxShadow: isSelected ? `0 0 16px ${theme.hex}20` : undefined
+                        }}>
+                        <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider ${isSelected ? '' : 'text-foreground/30'}`} style={{ color: isSelected ? theme.hex : undefined }}>
+                          {day.is_today ? 'TOD' : dateObj.toLocaleDateString('en', { weekday: 'short' })}
+                        </span>
+                        <span className={`text-base sm:text-xl lg:text-2xl font-headline font-bold ${isSelected ? 'text-foreground font-black' : 'text-foreground/40'}`}>{dateObj.getDate()}</span>
+                        <span className="text-[8px] font-bold text-foreground/30">{day.score}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
-            </Card>
 
-            {/* Grid selector */}
-            {range !== '7d' && yearlyData?.months && (
-              <div className="mb-4 sm:mb-6">
-                <MonthGrid months={yearlyData.months} colorHex={theme.hex} selectedMonth={selectedMonth} onSelect={setSelectedMonth} />
-              </div>
-            )}
+              {/* Insight */}
+              <ForecastInsight data={insightData} colorHex={theme.hex} />
+            </div>
 
-            {range === '7d' && weeklyData?.days && (
-              <div className="grid grid-cols-7 gap-1.5 sm:gap-3 mb-4 sm:mb-6">
-                {weeklyData.days.map(day => {
-                  const isSelected = selectedDay === day.date;
-                  const dateObj = new Date(day.date + 'T00:00:00');
-                  return (
-                    <button key={day.date} onClick={() => setSelectedDay(day.date)}
-                      className={`flex flex-col items-center p-1.5 sm:p-3 rounded-xl border transition-all ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 border-white/5'}`}
-                      style={{ borderColor: isSelected ? theme.hex + '40' : undefined }}>
-                      <span className={`text-[8px] sm:text-[10px] font-black uppercase ${isSelected ? '' : 'text-foreground/30'}`} style={{ color: isSelected ? theme.hex : undefined }}>
-                        {day.is_today ? 'TOD' : dateObj.toLocaleDateString('en', { weekday: 'short' })}
-                      </span>
-                      <span className={`text-base sm:text-xl font-headline font-bold ${isSelected ? 'text-foreground' : 'text-foreground/40'}`}>{dateObj.getDate()}</span>
-                      <span className="text-[8px] font-bold text-foreground/30">{day.score}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Insight */}
-            <ForecastInsight data={insightData} colorHex={theme.hex} />
-          </>
+            {/* Right Column: Sticky Cosmic Snapshot Panel */}
+            <div className="lg:col-span-4 lg:sticky lg:top-24">
+              <ForecastSnapshot 
+                insight={insightData} 
+                summary={summary ?? null} 
+                range={range} 
+                theme={theme} 
+                t={t} 
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

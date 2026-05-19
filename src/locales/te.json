@@ -523,6 +523,31 @@
       "a": "అవును. AstraNavi సాంప్రదాయ వేద ఆకృతులు (ఉత్తర భారత, దక్షిణ భారత డైమండ్ చార్ట్‌లు) మరియు పాశ్చాత్య వృత్తాకార చార్ట్‌లు రెండింటినీ ప్రదర్శిస్తుంది. అంతర్లీన గణనలు వేద గణనలుగానే ఉంటాయి—సైడ్రియల్ రాశిచక్రం, లాహిరి అయనాంశ—కానీ మీకు ఇష్టమైన దృశ్యమాన శైలిని ఎంచుకోవచ్చు."
     }
   ],
+  "forecast": {
+    "title": "Forecast",
+    "heading": "Your Cosmic Forecast",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "loading": "Calculating planetary positions...",
+    "best": "Best",
+    "worst": "Challenging",
+    "avg": "Average",
+    "trend": "Trend",
+    "todaysSnapshot": "Today's Cosmic Snapshot",
+    "labelFavorable": "Favorable",
+    "labelStable": "Stable but Pressured",
+    "labelChallenging": "Challenging",
+    "bestDay": "Best Day",
+    "challengingDay": "Challenging Day",
+    "naviSuggestion": "Navi Suggests",
+    "ctaAskNavi": "Ask Navi Why",
+    "ctaPlanDay": "Plan My Day",
+    "mainForecast": "Main Forecast",
+    "whatItMeans": "What It Means",
+    "whatItMeansBody": "{planet} is the dominant influence right now. A score of {score} suggests how strongly that energy shapes your day-to-day choices.",
+    "alerts": "Alerts",
+    "planetReason": "Planet Reason"
+  },
   "plans": {
     "title": "Unlock Your Cosmic Potential",
     "subtitle": "Choose the plan that matches your journey. From daily insights to deep kundli analysis — Navi credits power every feature.",

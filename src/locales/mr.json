@@ -523,6 +523,31 @@
       "a": "होय. AstraNavi पारंपारिक वैदिक फॉरमॅट्स (उत्तर भारतीय, दक्षिण भारतीय डायमंड चार्ट्स) आणि पाश्चात्य वर्तुळाकार चार्ट दोन्ही प्रदर्शित करते. मूळ गणना वैदिकच राहतात—साइडरिअल राशीचक्र, लाहिरी अयनांश—परंतु तुम्ही तुमची पसंतीची व्हिज्युअल शैली निवडू शकता."
     }
   ],
+  "forecast": {
+    "title": "Forecast",
+    "heading": "Your Cosmic Forecast",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "loading": "Calculating planetary positions...",
+    "best": "Best",
+    "worst": "Challenging",
+    "avg": "Average",
+    "trend": "Trend",
+    "todaysSnapshot": "Today's Cosmic Snapshot",
+    "labelFavorable": "Favorable",
+    "labelStable": "Stable but Pressured",
+    "labelChallenging": "Challenging",
+    "bestDay": "Best Day",
+    "challengingDay": "Challenging Day",
+    "naviSuggestion": "Navi Suggests",
+    "ctaAskNavi": "Ask Navi Why",
+    "ctaPlanDay": "Plan My Day",
+    "mainForecast": "Main Forecast",
+    "whatItMeans": "What It Means",
+    "whatItMeansBody": "{planet} is the dominant influence right now. A score of {score} suggests how strongly that energy shapes your day-to-day choices.",
+    "alerts": "Alerts",
+    "planetReason": "Planet Reason"
+  },
   "plans": {
     "title": "Unlock Your Cosmic Potential",
     "subtitle": "Choose the plan that matches your journey. From daily insights to deep kundli analysis — Navi credits power every feature.",

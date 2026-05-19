@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut } from 'next-auth/react';
 import { useToast, useTranslation } from '@/hooks';
@@ -29,6 +29,7 @@ const LoginContent = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lockedRemaining, setLockedRemaining] = useState<number>(0);
+  const recoveryStartedRef = useRef(false);
 
   // Handle Lockout Countdown
   useEffect(() => {
@@ -51,21 +52,31 @@ const LoginContent = () => {
     const authError = searchParams.get('error');
 
     if (authError === 'SessionExpired') {
-      const attempts = parseInt(sessionStorage.getItem('auth_recovery_attempts') || '0', 10);
-      if (attempts >= 2) {
-        sessionStorage.removeItem('auth_recovery_attempts');
-        return; // stop looping — show the form so user can sign in manually
-      }
-      sessionStorage.setItem('auth_recovery_attempts', String(attempts + 1));
-      (async () => {
-        try { await fetch('/api/auth/clear-session', { method: 'POST' }); } catch { /* ignore */ }
-        await signOut({ redirect: false });
-        router.replace('/login?sessionCleared=1');
+      if (recoveryStartedRef.current) return;
+      recoveryStartedRef.current = true;
+      sessionStorage.removeItem('auth_recovery_attempts');
+      window.history.replaceState(null, '', '/login?sessionCleared=1');
+      window.setTimeout(() => showError('Your session has expired. Please sign in again.'), 500);
+
+      void (async () => {
+        try {
+          await fetch('/api/auth/clear-session', { method: 'POST', cache: 'no-store' });
+        } catch {
+          // Best effort. Middleware also sends cookie deletion headers.
+        }
+
+        try {
+          await signOut({ redirect: false, redirectTo: '/login?sessionCleared=1' });
+        } catch {
+          // Keep the user on the stable login form even if the sign-out POST fails.
+        }
       })();
-      return;
+
+      return; // stop looping - show the form so user can sign in manually
     }
     // Clear the counter once the user lands on a clean login page
     if (!authError) {
+      recoveryStartedRef.current = false;
       sessionStorage.removeItem('auth_recovery_attempts');
     }
 

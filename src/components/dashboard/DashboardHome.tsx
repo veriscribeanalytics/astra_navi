@@ -1025,7 +1025,7 @@ export default function DashboardHome() {
                             </Card>
                         </Link>
 
-                        <Link href="/chat" className="group">
+                        <Link href="/horoscope/forecast" className="group">
                             <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-emerald-500/40 !p-0" padding="none">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-emerald-500/10 transition-colors" />
                                 <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">

@@ -523,6 +523,31 @@
       "a": "ಹೌದು. AstraNavi ಸಾಂಪ್ರದಾಯಿಕ ವೈದಿಕ ಸ್ವರೂಪಗಳನ್ನು (ಉತ್ತರ ಭಾರತೀಯ, ದಕ್ಷಿಣ ಭಾರತೀಯ ವಜ್ರದ ಚಾರ್ಟ್‌ಗಳು) ಮತ್ತು ಪಾಶ್ಚಿಮಾತ್ಯ ವೃತ್ತಾಕಾರದ ಚಾರ್ಟ್ ಎರಡನ್ನೂ ಪ್ರದರ್ಶಿಸುತ್ತದೆ. ಆಧಾರವಾಗಿರುವ ಲೆಕ್ಕಾಚಾರಗಳು ವೈದಿಕವಾಗಿರುತ್ತವೆ-ಸೈಡ್ರಿಯಲ್ ರಾಶಿಚಕ್ರ, ಲಾಹಿರಿ ಅಯನಾಂಶ-ಆದರೆ ನಿಮ್ಮ ಆದ್ಯತೆಯ ದೃಶ್ಯ ಶೈಲಿಯನ್ನು ನೀವು ಆಯ್ಕೆ ಮಾಡಬಹುದು."
     }
   ],
+  "forecast": {
+    "title": "Forecast",
+    "heading": "Your Cosmic Forecast",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "loading": "Calculating planetary positions...",
+    "best": "Best",
+    "worst": "Challenging",
+    "avg": "Average",
+    "trend": "Trend",
+    "todaysSnapshot": "Today's Cosmic Snapshot",
+    "labelFavorable": "Favorable",
+    "labelStable": "Stable but Pressured",
+    "labelChallenging": "Challenging",
+    "bestDay": "Best Day",
+    "challengingDay": "Challenging Day",
+    "naviSuggestion": "Navi Suggests",
+    "ctaAskNavi": "Ask Navi Why",
+    "ctaPlanDay": "Plan My Day",
+    "mainForecast": "Main Forecast",
+    "whatItMeans": "What It Means",
+    "whatItMeansBody": "{planet} is the dominant influence right now. A score of {score} suggests how strongly that energy shapes your day-to-day choices.",
+    "alerts": "Alerts",
+    "planetReason": "Planet Reason"
+  },
   "plans": {
     "title": "Unlock Your Cosmic Potential",
     "subtitle": "Choose the plan that matches your journey. From daily insights to deep kundli analysis — Navi credits power every feature.",

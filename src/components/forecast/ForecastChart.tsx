@@ -11,7 +11,7 @@ export interface ChartPoint {
 
 export default function ForecastChart({ points, colorHex, activeLabel }: { points: ChartPoint[]; colorHex: string; activeLabel?: string }) {
   if (!points.length) return null;
-  const h = 60, w = 220;
+  const h = 80, w = 240;
   const coords = points.map((p, i) => ({ x: (i / Math.max(points.length - 1, 1)) * w, y: h - (p.score / 100) * h }));
   const pathD = catmullRomToBezier(coords);
   const areaD = catmullRomArea(coords, h);
@@ -19,7 +19,7 @@ export default function ForecastChart({ points, colorHex, activeLabel }: { point
 
   return (
     <div className="relative w-full h-full">
-      <svg viewBox={`-10 -10 ${w + 20} ${h + 24}`} className="w-full h-full" preserveAspectRatio="none">
+      <svg viewBox="-12 -14 264 108" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id={`fc-area-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
@@ -41,9 +41,9 @@ export default function ForecastChart({ points, colorHex, activeLabel }: { point
           const isCurrent = p.isCurrent;
           return (
             <g key={i}>
-              {(isCurrent || isActive) && <circle cx={c.x} cy={c.y} r="5" fill={colorHex} opacity={0.12} />}
-              <circle cx={c.x} cy={c.y} r={isCurrent || isActive ? 3 : 1.5} fill={isCurrent || isActive ? colorHex : 'transparent'} stroke={colorHex} strokeWidth={isCurrent || isActive ? 0 : 1} />
-              <text x={c.x} y={c.y - 8} textAnchor="middle" fill={isActive ? colorHex : 'var(--color-foreground)'} fillOpacity={isActive ? 1 : isCurrent ? 0.6 : 0.3} fontSize="6.5" fontWeight="bold">{p.score}</text>
+              {(isCurrent || isActive) && <circle cx={c.x} cy={c.y} r="6" fill={colorHex} opacity={0.12} />}
+              <circle cx={c.x} cy={c.y} r={isCurrent || isActive ? 3.5 : 1.8} fill={isCurrent || isActive ? colorHex : 'transparent'} stroke={colorHex} strokeWidth={isCurrent || isActive ? 0 : 1} />
+              <text x={c.x} y={c.y - 8} textAnchor="middle" fill={isActive ? colorHex : 'var(--color-foreground)'} fillOpacity={isActive ? 1 : isCurrent ? 0.6 : 0.3} fontSize="8" fontWeight="bold">{p.score}</text>
             </g>
           );
         })}

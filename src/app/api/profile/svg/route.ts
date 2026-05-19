@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
             status: 200,
             headers: {
                 "Content-Type": "image/svg+xml",
-                "Cache-Control": "public, max-age=3600, s-maxage=3600",
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
             },
         });
     } catch (error) {

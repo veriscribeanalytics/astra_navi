@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { NextResponse } from "next/server";
 
 const SESSION_COOKIE_CHUNK_LIMIT = 20;
 
@@ -14,6 +15,12 @@ function redirectToLoginAndClearSession(nextUrl: URL) {
   loginUrl.searchParams.set("error", "SessionExpired");
   loginUrl.searchParams.set("sessionCleared", "1");
   const response = Response.redirect(loginUrl);
+  appendSessionClearCookies(response, nextUrl.hostname);
+  return response;
+}
+
+function continueAndClearSession(nextUrl: URL) {
+  const response = NextResponse.next();
   appendSessionClearCookies(response, nextUrl.hostname);
   return response;
 }
@@ -80,7 +87,7 @@ export const authConfig = {
       if (isAuthRoute) {
         if (hasSessionError) {
           if (nextUrl.searchParams.get("sessionCleared") === "1") {
-            return true;
+            return continueAndClearSession(nextUrl);
           }
           return redirectToLoginAndClearSession(nextUrl);
         }
