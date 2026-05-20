@@ -13,7 +13,7 @@ import { useToast, useTranslation } from "@/hooks";
 import {
     User, LogOut, Menu, X, ChevronDown, Sparkles,
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard,
-    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp
+    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users
 } from "lucide-react";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { getTierLabel } from "@/types/billing";
@@ -49,6 +49,12 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                         href: "/horoscope/forecast",
                         icon: <TrendingUp className="w-4 h-4" />,
                         desc: t('nav.forecastDesc')
+                    },
+                    {
+                        label: t('nav.myFamily'),
+                        href: "/family",
+                        icon: <Users className="w-4 h-4" />,
+                        desc: t('nav.myFamilyDesc')
                     },
                 ]
             },

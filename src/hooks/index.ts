@@ -34,3 +34,12 @@ export type { YearlyForecastData, YearlyMonthSummary, YearlySummary } from './us
 export { useChatSummary } from './useChatSummary';
 export type { ChatSummaryData } from './useChatSummary';
 export { useSwipeDrawer } from './useSwipeDrawer';
+export {
+    useFamilyMembers,
+    useFamilyChart,
+    useFamilyCompatibility,
+    createFamilyMember,
+    updateFamilyMember,
+    deleteFamilyMember,
+} from './useFamily';
+export type { CompatibilityFetchResult, MutationResult } from './useFamily';

@@ -25,6 +25,8 @@
     "chartMatchingDesc": "Vedic compatibility and relationship analysis.",
     "forecast": "Forecast",
     "forecastDesc": "Monthly and yearly astrological predictions.",
+    "myFamily": "My Family",
+    "myFamilyDesc": "Save loved ones' birth details, view charts, check compatibility.",
     "consultNavi": "Consult Navi",
     "guidedSessions": "Guided Sessions",
     "guidedSessionsDesc": "Step-by-step personalized life readings.",
@@ -755,5 +757,23 @@
     "filterPurchase": "Purchases",
     "filterCycleReset": "Cycle Reset",
     "oneTimeReports": "One-Time Reports"
+  },
+  "family": {
+    "myFamily": "My Family",
+    "subtitle": "Save birth details, view charts, and check compatibility with loved ones.",
+    "addMember": "Add Member",
+    "editMember": "Edit Family Member",
+    "addFirstMember": "Add Your First Member",
+    "empty": "No family members yet",
+    "emptyDesc": "Add a parent, partner, or friend to view their chart and check compatibility.",
+    "freeTierUsed": "members used on Free tier",
+    "freeTierCapMessage": "Free plan supports up to 3 members. Upgrade to add more.",
+    "upgrade": "Upgrade for more",
+    "removeTitle": "Remove family member?",
+    "removeConfirm": "Remove",
+    "formDesc": "Use the most accurate birth time and location for reliable charts.",
+    "chartTitle": "Birth Chart",
+    "compatibility": "Compatibility",
+    "compatibilityDesc": "First read charges credits. Repeating the same language is free."
   }
 }
