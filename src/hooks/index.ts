@@ -34,3 +34,4 @@ export type { YearlyForecastData, YearlyMonthSummary, YearlySummary } from './us
 export { useChatSummary } from './useChatSummary';
 export type { ChatSummaryData } from './useChatSummary';
 export { useSwipeDrawer } from './useSwipeDrawer';
+export { useAvatarTheme } from './useAvatarTheme';

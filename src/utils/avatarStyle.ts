@@ -36,3 +36,20 @@ export const getAvatarAccent = (avatarId?: string) =>
 /** Returns the image src for an avatar, or null if none configured. */
 export const getAvatarImage = (avatarId?: string): string | null =>
   AVATAR_IMAGE_MAP[avatarId ?? 'navi'] ?? null;
+
+export type AvatarTheme = {
+  secondary: string;
+  glowColor: string;
+  flareGold: string;
+};
+
+const AVATAR_THEME_MAP: Record<string, AvatarTheme> = {
+  navi:                { secondary: '#06b6d4', glowColor: 'rgba(6,182,212,0.35)',   flareGold: '#67e8f9' },
+  career_mentor:       { secondary: '#3b82f6', glowColor: 'rgba(59,130,246,0.35)',  flareGold: '#93c5fd' },
+  relationship_guide:  { secondary: '#f43f5e', glowColor: 'rgba(244,63,94,0.35)',   flareGold: '#fda4af' },
+  spiritual_guide:     { secondary: '#8b5cf6', glowColor: 'rgba(139,92,246,0.35)',  flareGold: '#c4b5fd' },
+  astro_sage:          { secondary: '#d97706', glowColor: 'rgba(217,119,6,0.35)',   flareGold: '#fcd34d' },
+};
+
+export const getAvatarTheme = (avatarId?: string): AvatarTheme =>
+  AVATAR_THEME_MAP[avatarId ?? 'navi'] ?? AVATAR_THEME_MAP.navi;
