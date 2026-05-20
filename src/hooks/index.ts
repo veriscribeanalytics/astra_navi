@@ -43,3 +43,4 @@ export {
     deleteFamilyMember,
 } from './useFamily';
 export type { CompatibilityFetchResult, MutationResult } from './useFamily';
+export { useAvatarTheme } from './useAvatarTheme';

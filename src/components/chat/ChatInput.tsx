@@ -11,14 +11,33 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const placeholderTexts = [
-  'Ask about your career this month...',
-  'What does Mercury retrograde mean for you?',
-  'Tell me about my love prospects...',
-  'How are the planets affecting my health?',
-  'What remedies can improve my finances?',
-  'When is the best time for a new venture?',
-];
+const AVATAR_PLACEHOLDERS: Record<string, string[]> = {
+  navi: [
+    "Ask Navi about the cosmos...",
+    "What guidance do you seek?",
+    "Type your question to the stars...",
+  ],
+  career_mentor: [
+    "Ask Arya about your career...",
+    "What's holding back your professional growth?",
+    "Type your question about work...",
+  ],
+  relationship_guide: [
+    "Ask Meera about love...",
+    "Share what's on your heart...",
+    "Type your question about relationships...",
+  ],
+  spiritual_guide: [
+    "Ask Anand for inner guidance...",
+    "What is your soul asking?",
+    "Type your spiritual question...",
+  ],
+  astro_sage: [
+    "Ask Rishi about your chart...",
+    "Which planet are you curious about?",
+    "Type your question about astrology...",
+  ],
+};
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -51,7 +70,8 @@ const ChatInput: React.FC = () => {
   const { 
     inputText, setInputText, sendMessage, 
     isSending, activeChatId, createNewChat,
-    mode, setMode, attachments, addAttachment, removeAttachment
+    mode, setMode, attachments, addAttachment, removeAttachment,
+    selectedAvatarId
   } = useChat();
   const { language } = useTranslation();
   const isMobile = useIsMobile();
@@ -153,13 +173,19 @@ const ChatInput: React.FC = () => {
     { value: "deep" as const, label: "Deep", Icon: Gem },
   ];
 
+  const currentPlaceholders = AVATAR_PLACEHOLDERS[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS.navi;
+
+  useEffect(() => {
+    setPlaceholderIdx(0);
+  }, [selectedAvatarId]);
+
   useEffect(() => {
     if (inputText.length > 0) return;
     const interval = setInterval(() => {
-      setPlaceholderIdx(prev => (prev + 1) % placeholderTexts.length);
+      setPlaceholderIdx(prev => (prev + 1) % currentPlaceholders.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [inputText.length]);
+  }, [inputText.length, currentPlaceholders]);
 
   useEffect(() => {
     const win = window as unknown as { SpeechRecognition?: new() => SpeechRecognition; webkitSpeechRecognition?: new() => SpeechRecognition };
@@ -357,7 +383,7 @@ const ChatInput: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={inputText.length > 0 ? '' : placeholderTexts[placeholderIdx]}
+            placeholder={inputText.length > 0 ? '' : currentPlaceholders[placeholderIdx % currentPlaceholders.length]}
             className="w-full bg-transparent border-none outline-none text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2.5 px-1 max-h-[150px] min-h-[44px] sm:min-h-0 no-scrollbar"
             rows={1}
           />

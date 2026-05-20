@@ -12,6 +12,17 @@ import type { ChatAvatar } from '@/types/avatar';
 
 const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
+const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage'];
+
+const readStoredAvatar = (): string => {
+  if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
+  try {
+    const v = localStorage.getItem(AVATAR_STORAGE_KEY);
+    return v && VALID_IDS.includes(v) ? v : DEFAULT_AVATAR_ID;
+  } catch {
+    return DEFAULT_AVATAR_ID;
+  }
+};
 
 /* ---------- Types ---------- */
 export interface FileAttachment {
@@ -158,18 +169,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
   const [avatars, setAvatars] = useState<ChatAvatar[]>([]);
   const [isLoadingAvatars, setIsLoadingAvatars] = useState(false);
-  const [selectedAvatarId, setSelectedAvatarIdState] = useState<string>(DEFAULT_AVATAR_ID);
+  const [selectedAvatarId, setSelectedAvatarIdState] = useState<string>(readStoredAvatar);
   const initialLoadDone = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const setSelectedAvatarId = useCallback((avatarId: string) => {
     setSelectedAvatarIdState(avatarId);
     if (typeof window !== 'undefined') {
-      if (avatarId && avatarId !== DEFAULT_AVATAR_ID) {
+      try {
         localStorage.setItem(AVATAR_STORAGE_KEY, avatarId);
-      } else {
-        localStorage.removeItem(AVATAR_STORAGE_KEY);
-      }
+      } catch {}
     }
   }, []);
 

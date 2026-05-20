@@ -11,10 +11,11 @@ import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { Sparkles } from 'lucide-react';
-import { useTranslation, useTransitsToday, useSwipeDrawer } from '@/hooks';
+import { useTranslation, useTransitsToday, useSwipeDrawer, useAvatarTheme } from '@/hooks';
 
 import { useAuth } from '@/context/AuthContext';
-import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
+import { calculateAge, getAgeBracket, getAvatarQuestions } from '@/utils/personalizedQuestions';
+import { getAvatarImage } from '@/utils/avatarStyle';
 
 const ChatPageClient: React.FC = () => {
   const { user, isLoading, isLoggedIn } = useAuth();
@@ -22,11 +23,27 @@ const ChatPageClient: React.FC = () => {
   const { data: transitsData, isLoading: isTransitsLoading } = useTransitsToday();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { 
-    isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
+  const {
+    isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
     activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
-    paywall, clearPaywall
+    paywall, clearPaywall, selectedAvatarId, avatars
     } = useChat();
+
+  useAvatarTheme(selectedAvatarId);
+
+  const currentAvatar = useMemo(() => {
+    return avatars.find(a => a.avatarId === selectedAvatarId);
+  }, [avatars, selectedAvatarId]);
+
+  const avatarName = currentAvatar?.name ?? 'Navi';
+
+  const imgSrc = getAvatarImage(selectedAvatarId);
+
+  const greetingText = useMemo(() => {
+    const id = selectedAvatarId ?? 'navi';
+    const intro = t(`chat.avatarIntros.${id}`);
+    return `Hi, I'm ${avatarName}. ${intro}`;
+  }, [selectedAvatarId, avatarName, t]);
 
   const { bindGestures } = useSwipeDrawer({
     onOpenLeft: () => setIsMobileMenuOpen(true),
@@ -79,8 +96,8 @@ const ChatPageClient: React.FC = () => {
   const suggestedQuestions = useMemo(() => {
     const transitQuestions = transitsData?.suggestedQuestions;
     if (transitQuestions && transitQuestions.length >= 4) return transitQuestions.slice(0, 4);
-    return getPersonalizedQuestions(ageBracket);
-  }, [ageBracket, transitsData?.suggestedQuestions]);
+    return getAvatarQuestions(selectedAvatarId, ageBracket);
+  }, [ageBracket, transitsData?.suggestedQuestions, selectedAvatarId]);
 
   const handleQuestionClick = (question: string) => {
     createNewChat(question);
@@ -111,7 +128,12 @@ const ChatPageClient: React.FC = () => {
         </div>
       )}
 
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-secondary/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      {/* Avatar ambient glow — scales with theme color */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[70vw] h-[60vh] rounded-full blur-[120px] opacity-20 bg-secondary transition-[background-color] duration-700" />
+        <div className="absolute bottom-[-5%] right-[-10%] w-[50vw] h-[50vh] rounded-full blur-[100px] opacity-10 bg-secondary transition-[background-color] duration-700" />
+        <div className="absolute top-1/2 left-[-5%] w-[30vw] h-[40vh] rounded-full blur-[80px] opacity-8 bg-secondary transition-[background-color] duration-700" />
+      </div>
 
       <div className={`sidebar-overlay ${(isMobileMenuOpen || isRightPanelOpen) ? 'active' : ''}`} onClick={closeOverlays} />
 
@@ -124,11 +146,20 @@ const ChatPageClient: React.FC = () => {
         {isEmptyChat ? (
           <div className="chat-empty-center">
             <div className="flex flex-col items-center w-full gap-4 sm:gap-6 mb-4">
-              <div className="chat-empty-icon w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl">
-                <Sparkles className="w-5 h-5" />
+              <div className="chat-empty-icon w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl overflow-hidden">
+                {imgSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={imgSrc}
+                    alt={currentAvatar?.name ?? 'Navi'}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <Sparkles className="w-5 h-5" />
+                )}
               </div>
               <h2 className="chat-empty-greeting text-lg sm:text-xl 3xl:text-[28px] font-headline font-bold text-on-surface/80 tracking-tight text-center">
-                {t('chat.emptyGreeting')}
+                {greetingText}
               </h2>
               {transitsData?.todayEnergy && (
                 <p className="text-center text-[13px] text-on-surface-variant/40 max-w-[32ch] leading-relaxed italic">

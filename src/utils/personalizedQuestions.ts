@@ -131,3 +131,40 @@ export const getStarterCards = (ageBracket: AgeBracket): Array<{title: string; d
 
   return cardsByAge[ageBracket];
 };
+
+export const getAvatarQuestions = (avatarId: string, ageBracket: AgeBracket): string[] => {
+  const avatarQuestionsMap: Record<string, string[]> = {
+    navi: [
+      "What does today's planetary alignment mean for me?",
+      "Which area of my life should I focus on this month?",
+      "What is my current life lesson?",
+      "Tell me about my dominant planetary energies."
+    ],
+    career_mentor: [
+      "What career path aligns with my chart?",
+      "When is a good time to ask for a promotion?",
+      "Will I find success in my current field?",
+      "What are my hidden professional strengths?"
+    ],
+    relationship_guide: [
+      "When will I meet my life partner?",
+      "Is my current relationship compatible?",
+      "What patterns keep showing up in my relationships?",
+      "How can I deepen my emotional connections?"
+    ],
+    spiritual_guide: [
+      "What is my soul's purpose in this life?",
+      "Which spiritual practices suit my nature?",
+      "How can I find inner peace right now?",
+      "What past-life karma am I working through?"
+    ],
+    astro_sage: [
+      "Explain my Mahadasha and what it means.",
+      "What does my Lagna reveal about me?",
+      "Walk me through my key planetary aspects.",
+      "Which yogas are present in my chart?"
+    ]
+  };
+
+  return avatarQuestionsMap[avatarId] || avatarQuestionsMap.navi;
+};

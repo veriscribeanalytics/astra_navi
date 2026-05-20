@@ -104,6 +104,10 @@ const ThinkingIndicator: React.FC = () => {
 
   const currentAvatar = avatars.find(a => a.avatarId === selectedAvatarId);
   const accent = selectedAvatarId && selectedAvatarId !== 'navi' ? getAvatarAccent(selectedAvatarId) : '';
+  const avatarName = currentAvatar?.name ?? 'Navi';
+  const statusText = t(thinkingStatuses[statusIdx]);
+  const lowerStatusText = statusText.charAt(0).toLowerCase() + statusText.slice(1);
+  const thinkingText = `${avatarName} is ${lowerStatusText}`;
 
   return (
     <div className="flex gap-3 items-start mt-4 mb-2">
@@ -126,9 +130,7 @@ const ThinkingIndicator: React.FC = () => {
           <span className="thinking-dot animate-bounce [animation-delay:300ms]" />
         </span>
         <span className="text-[14px] text-on-surface-variant/50 italic">
-          {currentAvatar && currentAvatar.avatarId !== 'navi'
-            ? `${currentAvatar.name} ${t(thinkingStatuses[statusIdx]).toLowerCase()}`
-            : t(thinkingStatuses[statusIdx])}
+          {thinkingText}
         </span>
       </div>
     </div>
