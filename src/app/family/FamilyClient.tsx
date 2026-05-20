@@ -53,6 +53,31 @@ const LANGS: { value: CompatibilityLang; label: string }[] = [
     { value: 'ko', label: '한국어' },
 ];
 
+/**
+ * Returns the *actual* script of the response when it doesn't match the
+ * requested language (e.g. user asked for "hi" but the backend returned
+ * Latin-script English). Returns null when the response matches expectation.
+ */
+function detectLanguageMismatch(
+    requested: CompatibilityLang,
+    data: { verdict?: string; lang?: string } | null | undefined
+): CompatibilityLang | null {
+    if (!data) return null;
+    const text = `${data.verdict ?? ''}`.slice(0, 400);
+    if (!text.trim()) return null;
+    const hasDevanagari = /[ऀ-ॿ]/.test(text);
+    const hasHangul = /[가-힯]/.test(text);
+    const hasLatin = /[A-Za-z]/.test(text);
+
+    let actual: CompatibilityLang | null = null;
+    if (hasDevanagari) actual = 'hi';
+    else if (hasHangul) actual = 'ko';
+    else if (hasLatin) actual = 'en';
+
+    if (!actual || actual === requested) return null;
+    return actual;
+}
+
 /* ====================================================================== */
 /* MAIN CLIENT                                                            */
 /* ====================================================================== */
@@ -664,7 +689,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
 function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: () => void }) {
     const { t } = useTranslation();
     const { totalCredits } = usePaywallContext();
-    const { success, error: toastError, info } = useToast();
+    const { success, error: toastError, info, warning } = useToast();
     const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member.id);
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member.id);
 
@@ -682,10 +707,24 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
         setConfirmingPurchase(false);
         const res = await fetchCompatibility(lang);
         if (res.ok) {
-            if (res.data?.cached) {
-                info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
+            const data = res.data;
+            const mismatch = detectLanguageMismatch(lang, data);
+            if (data?.cached) {
+                if (mismatch) {
+                    warning(
+                        `Showing the previously generated ${mismatch.toUpperCase()} analysis — a ${lang.toUpperCase()} translation isn't available yet.`
+                    );
+                } else {
+                    info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
+                }
             } else {
-                success(`${creditCost} credits used for compatibility analysis.`);
+                if (mismatch) {
+                    warning(
+                        `Charged ${creditCost} credits, but the response came back in ${mismatch.toUpperCase()} instead of ${lang.toUpperCase()}.`
+                    );
+                } else {
+                    success(`${creditCost} credits used for compatibility analysis.`);
+                }
             }
             return;
         }
