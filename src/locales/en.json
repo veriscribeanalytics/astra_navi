@@ -25,6 +25,8 @@
     "chartMatchingDesc": "Vedic compatibility and relationship analysis.",
     "forecast": "Forecast",
     "forecastDesc": "Monthly and yearly astrological predictions.",
+    "myFamily": "My Family",
+    "myFamilyDesc": "Save loved ones' birth details, view charts, check compatibility.",
     "consultNavi": "Consult Navi",
     "guidedSessions": "Guided Sessions",
     "guidedSessionsDesc": "Step-by-step personalized life readings.",
@@ -268,6 +270,12 @@
     "yesterday": "Yesterday",
     "systemHub": "System Hub",
     "cosmicPortals": "Cosmic Portals",
+    "yourGuides": "Your Guides",
+    "meetYourGuides": "Meet Your Guides",
+    "guidesSubtitle": "Choose a specialist for personalized guidance — from career to relationships to deep chart analysis.",
+    "startChat": "Start Chat",
+    "creditSingular": "credit",
+    "creditPlural": "credits",
     "janamKundli": "Janam Kundli",
     "janamKundliDesc": "Detailed birth chart & planetary analysis based on Vedic wisdom.",
     "aiGuidance": "AI Guidance",
@@ -463,6 +471,38 @@
     "guestLoginNow": "Login Now",
     "naviWelcome": "Namaste ✦ I'm Navi. Ask me anything.",
     "emptyGreeting": "What can I help you understand?",
+    "avatarQuestions": {
+      "navi": [
+        "What does today's planetary alignment mean for me?",
+        "Which area of my life should I focus on this month?",
+        "What is my current life lesson?",
+        "Tell me about my dominant planetary energies."
+      ],
+      "career_mentor": [
+        "What career path aligns with my chart?",
+        "When is a good time to ask for a promotion?",
+        "Will I find success in my current field?",
+        "What are my hidden professional strengths?"
+      ],
+      "relationship_guide": [
+        "When will I meet my life partner?",
+        "Is my current relationship compatible?",
+        "What patterns keep showing up in my relationships?",
+        "How can I deepen my emotional connections?"
+      ],
+      "spiritual_guide": [
+        "What is my soul's purpose in this life?",
+        "Which spiritual practices suit my nature?",
+        "How can I find inner peace right now?",
+        "What past-life karma am I working through?"
+      ],
+      "astro_sage": [
+        "Explain my Mahadasha and what it means.",
+        "What does my Lagna reveal about me?",
+        "Walk me through my key planetary aspects.",
+        "Which yogas are present in my chart?"
+      ]
+    },
     "newConversation": "New conversation",
     "errorSending": "Failed to send message. Please try again.",
     "networkError": "Network connection lost. Please check your internet and try again.",
@@ -755,5 +795,23 @@
     "filterPurchase": "Purchases",
     "filterCycleReset": "Cycle Reset",
     "oneTimeReports": "One-Time Reports"
+  },
+  "family": {
+    "myFamily": "My Family",
+    "subtitle": "Save birth details, view charts, and check compatibility with loved ones.",
+    "addMember": "Add Member",
+    "editMember": "Edit Family Member",
+    "addFirstMember": "Add Your First Member",
+    "empty": "No family members yet",
+    "emptyDesc": "Add a parent, partner, or friend to view their chart and check compatibility.",
+    "freeTierUsed": "members used on Free tier",
+    "freeTierCapMessage": "Free plan supports up to 3 members. Upgrade to add more.",
+    "upgrade": "Upgrade for more",
+    "removeTitle": "Remove family member?",
+    "removeConfirm": "Remove",
+    "formDesc": "Use the most accurate birth time and location for reliable charts.",
+    "chartTitle": "Birth Chart",
+    "compatibility": "Compatibility",
+    "compatibilityDesc": "First read charges credits. Repeating the same language is free."
   }
 }

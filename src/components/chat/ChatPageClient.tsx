@@ -11,10 +11,10 @@ import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { Sparkles } from 'lucide-react';
-import { useTranslation, useTransitsToday, useSwipeDrawer } from '@/hooks';
+import { useTranslation, useTransitsToday, useSwipeDrawer, useAvatarTheme } from '@/hooks';
 
 import { useAuth } from '@/context/AuthContext';
-import { calculateAge, getAgeBracket, getPersonalizedQuestions } from '@/utils/personalizedQuestions';
+import { calculateAge, getAgeBracket, getAvatarQuestions } from '@/utils/personalizedQuestions';
 
 const ChatPageClient: React.FC = () => {
   const { user, isLoading, isLoggedIn } = useAuth();
@@ -22,11 +22,13 @@ const ChatPageClient: React.FC = () => {
   const { data: transitsData, isLoading: isTransitsLoading } = useTransitsToday();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { 
-    isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen, 
+  const {
+    isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
     activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
-    paywall, clearPaywall
+    paywall, clearPaywall, selectedAvatarId
     } = useChat();
+
+  useAvatarTheme(selectedAvatarId);
 
   const { bindGestures } = useSwipeDrawer({
     onOpenLeft: () => setIsMobileMenuOpen(true),
@@ -79,8 +81,8 @@ const ChatPageClient: React.FC = () => {
   const suggestedQuestions = useMemo(() => {
     const transitQuestions = transitsData?.suggestedQuestions;
     if (transitQuestions && transitQuestions.length >= 4) return transitQuestions.slice(0, 4);
-    return getPersonalizedQuestions(ageBracket);
-  }, [ageBracket, transitsData?.suggestedQuestions]);
+    return getAvatarQuestions(selectedAvatarId, ageBracket);
+  }, [ageBracket, transitsData?.suggestedQuestions, selectedAvatarId]);
 
   const handleQuestionClick = (question: string) => {
     createNewChat(question);
@@ -111,7 +113,12 @@ const ChatPageClient: React.FC = () => {
         </div>
       )}
 
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-secondary/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      {/* Avatar ambient glow — scales with theme color */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[70vw] h-[60vh] rounded-full blur-[120px] opacity-20 bg-secondary transition-[background-color] duration-700" />
+        <div className="absolute bottom-[-5%] right-[-10%] w-[50vw] h-[50vh] rounded-full blur-[100px] opacity-10 bg-secondary transition-[background-color] duration-700" />
+        <div className="absolute top-1/2 left-[-5%] w-[30vw] h-[40vh] rounded-full blur-[80px] opacity-8 bg-secondary transition-[background-color] duration-700" />
+      </div>
 
       <div className={`sidebar-overlay ${(isMobileMenuOpen || isRightPanelOpen) ? 'active' : ''}`} onClick={closeOverlays} />
 
