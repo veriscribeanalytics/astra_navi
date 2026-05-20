@@ -18,6 +18,7 @@ import { useGreeting } from "@/hooks/useGreeting";
 import { getRashiData } from "@/lib/astrology";
 import { clientFetch } from "@/lib/apiClient";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
+import AvatarShowcase from "@/components/dashboard/AvatarShowcase";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
@@ -922,6 +923,9 @@ export default function DashboardHome() {
                         </Card>
                     </div>
                 </div>
+
+                {/* AVATAR SHOWCASE */}
+                <AvatarShowcase />
 
                 {/* ZONE 3: COSMIC PORTALS */}
                 <div className="mt-12 sm:mt-28">
