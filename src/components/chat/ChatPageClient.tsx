@@ -15,6 +15,7 @@ import { useTranslation, useTransitsToday, useSwipeDrawer, useAvatarTheme } from
 
 import { useAuth } from '@/context/AuthContext';
 import { calculateAge, getAgeBracket, getAvatarQuestions } from '@/utils/personalizedQuestions';
+import { getAvatarImage } from '@/utils/avatarStyle';
 
 const ChatPageClient: React.FC = () => {
   const { user, isLoading, isLoggedIn } = useAuth();
@@ -25,10 +26,24 @@ const ChatPageClient: React.FC = () => {
   const {
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
     activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
-    paywall, clearPaywall, selectedAvatarId
+    paywall, clearPaywall, selectedAvatarId, avatars
     } = useChat();
 
   useAvatarTheme(selectedAvatarId);
+
+  const currentAvatar = useMemo(() => {
+    return avatars.find(a => a.avatarId === selectedAvatarId);
+  }, [avatars, selectedAvatarId]);
+
+  const avatarName = currentAvatar?.name ?? 'Navi';
+
+  const imgSrc = getAvatarImage(selectedAvatarId);
+
+  const greetingText = useMemo(() => {
+    const id = selectedAvatarId ?? 'navi';
+    const intro = t(`chat.avatarIntros.${id}`);
+    return `Hi, I'm ${avatarName}. ${intro}`;
+  }, [selectedAvatarId, avatarName, t]);
 
   const { bindGestures } = useSwipeDrawer({
     onOpenLeft: () => setIsMobileMenuOpen(true),
@@ -131,11 +146,20 @@ const ChatPageClient: React.FC = () => {
         {isEmptyChat ? (
           <div className="chat-empty-center">
             <div className="flex flex-col items-center w-full gap-4 sm:gap-6 mb-4">
-              <div className="chat-empty-icon w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl">
-                <Sparkles className="w-5 h-5" />
+              <div className="chat-empty-icon w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl overflow-hidden">
+                {imgSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={imgSrc}
+                    alt={currentAvatar?.name ?? 'Navi'}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <Sparkles className="w-5 h-5" />
+                )}
               </div>
               <h2 className="chat-empty-greeting text-lg sm:text-xl 3xl:text-[28px] font-headline font-bold text-on-surface/80 tracking-tight text-center">
-                {t('chat.emptyGreeting')}
+                {greetingText}
               </h2>
               {transitsData?.todayEnergy && (
                 <p className="text-center text-[13px] text-on-surface-variant/40 max-w-[32ch] leading-relaxed italic">

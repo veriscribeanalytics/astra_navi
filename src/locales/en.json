@@ -503,6 +503,13 @@
         "Which yogas are present in my chart?"
       ]
     },
+    "avatarIntros": {
+      "navi": "What does the cosmos hold for you today?",
+      "career_mentor": "Let's talk about your professional journey.",
+      "relationship_guide": "What's on your heart?",
+      "spiritual_guide": "Take a deep breath. What's on your mind?",
+      "astro_sage": "Show me your chart — let's see what the planets reveal."
+    },
     "newConversation": "New conversation",
     "errorSending": "Failed to send message. Please try again.",
     "networkError": "Network connection lost. Please check your internet and try again.",
