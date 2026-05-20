@@ -7,6 +7,11 @@ import { clientFetch } from '@/lib/apiClient';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/hooks';
 import { PaywallData } from '@/types/paywall';
+import type { ChatPageContextSource } from '@/lib/schemas';
+import type { ChatAvatar } from '@/types/avatar';
+
+const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
+const DEFAULT_AVATAR_ID = 'navi';
 
 /* ---------- Types ---------- */
 export interface FileAttachment {
@@ -20,6 +25,7 @@ export interface FileAttachment {
 
 export interface ChatMessage {
   id: string;
+  clientId?: string;
   type: 'system' | 'ai' | 'user';
   text: string;
   attachments?: FileAttachment[];
@@ -38,11 +44,21 @@ export interface ChatMessage {
   retryUsed?: boolean;
   qualityRewriteUsed?: boolean;
   quality?: { score?: number; issues?: string[]; passed?: boolean; [key: string]: unknown };
+  summaryIncluded?: boolean;
+  persona?: string;
+  errorCode?: string;
   error?: boolean;
   errorMessage?: string;
   pinned?: boolean;
   edited?: boolean;
   originalText?: string;
+  contextUsed?: boolean;
+  contextSource?: ChatPageContextSource;
+  contextChars?: number;
+  avatarId?: string;
+  avatarName?: string;
+  avatarTitle?: string;
+  avatarCreditCost?: number;
   createdAt: string;
 }
 
@@ -88,8 +104,8 @@ interface ChatContextType {
   loadChats: () => Promise<void>;
   loadMoreChats: () => Promise<void>;
   selectChat: (chatId: string) => Promise<void>;
-  createNewChat: (initialMessage?: string) => Promise<string | null>;
-  sendMessage: (text: string, overrideChatId?: string) => Promise<void>;
+  createNewChat: (initialMessage?: string, pageContextSource?: ChatPageContextSource) => Promise<string | null>;
+  sendMessage: (text: string, overrideChatId?: string, pageContextSource?: ChatPageContextSource) => Promise<void>;
   rateMessage: (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => Promise<void>;
   regenerateMessage: (messageId: string) => Promise<void>;
   retryMessage: (messageId: string) => Promise<void>;
@@ -112,6 +128,10 @@ interface ChatContextType {
   deleteMessage: (messageId: string) => void;
   togglePin: (messageId: string) => void;
   thinkingData: ThinkingData | null;
+  avatars: ChatAvatar[];
+  selectedAvatarId: string;
+  setSelectedAvatarId: (avatarId: string) => void;
+  isLoadingAvatars: boolean;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -136,8 +156,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [paywall, setPaywall] = useState<PaywallData | null>(null);
   const [mode, setMode] = useState<"quick" | "normal" | "deep">("normal");
   const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
+  const [avatars, setAvatars] = useState<ChatAvatar[]>([]);
+  const [isLoadingAvatars, setIsLoadingAvatars] = useState(false);
+  const [selectedAvatarId, setSelectedAvatarIdState] = useState<string>(DEFAULT_AVATAR_ID);
   const initialLoadDone = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const setSelectedAvatarId = useCallback((avatarId: string) => {
+    setSelectedAvatarIdState(avatarId);
+    if (typeof window !== 'undefined') {
+      if (avatarId && avatarId !== DEFAULT_AVATAR_ID) {
+        localStorage.setItem(AVATAR_STORAGE_KEY, avatarId);
+      } else {
+        localStorage.removeItem(AVATAR_STORAGE_KEY);
+      }
+    }
+  }, []);
 
   // Guest State
   const [isGuest, setIsGuest] = useState(false);
@@ -241,7 +275,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isGuest]);
 
-  const sendMessage = useCallback(async (text: string, overrideChatId?: string) => {
+  const sendMessage = useCallback(async (text: string, overrideChatId?: string, pageContextSource?: ChatPageContextSource) => {
     let targetId = overrideChatId || activeChatId;
     
     if (isGuest) {
@@ -273,8 +307,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userMsgId = generateUUID();
     const aiMsgId = generateUUID();
     
-    const userMessage: ChatMessage = { id: userMsgId, type: 'user', text: text.trim(), attachments: attachments.length > 0 ? [...attachments] : undefined, createdAt: now };
-    const aiPlaceholder: ChatMessage = { id: aiMsgId, type: 'ai', text: '', createdAt: now };
+    const userMessage: ChatMessage = { id: userMsgId, clientId: userMsgId, type: 'user', text: text.trim(), attachments: attachments.length > 0 ? [...attachments] : undefined, createdAt: now };
+    const aiPlaceholder: ChatMessage = { id: aiMsgId, clientId: aiMsgId, type: 'ai', text: '', createdAt: now };
 
     setActiveChat(prev => prev ? { ...prev, messages: [...prev.messages, userMessage, aiPlaceholder] } : prev);
 
@@ -300,9 +334,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await clientFetch(`/api/chat/${targetId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, language, mode }),
+        body: JSON.stringify({
+          text,
+          language,
+          mode,
+          ...(pageContextSource ? { context: { source: pageContextSource } } : {}),
+          ...(selectedAvatarId && selectedAvatarId !== DEFAULT_AVATAR_ID ? { avatarId: selectedAvatarId } : {}),
+        }),
         signal: abortController.signal,
       });
+
+      // ── 400 invalid_avatar fallback ──
+      // Backend rejects unknown avatars. Reset to navi and let the user retry.
+      if (res.status === 400) {
+        const errData = await res.clone().json().catch(() => ({} as Record<string, unknown>));
+        if (errData?.error === 'invalid_avatar') {
+          setSelectedAvatarId(DEFAULT_AVATAR_ID);
+          setActiveChat(prev => prev ? {
+            ...prev,
+            messages: prev.messages.map(m => m.id === aiMsgId ? {
+              ...m,
+              text: '',
+              error: true,
+              errorMessage: t('chat.errorSending'),
+            } : m),
+          } : null);
+          toastError(t('chat.errorSending'));
+          setIsSending(false);
+          return;
+        }
+      }
 
       // ── 402 Paywall detection ──
       // If the backend returns 402, the feature is blocked.
@@ -329,7 +390,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (reader) {
         while (!streamDone) {
+          if (abortController.signal.aborted) {
+            // A newer send aborted this stream; stop reading and don't write any
+            // more state into the (now superseded) message.
+            break;
+          }
           const { done, value } = await reader.read();
+          if (abortController.signal.aborted) break;
           if (done) {
             setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
             setThinkingData(null);
@@ -370,6 +437,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
                   persistedAiMsgId = data.aiMessageId;
                 }
+                const errorCode = data.errorCode as string | undefined;
                 setActiveChat(prev => prev ? {
                   ...prev,
                   messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? {
@@ -385,6 +453,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     retryUsed: data.retryUsed ?? m.retryUsed,
                     qualityRewriteUsed: data.qualityRewriteUsed ?? m.qualityRewriteUsed,
                     quality: data.quality ?? m.quality,
+                    summaryIncluded: data.summaryIncluded ?? m.summaryIncluded,
+                    persona: data.persona ?? m.persona,
+                    contextUsed: data.contextUsed ?? m.contextUsed,
+                    contextSource: data.contextSource ?? m.contextSource,
+                    contextChars: data.contextChars ?? m.contextChars,
+                    avatarId: data.avatarId ?? m.avatarId,
+                    avatarName: data.avatarName ?? m.avatarName,
+                    avatarTitle: data.avatarTitle ?? m.avatarTitle,
+                    avatarCreditCost: data.avatarCreditCost ?? m.avatarCreditCost,
+                    errorCode: errorCode ?? m.errorCode,
+                    error: errorCode ? true : m.error,
+                    errorMessage: errorCode ? (() => {
+                      if (errorCode === 'capacity') return t('chat.errorCapacity');
+                      if (errorCode === 'response_interrupted') return t('chat.errorResponseInterrupted');
+                      if (errorCode === 'llm_unavailable') return t('chat.errorLlmUnavailable');
+                      return t('chat.failedResponse');
+                    })() : m.errorMessage,
                   } : m)
                 } : null);
               } else if (data.token) {
@@ -416,7 +501,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const localAiMsg = prev.messages.find(m => m.id === persistedAiMsgId || m.id === aiMsgId);
               if (!localAiMsg) return backendChat;
               const backendAiMsg = backendChat.messages.find(m => m.id === persistedAiMsgId) ?? backendChat.messages.find(m => m.type === 'ai' && m.text === localAiMsg.text);
-              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.mode || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality)) {
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.mode || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined)) {
                 const merged = backendChat.messages.map(m => {
                   if (m.id === backendAiMsg.id) {
                     return {
@@ -431,6 +516,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       retryUsed: localAiMsg.retryUsed ?? m.retryUsed,
                       qualityRewriteUsed: localAiMsg.qualityRewriteUsed ?? m.qualityRewriteUsed,
                       quality: localAiMsg.quality ?? m.quality,
+                      summaryIncluded: localAiMsg.summaryIncluded ?? m.summaryIncluded,
+                      persona: localAiMsg.persona ?? m.persona,
+                      contextUsed: localAiMsg.contextUsed ?? m.contextUsed,
+                      contextSource: localAiMsg.contextSource ?? m.contextSource,
+                      contextChars: localAiMsg.contextChars ?? m.contextChars,
+                      avatarId: localAiMsg.avatarId ?? m.avatarId,
+                      avatarName: localAiMsg.avatarName ?? m.avatarName,
+                      avatarTitle: localAiMsg.avatarTitle ?? m.avatarTitle,
+                      avatarCreditCost: localAiMsg.avatarCreditCost ?? m.avatarCreditCost,
+                      errorCode: localAiMsg.errorCode ?? m.errorCode,
                     };
                   }
                   return m;
@@ -461,30 +556,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsSending(false);
       setThinkingData(null);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode, attachments]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode, attachments, selectedAvatarId, setSelectedAvatarId]);
 
-  const createNewChat = useCallback(async (initialMessage?: string) => {
+  const createNewChat = useCallback(async (initialMessage?: string, pageContextSource?: ChatPageContextSource) => {
     if (isGuest) return 'guest-session';
     if (!user?.email) return null;
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
-    const tempChat: Chat = { 
-      id: tempId, 
-      userEmail: user.email, 
-      title: initialMessage?.slice(0,30) || t('chat.newConversation'), 
-      messages: [{ 
-        id: generateUUID(), 
-        type: 'ai', 
-        text: t('chat.naviWelcome'), 
-        createdAt: now 
-      }], 
-      averageRating: null, 
-      createdAt: now, 
-      updatedAt: now 
+    const tempChat: Chat = {
+      id: tempId,
+      userEmail: user.email,
+      title: initialMessage?.slice(0,30) || t('chat.newConversation'),
+      messages: [{
+        id: generateUUID(),
+        type: 'ai',
+        text: t('chat.naviWelcome'),
+        createdAt: now
+      }],
+      averageRating: null,
+      createdAt: now,
+      updatedAt: now
     };
     setActiveChat(tempChat);
     setActiveChatId(tempId);
-    if (initialMessage) sendMessage(initialMessage, tempId);
+    if (initialMessage) sendMessage(initialMessage, tempId, pageContextSource);
     return tempId;
   }, [user, sendMessage, isGuest, t]);
 
@@ -535,6 +630,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           retryUsed: metadata.retryUsed ?? m.retryUsed,
           qualityRewriteUsed: metadata.qualityRewriteUsed ?? m.qualityRewriteUsed,
           quality: metadata.quality ?? m.quality,
+          summaryIncluded: metadata.summaryIncluded ?? m.summaryIncluded,
+          persona: metadata.persona ?? m.persona,
+          errorCode: metadata.errorCode ?? m.errorCode,
         } : m),
       } : null);
       loadChats();
@@ -604,6 +702,32 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPaywall(null);
   }, []);
 
+  const loadAvatars = useCallback(async () => {
+    if (isGuest) return;
+    setIsLoadingAvatars(true);
+    try {
+      const res = await clientFetch('/api/chat/avatars');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load avatars');
+      const list: ChatAvatar[] = Array.isArray(data.avatars) ? data.avatars : [];
+      setAvatars(list);
+
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(AVATAR_STORAGE_KEY);
+        if (stored && list.some(a => a.avatarId === stored)) {
+          setSelectedAvatarIdState(stored);
+        } else if (stored) {
+          // Stored id no longer exists in catalog — clean up.
+          localStorage.removeItem(AVATAR_STORAGE_KEY);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load avatar catalog:', err);
+    } finally {
+      setIsLoadingAvatars(false);
+    }
+  }, [isGuest]);
+
   const editMessage = useCallback(async (messageId: string, newText: string) => {
     if (isGuest || !activeChatId || isSending) return;
     if (!newText.trim()) return;
@@ -662,8 +786,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!initialLoadDone.current && user?.email && !isGuest) {
       initialLoadDone.current = true;
       loadChats();
+      loadAvatars();
     }
-  }, [user?.email, loadChats, isGuest]);
+  }, [user?.email, loadChats, loadAvatars, isGuest]);
 
   return (
     <ChatContext.Provider value={{
@@ -673,7 +798,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       editMessage, deleteMessage, togglePin,
       inputText, setInputText, attachments, addAttachment, removeAttachment, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall,
-      thinkingData
+      thinkingData,
+      avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars
     }}>
       {children}
     </ChatContext.Provider>

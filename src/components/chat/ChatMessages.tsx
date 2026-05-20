@@ -11,7 +11,8 @@ import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
 import { useToast, useTranslation } from '@/hooks';
-import { Volume2, Copy, ChevronRight, RefreshCw, Sparkles, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp } from 'lucide-react';
+import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp } from 'lucide-react';
+import { getAvatarIcon, getAvatarAccent, getAvatarImage } from '@/utils/avatarStyle';
 
 const sanitizedHtmlCache = new Map<string, string>();
 
@@ -92,6 +93,7 @@ const thinkingStatuses = [
 const ThinkingIndicator: React.FC = () => {
   const [statusIdx, setStatusIdx] = useState(0);
   const { t } = useTranslation();
+  const { selectedAvatarId, avatars } = useChat();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -100,10 +102,22 @@ const ThinkingIndicator: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const currentAvatar = avatars.find(a => a.avatarId === selectedAvatarId);
+  const accent = selectedAvatarId && selectedAvatarId !== 'navi' ? getAvatarAccent(selectedAvatarId) : '';
+
   return (
     <div className="flex gap-3 items-start mt-4 mb-2">
-      <div className="ai-avatar">
-        <Sparkles className="w-4 h-4" />
+      <div className={`ai-avatar overflow-hidden ${accent}`}>
+        {getAvatarImage(selectedAvatarId) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={getAvatarImage(selectedAvatarId) as string}
+            alt={currentAvatar?.name ?? 'Navi'}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          React.createElement(getAvatarIcon(selectedAvatarId), { className: 'w-4 h-4' })
+        )}
       </div>
       <div className="flex items-center gap-3 pt-1">
         <span className="flex gap-1 items-center">
@@ -112,7 +126,9 @@ const ThinkingIndicator: React.FC = () => {
           <span className="thinking-dot animate-bounce [animation-delay:300ms]" />
         </span>
         <span className="text-[14px] text-on-surface-variant/50 italic">
-          {t(thinkingStatuses[statusIdx])}
+          {currentAvatar && currentAvatar.avatarId !== 'navi'
+            ? `${currentAvatar.name} ${t(thinkingStatuses[statusIdx]).toLowerCase()}`
+            : t(thinkingStatuses[statusIdx])}
         </span>
       </div>
     </div>
@@ -236,6 +252,7 @@ const ChatMessages: React.FC = () => {
   };
 
   const msgCount = activeChat?.messages?.length || 0;
+  const lastMsgTextLength = activeChat?.messages?.[msgCount - 1]?.text?.length || 0;
   useEffect(() => {
     const prevLength = prevMsgLengthRef.current;
     if (msgCount > prevLength && !isNearBottom) {
@@ -253,7 +270,7 @@ const ChatMessages: React.FC = () => {
       }, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [msgCount, isSending, isNearBottom]);
+  }, [msgCount, isSending, isNearBottom, lastMsgTextLength]);
 
   useEffect(() => {
     sanitizedHtmlCache.clear();
@@ -348,7 +365,7 @@ const ChatMessages: React.FC = () => {
         <div className="chat-msg-list flex min-h-full flex-col justify-end gap-4 sm:gap-5 3xl:gap-6">
         <AnimatePresence mode="popLayout">
         {messages.map((msg, i) => {
-        if (msg.type === 'system') return <SystemBubble key={msg.id || i} text={msg.text} />;
+        if (msg.type === 'system') return <SystemBubble key={msg.clientId || msg.id || i} text={msg.text} />;
 
         const isAi = msg.type === 'ai';
         const isLastAiMsg = isAi && i === messages.length - 1;
@@ -395,8 +412,8 @@ const ChatMessages: React.FC = () => {
           const isCurrentSearchMatch = searchMatches[searchMatchIdx]?.msgId === msg.id;
 
           return (
-            <motion.div 
-              key={msg.id || i}
+            <motion.div
+              key={msg.clientId || msg.id || i}
               id={`msg-${msg.id}`}
               className={`group/msg relative${isSearchMatch ? ' ring-1 ring-secondary/10 rounded-lg' : ''}${isCurrentSearchMatch ? ' ring-2 ring-secondary/30' : ''}`}
               initial={{ opacity: 0, y: 12 }}
@@ -407,10 +424,30 @@ const ChatMessages: React.FC = () => {
                 <div className="msg-pin-badge"><Pin className="w-2.5 h-2.5" /></div>
               )}
               <div className="flex gap-3 items-start">
-                <div className="ai-avatar">
-                  <Sparkles className="w-4 h-4" />
+                <div className={`ai-avatar overflow-hidden ${msg.avatarId && msg.avatarId !== 'navi' ? getAvatarAccent(msg.avatarId) : ''}`}>
+                  {getAvatarImage(msg.avatarId) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={getAvatarImage(msg.avatarId) as string}
+                      alt={msg.avatarName ?? 'Navi'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    React.createElement(getAvatarIcon(msg.avatarId), { className: 'w-4 h-4' })
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
+                  {msg.avatarId && msg.avatarId !== 'navi' && msg.avatarName && (
+                    <p className="text-[11px] font-bold text-foreground/50 mb-1.5 flex items-center gap-1.5">
+                      <span>{msg.avatarName}</span>
+                      {msg.avatarTitle && (
+                        <span className="text-foreground/30 font-medium">· {msg.avatarTitle}</span>
+                      )}
+                      {typeof msg.avatarCreditCost === 'number' && msg.avatarCreditCost > 0 && (
+                        <span className="text-foreground/30 font-medium">· {msg.avatarCreditCost} {msg.avatarCreditCost === 1 ? 'credit' : 'credits'}</span>
+                      )}
+                    </p>
+                  )}
                   {thinkingText && (
                     <details className="mb-3 group/think">
                       <summary className="text-[13px] font-bold text-secondary/50 cursor-pointer list-none flex items-center gap-1.5 hover:text-secondary transition-colors">
@@ -444,15 +481,15 @@ const ChatMessages: React.FC = () => {
                     <span className="typing-cursor inline-block w-[2px] h-[1em] bg-secondary/70 ml-0.5 rounded-sm align-text-bottom" />
                   )}
 
-                  {msg.error && (
-                    <div className="flex items-center gap-2 mt-3 p-3 rounded-xl bg-red-500/8 border border-red-500/15">
-                      <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+{msg.error && (
+                    <div className={`flex items-center gap-2 mt-3 p-3 rounded-xl border ${msg.errorCode === 'llm_unavailable' ? 'bg-amber-500/8 border-amber-500/15' : msg.errorCode === 'capacity' ? 'bg-orange-500/8 border-orange-500/15' : 'bg-red-500/8 border-red-500/15'}`}>
+                      <AlertCircle className={`w-4 h-4 shrink-0 ${msg.errorCode === 'llm_unavailable' ? 'text-amber-400' : msg.errorCode === 'capacity' ? 'text-orange-400' : 'text-red-400'}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] text-red-300">{msg.errorMessage || t('chat.failedResponse')}</p>
+                        <p className={`text-[13px] ${msg.errorCode === 'llm_unavailable' ? 'text-amber-300' : msg.errorCode === 'capacity' ? 'text-orange-300' : 'text-red-300'}`}>{msg.errorMessage || t('chat.failedResponse')}</p>
                       </div>
                       <button
-onClick={() => { haptic(); retryMessage(msg.id); }}
-                        className="shrink-0 px-3 py-1.5 ripple-btn bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-lg text-[12px] font-medium transition-colors"
+ onClick={() => { haptic(); retryMessage(msg.id); }}
+                        className={`shrink-0 px-3 py-1.5 ripple-btn rounded-lg text-[12px] font-medium transition-colors ${msg.errorCode === 'llm_unavailable' ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : msg.errorCode === 'capacity' ? 'bg-orange-500/15 hover:bg-orange-500/25 text-orange-400' : 'bg-red-500/15 hover:bg-red-500/25 text-red-400'}`}
                       >
                         {t('chat.retry')}
                       </button>
@@ -589,8 +626,8 @@ onClick={() => { haptic(); retryMessage(msg.id); }}
         }
 
         return (
-          <motion.div 
-            key={msg.id || i}
+          <motion.div
+            key={msg.clientId || msg.id || i}
             id={`msg-${msg.id}`}
             className="group/msg flex justify-end items-start gap-2"
             initial={{ opacity: 0, y: 12, x: 8 }}

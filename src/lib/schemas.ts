@@ -53,6 +53,21 @@ export const LoginSchema = z.object({
   password: z.string(),
 });
 
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const ResetPasswordSchema = z.object({
+  token: z.string().min(1, "Reset token is required").max(512),
+  password: z
+    .string()
+    .min(10, "Password must be at least 10 cycles (characters)")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+});
+
 export const ProfileUpdateSchema = z.object({
   name: z.string().min(2, "Name is required").max(100).optional(),
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
@@ -83,10 +98,26 @@ export const CreateChatSchema = z.object({
   language: languageOptionalEnum,
 });
 
+export const ChatPageContextSourceEnum = z.enum([
+  "career",
+  "kundli",
+  "horoscope",
+  "transit",
+  "match",
+  "profile",
+]);
+export type ChatPageContextSource = z.infer<typeof ChatPageContextSourceEnum>;
+
+export const ChatPageContextSchema = z.object({
+  source: ChatPageContextSourceEnum,
+}).strict();
+
 export const SendMessageSchema = z.object({
   text: z.string().min(1, "Message cannot be empty").max(3000, "Message exceeds celestial capacity"),
   language: languageOptionalEnum,
   mode: z.enum(["quick", "normal", "deep"]).optional().default("normal"),
+  context: ChatPageContextSchema.optional(),
+  avatarId: z.string().min(1).max(64).optional(),
 });
 
 export const RegenerateMessageSchema = z.object({
