@@ -150,6 +150,12 @@ export interface FamilyCompatibilityAdvice {
   next_step: string;
 }
 
+export interface FamilyRelationshipActions {
+  today: string;
+  this_week: string;
+  long_term: string;
+}
+
 export interface FamilyCompatibilityConfidence {
   level: FamilyCompatibilityConfidenceLevel;
   label: string;
@@ -164,6 +170,7 @@ export interface FamilyCompatibilityResponse {
   strengths?: FamilyCompatibilityHighlight[];
   tension_points?: FamilyCompatibilityHighlight[];
   advice?: FamilyCompatibilityAdvice;
+  relationship_actions?: FamilyRelationshipActions;
   confidence?: FamilyCompatibilityConfidence;
   lang: CompatibilityLang;
   relationship_type: FamilyRelationshipType;

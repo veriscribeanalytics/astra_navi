@@ -5,7 +5,7 @@ import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
     Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
-    ChevronDown, ChevronUp, HandHeart, Sparkles,
+    ChevronDown, ChevronUp, HandHeart, Sparkles, Compass,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -1102,6 +1102,39 @@ function FactorsBreakdown({ factors }: { factors: NonNullable<ReturnType<typeof 
     );
 }
 
+function RelationshipActions({ actions }: { actions: NonNullable<NonNullable<ReturnType<typeof useFamilyCompatibility>['data']>['relationship_actions']> }) {
+    const items: { label: string; text: string; icon: React.ReactNode; accent: string }[] = [
+        { label: 'Today', text: actions.today, icon: <Clock className="w-3 h-3" />, accent: 'text-emerald-400' },
+        { label: 'This Week', text: actions.this_week, icon: <Calendar className="w-3 h-3" />, accent: 'text-sky-400' },
+        { label: 'Long Term', text: actions.long_term, icon: <Compass className="w-3 h-3" />, accent: 'text-secondary' },
+    ].filter((it) => it.text?.trim());
+
+    if (items.length === 0) return null;
+
+    return (
+        <div>
+            <div className="flex items-center gap-1.5 mb-2 text-secondary">
+                <ArrowRight className="w-3.5 h-3.5" />
+                <p className="text-[11px] font-bold uppercase tracking-widest">What To Do</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {items.map((it) => (
+                    <div
+                        key={it.label}
+                        className="rounded-2xl border border-outline-variant/30 p-3 bg-surface"
+                    >
+                        <div className={`flex items-center gap-1.5 mb-1.5 ${it.accent}`}>
+                            {it.icon}
+                            <p className="text-[10px] font-bold uppercase tracking-widest">{it.label}</p>
+                        </div>
+                        <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{it.text}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function CompatibilityResult({
     result,
     onRerun,
@@ -1150,6 +1183,11 @@ function CompatibilityResult({
                 <p className="text-[11px] text-on-surface-variant/50 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
                     {result.confidence.note}
                 </p>
+            )}
+
+            {/* What to do — Today / This Week / Long Term */}
+            {result.relationship_actions && (
+                <RelationshipActions actions={result.relationship_actions} />
             )}
 
             {/* Strengths */}
