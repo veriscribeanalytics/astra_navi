@@ -1,0 +1,77 @@
+{
+  "locale": "bn",
+  "issues": [
+    {
+      "key": "landing.slides[1].title1",
+      "en": "Vedic Wisdom",
+      "current": "সীমানার বাইরে",
+      "issue": "Title and titleHighlight are swapped",
+      "explanation": "In English: title1='Vedic Wisdom', titleHighlight='Beyond Boundaries'. In Bengali: title1='সীমানার বাইরে' (Beyond Boundaries) should be titleHighlight. The order is reversed.",
+      "suggested": "title1 should be 'বৈদিক জ্ঞান' and titleHighlight should be 'সীমানার বাইরে'"
+    },
+    {
+      "key": "nav.community",
+      "en": "Community",
+      "current": "সম্পদ",
+      "issue": "Wrong word meaning",
+      "explanation": "সম্পদ means 'wealth' or 'resources', not 'community'. The correct word should be সম্প্রদায় (samprday) or কমিউনিটি.",
+      "suggested": "সম্প্রদায় or কমিউনিটি"
+    },
+    {
+      "key": "chat.empty (missing)",
+      "en": "Object with badge, headingLead, headingAccent, subtitle, dataPrivate",
+      "current": "Not found at top level of chat object",
+      "issue": "Structure mismatch - 'empty' key exists in English but appears nested differently in Bengali",
+      "explanation": "English has 'chat.empty' with keys like badge, headingLead, etc. The Bengali version has this structure but the English version from en.json shows 'chat.guestWelcome' as the first key instead.",
+      "suggested": "Verify if 'empty' sub-object should be at 'chat.empty' level or if structure is intentionally different"
+    },
+    {
+      "key": "healthForecast.vedaLull",
+      "en": "Veda Lull",
+      "current": "বেদ লাল",
+      "issue": "Wrong transliteration/meaning",
+      "explanation": "লাল means 'red' or 'lull' (lull as in nursery rhyme), but 'Veda Lull' here refers to a low period in Vedic energy. The term should be 'বেদ ক্ষয়' (Veda decay/decline) or similar, not 'লাল' which is informal/colloquial.",
+      "suggested": "বেদ ক্ষয় or বেদ মন্দ"
+    },
+    {
+      "key": "forecast.weekdays.tue",
+      "en": "TUE",
+      "current": "মঙ্গল",
+      "issue": "Incorrect translation - cultural mix",
+      "explanation": "মঙ্গল means 'Mars' (the planet and the day name in Vedic astrology). While Tuesday is Mangalbar (Mars day) in Bengali, the 3-letter abbreviation should be 'মঙ্গ' or 'মঙ্গ' or 'ম' to match other weekday abbreviations, not the full word. Also inconsistent with other days which are abbreviated (রবি, সোম, etc.)",
+      "suggested": "মঙ্গ (to match abbreviation pattern)"
+    },
+    {
+      "key": "chat.detail.header.viewChartContext",
+      "en": "View chart context",
+      "current": "কোষ্ঠী প্রসঙ্গ দেখুন",
+      "issue": "Wrong astrological term used",
+      "explanation": "কোষ্ঠী typically refers to 'birth constellation' or 'Nakshatra'. The word should be 'চার্ট' (chart) or 'কুণ্ডলী' (Kundli), not কোষ্ঠী. This is inconsistent with the correct usage elsewhere in the file.",
+      "suggested": "চার্ট প্রসঙ্গ দেখুন or কুণ্ডলী প্রসঙ্গ দেখুন"
+    },
+    {
+      "key": "pricing.plans.seeker.title",
+      "en": "Astra Seeker",
+      "current": "Astra Seeker",
+      "issue": "Brand name not localized (style check)",
+      "explanation": "While keeping brand names is correct per instructions, note that this is identical in both languages. This is acceptable for branding but worth noting.",
+      "suggested": "Keep as-is (brand name)"
+    },
+    {
+      "key": "about.signsDesc1",
+      "en": "Western astrology simplifies you to a single Sun sign. Jyotish reveals the full picture: 9 Grahas (planets), 12 Bhavas (houses), 27 Nakshatras (lunar mansions), and the exact degree of your Lagna (Ascendant) at the moment of your first breath.",
+      "current": "পাশ্চাত্য জ্যোতিষশাস্ত্র আপনাকে একটিমাত্র সূর্য রাশিতে সীমাবদ্ধ করে। জ্যোতিষশাস্ত্র সম্পূর্ণ চিত্রটি দেখে: ৯টি গ্রহ, ১২টি ভাব, ২৭টি নক্ষত্র এবং আপনার প্রথম নিঃশ্বাস নেওয়ার সময় লগ্নের সঠিক ডিগ্রি।",
+      "issue": "Missing 'Grahas' and 'Nakshatras' parenthetical context",
+      "explanation": "English: '9 Grahas (planets)' but Bengali just says '৯টি গ্রহ' without clarifying 'Grahas'. Similarly 'Nakshatras (lunar mansions)' should be '২৭টি নক্ষত্র (চন্দ্র প্রাসাদ)'. The Sanskrit terms with English explanations are omitted.",
+      "suggested": "৯টি গ্রহ (Grahas) and ২৭টি নক্ষত্র (চন্দ্র প্রাসাদ)"
+    },
+    {
+      "key": "faqs[0].a",
+      "en": "Jyotish (Vedic astrology) uses the sidereal zodiac...Western is descriptive.",
+      "current": "জ্যোতিষ (বৈদিক জ্যোতিষ) প্রকৃত নক্ষত্রের অবস্থানগুলি ট্র্যাক করার জন্য সাইডরিয়াল রাশিচক্র ব্যবহার করে এবং আপনার চন্দ্র রাশি (Rashi), কর্মের নিদর্শন এবং জীবনের ঘটনাগুলির সময় ভবিষ্যদ্বাণী করতে গ্রহের সময়ের চক্রের (দশা) উপর জোর দেয়। পশ্চিমা জ্যোতিষশাস্ত্র ক্রান্তীয় রাশিচক্র ব্যবহার করে এবং সূর্য রাশির মনোবিজ্ঞানের উপর জোর দেয়। বৈদিক জ্যোতিষশাস্ত্র ভবিষ্যদ্বাণীমূলক; পশ্চিমা হল বর্ণনামূলক।",
+      "issue": "Awkward phrasing in complex sentence",
+      "explanation": "The Bengali translation is grammatically correct but the sentence structure is convoluted. 'কর্মের নিদর্শন' (patterns of karma) might be better as 'কর্মিক নিদর্শনগুলি'. The overall flow is harder to read than English.",
+      "suggested": "Restructure for clarity: জ্যোতিষ সাইডরিয়াল রাশিচক্র ব্যবহার করে... আপনার চন্দ্র রাশি, কর্মিক প্যাটার্ন এবং গ্রহের দশা চক্রের উপর জোর দেয়।"
+    }
+  ]
+}

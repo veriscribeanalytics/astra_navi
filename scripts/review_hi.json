@@ -1,0 +1,141 @@
+{
+  "locale": "hi",
+  "issues": [
+    {
+      "key": "blogs.nakshatras.subtitle",
+      "en": "Mansions",
+      "current": "मंत्र",
+      "issue": "wrong-word",
+      "explanation": "'मंत्र' means 'mantra/chant', not 'mansion'. The English term 'Lunar Mansions' refers to the 27 Nakshatra divisions of the sky. Translating it as 'चंद्र मंत्र' (Lunar Mantras) completely changes the meaning.",
+      "suggested": "मंडल"
+    },
+    {
+      "key": "blogs.index.badge",
+      "en": "The Library of Wisdom",
+      "current": "ज्ञान की पुस्तकालय",
+      "issue": "grammar",
+      "explanation": "'पुस्तकालय' is a masculine noun, so the postposition should be 'का' (masculine), not 'की' (feminine).",
+      "suggested": "ज्ञान का पुस्तकालय"
+    },
+    {
+      "key": "blogs.index.ctaDescription",
+      "en": "Our Celestial Library is expanding every week. If you have a specific question about your chart, Navi has the answers ready for you now.",
+      "current": "हमारी आकाशीय पुस्तकालय हर हफ्ते बढ़ रही है। यदि आपके पास अपने चार्ट के बारे में कोई विशेष प्रश्न है, तो नवि के पास अभी आपके लिए उत्तर हैं।",
+      "issue": "grammar",
+      "explanation": "Gender agreement error: 'पुस्तकालय' is masculine, so it should be 'हमारा आकाशीय पुस्तकालय हर हफ्ते बढ़ रहा है' (masculine forms), not 'हमारी ... बढ़ रही है' (feminine forms).",
+      "suggested": "हमारा आकाशीय पुस्तकालय हर हफ्ते बढ़ रहा है। यदि आपके पास अपने चार्ट के बारे में कोई विशेष प्रश्न है, तो Navi के पास अभी आपके लिए उत्तर हैं।"
+    },
+    {
+      "key": "chat.emptyGreeting",
+      "en": "What can I help you understand?",
+      "current": "मैं आपकी किस समझ में मदद कर सकता हूं?",
+      "issue": "awkward",
+      "explanation": "The structure 'आपकी किस समझ में मदद' is grammatically twisted and unnatural. It reads as 'in what understanding of yours can I help' instead of 'what can I help you understand'.",
+      "suggested": "मैं आपको क्या समझने में मदद कर सकता हूं?"
+    },
+    {
+      "key": "chat.thinkingGeneral",
+      "en": "Consulting your cosmic blueprint...",
+      "current": "आपकी खगोलीय नक्शा का परामर्श कर रहा है...",
+      "issue": "grammar",
+      "explanation": "Two errors: (1) 'नक्शा' is masculine, so the possessive should be 'आपके खगोलीय नक्शे का', not 'आपकी ... नक्शा का'. (2) 'परामर्श कर रहा है' (giving advice) is the wrong verb for 'consulting (a document)'; the natural verb is 'देख रहा है' or 'से सलाह ले रहा है'.",
+      "suggested": "आपके ब्रह्मांडीय खाके से परामर्श ले रहा है..."
+    },
+    {
+      "key": "nav.naviAiModelsDesc",
+      "en": "Domain-specific Vedic intelligence agents.",
+      "current": "डोमेन-विशिष्ट वैदिक खुफिया एजेंट।",
+      "issue": "wrong-word",
+      "explanation": "'खुफिया' means 'intelligence' in the espionage/spy sense (e.g., 'खुफिया एजेंट' = secret agent). For AI 'intelligence' the correct word is 'बुद्धिमत्ता' or 'इंटेलिजेंस'.",
+      "suggested": "डोमेन-विशिष्ट वैदिक बुद्धिमत्ता एजेंट।"
+    },
+    {
+      "key": "profile.security.changePasswordWarning",
+      "en": "Changing your password will automatically log you out of all active sessions, including this one.",
+      "current": "आपके पासवर्ड को बदलने से आप सभी सक्रिय सत्रों से स्वचालित रूप से लॉगआउट हो जाएंगे, इस सहित।",
+      "issue": "awkward",
+      "explanation": "'इस सहित' (including this) hangs incomplete — 'this' has no referent noun. It should be 'इस सत्र सहित' (including this session) to be natural Hindi.",
+      "suggested": "आपके पासवर्ड को बदलने से आप इस सत्र सहित सभी सक्रिय सत्रों से स्वचालित रूप से लॉगआउट हो जाएंगे।"
+    },
+    {
+      "key": "profile.security.confirmPasswordLabel",
+      "en": "Confirm New Password",
+      "current": "नया पासवर्ड की पुष्टि करें",
+      "issue": "grammar",
+      "explanation": "Oblique case error. With the postposition 'की', the adjective 'नया' must inflect to 'नए' (masculine oblique). 'नया पासवर्ड की' is ungrammatical.",
+      "suggested": "नए पासवर्ड की पुष्टि करें"
+    },
+    {
+      "key": "profile.preferences.notificationsDescription",
+      "en": "Alerts for planetary transits",
+      "current": "ग्रहीय ट्रांजिट के लिए सतर्कताएं",
+      "issue": "wrong-word",
+      "explanation": "'सतर्कताएं' means 'cautions/alertness states', not 'alerts/notifications'. The correct word here is 'अलर्ट' or 'सूचनाएं'.",
+      "suggested": "ग्रहीय गोचर के लिए अलर्ट"
+    },
+    {
+      "key": "profile.onboarding.steps.tob.hint",
+      "en": "Pinpoints your ascendant (Lagna) and house cusps",
+      "current": "आपके आरोह (लग्न) और भाव कुंडलियों को निर्दिष्ट करता है",
+      "issue": "wrong-term",
+      "explanation": "Two issues: (1) 'आरोह' means 'ascent/rise (musical)', not 'ascendant'. The Jyotish term is simply 'लग्न' or 'आरोही'. (2) 'भाव कुंडलियों' (house horoscopes) is wrong for 'house cusps' — should be 'भाव संधि' or 'भाव-मध्य'.",
+      "suggested": "आपके लग्न और भाव संधियों को निर्धारित करता है"
+    },
+    {
+      "key": "blogs.houses.trikonaDesc",
+      "en": "Houses 1, 5, and 9 are the houses of Dharma and pure blessing. They represent past life merits (Purva Punya), intelligence, and divine grace. Planets here provide natural luck and spiritual evolution.",
+      "current": "भाव 1, 5, और 9 धर्म और शुद्ध आशीर्वाद के भाव हैं। ये पिछले जीवन की पूर्ण पूण्य (पूर्व पुण्य), बुद्धि और दिव्य अनुग्रह का प्रतिनिधित्व करते हैं। यहां के ग्रह प्राकृतिक भाग्य और आध्यात्मिक विकास प्रदान करते हैं।",
+      "issue": "typo",
+      "explanation": "Two typos in 'पूर्ण पूण्य': should be 'पूर्व पुण्य' (matches the parenthetical 'Purva Punya'). 'पूर्ण' means 'complete' (wrong word), and 'पूण्य' is a misspelling of 'पुण्य' (merit).",
+      "suggested": "भाव 1, 5, और 9 धर्म और शुद्ध आशीर्वाद के भाव हैं। ये पिछले जीवन के पूर्व पुण्य, बुद्धि और दिव्य अनुग्रह का प्रतिनिधित्व करते हैं। यहां के ग्रह प्राकृतिक भाग्य और आध्यात्मिक विकास प्रदान करते हैं।"
+    },
+    {
+      "key": "blogs.houses.dusthana",
+      "en": "Dusthana (Difficult) Houses",
+      "current": "दुष्टभाव (कठिन) भाव",
+      "issue": "wrong-term",
+      "explanation": "'दुष्टभाव' means 'evil intent/feeling' — wrong Sanskrit compound. The correct Jyotish term is 'दुःस्थान' (Dusthana, literally 'bad place').",
+      "suggested": "दुःस्थान (कठिन) भाव"
+    },
+    {
+      "key": "blogs.houses.bhavLogic",
+      "en": "Bhavat Bhavam Logic",
+      "current": "भवत्भवम् तर्क",
+      "issue": "typo",
+      "explanation": "Sanskrit spelling error. 'Bhavat Bhavam' transliterates to 'भावात् भावम्' (with long ā in both words), not 'भवत्भवम्'. As written it is a non-standard form.",
+      "suggested": "भावात् भावम् तर्क"
+    },
+    {
+      "key": "footer.contactSupport",
+      "en": "Contact Support",
+      "current": "संपर्क और समर्थन",
+      "issue": "wrong-word",
+      "explanation": "'संपर्क और समर्थन' means 'Contact and Support' (two separate items). The English 'Contact Support' is an action — to reach the support team. Should be 'सहायता से संपर्क करें' or 'सपोर्ट से संपर्क'.",
+      "suggested": "सहायता से संपर्क करें"
+    },
+    {
+      "key": "about.precisionDesc",
+      "en": "Navi uses Swiss Ephemeris—the same data NASA relies on. Your chart is calculated to the arc-second, not approximated.",
+      "current": "Navi स्विस एफेमेरिस का उपयोग करता है—वही डेटा जिस पर NASA निर्भर करता है। आपके चार्ट की गणना सेकंडों तक सटीक रूप से की जाती है, अनुमानित नहीं।",
+      "issue": "wrong-term",
+      "explanation": "'सेकंडों तक' means 'to the seconds (of time)'. The English 'arc-second' is an angular unit (1/3600 of a degree), not a unit of time. This loses the precise astronomical meaning.",
+      "suggested": "आपके चार्ट की गणना आर्क-सेकंड (कोणीय सेकंड) तक सटीक की जाती है, अनुमानित नहीं।"
+    },
+    {
+      "key": "blogs.planets.shadowNodesDesc",
+      "en": "Rahu and Ketu are not physical masses, but mathematical points where eclipses occur. Despite lacking bodies, these nodes are profound triggers of sudden destiny, obsession, and ultimate spiritual liberation.",
+      "current": "राहु और केतु भौतिक संहति नहीं हैं, बल्कि गणितीय बिंदु हैं जहां ग्रहण होते हैं। शरीर की कमी के बावजूद, ये नोड्स अचानक भाग्य, जुनून और अंतिम आध्यात्मिक मुक्ति के गहन ट्रिगर हैं।",
+      "issue": "wrong-word",
+      "explanation": "'संहति' is an obscure/archaic word that means 'compactness/aggregate' and is not the natural Hindi term for 'physical mass/body'. The standard term is 'पिंड' (physical body/mass).",
+      "suggested": "राहु और केतु भौतिक पिंड नहीं हैं, बल्कि गणितीय बिंदु हैं जहां ग्रहण होते हैं।"
+    },
+    {
+      "key": "blogs.index.ctaHeading",
+      "en": "Can't find what you're",
+      "current": "क्या आप नहीं खोज",
+      "issue": "awkward",
+      "explanation": "Together with the next key (ctaSubheading 'पा रहे हैं?'), this reads as 'Are you not finding... ?', which is the wrong question structure for 'Can't find what you're looking for?'. The split also breaks Hindi word order — verb fragments are awkward.",
+      "suggested": "जो आप खोज रहे हैं"
+    }
+  ]
+}

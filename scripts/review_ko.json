@@ -1,0 +1,125 @@
+{
+  "locale": "ko",
+  "issues": [
+    {
+      "key": "blogs.planets.karmicDeliverers",
+      "en": "Karmic Deliverers",
+      "current": "업적 전달자",
+      "issue": "wrong-word",
+      "explanation": "'업적' means 'achievement/accomplishment', not 'karma'. The intended Sanskrit term is karma. The header label for planets that deliver karmic results reads as 'achievement deliverers' in Korean, which is incorrect.",
+      "suggested": "카르마 전달자"
+    },
+    {
+      "key": "blogs.planets.primaryOffice",
+      "en": "Primary Office",
+      "current": "주요 사무실",
+      "issue": "wrong-word",
+      "explanation": "'사무실' literally means a physical office room. In the Mooltrikona context this label refers to a planet's primary domicile / seat of dignity, not a business office. The literal rendering is misleading.",
+      "suggested": "주된 거처"
+    },
+    {
+      "key": "profile.fields.maritalOptions.notSpecified",
+      "en": "Prefer not to say",
+      "current": "말하지 않는 것이 좋습니다.",
+      "issue": "wrong-word",
+      "explanation": "This is mistranslated as 'It is better not to say it' (advice). The English is a self-selected privacy option meaning the user declines to answer.",
+      "suggested": "답변하지 않음"
+    },
+    {
+      "key": "profile.fields.occupationOptions.notSpecified",
+      "en": "Prefer not to say",
+      "current": "말하지 않는 것이 좋습니다.",
+      "issue": "wrong-word",
+      "explanation": "Same mistranslation as the marital option — reads as 'It is better not to say' rather than the user's opt-out choice.",
+      "suggested": "답변하지 않음"
+    },
+    {
+      "key": "profile.security.logoutConfirmDialog.confirmButton",
+      "en": "Log Out Others",
+      "current": "다른 것들 로그아웃",
+      "issue": "wrong-word",
+      "explanation": "'다른 것들' literally means 'other things/objects', not other devices/sessions. The button means logging out other devices.",
+      "suggested": "다른 기기 로그아웃"
+    },
+    {
+      "key": "landing.slides.2.title1",
+      "en": "Discover Your",
+      "current": "당신의 발견",
+      "issue": "awkward",
+      "explanation": "'당신의 발견' reads as the noun phrase 'Your discovery'. The English fragment is a verbal phrase whose object is the highlighted '카르마적 정렬'. The current Korean breaks the sentence structure when concatenated with the highlight.",
+      "suggested": "당신의"
+    },
+    {
+      "key": "landing.slides.3.titleHighlight",
+      "en": "Your Moon Purpose",
+      "current": "맞추세요",
+      "issue": "wrong-word",
+      "explanation": "Combined with title1 '당신의 별자리에' the slide reads 'Align with your zodiac sign'. 'Moon Purpose' became '별자리' (zodiac sign), losing both the Moon/Nakshatra reference and the 'purpose' noun. The titleHighlight should restate the noun phrase, not just contain an imperative verb.",
+      "suggested": "당신의 달의 목적"
+    },
+    {
+      "key": "chat.feedback.tags.1.3",
+      "en": "Dasha analysis was way off",
+      "current": "Dasha(디샤) 분석이 전혀 맞지 않았습니다",
+      "issue": "wrong-word",
+      "explanation": "Dasha is consistently transliterated as '다샤' throughout the rest of the file (dashboard.currentDasha, faqs, plans, etc.). '디샤' is an incorrect transliteration that conflicts with the rest of the file. Same issue appears in chat.feedback.tags.2.x and 4.3.",
+      "suggested": "Dasha(다샤) 분석이 전혀 맞지 않았습니다"
+    },
+    {
+      "key": "chat.feedback.tags.4.3",
+      "en": "Dasha insights were brief",
+      "current": "Dasha(디샤) 통찰이 간략했습니다",
+      "issue": "wrong-word",
+      "explanation": "Same '디샤' vs '다샤' transliteration inconsistency. Dasha is rendered as '다샤' everywhere else in this locale file.",
+      "suggested": "Dasha(다샤) 통찰이 간략했습니다"
+    },
+    {
+      "key": "blogs.planets.exaltation",
+      "en": "Exaltation",
+      "current": "상승",
+      "issue": "wrong-word",
+      "explanation": "'상승' means 'rising/ascending' and overlaps with 'ascendant'. The Vedic technical term Exaltation (uchcha) is conventionally rendered as '고양' in Korean Jyotish material. '상승' is confusable with Lagna/ascendant.",
+      "suggested": "고양"
+    },
+    {
+      "key": "dashboard.sessionsDesc",
+      "en": "Interactive council for life's big questions.",
+      "current": "삶의 큰 질문들을 위한 상호작용 의회.",
+      "issue": "awkward",
+      "explanation": "'상호작용 의회' literally reads as 'interactive parliament/assembly', which is an odd description of a consulting feature. The phrasing is unnatural in Korean.",
+      "suggested": "삶의 큰 질문에 답하는 인터랙티브 상담."
+    },
+    {
+      "key": "about.empowermentTitle",
+      "en": "Empowerment, Not Fatalism",
+      "current": "숙명론이 아닌 권한 부여",
+      "issue": "wrong-word",
+      "explanation": "'권한 부여' in Korean carries the meaning of 'granting authorization/permission' (technical/legal). In this philosophical context, 'empowerment' should be rendered as personal agency/strengthening.",
+      "suggested": "숙명론이 아닌 역량 강화"
+    },
+    {
+      "key": "profile.page.description",
+      "en": "Manage your birth details to ensure your personalized readings are always accurate.",
+      "current": "출생 정보를 관리하여 개인화된 읽기가 항상 정확하도록 합니다.",
+      "issue": "awkward",
+      "explanation": "'개인화된 읽기' literally means 'personalized act of reading (text)'. In an astrology context 'reading' should be '리딩' or '운세 분석'. The sentence also lacks the polite imperative tone used elsewhere in the profile page.",
+      "suggested": "맞춤형 운세 분석이 항상 정확하도록 출생 정보를 관리하세요."
+    },
+    {
+      "key": "blogs.yogas.dhanaDesc",
+      "en": "...the native is destined for immense financial prosperity.",
+      "current": "...태생인은 막대한 재정적 번영에 운명지어집니다.",
+      "issue": "awkward",
+      "explanation": "'태생인' is an unnatural rendering of Vedic 'native' (jatak); the standard term in Korean Jyotish writing is '본인' or simply '당사자'. '운명지어집니다' is also an awkward passive form.",
+      "suggested": "본인은 막대한 재정적 번영을 누릴 운명을 지닙니다."
+    },
+    {
+      "key": "horoscope.aligningStars",
+      "en": "Aligning the Stars",
+      "current": "별들 정렬 중",
+      "issue": "awkward",
+      "explanation": "Missing object particle and unnatural noun-stacking. A loading message should use a more natural progressive form.",
+      "suggested": "별을 정렬하는 중"
+    }
+  ]
+}

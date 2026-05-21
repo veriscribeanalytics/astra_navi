@@ -109,7 +109,7 @@
       },
       {
         "tag": "소울메이트 매치메이킹",
-        "title1": "당신의 발견",
+        "title1": "당신의",
         "titleHighlight": "카르마적 정렬",
         "desc": "고급 36포인트 구나 밀란 및 아쉬타쿠타 표준에 기반한 깊은 행성 동기화 분석. 당신의 관계의 운명을 이해하세요.",
         "btn1": "36 구나 매치 확인",
@@ -124,7 +124,7 @@
       {
         "tag": "일일 개인 맞춤 플로우",
         "title1": "당신의 별자리에",
-        "titleHighlight": "맞추세요",
+        "titleHighlight": "당신의 달의 목적",
         "desc": "당신의 일일 운세는 당신의 정확한 달 별자리와 낙샤트라까지 계산됩니다. 일반적인 태양 별자리 예측을 따르는 것을 멈추세요.",
         "btn1": "일일 가이드 받기",
         "btn2": "트랜짓 탐색",
@@ -335,7 +335,7 @@
     "rashiLibDesc": "12 황도대 별자리 백과사전.",
     "openLibrary": "라이브러리 열기",
     "sessions": "세션",
-    "sessionsDesc": "삶의 큰 질문들을 위한 상호작용 의회.",
+    "sessionsDesc": "삶의 큰 질문에 답하는 인터랙티브 상담.",
     "inProgress": "진행 중",
     "joinSession": "세션 참가",
     "qDay": "오늘 내 하루는 어때?",
@@ -379,7 +379,7 @@
     "detailedForecast": "상세 예측",
     "viewFullForecast": "전체 예측 보기",
     "askNaviAboutToday": "오늘에 대해 Navi에게 묻기",
-    "aligningStars": "별들 정렬 중",
+    "aligningStars": "별을 정렬하는 중",
     "calculatingTransits": "개인화된 행성 트랜짓 계산 중...",
     "peak": "최고점",
     "trend": "트렌드",
@@ -469,7 +469,7 @@
     "ourFoundations": "우리의 기초",
     "precisionTitle": "천문학적 정밀도",
     "precisionDesc": "Navi는 NASA에서 의존하는 것과 동일한 데이터인 스위스 에페메리스를 사용합니다. 당신의 차트는 근사치가 아니라 초 단위로 계산됩니다.",
-    "empowermentTitle": "숙명론이 아닌 권한 부여",
+    "empowermentTitle": "숙명론이 아닌 역량 강화",
     "empowermentDesc": "조티시는 확실성이 아니라 경향을 보여줍니다. Navi는 우주 날씨 보고서를 제공하며 흐름을 어떻게 헤쳐 나갈지는 당신이 결정합니다.",
     "privacyTitle": "신성한 프라이버시",
     "privacyDesc": "당신의 출생 차트는 당신 영혼의 지문입니다. 우리는 모든 데이터를 종단 간 암호화합니다. 당신의 우주 블루프린트는 오직 당신만의 것입니다."
@@ -699,7 +699,7 @@
           "0": "말투가 무시하거나 무례하게 느껴졌습니다",
           "1": "완전히 틀린 예측이었습니다",
           "2": "행성 위치가 정확하지 않았습니다",
-          "3": "Dasha(디샤) 분석이 전혀 맞지 않았습니다",
+          "3": "Dasha(다샤) 분석이 전혀 맞지 않았습니다",
           "4": "내 출생 차트(Kundli)와 무관한 내용이었습니다",
           "5": "기타"
         },
@@ -723,7 +723,7 @@
           "0": "말투가 따뜻하고 지원적이었습니다",
           "1": "차트 상세 정보에 사소한 오류가 있었습니다",
           "2": "트랜짓(Transit) 분석이 더 깊었으면 좋겠습니다",
-          "3": "Dasha(디샤) 통찰이 간략했습니다",
+          "3": "Dasha(다샤) 통찰이 간략했습니다",
           "4": "더 구체적인 비방을 원했습니다",
           "5": "기타"
         },
@@ -1227,7 +1227,7 @@
       "understanding": "이해하기",
       "navagraha": "나바그라하(Navagraha)",
       "description": "베다 점성술에서 나바그라하(아홉 행성)는 우주의 업의 중개자입니다. 이들은 사건을 촉발하고, 당신의 심리를 형성하며, 영혼의 진화 여정을 시간과 공간을 통해 안내하는 역동적인 힘입니다.",
-      "karmicDeliverers": "업적 전달자",
+      "karmicDeliverers": "카르마 전달자",
       "karmicDesc": "행성은 단순히 특성을 상징하지 않습니다. 이들은 적극적으로 당신의 과거 행동의 열매를 전달합니다. 목성과 금성 같은 유익한 행성은 편의와 우아함을 가져오고, 토성과 화성 같은 해로운 행성은 필요하지만 종종 어려운 교훈을 시행합니다.",
       "avasthas": "아바스타(Avasthas, 행성의 상태)",
       "avasthasDesc": "행성의 힘은 그 조건에 따라 달라집니다. 상승된 행성은 가장 높고 순수한 잠재력을 표현하는 반면, 약화된 행성은 영혼이 타고난 약점을 극복하기 위해 더 열심히 일해야 하는 영역을 나타냅니다.",
@@ -1240,12 +1240,12 @@
       "signatures": "서명",
       "functionalImpact": "기능적 영향",
       "planetaryGovernance": "행성 관리",
-      "exaltation": "상승",
+      "exaltation": "고양",
       "highestPotential": "최고의 잠재력",
       "debilitation": "약화",
       "lowestVitality": "최저 활력",
       "mooltrikona": "뮬트리코나(Mooltrikona)",
-      "primaryOffice": "주요 사무실",
+      "primaryOffice": "주된 거처",
       "aligningWith": "{planet}과 정렬하기",
       "discoverInfluence": "이 행성이 당신의 차트에 미치는 영향 발견하기"
     },
@@ -1300,7 +1300,7 @@
   "profile": {
     "page": {
       "title": "사용자 프로필",
-      "description": "출생 정보를 관리하여 개인화된 읽기가 항상 정확하도록 합니다.",
+      "description": "맞춤형 운세 분석이 항상 정확하도록 출생 정보를 관리하세요.",
       "errors": {
         "fixErrors": "저장하기 전에 오류를 수정하십시오.",
         "noEmailSession": "세션에서 이메일을 찾을 수 없습니다. 로그아웃한 후 다시 로그인하십시오.",
@@ -1355,7 +1355,7 @@
         "divorced": "이혼",
         "widowed": "사별",
         "separated": "별거",
-        "notSpecified": "말하지 않는 것이 좋습니다."
+        "notSpecified": "답변하지 않음"
       },
       "occupation": "직업",
       "occupationPlaceholder": "직업 선택",
@@ -1366,7 +1366,7 @@
         "homemaker": "가정주부",
         "retired": "은퇴자",
         "unemployed": "실업자",
-        "notSpecified": "말하지 않는 것이 좋습니다."
+        "notSpecified": "답변하지 않음"
       },
       "errors": {
         "nameTooShort": "이름은 최소 2자 이상이어야 합니다.",
@@ -1452,7 +1452,7 @@
       "logoutConfirmDialog": {
         "title": "모든 기기에서 로그아웃하시겠습니까?",
         "message": "다른 모든 기기에서 계정을 로그아웃합니다. 현재 세션은 활성 상태를 유지합니다.",
-        "confirmButton": "다른 것들 로그아웃",
+        "confirmButton": "다른 기기 로그아웃",
         "cancelButton": "취소"
       },
       "errors": {

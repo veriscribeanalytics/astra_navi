@@ -1,0 +1,85 @@
+{
+  "locale": "ta",
+  "issues": [
+    {
+      "key": "landing.slides[1].title1",
+      "en": "Vedic Wisdom",
+      "current": "எல்லைகளுக்கு அப்பாற்பட்ட",
+      "issue": "wrong-word",
+      "explanation": "Current translation means 'Beyond Boundaries' which is actually the titleHighlight. The title1 and titleHighlight appear to be swapped in the Tamil translation.",
+      "suggested": "வேத ஞானம்"
+    },
+    {
+      "key": "landing.slides[1].titleHighlight",
+      "en": "Beyond Boundaries",
+      "current": "வேத ஞானம்",
+      "issue": "wrong-word",
+      "explanation": "Current translation means 'Vedic Wisdom' which is actually the title1. The values are swapped.",
+      "suggested": "எல்லைகளுக்கு அப்பாற்பட்ட"
+    },
+    {
+      "key": "blogs.planets.functionalDesc",
+      "en": "Beyond natural traits, a planet acts as a friend or foe based on your specific Ascendant (Lagna). The same Saturn that brings hardship to an Aries lagna acts as a supreme benefactor for a Taurus lagna.",
+      "current": "இயற்கை பண்புகளுக்கு அப்பாற்பட்டு, ஒரு கிரகம் உங்கள் குறிப்பிட்ட லக்னத்தின் (Ascendant) அடிப்படையில் நண்பனாகவோ அல்லது எதிரியாகவோ செயல்படுகிறது. மேஷ லக்னத்திற்கு கஷ்டம் தரும் அதே சனி, ரிஷப லக்னத்திற்கு உச்ச வரப்பிரசாதி ஆகச் செயல்படுகிறார்.",
+      "issue": "awkward",
+      "explanation": "The phrase 'உச்ச வரப்பிரசாதி' is grammatically awkward. It should be 'உச்ச அனுக்கிரகன்' or 'பரম கன்' (supreme benefactor). Also, using 'செயல்படுகிறார்' (acts like he/she) instead of 'செயல்படுகிறது' (acts) for a planet is unnatural.",
+      "suggested": "இயற்கை பண்புகளுக்கு அப்பாற்பட்டு, ஒரு கிரகம் உங்கள் குறிப்பிட்ட லக்னத்தின் (Ascendant) அடிப்படையில் நண்பனாகவோ அல்லது எதிரியாகவோ செயல்படுகிறது. மேஷ லக்னத்திற்கு கஷ்டம் தரும் அதே சனி, ரிஷப லக்னத்திற்கு உச்ச அனுக்கிரகன் ஆகச் செயல்படுகிறது."
+    },
+    {
+      "key": "blogs.houses.upachayaDesc",
+      "en": "Houses 3, 6, 10, and 11 represent areas of life that improve over time through conscious effort. Malefic planets (Saturn, Mars, Sun) placed here actually give excellent results as they provide the drive to overcome competition.",
+      "current": "வீடுகள் 3, 6, 10 மற்றும் 11 வாழ்க்கையின் குறிப்பிட்ட பகுதிகளைப் பிரதிநிதித்துவ வைக்கின்றன, அவை விவேக முள்ள முயற்சியின் மூலம் கால போக்கில் மேம்படுகின்றன. பாவ கிரகங்கள் (சனி, செவ்வாய், சூரியன்) இங்கு வைக்கப்பட்டபோது ஆச்சர்யமான பலன் அளிக்கின்றன, ஏனெனில் அவை போட்டியை சமாளிக்கும் ஆற்றலை அளிக்கின்றன.",
+      "issue": "typo",
+      "explanation": "'விவேக முள்ள' appears to be a typo or corruption. Should be 'விவேக முறை' or 'விவேக சக்தி' or simply 'விழிப்பான'.",
+      "suggested": "வீடுகள் 3, 6, 10 மற்றும் 11 வாழ்க்கையின் குறிப்பிட்ட பகுதிகளைப் பிரதிநிதித்துவ வைக்கின்றன, அவை விழிப்பான முயற்சியின் மூலம் கால போக்கில் மேம்படுகின்றன. பாவ கிரகங்கள் (சனி, செவ்வாய், சூரியன்) இங்கு வைக்கப்பட்டபோது சிறந்த பலன் அளிக்கின்றன, ஏனெனில் அவை போட்டியை கடக்கும் ஆற்றலை அளிக்கின்றன."
+    },
+    {
+      "key": "blogs.yogas.dhanaDesc",
+      "en": "Combinations for absolute wealth. When the houses of earnings (2nd) and gains (11th) connect deeply with the houses of destiny (5th, 9th), the native is destined for immense financial prosperity.",
+      "current": "முழுமையான செல்வத்திற்கான கூட்டுக்கள். வருமான வீடு (2வது) மற்றும் ஆதாயம் வீடு (11வது) விதிமுறை வீடுகளுடன் (5வது, 9வது) ஆழமான இணைக்கபொட்டபோது, ஜாதகன் பெருந்தாணுக மொத்த செல்வ சோதனைக்குரியவனாக உள்ளனர்.",
+      "issue": "broken-syntax",
+      "explanation": "'பெருந்தாணுக மொத்த செல்வ சோதனைக்குரியவனாக' is not proper Tamil. Should be 'பெரிய நிதி செழுமைக்குக் குறிப்பிடப்பட்டவனாக' or 'பெரிய நிதி செல்வத்திற்குக் குறிப்பிடப்பட்டவனாக'. Also 'இணைக்கபொட்டபோது' should be 'இணையும்போது'.",
+      "suggested": "முழுமையான செல்வத்திற்கான கூட்டுக்கள். வருமான வீடு (2வது) மற்றும் ஆதாயம் வீடு (11வது) விதிமுறை வீடுகளுடன் (5வது, 9வது) ஆழமாக இணையும்போது, ஜாதகன் பெரிய நிதி செல்வத்திற்குக் குறிப்பிடப்பட்டவனாக உள்ளனர்."
+    },
+    {
+      "key": "blogs.nakshatras.subtitle",
+      "en": "Mansions",
+      "current": "இடம்",
+      "issue": "wrong-word",
+      "explanation": "'இடம்' means 'place' or 'space'. For Lunar Mansions (Nakshatras), it should be 'மாளிகைகள்' (mansions) or 'மாளிக' (mansion).",
+      "suggested": "மாளிகைகள்"
+    },
+    {
+      "key": "blogs.planets.shadowNodesDesc",
+      "en": "Rahu and Ketu are not physical masses, but mathematical points where eclipses occur. Despite lacking bodies, these nodes are profound triggers of sudden destiny, obsession, and ultimate spiritual liberation.",
+      "current": "ராகு மற்றும் கேது உடல்ரீதியான வெகுஜனங்கள் அல்ல, ஆனால் கிரணங்கள் நிகழ்வதற்கான கணிதக் புள்ளிகள். உடல்கள் இல்லாமலும், இந்த கணுக்கள் திடீர் விதிமுறை, வெறிப்போக்கு, மற்றும் இறுதி ஆன்மீக விடுதலையின் ஆழ்ந்த தூண்டுதலாகும்.",
+      "issue": "typo",
+      "explanation": "'கிரணங்கள்' means 'rays'. Should be 'গ്रहণங்கள்' (eclipses). Also 'வெறிப்போக்கு' is awkward; should be 'மோகம்' or 'வெறி'.",
+      "suggested": "ராகு மற்றும் கேது உடல்ரீதியான பொருட்கள் அல்ல, ஆனால் கிரணங்கள் நிகழ்வதற்கான கணிதக் புள்ளிகள். உடல்கள் இல்லாமலும், இந்த கணுக்கள் திடீர் விதி, மோகம் மற்றும் இறுதி ஆன்மீக விடுதலையின் ஆழ்ந்த தூண்டுதலாகும்."
+    },
+    {
+      "key": "pricing.plans.seeker.period",
+      "en": "/always",
+      "current": "/எப்போதும்",
+      "issue": "awkward",
+      "explanation": "The phrase '/எப்போதும்' is grammatically awkward in this context. For pricing, it should be '/எப்போதும் இலவசம்' or '/வாழ்நாளுக்கு' or simply 'எப்போதும் உடன் வாழ்க'.",
+      "suggested": "/சர்வகாலத்துக்கும்"
+    },
+    {
+      "key": "blogs.yogas.karmicDesc",
+      "en": "Planets don't just symbolize traits; they actively deliver the fruits of your past actions. Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.",
+      "current": "கிரகங்கள் பண்புகளை மாத்திரம் குறிக்க மாட்டா; அவை உங்கள் கடந்த செயல்களின் பலனைத் திறம்பட விநியோகிக்கின்றன. சுப கிரகங்கள் குரு மற்றும் சுக்கிரன் சுகம் மற்றும் கருணையை கொண்டுவருவதால், பாவ கிரகங்கள் சனி மற்றும் செவ்வாய் அவசியமான, பெரும்பாலும் சிரமம் பூண்ட பாடங்களைக் கட்டாயப்படுத்துகின்றன.",
+      "issue": "broken-syntax",
+      "explanation": "The sentence structure is confusing. The main clause 'சுப கிரகங்கள் குரு மற்றும் சுக்கிரன் சுகம் மற்றும் கருணையை கொண்டுவருவதால்' is missing a main verb after 'while' (clause intro). It should be restructured for clarity.",
+      "suggested": "கிரகங்கள் பண்புகளை மாத்திரம் குறிக்க மாட்டா; அவை உங்கள் கடந்த செயல்களின் பலனைத் திறம்பட விநியோகிக்கின்றன. குரு மற்றும் சுக்கிரன் போன்ற சுப கிரகங்கள் சுகம் மற்றும் கருணையை கொண்டுவருவதாக, சனி மற்றும் செவ்வாய் போன்ற பாவ கிரகங்கள் அவசியமான, பெரும்பாலும் சிரமம் பூண்ட பாடங்களைக் கட்டாயப்படுத்துகின்றன."
+    },
+    {
+      "key": "blogs.houses.dusthanaDesc",
+      "en": "Houses 6, 8, and 12 govern obstacles, transformation, and loss. While challenging for material pursuits, they are essential for burning karma, building resilience, and achieving ultimate spiritual liberation (Moksha).",
+      "current": "வீடுகள் 6, 8 மற்றும் 12 தடைகள், மாற்றம் மற்றும் இழப்பை நிரணயிக்கின்றன. பொருளாதார இலக்குகளுக்கு சிரமம் இருந்தாலும், அவை கர்மத்தை எரிக்க, மீள்சக்தியை உருவாக்க, மற்றும் இறுதி ஆன்மீக விடுதலை (மோக்ஷம்) அடைய அவசியமாகும்.",
+      "issue": "wrong-word",
+      "explanation": "'பொருளாதார இலக்குகளுக்கு' (for economic objectives) is incorrect. Should be 'பொருள் வரவுக்கு' or 'பொருள் লாபங்களுக்கு' (for material gains/wealth).",
+      "suggested": "வீடுகள் 6, 8 மற்றும் 12 தடைகள், மாற்றம் மற்றும் இழப்பை நிரணயிக்கின்றன. பொருள் வரவுக்கு சிரமம் இருந்தாலும், அவை கர்மத்தை எரிக்க, மீளுசக்தியை உருவாக்க, மற்றும் இறுதி ஆன்மீக விடுதலை (மோக்ஷம்) அடைய அவசியமாகும்."
+    }
+  ]
+}

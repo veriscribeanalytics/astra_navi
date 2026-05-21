@@ -1,0 +1,165 @@
+{
+  "locale": "gu",
+  "issues": [
+    {
+      "key": "profile.page.title",
+      "en": "User Profile",
+      "current": "ચાલક પ્રોફાઇલ",
+      "issue": "Wrong word",
+      "explanation": "'ચાલક' means 'driver/operator', not 'user'. The standard term used elsewhere in this file (common.userProfile) is 'વપરાશકર્તા'.",
+      "suggested": "વપરાશકર્તા પ્રોફાઇલ"
+    },
+    {
+      "key": "profile.page.description",
+      "en": "Manage your birth details to ensure your personalized readings are always accurate.",
+      "current": "તમારા જન્મ વિગતોને સંચાલિત કરો તમારી વ્યક્તિગતકૃત વાંચણીઓ સર્વદા સરસ હોય તે સુનિશ્ચિત કરવા.",
+      "issue": "Wrong word + broken syntax",
+      "explanation": "'સરસ' means 'nice/good', not 'accurate' (which should be 'સચોટ'). Sentence order is also broken — the purpose clause is dangling at the end without a connector.",
+      "suggested": "તમારી વ્યક્તિગત વાંચણીઓ હંમેશા સચોટ રહે તે માટે તમારી જન્મ વિગતોનું સંચાલન કરો."
+    },
+    {
+      "key": "profile.fields.timeOfBirthHelper",
+      "en": "Exact time for precision",
+      "current": "ચોકસાઈ માટે સૌથી સમય",
+      "issue": "Non-sensical phrasing",
+      "explanation": "'સૌથી સમય' is not grammatical Gujarati — 'સૌથી' means 'most/from all' and doesn't combine with 'સમય' to mean 'exact time'. Should be 'ચોક્કસ સમય'.",
+      "suggested": "ચોકસાઈ માટે ચોક્કસ સમય"
+    },
+    {
+      "key": "profile.fields.placeOfBirthHelper",
+      "en": "Search and select your exact birth location",
+      "current": "તમારા જન્મ સ્થાનનો સર્વ શોધો અને પસંદ કરો",
+      "issue": "Wrong word",
+      "explanation": "'સર્વ' means 'all/everything' and makes no sense here. The intended word is likely 'સચોટ/ચોક્કસ' (exact). Compare auth.register.pobHelperText which renders this correctly.",
+      "suggested": "તમારું ચોક્કસ જન્મ સ્થળ શોધો અને પસંદ કરો"
+    },
+    {
+      "key": "profile.fields.maritalOptions.single",
+      "en": "Single",
+      "current": "એકલો",
+      "issue": "Wrong word",
+      "explanation": "'એકલો' means 'alone/lonely' (and is gender-marked masculine). For marital status 'single' the correct term is 'અપરિણીત' (unmarried), as used in auth.register.maritalSingle.",
+      "suggested": "અપરિણીત"
+    },
+    {
+      "key": "profile.fields.maritalOptions.notSpecified",
+      "en": "Prefer not to say",
+      "current": "કહેતા નથી",
+      "issue": "Wrong meaning",
+      "explanation": "'કહેતા નથી' literally means 'do not say' (a flat statement). 'Prefer not to say' should be 'જણાવવા માંગતા નથી', as used in auth.register.maritalNotSpecified.",
+      "suggested": "જણાવવા માંગતા નથી"
+    },
+    {
+      "key": "profile.fields.occupationOptions.student",
+      "en": "Student",
+      "current": "વિધાર્થી",
+      "issue": "Typo",
+      "explanation": "Misspelling of 'વિદ્યાર્થી' (correct conjunct is દ્ય, not ધ). Auth.register.occupationStudent has it spelled correctly.",
+      "suggested": "વિદ્યાર્થી"
+    },
+    {
+      "key": "profile.fields.occupationOptions.employed",
+      "en": "Employed / Salaried",
+      "current": "નોકરી / પગાર",
+      "issue": "Wrong form",
+      "explanation": "Renders as 'job / salary' (two nouns), not the adjective form 'employed / salaried'. Auth.register.occupationEmployed correctly uses 'નોકરીયાત / પગારદાર'.",
+      "suggested": "નોકરીયાત / પગારદાર"
+    },
+    {
+      "key": "profile.onboarding.steps.tob.hint",
+      "en": "Pinpoints your ascendant (Lagna) and house cusps",
+      "current": "ઉર્ધ્વ (લગ્ન) અને ભાવ ક્ષણિજ પ્રમાણ કરે છે",
+      "issue": "Wrong word + non-word",
+      "explanation": "'ઉર્ધ્વ' means 'upward/above', not 'ascendant'. 'ક્ષણિજ' is not a Gujarati word (likely intended 'ક્ષિતિજ' = horizon/cusp, but even that is awkward). 'પ્રમાણ કરે છે' doesn't mean 'pinpoints'.",
+      "suggested": "તમારું લગ્ન અને ભાવ સંધિઓ ચોક્કસપણે નક્કી કરે છે"
+    },
+    {
+      "key": "profile.onboarding.steps.pob.hint",
+      "en": "Search your city & select from the dropdown for precise coordinates",
+      "current": "તમારો શહેર શોધો અને સર્વેક્ષણ માંથી પસંદ કરો સર્વેક્ષણ માટે",
+      "issue": "Gender mismatch + wrong word + duplication",
+      "explanation": "'શહેર' is neuter, so 'તમારું શહેર' (not 'તમારો શહેર'). 'સર્વેક્ષણ' means 'survey', not 'dropdown' (should be 'ડ્રોપડાઉન'). The word 'સર્વેક્ષણ માટે' is repeated/dangling at the end.",
+      "suggested": "ચોક્કસ કોઓર્ડિનેટ્સ માટે તમારું શહેર શોધો અને ડ્રોપડાઉનમાંથી પસંદ કરો"
+    },
+    {
+      "key": "profile.onboarding.mobile.remainingHint",
+      "en": "Tap to see what's needed",
+      "current": "કોણ જરૂરી તે જોવા માટે ટ્યાપ કરો",
+      "issue": "Wrong word",
+      "explanation": "'કોણ' means 'who', not 'what'. The correct word here is 'શું'.",
+      "suggested": "શું જરૂરી છે તે જોવા માટે ટૅપ કરો"
+    },
+    {
+      "key": "profile.preferences.cosmicPreferences",
+      "en": "Cosmic Preferences",
+      "current": "આકાશીય પસંદીદાર",
+      "issue": "Wrong word",
+      "explanation": "'પસંદીદાર' means 'favorite', not 'preferences'. The correct word is 'પસંદગીઓ' (used in auth.register.preferencesLabel).",
+      "suggested": "આકાશીય પસંદગીઓ"
+    },
+    {
+      "key": "blogs.planets.shadowNodes",
+      "en": "The Shadow Nodes",
+      "current": "પછાયેલ નોડ્સ",
+      "issue": "Non-word",
+      "explanation": "'પછાયેલ' is not a standard Gujarati word. 'Shadow' is 'છાયા'; the term should be 'છાયા નોડ્સ' or 'છાયા ગ્રહો'.",
+      "suggested": "છાયા નોડ્સ"
+    },
+    {
+      "key": "blogs.planets.lowestVitality",
+      "en": "Lowest Vitality",
+      "current": "સબથી નીચું જીવનીયતા",
+      "issue": "Hindi word + gender mismatch",
+      "explanation": "'સબથી' is Hindi, not Gujarati (correct: 'સૌથી'). 'જીવનીયતા' is a non-standard form; standard is 'જીવનશક્તિ', which is feminine — so adjective should be 'નીચી', not 'નીચું'.",
+      "suggested": "સૌથી નીચી જીવનશક્તિ"
+    },
+    {
+      "key": "blogs.yogas.rajaDesc",
+      "en": "The kings of combinations. Formed when the lords of Kendra (action) houses unite with lords of Trikona (luck) houses. They guarantee status, authority, and massive success when activated.",
+      "current": "સમીકરણોના રાજાઓ. જ્યારે કેન્દ્ર (ક્રિયા) ભાવના પ્રભુઓ ત્રીણ (ભાગ્ય) ભાવના પ્રભુઓ સાથે જોડાય ત્યારે બનેલ. તેઓ સક્રિયતા હતી તે સમયે આત્માધીનતા, સત્તા અને વિશાળ સફળતા ગ્યારેન્ટી આપે છે.",
+      "issue": "Multiple wrong words",
+      "explanation": "'સમીકરણ' means mathematical 'equation', not 'combination' (should be 'સંયોજન/યોગ'). 'આત્માધીનતા' means 'self-dependence/autonomy', not 'status' (should be 'દરજ્જો'). 'ગ્યારેન્ટી' is a misspelling of 'ગૅરંટી'. 'ત્રીણ' should be 'ત્રિકોણ'.",
+      "suggested": "યોગોના રાજાઓ. જ્યારે કેન્દ્ર (ક્રિયા) ભાવોના સ્વામીઓ ત્રિકોણ (ભાગ્ય) ભાવોના સ્વામીઓ સાથે જોડાય ત્યારે રચાય છે. સક્રિય થાય ત્યારે તેઓ દરજ્જો, સત્તા અને વિશાળ સફળતાની ગૅરંટી આપે છે."
+    },
+    {
+      "key": "blogs.yogas.cancellationDesc",
+      "en": "Not all bad yogas are permanent. Neechabhanga occurs when a debilitated (weak) planet is supported by strong alignments, cancelling the weakness and often turning massive struggle into great success.",
+      "current": "તમામ આવતા યોગ કાયમી નથી. નીચભંગ ત્યારે ઘટે છે જ્યારે નીચ (નબળો) ગ્રહ મજબૂત ગોઠવણીઓ દ્વારા સમર્થિત હોય, નબળાઈને રદ્દ કરે છે અને ઘણી વાર વિશાળ સંઘર્ષને મહાન સફળતામાં ફેરવે છે.",
+      "issue": "Wrong word",
+      "explanation": "'આવતા' means 'coming/upcoming', not 'bad'. The intended word for 'bad yogas' is 'ખરાબ' or 'અશુભ'.",
+      "suggested": "બધા અશુભ યોગ કાયમી નથી. નીચભંગ ત્યારે થાય છે જ્યારે નીચ (નબળો) ગ્રહ મજબૂત ગોઠવણીઓ દ્વારા સમર્થિત હોય, નબળાઈને રદ કરે છે અને ઘણી વાર વિશાળ સંઘર્ષને મહાન સફળતામાં ફેરવે છે."
+    },
+    {
+      "key": "blogs.yogas.discoverCombinations",
+      "en": "Discover hidden combinations in your Kundli",
+      "current": "તમારી કુંડલીમાં છુપાયેલ સમીકરણો શોધો",
+      "issue": "Wrong word",
+      "explanation": "'સમીકરણ' means mathematical 'equation', not astrological 'combination'. Should be 'સંયોજનો' or 'યોગો'.",
+      "suggested": "તમારી કુંડળીમાં છુપાયેલ યોગો શોધો"
+    },
+    {
+      "key": "blogs.houses.upachayaDesc",
+      "en": "Houses 3, 6, 10, and 11 represent areas of life that improve over time through conscious effort. Malefic planets (Saturn, Mars, Sun) placed here actually give excellent results as they provide the drive to overcome competition.",
+      "current": "ભાવ 3, 6, 10 અને 11 જીવનના ક્ષેત્રોનું પ્રતિનિધિત્વ કરે છે જે જાણીતા પ્રયાસ દ્વારા સમયની સાથે વધે છે. અહીં મૂકાયેલ મંદગ્રહ (શનિ, મંગળ, સૂર્ય) વાસ્તવમાં ઉત્તમ પરિણામો આપે છે કારણ કે તેઓ સ્પર્ધાને દૂર કરવાની ચાલના પ્રદાન કરે છે.",
+      "issue": "Wrong word + non-word",
+      "explanation": "'જાણીતા' means 'known/famous', not 'conscious' (should be 'સભાન' or 'જાગૃત'). 'ચાલના' is not a standard Gujarati word — the intended meaning 'drive/motivation' is 'પ્રેરણા'.",
+      "suggested": "ભાવ 3, 6, 10 અને 11 જીવનના એવા ક્ષેત્રોનું પ્રતિનિધિત્વ કરે છે જે સભાન પ્રયાસ દ્વારા સમય સાથે સુધરે છે. અહીં મૂકાયેલ પાપગ્રહો (શનિ, મંગળ, સૂર્ય) વાસ્તવમાં ઉત્તમ પરિણામ આપે છે કારણ કે તેઓ સ્પર્ધાને જીતવાની પ્રેરણા આપે છે."
+    },
+    {
+      "key": "blogs.houses.dusthana",
+      "en": "Dusthana (Difficult) Houses",
+      "current": "દુષ્ટાન (મુશ્કેલ) ભાવ",
+      "issue": "Typo / wrong Sanskrit transliteration",
+      "explanation": "'દુષ્ટાન' is not the correct transliteration — it reads like 'evil ones'. The Sanskrit term Dusthana should be 'દુઃસ્થાન' (दुःस्थान).",
+      "suggested": "દુઃસ્થાન (મુશ્કેલ) ભાવ"
+    },
+    {
+      "key": "profile.security.logoutConfirmDialog.message",
+      "en": "This will sign out your account from all other devices. Your current session will remain active.",
+      "current": "આ તમારા ખાતાને બધા અન્ય ઉપકરણોમાંથી સાઇન આઉટ કરશે. તમારો વર્તમાન સત્ર સક્રિય રહીશે.",
+      "issue": "Wrong verb conjugation",
+      "explanation": "'રહીશે' is the first-person singular future ('I will remain'). The third-person form needed here is 'રહેશે' ('it will remain').",
+      "suggested": "આ તમારા ખાતાને બધા અન્ય ઉપકરણોમાંથી સાઇન આઉટ કરશે. તમારો વર્તમાન સત્ર સક્રિય રહેશે."
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "locale": "pa",
+  "issues": [
+    {
+      "key": "blogs.houses.description",
+      "en": "In Vedic Astrology, the 12 Houses (Bhavas) represent the 12 domains of human life. While planets provide the energy and signs provide the environment, the houses are the actual fields of experience where karma is enacted.",
+      "current": "ਵੈਦਿਕ ਜੋਤਿਸ਼ ਵਿੱਚ, 12 ਭਾਵ ਮਨੁੱਖੀ ਜੀਵਨ ਦੇ 12 ਸੂਤਰਾਂ ਦਨ੍ਹ ਪ੍ਰਤੀਨਿਧਿੱਤਵ ਕਰਦੇ ਹਨ। ਜਦਕਿ ਗ੍ਰਹ ਸ਼ਕਤੀ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਨ ਅਤੇ ਰਾਸ਼ੀ ਵਾਤਾਵਰਨ ਪ੍ਰਦਾਨ ਕਰਦੀ ਹੈ, ਭਾਵ ਉਹ ਅਸਲ ਖੇਤਰ ਹਨ ਜਿੱਥੇ ਕਰਮ ਅੰਜਾਮ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।",
+      "issue": "Typo / non-word + wrong concept word",
+      "explanation": "'ਦਨ੍ਹ' is a non-word (should be 'ਦਾ'). 'ਸੂਤਰਾਂ' means 'threads/formulas', wrong for 'domains' — should be 'ਖੇਤਰਾਂ'. The Hindi-style 'ਪ੍ਰਤੀਨਿਧਿੱਤਵ' is awkward in Punjabi.",
+      "suggested": "ਵੈਦਿਕ ਜੋਤਿਸ਼ ਵਿੱਚ, 12 ਭਾਵ ਮਨੁੱਖੀ ਜੀਵਨ ਦੇ 12 ਖੇਤਰਾਂ ਨੂੰ ਦਰਸਾਉਂਦੇ ਹਨ। ਜਦਕਿ ਗ੍ਰਹਿ ਸ਼ਕਤੀ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਨ ਅਤੇ ਰਾਸ਼ੀਆਂ ਵਾਤਾਵਰਨ ਪ੍ਰਦਾਨ ਕਰਦੀਆਂ ਹਨ, ਭਾਵ ਉਹ ਅਸਲ ਖੇਤਰ ਹਨ ਜਿੱਥੇ ਕਰਮ ਪ੍ਰਗਟ ਹੁੰਦਾ ਹੈ।"
+    },
+    {
+      "key": "blogs.houses.kendraDesc",
+      "en": "Houses 1, 4, 7, and 10 form the pillars of life. They govern self, home, partnerships, and career. Planets placed here have the maximum power to shape your worldly existence and initiate massive action.",
+      "current": "ਭਾਵ 1, 4, 7 ਅਤੇ 10 ਜੀਵਨ ਦੀਆਂ ਸਤੰਭਾਂ ਹਨ। ਇਹ ਆਪ, ਘਰ, ਸਾਂਝੇਦਾਰੀ ਅਤੇ ਕੈਰੀਅਰ ਦਾ ਸਾਂਭ-ਸੰਭਾਲ ਕਰਦੇ ਹਨ। ਇੱਥੇ ਰੱਖੇ ਗ੍ਰਹ ਤੁਹਾਡੀ ਦੁਨਿਆਵੀ ਹੋਂਦ ਨੂੰ ਰੂਪ ਦਿਨ ਅਤੇ ਵੱਡੀ ਕਾਰਵਾਈ ਸ਼ੁਰੂ ਕਰਨ ਦੀ ਸਰਵੋਚ੍ਚ ਸ਼ਕਤੀ ਰੱਖਦੇ ਹਨ।",
+      "issue": "Non-word verb form",
+      "explanation": "'ਦਿਨ' is a noun meaning 'day' — wrong verb form for 'shape'. Should be 'ਦੇਣ ਦੀ'. 'ਸਾਂਭ-ਸੰਭਾਲ ਕਰਦੇ ਹਨ' is awkward for 'govern' — better is 'ਚਲਾਉਂਦੇ ਹਨ'. 'ਸਤੰਭਾਂ' is Hindi loan; Punjabi prefers 'ਥੰਮ੍ਹ'.",
+      "suggested": "ਭਾਵ 1, 4, 7 ਅਤੇ 10 ਜੀਵਨ ਦੇ ਥੰਮ੍ਹ ਹਨ। ਇਹ ਆਪਣੇ-ਆਪ, ਘਰ, ਸਾਂਝੇਦਾਰੀਆਂ ਅਤੇ ਕਰੀਅਰ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦੇ ਹਨ। ਇੱਥੇ ਸਥਿਤ ਗ੍ਰਹਿਆਂ ਕੋਲ ਤੁਹਾਡੀ ਦੁਨਿਆਵੀ ਹੋਂਦ ਨੂੰ ਰੂਪ ਦੇਣ ਅਤੇ ਵੱਡੀ ਕਾਰਵਾਈ ਸ਼ੁਰੂ ਕਰਨ ਦੀ ਸਰਵਉੱਚ ਸ਼ਕਤੀ ਹੁੰਦੀ ਹੈ।"
+    },
+    {
+      "key": "blogs.houses.trikonaDesc",
+      "en": "Houses 1, 5, and 9 are the houses of Dharma and pure blessing. They represent past life merits (Purva Punya), intelligence, and divine grace. Planets here provide natural luck and spiritual evolution.",
+      "current": "ਭਾਵ 1, 5 ਅਤੇ 9 ਧਰਮ ਅਤੇ ਸ਼ੁੱਧ ਆਸ਼ੀਰਵਾਦ ਦੇ ਭਾਵ ਹਨ। ਇਹ ਪ੍ਰਾਚੀਨ ਜੀਵਨ ਦੇ ਪੁੰਨ (ਪੂਰਵ ਪੁੰਨ), ਮੇਧਾ ਅਤੇ ਦਿਵਨ ਕ੍ਰਿਪਾ ਦੀ ਨੁਮਾਈਸ਼ ਕਰਦੇ ਹਨ। ਇੱਥੇ ਰੱਖੇ ਗ੍ਰਹ ਕੁਦਰਤੀ ਸ਼ਾਂਤ ਅਤੇ ਆਤਮਿਕ ਵਿਕਾਸ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਨ।",
+      "issue": "Non-word + wrong word for 'luck'",
+      "explanation": "'ਦਿਵਨ' is a non-word — correct is 'ਦੈਵੀ' (divine). 'ਸ਼ਾਂਤ' means 'peace/calm', wrong for 'luck' — should be 'ਕਿਸਮਤ'. 'ਪ੍ਰਾਚੀਨ ਜੀਵਨ' means 'ancient life' not 'past life' — should be 'ਪਿਛਲੇ ਜਨਮ'. 'ਨੁਮਾਈਸ਼' (exhibition) is wrong for 'represent' — should be 'ਪ੍ਰਤੀਨਿਧਤਾ'.",
+      "suggested": "ਭਾਵ 1, 5 ਅਤੇ 9 ਧਰਮ ਅਤੇ ਸ਼ੁੱਧ ਆਸ਼ੀਰਵਾਦ ਦੇ ਭਾਵ ਹਨ। ਇਹ ਪਿਛਲੇ ਜਨਮ ਦੇ ਪੁੰਨ (ਪੂਰਵ ਪੁੰਨ), ਬੁੱਧੀ, ਅਤੇ ਦੈਵੀ ਕ੍ਰਿਪਾ ਦੀ ਪ੍ਰਤੀਨਿਧਤਾ ਕਰਦੇ ਹਨ। ਇੱਥੇ ਸਥਿਤ ਗ੍ਰਹਿ ਕੁਦਰਤੀ ਕਿਸਮਤ ਅਤੇ ਆਤਮਿਕ ਵਿਕਾਸ ਪ੍ਰਦਾਨ ਕਰਦੇ ਹਨ।"
+    },
+    {
+      "key": "blogs.houses.dusthanaDesc",
+      "en": "Houses 6, 8, and 12 govern obstacles, transformation, and loss. While challenging for material pursuits, they are essential for burning karma, building resilience, and achieving ultimate spiritual liberation (Moksha).",
+      "current": "ਭਾਵ 6, 8 ਅਤੇ 12 ਰੁਕਾਵਟਾਂ, ਪਰਿਵਰਤਨ ਅਤੇ ਹਾਨਿ ਦਾ ਸਾਂਭ-ਸੰਭਾਲ ਕਰਦੇ ਹਨ। ਜਦਕਿ ਭੌਤਿਕ ਲਾਭਾਂ ਲਈ ਚੁਨੌਤੀਪੂਰਨ ਹਨ, ਇਹ ਕਰਮ ਜਲਾਉਣ, ਤਾਕਤ ਪਾਉਣ ਅਤੇ ਅਖ਼ੀ ਮੁਕਤੀ (ਮੋਖ) ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਲਾਜ਼ਮੀ ਹਨ।",
+      "issue": "Non-word + truncated Sanskrit term",
+      "explanation": "'ਅਖ਼ੀ' is a non-word — correct is 'ਅੰਤਿਮ' (ultimate). 'ਮੋਖ' is a malformed truncation; correct Sanskrit/Punjabi is 'ਮੋਕਸ਼'. 'ਚੁਨੌਤੀਪੂਰਨ' is misspelled Hindi-style; Punjabi convention used elsewhere is 'ਚੁਣੌਤੀਪੂਰਨ'.",
+      "suggested": "ਭਾਵ 6, 8 ਅਤੇ 12 ਰੁਕਾਵਟਾਂ, ਪਰਿਵਰਤਨ ਅਤੇ ਨੁਕਸਾਨ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦੇ ਹਨ। ਭੌਤਿਕ ਲਾਭਾਂ ਲਈ ਚੁਣੌਤੀਪੂਰਨ ਹੋਣ ਦੇ ਬਾਵਜੂਦ, ਇਹ ਕਰਮ ਜਲਾਉਣ, ਸਹਿਣਸ਼ੀਲਤਾ ਬਣਾਉਣ ਅਤੇ ਅੰਤਿਮ ਆਤਮਿਕ ਮੁਕਤੀ (ਮੋਕਸ਼) ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਲਾਜ਼ਮੀ ਹਨ।"
+    },
+    {
+      "key": "blogs.planets.description",
+      "en": "In Vedic Astrology, the Navagraha (Nine Planets) are the cosmic agents of karma. They act as the dynamic forces that trigger events, shape your psychology, and guide the soul's evolutionary journey through time and space.",
+      "current": "ਵੈਦਿਕ ਜੋਤਿਸ਼ ਵਿੱਚ, ਨਵਗ੍ਰਹ (ਨੌ ਗ੍ਰਹ) ਕਰਮ ਦੇ ਬ੍ਰਹਮਾਂਡੀ ਏਜੰਟ ਹਨ। ਇਹ ਗਤੀਸ਼ੀਲ ਸ਼ਕਤੀਆਂ ਵਜੋਂ ਕਾਰਜ ਕਰਦੇ ਹਨ ਜੋ ਘਟਨਾਵਾਂ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰਦੀਆਂ ਹਨ, ਤੁਹਾਡੀ ਮਾਨਸਿਕਤਾ ਨੂੰ ਰੂਪ ਦਿੰਦੀਆਂ ਹਨ, ਅਤੇ ਆਤਮਾ ਦੀ ਵਿਕਾਸੀ ਯਾਤਰਾ ਨੂੰ ਸਮਾਂ ਅਤੇ ਸਪੇਸ ਵਿੱਚੋਂ ਮਾਗਦਰਸ਼ਨ ਕਰਦੀਆਂ ਹਨ।",
+      "issue": "Typo in critical word",
+      "explanation": "'ਮਾਗਦਰਸ਼ਨ' is missing the 'ਰ' — correct word is 'ਮਾਰਗਦਰਸ਼ਨ' (guidance), which is used correctly elsewhere in the file.",
+      "suggested": "...ਸਮਾਂ ਅਤੇ ਸਪੇਸ ਵਿੱਚੋਂ ਮਾਰਗਦਰਸ਼ਨ ਕਰਦੀਆਂ ਹਨ।"
+    },
+    {
+      "key": "blogs.planets.lowestVitality",
+      "en": "Lowest Vitality",
+      "current": "ਸਭ ਤੋਂ ਨੀਕ ਜੀਵਨ ਸ਼ਕਤੀ",
+      "issue": "Non-word",
+      "explanation": "'ਨੀਕ' is a non-word; correct is 'ਨੀਵੀਂ' (lowest, feminine) or 'ਨੀਚ'.",
+      "suggested": "ਸਭ ਤੋਂ ਨੀਵੀਂ ਜੀਵਨ ਸ਼ਕਤੀ"
+    },
+    {
+      "key": "blogs.planets.functionalNature",
+      "en": "Functional Nature",
+      "current": "ਕਰਤਵ ਸਮੋਰਨਾ",
+      "issue": "Non-word",
+      "explanation": "'ਸਮੋਰਨਾ' is not a Punjabi word. 'ਕਰਤਵ' (duty) is also a poor match for 'functional'. Correct phrase is 'ਕਾਰਜਾਤਮਕ ਸੁਭਾਅ'.",
+      "suggested": "ਕਾਰਜਾਤਮਕ ਸੁਭਾਅ"
+    },
+    {
+      "key": "blogs.planets.subtitle",
+      "en": "Archetypes",
+      "current": "ਮੂਲ ਚਿੱਤਰ",
+      "issue": "Wrong meaning",
+      "explanation": "'ਮੂਲ ਚਿੱਤਰ' literally means 'basic image/picture', not 'archetypes'. Better is the loanword 'ਆਰਕੀਟਾਈਪ' (used elsewhere in the file) or 'ਮੂਲ ਪ੍ਰਤੀਕ'.",
+      "suggested": "ਆਰਕੀਟਾਈਪ"
+    },
+    {
+      "key": "blogs.yogas.rajaDesc",
+      "en": "The kings of combinations. Formed when the lords of Kendra (action) houses unite with lords of Trikona (luck) houses. They guarantee status, authority, and massive success when activated.",
+      "current": "ਸੰਜੋਗਾਂ ਦੇ ਰਾਜਾ। ਕੇਂਦ (ਕਾਰਵਾਈ) ਭਾਵਾਂ ਦੇ ਪ੍ਰਭੂਆਂ ਨਾਲ ਤ੍ਰਿਕੋਣ (ਭਾਗ) ਭਾਵਾਂ ਦੇ ਪ੍ਰਭੂਆਂ ਦੀ ਯੋਗਤਾ ਲਖ ਕਿਉਂ ਮਿਲਦੀ ਹੈ। ਇਹ ਜਾਗ ਜਦੋਂ ਸਕ੍ਰਿਯ ਹੁੰਦੇ ਹਨ ਤਦ ਸਥਿਤੀ, ਅਧਿਕਾਰ ਅਤੇ ਵੱਡੀ ਸਫ਼ਲਤਾ ਦੀ ਗ੍ਰੰਥੀ ਦਿੰਦੇ ਹਨ।",
+      "issue": "Catastrophic broken syntax + non-words",
+      "explanation": "Multiple broken segments: 'ਕੇਂਦ' missing 'ਰ' (should be 'ਕੇਂਦਰ'); 'ਯੋਗਤਾ ਲਖ ਕਿਉਂ' is gibberish (likely meant 'ਯੋਗ ਉਦੋਂ' — yoga forms when); 'ਜਾਗ' is wrong (should be 'ਯੋਗ'); 'ਗ੍ਰੰਥੀ' (knot) is wrong for 'guarantee' — should be 'ਗਾਰੰਟੀ'. 'ਭਾਗ' (part) is wrong for 'luck' — should be 'ਭਾਗ' may be intended (fortune) but 'ਕਿਸਮਤ' is clearer.",
+      "suggested": "ਸੰਜੋਗਾਂ ਦੇ ਰਾਜੇ। ਉਦੋਂ ਬਣਦੇ ਹਨ ਜਦੋਂ ਕੇਂਦਰ (ਕਾਰਵਾਈ) ਭਾਵਾਂ ਦੇ ਸੁਆਮੀ ਤ੍ਰਿਕੋਣ (ਕਿਸਮਤ) ਭਾਵਾਂ ਦੇ ਸੁਆਮੀਆਂ ਨਾਲ ਮਿਲਦੇ ਹਨ। ਇਹ ਯੋਗ ਜਦੋਂ ਸਕ੍ਰਿਯ ਹੁੰਦੇ ਹਨ ਤਾਂ ਪਦ, ਅਧਿਕਾਰ ਅਤੇ ਵੱਡੀ ਸਫ਼ਲਤਾ ਦੀ ਗਾਰੰਟੀ ਦਿੰਦੇ ਹਨ।"
+    },
+    {
+      "key": "blogs.yogas.dhanaDesc",
+      "en": "Combinations for absolute wealth. When the houses of earnings (2nd) and gains (11th) connect deeply with the houses of destiny (5th, 9th), the native is destined for immense financial prosperity.",
+      "current": "ਸੰਪੂਰਨ ਦੌਲਤ ਦੇ ਸੰਜੋਗ। ਜਦੋਂ ਆਮਦਨ ਦੇ ਘਰ (2ਮ) ਅਤੇ ਲਾਭ (11ਮ) ਕੁੰਡਲੀ ਦੇ ਚੱਕਰ (5ਮ, 9ਮ) ਦੀ ਗ਼ਹਰਾਈ ਨਾਲ ਸੰਪਰਕ ਕਰਦੇ ਹਨ, ਤਾਂ ਜਾਤਕ ਬੇਅੰਤ ਆਰਥਿਕ ਸਮ੍ਰਿੱਧ ਲਈ ਵਿਲੱਖਿਤ ਹਵੇ ਹਨ।",
+      "issue": "Non-words + wrong ordinal abbreviation",
+      "explanation": "'2ਮ', '11ਮ', '5ਮ', '9ਮ' are wrong ordinal suffixes — Punjabi convention is 'ਵਾਂ/ਵੇਂ' (2ਵੇਂ, 11ਵੇਂ). 'ਗ਼ਹਰਾਈ' misspelled (correct: 'ਡੂੰਘਾਈ'). 'ਵਿਲੱਖਿਤ ਹਵੇ ਹਨ' is broken syntax — likely meant 'ਨਿਯਤ/ਨਿਸ਼ਚਿਤ ਹਨ' (destined). 'ਸਮ੍ਰਿੱਧ' is incomplete (should be 'ਸਮ੍ਰਿੱਧੀ'). 'ਚੱਕਰ' wrong for 'destiny' (should be 'ਕਿਸਮਤ').",
+      "suggested": "ਸੰਪੂਰਨ ਦੌਲਤ ਦੇ ਸੰਜੋਗ। ਜਦੋਂ ਆਮਦਨ ਦੇ ਘਰ (2ਵੇਂ) ਅਤੇ ਲਾਭ ਦੇ ਘਰ (11ਵੇਂ) ਕਿਸਮਤ ਦੇ ਘਰਾਂ (5ਵੇਂ, 9ਵੇਂ) ਨਾਲ ਡੂੰਘਾਈ ਨਾਲ ਜੁੜਦੇ ਹਨ, ਤਾਂ ਜਾਤਕ ਬੇਅੰਤ ਆਰਥਿਕ ਸਮ੍ਰਿੱਧੀ ਲਈ ਨਿਯਤ ਹੁੰਦਾ ਹੈ।"
+    },
+    {
+      "key": "blogs.yogas.cancellationDesc",
+      "en": "Not all bad yogas are permanent. Neechabhanga occurs when a debilitated (weak) planet is supported by strong alignments, cancelling the weakness and often turning massive struggle into great success.",
+      "current": "ਸਾਰੇ ਬੁਰੇ ਯੋਗ ਸ਼ਾਸ਼ਵਤ ਨਹੀਂ ਹਨ। ਨੀਚ ਭੰਗ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਇੱਕ ਨੀਚ (ਕਮਜ਼ੋਰ) ਗ੍ਰਹ ਮਜ਼ਬੂਤ ਸੰਰੇਖਣਾਂ ਦ੍ਵਾਰਾ ਸਹਾਇਤਾ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ, ਕਮਜ਼ੋਰੀ ਨੂੰ ਰੱਦ ਕਰਦੇ ਹੋਏ ਅਤੇ ਅਕਸਰ ਵੱਡੀ ਮਸਲਤ ਨੂੰ ਮਹਾਨ ਸਫ਼ਲਤਾ ਵਿੱਚ ਪਰਿਵਰਤਨ ਕਰਦੇ ਹੋਏ।",
+      "issue": "Non-word for 'struggle'",
+      "explanation": "'ਮਸਲਤ' is a non-word (perhaps confused with Urdu 'ਮਸਲਾ' = problem). Correct Punjabi for 'struggle' is 'ਸੰਘਰਸ਼' or 'ਮੁਸ਼ਕਲ'. 'ਸ਼ਾਸ਼ਵਤ' is Hindi-style (Punjabi: 'ਸਥਾਈ'/'ਪੱਕੇ').",
+      "suggested": "ਸਾਰੇ ਬੁਰੇ ਯੋਗ ਸਥਾਈ ਨਹੀਂ ਹੁੰਦੇ। ਨੀਚ ਭੰਗ ਉਦੋਂ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਇੱਕ ਨੀਚ (ਕਮਜ਼ੋਰ) ਗ੍ਰਹਿ ਨੂੰ ਮਜ਼ਬੂਤ ਸੰਰੇਖਣਾਂ ਦਾ ਸਹਾਰਾ ਮਿਲਦਾ ਹੈ, ਕਮਜ਼ੋਰੀ ਨੂੰ ਰੱਦ ਕਰਦੇ ਹੋਏ ਅਤੇ ਅਕਸਰ ਵੱਡੇ ਸੰਘਰਸ਼ ਨੂੰ ਮਹਾਨ ਸਫ਼ਲਤਾ ਵਿੱਚ ਬਦਲਦੇ ਹੋਏ।"
+    },
+    {
+      "key": "blogs.remedies.efficacyScale",
+      "en": "Efficacy Scale",
+      "current": "ਕਾਰਖਾਨੇ ਪੱਧਰ",
+      "issue": "Catastrophic mistranslation",
+      "explanation": "'ਕਾਰਖਾਨੇ' means 'factories' — completely wrong for 'Efficacy'. The intended word is 'ਪ੍ਰਭਾਵਸ਼ੀਲਤਾ' (effectiveness/efficacy).",
+      "suggested": "ਪ੍ਰਭਾਵਸ਼ੀਲਤਾ ਪੱਧਰ"
+    },
+    {
+      "key": "blogs.remedies.intensity",
+      "en": "Intensity",
+      "current": "ਸ਼ਿਦਤ",
+      "issue": "Wrong language / non-Punjabi",
+      "explanation": "'ਸ਼ਿਦਤ' is Urdu/Persian-origin, not standard Punjabi. The correct Punjabi word — used elsewhere in this very file at match.mangal.severity — is 'ਤੀਬਰਤਾ'.",
+      "suggested": "ਤੀਬਰਤਾ"
+    },
+    {
+      "key": "blogs.remedies.entity",
+      "en": "Entity",
+      "current": "ਸੰਟਾ",
+      "issue": "Non-word",
+      "explanation": "'ਸੰਟਾ' is not a Punjabi word. 'Entity' here should be 'ਇਕਾਈ' or 'ਸੱਤਾ'.",
+      "suggested": "ਇਕਾਈ"
+    },
+    {
+      "key": "blogs.remedies.target",
+      "en": "Target",
+      "current": "ਨਿਸ਼ਾਣਾ",
+      "issue": "Misspelled",
+      "explanation": "Misspelled — the nukta/dot is wrong. The correct Punjabi spelling is 'ਨਿਸ਼ਾਨਾ' (with plain 'ਨ', not 'ਣ').",
+      "suggested": "ਨਿਸ਼ਾਨਾ"
+    },
+    {
+      "key": "blogs.nakshatras.subtitle",
+      "en": "Mansions",
+      "current": "ਮਾਂਨਸਨ",
+      "issue": "Non-word phonetic transliteration",
+      "explanation": "'ਮਾਂਨਸਨ' is a malformed phonetic of English 'mansion', not a meaningful Punjabi word. Correct translation is 'ਮਹਿਲ' (the same word used correctly in nav.the27NakshatrasDesc → 'ਚੰਦਰਮਾ ਦੇ ਮਹਿਲ').",
+      "suggested": "ਮਹਿਲ"
+    },
+    {
+      "key": "blogs.houses.introduction",
+      "en": "Introduction",
+      "current": "ਜਾਣ-ਪਰਿਚਾਈ",
+      "issue": "Non-word",
+      "explanation": "'ਪਰਿਚਾਈ' is not a Punjabi word (appears to be a malformed mix of Hindi 'ਪਰਿਚਯ' and 'ਪਛਾਣ'). Standard Punjabi for 'introduction' is 'ਜਾਣ-ਪਛਾਣ'. Same issue at blogs.planets.introduction and blogs.yogas.introduction.",
+      "suggested": "ਜਾਣ-ਪਛਾਣ"
+    },
+    {
+      "key": "profile.fields.genderPlaceholder",
+      "en": "Select Gender",
+      "current": "ਜਿੰਦਰ ਚੁਣੋ",
+      "issue": "Anglicism / non-word",
+      "explanation": "'ਜਿੰਦਰ' is a phonetic transliteration of English 'gender' that doesn't exist as a Punjabi word. The label key uses 'ਲਿੰਗ' just above — that's the correct Punjabi word.",
+      "suggested": "ਲਿੰਗ ਚੁਣੋ"
+    },
+    {
+      "key": "profile.fields.genderOptions.female",
+      "en": "Female",
+      "current": "ਇਰਤ",
+      "issue": "Non-word",
+      "explanation": "'ਇਰਤ' is not a Punjabi word — appears to be a corrupted form. The correct word, used elsewhere at auth.register.genderFemale, is 'ਔਰਤ'.",
+      "suggested": "ਔਰਤ"
+    },
+    {
+      "key": "profile.fields.maritalOptions.single",
+      "en": "Single",
+      "current": "ਅਕੇਲੋ",
+      "issue": "Wrong language (Hindi)",
+      "explanation": "'ਅਕੇਲੋ' is Hindi 'अकेला' transcribed in Gurmukhi, not idiomatic Punjabi. For marital 'Single', Punjabi uses 'ਕੁਆਰਾ' or 'ਅਣਵਿਆਹਿਆ'. (The auth.register section correctly uses 'ਗੈਰ-ਵਿਆਹਿਆ'.)",
+      "suggested": "ਕੁਆਰਾ"
+    },
+    {
+      "key": "profile.fields.maritalOptions.notSpecified",
+      "en": "Prefer not to say",
+      "current": "ਸਾਹ ਕਰਣਾ ਪਸੰਦ ਨਹੀਂ",
+      "issue": "Non-words / broken phrase",
+      "explanation": "'ਸਾਹ ਕਰਣਾ' is not a meaningful Punjabi phrase ('ਸਾਹ' means 'breath'). The correct phrase, used elsewhere at auth.register.maritalNotSpecified, is 'ਦੱਸਣਾ ਨਹੀਂ ਚਾਹੁੰਦੇ'.",
+      "suggested": "ਦੱਸਣਾ ਨਹੀਂ ਚਾਹੁੰਦੇ"
+    },
+    {
+      "key": "profile.fields.occupationPlaceholder",
+      "en": "Select Occupation",
+      "current": "ਕਸ਼ਾ ਚੁਣੋ",
+      "issue": "Non-word",
+      "explanation": "'ਕਸ਼ਾ' is not a Punjabi word. The label key just above uses 'ਕਿੱਤਾ' (occupation), which is correct.",
+      "suggested": "ਕਿੱਤਾ ਚੁਣੋ"
+    },
+    {
+      "key": "profile.fields.occupationOptions.retired",
+      "en": "Retired",
+      "current": "ਸੋਲਾ",
+      "issue": "Non-word / catastrophic mistranslation",
+      "explanation": "'ਸੋਲਾ' resembles the numeral 'sixteen' colloquially but is not a word for 'retired'. The correct Punjabi term, used at auth.register.occupationRetired, is 'ਸੇਵਾਮੁਕਤ'.",
+      "suggested": "ਸੇਵਾਮੁਕਤ"
+    },
+    {
+      "key": "profile.fields.occupationOptions.homemaker",
+      "en": "Homemaker",
+      "current": "ਘਰ ਸਵਾਮਣ",
+      "issue": "Non-standard / awkward",
+      "explanation": "'ਘਰ ਸਵਾਮਣ' is non-standard ('ਸਵਾਮਣ' is not a recognized Punjabi word). The correct term, used at auth.register.occupationHomemaker, is 'ਘਰੇਲੂ ਮਹਿਲਾ'.",
+      "suggested": "ਘਰੇਲੂ ਮਹਿਲਾ"
+    },
+    {
+      "key": "profile.fields.occupationOptions.notSpecified",
+      "en": "Prefer not to say",
+      "current": "ਨਾ ਅਹਲ ਦੱਸਣਾ",
+      "issue": "Non-word + awkward phrase",
+      "explanation": "'ਅਹਲ' is not a Punjabi word, and the overall phrase is ungrammatical. Same correct rendering as elsewhere in the file: 'ਦੱਸਣਾ ਨਹੀਂ ਚਾਹੁੰਦੇ'.",
+      "suggested": "ਦੱਸਣਾ ਨਹੀਂ ਚਾਹੁੰਦੇ"
+    },
+    {
+      "key": "profile.fields.errors.nameTooShort",
+      "en": "Name must be at least 2 characters",
+      "current": "ਨਾਮ �ਘੱਟ ਤੋਂ ਘੱਟ 2 ਰਾਂ ਹੋ ਸਕਦਾ ਹੈ",
+      "issue": "Non-word + reversed logic",
+      "explanation": "'ਰਾਂ' is not a word (it's a stranded suffix — should be 'ਅੱਖਰਾਂ' = letters/characters). Also 'ਹੋ ਸਕਦਾ ਹੈ' (can be) reverses the constraint — should be 'ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ' (must be).",
+      "suggested": "ਨਾਮ ਘੱਟੋ-ਘੱਟ 2 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ"
+    },
+    {
+      "key": "profile.security.deleteAccountModal.confirmButton",
+      "en": "Delete Forever",
+      "current": "ਸ਼ਾਹੀ ਤੌਰ 'ਤੇ ਮਿਟਾਓ",
+      "issue": "Catastrophic mistranslation",
+      "explanation": "'ਸ਼ਾਹੀ ਤੌਰ 'ਤੇ' means 'royally / in a royal manner' — completely wrong for 'Forever' on a permanent-delete button. Should be 'ਪੱਕੇ ਤੌਰ 'ਤੇ' (permanently/forever).",
+      "suggested": "ਪੱਕੇ ਤੌਰ 'ਤੇ ਮਿਟਾਓ"
+    },
+    {
+      "key": "profile.security.deleteAccountModal.description",
+      "en": "This action is permanent and will securely erase all your birth details, generated horoscopes, and preferences. Please confirm with your password to proceed.",
+      "current": "ਇਹ ਕਾਰਵਾਈ ਸਥਾਈ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਸਾਰੇ ਜਨਮ ਵਿਵਰਣ, ਤਿਆਰ ਰਾਸ਼ੀਫਲ ਅਤੇ ਪਸੰਦਾਂ ਨੂੰ ਸੁਰੱਖਤ ਤੌਰ 'ਤੇ ਮਿਟਾ ਦੇਗੀ। ਅਗੇ ਜਾਣ ਲਈ ਆਪਣਾ ਪਾਸਵਰਡ ਨਾਲ ਪੁਸ਼ਟੀ ਕਰੋ।",
+      "issue": "Typo + broken postposition",
+      "explanation": "'ਸੁਰੱਖਤ' is a typo (missing characters); correct is 'ਸੁਰੱਖਿਅਤ'. 'ਆਪਣਾ ਪਾਸਵਰਡ ਨਾਲ' uses the wrong postposition agreement; should be 'ਆਪਣੇ ਪਾਸਵਰਡ ਨਾਲ'. 'ਅਗੇ' should be 'ਅੱਗੇ'.",
+      "suggested": "ਇਹ ਕਾਰਵਾਈ ਸਥਾਈ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਸਾਰੇ ਜਨਮ ਵੇਰਵੇ, ਤਿਆਰ ਕੀਤੇ ਰਾਸ਼ੀਫਲ ਅਤੇ ਤਰਜੀਹਾਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਤੌਰ 'ਤੇ ਮਿਟਾ ਦੇਵੇਗੀ। ਅੱਗੇ ਵਧਣ ਲਈ ਆਪਣੇ ਪਾਸਵਰਡ ਨਾਲ ਪੁਸ਼ਟੀ ਕਰੋ।"
+    },
+    {
+      "key": "profile.security.changePasswordWarning",
+      "en": "Changing your password will automatically log you out of all active sessions, including this one.",
+      "current": "ਆਪਣਾ ਪਾਸਵਰਡ ਬਦਲਨਾ ਆਤਕ ਸਾਰੇ ਸਕ੍ਰਿਯ ਸੈਸ਼ਨਾਂ ਤੋਂ ਆਉਟ ਕਰੇਗਾ, ਇਸ ਨੂੰ ਸਮੇਤ।",
+      "issue": "Non-word + broken syntax",
+      "explanation": "'ਆਤਕ' is a non-word (intended 'ਆਪਣੇ-ਆਪ' = automatically). 'ਆਉਟ ਕਰੇਗਾ' uses bare English 'out' as verb. 'ਇਸ ਨੂੰ ਸਮੇਤ' is grammatically reversed — should be 'ਇਸ ਸਮੇਤ'.",
+      "suggested": "ਆਪਣਾ ਪਾਸਵਰਡ ਬਦਲਣ ਨਾਲ ਤੁਸੀਂ ਆਪਣੇ-ਆਪ ਸਾਰੇ ਸਕ੍ਰਿਯ ਸੈਸ਼ਨਾਂ ਤੋਂ, ਇਸ ਸਮੇਤ, ਲੌਗ ਆਊਟ ਹੋ ਜਾਓਗੇ।"
+    },
+    {
+      "key": "profile.onboarding.sidebar.description",
+      "en": "Your birth details are the foundation of every cosmic insight — they unlock personalized horoscopes, kundli analysis, and AI-powered Vedic readings.",
+      "current": "ਤੁਹਾਡੇ ਜਨਮ ਵਿਵਰਣ ਪ੍ਰਤੀ ਬ੍ਰਹਮਾਂਡੀ ਨਖ਼ਜ਼ੇ ਦੀ ਨੀਂਹ ਹਨ - ਇਹ ਨਿੱਜੀ ਰਾਸ਼ੀਫਲ, ਕੁੰਡਲੀ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ AI-ਪਾਵਟ ਵੈਦਿਕ ਪੜ੍ਹਾਈਆਂ ਖੋਲ੍ਹਦੇ ਹਨ।",
+      "issue": "Multiple non-words + wrong postposition",
+      "explanation": "'ਨਖ਼ਜ਼ੇ' is a non-word (intended 'ਨਜ਼ਰੀਏ'/'ਇਨਸਾਈਟ'). 'AI-ਪਾਵਟ' is a non-word (intended 'AI-ਚਾਲਿਤ' or 'AI-ਪਾਵਰਡ'). 'ਪ੍ਰਤੀ' means 'per/towards' — wrong here; should be 'ਹਰ' or removed entirely. 'ਪੜ੍ਹਾਈਆਂ' means 'studies', not 'readings' — should be 'ਰੀਡਿੰਗਜ਼' / 'ਪੜ੍ਹਨਾਂ'.",
+      "suggested": "ਤੁਹਾਡੇ ਜਨਮ ਵੇਰਵੇ ਹਰ ਬ੍ਰਹਿਮੰਡੀ ਇਨਸਾਈਟ ਦੀ ਨੀਂਹ ਹਨ — ਇਹ ਨਿੱਜੀ ਰਾਸ਼ੀਫਲ, ਕੁੰਡਲੀ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ AI-ਚਾਲਿਤ ਵੈਦਿਕ ਰੀਡਿੰਗਜ਼ ਨੂੰ ਅਨਲੌਕ ਕਰਦੇ ਹਨ।"
+    },
+    {
+      "key": "profile.onboarding.sidebar.checklistLabel",
+      "en": "Profile Checklist",
+      "current": "ਪ੍ਰੋਫ਼ਾਈਲ ਚੋਂਕਲਿਸਟ",
+      "issue": "Misspelled transliteration",
+      "explanation": "'ਚੋਂਕਲਿਸਟ' is a misspelled transliteration of 'checklist'. Standard rendering is 'ਚੈੱਕਲਿਸਟ' or natively 'ਜਾਂਚ-ਸੂਚੀ'.",
+      "suggested": "ਪ੍ਰੋਫ਼ਾਈਲ ਚੈੱਕਲਿਸਟ"
+    },
+    {
+      "key": "profile.onboarding.mobile.completeHint",
+      "en": "Press Save & Continue to return",
+      "current": "ਲਉਟਾਨ ਲਈ ਸੇਵ ਅਤੇ ਅਗੇ ਦਬਾਓ",
+      "issue": "Non-word",
+      "explanation": "'ਲਉਟਾਨ' is not a Punjabi word (a corrupted attempt at Hindi 'लौटना'). Punjabi for 'to return' is 'ਵਾਪਸ ਆਉਣ'. 'ਅਗੇ' should be 'ਅੱਗੇ'.",
+      "suggested": "ਵਾਪਸ ਆਉਣ ਲਈ ਸੇਵ ਅਤੇ ਜਾਰੀ ਰੱਖੋ ਦਬਾਓ"
+    },
+    {
+      "key": "profile.page.description",
+      "en": "Manage your birth details to ensure your personalized readings are always accurate.",
+      "current": "ਆਪਣੇ ਜਨਮ ਵਿਵਰਣ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ ਤਾਂਜੋ ਤੁਹਾਡੀਆਂ ਨਿੱਜੀ ਪੜ੍ਹਾਈਆਂ ਹਮੇਸ਼ਾ ਸਹੀ ਰਹੋ।",
+      "issue": "Wrong word + verb-agreement error",
+      "explanation": "'ਪੜ੍ਹਾਈਆਂ' means 'studies/education', not 'readings' (astrological). Should be 'ਰੀਡਿੰਗਜ਼' or 'ਪੜ੍ਹਨਾਂ'. Also 'ਰਹੋ' is the imperative 'stay!' — should be 'ਰਹਿਣ' (subjunctive). 'ਤਾਂਜੋ' should be 'ਤਾਂ ਜੋ' (two words).",
+      "suggested": "ਆਪਣੇ ਜਨਮ ਵੇਰਵਿਆਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ ਤਾਂ ਜੋ ਤੁਹਾਡੀਆਂ ਨਿੱਜੀ ਰੀਡਿੰਗਜ਼ ਹਮੇਸ਼ਾ ਸਹੀ ਰਹਿਣ।"
+    },
+    {
+      "key": "profile.page.errors.dstConflict",
+      "en": "Your birth time falls during a DST transition. Please select which occurrence was your actual birth time.",
+      "current": "ਤੁਹਾਡਾ ਜਨਮ ਸਮਾਂ DST ਪਰਿਵਰਤਨ ਸਮਾਂ ਵਿੱਚ ਆਉਂਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਚੁਣੋ ਕਿ ਕਿਹੜਾ ਲੇਖ ਤੁਹਾਡਾ ਅਸਲ ਜਨਮ ਸਮਾਂ ਸੀ।",
+      "issue": "Wrong word for 'occurrence'",
+      "explanation": "'ਲੇਖ' means 'article/essay' — completely wrong for 'occurrence' (the time-instance during DST). Correct word is 'ਘਟਨਾ' or 'ਮੌਕਾ'. Also 'ਪਰਿਵਰਤਨ ਸਮਾਂ ਵਿੱਚ' has wrong postposition agreement.",
+      "suggested": "ਤੁਹਾਡਾ ਜਨਮ ਸਮਾਂ DST ਪਰਿਵਰਤਨ ਦੌਰਾਨ ਆਉਂਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਚੁਣੋ ਕਿ ਕਿਹੜੀ ਘਟਨਾ ਤੁਹਾਡਾ ਅਸਲ ਜਨਮ ਸਮਾਂ ਸੀ।"
+    },
+    {
+      "key": "profile.security.errors.passwordMinLength",
+      "en": "New password must be at least 10 characters.",
+      "current": "ਨਵਾਂ ਪਾਸਵਰਡ ਘੱਟ ਤੋਂ ਘੱਟ 10 ਰਾਂ ਹੋ ਸਕਦਾ ਹੈ।",
+      "issue": "Non-word + reversed logic",
+      "explanation": "Same issue as nameTooShort — '10 ਰਾਂ' is a stranded suffix (should be '10 ਅੱਖਰਾਂ'). 'ਹੋ ਸਕਦਾ ਹੈ' (can be) reverses the constraint; should be 'ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ' (must be).",
+      "suggested": "ਨਵਾਂ ਪਾਸਵਰਡ ਘੱਟੋ-ਘੱਟ 10 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"
+    },
+    {
+      "key": "blogs.index.badge",
+      "en": "The Library of Wisdom",
+      "current": "ਬੁੱਧਿ ਦੀ ਪੁਸਤਕਾਲਾ",
+      "issue": "Typo + grammar",
+      "explanation": "'ਬੁੱਧਿ' is misspelled — correct Punjabi is 'ਬੁੱਧੀ' (wisdom). 'ਪੁਸਤਕਾਲਾ' is the Hindi loan with wrong gender agreement; idiomatic Punjabi is 'ਲਾਇਬ੍ਰੇਰੀ' (used correctly elsewhere as 'ਜੋਤਿਸ਼ ਗਿਆਨ ਦੀ ਪੂਰੀ ਲਾਇਬ੍ਰੇਰੀ').",
+      "suggested": "ਬੁੱਧੀ ਦੀ ਲਾਇਬ੍ਰੇਰੀ"
+    },
+    {
+      "key": "blogs.index.ctaDescription",
+      "en": "Our Celestial Library is expanding every week. If you have a specific question about your chart, Navi has the answers ready for you now.",
+      "current": "ਸਾਡੀ ਨਖ਼ਤਰੀ ਪੁਸਤਕਾਲਾ ਹਰ ਹਫ਼ਤੇ ਵੱਡੀ ਹੋ ਰਹੀ ਹੈ। ਜੇ ਤੁਹਾਡਾ ਕੋਈ ਖ਼ਾਸ ਸਵਾਲ ਤੁਹਾਡੇ ਚਾਰਟ ਬਾਰੇ ਹੈ, ਤਾਂ Navi ਦੇ ਕੋਲ ਹੁਣ ਹੀ ਜਵਾਬ ਤਿਆਰ ਹਨ।",
+      "issue": "Malformed Gurmukhi + Hindi loan",
+      "explanation": "'ਨਖ਼ਤਰੀ' (used many times in this file) is a malformed Gurmukhi attempt at Urdu 'naxtari' for 'celestial' — not a standard Punjabi word. Should be 'ਖਗੋਲੀ' or 'ਆਕਾਸ਼ੀ'. 'ਪੁਸਤਕਾਲਾ' should be 'ਲਾਇਬ੍ਰੇਰੀ' for consistency.",
+      "suggested": "ਸਾਡੀ ਖਗੋਲੀ ਲਾਇਬ੍ਰੇਰੀ ਹਰ ਹਫ਼ਤੇ ਵੱਡੀ ਹੋ ਰਹੀ ਹੈ। ਜੇ ਤੁਹਾਡੇ ਚਾਰਟ ਬਾਰੇ ਤੁਹਾਡਾ ਕੋਈ ਖ਼ਾਸ ਸਵਾਲ ਹੈ, ਤਾਂ Navi ਕੋਲ ਹੁਣੇ ਜਵਾਬ ਤਿਆਰ ਹਨ।"
+    }
+  ]
+}

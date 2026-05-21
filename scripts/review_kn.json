@@ -1,0 +1,93 @@
+{
+  "locale": "kn",
+  "issues": [
+    {
+      "key": "landing.slides[1].titleHighlight",
+      "en": "Vedic Wisdom",
+      "current": "ಗಡಿಗಳನ್ನು ಮೀರಿ",
+      "issue": "wrong-word",
+      "explanation": "English says 'Vedic Wisdom' but Kannada says 'Beyond Boundaries'. The title1 and titleHighlight are swapped or mistranslated. Should translate 'Vedic Wisdom' as ವೈದಿಕ ಬುದ್ಧಿವಂತಿಕೆ.",
+      "suggested": "ವೈದಿಕ ಬುದ್ಧಿವಂತಿಕೆ"
+    },
+    {
+      "key": "landing.slides[1].title1",
+      "en": "Vedic Wisdom",
+      "current": "ಗಡಿಗಳನ್ನು ಮೀರಿ",
+      "issue": "wrong-word",
+      "explanation": "Title1 should be 'Vedic Wisdom' (ವೈದಿಕ ಬುದ್ಧಿವಂತಿಕೆ) but is showing 'Beyond Boundaries'. Content mismatch between English and Kannada.",
+      "suggested": "ವೈದಿಕ ಬುದ್ಧಿವಂತಿಕೆ"
+    },
+    {
+      "key": "about.signsDesc2",
+      "en": "...then interprets them through the lens of classical texts like Brihat Parashara Hora Shastra and Phaladeepika.",
+      "current": "...ತದನಂತರ ಬೃಹತ್ ಪರಾಶರ ಹೋರಾ ಶಾಸ್ತ್ರ ಮತ್ತು ಫಲದೀಪಿಕಾದಂತಹ ಶಾಸ್ತ್ರೀಯ ಪಠ್ಯಗಳ ಮಸೂರದ ಮೂಲಕ ಅವುಗಳನ್ನು ವಿವರಿಸುತ್ತದೆ.",
+      "issue": "wrong-word",
+      "explanation": "ಮಸೂರ (masoor) means 'lentil/lens' — physically correct word but semantically awkward. Should use ದೃಷ್ಟಿಕೋನ (drishtikoṇa = perspective/lens as in 'through the lens of'). Also Jataka Parijata is missing from the translation.",
+      "suggested": "...ತದನಂತರ ಬೃಹತ್ ಪರಾಶರ ಹೋರಾ ಶಾಸ್ತ್ರ, ಫಲದೀಪಿಕಾ ಮತ್ತು ಜಾತಕ ಪಾರಿಜಾತದಂತಹ ಶಾಸ್ತ್ರೀಯ ಪಠ್ಯಗಳ ದೃಷ್ಟಿಕೋನದಿಂದ ಅವುಗಳನ್ನು ವಿವರಿಸುತ್ತದೆ."
+    },
+    {
+      "key": "faqs[1].a",
+      "en": "...identifies planetary yogas, analyzes house lordships, and interprets Dasha periods...",
+      "current": "...ಇದು ಗ್ರಹಗಳ ಯೋಗಗಳನ್ನು ಗುರುತಿಸುತ್ತದೆ, ಭಾವಾಧಿಪತಿಗಳನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ ಮತ್ತು ದಶಾ ಚಕ್ರಗಳನ್ನು ವಿವರಿಸುತ್ತದೆ.",
+      "issue": "awkward",
+      "explanation": "'Dasha periods' should be ದಶಾ ಅವಧಿಗಳು or ದಶಾ ಕಾಲಮಾನಗಳು, not 'ದಶಾ ಚಕ್ರಗಳು' (dasha circles). ಚಕ್ರ means circle/cycle but is vague for planetary periods.",
+      "suggested": "ದಶಾ ಅವಧಿಗಳನ್ನು ವಿವರಿಸುತ್ತದೆ"
+    },
+    {
+      "key": "faqs[3].a",
+      "en": "Your complete Kundli includes: Lagna (Ascendant) chart, Navamsha (D9) chart, all 9 planetary positions...",
+      "current": "ನಿಮ್ಮ ಪೂರ್ಣ ಕುಂಡಲಿಯು ನಿಮ್ಮ ಲಗ್ನ ಚಾರ್ಟ್, ನವಾಂಶ (D9) ಚಾರ್ಟ್, ಎಲ್ಲಾ 9 ಗ್ರಹಗಳ ಸ್ಥಾನಗಳು...",
+      "issue": "awkward",
+      "explanation": "ನಿಮ್ಮ ಪೂರ್ಣ ಕುಂಡಲಿಯು ನಿಮ್ಮ ಲಗ್ನ ಚಾರ್ಟ್ has redundant 'ನಿಮ್ಮ' (your twice). Should be 'ಪೂರ್ಣ ಕುಂಡಲಿಯು ಲಗ್ನ ಚಾರ್ಟ್' or 'ನಿಮ್ಮ ಪೂರ್ಣ ಕುಂಡಲಿಯಲ್ಲಿ ಲಗ್ನ ಚಾರ್ಟ್'.",
+      "suggested": "ನಿಮ್ಮ ಪೂರ್ಣ ಕುಂಡಲಿಯು ಲಗ್ನ ಚಾರ್ಟ್, ನವಾಂಶ (D9) ಚಾರ್ಟ್, ಎಲ್ಲಾ 9 ಗ್ರಹಗಳ ಸ್ಥಾನಗಳು... ಒಳಗೊಂಡಿದೆ"
+    },
+    {
+      "key": "chat.feedback.placeholders[1]",
+      "en": "Which part of the reading missed the mark?",
+      "current": "ಓದಿನ ಯಾವ ಭಾಗವು ಗುರಿ ತಪ್ಪಿದೆ?",
+      "issue": "awkward",
+      "explanation": "ಗುರಿ ತಪ್ಪಿದೆ (missed the goal/target) is technically correct but awkward. Better phrasing: ಓದಿನ ಯಾವ ಭಾಗವು ಅಪೂರ್ಣವಾಗಿತ್ತು or ವಿಫಲವಾಗಿತ್ತು.",
+      "suggested": "ಓದಿನ ಯಾವ ಭಾಗವು ಅಪೂರ್ಣವಾಗಿತ್ತು?"
+    },
+    {
+      "key": "chat.feedback.tags[2][4]",
+      "en": "Remedies were too generic",
+      "current": "ಪರಿಹಾರಗಳು (Remedies) ತುಂಬಾ ಸಾಮಾನ್ಯವಾಗಿದ್ದವು",
+      "issue": "broken-syntax",
+      "explanation": "English word 'Remedies' should not appear in parentheses in Kannada translation. Either use pure Kannada ಪರಿಹಾರಗಳು or remove the English. The (Remedies) parenthetical is a translation error.",
+      "suggested": "ಪರಿಹಾರಗಳು ತುಂಬಾ ಸಾಮಾನ್ಯವಾಗಿದ್ದವು"
+    },
+    {
+      "key": "chat.thinkingStudy",
+      "en": "Checking your learning and study path...",
+      "current": "ನಿಮ್ಮ ಅಧ್ಯಯನ ಮತ್ತು ಕಲಿಕೆಯ ಮಾರ್ಗವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...",
+      "issue": "awkward",
+      "explanation": "ಕಲಿಕೆಯ is redundant with ಅಧ್ಯಯನ (both mean learning). Better: ನಿಮ್ಮ ಅಧ್ಯಯನದ ಮಾರ್ಗವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ.",
+      "suggested": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ಮಾರ್ಗವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."
+    },
+    {
+      "key": "forecast.whatItMeansBody",
+      "en": "{planet} is the dominant influence right now. A score of {score} suggests how strongly that energy shapes your day-to-day choices.",
+      "current": "ಪ್ರಸ್ತುತ {planet} ಪ್ರಮುಖ ಪ್ರಭಾವ ಬೀರಿದೆ. {score} ಅಂಕಗಳು ಆ ಶಕ್ತಿಯು ನಿಮ್ಮ ದೈನಂದಿನ ಆಯ್ಕೆಗಳನ್ನು ಎಷ್ಟು ಬಲವಾಗಿ ರೂಪಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಸೂಚಿಸುತ್ತದೆ.",
+      "issue": "awkward",
+      "explanation": "Word order is awkward: 'ಪ್ರಸ್ತುತ {planet} ಪ್ರಮುಖ ಪ್ರಭಾವ ಬೀರಿದೆ' puts the verb at the end. Better: '{planet} ಪ್ರಸ್ತುತ ಪ್ರಮುಖ ಪ್ರಭಾವವನ್ನು ಬೀರುತ್ತಿದೆ' (more natural flow).",
+      "suggested": "{planet} ಪ್ರಸ್ತುತ ಪ್ರಮುಖ ಪ್ರಭಾವವನ್ನು ಬೀರುತ್ತಿದೆ. {score} ಅಂಕಗಳು ಆ ಶಕ್ತಿಯು ನಿಮ್ಮ ದೈನಂದಿನ ಆಯ್ಕೆಗಳನ್ನು ಎಷ್ಟು ಬಲವಾಗಿ ರೂಪಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಸೂಚಿಸುತ್ತದೆ."
+    },
+    {
+      "key": "plans.betaNoticeDesc",
+      "en": "When we launch, early supporters will receive exclusive benefits...",
+      "current": "ನಾವು ಅಧಿಕೃತವಾಗಿ ಪ್ರಾರಂಭಿಸಿದಾಗ, ಆರಂಭಿಕ ಬೆಂಬಲಿಗರು ವಿಶೇಷ ಪ್ರಯೋಜನಗಳು...",
+      "issue": "wrong-word",
+      "explanation": "ಅಧಿಕೃತವಾಗಿ (officially/formally) doesn't match English 'launch'. Better: ಪ್ರಾರಂಭ ಮಾಡಿದಾಗ or ಆರಂಭ ಮಾಡಿದಾಗ (when we start/launch).",
+      "suggested": "ನಾವು ಆರಂಭ ಮಾಡಿದಾಗ, ಆರಂಭಿಕ ಬೆಂಬಲಿಗರು ವಿಶೇಷ ಪ್ರಯೋಜನಗಳನ್ನು ಪಡೆಯುತ್ತಾರೆ..."
+    },
+    {
+      "key": "match.additional.notice",
+      "en": "...for a safer match.",
+      "current": "...ಸುರಕ್ಷಿತ ಹೊಂದಾಣಿಕೆಗಾಗಿ 36-ಅಂಶಗಳ ಹೊಂದಾಣಿಕೆಗೆ (Guna Milan) ಪೂರಕವಾಗಿವೆ.",
+      "issue": "broken-syntax",
+      "explanation": "English phrase 'Guna Milan' appears in parentheses in the Kannada translation. Should translate to Kannada: ಗುಣ ಮಿಲನ ಅಥವಾ ಗುಣ ಹೊಂದಾಣಿಕೆ instead of including English transliteration.",
+      "suggested": "...ಸುರಕ್ಷಿತ ಹೊಂದಾಣಿಕೆಗಾಗಿ 36-ಅಂಶಗಳ ಗುಣ ಮಿಲನಕ್ಕೆ ಪೂರಕವಾಗಿವೆ."
+    }
+  ]
+}

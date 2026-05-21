@@ -1,0 +1,101 @@
+{
+  "locale": "te",
+  "issues": [
+    {
+      "key": "blogs.index.description",
+      "en": "Journey through the vast ocean of Vedic knowledge. From planetary movements to spiritual remedies, discover the keys to your cosmic existence.",
+      "current": "వేదిక జ్ఞానం యొక్క విశాల సముద్రం గుండా ప్రయాణం చేయండి. గ్రహాల కదలికల నుండి ఆధ్యాత్మిక నిరాకరణ వరకు, మీ సృష్టి సాక్ష్యం యొక్క సత్యాలను కనుగొనండి.",
+      "issue": "wrong-word",
+      "explanation": "'నిరాకరణ' means 'denial/refusal', not 'remedies'. The correct term for spiritual remedies is 'పరిహారాలు'. Also 'వేదిక' means 'stage/platform' — the correct word for 'Vedic' is 'వైదిక'. 'సృష్టి సాక్ష్యం' (creation witness) is a mistranslation of 'cosmic existence' which should be 'విశ్వ ఉనికి', and 'సత్యాలు' (truths) should be 'తాళాలు/రహస్యాలు' (keys).",
+      "suggested": "వైదిక జ్ఞానం యొక్క విశాల సముద్రం గుండా ప్రయాణం చేయండి. గ్రహాల కదలికల నుండి ఆధ్యాత్మిక పరిహారాల వరకు, మీ విశ్వ ఉనికికి తాళాలను కనుగొనండి."
+    },
+    {
+      "key": "blogs.houses.dusthanaDesc",
+      "en": "Houses 6, 8, and 12 govern obstacles, transformation, and loss. While challenging for material pursuits, they are essential for burning karma, building resilience, and achieving ultimate spiritual liberation (Moksha).",
+      "current": "ఇళ్ళు 6, 8 మరియు 12 అడ్డంకులు, రూపాంతరణ మరియు నష్టాన్ని నిర్వహిస్తాయి. భౌతిక సాధనల కోసం సవాలు కలిగినప్పటికీ, అవి కర్మను దహించడానికి, నిరంకుశత్వం నిర్మాణం చేయడానికి మరియు చివరి ఆధ్యాత్మిక విముక్తి (మోక్ష) సాధించడానికి అవసరమైనవి.",
+      "issue": "wrong-word",
+      "explanation": "'నిరంకుశత్వం' means 'autocracy/despotism/dictatorship', completely wrong for 'resilience'. The correct Telugu word for 'resilience' is 'స్థితిస్థాపకత' or 'పట్టుదల'.",
+      "suggested": "ఇళ్ళు 6, 8 మరియు 12 అడ్డంకులు, రూపాంతరణ మరియు నష్టాన్ని నిర్వహిస్తాయి. భౌతిక సాధనల కోసం సవాలు కలిగినప్పటికీ, అవి కర్మను దహించడానికి, స్థితిస్థాపకతను నిర్మించడానికి మరియు చివరి ఆధ్యాత్మిక విముక్తి (మోక్ష) సాధించడానికి అవసరమైనవి."
+    },
+    {
+      "key": "blogs.planets.karmicDesc",
+      "en": "Planets don't just symbolize traits; they actively deliver the fruits of your past actions. Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.",
+      "current": "గ్రహాలు లక్షణాలను సూచిస్తాయి; అవి సక్రియంగా మీ గత చర్యల ఫలితాలను ఎందుకు. గురువు మరియు శుక్రుడు వంటి లాభకరులు సులభత మరియు దయను తెస్తారు, శని మరియు కుజుడు వంటి దుష్టులు అవసరమైన, సరిగా ఎంతో కష్టమైన పాఠాలను అధికారం చేస్తారు.",
+      "issue": "broken-syntax",
+      "explanation": "'ఎందుకు' means 'why' — it is a question word, not a verb, leaving the sentence with no predicate. The intended verb is 'అందిస్తాయి' (deliver). Also 'don't just symbolize' is mistranslated as plain 'symbolize', losing the contrast. 'అధికారం చేస్తారు' literally means 'give authority' — wrong for 'enforce', which should be 'విధిస్తారు'. 'సరిగా' ('correctly') is a typo for 'సరిగ్గా'/'తరచుగా' (often).",
+      "suggested": "గ్రహాలు కేవలం లక్షణాలను సూచించడమే కాదు; అవి సక్రియంగా మీ గత చర్యల ఫలితాలను అందిస్తాయి. గురువు మరియు శుక్రుడు వంటి శుభగ్రహాలు సులభత మరియు దయను తెస్తాయి, శని మరియు కుజుడు వంటి పాపగ్రహాలు అవసరమైన, తరచుగా కష్టమైన పాఠాలను విధిస్తాయి."
+    },
+    {
+      "key": "blogs.yogas.cancellationDesc",
+      "en": "Not all bad yogas are permanent. Neechabhanga occurs when a debilitated (weak) planet is supported by strong alignments, cancelling the weakness and often turning massive struggle into great success.",
+      "current": "సమస్త దుష్ట యోగాలు శాశ్వతమైనవి కాదు. నీచభంగ దుర్బల (బలహీన) గ్రహ బలవంతమైన సమన్వయాల ద్వారా సమర్థించినప్పుడు సంభవిస్తుంది, బలహీనతను రద్దీ చేస్తుంది మరియు సరిగా భారీ నిరంతరాన్ని గొప్ప విజయానికి మారుస్తుంది.",
+      "issue": "typo",
+      "explanation": "'రద్దీ' means 'crowd/rush/congestion' — this is a typo for 'రద్దు' (cancel). Also 'నిరంతరం' means 'continuous/incessant', wrong for 'struggle' which should be 'పోరాటం' or 'కష్టం'. 'సరిగా' should be 'తరచుగా' (often).",
+      "suggested": "అన్ని దుష్ట యోగాలు శాశ్వతమైనవి కావు. నీచభంగ — దుర్బల (బలహీన) గ్రహం బలవంతమైన సమన్వయాల ద్వారా బలపడినప్పుడు సంభవిస్తుంది; ఇది బలహీనతను రద్దు చేస్తుంది మరియు తరచుగా భారీ పోరాటాన్ని గొప్ప విజయంగా మారుస్తుంది."
+    },
+    {
+      "key": "blogs.yogas.activationDesc",
+      "en": "Yogas lie dormant in a chart until their planetary lords are activated by the Vimshottari Dasha (time period). When the dasha of a Yoga-causing planet begins, the effects manifest drastically in reality.",
+      "current": "యోగాలు చార్ట్‌లో నిష్కియంగా ఉంటాయి వరకు వారి గ్రహ లార్డ్‌లు విమ్శోత్తరీ దశ (కాల వ్యవధి) ద్వారా సక్రియమయ్యే వరకు. యోగ-కారణ గ్రహ యొక్క దశ ప్రారంభమైనప్పుడు, ప్రభావాలు వాస్తవతలో విపరీతంగా వ్యక్తమవుతాయి.",
+      "issue": "broken-syntax",
+      "explanation": "Sentence 1 is broken: 'ఉంటాయి వరకు...సక్రియమయ్యే వరకు' uses 'వరకు' (until) twice in incompatible positions, making the clause ungrammatical. Also 'నిష్కియంగా' is a typo for 'నిష్క్రియంగా' (dormant/inactive).",
+      "suggested": "వారి గ్రహాధిపతులు విమ్శోత్తరీ దశ (కాల వ్యవధి) ద్వారా సక్రియమయ్యే వరకు యోగాలు చార్ట్‌లో నిష్క్రియంగా ఉంటాయి. యోగ-కారక గ్రహం యొక్క దశ ప్రారంభమైనప్పుడు, ప్రభావాలు వాస్తవంలో తీవ్రంగా వ్యక్తమవుతాయి."
+    },
+    {
+      "key": "blogs.yogas.dhanaDesc",
+      "en": "Combinations for absolute wealth. When the houses of earnings (2nd) and gains (11th) connect deeply with the houses of destiny (5th, 9th), the native is destined for immense financial prosperity.",
+      "current": "సంపూర్ణ సంపద కోసం సంయోగాలు. ఆదాయ (2వ) ఇళ్ల మరియు లాభ (11వ) ఇళ్ల నుండి భాగ్య (5వ, 9వ) ఇళ్లకు లోతైన సంబంధ ఏర్పడినప్పుడు, నిల స్థితిలో అసంఖ్యాత ఆర్థిక సమృద్ధి ఉంటుంది.",
+      "issue": "broken-syntax",
+      "explanation": "'నిల స్థితిలో' is not a valid Telugu phrase — 'నిల' means 'blue' and 'నిల స్థితి' makes no sense here. The intended meaning is 'the native' (జాతకుడు/జాతకుని జీవితంలో). The sentence as written reads 'in blue state, immense prosperity exists,' which is meaningless.",
+      "suggested": "సంపూర్ణ సంపద కోసం సంయోగాలు. ఆదాయ (2వ) మరియు లాభ (11వ) ఇళ్ళు భాగ్య (5వ, 9వ) ఇళ్ళతో లోతుగా అనుసంధానమైనప్పుడు, జాతకుడు అపారమైన ఆర్థిక సమృద్ధికి విధించబడతాడు."
+    },
+    {
+      "key": "profile.onboarding.sidebar.description",
+      "en": "Your birth details are the foundation of every cosmic insight — they unlock personalized horoscopes, kundli analysis, and AI-powered Vedic readings.",
+      "current": "మీ జన్మ వివరాలు ప్రతి సృష్టి అంతర్దృష్టి యొక్క ఆధారం - అవి వ్యక్తిగత హోరోస్కోపులు, కుండలి విశ్లేషణ మరియు AI-శక్తిమంతమైన వేదిక చదివినవిని అన్‌లాక్ చేస్తాయి.",
+      "issue": "wrong-word",
+      "explanation": "'వేదిక' means 'stage/platform' — the correct word for 'Vedic' is 'వైదిక'. 'చదివినవి' is the past participle 'things-that-were-read', not the noun 'readings' which should be 'పఠనాలు'. Also 'సృష్టి' (creation) is used throughout for 'cosmic' — better is 'విశ్వ'.",
+      "suggested": "మీ జన్మ వివరాలు ప్రతి విశ్వ అంతర్దృష్టికి ఆధారం - అవి వ్యక్తిగత హోరోస్కోపులు, కుండలి విశ్లేషణ మరియు AI-ఆధారిత వైదిక పఠనాలను అన్‌లాక్ చేస్తాయి."
+    },
+    {
+      "key": "profile.page.errors.dstConflict",
+      "en": "Your birth time falls during a DST transition. Please select which occurrence was your actual birth time.",
+      "current": "మీ జన్మ సమయం DST మార్పు కాలానికి సంబంధించినది. దయచేసి ఎటువంటి సంభవించిన మీ నిజమైన జన్మ సమయమో ఎంచుకోండి.",
+      "issue": "broken-syntax",
+      "explanation": "'ఎటువంటి సంభవించిన మీ నిజమైన జన్మ సమయమో' is grammatically broken — 'ఎటువంటి' (what-kind-of) does not pair with 'సంభవించిన' here, and the construction does not form a valid 'which occurrence' clause. It reads roughly 'select what-kind-of occurred your actual birth time'.",
+      "suggested": "మీ జన్మ సమయం DST మార్పు కాలానికి సంబంధించినది. దయచేసి ఏ సంఘటన మీ నిజమైన జన్మ సమయమో ఎంచుకోండి."
+    },
+    {
+      "key": "profile.security.messages.accountDeleted",
+      "en": "Account successfully deleted. Goodbye.",
+      "current": "ఖాతా విజయవంతంగా తొలగించబడింది. చాలా మంచి.",
+      "issue": "wrong-word",
+      "explanation": "'చాలా మంచి' literally means 'very good' — this does not mean 'Goodbye'. The correct farewell in Telugu is 'వీడ్కోలు' or 'శెలవు'.",
+      "suggested": "ఖాతా విజయవంతంగా తొలగించబడింది. వీడ్కోలు."
+    },
+    {
+      "key": "profile.page.securitySection.description",
+      "en": "Manage your password and active sessions.",
+      "current": "మీ పదం మరియు క్రియాశీల సెషనులను నిర్వహించండి.",
+      "issue": "wrong-word",
+      "explanation": "'పదం' means 'word', not 'password'. This is the exact bug pattern (పదం used for password). Should be 'పాస్‌వర్డ్'.",
+      "suggested": "మీ పాస్‌వర్డ్ మరియు క్రియాశీల సెషన్‌లను నిర్వహించండి."
+    },
+    {
+      "key": "profile.preferences.notificationsDescription",
+      "en": "Alerts for planetary transits",
+      "current": "గ్రహ ఆయుధాల కోసం అలర్టులు",
+      "issue": "wrong-word",
+      "explanation": "'ఆయుధాల' means 'of weapons'. The correct term for 'transits' (planetary movements) is 'గోచారాల'. This is a serious meaning bug: 'Alerts for planetary weapons' is what it currently reads.",
+      "suggested": "గ్రహ గోచారాల కోసం అలర్ట్‌లు"
+    },
+    {
+      "key": "blogs.planets.shadowNodesDesc",
+      "en": "Rahu and Ketu are not physical masses, but mathematical points where eclipses occur. Despite lacking bodies, these nodes are profound triggers of sudden destiny, obsession, and ultimate spiritual liberation.",
+      "current": "రాహువు మరియు కేతువు భౌతిక ద్రవ్యరాశులు కాదు, కానీ గ్రహణాలు సంభవించే గణిత బిందువులు. శరీరాలు లేనప్పటికీ, ఈ నోడ్‌లు ఆకస్మిక భాగ్యం, అబిరుచి మరియు చివరి ఆధ్యాత్మిక విముక్తి యొక్క లోతైన ట్రిగర్‌లు.",
+      "issue": "typo",
+      "explanation": "'అబిరుచి' is a misspelling of 'అభిరుచి' (interest/taste). Even when corrected, 'అభిరుచి' means a mild 'interest/liking', not 'obsession' — the correct word is 'వ్యామోహం' or 'మోహం'.",
+      "suggested": "రాహువు మరియు కేతువు భౌతిక ద్రవ్యరాశులు కావు; అవి గ్రహణాలు సంభవించే గణిత బిందువులు. శరీరాలు లేనప్పటికీ, ఈ నోడ్‌లు ఆకస్మిక భాగ్యం, వ్యామోహం మరియు అంతిమ ఆధ్యాత్మిక విముక్తికి లోతైన ట్రిగర్‌లు."
+    }
+  ]
+}
