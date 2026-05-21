@@ -74,11 +74,44 @@ export interface FamilyMemberUpdatePayload {
   notes?: string;
 }
 
+export interface FamilyLagna {
+  sign: string;
+  degree: number;
+  absolute_longitude: number;
+  nakshatra: string;
+  pada: number;
+}
+
+export interface FamilyPlanet {
+  sign: string;
+  absolute_longitude: number;
+  sign_degree: number;
+  nakshatra: string;
+  pada: number;
+  house: number;
+  motion: string;
+  dignity: string;
+  lord_of: number[];
+  conjuncts: string[];
+  shadbala_total?: number;
+  shadbala_rupas?: number;
+  shadbala_meets_req?: string;
+}
+
+export interface FamilyHouse {
+  sign: string;
+  lord: string;
+  occupants: string[];
+}
+
 export interface FamilyChart {
   schema_version: number;
-  lagna: Record<string, unknown>;
-  planets: Record<string, unknown>;
-  houses: Record<string, unknown>;
+  ayanamsa?: { name: string; value: number };
+  lagna: FamilyLagna;
+  planets: Record<string, FamilyPlanet>;
+  houses: Record<string, FamilyHouse>;
+  /** Backend also returns dasha / panchanga / ashtakavarga — not consumed yet. */
+  [extra: string]: unknown;
 }
 
 export interface FamilyChartResponse {
@@ -86,19 +119,52 @@ export interface FamilyChartResponse {
   chart: FamilyChart;
 }
 
+export type FamilyCompatibilityBand = 'Excellent' | 'Good' | 'Average' | 'Challenging';
+export type FamilyCompatibilityFactorStatus = 'strength' | 'balanced' | 'tension';
+export type FamilyCompatibilityConfidenceLevel = 'high' | 'medium' | 'low';
+
 export interface FamilyCompatibilityFactor {
-  key?: string;
-  label?: string;
+  name: string;
+  label: string;
   score?: number;
+  score_percent: number;
+  weight?: number;
+  note?: string;
+  status: FamilyCompatibilityFactorStatus;
+  summary: string;
+  /** Legacy field — older payloads. */
+  key?: string;
   detail?: string;
-  [k: string]: unknown;
+}
+
+export interface FamilyCompatibilityHighlight {
+  factor: string;
+  score: number;
+  text: string;
+}
+
+export interface FamilyCompatibilityAdvice {
+  communication_style: string;
+  best_support_method: string;
+  boundaries_or_cautions: string;
+  next_step: string;
+}
+
+export interface FamilyCompatibilityConfidence {
+  level: FamilyCompatibilityConfidenceLevel;
+  label: string;
+  note: string;
 }
 
 export interface FamilyCompatibilityResponse {
   score: number;
-  band: string;
+  band: FamilyCompatibilityBand | string;
   verdict: string;
   factors: FamilyCompatibilityFactor[];
+  strengths?: FamilyCompatibilityHighlight[];
+  tension_points?: FamilyCompatibilityHighlight[];
+  advice?: FamilyCompatibilityAdvice;
+  confidence?: FamilyCompatibilityConfidence;
   lang: CompatibilityLang;
   relationship_type: FamilyRelationshipType;
   member_id: number;

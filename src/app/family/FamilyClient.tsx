@@ -4,7 +4,8 @@ import React, { useMemo, useState } from 'react';
 import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
-    Crown,
+    Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
+    ChevronDown, ChevronUp, HandHeart, Sparkles,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -29,6 +30,7 @@ import {
     FAMILY_FREE_TIER_LIMIT,
 } from '@/types/family';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
+import FamilyChartView from '@/components/family/FamilyChartView';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'mother', label: 'Mother' },
@@ -810,17 +812,7 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                     </div>
                 )}
                 {chart && !chartLoading && !chartError && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[12px]">
-                        <ChartStat label="Lagna" value={JSON.stringify(chart.chart.lagna) === '{}' ? 'Pending' : 'Available'} />
-                        <ChartStat
-                            label="Planets"
-                            value={`${Object.keys(chart.chart.planets || {}).length} mapped`}
-                        />
-                        <ChartStat
-                            label="Houses"
-                            value={`${Object.keys(chart.chart.houses || {}).length} cusps`}
-                        />
-                    </div>
+                    <FamilyChartView chart={chart.chart} />
                 )}
             </Card>
 
@@ -900,11 +892,212 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
     );
 }
 
-function ChartStat({ label, value }: { label: string; value: string }) {
+/* ---------- Compatibility helpers ---------- */
+
+function bandPalette(band: string): { ring: string; text: string; bg: string; border: string } {
+    switch (band) {
+        case 'Excellent':
+            return { ring: 'text-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
+        case 'Good':
+            return { ring: 'text-secondary', text: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/30' };
+        case 'Average':
+            return { ring: 'text-amber-400', text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30' };
+        case 'Challenging':
+            return { ring: 'text-orange-400', text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
+        default:
+            return { ring: 'text-secondary', text: 'text-primary', bg: 'bg-secondary/10', border: 'border-secondary/30' };
+    }
+}
+
+function statusPalette(status: string): { text: string; bg: string; border: string; bar: string } {
+    switch (status) {
+        case 'strength':
+            return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', bar: 'bg-emerald-400' };
+        case 'tension':
+            return { text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30', bar: 'bg-orange-400' };
+        case 'balanced':
+        default:
+            return { text: 'text-indigo-300', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', bar: 'bg-indigo-400' };
+    }
+}
+
+function confidencePalette(level: string): { text: string; bg: string; border: string } {
+    switch (level) {
+        case 'high':
+            return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
+        case 'low':
+            return { text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
+        case 'medium':
+        default:
+            return { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30' };
+    }
+}
+
+function ScoreRing({ score, band, size = 88 }: { score: number; band: string; size?: number }) {
+    const clamped = Math.max(0, Math.min(100, score));
+    const stroke = 6;
+    const r = (size - stroke) / 2;
+    const circ = 2 * Math.PI * r;
+    const offset = circ * (1 - clamped / 100);
+    const palette = bandPalette(band);
     return (
-        <div className="rounded-2xl border border-outline-variant/30 p-3">
-            <p className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">{label}</p>
-            <p className="text-sm font-bold text-primary mt-1">{value}</p>
+        <div className="relative shrink-0" style={{ width: size, height: size }}>
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={r}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={stroke}
+                    className="text-outline-variant/30"
+                />
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={r}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={stroke}
+                    strokeLinecap="round"
+                    strokeDasharray={circ}
+                    strokeDashoffset={offset}
+                    className={`${palette.ring} transition-[stroke-dashoffset] duration-700 ease-out`}
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+                <span className="text-xl sm:text-2xl font-headline font-bold text-primary">{score}</span>
+                <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/40 mt-0.5">
+                    /100
+                </span>
+            </div>
+        </div>
+    );
+}
+
+function HighlightList({
+    title,
+    items,
+    icon,
+    variant,
+}: {
+    title: string;
+    items: { factor: string; score: number; text: string }[];
+    icon: React.ReactNode;
+    variant: 'strength' | 'tension';
+}) {
+    const palette = statusPalette(variant);
+    return (
+        <div>
+            <div className={`flex items-center gap-1.5 mb-2 ${palette.text}`}>
+                {icon}
+                <p className="text-[11px] font-bold uppercase tracking-widest">{title}</p>
+            </div>
+            <div className="space-y-2">
+                {items.map((it, i) => (
+                    <div
+                        key={i}
+                        className={`rounded-2xl p-3 border ${palette.bg} ${palette.border}`}
+                    >
+                        <div className="flex items-baseline justify-between gap-2 mb-1">
+                            <p className={`text-[12px] font-bold ${palette.text}`}>{it.factor}</p>
+                            <span className="text-[10px] font-bold text-on-surface-variant/50 shrink-0">
+                                {Math.round(it.score)}
+                            </span>
+                        </div>
+                        <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{it.text}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function AdviceCard({
+    icon,
+    label,
+    text,
+    accent,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    text: string;
+    accent: string;
+}) {
+    if (!text?.trim()) return null;
+    return (
+        <div className="rounded-2xl border border-outline-variant/30 p-3 bg-surface">
+            <div className={`flex items-center gap-1.5 mb-1.5 ${accent}`}>
+                {icon}
+                <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+            </div>
+            <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{text}</p>
+        </div>
+    );
+}
+
+function FactorsBreakdown({ factors }: { factors: NonNullable<ReturnType<typeof useFamilyCompatibility>['data']>['factors'] }) {
+    const [expanded, setExpanded] = useState(false);
+    if (!factors?.length) return null;
+    return (
+        <div className="rounded-2xl border border-outline-variant/30 overflow-hidden">
+            <button
+                onClick={() => setExpanded((v) => !v)}
+                className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-secondary/5 transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+                        Factor Breakdown
+                    </p>
+                    <span className="text-[10px] text-on-surface-variant/40 font-bold">
+                        {factors.length}
+                    </span>
+                </div>
+                {expanded ? (
+                    <ChevronUp className="w-4 h-4 text-on-surface-variant/40" />
+                ) : (
+                    <ChevronDown className="w-4 h-4 text-on-surface-variant/40" />
+                )}
+            </button>
+            {expanded && (
+                <div className="border-t border-outline-variant/20 p-3 space-y-3">
+                    {factors.map((f, i) => {
+                        const palette = statusPalette(f.status);
+                        const pct = Math.max(0, Math.min(100, f.score_percent ?? 0));
+                        return (
+                            <div key={f.name ?? f.key ?? i} className="space-y-1.5">
+                                <div className="flex items-baseline justify-between gap-2">
+                                    <p className="text-[12px] font-bold text-primary">
+                                        {f.label || f.name || f.key || `Factor ${i + 1}`}
+                                    </p>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        <span
+                                            className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${palette.bg} ${palette.text} ${palette.border}`}
+                                        >
+                                            {f.status}
+                                        </span>
+                                        <span className="text-[11px] font-bold text-on-surface-variant/60 tabular-nums">
+                                            {Math.round(pct)}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="h-1.5 rounded-full bg-outline-variant/20 overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full ${palette.bar} transition-[width] duration-700 ease-out`}
+                                        style={{ width: `${pct}%` }}
+                                    />
+                                </div>
+                                {(f.summary || f.detail) && (
+                                    <p className="text-[11px] text-on-surface-variant/70 leading-relaxed">
+                                        {f.summary || f.detail}
+                                    </p>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }
@@ -918,56 +1111,105 @@ function CompatibilityResult({
     onRerun: () => void;
     alreadyPaid: boolean;
 }) {
+    const palette = bandPalette(result.band);
+    const confPalette = result.confidence ? confidencePalette(result.confidence.level) : null;
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-secondary/10 border border-secondary/30 flex items-center justify-center">
-                    <span className="text-2xl font-headline font-bold text-secondary">{result.score}</span>
-                </div>
-                <div>
+        <div className="space-y-5">
+            {/* Top summary */}
+            <div className="flex items-center gap-4 flex-wrap">
+                <ScoreRing score={result.score} band={result.band} />
+                <div className="flex-1 min-w-0">
                     <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold">
                         Band
                     </p>
-                    <p className="text-lg font-headline font-bold text-primary">{result.band}</p>
+                    <p className={`text-xl font-headline font-bold ${palette.text}`}>{result.band}</p>
+                    {result.confidence && confPalette && (
+                        <span
+                            className={`inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${confPalette.bg} ${confPalette.text} ${confPalette.border}`}
+                        >
+                            <Shield className="w-3 h-3" />
+                            {result.confidence.label}
+                        </span>
+                    )}
                 </div>
                 {result.cached && (
-                    <span className="ml-auto text-[10px] font-bold uppercase tracking-wider text-secondary/70 bg-secondary/10 rounded-full px-2 py-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary/70 bg-secondary/10 rounded-full px-2 py-0.5">
                         Cached
                     </span>
                 )}
             </div>
 
+            {/* Verdict */}
             <p className="text-sm text-on-surface-variant/80 leading-relaxed whitespace-pre-line">
                 {result.verdict}
             </p>
 
-            {result.factors?.length > 0 && (
-                <div className="space-y-2">
-                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold">
-                        Factors
-                    </p>
+            {/* Confidence note */}
+            {result.confidence?.note && (
+                <p className="text-[11px] text-on-surface-variant/50 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
+                    {result.confidence.note}
+                </p>
+            )}
+
+            {/* Strengths */}
+            {result.strengths && result.strengths.length > 0 && (
+                <HighlightList
+                    title="Top Strengths"
+                    items={result.strengths}
+                    icon={<TrendingUp className="w-3.5 h-3.5" />}
+                    variant="strength"
+                />
+            )}
+
+            {/* Tension points */}
+            {result.tension_points && result.tension_points.length > 0 && (
+                <HighlightList
+                    title="Tension Points"
+                    items={result.tension_points}
+                    icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                    variant="tension"
+                />
+            )}
+
+            {/* Advice */}
+            {result.advice && (
+                <div>
+                    <div className="flex items-center gap-1.5 mb-2 text-secondary">
+                        <HandHeart className="w-3.5 h-3.5" />
+                        <p className="text-[11px] font-bold uppercase tracking-widest">Guidance</p>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {result.factors.map((f, i) => (
-                            <div
-                                key={i}
-                                className="rounded-2xl border border-outline-variant/30 p-3 text-[12px]"
-                            >
-                                <p className="font-bold text-primary">
-                                    {f.label ?? f.key ?? `Factor ${i + 1}`}
-                                </p>
-                                {typeof f.score === 'number' && (
-                                    <p className="text-secondary/80 mt-0.5">Score: {f.score}</p>
-                                )}
-                                {f.detail && (
-                                    <p className="text-on-surface-variant/60 mt-1 leading-relaxed">
-                                        {f.detail}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
+                        <AdviceCard
+                            icon={<MessageCircle className="w-3 h-3" />}
+                            label="Communication"
+                            text={result.advice.communication_style}
+                            accent="text-sky-400"
+                        />
+                        <AdviceCard
+                            icon={<HandHeart className="w-3 h-3" />}
+                            label="Best Support"
+                            text={result.advice.best_support_method}
+                            accent="text-emerald-400"
+                        />
+                        <AdviceCard
+                            icon={<Shield className="w-3 h-3" />}
+                            label="Boundaries"
+                            text={result.advice.boundaries_or_cautions}
+                            accent="text-amber-400"
+                        />
+                        <AdviceCard
+                            icon={<ArrowRight className="w-3 h-3" />}
+                            label="Next Step"
+                            text={result.advice.next_step}
+                            accent="text-secondary"
+                        />
                     </div>
                 </div>
             )}
+
+            {/* Factor breakdown */}
+            <FactorsBreakdown factors={result.factors} />
 
             {!alreadyPaid && (
                 <Button variant="ghost" size="sm" onClick={onRerun}>
