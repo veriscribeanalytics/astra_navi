@@ -7,6 +7,12 @@ export interface ChatAvatar {
   personality: string;
   creditCost: number;
   isDefault: boolean;
+  /** Optional logical path or future CDN URL for the avatar artwork. May not be hosted yet. */
+  imageUrl?: string;
+  /** Hex color (e.g. "#6366F1") sourced from the backend catalog. */
+  accentColor?: string;
+  /** Icon library key (e.g. "sparkles", "briefcase"). FE maps to its icon set, falling back to sparkles. */
+  iconKey?: string;
 }
 
 export interface ChatAvatarCatalog {

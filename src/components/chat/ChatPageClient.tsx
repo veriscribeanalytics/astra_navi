@@ -147,13 +147,15 @@ const ChatPageClient: React.FC = () => {
 
       <div className={`sidebar-overlay ${(isMobileMenuOpen || isRightPanelOpen) ? 'active' : ''}`} onClick={closeOverlays} />
 
-      <div className={`chat-left-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-        <ChatSidebar />
-      </div>
+      <ChatHeader />
 
-      <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`} {...bindGestures}>
-        <ChatHeader />
-        {isEmptyChat ? (
+      <div className="chat-body">
+        <div className={`chat-left-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <ChatSidebar />
+        </div>
+
+        <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`} {...bindGestures}>
+          {isEmptyChat ? (
           <div className="chat-empty-shell">
             <div className="chat-empty-hero">
               {/* Cosmic avatar */}
@@ -258,6 +260,7 @@ const ChatPageClient: React.FC = () => {
             <ChatInput />
           </div>
         )}
+        </div>
       </div>
 
       {paywall && !paywall.isSoft && (

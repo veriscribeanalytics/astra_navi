@@ -9,7 +9,13 @@ export async function GET(req: NextRequest) {
     const { user, accessToken } = authContext;
     const email = user?.email;
 
-    const response = await backendFetch('/api/chat/avatars', {
+    // Forward ?lang= to the backend so catalog comes back localized.
+    const lang = req.nextUrl.searchParams.get('lang');
+    const path = lang
+      ? `/api/chat/avatars?lang=${encodeURIComponent(lang)}`
+      : '/api/chat/avatars';
+
+    const response = await backendFetch(path, {
       userEmail: email as string,
       accessToken: accessToken as string,
     });

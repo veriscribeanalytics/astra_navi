@@ -6,6 +6,7 @@ import { ALL_FONT_VARIABLES } from "@/lib/fonts";
 import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
+import SkipLink from "@/components/layout/SkipLink";
 import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -57,9 +58,7 @@ export default async function RootLayout({
                 <ChatProvider>
                   <PaywallProvider>
                   <ThemeProvider>
-                    <a href="#main-content" className="skip-to-content">
-                      Skip to main content
-                    </a>
+                    <SkipLink />
                     
                     <OptimizedBackgrounds />
                     <Toaster />

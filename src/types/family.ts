@@ -15,7 +15,13 @@ export type FamilyRelationshipType =
 
 export type FamilyGender = 'male' | 'female' | 'other';
 
-export type CompatibilityLang = 'en' | 'hi' | 'ko';
+export type CompatibilityLang = 'en' | 'hi' | 'ko' | 'ta' | 'te' | 'kn' | 'bn' | 'mr' | 'pa';
+
+/** Languages the family compatibility backend currently supports.
+ *  Source of truth on backend; mirror this list when surfacing a picker. */
+export const COMPATIBILITY_LANGS: readonly CompatibilityLang[] = [
+  'en', 'hi', 'ko', 'ta', 'te', 'kn', 'bn', 'mr', 'pa',
+] as const;
 
 /** Credit cost per relationship type for compatibility calls. */
 export const COMPATIBILITY_CREDIT_COST: Record<FamilyRelationshipType, number> = {
@@ -31,7 +37,9 @@ export const COMPATIBILITY_CREDIT_COST: Record<FamilyRelationshipType, number> =
 
 export const FAMILY_FREE_TIER_LIMIT = 3;
 
-/** Server returns numeric id; we keep number | string for flexibility. */
+/** Server returns numeric id; we keep number | string for flexibility.
+ *  Backend response is snake_case; useFamily.ts normalizes into this camelCase
+ *  shape before handing to React components. */
 export interface FamilyMember {
   id: number;
   name: string;
@@ -44,6 +52,8 @@ export interface FamilyMember {
   longitude: number;
   timezoneOffset: number; // hours, e.g. 5.5
   notes?: string | null;
+  consentAcknowledged?: boolean;
+  consentAcknowledgedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -122,6 +132,7 @@ export interface FamilyChartResponse {
 export type FamilyCompatibilityBand = 'Excellent' | 'Good' | 'Average' | 'Challenging';
 export type FamilyCompatibilityFactorStatus = 'strength' | 'balanced' | 'tension';
 export type FamilyCompatibilityConfidenceLevel = 'high' | 'medium' | 'low';
+export type FamilyCompatibilityDataQuality = 'ok' | 'partial' | 'missing';
 
 export interface FamilyCompatibilityFactor {
   name: string;
@@ -130,8 +141,13 @@ export interface FamilyCompatibilityFactor {
   score_percent: number;
   weight?: number;
   note?: string;
+  /** Tells the UI to surface a "missing data" badge when not 'ok'. */
+  data_quality?: FamilyCompatibilityDataQuality;
   status: FamilyCompatibilityFactorStatus;
   summary: string;
+  /** Ashtakoot-only (spouse): raw obtained / max points per koot. */
+  obtained?: number;
+  max?: number;
   /** Legacy field — older payloads. */
   key?: string;
   detail?: string;
@@ -184,4 +200,18 @@ export interface FamilyFreeTierCapError {
   code: 'FAMILY_FREE_TIER_CAP';
   detail?: string;
   error?: string;
+}
+
+/** 400 body when the requesting user's own profile is missing birth fields
+ *  required to compute synastry against a family member. */
+export interface FamilyMissingBirthDetailsError {
+  error: 'missing_birth_details';
+  missing: string[]; // e.g. ['dob', 'tob', 'pob']
+}
+
+/** 409 body when a compatibility computation is already in progress for this
+ *  member+lang and the caller should retry shortly. */
+export interface FamilyReservationPendingError {
+  error: 'reservation_pending';
+  idempotency_key: string;
 }

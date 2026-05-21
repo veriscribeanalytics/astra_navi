@@ -66,7 +66,9 @@ export interface ChatMessage {
   contextUsed?: boolean;
   contextSource?: ChatPageContextSource;
   contextChars?: number;
-  avatarId?: string;
+  /** Set by backend on AI messages — identifies which avatar produced this response.
+   *  Null/undefined for user, system, historical, and welcome messages. */
+  avatarId?: string | null;
   avatarName?: string;
   avatarTitle?: string;
   avatarCreditCost?: number;
@@ -611,15 +613,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const regenerateMessage = useCallback(async (messageId: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-') || isSending) return;
     setIsSending(true);
-    setActiveChat(prev => prev ? {
-      ...prev,
-      messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null } : m),
-    } : null);
+
+    // Preserve the avatar that originally produced this message so a regenerate
+    // doesn't silently switch personas (per backend handoff). Fall back to the
+    // currently selected avatar if the historical message has no avatarId.
+    let avatarIdForRegen: string | undefined;
+    setActiveChat(prev => {
+      if (!prev) return null;
+      const target = prev.messages.find(m => m.id === messageId);
+      avatarIdForRegen = target?.avatarId ?? selectedAvatarId ?? undefined;
+      return {
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null } : m),
+      };
+    });
+
     try {
       const res = await clientFetch(`/api/chat/${activeChatId}/message/${messageId}/regenerate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language, mode }),
+        body: JSON.stringify({
+          language,
+          mode,
+          ...(avatarIdForRegen ? { avatarId: avatarIdForRegen } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.detail || 'Regenerate failed');
@@ -651,7 +668,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t]);
+  }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t, selectedAvatarId]);
 
   const retryMessage = useCallback(async (messageId: string) => {
     if (isGuest || isSending) return;
@@ -715,7 +732,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isGuest) return;
     setIsLoadingAvatars(true);
     try {
-      const res = await clientFetch('/api/chat/avatars');
+      const lang = language || 'en';
+      const res = await clientFetch(`/api/chat/avatars?lang=${encodeURIComponent(lang)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load avatars');
       const list: ChatAvatar[] = Array.isArray(data.avatars) ? data.avatars : [];
@@ -735,7 +753,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingAvatars(false);
     }
-  }, [isGuest]);
+  }, [isGuest, language]);
 
   const editMessage = useCallback(async (messageId: string, newText: string) => {
     if (isGuest || !activeChatId || isSending) return;

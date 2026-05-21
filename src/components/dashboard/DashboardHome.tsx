@@ -544,12 +544,12 @@ export default function DashboardHome() {
                                     </Link>
                                 )}
                             </div>
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-headline font-bold tracking-tight leading-tight flex flex-wrap items-center justify-center lg:justify-start gap-x-3">
-                                {greeting}, 
+                            <h1 className="text-xl sm:text-3xl lg:text-4xl font-headline font-bold tracking-tight leading-tight flex flex-wrap items-center justify-center lg:justify-start gap-x-3 break-keep break-words">
+                                {greeting},
                                 {userLoading ? (
                                     <Skeleton height={32} width={180} className="inline-block rounded-xl" />
                                 ) : (
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-amber-500 to-secondary animate-gradient-x capitalize">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-amber-500 to-secondary animate-gradient-x capitalize break-keep break-words">
                                         {user?.name || user?.email?.split('@')[0] || t('common.user')}
                                     </span>
                                 )}

@@ -731,11 +731,31 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
             return;
         }
         // Error cases
+        if (res.status === 400 && res.missingBirthFields && res.missingBirthFields.length > 0) {
+            const fieldLabels: Record<string, string> = {
+                dob: 'date of birth',
+                tob: 'time of birth',
+                pob: 'place of birth',
+                latitude: 'birth coordinates',
+                longitude: 'birth coordinates',
+                timezone_offset: 'timezone',
+                timezoneOffset: 'timezone',
+            };
+            const missing = Array.from(new Set(res.missingBirthFields.map((f) => fieldLabels[f] ?? f)));
+            toastError(
+                `Complete your profile first — missing ${missing.join(', ')}. Open Profile to add them.`
+            );
+            return;
+        }
         if (res.status === 400) {
             toastError(
                 res.error ||
                     'Your profile is missing birth date, time, coordinates, or timezone. Update your profile to enable compatibility.'
             );
+            return;
+        }
+        if (res.status === 409 && res.stillComputing) {
+            info('Still computing your compatibility — please try again in a few seconds.');
             return;
         }
         if (res.status === 402) {

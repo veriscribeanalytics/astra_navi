@@ -223,21 +223,35 @@ button:focus-visible:not(.chat-input-icon-btn),
 
 /* Skip to content link */
 .skip-to-content {
-  position: absolute;
-  top: -40px;
+  position: fixed;
+  top: -60px;
   left: 0;
   background: var(--secondary);
   color: var(--on-primary);
-  padding: 8px 16px;
+  padding: 10px 18px;
   text-decoration: none;
   z-index: 9999;
-  border-radius: 0 0 4px 0;
+  border-radius: 0 0 6px 0;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: top 0.2s ease;
 }
 
-.skip-to-content:focus {
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
   top: 0;
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+/* Once the user does anything other than press Tab first, hide the skip link
+   permanently until the next page refresh. SkipLink.tsx toggles this class. */
+body.skip-disabled .skip-to-content,
+body.skip-disabled .skip-to-content:focus,
+body.skip-disabled .skip-to-content:focus-visible {
+  top: -200px !important;
+  pointer-events: none;
 }
 
 :root {
@@ -953,14 +967,27 @@ html:has(.chat-layout) body {
 }
 
 .chat-layout {
-  display: grid;
-  grid-template-columns: minmax(0, clamp(220px, 18vw, 300px)) minmax(0, 1fr);
+  --chat-header-height: 52px;
+  --chat-sidebar-width: clamp(220px, 18vw, 300px);
+  display: flex;
+  flex-direction: column;
   flex: 1;
   overflow: hidden;
   height: 100%;
   min-height: 0;
   position: relative;
   isolation: isolate;
+}
+
+.chat-body {
+  display: grid;
+  grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .chat-layout::before {
@@ -976,7 +1003,7 @@ html:has(.chat-layout) body {
 }
 
 @media (max-width: 1280px) {
-  .chat-layout { grid-template-columns: minmax(0, clamp(200px, 20vw, 260px)) minmax(0, 1fr); }
+  .chat-layout { --chat-sidebar-width: clamp(200px, 20vw, 260px); }
 }
 
 @media (min-width: 1280px) {
@@ -992,17 +1019,18 @@ html:has(.chat-layout) body {
 }
 
 @media (max-width: 1024px) {
-  .chat-layout { grid-template-columns: 1fr; }
-  
+  .chat-body { grid-template-columns: 1fr; }
+
   .chat-left-sidebar {
     display: flex !important;
     position: fixed !important;
-    top: 0; bottom: 0;
+    top: var(--chat-header-height, 52px);
+    bottom: 0;
     z-index: 999 !important;
     transform: none !important;
     flex-direction: column;
   }
-  
+
   .chat-left-sidebar {
     left: calc(min(86vw, 320px) * -1); width: min(86vw, 320px);
     border-top-right-radius: 20px;
@@ -1010,7 +1038,7 @@ html:has(.chat-layout) body {
     transition: left 0.3s ease;
     pointer-events: none;
   }
-  
+
   .chat-left-sidebar.mobile-open { left: 0; display: flex; pointer-events: auto; }
 }
 
@@ -1169,7 +1197,8 @@ html:has(.chat-layout) body {
   grid-column: 3;
   grid-row: 1;
   position: fixed !important;
-  top: 0; bottom: 0;
+  top: var(--chat-header-height, 52px);
+  bottom: 0;
   right: 0; width: min(92vw, 400px);
   z-index: 999 !important;
   background: color-mix(in srgb, var(--surface) 90%, transparent);
@@ -1211,27 +1240,84 @@ html:has(.chat-layout) body {
   letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;
 }
 
-.chat-main-area { 
+.chat-main-area {
   grid-column: 2;
   grid-row: 1;
-  display: flex; 
-  flex-direction: column; 
-  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-x: hidden;
   height: 100%;
   min-height: 0;
   min-width: 0;
+  max-width: 100%;
+}
+
+/* Mobile/tablet: sidebar is position:fixed (out of grid). Move the main
+   area into column 1 so it doesn't sit in an implicit second column.
+   This rule MUST come after the .chat-main-area default above. */
+@media (max-width: 1024px) {
+  .chat-main-area {
+    grid-column: 1 / -1;
+  }
 }
 
 .chat-main-header {
   border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 25%, transparent);
-  padding: 8px 14px; display: flex; align-items: center; justify-content: space-between;
   background: var(--background);
-  min-height: 44px;
+  height: var(--chat-header-height, 52px);
+  min-height: var(--chat-header-height, 52px);
+  flex-shrink: 0;
   min-width: 0;
+  position: relative;
+  z-index: 40;
+  /* Match the chat-body grid so the back zone lines up with the sidebar */
+  display: grid;
+  grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.chat-header-back-zone {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border-right: 1px solid color-mix(in srgb, var(--secondary) 10%, var(--outline-variant));
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chat-header-main-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  min-width: 0;
+  gap: 8px;
+}
+
+@media (max-width: 1280px) {
+  .chat-main-header { grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .chat-main-header { grid-template-columns: auto minmax(0, 1fr); }
+  .chat-header-back-zone {
+    border-right: none;
+    padding: 0;
+  }
+  .chat-header-main-zone {
+    padding-left: 8px;
+  }
 }
 
 @media (max-width: 768px) {
-  .chat-main-header { padding: 8px 10px; }
+  .chat-header-back-zone {
+    padding: 0;
+  }
+  .chat-header-main-zone {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 }
 
 .chat-center-column {
@@ -1294,6 +1380,7 @@ html:has(.chat-layout) body {
   min-height: 0;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
 }
 
 .chat-empty-hero {
@@ -1334,7 +1421,7 @@ html:has(.chat-layout) body {
 @media (min-width: 2560px) {
   .chat-empty-hero,
   .chat-empty-footer {
-    max-width: clamp(700px, 40vw, 1000px);
+    max-width: clamp(900px, 55vw, 1500px);
   }
 }
 
@@ -1473,7 +1560,6 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
 @media (min-width: 2560px) {
   .glass-panel { border-radius: 40px; }
   .chat-input-container { font-size: 17px; }
-  .chat-main-header { padding: 10px 20px; min-height: 52px; }
   .chat-empty-center .chat-empty-greeting { font-size: 28px; }
   .chat-empty-center .chat-empty-icon { width: 56px; height: 56px; font-size: 24px; }
 }

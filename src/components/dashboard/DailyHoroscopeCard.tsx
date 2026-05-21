@@ -104,9 +104,16 @@ export default function DailyHoroscopeCard({
     
     // Optimization Refs
     const currentSign = horoscope?.user?.sign || sign || 'Aries';
-    // Normalize sign name to English ID for t() lookup — backend may return Hindi (e.g. "सिंह") or Sanskrit ("Simha")
-    const normalizedSignId = getRashiData(currentSign)?.id || currentSign.toLowerCase();
-    const translatedSign = t(`signs.${normalizedSignId}`);
+    // Normalize sign name to English ID for t() lookup — backend may return Hindi (e.g. "सिंह"),
+    // Sanskrit ("Simha"), or a translated label ("사자자리"). Fall back to the raw value when t()
+    // can't resolve, so we never render the raw "signs.xyz" key.
+    const rashi = getRashiData(currentSign);
+    const normalizedSignId = rashi?.id;
+    const lookupKey = normalizedSignId ? `signs.${normalizedSignId}` : '';
+    const translatedAttempt = lookupKey ? t(lookupKey) : '';
+    const translatedSign = (translatedAttempt && translatedAttempt !== lookupKey)
+        ? translatedAttempt
+        : (rashi?.en || currentSign);
 
     const _fetchedAreasRef = useRef<Set<string>>(new Set());
     const forecastDataCacheRef = useRef<Map<string, ForecastData>>(new Map());
