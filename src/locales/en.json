@@ -634,6 +634,13 @@
       "transitPlanets": "Active Planets",
       "transitPanchanga": "Panchanga",
       "notableTransits": "Notable Transits"
+    },
+    "empty": {
+      "badge": "Your Personal Vedic Guide",
+      "headingLead": "What would you like to understand",
+      "headingAccent": "today?",
+      "subtitle": "Ask about your chart, timing, relationships, career, or today's planetary energy.",
+      "dataPrivate": "Your data is private and secure"
     }
   },
   "healthForecast": {
