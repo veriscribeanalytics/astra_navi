@@ -422,7 +422,7 @@ export default function HousesPage() {
 
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <Zap className="w-4 h-4" /> {{t('blogs.houses.dominions')}}
+                                                        <Zap className="w-4 h-4" /> {t('blogs.houses.dominions')}
                                                     </h3>
                                                     <div className="flex flex-wrap gap-3">
                                                         {selectedHouse.traits.map(t => (
@@ -436,7 +436,7 @@ export default function HousesPage() {
                                             <div className="col-span-5 space-y-4">
                                                 <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
                                                     <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-3">
-                                                        <Shield className="w-4 h-4" /> {{t('blogs.houses.lifeGovernance')}}
+                                                        <Shield className="w-4 h-4" /> {t('blogs.houses.lifeGovernance')}
                                                     </h3>
                                                     <p className="text-[14px] font-medium leading-relaxed text-foreground/90">
                                                         {selectedHouse.represents}

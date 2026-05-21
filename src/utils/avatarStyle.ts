@@ -39,7 +39,7 @@ const AVATAR_IMAGE_MAP: Record<string, string> = {
 };
 
 export const getAvatarIcon = (
-  avatarId?: string,
+  avatarId?: string | null,
   catalogEntry?: ChatAvatar
 ): React.FC<{ className?: string }> => {
   if (catalogEntry?.iconKey) {
@@ -49,7 +49,7 @@ export const getAvatarIcon = (
   return AVATAR_ICON_MAP[avatarId ?? 'navi'] || Sparkles;
 };
 
-export const getAvatarAccent = (avatarId?: string) =>
+export const getAvatarAccent = (avatarId?: string | null) =>
   AVATAR_ACCENT_MAP[avatarId ?? 'navi'] || AVATAR_ACCENT_MAP.navi;
 
 export const getAvatarAccentStyle = (accentColor?: string | null): React.CSSProperties | null => {
@@ -65,7 +65,7 @@ export const getAvatarAccentStyle = (accentColor?: string | null): React.CSSProp
  *  Prefers the backend `imageUrl` (proxied through next.config rewrites for
  *  `/static/avatars/*`), so a future CDN move can ship from the backend alone. */
 export const getAvatarImage = (
-  avatarId?: string,
+  avatarId?: string | null,
   catalogEntry?: ChatAvatar
 ): string | null => {
   if (catalogEntry?.imageUrl) return catalogEntry.imageUrl;
@@ -91,7 +91,7 @@ const AVATAR_THEME_MAP: Record<string, AvatarTheme> = {
 };
 
 export const getAvatarTheme = (
-  avatarId?: string,
+  avatarId?: string | null,
   catalogEntry?: ChatAvatar
 ): AvatarTheme => {
   if (catalogEntry?.accentColor) {

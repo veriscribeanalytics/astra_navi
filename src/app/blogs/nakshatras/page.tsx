@@ -313,7 +313,7 @@ export default function NakshatrasPage() {
                                             onClick={() => router.push('/kundli')}
                                             className="h-12 px-6 bg-gradient-to-r from-secondary to-secondary/80 text-background font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
                                         >
-                                            <Lock className="w-4 h-4 opacity-40" /> {{t('blogs.nakshatras.analyzeBtn')}}
+                                            <Lock className="w-4 h-4 opacity-40" /> {t('blogs.nakshatras.analyzeBtn')}
                                         </button>
                                     </div>
                                     <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
@@ -367,7 +367,7 @@ export default function NakshatrasPage() {
                                             <div className="col-span-7 space-y-8">
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <BookOpen className="w-4 h-4" /> {{t('blogs.nakshatras.karmicDeepDive')}}
+                                                        <BookOpen className="w-4 h-4" /> {t('blogs.nakshatras.karmicDeepDive')}
                                                     </h3>
                                                     <p className="text-[16px] font-light leading-relaxed text-foreground/80 italic border-l-2 border-secondary/20 pl-6 pr-6">
                                                         &quot;{selectedNakshatra.deepDive}&quot;
@@ -376,7 +376,7 @@ export default function NakshatrasPage() {
 
                                                 <div className="p-6 rounded-2xl bg-secondary/5 border border-secondary/5">
                                                     <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-2">
-                                                        <Sparkles className="w-4 h-4" /> {{t('blogs.nakshatras.fundamentalTrait')}}
+                                                        <Sparkles className="w-4 h-4" /> {t('blogs.nakshatras.fundamentalTrait')}
                                                     </h3>
                                                     <p className="text-[14px] font-medium text-foreground/70 leading-relaxed">
                                                         {selectedNakshatra.trait}

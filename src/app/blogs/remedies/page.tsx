@@ -119,8 +119,8 @@ export default function RemediesPage() {
                     </motion.div>
                     
                     <div className="text-right">
-                        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight">{{t('blogs.remedies.title')}} <span className="text-secondary italic">{{t('blogs.remedies.subtitle')}}</span></h1>
-                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">{{t('blogs.remedies.tagline')}}</p>
+                        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight">{t('blogs.remedies.title')} <span className="text-secondary italic">{t('blogs.remedies.subtitle')}</span></h1>
+                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">{t('blogs.remedies.tagline')}</p>
                     </div>
                 </div>
 
@@ -178,26 +178,26 @@ export default function RemediesPage() {
 
                                             <div className="flex-1 text-center md:text-left">
                                                 <div className="flex flex-wrap items-baseline justify-center md:justify-start gap-4 mb-4">
-                                                    <h2 className="text-6xl font-headline font-bold text-foreground">{{selectedRemedy.nameEn}}</h2>
-                                                    <span className="text-3xl text-secondary font-headline italic">— {{selectedRemedy.nameHi}}</span>
+                                                    <h2 className="text-6xl font-headline font-bold text-foreground">{selectedRemedy.nameEn}</h2>
+                                                    <span className="text-3xl text-secondary font-headline italic">— {selectedRemedy.nameHi}</span>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                                                     <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{{t('blogs.remedies.logic')}}</p>
-                                                        <p className="text-base font-bold text-secondary">{{selectedRemedy.logic}}</p>
+                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{t('blogs.remedies.logic')}</p>
+                                                        <p className="text-base font-bold text-secondary">{selectedRemedy.logic}</p>
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{{t('blogs.remedies.target')}}</p>
-                                                        <p className="text-base font-bold text-foreground/80">{{selectedRemedy.classification}}</p>
+                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{t('blogs.remedies.target')}</p>
+                                                        <p className="text-base font-bold text-foreground/80">{selectedRemedy.classification}</p>
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{{t('blogs.remedies.intensity')}}</p>
-                                                        <p className="text-base font-bold text-foreground/80">{{selectedRemedy.potency}}</p>
+                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{t('blogs.remedies.intensity')}</p>
+                                                        <p className="text-base font-bold text-foreground/80">{selectedRemedy.potency}</p>
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{{t('blogs.remedies.entity')}}</p>
-                                                        <p className="text-base font-bold text-secondary">{{selectedRemedy.keyEntity}}</p>
+                                                        <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest">{t('blogs.remedies.entity')}</p>
+                                                        <p className="text-base font-bold text-secondary">{selectedRemedy.keyEntity}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -208,7 +208,7 @@ export default function RemediesPage() {
                                                 <div>
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                                                         <Dna className="w-4 h-4" />
-                                                        {{t('blogs.remedies.remedialTheory')}}
+                                                        {t('blogs.remedies.remedialTheory')}
                                                     </h3>
                                                     <p className="text-lg text-foreground/90 leading-relaxed font-light italic border-l-2 border-secondary/20 pl-6">
                                                         &quot;{selectedRemedy.deepDive}&quot;
@@ -216,7 +216,7 @@ export default function RemediesPage() {
                                                 </div>
 
                                                 <div className="p-6 rounded-2xl bg-surface border border-outline-variant/10 shadow-sm">
-                                                    <h4 className="text-[10px] font-bold text-foreground/50 mb-3 uppercase tracking-widest">{{t('blogs.remedies.operationalRole')}}</h4>
+                                                    <h4 className="text-[10px] font-bold text-foreground/50 mb-3 uppercase tracking-widest">{t('blogs.remedies.operationalRole')}</h4>
                                                     <p className="text-[15px] text-foreground font-medium leading-relaxed">
                                                         {selectedRemedy.represents}
                                                     </p>
@@ -228,23 +228,23 @@ export default function RemediesPage() {
                                                     <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-center justify-between group">
                                                         <div className="flex items-center gap-3">
                                                             <Activity className="w-5 h-5 text-secondary/40 group-hover:text-secondary transition-colors" />
-                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{{t('blogs.remedies.efficacyScale')}}</span>
+                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{t('blogs.remedies.efficacyScale')}</span>
                                                         </div>
                                                         <span className="text-sm font-bold text-foreground">{selectedRemedy.potency}</span>
                                                     </div>
                                                     <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-center justify-between group">
                                                         <div className="flex items-center gap-3">
                                                             <Zap className="w-5 h-5 text-secondary/40 group-hover:text-secondary transition-colors" />
-                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{{t('blogs.remedies.primaryLogic')}}</span>
+                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{t('blogs.remedies.primaryLogic')}</span>
                                                         </div>
                                                         <span className="text-sm font-bold text-foreground">{selectedRemedy.logic}</span>
                                                     </div>
                                                     <div className="p-5 rounded-2xl bg-secondary/5 border border-secondary/10 flex items-center justify-between group">
                                                         <div className="flex items-center gap-3">
                                                             <Shield className="w-5 h-5 text-secondary/40 group-hover:text-secondary transition-colors" />
-                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{{t('blogs.remedies.safetyLevel')}}</span>
+                                                            <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{t('blogs.remedies.safetyLevel')}</span>
                                                         </div>
-                                                        <span className="text-sm font-bold text-foreground">{{t('blogs.remedies.highNonInvasive')}}</span>
+                                                        <span className="text-sm font-bold text-foreground">{t('blogs.remedies.highNonInvasive')}</span>
                                                     </div>
                                                 </div>
 
@@ -253,7 +253,7 @@ export default function RemediesPage() {
                                                         <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
                                                             <Sparkles className="w-4 h-4 text-secondary" />
                                                         </div>
-                                                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{{t('blogs.remedies.keyExamples')}}</p>
+                                                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{t('blogs.remedies.keyExamples')}</p>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2">
                                                         {selectedRemedy.traits.map((trait, idx) => (
@@ -270,11 +270,11 @@ export default function RemediesPage() {
                                                     <Stars className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-base font-headline font-bold text-foreground">{{t('blogs.remedies.personalizedScan')}}</h3>
-                                                    <p className="text-[10px] text-foreground/40 tracking-wider uppercase font-bold">{{t('blogs.remedies.discoverSpecific')}}</p>
+                                                    <h3 className="text-base font-headline font-bold text-foreground">{t('blogs.remedies.personalizedScan')}</h3>
+                                                    <p className="text-[10px] text-foreground/40 tracking-wider uppercase font-bold">{t('blogs.remedies.discoverSpecific')}</p>
                                                 </div>
                                             </div>
-                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-8 !py-3 !rounded-2xl !font-bold">{{t('blogs.remedies.consultNavi')}} ✦</Button>
+                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-8 !py-3 !rounded-2xl !font-bold">{t('blogs.remedies.consultNavi')} ✦</Button>
                                         </div>
                                     </div>
                                 </Card>
