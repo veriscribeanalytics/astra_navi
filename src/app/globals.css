@@ -1286,6 +1286,58 @@ html:has(.chat-layout) body {
   }
 }
 
+/* New empty-state layout: hero centers in remaining space, input pins to bottom */
+.chat-empty-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.chat-empty-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
+  max-width: clamp(560px, 44vw, 860px);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 1rem;
+  overflow-y: auto;
+}
+
+.chat-empty-footer {
+  width: 100%;
+  max-width: clamp(560px, 44vw, 860px);
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .chat-empty-hero {
+    justify-content: flex-start;
+    padding: clamp(1.25rem, 6vh, 2.5rem) 0.75rem 0.75rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .chat-empty-hero {
+    justify-content: flex-start;
+    padding-top: 1rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .chat-empty-hero,
+  .chat-empty-footer {
+    max-width: clamp(700px, 40vw, 1000px);
+  }
+}
+
 /* DASHBOARD SHELL */
 html:has(.dashboard-shell), html:has(.dashboard-shell) body { height: 100vh; overflow: hidden; }
 body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height: 100%; overflow: hidden; }

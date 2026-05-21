@@ -73,7 +73,7 @@ const ChatInput: React.FC = () => {
     mode, setMode, attachments, addAttachment, removeAttachment,
     selectedAvatarId
   } = useChat();
-  const { language } = useTranslation();
+  const { t, language } = useTranslation();
   const isMobile = useIsMobile();
   
   const [isListening, setIsListening] = useState(false);
@@ -302,7 +302,7 @@ const ChatInput: React.FC = () => {
         <div className="absolute inset-0 z-50 bg-secondary/10 border-2 border-secondary rounded-2xl flex items-center justify-center backdrop-blur-sm">
           <div className="text-center">
             <Paperclip className="w-8 h-8 text-secondary mx-auto mb-2" />
-            <p className="text-sm font-semibold text-secondary">Drop files here</p>
+            <p className="text-sm font-semibold text-secondary">{t('chat.input.dropFiles')}</p>
             <p className="text-xs text-on-surface-variant/50">Images & PDFs only</p>
           </div>
         </div>
@@ -335,7 +335,7 @@ const ChatInput: React.FC = () => {
       <div className="chat-input-container relative flex flex-col overflow-hidden transition-all">
         {showPreview && inputText.length > 0 && (
           <div className="px-4 py-3 border-b border-outline-variant/15 max-h-[150px] overflow-y-auto text-[15px] text-foreground">
-            <p className="text-[11px] font-bold text-on-surface-variant/40 uppercase tracking-wider mb-1">Preview</p>
+            <p className="text-[11px] font-bold text-on-surface-variant/40 uppercase tracking-wider mb-1">{t('chat.input.preview')}</p>
             <div className="ai-message-content leading-[1.8] break-words" style={{ whiteSpace: 'pre-wrap' }}>
               {inputText}
             </div>
@@ -358,7 +358,7 @@ const ChatInput: React.FC = () => {
               ? 'text-foreground/15 cursor-not-allowed'
               : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
             }`}
-            title="Attach file"
+            title={t('chat.input.attachFile')}
           >
             <Paperclip className="w-4.5 h-4.5" />
           </button>
@@ -398,13 +398,13 @@ const ChatInput: React.FC = () => {
             </button>
           )}
 
-          <button 
+          <button
             onClick={handleSend}
             disabled={!inputText.trim() || isSending || isOverLimit}
-            className={`ripple-btn w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+            className={`ripple-btn w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all gold-gradient text-on-primary shadow-md shadow-secondary/25 ${
               !inputText.trim() || isSending || isOverLimit
-              ? 'bg-surface-variant/50 text-foreground/15 cursor-not-allowed'
-              : 'gold-gradient text-on-primary hover:opacity-90 hover:scale-105 active:scale-95 shadow-md shadow-secondary/25'
+              ? 'opacity-60 cursor-not-allowed'
+              : 'hover:opacity-90 hover:scale-105 active:scale-95'
             }`}
           >
             <AnimatePresence mode="wait">
@@ -448,7 +448,7 @@ const ChatInput: React.FC = () => {
                 </button>
               ))
             )}
-            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden sm:inline ml-1">Navi uses your birth chart</span>
+            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden sm:inline ml-1">{t('chat.input.naviUsesChart')}</span>
           </div>
           {showCharCount && (
             <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'}`}>

@@ -154,101 +154,102 @@ const ChatPageClient: React.FC = () => {
       <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`} {...bindGestures}>
         <ChatHeader />
         {isEmptyChat ? (
-          <div className="chat-empty-center">
-            {/* Cosmic avatar */}
-            <div className="relative w-[136px] h-[136px] sm:w-[160px] sm:h-[160px] mb-5 sm:mb-6 shrink-0">
-              <div className="absolute inset-0 rounded-full bg-secondary/20 blur-2xl" aria-hidden />
-              <div className="absolute inset-0 rounded-full border border-secondary/30" aria-hidden />
-              <div className="absolute inset-1.5 rounded-full border border-secondary/15" aria-hidden />
-              <div className="absolute inset-3 rounded-full overflow-hidden border-2 border-secondary/40 bg-surface shadow-[0_0_30px_rgba(212,175,55,0.25)]">
-                {imgSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imgSrc}
-                    alt={currentAvatar?.name ?? 'Navi'}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-secondary">
-                    <Sparkles className="w-8 h-8" />
-                  </div>
-                )}
+          <div className="chat-empty-shell">
+            <div className="chat-empty-hero">
+              {/* Cosmic avatar */}
+              <div className="relative w-[136px] h-[136px] sm:w-[160px] sm:h-[160px] mb-5 sm:mb-6 shrink-0">
+                <div className="absolute inset-0 rounded-full bg-secondary/20 blur-2xl" aria-hidden />
+                <div className="absolute inset-0 rounded-full border border-secondary/30" aria-hidden />
+                <div className="absolute inset-1.5 rounded-full border border-secondary/15" aria-hidden />
+                <div className="absolute inset-3 rounded-full overflow-hidden border-2 border-secondary/40 bg-surface shadow-[0_0_30px_rgba(212,175,55,0.25)]">
+                  {imgSrc ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imgSrc}
+                      alt={currentAvatar?.name ?? 'Navi'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-secondary">
+                      <Sparkles className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+                {/* Floating sparkles */}
+                <Sparkles className="absolute top-0 right-2 w-3 h-3 text-secondary/80" aria-hidden />
+                <Sparkles className="absolute bottom-3 left-1 w-2.5 h-2.5 text-secondary/60" aria-hidden />
+                <Sparkles className="absolute top-1/2 -right-1 w-3 h-3 text-secondary/70" aria-hidden />
               </div>
-              {/* Floating sparkles */}
-              <Sparkles className="absolute top-0 right-2 w-3 h-3 text-secondary/80" aria-hidden />
-              <Sparkles className="absolute bottom-3 left-1 w-2.5 h-2.5 text-secondary/60" aria-hidden />
-              <Sparkles className="absolute top-1/2 -right-1 w-3 h-3 text-secondary/70" aria-hidden />
-            </div>
 
-            {/* Pill badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 mb-4">
-              <Sparkles className="w-3 h-3 text-secondary" />
-              <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-secondary">
-                {t('chat.empty.badge')}
-              </span>
-            </div>
+              {/* Pill badge */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 mb-4">
+                <Sparkles className="w-3 h-3 text-secondary" />
+                <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-secondary">
+                  {t('chat.empty.badge')}
+                </span>
+              </div>
 
-            {/* Heading */}
-            <h1 className="text-2xl sm:text-3xl 3xl:text-4xl font-headline font-bold text-foreground/90 tracking-tight text-center max-w-[18ch] mb-3">
-              {t('chat.empty.headingLead')}{' '}
-              <span className="text-secondary italic">{t('chat.empty.headingAccent')}</span>
-            </h1>
+              {/* Heading */}
+              <h1 className="text-2xl sm:text-3xl 3xl:text-4xl font-headline font-bold text-foreground/90 tracking-tight text-center max-w-[18ch] mb-3">
+                {t('chat.empty.headingLead')}{' '}
+                <span className="text-secondary italic">{t('chat.empty.headingAccent')}</span>
+              </h1>
 
-            {/* Subtitle */}
-            <p className="text-[13px] sm:text-[14px] text-foreground/45 max-w-[44ch] leading-relaxed text-center mb-1">
-              {t('chat.empty.subtitle')}
-            </p>
-
-            {/* Today's energy ribbon (if available) */}
-            {transitsData?.todayEnergy && (
-              <p className="text-[12px] text-secondary/70 max-w-[40ch] leading-relaxed text-center italic mt-1 mb-3">
-                {transitsData.todayEnergy}
+              {/* Subtitle */}
+              <p className="text-[13px] sm:text-[14px] text-foreground/45 max-w-[44ch] leading-relaxed text-center mb-1">
+                {t('chat.empty.subtitle')}
               </p>
-            )}
-            {isTransitsLoading && !transitsData && (
-              <p className="text-[12px] text-foreground/30 italic mt-1 mb-3">
-                {t('chat.detail.todayEnergyLoading')}
-              </p>
-            )}
 
-            {/* Cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full mt-5 sm:mt-6 mb-4 sm:mb-6">
-              {heroCards.slice(0, 4).map((card, idx) => {
-                const Icon = STARTER_ICONS[card.icon] ?? Sparkles;
-                return (
-                  <motion.button
-                    key={`${card.title}-${idx}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.08 }}
-                    onClick={() => handleQuestionClick(card.question)}
-                    className="group flex items-center gap-3 px-4 py-3 sm:px-4 sm:py-3.5 rounded-2xl bg-surface/80 border border-outline-variant/20 text-left hover:border-secondary/40 hover:bg-surface transition-all"
-                    aria-label={`Ask: ${card.question}`}
-                  >
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-secondary/10 border border-secondary/15 flex items-center justify-center text-secondary shrink-0 group-hover:bg-secondary/15 group-hover:border-secondary/30 transition-colors">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] sm:text-[14px] font-bold text-secondary leading-tight">
-                        {card.title}
-                      </p>
-                      <p className="text-[11px] sm:text-[12px] text-foreground/50 leading-snug mt-0.5 line-clamp-2">
-                        {card.description}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-foreground/30 group-hover:text-secondary shrink-0 transition-colors" />
-                  </motion.button>
-                );
-              })}
+              {/* Today's energy ribbon (if available) */}
+              {transitsData?.todayEnergy && (
+                <p className="text-[12px] text-secondary/70 max-w-[40ch] leading-relaxed text-center italic mt-1 mb-3">
+                  {transitsData.todayEnergy}
+                </p>
+              )}
+              {isTransitsLoading && !transitsData && (
+                <p className="text-[12px] text-foreground/30 italic mt-1 mb-3">
+                  {t('chat.detail.todayEnergyLoading')}
+                </p>
+              )}
+
+              {/* Cards grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full mt-5 sm:mt-6">
+                {heroCards.slice(0, 4).map((card, idx) => {
+                  const Icon = STARTER_ICONS[card.icon] ?? Sparkles;
+                  return (
+                    <motion.button
+                      key={`${card.title}-${idx}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: idx * 0.08 }}
+                      onClick={() => handleQuestionClick(card.question)}
+                      className="group flex items-center gap-3 px-4 py-3 sm:px-4 sm:py-3.5 rounded-2xl bg-surface/80 border border-outline-variant/20 text-left hover:border-secondary/40 hover:bg-surface transition-all"
+                      aria-label={`Ask: ${card.question}`}
+                    >
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-secondary/10 border border-secondary/15 flex items-center justify-center text-secondary shrink-0 group-hover:bg-secondary/15 group-hover:border-secondary/30 transition-colors">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] sm:text-[14px] font-bold text-secondary leading-tight">
+                          {card.title}
+                        </p>
+                        <p className="text-[11px] sm:text-[12px] text-foreground/50 leading-snug mt-0.5 line-clamp-2">
+                          {card.description}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-foreground/30 group-hover:text-secondary shrink-0 transition-colors" />
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="w-full">
+            <div className="chat-empty-footer">
               <ChatInput />
-            </div>
-
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-foreground/30 text-[11px]">
-              <Shield className="w-3 h-3" />
-              <span>{t('chat.empty.dataPrivate')}</span>
+              <div className="flex items-center justify-center gap-1.5 mt-2 text-foreground/30 text-[11px]">
+                <Shield className="w-3 h-3" />
+                <span>{t('chat.empty.dataPrivate')}</span>
+              </div>
             </div>
           </div>
         ) : (

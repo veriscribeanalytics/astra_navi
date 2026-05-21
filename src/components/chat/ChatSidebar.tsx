@@ -157,24 +157,24 @@ const ChatSidebar: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center gap-2 px-3 pt-2.5 pb-1 shrink-0">
+      <div className="flex items-center gap-2 px-3 pt-3 pb-2 shrink-0">
         <Button
           variant="secondary"
-          size="sm"
+          size="md"
           fullWidth
-          className="!border-secondary/20 !text-secondary font-semibold !py-1.5 gap-1 !text-[11px]"
+          className="!border-secondary/30 !text-secondary !bg-secondary/8 hover:!bg-secondary/15 hover:!border-secondary/50 font-bold !py-2.5 gap-1.5 !text-[13px] !rounded-xl"
           disabled={isGuest}
           onClick={() => {
             createNewChat();
             setIsMobileMenuOpen(false);
           }}
         >
-          <Plus className="w-3 h-3" /> {t('chat.sidebar.newChat')}
+          <Plus className="w-4 h-4" /> {t('chat.sidebar.newChat')}
         </Button>
-        <button 
+        <button
           onClick={() => setIsMobileMenuOpen(false)}
           className="lg:hidden chat-sidebar-close-btn text-on-surface-variant/50 hover:text-secondary rounded-lg transition-all shrink-0 flex items-center justify-center"
-          aria-label="Close sidebar"
+          aria-label={t('chat.sidebar.close')}
         >
           <X size={18} />
         </button>
