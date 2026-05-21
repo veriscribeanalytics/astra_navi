@@ -35,17 +35,17 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
         let error = '';
         switch (field) {
             case 'name':
-                if (value.trim().length < 2) error = 'Name must be at least 2 characters';
-                else if (!/^[a-zA-Z\s]+$/.test(value)) error = 'Name can only contain letters';
+                if (value.trim().length < 2) error = t('home.portals.validation.nameLength');
+                else if (!/^[a-zA-Z\s]+$/.test(value)) error = t('home.portals.validation.nameLetters');
                 break;
             case 'dob':
                 if (value) {
                     const dob = new Date(value);
-                    if (dob > new Date()) error = 'Birth date cannot be in the future';
+                    if (dob > new Date()) error = t('home.portals.validation.dobFuture');
                 }
                 break;
             case 'pob':
-                if (value.trim().length < 2) error = 'Please enter a valid place';
+                if (value.trim().length < 2) error = t('home.portals.validation.pobInvalid');
                 break;
         }
         return error;
@@ -171,14 +171,14 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
                                 <h3 className="text-base sm:text-xl font-headline font-bold text-primary mb-1 sm:mb-2">{t('landing.janamKundliTitle')}</h3>
                                 <p className="text-xs sm:text-sm text-on-surface-variant/70 mb-4 sm:mb-6">{t('landing.janamKundliDesc')}</p>
                                 <form onSubmit={handleSubmit} className="space-y-2 w-full">
-                                    <Input placeholder="Full Name" value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setErrors({...errors, name: validateField('name', e.target.value)}); }} required className="h-9 text-xs" />
+                                    <Input placeholder={t('home.portals.placeholders.fullName')} value={formData.name} onChange={(e) => { setFormData({...formData, name: e.target.value}); setErrors({...errors, name: validateField('name', e.target.value)}); }} required className="h-9 text-xs" />
                                     {errors.name && <p className="text-[10px] text-red-400 text-left">{errors.name}</p>}
                                     <div className="grid grid-cols-2 gap-2">
                                         <Input type="date" value={formData.dob} onChange={(e) => { setFormData({...formData, dob: e.target.value}); setErrors({...errors, dob: validateField('dob', e.target.value)}); }} required className="h-9 text-xs" />
                                         <Input type="time" value={formData.tob} onChange={(e) => setFormData({...formData, tob: e.target.value})} required className="h-9 text-xs" />
                                     </div>
                                     {errors.dob && <p className="text-[10px] text-red-400 text-left">{errors.dob}</p>}
-                                    <Input placeholder="Place of Birth" value={formData.pob} onChange={(e) => { setFormData({...formData, pob: e.target.value}); setErrors({...errors, pob: validateField('pob', e.target.value)}); }} required className="h-9 text-xs" />
+                                    <Input placeholder={t('home.portals.placeholders.pob')} value={formData.pob} onChange={(e) => { setFormData({...formData, pob: e.target.value}); setErrors({...errors, pob: validateField('pob', e.target.value)}); }} required className="h-9 text-xs" />
                                     {errors.pob && <p className="text-[10px] text-red-400 text-left">{errors.pob}</p>}
                                     <Button type="submit" fullWidth size="sm" className="h-9 text-xs mt-2">{t('landing.calculateKundli')}</Button>
                                 </form>
@@ -213,8 +213,8 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
                                 <h3 className="text-base sm:text-xl font-headline font-bold text-primary mb-1 sm:mb-2">{t('landing.soulmateSyncTitle')}</h3>
                                 <p className="text-xs sm:text-sm text-on-surface-variant/70 mb-4 sm:mb-6">{t('landing.soulmateSyncDesc')}</p>
                                 <div className="w-full space-y-2 mb-3">
-                                    <Input placeholder="Your Name" value={matchData.name1} onChange={(e) => setMatchData({...matchData, name1: e.target.value})} className="h-9 text-xs" />
-                                    <Input placeholder="Partner's Name" value={matchData.name2} onChange={(e) => setMatchData({...matchData, name2: e.target.value})} className="h-9 text-xs" />
+                                    <Input placeholder={t('home.portals.placeholders.yourName')} value={matchData.name1} onChange={(e) => setMatchData({...matchData, name1: e.target.value})} className="h-9 text-xs" />
+                                    <Input placeholder={t('home.portals.placeholders.partnerName')} value={matchData.name2} onChange={(e) => setMatchData({...matchData, name2: e.target.value})} className="h-9 text-xs" />
                                 </div>
                                 <Button onClick={() => handleGenerateTeaser('match')} variant="secondary" size="sm" className="border-rose-500/30 hover:bg-rose-500/10 text-rose-600 w-full h-9 text-xs">
                                     {t('landing.checkMatch')}

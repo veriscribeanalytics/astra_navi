@@ -13,7 +13,9 @@
     "howItWorks": "How it Works",
     "online": "Online",
     "onlineNow": "Online Now",
-    "friend": "Friend"
+    "friend": "Friend",
+    "goBack": "Go Back",
+    "returnHome": "Return Home"
   },
   "nav": {
     "myJourney": "My Journey",
@@ -256,7 +258,18 @@
         "desc": "Edge-based computation ensures high availability for transit tracking.",
         "sub": "99.9% Uptime"
       }
-    ]
+    ],
+    "hero": {
+      "bphsCertified": "BPHS Certified",
+      "authenticJyotish": "Authentic Jyotish",
+      "scripturalInsight": "Scriptural Insight",
+      "askNavi": "Ask Navi...",
+      "ashtakootMilan": "Ashtakoot Milan",
+      "gunaMatching": "Guna Matching",
+      "highCompatibility": "High Compatibility",
+      "dailyAlignment": "Daily Alignment",
+      "transitTip": "Transit Tip"
+    }
   },
   "dashboard": {
     "greetingMorning": "Good Morning",
@@ -349,7 +362,9 @@
     "soulmateMatch": "Match",
     "tithi": "Tithi",
     "yoga": "Yoga",
-    "startJourneyDesc": "Your cosmic journey starts here. Consult with Navi to see it here."
+    "startJourneyDesc": "Your cosmic journey starts here. Consult with Navi to see it here.",
+    "unknownSign": "???",
+    "askNaviFab": "Ask Navi"
   },
   "horoscope": {
     "yourDayToday": "Your Day Today",
@@ -428,10 +443,6 @@
     "stepPreferences": "Personalize Your Experience",
     "next": "Continue",
     "back": "Back",
-    "fullName": "Full Name",
-    "dob": "Date of Birth",
-    "tob": "Time of Birth",
-    "pob": "Place of Birth",
     "preferredLanguage": "Preferred Language",
     "receiveHoroscope": "Receive daily horoscope",
     "enableNotifications": "Enable notifications",
@@ -599,7 +610,8 @@
       "downloadHeaderPrefix": "AstraNavi Chat —",
       "downloadDateLabel": "Date:",
       "downloadRoleYou": "You",
-      "downloadRoleNavi": "Navi"
+      "downloadRoleNavi": "Navi",
+      "close": "Close sidebar"
     },
     "detail": {
       "moonSign": "Moon Sign",
@@ -635,12 +647,108 @@
       "transitPanchanga": "Panchanga",
       "notableTransits": "Notable Transits"
     },
+    "avatarPicker": {
+      "loading": "Loading…",
+      "defaultName": "Navi",
+      "ariaAvatar": "Avatar: {name}{title}. Click to change.",
+      "ariaChooseAvatar": "Choose avatar",
+      "chooseGuide": "Choose your guide",
+      "creditsNotice": "Different avatars cost different credits per message.",
+      "creditSingle": "{n} credit",
+      "creditPlural": "{n} credits",
+      "default": "Default"
+    },
+    "header": {
+      "viewHistory": "View history",
+      "online": "Online",
+      "viewChartContext": "View chart context",
+      "closeChat": "Close chat",
+      "back": "Back"
+    },
+    "feedback": {
+      "ratingLabels": {
+        "1": "Misaligned",
+        "2": "Needs Work",
+        "3": "Partial Clarity",
+        "4": "Nearly There",
+        "5": "Cosmically Aligned"
+      },
+      "tagSectionLabels": {
+        "1": "What went wrong with this reading?",
+        "2": "Where did the reading fall short?",
+        "3": "What could improve this insight?",
+        "4": "What small thing was missing?",
+        "5": "What made this reading shine?"
+      },
+      "placeholders": {
+        "1": "The stars were completely misaligned here - what felt wrong?",
+        "2": "Which part of the reading missed the mark?",
+        "3": "What celestial insight was missing from this reading?",
+        "4": "Almost aligned - what would make this reading perfect?",
+        "5": "What resonated most with your cosmic journey?"
+      },
+      "tags": {
+        "1": {
+          "0": "Tone felt dismissive or rude",
+          "1": "Completely wrong prediction",
+          "2": "Planetary positions were incorrect",
+          "3": "Dasha analysis was way off",
+          "4": "Irrelevant to my birth chart",
+          "5": "Other"
+        },
+        "2": {
+          "0": "Tone felt robotic or impersonal",
+          "1": "Misread my birth chart details",
+          "2": "Wrong planetary transits mentioned",
+          "3": "Timing predictions were inaccurate",
+          "4": "Ignored my actual question",
+          "5": "Other"
+        },
+        "3": {
+          "0": "Tone could be more empathetic",
+          "1": "Partially accurate but missed key aspects",
+          "2": "Planetary combinations not fully explained",
+          "3": "Timing predictions felt vague",
+          "4": "Remedies were too generic",
+          "5": "Other"
+        },
+        "4": {
+          "0": "Tone was warm and supportive",
+          "1": "Minor inaccuracy in chart details",
+          "2": "Transit analysis could go deeper",
+          "3": "Dasha insights were brief",
+          "4": "Wanted more specific remedies",
+          "5": "Other"
+        },
+        "5": {
+          "0": "Tone was compassionate and wise",
+          "1": "Spot-on prediction accuracy",
+          "2": "Excellent planetary analysis",
+          "3": "Precise timing insights",
+          "4": "Remedies were practical and helpful",
+          "5": "Other"
+        }
+      },
+      "shareFeedback": "Share feedback",
+      "commentPlaceholder": "Share details (optional)",
+      "disclaimer": "Your feedback helps Navi refine its Vedic wisdom. All responses are anonymous and used solely to improve AstraNavi's celestial guidance.",
+      "submit": "Submit Feedback"
+    },
+    "input": {
+      "dropFiles": "Drop files here",
+      "preview": "Preview",
+      "attachFile": "Attach file",
+      "naviUsesChart": "Navi uses your birth chart"
+    },
     "empty": {
       "badge": "Your Personal Vedic Guide",
       "headingLead": "What would you like to understand",
       "headingAccent": "today?",
       "subtitle": "Ask about your chart, timing, relationships, career, or today's planetary energy.",
       "dataPrivate": "Your data is private and secure"
+    },
+    "messages": {
+      "scrollToLatest": "Scroll to latest message"
     }
   },
   "healthForecast": {
@@ -745,7 +853,29 @@
       "thu": "THU",
       "fri": "FRI",
       "sat": "SAT"
-    }
+    },
+    "monthsShort": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    },
+    "snapshot": {
+      "defaultSuggestion": "Align your activities with the current celestial rhythms for optimal outcome.",
+      "whyPrompt": "Why is my forecast score {score} today?",
+      "planPrompt": "Help me plan my day based on today's forecast details."
+    },
+    "ariaDay": "{weekday} {date}, score {score}",
+    "todayShort": "TOD",
+    "weekly": "7D"
   },
   "plans": {
     "title": "Unlock Your Cosmic Potential",
@@ -844,5 +974,501 @@
     "chartTitle": "Birth Chart",
     "compatibility": "Compatibility",
     "compatibilityDesc": "First read charges credits. Repeating the same language is free."
+  },
+  "match": {
+    "mangal": {
+      "cancelled": "Cancelled",
+      "present": "Present",
+      "absent": "Absent",
+      "title": "Mangal Dosha Analysis",
+      "subtitle": "Mars Compatibility Check",
+      "severity": "Severity",
+      "verdictLabel": "Compatibility Verdict",
+      "severityLevels": {
+        "none": "none",
+        "low": "low",
+        "medium": "medium",
+        "high": "high"
+      }
+    },
+    "additional": {
+      "title": "Supplemental Checks",
+      "subtitle": "Critical Doshas & Alignments",
+      "clear": "Clear",
+      "present": "Present",
+      "notice": "These checks are vital in South Indian traditions and complement the 36-point system for a safer match."
+    },
+    "person": {
+      "unknownSign": "Unknown Sign",
+      "unknown": "Unknown"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Please enter a valid email.",
+      "passwordRequired": "Password is required.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "forgotPassword": "Forgot Password?",
+      "submit": "Sign In"
+    },
+    "register": {
+      "steps": {
+        "account": "Account",
+        "personal": "Personal",
+        "birth": "Birth",
+        "preferences": "Preferences"
+      },
+      "validation": {
+        "emailInvalid": "Please enter a valid email address.",
+        "passwordLength": "Password must be at least 10 characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "passwordUpper": "Password must contain at least one uppercase letter.",
+        "passwordLower": "Password must contain at least one lowercase letter.",
+        "passwordDigit": "Password must contain at least one number.",
+        "passwordSpecial": "Password must contain at least one special character.",
+        "nameLength": "Name must be at least 2 characters.",
+        "dobFuture": "Date of birth cannot be in the future.",
+        "tobFormat": "Time must be in HH:MM format.",
+        "pobLength": "Place name must be at least 2 characters.",
+        "failed": "Registration failed. Please try again."
+      },
+      "reqs": {
+        "title": "Password Requirements",
+        "length": "10+ characters",
+        "upper": "Uppercase letter",
+        "lower": "Lowercase letter",
+        "digit": "Number",
+        "special": "Special character"
+      },
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "genderLabel": "Gender",
+      "selectOption": "Select",
+      "genderMale": "Male",
+      "genderFemale": "Female",
+      "genderOther": "Other",
+      "genderNotSpecified": "Not Specified",
+      "maritalStatusLabel": "Status",
+      "maritalSingle": "Single",
+      "maritalMarried": "Married",
+      "maritalDivorced": "Divorced",
+      "maritalWidowed": "Widowed",
+      "maritalSeparated": "Separated",
+      "maritalNotSpecified": "Prefer not to say",
+      "occupationLabel": "Occupation",
+      "occupationStudent": "Student",
+      "occupationBusiness": "Business Owner",
+      "occupationEmployed": "Employed / Salaried",
+      "occupationHomemaker": "Homemaker",
+      "occupationRetired": "Retired",
+      "occupationUnemployed": "Unemployed",
+      "occupationNotSpecified": "Prefer not to say",
+      "phoneNumberLabel": "Phone Number",
+      "phoneNumberPlaceholder": "Enter phone number (optional)",
+      "dobLabel": "Date of Birth",
+      "tobLabel": "Time of Birth",
+      "pobLabel": "Place of Birth",
+      "pobPlaceholder": "Search city, e.g. Delhi",
+      "pobHelperText": "Search and select your exact birth location",
+      "languageLabel": "Preferred Language",
+      "preferencesLabel": "Preferences",
+      "prefHoroscope": "Receive daily horoscope",
+      "prefNotifications": "Enable notifications",
+      "continue": "Continue",
+      "submit": "Create Account"
+    },
+    "errorBanner": {
+      "dismiss": "Dismiss error"
+    }
+  },
+  "home": {
+    "portals": {
+      "validation": {
+        "nameLength": "Name must be at least 2 characters",
+        "nameLetters": "Name can only contain letters",
+        "dobFuture": "Birth date cannot be in the future",
+        "pobInvalid": "Please enter a valid place"
+      },
+      "placeholders": {
+        "fullName": "Full Name",
+        "pob": "Place of Birth",
+        "yourName": "Your Name",
+        "partnerName": "Partner's Name"
+      }
+    }
+  },
+  "pricing": {
+    "plans": {
+      "seeker": {
+        "title": "Astra Seeker",
+        "price": "₹0",
+        "period": "/always",
+        "buttonText": "Begin Journey",
+        "features": {
+          "0": "Complete Kundli Generation",
+          "1": "Daily Rashi Predictions",
+          "2": "Limited Consultations (5 min/day)",
+          "3": "Basic Planetary Insights"
+        }
+      },
+      "devotee": {
+        "title": "Devotee",
+        "price": "₹299",
+        "period": "/mo",
+        "badge": "Most Chosen",
+        "buttonText": "Select Devotee",
+        "features": {
+          "0": "Unlimited Navi Consultations",
+          "1": "Detailed Kundli Reports (PDF)",
+          "2": "Dasha Period Analysis",
+          "3": "Remedial Gemstone Guidance"
+        }
+      },
+      "disciple": {
+        "title": "Disciple",
+        "price": "₹2,999",
+        "period": "/year",
+        "badge": "Best Value",
+        "buttonText": "Commit Fully",
+        "features": {
+          "0": "All Devotee Features",
+          "1": "Save ₹589 Annually",
+          "2": "Permanent Chart Archive",
+          "3": "Compatibility Analysis"
+        }
+      }
+    }
+  },
+  "blogs": {
+    "index": {
+      "badge": "The Library of Wisdom",
+      "title": "Ancient Science,",
+      "subtitle": "Modern Insight",
+      "description": "Journey through the vast ocean of Vedic knowledge. From planetary movements to spiritual remedies, discover the keys to your cosmic existence.",
+      "liveGuide": "Live Guide",
+      "inProduction": "In Production",
+      "readStory": "Read Story",
+      "ctaHeading": "Can't find what you're",
+      "ctaSubheading": "looking for?",
+      "ctaDescription": "Our Celestial Library is expanding every week. If you have a specific question about your chart, Navi has the answers ready for you now.",
+      "askNavi": "Ask Navi Anything",
+      "subscribe": "Subscribe for Updates",
+      "footer": "© 2026 ASTRANAVI · THE COSMIC ARCHIVE"
+    },
+    "houses": {
+      "title": "The 12",
+      "titleSanskrit": "Bhavas",
+      "encyclopediaTitle": "Encyclopedia",
+      "introduction": "Introduction",
+      "sidebarLabel": "The 12 Bhavas",
+      "coreConcepts": "Core Concepts",
+      "understanding": "Understanding the",
+      "bhavas": "Bhavas",
+      "description": "In Vedic Astrology, the 12 Houses (Bhavas) represent the 12 domains of human life. While planets provide the energy and signs provide the environment, the houses are the actual fields of experience where karma is enacted.",
+      "kendra": "Kendra (Angular) Houses",
+      "kendraDesc": "Houses 1, 4, 7, and 10 form the pillars of life. They govern self, home, partnerships, and career. Planets placed here have the maximum power to shape your worldly existence and initiate massive action.",
+      "trikona": "Trikona (Trinal) Houses",
+      "trikonaDesc": "Houses 1, 5, and 9 are the houses of Dharma and pure blessing. They represent past life merits (Purva Punya), intelligence, and divine grace. Planets here provide natural luck and spiritual evolution.",
+      "dusthana": "Dusthana (Difficult) Houses",
+      "dusthanaDesc": "Houses 6, 8, and 12 govern obstacles, transformation, and loss. While challenging for material pursuits, they are essential for burning karma, building resilience, and achieving ultimate spiritual liberation (Moksha).",
+      "upachaya": "Upachaya (Growing) Houses",
+      "upachayaDesc": "Houses 3, 6, 10, and 11 represent areas of life that improve over time through conscious effort. Malefic planets (Saturn, Mars, Sun) placed here actually give excellent results as they provide the drive to overcome competition.",
+      "analyzeBtn": "Analyze House",
+      "sanskrit": "Sanskrit",
+      "significator": "Significator",
+      "nature": "Nature",
+      "bodyMatrix": "Body Matrix",
+      "houseEssence": "House Essence",
+      "dominions": "Dominions",
+      "lifeGovernance": "Life Governance",
+      "bhavaMechanics": "Bhava Mechanics",
+      "bhavLogic": "Bhavat Bhavam Logic",
+      "howAffects": "How {house} affects derivative life domains",
+      "analyzeBtn2": "Analyze Alignment"
+    },
+    "nakshatras": {
+      "title": "Lunar",
+      "subtitle": "Mansions",
+      "sidebarLabel": "The 27 Nakshatras",
+      "analyzeBtn": "Analyze Nakshatra",
+      "rulerLabel": "Ruler (Lord)",
+      "symbol": "Symbol",
+      "gana": "Gana",
+      "yoni": "Animal (Yoni)",
+      "karmicDeepDive": "Karmic Deep Dive",
+      "fundamentalTrait": "Fundamental Trait",
+      "shakti": "Nakshatra Shakti",
+      "nadi": "Nadi (Ayurvedic)",
+      "purushartha": "Purushartha",
+      "padaD9Logic": "Pada (D9) Logic",
+      "subconscious": "Subconscious Blueprint",
+      "discoverJanma": "Discover your core Janma Nakshatra",
+      "analyzeChart": "Analyze Chart"
+    },
+    "planets": {
+      "title": "Navagraha",
+      "subtitle": "Archetypes",
+      "encyclopediaTitle": "Encyclopedia",
+      "introduction": "Introduction",
+      "sidebarLabel": "The Nine Planets",
+      "coreConcepts": "Core Concepts",
+      "understanding": "Understanding the",
+      "navagraha": "Navagraha",
+      "description": "In Vedic Astrology, the Navagraha (Nine Planets) are the cosmic agents of karma. They act as the dynamic forces that trigger events, shape your psychology, and guide the soul's evolutionary journey through time and space.",
+      "karmicDeliverers": "Karmic Deliverers",
+      "karmicDesc": "Planets don't just symbolize traits; they actively deliver the fruits of your past actions. Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.",
+      "avasthas": "Avasthas (Planetary States)",
+      "avasthasDesc": "A planet's power depends on its condition. An exalted planet expresses its highest, purest potential, while a debilitated planet signifies areas where the soul must work harder to overcome innate weaknesses.",
+      "shadowNodes": "The Shadow Nodes",
+      "shadowNodesDesc": "Rahu and Ketu are not physical masses, but mathematical points where eclipses occur. Despite lacking bodies, these nodes are profound triggers of sudden destiny, obsession, and ultimate spiritual liberation.",
+      "functionalNature": "Functional Nature",
+      "functionalDesc": "Beyond natural traits, a planet acts as a friend or foe based on your specific Ascendant (Lagna). The same Saturn that brings hardship to an Aries lagna acts as a supreme benefactor for a Taurus lagna.",
+      "analyzeBtn": "Analyze Alignment",
+      "cosmicArchetype": "Cosmic Archetype",
+      "signatures": "Signatures",
+      "functionalImpact": "Functional Impact",
+      "planetaryGovernance": "Planetary Governance",
+      "exaltation": "Exaltation",
+      "highestPotential": "Highest Potential",
+      "debilitation": "Debilitation",
+      "lowestVitality": "Lowest Vitality",
+      "mooltrikona": "Mooltrikona",
+      "primaryOffice": "Primary Office",
+      "aligningWith": "Aligning with {planet}",
+      "discoverInfluence": "Discover how this planet influences your chart"
+    },
+    "yogas": {
+      "title": "Planetary",
+      "subtitle": "Yogas",
+      "encyclopediaTitle": "Encyclopedia",
+      "introduction": "Introduction",
+      "sidebarLabel": "Sacred Unions",
+      "coreConcepts": "Core Concepts",
+      "understanding": "Understanding",
+      "yogasLabel": "Yogas",
+      "description": "In Vedic Astrology, a \"Yoga\" means union. It refers to specific planetary combinations and alignments that lock together to create powerful, destined effects. These cosmic signatures dictate the heights of wealth, power, and spiritual liberation in a chart.",
+      "rajaYogas": "Raja Yogas",
+      "rajaDesc": "The kings of combinations. Formed when the lords of Kendra (action) houses unite with lords of Trikona (luck) houses. They guarantee status, authority, and massive success when activated.",
+      "dhanaYogas": "Dhana Yogas",
+      "dhanaDesc": "Combinations for absolute wealth. When the houses of earnings (2nd) and gains (11th) connect deeply with the houses of destiny (5th, 9th), the native is destined for immense financial prosperity.",
+      "activation": "Activation (Dashas)",
+      "activationDesc": "Yogas lie dormant in a chart until their planetary lords are activated by the Vimshottari Dasha (time period). When the dasha of a Yoga-causing planet begins, the effects manifest drastically in reality.",
+      "cancellation": "Cancellation (Bhanga)",
+      "cancellationDesc": "Not all bad yogas are permanent. Neechabhanga occurs when a debilitated (weak) planet is supported by strong alignments, cancelling the weakness and often turning massive struggle into great success.",
+      "analyzeBtn": "Analyze Yogas",
+      "formationTheory": "Formation Theory",
+      "archetypeTraits": "Archetypal Traits",
+      "manifestation": "Manifestation",
+      "activationPath": "Activation Path",
+      "activationPathDesc": "Primarily triggers during major Dasha / Bhukti periods of the involved planets.",
+      "yogaAnalysisScan": "Yoga Analysis Scan",
+      "discoverCombinations": "Discover hidden combinations in your Kundli",
+      "scanChart": "Scan My Chart"
+    },
+    "remedies": {
+      "title": "Sacred",
+      "subtitle": "Remedies",
+      "tagline": "The Science of Alignment",
+      "logic": "Logic",
+      "target": "Target",
+      "intensity": "Intensity",
+      "entity": "Entity",
+      "remedialTheory": "Remedial Theory",
+      "operationalRole": "Operational Role",
+      "efficacyScale": "Efficacy Scale",
+      "primaryLogic": "Primary Logic",
+      "safetyLevel": "Safety Level",
+      "highNonInvasive": "High (Non-Invasive)",
+      "keyExamples": "Key Examples",
+      "personalizedScan": "Personalized Remedy Scan",
+      "discoverSpecific": "Discover specific alignments needed for your chart",
+      "consultNavi": "Consult Navi"
+    }
+  },
+  "profile": {
+    "page": {
+      "title": "User Profile",
+      "description": "Manage your birth details to ensure your personalized readings are always accurate.",
+      "errors": {
+        "fixErrors": "Please fix the errors before saving",
+        "noEmailSession": "No email found in session. Please logout and login again.",
+        "dstConflict": "Your birth time falls during a DST transition. Please select which occurrence was your actual birth time.",
+        "updateFailed": "Update failed. Please try again."
+      },
+      "messages": {
+        "profileUpdated": "Profile updated successfully!"
+      },
+      "buttons": {
+        "updating": "Updating...",
+        "saveAndContinue": "Save & Continue to Dashboard",
+        "saveChanges": "Save Changes",
+        "reset": "Reset",
+        "backToHome": "Back to Home"
+      },
+      "securitySection": {
+        "title": "Security Settings",
+        "description": "Manage your password and active sessions.",
+        "button": "Manage Security Settings"
+      }
+    },
+    "fields": {
+      "email": "Email Address",
+      "emailHelper": "Your email cannot be changed",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "fullNameHelper": "Your full name as per birth certificate",
+      "dateOfBirth": "Date of Birth",
+      "dateOfBirthHelper": "Your birth date",
+      "timeOfBirth": "Time of Birth",
+      "timeOfBirthHelper": "Exact time for precision",
+      "placeOfBirth": "Place of Birth",
+      "placeOfBirthPlaceholder": "Search city, e.g. Delhi",
+      "placeOfBirthHelper": "Search and select your exact birth location",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "+1234567890",
+      "phoneNumberHelper": "Optional phone number",
+      "gender": "Gender",
+      "genderPlaceholder": "Select Gender",
+      "genderOptions": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "notSpecified": "Not Specified"
+      },
+      "maritalStatus": "Marital Status",
+      "maritalStatusPlaceholder": "Select Status",
+      "maritalOptions": {
+        "single": "Single",
+        "married": "Married",
+        "divorced": "Divorced",
+        "widowed": "Widowed",
+        "separated": "Separated",
+        "notSpecified": "Prefer not to say"
+      },
+      "occupation": "Occupation",
+      "occupationPlaceholder": "Select Occupation",
+      "occupationOptions": {
+        "student": "Student",
+        "business": "Business Owner",
+        "employed": "Employed / Salaried",
+        "homemaker": "Homemaker",
+        "retired": "Retired",
+        "unemployed": "Unemployed",
+        "notSpecified": "Prefer not to say"
+      },
+      "errors": {
+        "nameTooShort": "Name must be at least 2 characters",
+        "nameTooLong": "Name is too long",
+        "dobInFuture": "Birth date cannot be in the future",
+        "dobInvalid": "Please enter a valid birth date",
+        "pobInvalid": "Please enter a valid place",
+        "pobTooLong": "Place name is too long",
+        "nameRequired": "Name is required",
+        "dobRequired": "Date of birth is required",
+        "tobRequired": "Time of birth is required",
+        "pobRequired": "Place of birth is required",
+        "pobSelectRequired": "Please select your exact birth location from the search results"
+      }
+    },
+    "onboarding": {
+      "steps": {
+        "name": {
+          "label": "Full Name",
+          "hint": "Your name as per birth certificate"
+        },
+        "dob": {
+          "label": "Date of Birth",
+          "hint": "Determines your planetary positions (Nakshatra)"
+        },
+        "tob": {
+          "label": "Time of Birth",
+          "hint": "Pinpoints your ascendant (Lagna) and house cusps"
+        },
+        "pob": {
+          "label": "Accurate Birth Location",
+          "hint": "Search your city & select from the dropdown for precise coordinates"
+        }
+      },
+      "mobile": {
+        "complete": "All set! Your celestial profile is complete ✨",
+        "remaining": "{n} step{plural} remaining",
+        "completeHint": "Press Save & Continue to return",
+        "remainingHint": "Tap to see what's needed"
+      },
+      "sidebar": {
+        "title": "Complete Your Celestial Identity",
+        "description": "Your birth details are the foundation of every cosmic insight — they unlock personalized horoscopes, kundli analysis, and AI-powered Vedic readings.",
+        "checklistLabel": "Profile Checklist",
+        "completeMessage": "All set! Your celestial profile is complete. Press Save & Continue to return to the dashboard.",
+        "progressLabel": "Profile Completion"
+      }
+    },
+    "preferences": {
+      "language": "Preferred Language",
+      "cosmicPreferences": "Cosmic Preferences",
+      "horoscopeTitle": "Daily Horoscope",
+      "horoscopeDescription": "Receive daily cosmic insights",
+      "notificationsTitle": "Notifications",
+      "notificationsDescription": "Alerts for planetary transits"
+    },
+    "security": {
+      "pageTitle": "Security Settings",
+      "pageDescription": "Manage your password, active sessions, and account data.",
+      "backButton": "Back to Profile",
+      "changePasswordTitle": "Change Password",
+      "changePasswordWarning": "Changing your password will automatically log you out of all active sessions, including this one.",
+      "currentPasswordLabel": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "updatePasswordButton": "Update Password",
+      "sessionManagementTitle": "Session Management",
+      "sessionManagementDescription": "Log out from all other devices where your account is currently signed in. This device will remain logged in.",
+      "logoutAllButton": "Log Out All Other Devices",
+      "dangerZoneTitle": "Danger Zone",
+      "dangerZoneDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteAccountButton": "Delete Account",
+      "deleteAccountModal": {
+        "title": "Delete Account",
+        "description": "This action is permanent and will securely erase all your birth details, generated horoscopes, and preferences. Please confirm with your password to proceed.",
+        "passwordPlaceholder": "Enter your password to confirm",
+        "cancelButton": "Cancel",
+        "confirmButton": "Delete Forever"
+      },
+      "logoutConfirmDialog": {
+        "title": "Log Out All Devices?",
+        "message": "This will sign out your account from all other devices. Your current session will remain active.",
+        "confirmButton": "Log Out Others",
+        "cancelButton": "Cancel"
+      },
+      "errors": {
+        "passwordMinLength": "New password must be at least 10 characters.",
+        "passwordMismatch": "New passwords do not match.",
+        "passwordRequired": "Please enter your password to confirm deletion."
+      },
+      "messages": {
+        "passwordChanged": "Password changed successfully. You will be logged out of all devices.",
+        "logoutAllSuccess": "Successfully logged out from all other devices.",
+        "accountDeleted": "Account successfully deleted. Goodbye."
+      }
+    }
+  },
+  "support": {
+    "title": "Contact Support",
+    "description": "Need help? Our support system is being set up to provide you with the best assistance. For urgent matters, please check back soon!"
   }
 }

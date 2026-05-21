@@ -589,7 +589,7 @@ export default function DashboardHome() {
                                             <Skeleton height={14} width={60} className="mx-auto mt-1" />
                                         ) : (
                                             <p className={`text-[10px] sm:text-xs lg:text-sm font-headline font-bold ${sign.color} group-hover:text-amber-500 transition-colors uppercase tracking-[0.1em] whitespace-nowrap`}>
-                                                {sign.data?.name || "???"}
+                                                {sign.data?.name || t('dashboard.unknownSign')}
                                             </p>
                                         )}
                                     </div>
@@ -1116,7 +1116,7 @@ export default function DashboardHome() {
             {/* Mobile-only "Ask Navi" Floating Action Button */}
             <Link href="/chat" className="fixed bottom-6 right-5 z-[1000] md:hidden flex items-center gap-2 py-3.5 px-5 rounded-full bg-[#c8991f] text-white font-semibold text-[15px] shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:scale-95 transition-transform">
                 <MessageSquare size={18} />
-                Ask Navi
+                {t('dashboard.askNaviFab')}
                 <ArrowRight size={16} />
             </Link>
         </div>

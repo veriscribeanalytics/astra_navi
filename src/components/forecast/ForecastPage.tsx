@@ -164,7 +164,7 @@ export default function ForecastPage() {
 
         {/* Time range toggle */}
         <div className="flex gap-1 p-1 rounded-xl bg-surface border border-white/5 w-fit mb-6 sm:mb-8">
-          {([['7d', '7D'], ['monthly', t('forecast.monthly')], ['yearly', t('forecast.yearly')]] as [TimeRange, string][]).map(([key, label]) => (
+          {([['7d', t('forecast.weekly')], ['monthly', t('forecast.monthly')], ['yearly', t('forecast.yearly')]] as [TimeRange, string][]).map(([key, label]) => (
             <button key={key} onClick={() => setRange(key)}
               className={`px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/30 hover:text-foreground/60'}`}>
               {label}
@@ -218,7 +218,7 @@ export default function ForecastPage() {
                           boxShadow: isSelected ? `0 0 16px ${theme.hex}20` : undefined
                         }}>
                         <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider ${isSelected ? '' : 'text-foreground/30'}`} style={{ color: isSelected ? theme.hex : undefined }}>
-                          {day.is_today ? 'TOD' : dateObj.toLocaleDateString('en', { weekday: 'short' })}
+                          {day.is_today ? t('forecast.todayShort') : dateObj.toLocaleDateString('en', { weekday: 'short' })}
                         </span>
                         <span className={`text-base sm:text-xl lg:text-2xl font-headline font-bold ${isSelected ? 'text-foreground font-black' : 'text-foreground/40'}`}>{dateObj.getDate()}</span>
                         <span className="text-[8px] font-bold text-foreground/30">{day.score}</span>

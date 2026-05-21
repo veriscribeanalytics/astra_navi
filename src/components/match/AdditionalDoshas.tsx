@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import { useTranslation } from '@/hooks';
 
 interface DoshaCheck {
   name: string;
@@ -16,6 +17,7 @@ interface AdditionalDoshasProps {
 }
 
 export default function AdditionalDoshas({ doshas = [] }: AdditionalDoshasProps) {
+  const { t } = useTranslation();
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
@@ -26,10 +28,10 @@ export default function AdditionalDoshas({ doshas = [] }: AdditionalDoshasProps)
         </div>
         <div>
           <h3 className="text-lg font-headline font-bold text-foreground">
-            Supplemental Checks
+            {t('match.additional.title')}
           </h3>
           <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-[0.2em]">
-            Critical Doshas & Alignments
+            {t('match.additional.subtitle')}
           </p>
         </div>
       </div>
@@ -55,7 +57,7 @@ export default function AdditionalDoshas({ doshas = [] }: AdditionalDoshasProps)
                         ? 'border-green-500/20 text-green-500 bg-green-500/5' 
                         : 'border-red-500/20 text-red-500 bg-red-500/5'
                     }`}>
-                      {dosha.isClear ? 'Clear' : 'Present'}
+                      {dosha.isClear ? t('match.additional.clear') : t('match.additional.present')}
                     </span>
                   </h4>
                   <p className="text-[10px] text-foreground/30 font-medium italic mt-0.5">
@@ -101,7 +103,7 @@ export default function AdditionalDoshas({ doshas = [] }: AdditionalDoshasProps)
           <Info size={14} className="text-secondary/50" />
         </div>
         <p className="text-[10px] text-foreground/40 leading-snug">
-          These checks are vital in South Indian traditions and complement the 36-point system for a safer match.
+          {t('match.additional.notice')}
         </p>
       </div>
     </div>

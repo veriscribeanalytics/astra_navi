@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
-import { useTranslation, useIsMobile } from '@/hooks';
+import { useTranslation, useIsMobile, useResponsive } from '@/hooks';
 import { 
     Mic, MicOff, 
     ArrowUp, Zap, Sparkles, Gem,
@@ -37,6 +37,16 @@ const AVATAR_PLACEHOLDERS: Record<string, string[]> = {
     "Which planet are you curious about?",
     "Type your question about astrology...",
   ],
+};
+
+/** Short single-line placeholders for narrow viewports (≤480px) where the
+ *  long versions wrap and stretch the textarea. */
+const AVATAR_PLACEHOLDERS_SHORT: Record<string, string> = {
+  navi: "Ask Navi…",
+  career_mentor: "Ask Arya…",
+  relationship_guide: "Ask Meera…",
+  spiritual_guide: "Ask Anand…",
+  astro_sage: "Ask Rishi…",
 };
 
 interface SpeechRecognitionEvent extends Event {
@@ -75,6 +85,8 @@ const ChatInput: React.FC = () => {
   } = useChat();
   const { t, language } = useTranslation();
   const isMobile = useIsMobile();
+  const { width: viewportWidth } = useResponsive();
+  const isNarrowViewport = viewportWidth > 0 && viewportWidth <= 480;
   
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
@@ -174,6 +186,10 @@ const ChatInput: React.FC = () => {
   ];
 
   const currentPlaceholders = AVATAR_PLACEHOLDERS[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS.navi;
+  const shortPlaceholder = AVATAR_PLACEHOLDERS_SHORT[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS_SHORT.navi;
+  const activePlaceholder = isNarrowViewport
+    ? shortPlaceholder
+    : currentPlaceholders[placeholderIdx % currentPlaceholders.length];
 
   useEffect(() => {
     setPlaceholderIdx(0);
@@ -293,7 +309,7 @@ const ChatInput: React.FC = () => {
   const cycleLabel = currentModeOpt?.label || 'Normal';
 
  return (
-    <div ref={containerRef} className="w-full px-3 sm:px-5 3xl:px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
+    <div ref={containerRef} className="w-full px-2 sm:px-5 3xl:px-6 pb-[calc(0.5rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -341,7 +357,7 @@ const ChatInput: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex items-end gap-1.5 sm:gap-2 px-3.5 py-3 sm:py-2.5">
+        <div className="flex items-end gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5">
           <input
             ref={fileInputRef}
             type="file"
@@ -350,23 +366,23 @@ const ChatInput: React.FC = () => {
             className="hidden"
             onChange={(e) => { handleFileSelect(e.target.files); e.target.value = ''; }}
           />
-          <button 
+          <button
             onClick={() => fileInputRef.current?.click()}
             disabled={attachments.length >= MAX_ATTACHMENTS}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
               attachments.length >= MAX_ATTACHMENTS
               ? 'text-foreground/15 cursor-not-allowed'
               : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
             }`}
             title={t('chat.input.attachFile')}
           >
-            <Paperclip className="w-4.5 h-4.5" />
+            <Paperclip className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </button>
 
-          <button 
+          <button
             onClick={toggleListening}
             disabled={!speechSupported}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
               !speechSupported
               ? 'text-foreground/15 cursor-not-allowed'
               : isListening 
@@ -375,7 +391,7 @@ const ChatInput: React.FC = () => {
             }`}
             title={!speechSupported ? "Voice input not supported" : isListening ? "Stop listening" : "Voice input"}
           >
-            {!speechSupported ? <MicOff className="w-4.5 h-4.5" /> : isListening ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
+            {!speechSupported ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : isListening ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
           </button>
 
           <textarea
@@ -383,8 +399,8 @@ const ChatInput: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={inputText.length > 0 ? '' : currentPlaceholders[placeholderIdx % currentPlaceholders.length]}
-            className="w-full bg-transparent border-none outline-none text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2.5 px-1 max-h-[150px] min-h-[44px] sm:min-h-0 no-scrollbar"
+            placeholder={inputText.length > 0 ? '' : activePlaceholder}
+            className="w-full bg-transparent border-none outline-none text-[14px] sm:text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2 sm:py-2.5 px-1 max-h-[150px] min-h-[40px] sm:min-h-0 no-scrollbar"
             rows={1}
           />
 
@@ -398,10 +414,21 @@ const ChatInput: React.FC = () => {
             </button>
           )}
 
+          {/* Mobile-only inline mode toggle (single-row layout) */}
+          <button
+            onClick={cycleMode}
+            className="sm:hidden inline-flex items-center gap-1 px-2 h-8 rounded-lg bg-secondary/15 text-secondary border border-secondary/25 shrink-0 text-[11px] font-bold uppercase tracking-wide"
+            title={`Mode: ${cycleLabel} — tap to cycle`}
+            aria-label={`Mode: ${cycleLabel}`}
+          >
+            <CycleIcon className="w-3.5 h-3.5" />
+            <span>{cycleLabel}</span>
+          </button>
+
           <button
             onClick={handleSend}
             disabled={!inputText.trim() || isSending || isOverLimit}
-            className={`ripple-btn w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all gold-gradient text-on-primary shadow-md shadow-secondary/25 ${
+            className={`ripple-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all gold-gradient text-on-primary shadow-md shadow-secondary/25 ${
               !inputText.trim() || isSending || isOverLimit
               ? 'opacity-60 cursor-not-allowed'
               : 'hover:opacity-90 hover:scale-105 active:scale-95'
@@ -421,19 +448,9 @@ const ChatInput: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex flex-col gap-2 px-3.5 py-2.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 sm:flex-row sm:items-center sm:justify-between">
+        <div className="hidden sm:flex flex-col gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
-            {isMobile ? (
-              <button
-                onClick={cycleMode}
-                className={`chat-mode-cycle-btn bg-secondary/20 text-secondary border border-secondary/30 shadow-sm shadow-secondary/10`}
-                title={`Mode: ${cycleLabel} — tap to cycle`}
-              >
-                <CycleIcon className="w-3.5 h-3.5" />
-                {cycleLabel}
-              </button>
-            ) : (
-              modeOptions.map(({ value: m, label, Icon }) => (
+            {modeOptions.map(({ value: m, label, Icon }) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
@@ -446,8 +463,7 @@ const ChatInput: React.FC = () => {
                   <Icon className="w-3.5 h-3.5" />
                   {label}
                 </button>
-              ))
-            )}
+              ))}
             <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden sm:inline ml-1">{t('chat.input.naviUsesChart')}</span>
           </div>
           {showCharCount && (

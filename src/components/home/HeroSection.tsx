@@ -140,14 +140,14 @@ export default function HeroSection({
                             <SwapCard className="bg-[#12122b] border-[8px] border-outline-variant/30 overflow-hidden relative">
                                 <div className="absolute top-4 right-4 z-20">
                                     <div className="px-3 py-1.5 rounded-lg bg-secondary/90 backdrop-blur-sm border border-white/20 shadow-lg">
-                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest">BPHS Certified</span>
+                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest">{t('landing.hero.bphsCertified')}</span>
                                     </div>
                                 </div>
                                 <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                 <div className="p-6 pt-10 space-y-6">
                                     <div className="h-28 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
                                         <div className="text-center px-4">
-                                            <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Authentic Jyotish</div>
+                                            <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">{t('landing.hero.authenticJyotish')}</div>
                                             <div className="text-white font-headline text-lg">{t('landing.janamKundliTitle')}</div>
                                         </div>
                                     </div>
@@ -159,7 +159,7 @@ export default function HeroSection({
                                     <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-secondary/20 to-transparent border border-secondary/10 p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-                                            <span className="text-[9px] font-bold text-white uppercase tracking-wider">Scriptural Insight</span>
+                                            <span className="text-[9px] font-bold text-white uppercase tracking-wider">{t('landing.hero.scripturalInsight')}</span>
                                         </div>
                                         <p className="text-[10px] text-white/50 leading-tight">Accurate Dasha & Varga calculations based on Brihat Parashara Hora Shastra.</p>
                                     </div>
@@ -187,7 +187,7 @@ export default function HeroSection({
                                         </div>
                                     </div>
                                     <div className="mt-auto h-9 w-full rounded-full bg-white/5 border border-white/10 flex items-center px-4 justify-between">
-                                        <span className="text-[10px] text-white/30">Ask Navi...</span>
+                                        <span className="text-[10px] text-white/30">{t('landing.hero.askNavi')}</span>
                                         <MessageSquare className="w-3 h-3 text-blue-400" />
                                     </div>
                                 </div>
@@ -198,14 +198,14 @@ export default function HeroSection({
                             <SwapCard className="bg-[#240a12] border-[8px] border-outline-variant/30 overflow-hidden">
                                 <div className="absolute top-4 right-4 z-20">
                                     <div className="px-3 py-1.5 rounded-lg bg-rose-500/90 backdrop-blur-sm border border-white/20 shadow-lg">
-                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest">Ashtakoot Milan</span>
+                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest">{t('landing.hero.ashtakootMilan')}</span>
                                     </div>
                                 </div>
                                 <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
                                 <div className="p-6 pt-10 space-y-6">
                                     <div className="h-28 w-full rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
                                         <div className="text-center px-4">
-                                            <div className="text-rose-400 text-[9px] font-bold uppercase tracking-widest mb-1">Guna Matching</div>
+                                            <div className="text-rose-400 text-[9px] font-bold uppercase tracking-widest mb-1">{t('landing.hero.gunaMatching')}</div>
                                             <div className="text-white font-headline text-xl">28/36 Gunas</div>
                                         </div>
                                     </div>
@@ -219,7 +219,7 @@ export default function HeroSection({
                                         </div>
                                     </div>
                                     <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-rose-500/20 to-transparent border border-rose-500/10 flex flex-col items-center justify-center text-center p-2">
-                                        <div className="text-[11px] font-bold text-rose-300 uppercase tracking-widest mb-0.5">High Compatibility</div>
+                                        <div className="text-[11px] font-bold text-rose-300 uppercase tracking-widest mb-0.5">{t('landing.hero.highCompatibility')}</div>
                                         <p className="text-[9px] text-white/40 leading-tight">Strong emotional & spiritual bond.</p>
                                     </div>
                                 </div>
@@ -232,7 +232,7 @@ export default function HeroSection({
                                 <div className="p-6 pt-10 space-y-6">
                                     <div className="h-28 w-full rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center justify-center">
                                         <div className="text-emerald-400 text-2xl font-headline font-bold">85%</div>
-                                        <div className="text-[9px] text-emerald-400/60 font-bold uppercase tracking-widest">Daily Alignment</div>
+                                        <div className="text-[9px] text-emerald-400/60 font-bold uppercase tracking-widest">{t('landing.hero.dailyAlignment')}</div>
                                     </div>
                                     <div className="space-y-3">
                                         {[
@@ -251,7 +251,7 @@ export default function HeroSection({
                                         ))}
                                     </div>
                                     <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 p-3">
-                                        <div className="text-[9px] text-emerald-300 uppercase font-bold mb-0.5">Transit Tip</div>
+                                        <div className="text-[9px] text-emerald-300 uppercase font-bold mb-0.5">{t('landing.hero.transitTip')}</div>
                                         <p className="text-[10px] text-white/60 italic leading-tight">{"\"Auspicious time for new beginnings.\""}</p>
                                     </div>
                                 </div>

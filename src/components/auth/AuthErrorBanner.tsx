@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertCircle, X } from 'lucide-react';
+import { useTranslation } from '@/hooks';
 
 interface AuthErrorBannerProps {
   message: string;
@@ -7,6 +8,8 @@ interface AuthErrorBannerProps {
 }
 
 const AuthErrorBanner: React.FC<AuthErrorBannerProps> = ({ message, onDismiss }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       role="alert"
@@ -19,7 +22,7 @@ const AuthErrorBanner: React.FC<AuthErrorBannerProps> = ({ message, onDismiss })
           type="button"
           onClick={onDismiss}
           className="shrink-0 p-0.5 rounded hover:bg-red-500/20 transition-colors"
-          aria-label="Dismiss error"
+          aria-label={t('auth.errorBanner.dismiss')}
         >
           <X size={14} />
         </button>

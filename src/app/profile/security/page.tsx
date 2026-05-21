@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks';
+import { useToast, useTranslation } from '@/hooks';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -13,6 +13,7 @@ import { clientFetch } from '@/lib/apiClient';
 
 export default function SecuritySettingsPage() {
     const { logout, isLoggedIn, isLoading } = useAuth();
+    const { t } = useTranslation();
     const router = useRouter();
     const { ToastContainer, success, error } = useToast();
 
@@ -40,14 +41,14 @@ export default function SecuritySettingsPage() {
 
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (newPassword.length < 10) {
-            error("New password must be at least 10 characters.");
+            error(t('profile.security.errors.passwordMinLength'));
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            error("New passwords do not match.");
+            error(t('profile.security.errors.passwordMismatch'));
             return;
         }
 
@@ -65,7 +66,7 @@ export default function SecuritySettingsPage() {
                 throw new Error(data.error || "Failed to change password");
             }
 
-            success("Password changed successfully. You will be logged out of all devices.");
+            success(t('profile.security.messages.passwordChanged'));
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
@@ -92,7 +93,7 @@ export default function SecuritySettingsPage() {
                 throw new Error(data.error || "Failed to log out other devices");
             }
 
-            success("Successfully logged out from all other devices.");
+            success(t('profile.security.messages.logoutAllSuccess'));
         } catch (err: unknown) {
             error(err instanceof Error ? err.message : String(err));
         } finally {
@@ -103,7 +104,7 @@ export default function SecuritySettingsPage() {
 
     const handleDeleteAccount = async () => {
         if (!deletePassword) {
-            error("Please enter your password to confirm deletion.");
+            error(t('profile.security.errors.passwordRequired'));
             return;
         }
 
@@ -120,7 +121,7 @@ export default function SecuritySettingsPage() {
                 throw new Error(data.error || "Failed to delete account");
             }
 
-            success("Account successfully deleted. Goodbye.");
+            success(t('profile.security.messages.accountDeleted'));
             setShowDeleteModal(false);
             setTimeout(() => {
                 logout();
@@ -138,23 +139,23 @@ export default function SecuritySettingsPage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
             <div className="w-full max-w-xl relative z-10">
-                <Button 
-                    type="button" 
-                    variant="ghost" 
-                    onClick={() => router.push('/profile')} 
+                <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => router.push('/profile')}
                     leftIcon={<ArrowLeft className="w-4 h-4" />}
                     className="mb-6 -ml-4"
                 >
-                    Back to Profile
+                    {t('profile.security.backButton')}
                 </Button>
 
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 mb-4 sm:mb-6 cosmic-glow">
                         <ShieldCheck className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">Security Settings</h1>
+                    <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">{t('profile.security.pageTitle')}</h1>
                     <p className="text-sm font-body text-on-surface-variant max-w-md mx-auto">
-                        Manage your password, active sessions, and account data.
+                        {t('profile.security.pageDescription')}
                     </p>
                 </div>
 
@@ -162,43 +163,43 @@ export default function SecuritySettingsPage() {
                     {/* Change Password Card */}
                     <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
                         <h2 className="text-xl font-headline font-bold text-primary mb-4 flex items-center gap-2">
-                            <Lock className="w-5 h-5 text-secondary" /> Change Password
+                            <Lock className="w-5 h-5 text-secondary" /> {t('profile.security.changePasswordTitle')}
                         </h2>
                         <div className="mb-6 p-4 rounded-xl bg-surface-variant/30 border border-outline-variant/20 text-xs text-on-surface-variant">
-                            Changing your password will automatically log you out of all active sessions, including this one.
+                            {t('profile.security.changePasswordWarning')}
                         </div>
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <div className="relative">
-                                <Input 
-                                    type={showPassword ? "text" : "password"} 
-                                    label="Current Password"
-                                    placeholder="Enter current password" 
-                                    value={currentPassword} 
-                                    onChange={(e) => setCurrentPassword(e.target.value)} 
-                                    required 
+                                <Input
+                                    type={showPassword ? "text" : "password"}
+                                    label={t('profile.security.currentPasswordLabel')}
+                                    placeholder={t('profile.security.currentPasswordPlaceholder')}
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    required
                                 />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-[38px] text-on-surface-variant/30 hover:text-secondary"><Eye size={16} /></button>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Input 
-                                    type={showPassword ? "text" : "password"} 
-                                    label="New Password"
-                                    placeholder="Enter new password" 
-                                    value={newPassword} 
-                                    onChange={(e) => setNewPassword(e.target.value)} 
-                                    required 
+                                <Input
+                                    type={showPassword ? "text" : "password"}
+                                    label={t('profile.security.newPasswordLabel')}
+                                    placeholder={t('profile.security.newPasswordPlaceholder')}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required
                                 />
-                                <Input 
-                                    type={showPassword ? "text" : "password"} 
-                                    label="Confirm New Password"
-                                    placeholder="Confirm new password" 
-                                    value={confirmPassword} 
-                                    onChange={(e) => setConfirmPassword(e.target.value)} 
-                                    required 
+                                <Input
+                                    type={showPassword ? "text" : "password"}
+                                    label={t('profile.security.confirmPasswordLabel')}
+                                    placeholder={t('profile.security.confirmPasswordPlaceholder')}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
                                 />
                             </div>
                             <Button type="submit" loading={isChangingPassword} className="mt-2 gold-gradient">
-                                Update Password
+                                {t('profile.security.updatePasswordButton')}
                             </Button>
                         </form>
                     </Card>
@@ -206,35 +207,35 @@ export default function SecuritySettingsPage() {
                     {/* Session Management Card */}
                     <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
                         <h2 className="text-xl font-headline font-bold text-primary mb-2 flex items-center gap-2">
-                            <LogOut className="w-5 h-5 text-secondary" /> Session Management
+                            <LogOut className="w-5 h-5 text-secondary" /> {t('profile.security.sessionManagementTitle')}
                         </h2>
                         <p className="text-sm text-on-surface-variant mb-6">
-                            Log out from all other devices where your account is currently signed in. This device will remain logged in.
+                            {t('profile.security.sessionManagementDescription')}
                         </p>
-                        <Button 
-                            type="button" 
+                        <Button
+                            type="button"
                             variant="ghost"
                             onClick={() => setShowLogoutAllDialog(true)}
                             className="border-secondary/30 hover:bg-secondary/10"
                         >
-                            Log Out All Other Devices
+                            {t('profile.security.logoutAllButton')}
                         </Button>
                     </Card>
 
                     {/* Danger Zone */}
                     <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-error/20 bg-error/5" hoverable={false}>
                         <h2 className="text-xl font-headline font-bold text-error mb-2 flex items-center gap-2">
-                            <AlertTriangle className="w-5 h-5" /> Danger Zone
+                            <AlertTriangle className="w-5 h-5" /> {t('profile.security.dangerZoneTitle')}
                         </h2>
                         <p className="text-sm text-on-surface-variant mb-6">
-                            Permanently delete your account and all associated data. This action cannot be undone.
+                            {t('profile.security.dangerZoneDescription')}
                         </p>
-                        <Button 
-                            type="button" 
-                            className="bg-error hover:bg-error/80 text-white" 
+                        <Button
+                            type="button"
+                            className="bg-error hover:bg-error/80 text-white"
                             onClick={() => setShowDeleteModal(true)}
                         >
-                            Delete Account
+                            {t('profile.security.deleteAccountButton')}
                         </Button>
                     </Card>
                 </div>
@@ -246,40 +247,40 @@ export default function SecuritySettingsPage() {
                     <div className="w-full max-w-md bg-surface border border-error/20 rounded-3xl p-6 shadow-2xl">
                         <div className="flex items-center gap-3 text-error mb-4">
                             <AlertTriangle className="w-6 h-6" />
-                            <h3 className="text-xl font-bold">Delete Account</h3>
+                            <h3 className="text-xl font-bold">{t('profile.security.deleteAccountModal.title')}</h3>
                         </div>
                         <p className="text-sm text-on-surface-variant mb-6">
-                            This action is permanent and will securely erase all your birth details, generated horoscopes, and preferences. Please confirm with your password to proceed.
+                            {t('profile.security.deleteAccountModal.description')}
                         </p>
                         <div className="space-y-4">
-                            <Input 
-                                type="password" 
-                                placeholder="Enter your password to confirm" 
-                                value={deletePassword} 
-                                onChange={(e) => setDeletePassword(e.target.value)} 
+                            <Input
+                                type="password"
+                                placeholder={t('profile.security.deleteAccountModal.passwordPlaceholder')}
+                                value={deletePassword}
+                                onChange={(e) => setDeletePassword(e.target.value)}
                             />
                             <div className="flex gap-3 pt-2">
-                                <Button 
-                                    type="button" 
-                                    variant="ghost" 
-                                    fullWidth 
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    fullWidth
                                     onClick={() => {
                                         setShowDeleteModal(false);
                                         setDeletePassword('');
                                     }}
                                     disabled={isDeleting}
                                 >
-                                    Cancel
+                                    {t('profile.security.deleteAccountModal.cancelButton')}
                                 </Button>
-                                <Button 
-                                    type="button" 
-                                    fullWidth 
-                                    className="bg-error hover:bg-error/80 text-white" 
+                                <Button
+                                    type="button"
+                                    fullWidth
+                                    className="bg-error hover:bg-error/80 text-white"
                                     loading={isDeleting}
                                     onClick={handleDeleteAccount}
                                     disabled={!deletePassword}
                                 >
-                                    Delete Forever
+                                    {t('profile.security.deleteAccountModal.confirmButton')}
                                 </Button>
                             </div>
                         </div>
@@ -292,10 +293,10 @@ export default function SecuritySettingsPage() {
                 isOpen={showLogoutAllDialog}
                 onClose={() => setShowLogoutAllDialog(false)}
                 onConfirm={handleLogoutAll}
-                title="Log Out All Devices?"
-                message="This will sign out your account from all other devices. Your current session will remain active."
-                confirmText="Log Out Others"
-                cancelText="Cancel"
+                title={t('profile.security.logoutConfirmDialog.title')}
+                message={t('profile.security.logoutConfirmDialog.message')}
+                confirmText={t('profile.security.logoutConfirmDialog.confirmButton')}
+                cancelText={t('profile.security.logoutConfirmDialog.cancelButton')}
                 variant="warning"
                 isLoading={isLoggingOutAll}
             />

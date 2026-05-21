@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { 
-    Brain, ArrowLeft, Crown, DollarSign, Sparkles, 
-    TrendingUp, Zap, 
+import {
+    Brain, ArrowLeft, Crown, DollarSign, Sparkles,
+    TrendingUp, Zap,
     Shield, Activity, Lock, Dna, BookOpen, Target
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks';
 
 const yogas = [
     {
@@ -128,6 +129,7 @@ const yogas = [
 ];
 
 export default function YogasPage() {
+    const { t } = useTranslation();
     const [selectedYoga, setSelectedYoga] = useState(yogas[0]);
     const [viewMode, setViewMode] = useState<'encyclopedia' | 'detail'>('encyclopedia');
     const router = useRouter();
@@ -149,7 +151,7 @@ export default function YogasPage() {
                             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
                         <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
-                            Planetary <span className="text-secondary italic">Yogas</span>
+                            {{t('blogs.yogas.title')}} <span className="text-secondary italic">{{t('blogs.yogas.subtitle')}}</span>
                         </h1>
                     </div>
 
@@ -165,12 +167,12 @@ export default function YogasPage() {
                                 <BookOpen className={`w-4 h-4 ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/50'}`} />
                             </div>
                             <div>
-                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>Encyclopedia</h3>
-                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">Introduction</p>
+                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>{{t('blogs.yogas.encyclopediaTitle')}}</h3>
+                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">{{t('blogs.yogas.introduction')}}</p>
                             </div>
                         </button>
 
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">Sacred Unions</div>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">{{t('blogs.yogas.sidebarLabel')}}</div>
                         <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
                             {yogas.map((yoga) => {
                                 const isActive = viewMode === 'detail' && selectedYoga.id === yoga.id;
@@ -214,14 +216,13 @@ export default function YogasPage() {
                                     <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
                                         <div className="p-8 lg:p-10 flex-grow flex flex-col">
                                             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
-                                            <BookOpen className="w-3 h-3" /> Core Concepts
+                                            <BookOpen className="w-3 h-3" /> {{t('blogs.yogas.coreConcepts')}}
                                         </div>
                                         <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-2">
-                                            Understanding <span className="text-secondary italic">Yogas</span>
+                                            {{t('blogs.yogas.understanding')}} <span className="text-secondary italic">{{t('blogs.yogas.yogasLabel')}}</span>
                                         </h2>
                                         <p className="text-sm sm:text-base text-foreground/70 leading-relaxed max-w-3xl mb-6">
-                                            In Vedic Astrology, a &quot;Yoga&quot; means union. It refers to specific planetary combinations and alignments that lock together to create powerful, destined effects. These cosmic signatures dictate the heights of wealth, power, and spiritual liberation in a chart.
-                                        </p>
+                                            {{t('blogs.yogas.description')}}
 
                                         <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">
                                             {/* Column 1 */}
@@ -231,9 +232,9 @@ export default function YogasPage() {
                                                         <Activity className="w-5 h-5 text-primary" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Raja Yogas</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{{t('blogs.yogas.rajaYogas')}}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            The kings of combinations. Formed when the lords of Kendra (action) houses unite with lords of Trikona (luck) houses. They guarantee status, authority, and massive success when activated.
+                                                            {{t('blogs.yogas.rajaDesc')}}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -243,10 +244,9 @@ export default function YogasPage() {
                                                         <Dna className="w-5 h-5 text-emerald-500" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Dhana Yogas</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{{t('blogs.yogas.dhanaYogas')}}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Combinations for absolute wealth. When the houses of earnings (2nd) and gains (11th) connect deeply with the houses of destiny (5th, 9th), the native is destined for immense financial prosperity.
-                                                        </p>
+                                                            {{t('blogs.yogas.dhanaDesc')}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -258,10 +258,9 @@ export default function YogasPage() {
                                                         <Zap className="w-5 h-5 text-rose-500" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Activation (Dashas)</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{{t('blogs.yogas.activation')}}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Yogas lie dormant in a chart until their planetary lords are activated by the Vimshottari Dasha (time period). When the dasha of a Yoga-causing planet begins, the effects manifest drastically in reality.
-                                                        </p>
+                                                            {{t('blogs.yogas.activationDesc')}}
                                                     </div>
                                                 </div>
 
@@ -270,10 +269,9 @@ export default function YogasPage() {
                                                         <Shield className="w-5 h-5 text-amber-500" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Cancellation (Bhanga)</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{{t('blogs.yogas.cancellation')}}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Not all bad yogas are permanent. Neechabhanga occurs when a debilitated (weak) planet is supported by strong alignments, cancelling the weakness and often turning massive struggle into great success.
-                                                        </p>
+                                                            {{t('blogs.yogas.cancellationDesc')}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -298,7 +296,7 @@ export default function YogasPage() {
                                             onClick={() => router.push('/kundli')}
                                             className="h-12 px-6 bg-gradient-to-r from-secondary to-secondary/80 text-background font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
                                         >
-                                            <Lock className="w-4 h-4 opacity-40" /> Analyze Yogas
+                                            <Lock className="w-4 h-4 opacity-40" /> {{t('blogs.yogas.analyzeBtn')}}
                                         </button>
                                     </div>
                                     <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
@@ -344,7 +342,7 @@ export default function YogasPage() {
                                             <div className="col-span-7 space-y-8">
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <BookOpen className="w-4 h-4" /> Formation Theory
+                                                        <BookOpen className="w-4 h-4" /> {{t('blogs.yogas.formationTheory')}}
                                                     </h3>
                                                     <p className="text-[16px] font-light leading-relaxed text-foreground/80 pr-6 italic border-l-2 border-secondary/20 pl-6">
                                                         &quot;{selectedYoga.deepDive}&quot;
@@ -353,7 +351,7 @@ export default function YogasPage() {
 
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <Zap className="w-4 h-4" /> Archetypal Traits
+                                                        <Zap className="w-4 h-4" /> {{t('blogs.yogas.archetypeTraits')}}
                                                     </h3>
                                                     <div className="flex flex-wrap gap-3">
                                                         {selectedYoga.traits.map(t => (
@@ -367,7 +365,7 @@ export default function YogasPage() {
                                             <div className="col-span-5 space-y-4">
                                                 <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
                                                     <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-3">
-                                                        <Shield className="w-4 h-4" /> Manifestation
+                                                        <Shield className="w-4 h-4" /> {{t('blogs.yogas.manifestation')}}
                                                     </h3>
                                                     <p className="text-[14px] font-medium leading-relaxed text-foreground/90">
                                                         {selectedYoga.represents}
@@ -379,9 +377,9 @@ export default function YogasPage() {
                                                         <Activity className="w-5 h-5 text-secondary" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[13px] font-bold text-foreground">Activation Path</p>
+                                                        <p className="text-[13px] font-bold text-foreground">{{t('blogs.yogas.activationPath')}}</p>
                                                         <p className="text-[11px] text-foreground/50 leading-tight">
-                                                            Primarily triggers during major <span className="text-secondary font-bold">Dasha / Bhukti</span> periods of the involved planets.
+                                                            {{t('blogs.yogas.activationPathDesc')}}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -395,11 +393,11 @@ export default function YogasPage() {
                                                     <Brain className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-sm font-bold text-foreground">Yoga Analysis Scan</h3>
-                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">Discover hidden combinations in your Kundli</p>
+                                                    <h3 className="text-sm font-bold text-foreground">{{t('blogs.yogas.yogaAnalysisScan')}}</h3>
+                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">{{t('blogs.yogas.discoverCombinations')}}</p>
                                                 </div>
                                             </div>
-                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">Scan My Chart ✦</Button>
+                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">{{t('blogs.yogas.scanChart')}} ✦</Button>
                                         </div>
                                     </div>
                                 </Card>

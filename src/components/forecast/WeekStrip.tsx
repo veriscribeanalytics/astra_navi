@@ -3,6 +3,7 @@
 import React from 'react';
 import type { WeeklyDay } from '@/types/forecast';
 import { todayISO } from '@/utils/forecastError';
+import { useTranslation } from '@/hooks';
 
 interface WeekStripProps {
   days: WeeklyDay[];
@@ -12,13 +13,15 @@ interface WeekStripProps {
 }
 
 export default function WeekStrip({ days, colorHex, selectedDate, onSelect }: WeekStripProps) {
+  const { t } = useTranslation();
   const today = todayISO();
   return (
     <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
       {days.map(day => {
         const isSelected = selectedDate === day.date;
         const isToday = day.date === today;
-        const weekdayShort = (day.weekday || '').slice(0, 3).toUpperCase();
+        const weekdayKey = (day.weekday || '').slice(0, 3).toLowerCase();
+        const weekdayShort = t(`forecast.weekdays.${weekdayKey}`).toUpperCase();
         const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
 
         return (
@@ -35,7 +38,7 @@ export default function WeekStrip({ days, colorHex, selectedDate, onSelect }: We
               className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isSelected ? '' : 'text-foreground/30'}`}
               style={{ color: isSelected ? colorHex : undefined }}
             >
-              {isToday ? 'TOD' : weekdayShort}
+              {isToday ? t('forecast.todayShort').toUpperCase() : weekdayShort}
             </span>
             <span className={`text-base sm:text-xl lg:text-2xl 3xl:text-3xl font-headline font-bold ${isSelected ? 'text-foreground' : 'text-foreground/40'}`}>
               {dayOfMonth}

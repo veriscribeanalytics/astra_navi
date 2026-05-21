@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ShieldAlert, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { useTranslation } from '@/hooks';
 
 interface DoshaStatus {
   hasDosha: boolean;
@@ -19,6 +20,8 @@ interface MangalDoshaPanelProps {
 }
 
 export default function MangalDoshaPanel({ person1, person2, verdict, isCompatible }: MangalDoshaPanelProps) {
+  const { t } = useTranslation();
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high': return 'text-red-500 bg-red-500/10';
@@ -33,7 +36,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
       return (
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase tracking-wider">
           <ShieldCheck size={12} />
-          Cancelled
+          {t('match.mangal.cancelled')}
         </div>
       );
     }
@@ -41,14 +44,14 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
       return (
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider">
           <ShieldAlert size={12} />
-          Present
+          {t('match.mangal.present')}
         </div>
       );
     }
     return (
       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-bold uppercase tracking-wider">
         <CheckCircle2 size={12} />
-        Absent
+        {t('match.mangal.absent')}
       </div>
     );
   };
@@ -66,10 +69,10 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
         </div>
         <div>
           <h3 className="text-lg font-headline font-bold text-foreground">
-            Mangal Dosha Analysis
+            {t('match.mangal.title')}
           </h3>
           <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-[0.2em]">
-            Mars Compatibility Check
+            {t('match.mangal.subtitle')}
           </p>
         </div>
       </div>
@@ -85,9 +88,9 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
             {person1.hasDosha && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-foreground/30 font-bold uppercase tracking-widest">Severity</span>
+                  <span className="text-foreground/30 font-bold uppercase tracking-widest">{t('match.mangal.severity')}</span>
                   <span className={`font-bold uppercase tracking-widest ${getSeverityColor(person1.severity).split(' ')[0]}`}>
-                    {person1.severity}
+                    {t('match.mangal.severityLevels.' + person1.severity)}
                   </span>
                 </div>
                 {person1.isCancelled && person1.cancellationReason && (
@@ -108,9 +111,9 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
             {person2.hasDosha && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-foreground/30 font-bold uppercase tracking-widest">Severity</span>
+                  <span className="text-foreground/30 font-bold uppercase tracking-widest">{t('match.mangal.severity')}</span>
                   <span className={`font-bold uppercase tracking-widest ${getSeverityColor(person2.severity).split(' ')[0]}`}>
-                    {person2.severity}
+                    {t('match.mangal.severityLevels.' + person2.severity)}
                   </span>
                 </div>
                 {person2.isCancelled && person2.cancellationReason && (
@@ -136,7 +139,7 @@ export default function MangalDoshaPanel({ person1, person2, verdict, isCompatib
             <h4 className={`text-xs font-bold uppercase tracking-widest mb-1 ${
               isCompatible ? 'text-green-500' : 'text-red-500'
             }`}>
-              Compatibility Verdict
+              {t('match.mangal.verdictLabel')}
             </h4>
             <div className="flex flex-col gap-1">
               <p className="text-sm text-foreground/80 leading-relaxed font-body">

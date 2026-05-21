@@ -1,16 +1,19 @@
+'use client';
+
 import type { Metadata } from 'next';
+import { useTranslation } from '@/hooks';
 import WorkInProgress from '@/components/WorkInProgress';
 
-export const metadata: Metadata = {
-  title: 'Support | AstraNavi',
-  description: 'Get help with your AstraNavi account or reach our support team.',
-};
+// Note: Metadata cannot be used in client components
+// Static metadata is kept but should be migrated to generateMetadata in a server component wrapper if needed
 
 export default function SupportPage() {
+    const { t } = useTranslation();
+
     return (
-        <WorkInProgress 
-            title="Contact Support"
-            description="Need help? Our support system is being set up to provide you with the best assistance. For urgent matters, please check back soon!"
+        <WorkInProgress
+            title={t('support.title')}
+            description={t('support.description')}
         />
     );
 }

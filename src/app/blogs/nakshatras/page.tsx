@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { 
-    ArrowLeft, Compass, Scale, 
+import {
+    ArrowLeft, Compass, Scale,
     Activity, Lock, Zap, Sparkles, Target,
     BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks';
 
 import Image from 'next/image';
 
@@ -234,6 +235,7 @@ const nakshatras = [
 ];
 
 export default function NakshatrasPage() {
+    const { t } = useTranslation();
     const [selectedNakshatra, setSelectedNakshatra] = useState(nakshatras[0]);
     const router = useRouter();
 
@@ -254,12 +256,12 @@ export default function NakshatrasPage() {
                             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
                         <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
-                            Lunar <span className="text-secondary italic">Mansions</span>
+                            {t('blogs.nakshatras.title')} <span className="text-secondary italic">{t('blogs.nakshatras.subtitle')}</span>
                         </h1>
                     </div>
 
                     <div className="flex-grow overflow-y-auto scrollbar-hide pb-10">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">The 27 Nakshatras</div>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">{t('blogs.nakshatras.sidebarLabel')}</div>
                         <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
                             {nakshatras.map((nak) => {
                                 const isActive = selectedNakshatra.id === nak.id;
@@ -311,7 +313,7 @@ export default function NakshatrasPage() {
                                             onClick={() => router.push('/kundli')}
                                             className="h-12 px-6 bg-gradient-to-r from-secondary to-secondary/80 text-background font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-secondary/20"
                                         >
-                                            <Lock className="w-4 h-4 opacity-40" /> Analyze Nakshatra
+                                            <Lock className="w-4 h-4 opacity-40" /> {{t('blogs.nakshatras.analyzeBtn')}}
                                         </button>
                                     </div>
                                     <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent pointer-events-none" />
@@ -340,19 +342,19 @@ export default function NakshatrasPage() {
                                                 {/* Top Metrics Grid */}
                                                 <div className="grid grid-cols-4 gap-8 pt-2">
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Ruler (Lord)</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.nakshatras.rulerLabel')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90">{selectedNakshatra.ruler}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Symbol</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.nakshatras.symbol')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90">{selectedNakshatra.symbol}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Gana</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.nakshatras.gana')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedNakshatra.gana}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Animal (Yoni)</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.nakshatras.yoni')}</span>
                                                         <p className="text-[14px] font-bold text-secondary uppercase">{selectedNakshatra.yoni}</p>
                                                     </div>
                                                 </div>
@@ -365,7 +367,7 @@ export default function NakshatrasPage() {
                                             <div className="col-span-7 space-y-8">
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <BookOpen className="w-4 h-4" /> Karmic Deep Dive
+                                                        <BookOpen className="w-4 h-4" /> {{t('blogs.nakshatras.karmicDeepDive')}}
                                                     </h3>
                                                     <p className="text-[16px] font-light leading-relaxed text-foreground/80 italic border-l-2 border-secondary/20 pl-6 pr-6">
                                                         &quot;{selectedNakshatra.deepDive}&quot;
@@ -374,7 +376,7 @@ export default function NakshatrasPage() {
 
                                                 <div className="p-6 rounded-2xl bg-secondary/5 border border-secondary/5">
                                                     <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-2">
-                                                        <Sparkles className="w-4 h-4" /> Fundamental Trait
+                                                        <Sparkles className="w-4 h-4" /> {{t('blogs.nakshatras.fundamentalTrait')}}
                                                     </h3>
                                                     <p className="text-[14px] font-medium text-foreground/70 leading-relaxed">
                                                         {selectedNakshatra.trait}
@@ -389,21 +391,21 @@ export default function NakshatrasPage() {
                                                         <div className="flex items-center justify-between border-b border-outline-variant/5 pb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <Zap className="w-4 h-4 text-secondary/60" />
-                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">Nakshatra Shakti</span>
+                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">{t('blogs.nakshatras.shakti')}</span>
                                                             </div>
                                                             <span className="text-sm font-bold text-foreground">{selectedNakshatra.shakti}</span>
                                                         </div>
                                                         <div className="flex items-center justify-between border-b border-outline-variant/5 pb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <Activity className="w-4 h-4 text-secondary/60" />
-                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">Nadi (Ayurvedic)</span>
+                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">{t('blogs.nakshatras.nadi')}</span>
                                                             </div>
                                                             <span className="text-sm font-bold text-foreground">{selectedNakshatra.nadi}</span>
                                                         </div>
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
                                                                 <Compass className="w-4 h-4 text-secondary/60" />
-                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">Purushartha</span>
+                                                                <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-widest">{t('blogs.nakshatras.purushartha')}</span>
                                                             </div>
                                                             <span className="text-sm font-bold text-foreground">{selectedNakshatra.element}</span>
                                                         </div>
@@ -415,7 +417,7 @@ export default function NakshatrasPage() {
                                                         <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
                                                             <Scale className="w-4 h-4 text-secondary" />
                                                         </div>
-                                                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Pada (D9) Logic</p>
+                                                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{t('blogs.nakshatras.padaD9Logic')}</p>
                                                     </div>
                                                     <p className="text-[13px] text-foreground/70 leading-relaxed italic">
                                                         {selectedNakshatra.pada_logic}
@@ -431,11 +433,11 @@ export default function NakshatrasPage() {
                                                     <Target className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-sm font-bold text-foreground">Subconscious Blueprint</h3>
-                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">Discover your core Janma Nakshatra</p>
+                                                    <h3 className="text-sm font-bold text-foreground">{t('blogs.nakshatras.subconscious')}</h3>
+                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">{t('blogs.nakshatras.discoverJanma')}</p>
                                                 </div>
                                             </div>
-                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">Analyze Chart ✦</Button>
+                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">{t('blogs.nakshatras.analyzeChart')} ✦</Button>
                                         </div>
                                     </div>
                                 </Card>

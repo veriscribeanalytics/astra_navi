@@ -777,7 +777,7 @@ aria-label={t('chat.editMessage')}
                 ? 'bg-secondary text-on-primary hover:bg-secondary/90'
                 : 'bg-surface border border-outline-variant/20 text-secondary hover:bg-surface-variant'
             }`}
-            aria-label="Scroll to latest message"
+            aria-label={t('chat.messages.scrollToLatest')}
           >
             <ArrowDown className="w-4 h-4" />
             {newMsgCount > 0 && (

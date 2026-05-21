@@ -6,6 +6,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import AuthErrorBanner from './AuthErrorBanner';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from '@/hooks';
 
 interface SignInFormData {
   email: string;
@@ -29,6 +30,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   disabledReason,
   onForgotPassword,
 }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,9 +40,9 @@ const SignInForm: React.FC<SignInFormProps> = ({
 
   const validate = (): boolean => {
     const errors: { email?: string; password?: string } = {};
-    if (!email.trim()) errors.email = 'Email is required.';
-    else if (!email.includes('@')) errors.email = 'Please enter a valid email.';
-    if (!password.trim()) errors.password = 'Password is required.';
+    if (!email.trim()) errors.email = t('auth.signIn.emailRequired');
+    else if (!email.includes('@')) errors.email = t('auth.signIn.emailInvalid');
+    if (!password.trim()) errors.password = t('auth.signIn.passwordRequired');
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -72,8 +74,8 @@ const SignInForm: React.FC<SignInFormProps> = ({
 
       <Input
         type="email"
-        label="Email"
-        placeholder="Enter your email"
+        label={t('auth.signIn.emailLabel')}
+        placeholder={t('auth.signIn.emailPlaceholder')}
         icon={<Mail size={16} className="text-secondary" />}
         value={email}
         onChange={(e) => {
@@ -89,8 +91,8 @@ const SignInForm: React.FC<SignInFormProps> = ({
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
-          label="Password"
-          placeholder="Enter your password"
+          label={t('auth.signIn.passwordLabel')}
+          placeholder={t('auth.signIn.passwordPlaceholder')}
           icon={<Lock size={16} className="text-secondary" />}
           value={password}
           onChange={(e) => {
@@ -107,7 +109,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
           onClick={() => setShowPassword(!showPassword)}
           disabled={disabled || isSubmitting}
           className="absolute right-4 top-[38px] text-on-surface-variant/40 hover:text-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 rounded"
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          aria-label={showPassword ? t('auth.signIn.hidePassword') : t('auth.signIn.showPassword')}
           aria-pressed={showPassword}
         >
           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -120,7 +122,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
           onClick={onForgotPassword}
           className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 hover:text-secondary transition-colors"
         >
-          Forgot Password?
+          {t('auth.signIn.forgotPassword')}
         </button>
       </div>
 
@@ -132,7 +134,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
         disabled={isSubmitDisabled}
         className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
       >
-        {disabled ? disabledReason || 'Sign In' : 'Sign In'}
+        {disabled ? disabledReason || t('auth.signIn.submit') : t('auth.signIn.submit')}
         {!isSubmitting && !disabled && <ArrowRight size={14} />}
       </Button>
     </form>

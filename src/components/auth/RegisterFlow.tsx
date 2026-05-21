@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Mail, Lock, ShieldCheck, User as UserIcon, Calendar, Clock,
@@ -43,8 +43,6 @@ interface RegisterFlowProps {
   disabled?: boolean;
 }
 
-const STEP_LABELS = ['Account', 'Personal', 'Birth', 'Preferences'] as const;
-
 const minLengthOk = (p: string) => p.length >= 10;
 const hasUpper = (p: string) => /[A-Z]/.test(p);
 const hasLower = (p: string) => /[a-z]/.test(p);
@@ -66,6 +64,14 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
 
+  // Dynamic step labels
+  const stepLabels = useMemo(() => [
+    t('auth.register.steps.account'),
+    t('auth.register.steps.personal'),
+    t('auth.register.steps.birth'),
+    t('auth.register.steps.preferences')
+  ], [t]);
+
   // Sync language from context
   useEffect(() => {
     setData((prev) => ({ ...prev, language: contextLanguage }));
@@ -74,26 +80,26 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
   const validateStep = (): string | null => {
     switch (step) {
       case 0: {
-        if (!data.email.includes('@')) return 'Please enter a valid email address.';
-        if (!minLengthOk(data.password)) return 'Password must be at least 10 characters.';
-        if (data.password !== data.confirmPassword) return 'Passwords do not match.';
-        if (!hasUpper(data.password)) return 'Password must contain at least one uppercase letter.';
-        if (!hasLower(data.password)) return 'Password must contain at least one lowercase letter.';
-        if (!hasDigit(data.password)) return 'Password must contain at least one number.';
-        if (!hasSpecial(data.password)) return 'Password must contain at least one special character.';
+        if (!data.email.includes('@')) return t('auth.register.validation.emailInvalid');
+        if (!minLengthOk(data.password)) return t('auth.register.validation.passwordLength');
+        if (data.password !== data.confirmPassword) return t('auth.register.validation.passwordMismatch');
+        if (!hasUpper(data.password)) return t('auth.register.validation.passwordUpper');
+        if (!hasLower(data.password)) return t('auth.register.validation.passwordLower');
+        if (!hasDigit(data.password)) return t('auth.register.validation.passwordDigit');
+        if (!hasSpecial(data.password)) return t('auth.register.validation.passwordSpecial');
         return null;
       }
       case 1: {
-        if (data.name.trim() && data.name.trim().length < 2) return 'Name must be at least 2 characters.';
+        if (data.name.trim() && data.name.trim().length < 2) return t('auth.register.validation.nameLength');
         return null;
       }
       case 2: {
         if (data.dob) {
           const d = new Date(data.dob);
-          if (d > new Date()) return 'Date of birth cannot be in the future.';
+          if (d > new Date()) return t('auth.register.validation.dobFuture');
         }
-        if (data.tob && !/^\d{2}:\d{2}$/.test(data.tob)) return 'Time must be in HH:MM format.';
-        if (data.pob && data.pob.length < 2) return 'Place name must be at least 2 characters.';
+        if (data.tob && !/^\d{2}:\d{2}$/.test(data.tob)) return t('auth.register.validation.tobFormat');
+        if (data.pob && data.pob.length < 2) return t('auth.register.validation.pobLength');
         return null;
       }
       default:
@@ -119,7 +125,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
       await onSubmit(submitData);
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : 'Registration failed. Please try again.';
+        err instanceof Error ? err.message : t('auth.register.validation.failed');
       setStepError(message);
     } finally {
       setIsSubmitting(false);
@@ -128,13 +134,13 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
 
   const update = (field: Partial<RegisterData>) => setData((p) => ({ ...p, ...field }));
 
-  const passwordReqs = [
-    { met: minLengthOk(data.password), label: '10+ characters' },
-    { met: hasUpper(data.password), label: 'Uppercase letter' },
-    { met: hasLower(data.password), label: 'Lowercase letter' },
-    { met: hasDigit(data.password), label: 'Number' },
-    { met: hasSpecial(data.password), label: 'Special character' },
-  ];
+  const passwordReqs = useMemo(() => [
+    { met: minLengthOk(data.password), label: t('auth.register.reqs.length') },
+    { met: hasUpper(data.password), label: t('auth.register.reqs.upper') },
+    { met: hasLower(data.password), label: t('auth.register.reqs.lower') },
+    { met: hasDigit(data.password), label: t('auth.register.reqs.digit') },
+    { met: hasSpecial(data.password), label: t('auth.register.reqs.special') },
+  ], [data.password, t]);
 
   return (
     <div className="space-y-4">
@@ -142,7 +148,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
         <AuthErrorBanner message={stepError} onDismiss={() => setStepError(null)} />
       )}
 
-      <RegisterStepIndicator currentStep={step} steps={[...STEP_LABELS]} />
+      <RegisterStepIndicator currentStep={step} steps={stepLabels} />
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -157,8 +163,8 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
             <>
               <Input
                 type="email"
-                label="Email"
-                placeholder="you@example.com"
+                label={t('auth.register.emailLabel')}
+                placeholder={t('auth.register.emailPlaceholder')}
                 icon={<Mail size={14} className="text-secondary" />}
                 value={data.email}
                 onChange={(e) => update({ email: e.target.value })}
@@ -166,8 +172,8 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 required
               />
               <PasswordField
-                label="Password"
-                placeholder="Create a strong password"
+                label={t('auth.register.passwordLabel')}
+                placeholder={t('auth.register.passwordPlaceholder')}
                 icon={<Lock size={14} className="text-secondary" />}
                 value={data.password}
                 onChange={(e) => update({ password: e.target.value })}
@@ -176,7 +182,9 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
               />
               {/* Password requirements */}
               <div className="space-y-1.5 p-3 rounded-xl bg-surface-variant/20 border border-outline-variant/10">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">Password Requirements</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">
+                  {t('auth.register.reqs.title')}
+                </p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                   {passwordReqs.map((req) => (
                     <div key={req.label} className="flex items-center gap-1.5">
@@ -189,8 +197,8 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 </div>
               </div>
               <PasswordField
-                label="Confirm Password"
-                placeholder="Re-enter your password"
+                label={t('auth.register.confirmPasswordLabel')}
+                placeholder={t('auth.register.confirmPasswordPlaceholder')}
                 icon={<ShieldCheck size={14} className="text-secondary" />}
                 value={data.confirmPassword || ''}
                 onChange={(e) => update({ confirmPassword: e.target.value })}
@@ -204,8 +212,8 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
           {step === 1 && (
             <>
               <Input
-                label={t('login.fullName') || 'Full Name'}
-                placeholder="Enter your full name"
+                label={t('auth.register.fullNameLabel')}
+                placeholder={t('auth.register.fullNamePlaceholder')}
                 icon={<UserIcon size={14} className="text-secondary" />}
                 value={data.name}
                 onChange={(e) => update({ name: e.target.value })}
@@ -214,61 +222,61 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block">
-                    Gender
+                    {t('auth.register.genderLabel')}
                   </label>
                   <select
                     className="w-full h-11 bg-surface border border-outline-variant/30 rounded-xl px-4 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all appearance-none cursor-pointer font-body"
                     value={data.gender}
                     onChange={(e) => update({ gender: e.target.value })}
                   >
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="Not Specified">Not Specified</option>
+                    <option value="">{t('auth.register.selectOption')}</option>
+                    <option value="male">{t('auth.register.genderMale')}</option>
+                    <option value="female">{t('auth.register.genderFemale')}</option>
+                    <option value="other">{t('auth.register.genderOther')}</option>
+                    <option value="Not Specified">{t('auth.register.genderNotSpecified')}</option>
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block">
-                    Status
+                    {t('auth.register.maritalStatusLabel')}
                   </label>
                   <select
                     className="w-full h-11 bg-surface border border-outline-variant/30 rounded-xl px-4 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all appearance-none cursor-pointer font-body"
                     value={data.maritalStatus}
                     onChange={(e) => update({ maritalStatus: e.target.value })}
                   >
-                    <option value="">Select</option>
-                    <option value="single">Single</option>
-                    <option value="married">Married</option>
-                    <option value="divorced">Divorced</option>
-                    <option value="widowed">Widowed</option>
-                    <option value="separated">Separated</option>
-                    <option value="Not Specified">Prefer not to say</option>
+                    <option value="">{t('auth.register.selectOption')}</option>
+                    <option value="single">{t('auth.register.maritalSingle')}</option>
+                    <option value="married">{t('auth.register.maritalMarried')}</option>
+                    <option value="divorced">{t('auth.register.maritalDivorced')}</option>
+                    <option value="widowed">{t('auth.register.maritalWidowed')}</option>
+                    <option value="separated">{t('auth.register.maritalSeparated')}</option>
+                    <option value="Not Specified">{t('auth.register.maritalNotSpecified')}</option>
                   </select>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block">
-                  Occupation
+                  {t('auth.register.occupationLabel')}
                 </label>
                 <select
                   className="w-full h-11 bg-surface border border-outline-variant/30 rounded-xl px-4 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all appearance-none cursor-pointer font-body"
                   value={data.occupation}
                   onChange={(e) => update({ occupation: e.target.value })}
                 >
-                  <option value="">Select</option>
-                  <option value="student">Student</option>
-                  <option value="business">Business Owner</option>
-                  <option value="employed">Employed / Salaried</option>
-                  <option value="homemaker">Homemaker</option>
-                  <option value="retired">Retired</option>
-                  <option value="unemployed">Unemployed</option>
-                  <option value="Not Specified">Prefer not to say</option>
+                  <option value="">{t('auth.register.selectOption')}</option>
+                  <option value="student">{t('auth.register.occupationStudent')}</option>
+                  <option value="business">{t('auth.register.occupationBusiness')}</option>
+                  <option value="employed">{t('auth.register.occupationEmployed')}</option>
+                  <option value="homemaker">{t('auth.register.occupationHomemaker')}</option>
+                  <option value="retired">{t('auth.register.occupationRetired')}</option>
+                  <option value="unemployed">{t('auth.register.occupationUnemployed')}</option>
+                  <option value="Not Specified">{t('auth.register.occupationNotSpecified')}</option>
                 </select>
               </div>
               <Input
-                label="Phone Number"
-                placeholder="Enter phone number (optional)"
+                label={t('auth.register.phoneNumberLabel')}
+                placeholder={t('auth.register.phoneNumberPlaceholder')}
                 icon={<Phone size={14} className="text-secondary" />}
                 value={data.phoneNumber}
                 onChange={(e) => update({ phoneNumber: e.target.value })}
@@ -281,14 +289,14 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
           {step === 2 && (
             <>
               <Input
-                label={t('login.dob') || 'Date of Birth'}
+                label={t('auth.register.dobLabel')}
                 type="date"
                 icon={<Calendar size={14} className="text-secondary" />}
                 value={data.dob}
                 onChange={(e) => update({ dob: e.target.value })}
               />
               <Input
-                label={t('login.tob') || 'Time of Birth'}
+                label={t('auth.register.tobLabel')}
                 type="time"
                 icon={<Clock size={14} className="text-secondary" />}
                 value={data.tob}
@@ -296,10 +304,10 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
               />
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block ml-1">
-                  {t('login.pob') || 'Place of Birth'}
+                  {t('auth.register.pobLabel')}
                 </label>
                 <LocationSearch
-                  placeholder="Search city, e.g. Delhi"
+                  placeholder={t('auth.register.pobPlaceholder')}
                   value={data.pob || data.birthPlaceName}
                   onSelect={(location: LocationResult) => {
                     update({
@@ -324,7 +332,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                     }
                   }}
                   confirmedLocation={selectedLocation}
-                  helperText="Search and select your exact birth location"
+                  helperText={t('auth.register.pobHelperText')}
                 />
               </div>
             </>
@@ -336,7 +344,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
               {/* Language */}
               <div className="space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block">
-                  {t('login.preferredLanguage') || 'Preferred Language'}
+                  {t('auth.register.languageLabel')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {availableLanguages.map((lang) => (
@@ -362,15 +370,15 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
               {/* Preferences toggles */}
               <div className="space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block">
-                  Preferences
+                  {t('auth.register.preferencesLabel')}
                 </label>
                 <div className="space-y-2">
                   {([
-                    { key: 'horoscope' as const, label: t('login.receiveHoroscope') || 'Receive daily horoscope', Icon: Sparkles },
-                    { key: 'notifications' as const, label: t('login.enableNotifications') || 'Enable notifications', Icon: Bell },
+                    { key: 'horoscope' as const, label: t('auth.register.prefHoroscope'), Icon: Sparkles },
+                    { key: 'notifications' as const, label: t('auth.register.prefNotifications'), Icon: Bell },
                   ]).map(({ key, label: prefLabel, Icon }) => (
                     <label
-                      key={key}
+                       key={key}
                       className="flex items-center justify-between p-3 rounded-xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all cursor-pointer select-none"
                     >
                       <div className="flex items-center gap-3">
@@ -425,7 +433,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
             onClick={handleContinue}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
-            {t('login.next') || 'Continue'}
+            {t('auth.register.continue')}
             <ArrowRight size={14} />
           </Button>
         ) : (
@@ -438,7 +446,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
             onClick={handleSubmit}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
-            {t('login.createAccount') || 'Create Account'}
+            {t('auth.register.submit')}
             <ArrowRight size={14} />
           </Button>
         )}

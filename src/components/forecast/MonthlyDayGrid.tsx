@@ -62,7 +62,10 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
               key={day.date}
               whileTap={{ scale: 0.94 }}
               onClick={() => onSelect(day.date)}
-              aria-label={`${day.weekday || ''} ${day.date}, score ${day.score}`}
+              aria-label={t('forecast.ariaDay')
+                .replace('{weekday}', day.weekday || '')
+                .replace('{date}', day.date)
+                .replace('{score}', String(day.score))}
               className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 hover:bg-surface/50 hover:border-white/15'}`}
               style={{
                 borderColor: isSelected

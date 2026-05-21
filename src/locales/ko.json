@@ -13,7 +13,9 @@
     "howItWorks": "이용 방법",
     "online": "온라인",
     "onlineNow": "현재 접속 중",
-    "friend": "친구"
+    "friend": "친구",
+    "goBack": "돌아가기",
+    "returnHome": "홈으로 돌아가기"
   },
   "nav": {
     "myJourney": "나의 여정",
@@ -256,7 +258,18 @@
         "desc": "에지 기반 컴퓨팅은 트랜짓 추적을 위한 고가용성을 보장합니다.",
         "sub": "99.9% 가동 시간"
       }
-    ]
+    ],
+    "hero": {
+      "bphsCertified": "BPHS 인증됨",
+      "authenticJyotish": "정통 조티쉬",
+      "scripturalInsight": "경전적 통찰",
+      "askNavi": "Navi에게 물어보세요...",
+      "ashtakootMilan": "아쉬타쿠트 밀란",
+      "gunaMatching": "구나 매칭",
+      "highCompatibility": "높은 궁합",
+      "dailyAlignment": "일일 조율",
+      "transitTip": "트랜싯 팁"
+    }
   },
   "dashboard": {
     "greetingMorning": "좋은 아침입니다",
@@ -349,7 +362,9 @@
     "soulmateMatch": "매치",
     "tithi": "티티",
     "yoga": "요가",
-    "startJourneyDesc": "우주 여정이 여기서 시작됩니다. 여기서 확인하려면 Navi와 상담하세요."
+    "startJourneyDesc": "우주 여정이 여기서 시작됩니다. 여기서 확인하려면 Navi와 상담하세요.",
+    "unknownSign": "???",
+    "askNaviFab": "Navi에게 묻기"
   },
   "horoscope": {
     "yourDayToday": "오늘 당신의 하루",
@@ -460,6 +475,13 @@
     "privacyDesc": "당신의 출생 차트는 당신 영혼의 지문입니다. 우리는 모든 데이터를 종단 간 암호화합니다. 당신의 우주 블루프린트는 오직 당신만의 것입니다."
   },
   "chat": {
+    "empty": {
+      "badge": "당신의 개인 베다 가이드",
+      "headingLead": "당신은 무엇을 이해하고 싶으신가요",
+      "headingAccent": "오늘?",
+      "subtitle": "당신의 차트, 시간, 관계, 경력 또는 오늘의 행성 에너지에 대해 물어보세요.",
+      "dataPrivate": "당신의 데이터는 비공개이며 안전합니다"
+    },
     "guestWelcome": "나마스테 ✦ 현재 미리보기 모드입니다. Navi와 상담하고 심층적인 베다 분석을 받으려면 계정에 로그인하세요.",
     "guestLoginRequired": "Navi와 상담하려면 계정이 필요합니다. 전체 베다 분석 및 행성 인사이트를 받으려면 로그인하세요.",
     "guestExpired": "미리보기 만료됨",
@@ -490,12 +512,12 @@
         "이 삶에서 제 영혼의 목적은 무엇인가요?",
         "제 본성에 맞는 영적 수행은 무엇인가요?",
         "지금 당장 어떻게 내면의 평화를 찾을 수 있을까요?",
-        "제가 헤쳐나가고 있는 전생의 karma는 무엇인가요?"
+        "제가 헤쳐나가고 있는 전생의 카르마는 무엇인가요?"
       ],
       "astro_sage": [
         "제 Mahadasha에 대해 설명해주시고 그것이 무엇을 의미하는지 알려주세요.",
         "제 Lagna는 저에 대해 무엇을 밝혀주나요?",
-        "제 핵심 행성 aspect들을 안내해 주세요.",
+        "제 핵심 행성 어스펙트들을 안내해 주세요.",
         "제 차트에는 어떤 Yoga들이 있나요?"
       ]
     },
@@ -541,7 +563,7 @@
     "newResponseArriving": "새 응답이 도착하는 중...",
     "thinkingReadingChart": "차트 읽는 중...",
     "thinkingConsultingStars": "별들과 상의하는 중...",
-    "thinkingInterpretingTransits": "transits 해석하는 중...",
+    "thinkingInterpretingTransits": "트랜짓 해석하는 중...",
     "thinkingAligningPlanetaryData": "행성 데이터 정렬 중...",
     "thinkingCareer": "커리어 전망 분석 중...",
     "thinkingLove": "관계 인사이트 탐색 중...",
@@ -549,8 +571,8 @@
     "thinkingFinance": "재정 지표 조사 중...",
     "thinkingHealth": "건강 및 활력 평가 중...",
     "thinkingTiming": "최적의 타이밍 계산 중...",
-    "thinkingRemedy": "remedies 준비 중...",
-    "thinkingGeneral": "우주 blueprint 참조 중...",
+    "thinkingRemedy": "비방을 준비하는 중...",
+    "thinkingGeneral": "우주의 청사진을 참조하는 중...",
     "thoughtProcess": "생각 과정",
     "chartFactors": "이 리딩에 대한 차트 요소",
     "retry": "재시도",
@@ -595,7 +617,8 @@
       "downloadHeaderPrefix": "AstraNavi 채팅 —",
       "downloadDateLabel": "날짜:",
       "downloadRoleYou": "나",
-      "downloadRoleNavi": "Navi"
+      "downloadRoleNavi": "Navi",
+      "close": "사이드바 닫기"
     },
     "detail": {
       "moonSign": "달 별자리",
@@ -627,9 +650,105 @@
       "noSummaryYet": "요약을 생성하려면 메시지를 몇 개 보내보세요.",
       "todayEnergy": "오늘의 에너지",
       "todayEnergyLoading": "오늘의 에너지 로딩 중...",
-      "transitPlanets": "활성 Grahas",
+      "transitPlanets": "활성 행성",
       "transitPanchanga": "판창가 (Panchanga)",
-      "notableTransits": "주요 Transits"
+      "notableTransits": "주요 트랜짓"
+    },
+    "avatarPicker": {
+      "loading": "로딩 중…",
+      "defaultName": "Navi",
+      "ariaAvatar": "Avatar: {name}{title}. 클릭하여 변경합니다.",
+      "ariaChooseAvatar": "아바타 선택",
+      "chooseGuide": "당신의 가이드를 선택하세요",
+      "creditsNotice": "아바타마다 메시지당 소모되는 크레딧이 다릅니다.",
+      "creditSingle": "{n} 크레딧",
+      "creditPlural": "{n} 크레딧",
+      "default": "기본"
+    },
+    "header": {
+      "viewHistory": "기록 보기",
+      "online": "온라인",
+      "viewChartContext": "차트 정보 보기",
+      "closeChat": "채팅 닫기",
+      "back": "뒤로"
+    },
+    "feedback": {
+      "ratingLabels": {
+        "1": "불일치함",
+        "2": "개선 필요",
+        "3": "부분적 명확함",
+        "4": "거의 일치함",
+        "5": "우주적으로 일치함"
+      },
+      "tagSectionLabels": {
+        "1": "이번 리딩에서 무엇이 잘못되었나요?",
+        "2": "리딩이 부족했던 부분은 어디인가요?",
+        "3": "이 분석에서 개선할 수 있는 부분은 무엇인가요?",
+        "4": "어떤 작은 부분이 아쉬웠나요?",
+        "5": "이번 리딩을 훌륭하게 만든 요소는 무엇인가요?"
+      },
+      "placeholders": {
+        "1": "별자리가 전혀 일치하지 않았습니다. 어떤 점이 잘못되었나요?",
+        "2": "리딩의 어느 부분이 어긋났나요?",
+        "3": "이번 리딩에서 어떤 우주적 통찰이 빠져 있었나요?",
+        "4": "거의 일치합니다. 리딩을 완벽하게 만들려면 무엇이 더 필요할까요?",
+        "5": "우주적 여정 중 어떤 부분이 가장 마음에 와닿았나요?"
+      },
+      "tags": {
+        "1": {
+          "0": "말투가 무시하거나 무례하게 느껴졌습니다",
+          "1": "완전히 틀린 예측이었습니다",
+          "2": "행성 위치가 정확하지 않았습니다",
+          "3": "Dasha(디샤) 분석이 전혀 맞지 않았습니다",
+          "4": "내 출생 차트(Kundli)와 무관한 내용이었습니다",
+          "5": "기타"
+        },
+        "2": {
+          "0": "말투가 로봇 같거나 기계적으로 느껴졌습니다",
+          "1": "내 출생 차트 상세 정보를 오독했습니다",
+          "2": "잘못된 행성 트랜짓(Transit)을 언급했습니다",
+          "3": "시기 예측이 맞지 않았습니다",
+          "4": "실제 질문을 무시했습니다",
+          "5": "기타"
+        },
+        "3": {
+          "0": "말투가 좀 더 공감되었으면 좋겠습니다",
+          "1": "부분적으로 맞았으나 주요 핵심을 놓쳤습니다",
+          "2": "행성의 조합이 완전하게 설명되지 않았습니다",
+          "3": "시기 예측이 모호하게 느껴졌습니다",
+          "4": "비방(Remedies)이 너무 일반적이었습니다",
+          "5": "기타"
+        },
+        "4": {
+          "0": "말투가 따뜻하고 지원적이었습니다",
+          "1": "차트 상세 정보에 사소한 오류가 있었습니다",
+          "2": "트랜짓(Transit) 분석이 더 깊었으면 좋겠습니다",
+          "3": "Dasha(디샤) 통찰이 간략했습니다",
+          "4": "더 구체적인 비방을 원했습니다",
+          "5": "기타"
+        },
+        "5": {
+          "0": "말투가 자비롭고 지혜로웠습니다",
+          "1": "예측이 아주 정확했습니다",
+          "2": "뛰어난 행성 분석이었습니다",
+          "3": "정확한 시기 통찰을 얻었습니다",
+          "4": "비방이 현실적이고 도움이 되었습니다",
+          "5": "기타"
+        }
+      },
+      "shareFeedback": "피드백 공유",
+      "commentPlaceholder": "의견 공유 (선택 사항)",
+      "disclaimer": "작성해주신 피드백은 Navi가 베딕 지혜를 더욱 정교화하는 데 큰 도움이 됩니다. 모든 답변은 익명으로 처리되며 AstraNavi의 안내 서비스를 개선하는 목적으로만 사용됩니다.",
+      "submit": "피드백 제출"
+    },
+    "input": {
+      "dropFiles": "여기에 파일을 놓으세요",
+      "preview": "미리보기",
+      "attachFile": "파일 첨부",
+      "naviUsesChart": "Navi는 귀하의 출생 차트를 사용합니다"
+    },
+    "messages": {
+      "scrollToLatest": "최신 메시지로 스크롤"
     }
   },
   "healthForecast": {
@@ -734,7 +853,29 @@
       "thu": "목",
       "fri": "금",
       "sat": "토"
-    }
+    },
+    "monthsShort": {
+      "jan": "1월",
+      "feb": "2월",
+      "mar": "3월",
+      "apr": "4월",
+      "may": "5월",
+      "jun": "6월",
+      "jul": "7월",
+      "aug": "8월",
+      "sep": "9월",
+      "oct": "10월",
+      "nov": "11월",
+      "dec": "12월"
+    },
+    "snapshot": {
+      "defaultSuggestion": "최상의 결과를 얻기 위해 현재의 우주적 흐름에 맞춰 활동을 조율하세요.",
+      "whyPrompt": "오늘 내 포캐스트 점수가 {score}점인 이유는 무엇인가요?",
+      "planPrompt": "오늘의 포캐스트 상세 정보를 바탕으로 하루 일정을 계획할 수 있도록 도와주세요."
+    },
+    "ariaDay": "{weekday} {date}, 점수 {score}점",
+    "todayShort": "오늘",
+    "weekly": "7일"
   },
   "plans": {
     "title": "당신의 우주적 잠재력을 깨우세요",
@@ -775,7 +916,7 @@
     "earlyAdopter": "초기 후원자",
     "featureUnlimitedChat": "무제한 Navi 상담",
     "featureExtendedChat": "연장된 일일 채팅 액세스",
-    "featureFullHoroscope": "전체 맞춤형 일일 Horoscope",
+    "featureFullHoroscope": "전체 맞춤형 일일 운세",
     "featureTomorrowHoroscope": "내일의 예측 — 미리 계획하기",
     "featureBasicConsult": "가이드 상담 세션",
     "featureGuidedConsult": "무제한 가이드 상담 세션",
@@ -787,7 +928,7 @@
     "featureChatMessages": "Navi 채팅 메시지",
     "featureGuidedConsults": "가이드 상담 세션",
     "featureMatchReports": "매칭 호환성 리포트",
-    "featureHoroscopeAccess": "전체 horoscope 및 예측 액세스",
+    "featureHoroscopeAccess": "전체 운세 및 예측 액세스",
     "featureNoExpiry": "크레딧 유효 기간(일)",
     "subscriptionCredits": "구독",
     "packCredits": "팩",
@@ -833,5 +974,501 @@
     "chartTitle": "탄생 차트",
     "compatibility": "호환성",
     "compatibilityDesc": "첫 번째 리딩 시 크레딧이 차감됩니다. 동일한 언어로 반복 조회하는 것은 무료입니다."
+  },
+  "match": {
+    "mangal": {
+      "cancelled": "해소됨 (Cancelled)",
+      "present": "있음 (Present)",
+      "absent": "없음 (Absent)",
+      "title": "Mangal Dosha(망갈 도샤) 분석",
+      "subtitle": "화성 호환성 체크",
+      "severity": "심각도",
+      "verdictLabel": "호환성 판정",
+      "severityLevels": {
+        "none": "없음",
+        "low": "낮음",
+        "medium": "보통",
+        "high": "높음"
+      }
+    },
+    "additional": {
+      "title": "추가 검증",
+      "subtitle": "주요 도샤(Doshas) 및 정렬",
+      "clear": "안전 (Clear)",
+      "present": "있음 (Present)",
+      "notice": "이 검증은 남인도 전통에서 매우 중요하며, 보다 안전한 매칭을 위해 36점 궁합 시스템(Guna Milan)을 보완합니다."
+    },
+    "person": {
+      "unknownSign": "알 수 없는 별자리",
+      "unknown": "알 수 없음"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "emailRequired": "이메일을 입력해야 합니다.",
+      "emailInvalid": "올바른 이메일을 입력하세요.",
+      "passwordRequired": "비밀번호를 입력해야 합니다.",
+      "emailLabel": "이메일",
+      "emailPlaceholder": "이메일을 입력하세요",
+      "passwordLabel": "비밀번호",
+      "passwordPlaceholder": "비밀번호를 입력하세요",
+      "showPassword": "비밀번호 표시",
+      "hidePassword": "비밀번호 숨기기",
+      "forgotPassword": "비밀번호를 잊으셨나요?",
+      "submit": "로그인"
+    },
+    "register": {
+      "steps": {
+        "account": "계정",
+        "personal": "개인 정보",
+        "birth": "출생 정보",
+        "preferences": "설정"
+      },
+      "validation": {
+        "emailInvalid": "올바른 이메일 주소를 입력하세요.",
+        "passwordLength": "비밀번호는 최소 10자 이상이어야 합니다.",
+        "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+        "passwordUpper": "비밀번호에는 최소 하나의 대문자(uppercase)가 포함되어야 합니다.",
+        "passwordLower": "비밀번호에는 최소 하나의 소문자(lowercase)가 포함되어야 합니다.",
+        "passwordDigit": "비밀번호에는 최소 하나의 숫자가 포함되어야 합니다.",
+        "passwordSpecial": "비밀번호에는 최소 하나의 특수 문자(special character)가 포함되어야 합니다.",
+        "nameLength": "이름은 최소 2자 이상이어야 합니다.",
+        "dobFuture": "생년월일은 미래 날짜일 수 없습니다.",
+        "tobFormat": "시간은 HH:MM 형식이어야 합니다.",
+        "pobLength": "출생지 이름은 최소 2자 이상이어야 합니다.",
+        "failed": "회원가입에 실패했습니다. 다시 시도해 주세요."
+      },
+      "reqs": {
+        "title": "비밀번호 필수 조건",
+        "length": "10자 이상",
+        "upper": "대문자 포함",
+        "lower": "소문자 포함",
+        "digit": "숫자 포함",
+        "special": "특수 문자 포함"
+      },
+      "emailLabel": "이메일",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "비밀번호",
+      "passwordPlaceholder": "안전한 비밀번호 생성",
+      "confirmPasswordLabel": "비밀번호 확인",
+      "confirmPasswordPlaceholder": "비밀번호 재입력",
+      "fullNameLabel": "이름",
+      "fullNamePlaceholder": "전체 이름을 입력하세요",
+      "genderLabel": "성별",
+      "selectOption": "선택",
+      "genderMale": "남성",
+      "genderFemale": "여성",
+      "genderOther": "기타",
+      "genderNotSpecified": "지정하지 않음",
+      "maritalStatusLabel": "결혼 여부",
+      "maritalSingle": "미혼",
+      "maritalMarried": "기혼",
+      "maritalDivorced": "이혼",
+      "maritalWidowed": "사별",
+      "maritalSeparated": "별거",
+      "maritalNotSpecified": "답변 의사 없음",
+      "occupationLabel": "직업",
+      "occupationStudent": "학생",
+      "occupationBusiness": "자영업 / 사업가",
+      "occupationEmployed": "직장인 / 회사원",
+      "occupationHomemaker": "전업주부",
+      "occupationRetired": "퇴직",
+      "occupationUnemployed": "무직",
+      "occupationNotSpecified": "답변 의사 없음",
+      "phoneNumberLabel": "전화번호",
+      "phoneNumberPlaceholder": "전화번호 입력 (선택 사항)",
+      "dobLabel": "생년월일",
+      "tobLabel": "출생 시간",
+      "pobLabel": "출생지",
+      "pobPlaceholder": "도시 검색, 예: 서울",
+      "pobHelperText": "정확한 출생 위치를 검색하여 선택하세요",
+      "languageLabel": "선호 언어",
+      "preferencesLabel": "기본 설정",
+      "prefHoroscope": "일일 포캐스트 메일 수신",
+      "prefNotifications": "알림 수신 동의",
+      "continue": "다음 단계",
+      "submit": "가입하기"
+    },
+    "errorBanner": {
+      "dismiss": "오류 닫기"
+    }
+  },
+  "home": {
+    "portals": {
+      "validation": {
+        "nameLength": "이름은 최소 2자 이상이어야 합니다",
+        "nameLetters": "이름은 영문 및 한글 문자만 포함할 수 있습니다",
+        "dobFuture": "생년월일은 미래 날짜일 수 없습니다",
+        "pobInvalid": "올바른 출생지를 입력해 주세요"
+      },
+      "placeholders": {
+        "fullName": "성명",
+        "pob": "출생지",
+        "yourName": "본인 이름",
+        "partnerName": "상대방 이름"
+      }
+    }
+  },
+  "pricing": {
+    "plans": {
+      "seeker": {
+        "title": "Astra Seeker(아스트라 시커)",
+        "price": "₩0",
+        "period": "/평생 무료",
+        "buttonText": "여정 시작하기",
+        "features": {
+          "0": "기본 출생 차트(Kundli) 생성",
+          "1": "일일 라시(Rashi) 예측",
+          "2": "제한된 나비 상담 (일 5분)",
+          "3": "기본 행성 분석 및 통찰"
+        }
+      },
+      "devotee": {
+        "title": "Devotee(디보티)",
+        "price": "₩4,900",
+        "period": "/월",
+        "badge": "가장 인기 있음",
+        "buttonText": "Devotee 선택",
+        "features": {
+          "0": "무제한 나비 AI 상담",
+          "1": "정밀 쿤들리 분석 보고서 (PDF)",
+          "2": "Dasha(디샤) 시기 정밀 분석",
+          "3": "개인 비방 및 보석 처방 안내"
+        }
+      },
+      "disciple": {
+        "title": "Disciple(디사이플)",
+        "price": "₩49,000",
+        "period": "/년",
+        "badge": "최고의 혜택",
+        "buttonText": "Disciple 선택",
+        "features": {
+          "0": "모든 Devotee 혜택 포함",
+          "1": "연간 약 10,000원 절약",
+          "2": "평생 출생 차트 보관함 제공",
+          "3": "상세 궁합 및 호환성 분석"
+        }
+      }
+    }
+  },
+  "blogs": {
+    "index": {
+      "badge": "지혜의 도서관",
+      "title": "고대 과학,",
+      "subtitle": "현대의 통찰",
+      "description": "베다 지식의 광활한 바다를 여행합니다. 행성의 움직임에서부터 영적 치료법까지, 당신의 우주적 존재의 열쇠를 발견합니다.",
+      "liveGuide": "라이브 가이드",
+      "inProduction": "준비 중",
+      "readStory": "이야기 읽기",
+      "ctaHeading": "원하는 것을 찾을 수 없으신가요?",
+      "ctaSubheading": "찾고 있으신가요?",
+      "ctaDescription": "우리의 천체 도서관은 매주 확장되고 있습니다. 귀하의 차트에 대한 구체적인 질문이 있으시면 Navi가 지금 바로 답변해 드립니다.",
+      "askNavi": "Navi에 무엇이든 물어보기",
+      "subscribe": "업데이트 구독하기",
+      "footer": "© 2026 ASTRANAVI · 우주 기록 보관소"
+    },
+    "houses": {
+      "title": "12",
+      "titleSanskrit": "바바",
+      "encyclopediaTitle": "백과사전",
+      "introduction": "소개",
+      "sidebarLabel": "12 바바(Bhava)",
+      "coreConcepts": "핵심 개념",
+      "understanding": "이해하기",
+      "bhavas": "바바(Bhava)",
+      "description": "베다 점성술에서 12개의 집(바바)은 인간 삶의 12개 영역을 나타냅니다. 행성이 에너지를 제공하고 별자리가 환경을 제공하는 동안, 집은 업이 작용하는 실제 경험의 장입니다.",
+      "kendra": "켄드라(Kendra, 각형 집)",
+      "kendraDesc": "1, 4, 7, 10번 집은 삶의 기둥입니다. 이들은 자아, 가정, 관계, 그리고 경력을 관장합니다. 이 곳에 배치된 행성은 당신의 세속적 존재를 형성하고 대규모 행동을 시작할 최대한의 힘을 가집니다.",
+      "trikona": "트리코나(Trikona, 삼각형 집)",
+      "trikonaDesc": "1, 5, 9번 집은 법(Dharma)과 순수한 축복의 집입니다. 이들은 전생의 공덕(Purva Punya), 지능, 그리고 신의 은총을 나타냅니다. 이 곳의 행성은 자연스러운 운과 영적 진화를 제공합니다.",
+      "dusthana": "두샤나(Dusthana, 어려운 집)",
+      "dusthanaDesc": "6, 8, 12번 집은 장애, 변환, 그리고 손실을 관장합니다. 물질적 추구에는 어려우나 업의 소각, 회복력 구축, 궁극적인 영적 해방(모크샤)을 달성하는 데 필수적입니다.",
+      "upachaya": "우파차야(Upachaya, 성장하는 집)",
+      "upachayaDesc": "3, 6, 10, 11번 집은 의식적인 노력을 통해 시간이 지남에 따라 개선되는 삶의 영역을 나타냅니다. 이곳에 배치된 악행성(Saturn, Mars, Sun)은 실제로 경쟁을 극복하려는 추진력을 제공하므로 탁월한 결과를 제공합니다.",
+      "analyzeBtn": "집 분석하기",
+      "sanskrit": "산스크리트어",
+      "significator": "의미부여자",
+      "nature": "성질",
+      "bodyMatrix": "신체 매트릭스",
+      "houseEssence": "집의 본질",
+      "dominions": "영역",
+      "lifeGovernance": "인생 관리",
+      "bhavaMechanics": "바바 역학",
+      "bhavLogic": "바바트 바바(Bhavat Bhavam) 논리",
+      "howAffects": "{house}가 파생된 인생 영역에 미치는 영향",
+      "analyzeBtn2": "정렬 분석하기"
+    },
+    "nakshatras": {
+      "title": "달의",
+      "subtitle": "관저(Nakshatra)",
+      "sidebarLabel": "27개의 나크샤트라(Nakshatra)",
+      "analyzeBtn": "나크샤트라 분석하기",
+      "rulerLabel": "통치자(주인)",
+      "symbol": "기호",
+      "gana": "가나(Gana)",
+      "yoni": "동물(요니)",
+      "karmicDeepDive": "카르마 심층 탐구",
+      "fundamentalTrait": "기본 특성",
+      "shakti": "나크샤트라 샤크티(Shakti)",
+      "nadi": "나디(아유르베다)",
+      "purushartha": "푸루샤르타(Purushartha)",
+      "padaD9Logic": "파다(Pada, D9) 논리",
+      "subconscious": "무의식적 청사진",
+      "discoverJanma": "당신의 핵심 자나마 나크샤트라 발견하기",
+      "analyzeChart": "차트 분석하기"
+    },
+    "planets": {
+      "title": "나바그라하",
+      "subtitle": "원형(Archetypes)",
+      "encyclopediaTitle": "백과사전",
+      "introduction": "소개",
+      "sidebarLabel": "아홉 행성",
+      "coreConcepts": "핵심 개념",
+      "understanding": "이해하기",
+      "navagraha": "나바그라하(Navagraha)",
+      "description": "베다 점성술에서 나바그라하(아홉 행성)는 우주의 업의 중개자입니다. 이들은 사건을 촉발하고, 당신의 심리를 형성하며, 영혼의 진화 여정을 시간과 공간을 통해 안내하는 역동적인 힘입니다.",
+      "karmicDeliverers": "업적 전달자",
+      "karmicDesc": "행성은 단순히 특성을 상징하지 않습니다. 이들은 적극적으로 당신의 과거 행동의 열매를 전달합니다. 목성과 금성 같은 유익한 행성은 편의와 우아함을 가져오고, 토성과 화성 같은 해로운 행성은 필요하지만 종종 어려운 교훈을 시행합니다.",
+      "avasthas": "아바스타(Avasthas, 행성의 상태)",
+      "avasthasDesc": "행성의 힘은 그 조건에 따라 달라집니다. 상승된 행성은 가장 높고 순수한 잠재력을 표현하는 반면, 약화된 행성은 영혼이 타고난 약점을 극복하기 위해 더 열심히 일해야 하는 영역을 나타냅니다.",
+      "shadowNodes": "그림자 노드",
+      "shadowNodesDesc": "라후와 케투는 물리적 질량이 아니라 일식이 발생하는 수학적 지점입니다. 신체가 없음에도 불구하고 이들 노드는 갑작스런 운명, 집착, 궁극적인 영적 해방의 심오한 촉발자입니다.",
+      "functionalNature": "기능적 성질",
+      "functionalDesc": "자연스러운 특성을 넘어서, 행성은 당신의 특정 상승점(라그나)에 따라 친구 또는 적으로 작용합니다. 양의 라그나에 어려움을 주는 같은 토성이 황소 라그나에는 최고의 수혜자로 작용합니다.",
+      "analyzeBtn": "정렬 분석하기",
+      "cosmicArchetype": "우주적 원형",
+      "signatures": "서명",
+      "functionalImpact": "기능적 영향",
+      "planetaryGovernance": "행성 관리",
+      "exaltation": "상승",
+      "highestPotential": "최고의 잠재력",
+      "debilitation": "약화",
+      "lowestVitality": "최저 활력",
+      "mooltrikona": "뮬트리코나(Mooltrikona)",
+      "primaryOffice": "주요 사무실",
+      "aligningWith": "{planet}과 정렬하기",
+      "discoverInfluence": "이 행성이 당신의 차트에 미치는 영향 발견하기"
+    },
+    "yogas": {
+      "title": "행성",
+      "subtitle": "요가(Yogas)",
+      "encyclopediaTitle": "백과사전",
+      "introduction": "소개",
+      "sidebarLabel": "신성한 결합",
+      "coreConcepts": "핵심 개념",
+      "understanding": "이해하기",
+      "yogasLabel": "요가(Yogas)",
+      "description": "베다 점성술에서 \"요가\"는 결합을 의미합니다. 그것은 강력한 운명의 효과를 만들기 위해 함께 잠금되는 특정 행성 조합과 정렬을 나타냅니다. 이 우주적 서명은 차트에서 부, 권력, 영적 해방의 높이를 결정합니다.",
+      "rajaYogas": "라자 요가(Raja Yogas)",
+      "rajaDesc": "조합의 왕들. 켄드라(행동) 집의 주인들이 트리코나(행운) 집의 주인들과 결합할 때 형성됩니다. 활성화되면 지위, 권위, 그리고 대규모 성공을 보장합니다.",
+      "dhanaYogas": "다나 요가(Dhana Yogas)",
+      "dhanaDesc": "절대 부의 조합. 수입의 집(2번)과 이득의 집(11번)이 운명의 집(5번, 9번)과 깊게 연결될 때, 태생인은 막대한 재정적 번영에 운명지어집니다.",
+      "activation": "활성화(다샤)",
+      "activationDesc": "요가는 그들의 행성 주인이 빔쇼따리 다샤(시간 기간)에 의해 활성화될 때까지 차트에서 휴면 상태입니다. 요가를 야기하는 행성의 다샤가 시작되면 그 효과는 현실에서 급격히 나타납니다.",
+      "cancellation": "취소(방가)",
+      "cancellationDesc": "모든 나쁜 요가가 영구적인 것은 아닙니다. 약화된(약한) 행성이 강한 정렬로 지지될 때 니차방가가 발생하여 약점을 취소하고 종종 거대한 투쟁을 큰 성공으로 바꿉니다.",
+      "analyzeBtn": "요가 분석하기",
+      "formationTheory": "형성 이론",
+      "archetypeTraits": "원형적 특성",
+      "manifestation": "현현",
+      "activationPath": "활성화 경로",
+      "activationPathDesc": "주로 관련 행성의 주요 다샤 / 부크티 기간 동안 촉발됩니다.",
+      "yogaAnalysisScan": "요가 분석 스캔",
+      "discoverCombinations": "당신의 쿤달리에서 숨겨진 조합 발견하기",
+      "scanChart": "내 차트 스캔하기"
+    },
+    "remedies": {
+      "title": "신성한",
+      "subtitle": "치료법(Remedies)",
+      "tagline": "정렬의 과학",
+      "logic": "논리",
+      "target": "대상",
+      "intensity": "강도",
+      "entity": "개체",
+      "remedialTheory": "치료 이론",
+      "operationalRole": "운영 역할",
+      "efficacyScale": "효능 척도",
+      "primaryLogic": "주요 논리",
+      "safetyLevel": "안전 수준",
+      "highNonInvasive": "높음(비침습적)",
+      "keyExamples": "주요 사례",
+      "personalizedScan": "개인화된 치료 스캔",
+      "discoverSpecific": "당신의 차트에 필요한 특정 정렬 발견하기",
+      "consultNavi": "Navi와 상담하기"
+    }
+  },
+  "profile": {
+    "page": {
+      "title": "사용자 프로필",
+      "description": "출생 정보를 관리하여 개인화된 읽기가 항상 정확하도록 합니다.",
+      "errors": {
+        "fixErrors": "저장하기 전에 오류를 수정하십시오.",
+        "noEmailSession": "세션에서 이메일을 찾을 수 없습니다. 로그아웃한 후 다시 로그인하십시오.",
+        "dstConflict": "출생 시간이 일광절약시간 전환 중에 발생합니다. 실제 출생 시간인 것을 선택하십시오.",
+        "updateFailed": "업데이트 실패. 다시 시도하십시오."
+      },
+      "messages": {
+        "profileUpdated": "프로필이 성공적으로 업데이트되었습니다!"
+      },
+      "buttons": {
+        "updating": "업데이트 중...",
+        "saveAndContinue": "저장 및 대시보드로 계속",
+        "saveChanges": "변경 사항 저장",
+        "reset": "재설정",
+        "backToHome": "홈으로 돌아가기"
+      },
+      "securitySection": {
+        "title": "보안 설정",
+        "description": "암호 및 활성 세션을 관리합니다.",
+        "button": "보안 설정 관리"
+      }
+    },
+    "fields": {
+      "email": "이메일 주소",
+      "emailHelper": "이메일 주소를 변경할 수 없습니다.",
+      "fullName": "이름",
+      "fullNamePlaceholder": "이름을 입력하십시오.",
+      "fullNameHelper": "출생 증명서상의 이름",
+      "dateOfBirth": "출생 날짜",
+      "dateOfBirthHelper": "출생 날짜",
+      "timeOfBirth": "출생 시간",
+      "timeOfBirthHelper": "정밀도를 위한 정확한 시간",
+      "placeOfBirth": "출생지",
+      "placeOfBirthPlaceholder": "도시 검색, 예: 서울",
+      "placeOfBirthHelper": "검색하여 정확한 출생지를 선택하십시오.",
+      "phoneNumber": "전화 번호",
+      "phoneNumberPlaceholder": "+1234567890",
+      "phoneNumberHelper": "선택적 전화 번호",
+      "gender": "성별",
+      "genderPlaceholder": "성별 선택",
+      "genderOptions": {
+        "male": "남성",
+        "female": "여성",
+        "other": "기타",
+        "notSpecified": "명시하지 않음"
+      },
+      "maritalStatus": "결혼 상태",
+      "maritalStatusPlaceholder": "상태 선택",
+      "maritalOptions": {
+        "single": "미혼",
+        "married": "기혼",
+        "divorced": "이혼",
+        "widowed": "사별",
+        "separated": "별거",
+        "notSpecified": "말하지 않는 것이 좋습니다."
+      },
+      "occupation": "직업",
+      "occupationPlaceholder": "직업 선택",
+      "occupationOptions": {
+        "student": "학생",
+        "business": "사업가",
+        "employed": "피고용인 / 급여생",
+        "homemaker": "가정주부",
+        "retired": "은퇴자",
+        "unemployed": "실업자",
+        "notSpecified": "말하지 않는 것이 좋습니다."
+      },
+      "errors": {
+        "nameTooShort": "이름은 최소 2자 이상이어야 합니다.",
+        "nameTooLong": "이름이 너무 깁니다.",
+        "dobInFuture": "출생 날짜는 미래일 수 없습니다.",
+        "dobInvalid": "유효한 출생 날짜를 입력하십시오.",
+        "pobInvalid": "유효한 장소를 입력하십시오.",
+        "pobTooLong": "장소 이름이 너무 깁니다.",
+        "nameRequired": "이름이 필요합니다.",
+        "dobRequired": "출생 날짜가 필요합니다.",
+        "tobRequired": "출생 시간이 필요합니다.",
+        "pobRequired": "출생지가 필요합니다.",
+        "pobSelectRequired": "검색 결과에서 정확한 출생지를 선택하십시오."
+      }
+    },
+    "onboarding": {
+      "steps": {
+        "name": {
+          "label": "이름",
+          "hint": "출생 증명서상의 이름"
+        },
+        "dob": {
+          "label": "출생 날짜",
+          "hint": "행성 위치(나크샤트라)를 결정합니다."
+        },
+        "tob": {
+          "label": "출생 시간",
+          "hint": "상승점(라그나)과 집의 꼭짓점을 정확히 가리킵니다."
+        },
+        "pob": {
+          "label": "정확한 출생지",
+          "hint": "도시를 검색하고 드롭다운에서 선택하여 정확한 좌표를 얻습니다."
+        }
+      },
+      "mobile": {
+        "complete": "모두 완료되었습니다! 당신의 천체 프로필이 완성되었습니다.",
+        "remaining": "{n}단계{plural} 남음",
+        "completeHint": "저장 및 계속을 누르면 반환됩니다.",
+        "remainingHint": "누르면 필요한 것을 볼 수 있습니다."
+      },
+      "sidebar": {
+        "title": "당신의 천체 정체성 완성",
+        "description": "출생 정보는 모든 우주적 통찰의 기초입니다. 개인화된 운세, 쿤달리 분석, AI 기반 베다 읽기를 잠금 해제합니다.",
+        "checklistLabel": "프로필 체크리스트",
+        "completeMessage": "모두 완료되었습니다! 천체 프로필이 완성되었습니다. 저장 및 계속을 눌러 대시보드로 돌아갑니다.",
+        "progressLabel": "프로필 완성도"
+      }
+    },
+    "preferences": {
+      "language": "선호 언어",
+      "cosmicPreferences": "우주적 선호도",
+      "horoscopeTitle": "일일 운세",
+      "horoscopeDescription": "일일 우주적 통찰을 받으십시오.",
+      "notificationsTitle": "알림",
+      "notificationsDescription": "행성 통과에 대한 경고"
+    },
+    "security": {
+      "pageTitle": "보안 설정",
+      "pageDescription": "암호, 활성 세션 및 계정 데이터를 관리합니다.",
+      "backButton": "프로필로 돌아가기",
+      "changePasswordTitle": "암호 변경",
+      "changePasswordWarning": "암호를 변경하면 이 기기를 포함한 모든 활성 세션에서 자동으로 로그아웃됩니다.",
+      "currentPasswordLabel": "현재 암호",
+      "currentPasswordPlaceholder": "현재 암호 입력",
+      "newPasswordLabel": "새 암호",
+      "newPasswordPlaceholder": "새 암호 입력",
+      "confirmPasswordLabel": "새 암호 확인",
+      "confirmPasswordPlaceholder": "새 암호 확인",
+      "updatePasswordButton": "암호 업데이트",
+      "sessionManagementTitle": "세션 관리",
+      "sessionManagementDescription": "현재 계정이 로그인되어 있는 다른 모든 기기에서 로그아웃합니다. 이 기기는 로그인 상태를 유지합니다.",
+      "logoutAllButton": "다른 모든 기기에서 로그아웃",
+      "dangerZoneTitle": "위험 영역",
+      "dangerZoneDescription": "계정 및 모든 관련 데이터를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.",
+      "deleteAccountButton": "계정 삭제",
+      "deleteAccountModal": {
+        "title": "계정 삭제",
+        "description": "이 작업은 영구적이며 모든 출생 정보, 생성된 운세 및 선호도를 안전하게 삭제합니다. 진행하려면 암호로 확인하십시오.",
+        "passwordPlaceholder": "암호를 입력하여 확인",
+        "cancelButton": "취소",
+        "confirmButton": "영구 삭제"
+      },
+      "logoutConfirmDialog": {
+        "title": "모든 기기에서 로그아웃하시겠습니까?",
+        "message": "다른 모든 기기에서 계정을 로그아웃합니다. 현재 세션은 활성 상태를 유지합니다.",
+        "confirmButton": "다른 것들 로그아웃",
+        "cancelButton": "취소"
+      },
+      "errors": {
+        "passwordMinLength": "새 암호는 최소 10자 이상이어야 합니다.",
+        "passwordMismatch": "새 암호가 일치하지 않습니다.",
+        "passwordRequired": "삭제를 확인하려면 암호를 입력하십시오."
+      },
+      "messages": {
+        "passwordChanged": "암호가 성공적으로 변경되었습니다. 모든 기기에서 로그아웃됩니다.",
+        "logoutAllSuccess": "다른 모든 기기에서 성공적으로 로그아웃되었습니다.",
+        "accountDeleted": "계정이 성공적으로 삭제되었습니다. 안녕히 가세요."
+      }
+    }
+  },
+  "support": {
+    "title": "지원팀에 문의",
+    "description": "도움이 필요하신가요? 지원 시스템이 최고의 지원을 제공하도록 설정되고 있습니다. 긴급한 문제가 있으시면 곧 다시 확인해 주세요!"
   }
 }
