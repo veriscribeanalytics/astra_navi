@@ -502,10 +502,10 @@
         "How can I deepen my emotional connections?"
       ],
       "spiritual_guide": [
-        "What is my soul's purpose in this life?",
-        "Which spiritual practices suit my nature?",
-        "How can I find inner peace right now?",
-        "What past-life karma am I working through?"
+        "What does my birth chart reveal about my overall health?",
+        "When will my physical energy and vitality improve?",
+        "Which planetary alignments are currently affecting my well-being?",
+        "What astrological remedies can support my physical and mental health?"
       ],
       "astro_sage": [
         "Explain my Mahadasha and what it means.",
@@ -524,9 +524,9 @@
       "navi": "What does the cosmos hold for you today?",
       "career_mentor": "Let's talk about your professional journey.",
       "relationship_guide": "What's on your heart?",
-      "spiritual_guide": "Take a deep breath. What's on your mind?",
+      "spiritual_guide": "Let's explore your health, vitality, and physical well-being using the wisdom of Vedic astrology.",
       "astro_sage": "Show me your chart — let's see what the planets reveal.",
-      "finance_mentor": "Let's optimize your financial future using the planets."
+      "finance_mentor": "Let's optimize your financial future and wealth potential using the planets."
     },
     "newConversation": "New conversation",
     "errorSending": "Failed to send message. Please try again.",
@@ -829,24 +829,24 @@
       ],
       "spiritual_guide": [
         {
-          "title": "Soul's Purpose",
-          "description": "What is my reason for being here?",
-          "question": "What is my soul's purpose in this life?"
+          "title": "Overall Health",
+          "description": "What does my chart reveal about my well-being?",
+          "question": "What does my birth chart reveal about my overall health?"
         },
         {
-          "title": "Spiritual Practice",
-          "description": "Which practices fit my nature?",
-          "question": "Which spiritual practices suit my nature?"
+          "title": "Vitality & Energy",
+          "description": "When will my physical energy improve?",
+          "question": "When will my physical energy and vitality improve?"
         },
         {
-          "title": "Inner Peace",
-          "description": "How can I find calm right now?",
-          "question": "How can I find inner peace right now?"
+          "title": "Planetary Alignments",
+          "description": "Which planets affect my well-being currently?",
+          "question": "Which planetary alignments are currently affecting my well-being?"
         },
         {
-          "title": "Past-Life Karma",
-          "description": "What am I here to resolve?",
-          "question": "What past-life karma am I working through?"
+          "title": "Health Remedies",
+          "description": "What remedies support my health?",
+          "question": "What astrological remedies can support my physical and mental health?"
         }
       ],
       "astro_sage": [
@@ -893,6 +893,18 @@
           "question": "How can I enhance my financial stability?"
         }
       ]
+    },
+    "avatars": {
+      "spiritual_guide": {
+        "name": "Anand",
+        "title": "Health Advisor",
+        "description": "Gain insights into your health, vitality, and physical well-being."
+      },
+      "finance_mentor": {
+        "name": "Vidya",
+        "title": "Financial Astrologer",
+        "description": "Optimize your wealth, investments, and financial stability."
+      }
     }
   },
   "healthForecast": {

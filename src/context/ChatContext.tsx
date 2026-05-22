@@ -14,6 +14,15 @@ const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
 const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
 
+const FALLBACK_DEFAULT_MODES: Record<string, "quick" | "normal" | "deep"> = {
+  navi: 'quick',
+  relationship_guide: 'normal',
+  career_mentor: 'normal',
+  finance_mentor: 'normal',
+  spiritual_guide: 'normal',
+  astro_sage: 'deep',
+};
+
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
   try {
@@ -167,7 +176,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallData | null>(null);
-  const [mode, setMode] = useState<"quick" | "normal" | "deep">("normal");
+  const [mode, setModeState] = useState<"quick" | "normal" | "deep">("normal");
+  const [userHasManuallyChangedMode, setUserHasManuallyChangedMode] = useState(false);
+
+  const setMode = useCallback((action: React.SetStateAction<"quick" | "normal" | "deep">) => {
+    setModeState(action);
+    setUserHasManuallyChangedMode(true);
+  }, []);
+
   const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
   const [avatars, setAvatars] = useState<ChatAvatar[]>([]);
   const [isLoadingAvatars, setIsLoadingAvatars] = useState(false);
@@ -182,11 +198,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem(AVATAR_STORAGE_KEY, avatarId);
       } catch {}
     }
-    const avatar = avatars.find(a => a.avatarId === avatarId);
-    if (avatar?.defaultMode) {
-      setMode(avatar.defaultMode);
+    if (!userHasManuallyChangedMode) {
+      const avatar = avatars.find(a => a.avatarId === avatarId);
+      const resolvedMode = avatar?.defaultMode || FALLBACK_DEFAULT_MODES[avatarId] || 'normal';
+      setModeState(resolvedMode);
     }
-  }, [avatars, setMode]);
+  }, [avatars, userHasManuallyChangedMode]);
 
   // Guest State
   const [isGuest, setIsGuest] = useState(false);
@@ -594,9 +611,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setActiveChat(tempChat);
     setActiveChatId(tempId);
+    setUserHasManuallyChangedMode(false);
     if (initialMessage) sendMessage(initialMessage, tempId, pageContextSource);
     return tempId;
-  }, [user, sendMessage, isGuest, t]);
+  }, [user, sendMessage, isGuest, t, setUserHasManuallyChangedMode]);
 
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
@@ -726,7 +744,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveChat(null);
     setActiveChatId(null);
     setPaywall(null);
-  }, []);
+    setUserHasManuallyChangedMode(false);
+  }, [setUserHasManuallyChangedMode]);
 
   const clearPaywall = useCallback(() => {
     setPaywall(null);
@@ -740,19 +759,48 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await clientFetch(`/api/chat/avatars?lang=${encodeURIComponent(lang)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load avatars');
+      
+      const getLocalizedValue = (key: string, fallbackVal: string) => {
+        const val = t(key);
+        return val === key ? fallbackVal : val;
+      };
+
       const list: ChatAvatar[] = Array.isArray(data.avatars) ? data.avatars : [];
-      setAvatars(list);
+      
+      const mappedList = list.map(avatar => {
+        if (avatar.avatarId === 'spiritual_guide') {
+          return {
+            ...avatar,
+            name: getLocalizedValue('chat.avatars.spiritual_guide.name', avatar.name || 'Anand'),
+            title: getLocalizedValue('chat.avatars.spiritual_guide.title', avatar.title || 'Health Guide'),
+            description: getLocalizedValue('chat.avatars.spiritual_guide.description', avatar.description || 'Gain insights into your health and well-being.')
+          };
+        }
+        if (avatar.avatarId === 'finance_mentor') {
+          return {
+            ...avatar,
+            name: getLocalizedValue('chat.avatars.finance_mentor.name', avatar.name || 'Vidya'),
+            title: getLocalizedValue('chat.avatars.finance_mentor.title', avatar.title || 'Finance Guide'),
+            description: getLocalizedValue('chat.avatars.finance_mentor.description', avatar.description || 'Optimize your wealth and financial stability.')
+          };
+        }
+        return avatar;
+      });
+
+      setAvatars(mappedList);
 
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem(AVATAR_STORAGE_KEY);
-        const activeId = (stored && list.some(a => a.avatarId === stored)) ? stored : DEFAULT_AVATAR_ID;
-        if (stored && !list.some(a => a.avatarId === stored)) {
+        const activeId = (stored && mappedList.some(a => a.avatarId === stored)) ? stored : DEFAULT_AVATAR_ID;
+        if (stored && !mappedList.some(a => a.avatarId === stored)) {
           localStorage.removeItem(AVATAR_STORAGE_KEY);
         }
         setSelectedAvatarIdState(activeId);
-        const avatar = list.find(a => a.avatarId === activeId);
-        if (avatar?.defaultMode) {
-          setMode(avatar.defaultMode);
+        
+        if (!userHasManuallyChangedMode) {
+          const avatar = mappedList.find(a => a.avatarId === activeId);
+          const resolvedMode = avatar?.defaultMode || FALLBACK_DEFAULT_MODES[activeId] || 'normal';
+          setModeState(resolvedMode);
         }
       }
     } catch (err) {
@@ -760,7 +808,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingAvatars(false);
     }
-  }, [isGuest, language, setMode]);
+  }, [isGuest, language, t, userHasManuallyChangedMode]);
 
   const editMessage = useCallback(async (messageId: string, newText: string) => {
     if (isGuest || !activeChatId || isSending) return;

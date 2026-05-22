@@ -153,10 +153,10 @@ export const getAvatarQuestions = (avatarId: string, ageBracket: AgeBracket): st
       "How can I deepen my emotional connections?"
     ],
     spiritual_guide: [
-      "What is my soul's purpose in this life?",
-      "Which spiritual practices suit my nature?",
-      "How can I find inner peace right now?",
-      "What past-life karma am I working through?"
+      "What does my birth chart reveal about my overall health?",
+      "When will my physical energy and vitality improve?",
+      "Which planetary alignments are currently affecting my well-being?",
+      "What astrological remedies can support my physical and mental health?"
     ],
     astro_sage: [
       "Explain my Mahadasha and what it means.",

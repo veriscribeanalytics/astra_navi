@@ -28,9 +28,9 @@ const AVATAR_PLACEHOLDERS: Record<string, string[]> = {
     "Type your question about relationships...",
   ],
   spiritual_guide: [
-    "Ask Anand for inner guidance...",
-    "What is your soul asking?",
-    "Type your spiritual question...",
+    "Ask Anand about health...",
+    "What guidance do you seek for your health?",
+    "Type your question about well-being...",
   ],
   astro_sage: [
     "Ask Rishi about your chart...",
