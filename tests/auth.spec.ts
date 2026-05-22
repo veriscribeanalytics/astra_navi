@@ -266,6 +266,30 @@ test.describe('Backend Auth Error Handling & Localization', () => {
     await expect(inlineError).toContainText(/Incorrect password|wrong/i);
   });
 
+  test('shows banner error for server_down when API route returns 500 server down error', async ({ page }) => {
+    await page.route('**/api/login', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'server_down',
+          error: 'Server is down, please contact the developer.'
+        })
+      });
+    });
+
+    await page.goto('/login');
+    await page.waitForTimeout(500);
+    await page.locator('input[type="email"]').first().fill('test@test.com');
+    await page.locator('input[type="password"]').first().fill('password123');
+    await page.getByRole('button', { name: /Sign In/i }).click();
+
+    // Verify error banner is shown with server down message
+    const banner = page.locator('[role="alert"]').first();
+    await expect(banner).toBeVisible({ timeout: 5000 });
+    await expect(banner).toContainText(/server is down/i);
+  });
+
   test('shows lockout banner with timer and redirect for account_locked', async ({ page }) => {
     await page.route('**/api/login', async (route) => {
       await route.fulfill({

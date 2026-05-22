@@ -54,7 +54,8 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error("Login proxy error:", error);
         return NextResponse.json({ 
-            error: "An error occurred. Please try again later." 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
         }, { status: 500 });
     }
 }

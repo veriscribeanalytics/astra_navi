@@ -1225,7 +1225,8 @@
       "password_too_short": "Password is too short.",
       "password_too_long": "Password is too long.",
       "generic": "An unexpected error occurred. Please try again.",
-      "retry_after": "Please try again in {minutes}m {seconds}s."
+      "retry_after": "Please try again in {minutes}m {seconds}s.",
+      "server_down": "Server is down, please contact the developer."
     },
     "resetPassword": {
       "title": "Create New Password",

@@ -1225,7 +1225,8 @@
       "password_too_short": "비밀번호가 너무 짧습니다.",
       "password_too_long": "비밀번호가 너무 깁니다.",
       "generic": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
-      "retry_after": "{minutes}분 {seconds}초 후에 다시 시도해 주세요."
+      "retry_after": "{minutes}분 {seconds}초 후에 다시 시도해 주세요.",
+      "server_down": "서버가 다운되었습니다. 개발자에게 문의해 주세요."
     },
     "resetPassword": {
       "title": "새 비밀번호 생성",

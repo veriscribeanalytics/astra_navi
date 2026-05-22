@@ -114,6 +114,9 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("Registration error:", error);
-        return NextResponse.json({ error: "Registration failed. Please try again later." }, { status: 500 });
+        return NextResponse.json({ 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
+        }, { status: 500 });
     }
 }

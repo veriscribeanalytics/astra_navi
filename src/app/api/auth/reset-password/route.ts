@@ -20,6 +20,9 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("Reset password error:", error);
-        return NextResponse.json({ error: "Failed to reset password. Please try again later." }, { status: 500 });
+        return NextResponse.json({ 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
+        }, { status: 500 });
     }
 }
