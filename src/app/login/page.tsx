@@ -19,6 +19,7 @@ import {
   RegisterFlow,
 } from '@/components/auth';
 import { isProfileComplete } from '@/lib/profileCompleteness';
+import { ParsedAuthError, parseAuthError } from '@/utils/authErrorParser';
 
 const LoginContent = () => {
   const router = useRouter();
@@ -120,33 +121,45 @@ const LoginContent = () => {
 
   // --- Sign In handler ---
   const handleSignIn = async (formData: { email: string; password: string }) => {
-    const result = await signIn('credentials', {
-      redirect: false,
-      email: formData.email,
-      password: formData.password,
-    });
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
 
-    if (result?.error) {
-      if (result.error.toLowerCase().includes('locked')) {
-        const lockoutEnd = Date.now() + 15 * 60 * 1000;
-        setLockedUntil(lockoutEnd);
-        setLockedRemaining(15 * 60);
-        showError('Account locked due to too many failed attempts.');
-        return { error: 'Account locked. Try again later.' };
+      const data = await res.json();
+
+      if (!res.ok) {
+        const parsedError = parseAuthError(data);
+        if (parsedError.code === 'account_locked' || (parsedError.message && parsedError.message.toLowerCase().includes('locked'))) {
+          const seconds = parsedError.retryAfterSeconds || 15 * 60;
+          const lockoutEnd = Date.now() + seconds * 1000;
+          setLockedUntil(lockoutEnd);
+          setLockedRemaining(seconds);
+        }
+        return { parsedError };
       }
-      const msg =
-        result.error === 'CredentialsSignin'
-          ? t('login.invalidCredentials')
-          : result.error === 'Configuration'
-            ? t('login.networkError')
-            : result.error;
-      return { error: msg };
-    }
 
-    showLoading(t('login.signingYouIn'), 1500);
-    setTimeout(() => {
-      router.push(getCallbackUrl());
-    }, 1500);
+      // If credentials check succeeded, proceed with NextAuth signIn to establish the session.
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result?.error) {
+        return { parsedError: parseAuthError(result.error) };
+      }
+
+      showLoading(t('login.signingYouIn'), 1500);
+      setTimeout(() => {
+        router.push(getCallbackUrl());
+      }, 1500);
+
+    } catch (err: unknown) {
+      return { parsedError: parseAuthError(err) };
+    }
   };
 
   // --- Register handler ---
@@ -157,63 +170,79 @@ const LoginContent = () => {
     birthLatitude: number | undefined; birthLongitude: number | undefined;
     birthTimezoneName: string; language: string;
     preferences: { horoscope: boolean; notifications: boolean };
-  }) => {
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(submitData),
-    });
+  }): Promise<{ ok: boolean; data: Record<string, unknown>; parsedError?: ParsedAuthError | null }> => {
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      const errorMsg = data.error || data.detail || t('login.registrationFailed');
-      const msg = typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg);
-      throw new Error(msg);
-    }
-
-    success(t('login.accountCreated'));
-
-    // Save preferences if different from defaults
-    if (submitData.preferences) {
-      try {
-        await fetch('/api/user/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${data.accessToken}`,
-          },
-          body: JSON.stringify({ preferences: submitData.preferences }),
-        });
-      } catch {
-        // non-critical — preference save is best-effort
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, data: {}, parsedError: parseAuthError(data) };
       }
+
+      success(t('login.accountCreated'));
+
+      // Save preferences if different from defaults
+      if (submitData.preferences) {
+        try {
+          await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${data.accessToken}`,
+            },
+            body: JSON.stringify({ preferences: submitData.preferences }),
+          });
+        } catch {
+          // non-critical — preference save is best-effort
+        }
+      }
+
+      // Auto-login after registration
+      const result = await signIn('credentials', {
+        redirect: false,
+        isRegistration: 'true',
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresIn: data.expiresIn,
+      });
+
+      if (result?.error) {
+        return { ok: false, data: {}, parsedError: parseAuthError(result.error) };
+      }
+
+      const { password: _password, ...profileData } = submitData;
+      setAuthUser(data.user.email, {
+        ...profileData,
+        id: data.user.id,
+        name: data.user.name || submitData.name,
+      });
+
+      showLoading(t('login.signingYouIn'), 1500);
+      setTimeout(() => {
+        router.push(data.profileComplete || isProfileComplete(submitData) ? '/?login=success' : '/profile?onboarding=true');
+      }, 1500);
+
+      return { ok: true, data: data || {} };
+    } catch (err: unknown) {
+      return { ok: false, data: {}, parsedError: parseAuthError(err) };
     }
+  };
 
-    // Auto-login after registration
-    const result = await signIn('credentials', {
-      redirect: false,
-      isRegistration: 'true',
-      id: data.user.id,
-      email: data.user.email,
-      name: data.user.name,
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
-      expiresIn: data.expiresIn,
-    });
-
-    if (result?.error) throw new Error(result.error);
-
-    const { password: _password, ...profileData } = submitData;
-    setAuthUser(data.user.email, {
-      ...profileData,
-      id: data.user.id,
-      name: data.user.name || submitData.name,
-    });
-
-    showLoading(t('login.signingYouIn'), 1500);
-    setTimeout(() => {
-      router.push(data.profileComplete || isProfileComplete(submitData) ? '/?login=success' : '/profile?onboarding=true');
-    }, 1500);
+  const handleActionClick = (action: string) => {
+    if (action === 'register') {
+      setIsRegister(true);
+    } else if (action === 'login') {
+      setIsRegister(false);
+    } else if (action === 'reset_password') {
+      router.push('/forgot-password');
+    }
   };
 
   const [quoteIndex, setQuoteIndex] = useState(0);
@@ -307,56 +336,57 @@ const LoginContent = () => {
           </div>
 
           {/* Form body */}
-          <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col justify-center">
-            {/* Header */}
-            <div className="px-4 sm:px-6 pb-6 shrink-0">
-              <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5 text-center">
-                {isRegister ? t('login.stepAccount') || 'Create Your Account' : t('login.signIn')}
-              </h1>
-              <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium text-center">
-                {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
-              </p>
+          <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col">
+            <div className="m-auto w-full">
+              {/* Header */}
+              <div className="px-4 sm:px-6 pb-6 shrink-0">
+                <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5 text-center">
+                  {isRegister ? t('login.stepAccount') || 'Create Your Account' : t('login.signIn')}
+                </h1>
+                <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium text-center">
+                  {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
+                </p>
+              </div>
+
+              <AuthFormCard>
+                {!isRegister ? (
+                  <SignInForm
+                    onSubmit={handleSignIn}
+                    disabled={!!lockedUntil}
+                    disabledReason={lockedDisplay}
+                    onForgotPassword={() => router.push('/forgot-password')}
+                    onActionClick={handleActionClick}
+                  />
+                ) : (
+                  <RegisterFlow
+                    onSubmit={handleRegister}
+                    onActionClick={handleActionClick}
+                  />
+                )}
+
+                <div className="flex items-center gap-4 py-3">
+                  <div className="h-[1px] flex-1 bg-outline-variant/10" />
+                  <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
+                    {t('login.secureConnection')}
+                  </span>
+                  <div className="h-[1px] flex-1 bg-outline-variant/10" />
+                </div>
+
+                <div className="text-center pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsRegister(!isRegister)}
+                    className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
+                  >
+                    {isRegister ? (
+                      <>{t('login.alreadyHaveAccount')} <span className="text-secondary ml-1">{t('login.signIn')}</span></>
+                    ) : (
+                      <>{t('login.dontHaveAccount')} <span className="text-secondary ml-1">{t('login.createAccount')}</span></>
+                    )}
+                  </button>
+                </div>
+              </AuthFormCard>
             </div>
-
-            <AuthFormCard>
-              {!isRegister ? (
-                <SignInForm
-                  onSubmit={handleSignIn}
-                  disabled={!!lockedUntil}
-                  disabledReason={lockedDisplay}
-                  onForgotPassword={() => router.push('/forgot-password')}
-                />
-              ) : (
-                <RegisterFlow
-                  onSubmit={async (data) => {
-                    await handleRegister(data);
-                    return { ok: true, data: {} };
-                  }}
-                />
-              )}
-
-              <div className="flex items-center gap-4 py-3">
-                <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
-                  {t('login.secureConnection')}
-                </span>
-                <div className="h-[1px] flex-1 bg-outline-variant/10" />
-              </div>
-
-              <div className="text-center pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsRegister(!isRegister)}
-                  className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
-                >
-                  {isRegister ? (
-                    <>{t('login.alreadyHaveAccount')} <span className="text-secondary ml-1">{t('login.signIn')}</span></>
-                  ) : (
-                    <>{t('login.dontHaveAccount')} <span className="text-secondary ml-1">{t('login.createAccount')}</span></>
-                  )}
-                </button>
-              </div>
-            </AuthFormCard>
           </div>
         </div>
 

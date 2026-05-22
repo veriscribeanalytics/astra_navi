@@ -749,6 +749,118 @@
     },
     "messages": {
       "scrollToLatest": "최신 메시지로 스크롤"
+    },
+    "starterCards": {
+      "navi": [
+        {
+          "title": "오늘의 에너지",
+          "description": "오늘의 행성 배치가 저에게 무엇을 의미하나요?",
+          "question": "오늘의 행성 배치가 저에게 무엇을 의미하나요?"
+        },
+        {
+          "title": "커리어 타이밍",
+          "description": "이번 달에는 어떤 업무 영역에 집중해야 할까요?",
+          "question": "이번 달에는 어떤 업무 영역에 집중해야 할까요?"
+        },
+        {
+          "title": "인생의 교훈",
+          "description": "현재 제 인생의 교훈이나 영혼의 성장은 무엇인가요?",
+          "question": "현재 제 인생의 교훈은 무엇인가요?"
+        },
+        {
+          "title": "인간관계",
+          "description": "지금 사랑에 대해 제가 이해해야 할 것은 무엇인가요?",
+          "question": "지금 사랑에 대해 제가 이해해야 할 것은 무엇인가요?"
+        }
+      ],
+      "career_mentor": [
+        {
+          "title": "커리어 방향",
+          "description": "제 차트에 가장 잘 맞는 방향은 어디인가요?",
+          "question": "제 차트에 어떤 커리어 방향이 맞을까요?"
+        },
+        {
+          "title": "승진 타이밍",
+          "description": "승진을 요청하기에 좋은 시기는 언제인가요?",
+          "question": "승진을 요청하기에 좋은 시기는 언제인가요?"
+        },
+        {
+          "title": "숨겨진 강점",
+          "description": "제가 간과하고 있는 전문적인 재능은 무엇인가요?",
+          "question": "제가 간과하고 있는 전문적인 재능은 무엇인가요?"
+        },
+        {
+          "title": "성공 전망",
+          "description": "현재 분야에서 성공을 거둘 수 있을까요?",
+          "question": "현재 분야에서 성공을 거둘 수 있을까요?"
+        }
+      ],
+      "relationship_guide": [
+        {
+          "title": "파트너와의 만남",
+          "description": "평생의 동반자를 언제 만날 수 있을까요?",
+          "question": "평생의 동반자를 언제 만날 수 있을까요?"
+        },
+        {
+          "title": "궁합",
+          "description": "현재 관계가 제 차트와 잘 맞을까요?",
+          "question": "현재 관계가 궁합이 맞을까요?"
+        },
+        {
+          "title": "반복되는 패턴",
+          "description": "관계에서 자꾸 반복되는 문제는 무엇인가요?",
+          "question": "관계에서 반복되는 문제들은 무엇인가요?"
+        },
+        {
+          "title": "깊은 유대감",
+          "description": "감정적인 유대를 어떻게 더 깊게 만들 수 있을까요?",
+          "question": "감정적인 유대를 어떻게 더 깊게 만들 수 있을까요?"
+        }
+      ],
+      "spiritual_guide": [
+        {
+          "title": "영혼의 목적",
+          "description": "제가 여기에 존재하는 이유는 무엇인가요?",
+          "question": "이번 생에서 제 영혼의 목적은 무엇인가요?"
+        },
+        {
+          "title": "영적 수행",
+          "description": "제 성향에 맞는 영적 수행은 무엇인가요?",
+          "question": "제 성향에 맞는 영적 수행은 무엇인가요?"
+        },
+        {
+          "title": "내면의 평화",
+          "description": "지금 당장 내면의 평화를 어떻게 찾을 수 있을까요?",
+          "question": "지금 당장 내면의 평화를 어떻게 찾을 수 있을까요?"
+        },
+        {
+          "title": "전생의 카르마",
+          "description": "여기서 무엇을 해결해야 하나요?",
+          "question": "제가 겪고 있는 전생의 카르마는 무엇인가요?"
+        }
+      ],
+      "astro_sage": [
+        {
+          "title": "마하다샤",
+          "description": "저는 현재 어떤 행성 주기(대운)에 있나요?",
+          "question": "제 마하다샤(대운)에 대해 설명해주세요."
+        },
+        {
+          "title": "나의 라그나",
+          "description": "나의 상승궁(라그나)은 나에 대해 무엇을 보여주나요?",
+          "question": "나의 상승궁(라그나)은 나에 대해 무엇을 보여주나요?"
+        },
+        {
+          "title": "행성 각도",
+          "description": "주요 행성 각도(아스펙트)에 대해 설명해주세요.",
+          "question": "주요 행성 각도(아스펙트)에 대해 설명해주세요."
+        },
+        {
+          "title": "차트의 요가",
+          "description": "제 차트에는 어떤 행성 결합(요가)이 있나요?",
+          "question": "제 차트에는 어떤 행성 결합(요가)이 있나요?"
+        }
+      ]
     }
   },
   "healthForecast": {
@@ -1091,6 +1203,41 @@
     },
     "errorBanner": {
       "dismiss": "오류 닫기"
+    },
+    "errors": {
+      "email_not_registered": "등록되지 않은 이메일 주소입니다.",
+      "wrong_password": "잘못된 비밀번호입니다. 다시 시도해 주세요.",
+      "account_locked": "비밀번호 오류 횟수 초과로 계정이 잠겼습니다.",
+      "email_already_registered": "이미 등록된 이메일 주소입니다.",
+      "registration_failed": "회원가입에 실패했습니다. 다시 시도해 주세요.",
+      "token_invalid": "유효하지 않은 인증 토큰입니다.",
+      "token_expired": "만료된 인증 토큰입니다.",
+      "token_reuse_detected": "보안 경고: 세션 토큰 재사용이 감지되었습니다.",
+      "password_reset_unavailable": "현재 비밀번호 재설정을 사용할 수 없습니다.",
+      "reset_token_invalid": "비밀번호 재설정 링크가 유효하지 않거나 만료되었습니다.",
+      "user_not_found": "이 이메일 주소로 등록된 계정을 찾을 수 없습니다.",
+      "incorrect_password": "잘못된 비밀번호입니다. 다시 시도해 주세요.",
+      "rate_limited": "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+      "invalid_email": "유효한 이메일 주소를 입력해 주세요.",
+      "missing_email": "이메일 주소를 입력해야 합니다.",
+      "missing_password": "비밀번호를 입력해야 합니다.",
+      "weak_password": "비밀번호가 너무 취약합니다.",
+      "password_too_short": "비밀번호가 너무 짧습니다.",
+      "password_too_long": "비밀번호가 너무 깁니다.",
+      "generic": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+      "retry_after": "{minutes}분 {seconds}초 후에 다시 시도해 주세요."
+    },
+    "resetPassword": {
+      "title": "새 비밀번호 생성",
+      "subtitle": "아래에 새 비밀번호를 입력해 주세요.",
+      "newPasswordLabel": "새 비밀번호",
+      "newPasswordPlaceholder": "새 비밀번호 입력",
+      "confirmPasswordLabel": "비밀번호 확인",
+      "confirmPasswordPlaceholder": "새 비밀번호 재입력",
+      "submit": "비밀번호 재설정",
+      "successTitle": "비밀번호 재설정 완료",
+      "successSubtitle": "비밀번호가 성공적으로 재설정되었습니다.",
+      "proceedToLogin": "로그인으로 이동"
     }
   },
   "home": {

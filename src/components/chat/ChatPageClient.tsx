@@ -40,11 +40,11 @@ const ChatPageClient: React.FC = () => {
     paywall, clearPaywall, selectedAvatarId, avatars
     } = useChat();
 
-  useAvatarTheme(selectedAvatarId);
-
   const currentAvatar = useMemo(() => {
     return avatars.find(a => a.avatarId === selectedAvatarId);
   }, [avatars, selectedAvatarId]);
+
+  useAvatarTheme(selectedAvatarId, currentAvatar);
 
   const imgSrc = getAvatarImage(selectedAvatarId);
 
@@ -94,7 +94,7 @@ const ChatPageClient: React.FC = () => {
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [createNewChat]);
 
-  const starterCards = useMemo(() => getAvatarStarterCards(selectedAvatarId), [selectedAvatarId]);
+  const starterCards = useMemo(() => getAvatarStarterCards(selectedAvatarId, t), [selectedAvatarId, t]);
 
   // Map transit-driven suggestions onto the card layout when present (keeps freshness without losing the new UI).
   const heroCards = useMemo(() => {

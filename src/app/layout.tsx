@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { ALL_FONT_VARIABLES } from "@/lib/fonts";
 import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
+import AskNaviFab from "@/components/layout/AskNaviFab";
 import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
 import SkipLink from "@/components/layout/SkipLink";
 import { AuthProvider } from "@/context/AuthContext";
@@ -68,6 +69,7 @@ export default async function RootLayout({
                       {children}
                     </main>
                     <ConditionalFooter />
+                    <AskNaviFab />
                   </ThemeProvider>
                   </PaywallProvider>
                 </ChatProvider>

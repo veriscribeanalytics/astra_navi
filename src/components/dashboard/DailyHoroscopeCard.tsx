@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -238,7 +238,7 @@ export default function DailyHoroscopeCard({
         }
     }, [loading, horoscope, userLoading]);
 
-    // ΓöÇΓöÇΓöÇ Score Color Logic ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // --- Score Color Logic ----------------------------------------------------
     const getScoreStyle = useCallback((s: number) => {
         if (s >= 85) return { color: 'text-green-600', bg: 'bg-green-600/10', hex: '#16a34a', label: t('horoscope.excellent') };
         if (s >= 70) return { color: 'text-green-400', bg: 'bg-green-400/10', hex: '#4ade80', label: t('horoscope.good') };
@@ -312,14 +312,14 @@ export default function DailyHoroscopeCard({
     };
 
     const fmtDate = (ds: string) => {
-        if (!ds) return 'ΓÇö';
+        if (!ds) return '—';
         const d = new Date(ds.includes('T') ? ds : ds + 'T00:00:00');
-        return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+        return isNaN(d.getTime()) ? '—' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
     };
     const fmtDay = (ds: string) => {
-        if (!ds) return 'ΓÇö';
+        if (!ds) return '—';
         const d = new Date(ds.includes('T') ? ds : ds + 'T00:00:00');
-        return isNaN(d.getTime()) ? 'ΓÇö' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { weekday: 'short' });
+        return isNaN(d.getTime()) ? '—' : d.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-IN', { weekday: 'short' });
     };
 
     if (profileLocationRequired && !horoscope) return (
@@ -367,7 +367,7 @@ export default function DailyHoroscopeCard({
                         <div className={`${highlightMetric.iconBg} border-b border-white/5 px-6 py-2 flex items-center gap-2.5`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${highlightMetric.iconColor} animate-pulse`} />
                             <span className={`text-[10px] font-bold ${highlightMetric.scoreColor} uppercase tracking-[0.2em]`}>
-                                Γ¡É {t('horoscope.todaysHighlight')}: {t('horoscope.todaysHighlightMsg').replace('{label}', highlightMetric.label).replace('{score}', String(highlightMetric.score))}
+                                ⭐ {t('horoscope.todaysHighlight')}: {t('horoscope.todaysHighlightMsg').replace('{label}', highlightMetric.label).replace('{score}', String(highlightMetric.score))}
                             </span>
                         </div>
                     )}
@@ -488,8 +488,8 @@ export default function DailyHoroscopeCard({
                             <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-4 border-t border-white/5">
                                 {[
                                     { l: t('horoscope.mood'), v: (typeof horoscope?.mood === 'object' ? horoscope.mood?.value : horoscope?.mood) || 'Neutral' }, 
-                                    { l: t('horoscope.luckyColor'), v: (horoscope?.lucky?.color || horoscope?.lucky_color) ?? 'ΓÇö', dot: luckyColorHex }, 
-                                    { l: t('horoscope.luckyNumber'), v: String((horoscope?.lucky?.number || horoscope?.lucky_number) ?? 'ΓÇö') }, 
+                                    { l: t('horoscope.luckyColor'), v: (horoscope?.lucky?.color || horoscope?.lucky_color) ?? '—', dot: luckyColorHex }, 
+                                    { l: t('horoscope.luckyNumber'), v: String((horoscope?.lucky?.number || horoscope?.lucky_number) ?? '—') }, 
                                     ...(horoscope?.planetary?.dominant_planet || horoscope?.dominant_planet ? [{ l: t('horoscope.dominant'), v: horoscope?.planetary?.dominant_planet || horoscope?.dominant_planet, sec: true }] : [])
                                 ].map((s, i) => (
                                     <button 

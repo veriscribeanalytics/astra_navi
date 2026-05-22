@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.detail || "Registration failed. Please try again." }, { status: response.status });
+            return NextResponse.json(data, { status: response.status });
         }
 
         let user = normalizeProfileUser({

@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import AuthErrorBanner from './AuthErrorBanner';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/hooks';
+import { ParsedAuthError, parseAuthError, getLocalizedErrorMessage } from '@/utils/authErrorParser';
 
 interface SignInFormData {
   email: string;
@@ -15,13 +16,15 @@ interface SignInFormData {
 
 interface SignInFormProps {
   /** Called when user clicks submit. Should call signIn('credentials', ...). */
-  onSubmit: (data: SignInFormData) => Promise<{ error?: string } | void>;
+  onSubmit: (data: SignInFormData) => Promise<{ error?: string; parsedError?: ParsedAuthError | null } | void>;
   /** Whether the form should be disabled (e.g. account locked). */
   disabled?: boolean;
   /** Disabled reason shown on the submit button. */
   disabledReason?: string;
   /** Called when "Forgot Password?" is clicked. */
   onForgotPassword: () => void;
+  /** Callback for context-aware CTA redirects. */
+  onActionClick?: (action: string) => void;
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({
@@ -29,6 +32,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   disabled = false,
   disabledReason,
   onForgotPassword,
+  onActionClick,
 }) => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -36,7 +40,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
-  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [bannerError, setBannerError] = useState<ParsedAuthError | null>(null);
 
   const validate = (): boolean => {
     const errors: { email?: string; password?: string } = {};
@@ -50,14 +54,22 @@ const SignInForm: React.FC<SignInFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBannerError(null);
+    setFieldErrors({});
 
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
       const result = await onSubmit({ email: email.trim(), password });
-      if (result && result.error) {
-        setBannerError(result.error);
+      if (result && (result.error || result.parsedError)) {
+        const parsed = result.parsedError || parseAuthError(result.error);
+        if (parsed.field === 'email') {
+          setFieldErrors({ email: getLocalizedErrorMessage(parsed, t) });
+        } else if (parsed.field === 'password') {
+          setFieldErrors({ password: getLocalizedErrorMessage(parsed, t) });
+        } else {
+          setBannerError(parsed);
+        }
       }
     } finally {
       setIsSubmitting(false);
@@ -66,10 +78,16 @@ const SignInForm: React.FC<SignInFormProps> = ({
 
   const isSubmitDisabled = disabled || isSubmitting || !email.trim() || !password.trim();
 
+  console.log('[SignInForm] Render:', { email, password, disabled, isSubmitting, isSubmitDisabled });
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {bannerError && (
-        <AuthErrorBanner message={bannerError} onDismiss={() => setBannerError(null)} />
+        <AuthErrorBanner
+          parsedError={bannerError}
+          onDismiss={() => setBannerError(null)}
+          onActionClick={onActionClick}
+        />
       )}
 
       <Input
@@ -79,6 +97,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
         icon={<Mail size={16} className="text-secondary" />}
         value={email}
         onChange={(e) => {
+          console.log('[SignInForm] Email onChange:', e.target.value);
           setEmail(e.target.value);
           if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: undefined }));
         }}
@@ -96,6 +115,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
           icon={<Lock size={16} className="text-secondary" />}
           value={password}
           onChange={(e) => {
+            console.log('[SignInForm] Password onChange:', e.target.value);
             setPassword(e.target.value);
             if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
           }}

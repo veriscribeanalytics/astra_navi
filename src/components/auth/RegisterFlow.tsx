@@ -36,11 +36,15 @@ export interface RegisterData {
   confirmPassword?: string; // only used for validation, not sent
 }
 
+import { ParsedAuthError, parseAuthError, getLocalizedErrorMessage } from '@/utils/authErrorParser';
+
 interface RegisterFlowProps {
   /** Called when registration completes. Receives the data ready to POST to /api/register. */
-  onSubmit: (data: Omit<RegisterData, 'confirmPassword'>) => Promise<{ ok: boolean; data: Record<string, unknown> } | void>;
+  onSubmit: (data: Omit<RegisterData, 'confirmPassword'>) => Promise<{ ok: boolean; data: Record<string, unknown>; error?: string; parsedError?: ParsedAuthError | null } | void>;
   /** Whether the whole form should be disabled. */
   disabled?: boolean;
+  /** Callback for context-aware CTA redirects. */
+  onActionClick?: (action: string) => void;
 }
 
 const minLengthOk = (p: string) => p.length >= 10;
@@ -49,7 +53,7 @@ const hasLower = (p: string) => /[a-z]/.test(p);
 const hasDigit = (p: string) => /[0-9]/.test(p);
 const hasSpecial = (p: string) => /[^A-Za-z0-9]/.test(p);
 
-const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false }) => {
+const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false, onActionClick }) => {
   const { t, language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<RegisterData>({
@@ -62,7 +66,8 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
   });
   const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [stepError, setStepError] = useState<string | null>(null);
+  const [stepError, setStepError] = useState<ParsedAuthError | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Dynamic step labels
   const stepLabels = useMemo(() => [
@@ -110,29 +115,75 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
   const handleContinue = () => {
     const error = validateStep();
     if (error) {
-      setStepError(error);
+      setStepError(parseAuthError({ message: error }));
       return;
     }
     setStepError(null);
+    setFieldErrors({});
     setStep((s) => s + 1);
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setStepError(null);
+    setFieldErrors({});
     try {
       const { confirmPassword: _confirmPassword, ...submitData } = data;
-      await onSubmit(submitData);
+      const res = await onSubmit(submitData);
+      if (res && (res.error || res.parsedError)) {
+        const parsed = res.parsedError || parseAuthError(res.error);
+        if (parsed.field) {
+          if (parsed.field === 'email' || parsed.field === 'password') {
+            setStep(0);
+            setFieldErrors({ [parsed.field]: getLocalizedErrorMessage(parsed, t) });
+          } else if (parsed.field === 'name') {
+            setStep(1);
+            setFieldErrors({ name: getLocalizedErrorMessage(parsed, t) });
+          } else if (parsed.field === 'dob' || parsed.field === 'tob' || parsed.field === 'pob') {
+            setStep(2);
+            setFieldErrors({ [parsed.field]: getLocalizedErrorMessage(parsed, t) });
+          } else {
+            setStepError(parsed);
+          }
+        } else {
+          setStepError(parsed);
+        }
+      }
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : t('auth.register.validation.failed');
-      setStepError(message);
+      const parsed = parseAuthError(err);
+      if (parsed.field) {
+        if (parsed.field === 'email' || parsed.field === 'password') {
+          setStep(0);
+          setFieldErrors({ [parsed.field]: getLocalizedErrorMessage(parsed, t) });
+        } else if (parsed.field === 'name') {
+          setStep(1);
+          setFieldErrors({ name: getLocalizedErrorMessage(parsed, t) });
+        } else if (parsed.field === 'dob' || parsed.field === 'tob' || parsed.field === 'pob') {
+          setStep(2);
+          setFieldErrors({ [parsed.field]: getLocalizedErrorMessage(parsed, t) });
+        } else {
+          setStepError(parsed);
+        }
+      } else {
+        setStepError(parsed);
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const update = (field: Partial<RegisterData>) => setData((p) => ({ ...p, ...field }));
+  const update = (field: Partial<RegisterData>) => {
+    setData((p) => ({ ...p, ...field }));
+    // Clear field-level error when user starts typing/editing
+    const fieldKey = Object.keys(field)[0];
+    if (fieldKey && fieldErrors[fieldKey]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[fieldKey];
+        return copy;
+      });
+    }
+  };
 
   const passwordReqs = useMemo(() => [
     { met: minLengthOk(data.password), label: t('auth.register.reqs.length') },
@@ -145,7 +196,11 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
   return (
     <div className="space-y-4">
       {stepError && (
-        <AuthErrorBanner message={stepError} onDismiss={() => setStepError(null)} />
+        <AuthErrorBanner
+          parsedError={stepError}
+          onDismiss={() => setStepError(null)}
+          onActionClick={onActionClick}
+        />
       )}
 
       <RegisterStepIndicator currentStep={step} steps={stepLabels} />
@@ -168,6 +223,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 icon={<Mail size={14} className="text-secondary" />}
                 value={data.email}
                 onChange={(e) => update({ email: e.target.value })}
+                error={fieldErrors.email}
                 autoComplete="email"
                 required
               />
@@ -177,6 +233,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 icon={<Lock size={14} className="text-secondary" />}
                 value={data.password}
                 onChange={(e) => update({ password: e.target.value })}
+                error={fieldErrors.password}
                 autoComplete="new-password"
                 required
               />
@@ -217,6 +274,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 icon={<UserIcon size={14} className="text-secondary" />}
                 value={data.name}
                 onChange={(e) => update({ name: e.target.value })}
+                error={fieldErrors.name}
                 autoComplete="name"
               />
               <div className="grid grid-cols-2 gap-3">
@@ -280,6 +338,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 icon={<Phone size={14} className="text-secondary" />}
                 value={data.phoneNumber}
                 onChange={(e) => update({ phoneNumber: e.target.value })}
+                error={fieldErrors.phoneNumber}
                 autoComplete="tel"
               />
             </>
@@ -294,6 +353,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 icon={<Calendar size={14} className="text-secondary" />}
                 value={data.dob}
                 onChange={(e) => update({ dob: e.target.value })}
+                error={fieldErrors.dob}
               />
               <Input
                 label={t('auth.register.tobLabel')}
@@ -301,6 +361,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                 icon={<Clock size={14} className="text-secondary" />}
                 value={data.tob}
                 onChange={(e) => update({ tob: e.target.value })}
+                error={fieldErrors.tob}
               />
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 block ml-1">
@@ -332,6 +393,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                     }
                   }}
                   confirmedLocation={selectedLocation}
+                  error={fieldErrors.pob}
                   helperText={t('auth.register.pobHelperText')}
                 />
               </div>

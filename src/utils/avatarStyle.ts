@@ -6,8 +6,8 @@ const AVATAR_ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   navi: Sparkles,
   career_mentor: Briefcase,
   relationship_guide: Heart,
-  spiritual_guide: Star,
-  astro_sage: Sparkles,
+  spiritual_guide: Flower,
+  astro_sage: Telescope,
 };
 
 /** Maps the backend's `iconKey` (e.g. "sparkles", "briefcase") to a lucide icon.
@@ -26,8 +26,8 @@ const AVATAR_ACCENT_MAP: Record<string, string> = {
   navi: 'text-secondary bg-secondary/10 border-secondary/30',
   career_mentor: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
   relationship_guide: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
-  spiritual_guide: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
-  astro_sage: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+  spiritual_guide: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+  astro_sage: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
 };
 
 const AVATAR_IMAGE_MAP: Record<string, string> = {
@@ -86,8 +86,8 @@ const AVATAR_THEME_MAP: Record<string, AvatarTheme> = {
   navi:                { secondary: '#06b6d4', glowColor: 'rgba(6,182,212,0.35)',   flareGold: '#67e8f9' },
   career_mentor:       { secondary: '#3b82f6', glowColor: 'rgba(59,130,246,0.35)',  flareGold: '#93c5fd' },
   relationship_guide:  { secondary: '#f43f5e', glowColor: 'rgba(244,63,94,0.35)',   flareGold: '#fda4af' },
-  spiritual_guide:     { secondary: '#8b5cf6', glowColor: 'rgba(139,92,246,0.35)',  flareGold: '#c4b5fd' },
-  astro_sage:          { secondary: '#d97706', glowColor: 'rgba(217,119,6,0.35)',   flareGold: '#fcd34d' },
+  spiritual_guide:     { secondary: '#d97706', glowColor: 'rgba(217,119,6,0.35)',   flareGold: '#fcd34d' },
+  astro_sage:          { secondary: '#8b5cf6', glowColor: 'rgba(139,92,246,0.35)',  flareGold: '#c4b5fd' },
 };
 
 export const getAvatarTheme = (

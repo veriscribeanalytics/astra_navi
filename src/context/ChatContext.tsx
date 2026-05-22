@@ -809,13 +809,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  // Load initial chats
   useEffect(() => {
     if (!initialLoadDone.current && user?.email && !isGuest) {
       initialLoadDone.current = true;
       loadChats();
+    }
+  }, [user?.email, loadChats, isGuest]);
+
+  // Load avatars initially and when language or auth state changes
+  useEffect(() => {
+    if (user?.email && !isGuest) {
       loadAvatars();
     }
-  }, [user?.email, loadChats, loadAvatars, isGuest]);
+  }, [user?.email, loadAvatars, isGuest]);
 
   return (
     <ChatContext.Provider value={{

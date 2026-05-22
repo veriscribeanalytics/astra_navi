@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { useRouter } from 'next/navigation';
-import { Info, History, X, Settings, ArrowLeft } from 'lucide-react';
+import { Info, History, X, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks';
 import AvatarPicker, { type AvatarPickerHandle } from './AvatarPicker';
 
@@ -63,13 +63,7 @@ const ChatHeader: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => pickerRef.current?.toggle()}
-            className="chat-header-btn text-foreground/40 hover:text-secondary transition-colors rounded-lg"
-            aria-label={t('chat.avatarPicker.chooseGuide')}
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+
           <button
             onClick={() => setIsRightPanelOpen(true)}
             className="chat-header-btn text-foreground/40 hover:text-secondary transition-colors rounded-lg"

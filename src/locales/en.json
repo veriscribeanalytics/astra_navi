@@ -749,6 +749,118 @@
     },
     "messages": {
       "scrollToLatest": "Scroll to latest message"
+    },
+    "starterCards": {
+      "navi": [
+        {
+          "title": "Today's Energy",
+          "description": "What does today's planetary alignment mean for me?",
+          "question": "What does today's planetary alignment mean for me?"
+        },
+        {
+          "title": "Career Timing",
+          "description": "Which area of work should I focus on this month?",
+          "question": "Which area of work should I focus on this month?"
+        },
+        {
+          "title": "Life Lesson",
+          "description": "What is my current life lesson or soul growth?",
+          "question": "What is my current life lesson?"
+        },
+        {
+          "title": "Relationships",
+          "description": "What should I understand about love right now?",
+          "question": "What should I understand about love right now?"
+        }
+      ],
+      "career_mentor": [
+        {
+          "title": "Career Path",
+          "description": "Which direction best aligns with my chart?",
+          "question": "What career path aligns with my chart?"
+        },
+        {
+          "title": "Promotion Timing",
+          "description": "When is a good time to make my move?",
+          "question": "When is a good time to ask for a promotion?"
+        },
+        {
+          "title": "Hidden Strengths",
+          "description": "What professional gifts am I overlooking?",
+          "question": "What are my hidden professional strengths?"
+        },
+        {
+          "title": "Success Outlook",
+          "description": "Will I find success in my current field?",
+          "question": "Will I find success in my current field?"
+        }
+      ],
+      "relationship_guide": [
+        {
+          "title": "Meeting My Partner",
+          "description": "When will the right person enter my life?",
+          "question": "When will I meet my life partner?"
+        },
+        {
+          "title": "Compatibility",
+          "description": "Is my current relationship aligned with my chart?",
+          "question": "Is my current relationship compatible?"
+        },
+        {
+          "title": "Recurring Patterns",
+          "description": "What keeps repeating in my relationships?",
+          "question": "What patterns keep showing up in my relationships?"
+        },
+        {
+          "title": "Deeper Connection",
+          "description": "How can I deepen my emotional bonds?",
+          "question": "How can I deepen my emotional connections?"
+        }
+      ],
+      "spiritual_guide": [
+        {
+          "title": "Soul's Purpose",
+          "description": "What is my reason for being here?",
+          "question": "What is my soul's purpose in this life?"
+        },
+        {
+          "title": "Spiritual Practice",
+          "description": "Which practices fit my nature?",
+          "question": "Which spiritual practices suit my nature?"
+        },
+        {
+          "title": "Inner Peace",
+          "description": "How can I find calm right now?",
+          "question": "How can I find inner peace right now?"
+        },
+        {
+          "title": "Past-Life Karma",
+          "description": "What am I here to resolve?",
+          "question": "What past-life karma am I working through?"
+        }
+      ],
+      "astro_sage": [
+        {
+          "title": "Mahadasha",
+          "description": "What planetary period am I in?",
+          "question": "Explain my Mahadasha and what it means."
+        },
+        {
+          "title": "My Lagna",
+          "description": "What does my Ascendant reveal?",
+          "question": "What does my Lagna reveal about me?"
+        },
+        {
+          "title": "Planetary Aspects",
+          "description": "Walk me through my key aspects.",
+          "question": "Walk me through my key planetary aspects."
+        },
+        {
+          "title": "Yogas in My Chart",
+          "description": "Which yogas shape my life?",
+          "question": "Which yogas are present in my chart?"
+        }
+      ]
     }
   },
   "healthForecast": {
@@ -1091,6 +1203,41 @@
     },
     "errorBanner": {
       "dismiss": "Dismiss error"
+    },
+    "errors": {
+      "email_not_registered": "This email address is not registered.",
+      "wrong_password": "Incorrect password. Please try again.",
+      "account_locked": "Account is locked due to too many failed attempts.",
+      "email_already_registered": "This email address is already registered.",
+      "registration_failed": "Registration failed. Please try again.",
+      "token_invalid": "The authorization token is invalid.",
+      "token_expired": "The authorization token has expired.",
+      "token_reuse_detected": "Security alert: Session token reuse detected.",
+      "password_reset_unavailable": "Password reset is currently unavailable.",
+      "reset_token_invalid": "The password reset link is invalid or has expired.",
+      "user_not_found": "No account found with this email address.",
+      "incorrect_password": "Incorrect password. Please try again.",
+      "rate_limited": "Too many requests. Please try again later.",
+      "invalid_email": "Please enter a valid email address.",
+      "missing_email": "Email address is required.",
+      "missing_password": "Password is required.",
+      "weak_password": "Password is too weak.",
+      "password_too_short": "Password is too short.",
+      "password_too_long": "Password is too long.",
+      "generic": "An unexpected error occurred. Please try again.",
+      "retry_after": "Please try again in {minutes}m {seconds}s."
+    },
+    "resetPassword": {
+      "title": "Create New Password",
+      "subtitle": "Please enter your new password below.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "submit": "Reset Password",
+      "successTitle": "Password Reset Successful",
+      "successSubtitle": "Your password has been successfully reset.",
+      "proceedToLogin": "Proceed to Login"
     }
   },
   "home": {

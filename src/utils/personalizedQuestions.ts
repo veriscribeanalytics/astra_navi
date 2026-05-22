@@ -178,139 +178,31 @@ export interface StarterCard {
   icon: StarterIconKey;
 }
 
-export const getAvatarStarterCards = (avatarId: string): StarterCard[] => {
-  const cardsByAvatar: Record<string, StarterCard[]> = {
-    navi: [
-      {
-        title: "Today's Energy",
-        description: "What does today's planetary alignment mean for me?",
-        question: "What does today's planetary alignment mean for me?",
-        icon: 'sun',
-      },
-      {
-        title: 'Career Timing',
-        description: 'Which area of work should I focus on this month?',
-        question: 'Which area of work should I focus on this month?',
-        icon: 'briefcase',
-      },
-      {
-        title: 'Life Lesson',
-        description: 'What is my current life lesson or soul growth?',
-        question: 'What is my current life lesson?',
-        icon: 'orbit',
-      },
-      {
-        title: 'Relationships',
-        description: 'What should I understand about love right now?',
-        question: 'What should I understand about love right now?',
-        icon: 'heart',
-      },
-    ],
-    career_mentor: [
-      {
-        title: 'Career Path',
-        description: 'Which direction best aligns with my chart?',
-        question: 'What career path aligns with my chart?',
-        icon: 'compass',
-      },
-      {
-        title: 'Promotion Timing',
-        description: 'When is a good time to make my move?',
-        question: 'When is a good time to ask for a promotion?',
-        icon: 'briefcase',
-      },
-      {
-        title: 'Hidden Strengths',
-        description: 'What professional gifts am I overlooking?',
-        question: 'What are my hidden professional strengths?',
-        icon: 'star',
-      },
-      {
-        title: 'Success Outlook',
-        description: 'Will I find success in my current field?',
-        question: 'Will I find success in my current field?',
-        icon: 'gem',
-      },
-    ],
-    relationship_guide: [
-      {
-        title: 'Meeting My Partner',
-        description: 'When will the right person enter my life?',
-        question: 'When will I meet my life partner?',
-        icon: 'heart',
-      },
-      {
-        title: 'Compatibility',
-        description: 'Is my current relationship aligned with my chart?',
-        question: 'Is my current relationship compatible?',
-        icon: 'sparkles',
-      },
-      {
-        title: 'Recurring Patterns',
-        description: 'What keeps repeating in my relationships?',
-        question: 'What patterns keep showing up in my relationships?',
-        icon: 'orbit',
-      },
-      {
-        title: 'Deeper Connection',
-        description: 'How can I deepen my emotional bonds?',
-        question: 'How can I deepen my emotional connections?',
-        icon: 'star',
-      },
-    ],
-    spiritual_guide: [
-      {
-        title: "Soul's Purpose",
-        description: 'What is my reason for being here?',
-        question: "What is my soul's purpose in this life?",
-        icon: 'sparkles',
-      },
-      {
-        title: 'Spiritual Practice',
-        description: 'Which practices fit my nature?',
-        question: 'Which spiritual practices suit my nature?',
-        icon: 'gem',
-      },
-      {
-        title: 'Inner Peace',
-        description: 'How can I find calm right now?',
-        question: 'How can I find inner peace right now?',
-        icon: 'compass',
-      },
-      {
-        title: 'Past-Life Karma',
-        description: 'What am I here to resolve?',
-        question: 'What past-life karma am I working through?',
-        icon: 'orbit',
-      },
-    ],
-    astro_sage: [
-      {
-        title: 'Mahadasha',
-        description: 'What planetary period am I in?',
-        question: 'Explain my Mahadasha and what it means.',
-        icon: 'orbit',
-      },
-      {
-        title: 'My Lagna',
-        description: 'What does my Ascendant reveal?',
-        question: 'What does my Lagna reveal about me?',
-        icon: 'sun',
-      },
-      {
-        title: 'Planetary Aspects',
-        description: 'Walk me through my key aspects.',
-        question: 'Walk me through my key planetary aspects.',
-        icon: 'star',
-      },
-      {
-        title: 'Yogas in My Chart',
-        description: 'Which yogas shape my life?',
-        question: 'Which yogas are present in my chart?',
-        icon: 'gem',
-      },
-    ],
+export const getAvatarStarterCards = (avatarId: string, t: (key: string) => string): StarterCard[] => {
+  const iconsByAvatar: Record<string, StarterIconKey[]> = {
+    navi: ['sun', 'briefcase', 'orbit', 'heart'],
+    career_mentor: ['compass', 'briefcase', 'star', 'gem'],
+    relationship_guide: ['heart', 'sparkles', 'orbit', 'star'],
+    spiritual_guide: ['sparkles', 'gem', 'compass', 'orbit'],
+    astro_sage: ['orbit', 'sun', 'star', 'gem'],
   };
 
-  return cardsByAvatar[avatarId] || cardsByAvatar.navi;
+  const selectedAvatarId = iconsByAvatar[avatarId] ? avatarId : 'navi';
+  const icons = iconsByAvatar[selectedAvatarId];
+
+  const cards: StarterCard[] = [];
+  for (let i = 0; i < 4; i++) {
+    const titleKey = `chat.starterCards.${selectedAvatarId}.${i}.title`;
+    const descKey = `chat.starterCards.${selectedAvatarId}.${i}.description`;
+    const questionKey = `chat.starterCards.${selectedAvatarId}.${i}.question`;
+
+    cards.push({
+      title: t(titleKey),
+      description: t(descKey),
+      question: t(questionKey),
+      icon: icons[i],
+    });
+  }
+
+  return cards;
 };

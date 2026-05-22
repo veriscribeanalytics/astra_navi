@@ -506,11 +506,13 @@ const Navbar: React.FC = () => {
                                     </div>
                                     {/* Credit Balance */}
                                     {isLoggedIn && isLoaded && (
-                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center gap-2.5">
-                                            <Wallet className="w-3.5 h-3.5 text-secondary" />
-                                            <span className="text-[10px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
-                                            <span className="text-[9px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
-                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{getTierLabel(tier || 'free')}</span>
+                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <Wallet className="w-3.5 h-3.5 text-secondary shrink-0" />
+                                                <span className="text-[10px] font-bold text-secondary tabular-nums whitespace-nowrap shrink-0">{totalCredits ?? 0}</span>
+                                                <span className="text-[9px] text-foreground/30 uppercase tracking-wider whitespace-nowrap truncate">{t('plans.naviCredits')}</span>
+                                            </div>
+                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15 whitespace-nowrap shrink-0">{getTierLabel(tier || 'free')}</span>
                                         </div>
                                     )}
                                     <div className="space-y-0.5">
@@ -572,11 +574,13 @@ const Navbar: React.FC = () => {
                                     </div>
                                     {/* Credit Balance */}
                                     {isLoggedIn && isLoaded && (
-                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center gap-2.5">
-                                            <Wallet className="w-3.5 h-3.5 text-secondary" />
-                                            <span className="text-[10px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
-                                            <span className="text-[9px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
-                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{getTierLabel(tier || 'free')}</span>
+                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <Wallet className="w-3.5 h-3.5 text-secondary shrink-0" />
+                                                <span className="text-[10px] font-bold text-secondary tabular-nums whitespace-nowrap shrink-0">{totalCredits ?? 0}</span>
+                                                <span className="text-[9px] text-foreground/30 uppercase tracking-wider whitespace-nowrap truncate">{t('plans.naviCredits')}</span>
+                                            </div>
+                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15 whitespace-nowrap shrink-0">{getTierLabel(tier || 'free')}</span>
                                         </div>
                                     )}
                                     <div className="space-y-0.5">

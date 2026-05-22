@@ -206,6 +206,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                     key={i} 
                     onClick={() => goToSlide(i)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? 'w-5 sm:w-7 bg-[#c8991f]' : 'w-1.5 sm:w-2 bg-white/15 hover:bg-white/30'}`}
+                    style={{ minHeight: 0, minWidth: 0 }}
                     aria-label={`Go to slide ${i + 1}`}
                 />
             ))}
@@ -294,6 +295,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                             key={i} 
                             onClick={() => goToSlide(i)}
                             className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? 'w-7 bg-[#c8991f]' : 'w-2 bg-white/15 hover:bg-white/30'}`}
+                            style={{ minHeight: 0, minWidth: 0 }}
                             aria-label={`Go to slide ${i + 1}`}
                         />
                     ))}
@@ -527,9 +529,9 @@ export default function DashboardHome() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-8 sm:mb-10 pt-4 lg:pt-0"
+                    className="flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-10 pt-4 lg:pt-0"
                 >
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 w-full">
                         <div className="space-y-3 text-center lg:text-left pt-4 lg:pt-0">
                             <div className="flex items-center justify-center lg:justify-start gap-3">
                                 <div className="hidden sm:block h-[1px] w-8 bg-secondary/30" />
@@ -598,7 +600,7 @@ export default function DashboardHome() {
                         </div>
                     </div>
 
-                    <div className="w-full mt-4 sm:mt-8 mb-2">
+                    <div className="w-full mb-2">
                         <div className="w-full relative group">
                             <div className="w-full h-[80px] sm:h-[100px] bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
                                 <FeatureSlider onQuestion={handleSendMessage} t={t} />
@@ -608,13 +610,13 @@ export default function DashboardHome() {
                 </motion.div>
 
                 {/* ZONE 2: HERO DASHBOARD */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 min-[1600px]:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                    <div className="min-[1600px]:col-span-8 flex flex-col gap-4 sm:gap-6">
                         <DailyHoroscopeCard userLoading={userLoading} onSendMessage={handleSendMessage} />
                     </div>
 
-                    <div className="lg:col-span-4 flex flex-col min-h-0">
-                        <Card padding="none" className="!rounded-[24px] sm:!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-[500px] sm:h-full min-h-0">
+                    <div className="hidden min-[1600px]:flex flex-col min-[1600px]:col-span-4 min-h-0">
+                        <Card padding="none" className="!rounded-[24px] sm:!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-full min-h-0">
                             <div className="p-2 border-b border-white/5 flex items-center gap-1 shrink-0">
                                 {[
                                     { id: 'chat' as const, label: t('dashboard.tabChat'), icon: <MessageSquare className="w-4 h-4" /> },
