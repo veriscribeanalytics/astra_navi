@@ -39,8 +39,8 @@ const AvatarShowcase: React.FC = () => {
       </div>
 
       {isLoadingAvatars && avatars.length === 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
-          {[1, 2, 3, 4, 5].map(i => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
+          {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="flex flex-col items-center p-5 rounded-[24px] bg-surface border border-outline-variant/20">
               <SkeletonCircle size={96} />
               <Skeleton height={16} width={80} className="mt-4" />
@@ -49,7 +49,7 @@ const AvatarShowcase: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
           {avatars.map((avatar, idx) => {
             const imgSrc = getAvatarImage(avatar.avatarId);
             const accent = getAvatarAccent(avatar.avatarId);
