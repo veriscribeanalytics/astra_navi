@@ -9,6 +9,7 @@ const AVATAR_BG_LIGHT: Record<string, { bg: string; surface: string; outline: st
   relationship_guide: { bg: '#fff0f3', surface: '#ffdde4', outline: '#fda4af' },
   spiritual_guide:    { bg: '#fff8ed', surface: '#ffecd0', outline: '#fcd34d' },
   astro_sage:         { bg: '#f5f0ff', surface: '#ecdeff', outline: '#c4b5fd' },
+  finance_mentor:     { bg: '#e6f9f0', surface: '#cbf1df', outline: '#34d399' },
 };
 
 const AVATAR_BG_DARK: Record<string, { bg: string; surface: string; outline: string }> = {
@@ -17,6 +18,7 @@ const AVATAR_BG_DARK: Record<string, { bg: string; surface: string; outline: str
   relationship_guide: { bg: '#180810', surface: '#220a14', outline: '#f43f5e' },
   spiritual_guide:    { bg: '#120a04', surface: '#1c1008', outline: '#d97706' },
   astro_sage:         { bg: '#0e0818', surface: '#160a22', outline: '#8b5cf6' },
+  finance_mentor:     { bg: '#04130d', surface: '#061d14', outline: '#10b981' },
 };
 
 export function useAvatarTheme(avatarId?: string, catalogEntry?: ChatAvatar) {

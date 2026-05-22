@@ -37,6 +37,11 @@ const AVATAR_PLACEHOLDERS: Record<string, string[]> = {
     "Which planet are you curious about?",
     "Type your question about astrology...",
   ],
+  finance_mentor: [
+    "Ask Vidya about finance...",
+    "What's holding back your financial growth?",
+    "Type your question about wealth...",
+  ],
 };
 
 /** Short single-line placeholders for narrow viewports (≤480px) where the
@@ -47,6 +52,7 @@ const AVATAR_PLACEHOLDERS_SHORT: Record<string, string> = {
   relationship_guide: "Ask Meera…",
   spiritual_guide: "Ask Anand…",
   astro_sage: "Ask Rishi…",
+  finance_mentor: "Ask Vidya…",
 };
 
 interface SpeechRecognitionEvent extends Event {
@@ -71,9 +77,9 @@ interface SpeechRecognition extends EventTarget {
 const modeCycleOrder: Array<'quick' | 'normal' | 'deep'> = ['quick', 'normal', 'deep'];
 
 const modeOptionMap: Record<string, { label: string; Icon: React.FC<{ className?: string }> }> = {
-  quick: { label: 'Quick', Icon: Zap },
-  normal: { label: 'Normal', Icon: Sparkles },
-  deep: { label: 'Deep', Icon: Gem },
+  quick: { label: 'Instant', Icon: Zap },
+  normal: { label: 'Standard', Icon: Sparkles },
+  deep: { label: 'Deep Analysis', Icon: Gem },
 };
 
 const ChatInput: React.FC = () => {
@@ -180,9 +186,9 @@ const ChatInput: React.FC = () => {
   };
 
   const modeOptions = [
-    { value: "quick" as const, label: "Quick", Icon: Zap },
-    { value: "normal" as const, label: "Normal", Icon: Sparkles },
-    { value: "deep" as const, label: "Deep", Icon: Gem },
+    { value: "quick" as const, label: "Instant", Icon: Zap },
+    { value: "normal" as const, label: "Standard", Icon: Sparkles },
+    { value: "deep" as const, label: "Deep Analysis", Icon: Gem },
   ];
 
   const currentPlaceholders = AVATAR_PLACEHOLDERS[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS.navi;

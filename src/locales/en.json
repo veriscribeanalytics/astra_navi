@@ -512,6 +512,12 @@
         "What does my Lagna reveal about me?",
         "Walk me through my key planetary aspects.",
         "Which yogas are present in my chart?"
+      ],
+      "finance_mentor": [
+        "What does my chart say about my wealth potential?",
+        "When will my financial situation improve?",
+        "Is this a good time to make major investments?",
+        "How can I enhance my financial stability?"
       ]
     },
     "avatarIntros": {
@@ -519,10 +525,14 @@
       "career_mentor": "Let's talk about your professional journey.",
       "relationship_guide": "What's on your heart?",
       "spiritual_guide": "Take a deep breath. What's on your mind?",
-      "astro_sage": "Show me your chart — let's see what the planets reveal."
+      "astro_sage": "Show me your chart — let's see what the planets reveal.",
+      "finance_mentor": "Let's optimize your financial future using the planets."
     },
     "newConversation": "New conversation",
     "errorSending": "Failed to send message. Please try again.",
+    "errorCapacity": "Our cosmic guides are currently at capacity. Please try again in a few moments.",
+    "errorResponseInterrupted": "The response was interrupted. Please try again or rephrase your question.",
+    "errorLlmUnavailable": "Our planetary intelligence engine is temporarily unavailable. Please try again shortly.",
     "networkError": "Network connection lost. Please check your internet and try again.",
     "failedResponse": "Failed to get response",
     "ratingSuccess": "Rating saved. Thank you for your feedback!",
@@ -859,6 +869,28 @@
           "title": "Yogas in My Chart",
           "description": "Which yogas shape my life?",
           "question": "Which yogas are present in my chart?"
+        }
+      ],
+      "finance_mentor": [
+        {
+          "title": "Wealth Potential",
+          "description": "What does my chart say about my wealth?",
+          "question": "What does my chart say about my wealth potential?"
+        },
+        {
+          "title": "Financial Growth",
+          "description": "When will my financial situation improve?",
+          "question": "When will my financial situation improve?"
+        },
+        {
+          "title": "Investment Timing",
+          "description": "Is this a good time to make major investments?",
+          "question": "Is this a good time to make major investments?"
+        },
+        {
+          "title": "Financial Stability",
+          "description": "How can I enhance my stability?",
+          "question": "How can I enhance my financial stability?"
         }
       ]
     }

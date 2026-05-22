@@ -13,6 +13,8 @@ export interface ChatAvatar {
   accentColor?: string;
   /** Icon library key (e.g. "sparkles", "briefcase"). FE maps to its icon set, falling back to sparkles. */
   iconKey?: string;
+  /** The default mode to pre-select for this avatar. */
+  defaultMode?: 'quick' | 'normal' | 'deep';
 }
 
 export interface ChatAvatarCatalog {

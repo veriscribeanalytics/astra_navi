@@ -12,7 +12,7 @@ import type { ChatAvatar } from '@/types/avatar';
 
 const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
-const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage'];
+const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
 
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
@@ -182,7 +182,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem(AVATAR_STORAGE_KEY, avatarId);
       } catch {}
     }
-  }, []);
+    const avatar = avatars.find(a => a.avatarId === avatarId);
+    if (avatar?.defaultMode) {
+      setMode(avatar.defaultMode);
+    }
+  }, [avatars, setMode]);
 
   // Guest State
   const [isGuest, setIsGuest] = useState(false);
@@ -741,11 +745,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem(AVATAR_STORAGE_KEY);
-        if (stored && list.some(a => a.avatarId === stored)) {
-          setSelectedAvatarIdState(stored);
-        } else if (stored) {
-          // Stored id no longer exists in catalog — clean up.
+        const activeId = (stored && list.some(a => a.avatarId === stored)) ? stored : DEFAULT_AVATAR_ID;
+        if (stored && !list.some(a => a.avatarId === stored)) {
           localStorage.removeItem(AVATAR_STORAGE_KEY);
+        }
+        setSelectedAvatarIdState(activeId);
+        const avatar = list.find(a => a.avatarId === activeId);
+        if (avatar?.defaultMode) {
+          setMode(avatar.defaultMode);
         }
       }
     } catch (err) {
@@ -753,7 +760,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingAvatars(false);
     }
-  }, [isGuest, language]);
+  }, [isGuest, language, setMode]);
 
   const editMessage = useCallback(async (messageId: string, newText: string) => {
     if (isGuest || !activeChatId || isSending) return;

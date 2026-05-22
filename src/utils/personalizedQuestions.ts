@@ -163,6 +163,12 @@ export const getAvatarQuestions = (avatarId: string, ageBracket: AgeBracket): st
       "What does my Lagna reveal about me?",
       "Walk me through my key planetary aspects.",
       "Which yogas are present in my chart?"
+    ],
+    finance_mentor: [
+      "What does my chart say about my wealth potential?",
+      "When will my financial situation improve?",
+      "Is this a good time to make major investments?",
+      "How can I enhance my financial stability?"
     ]
   };
 
@@ -185,6 +191,7 @@ export const getAvatarStarterCards = (avatarId: string, t: (key: string) => stri
     relationship_guide: ['heart', 'sparkles', 'orbit', 'star'],
     spiritual_guide: ['sparkles', 'gem', 'compass', 'orbit'],
     astro_sage: ['orbit', 'sun', 'star', 'gem'],
+    finance_mentor: ['gem', 'briefcase', 'sun', 'star'],
   };
 
   const selectedAvatarId = iconsByAvatar[avatarId] ? avatarId : 'navi';

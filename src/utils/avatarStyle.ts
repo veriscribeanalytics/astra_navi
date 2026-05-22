@@ -1,4 +1,4 @@
-import { Briefcase, Heart, Sparkles, Star, Telescope, Flower } from 'lucide-react';
+import { Briefcase, Heart, Sparkles, Star, Telescope, Flower, Coins } from 'lucide-react';
 import type React from 'react';
 import type { ChatAvatar } from '@/types/avatar';
 
@@ -8,6 +8,7 @@ const AVATAR_ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   relationship_guide: Heart,
   spiritual_guide: Flower,
   astro_sage: Telescope,
+  finance_mentor: Coins,
 };
 
 /** Maps the backend's `iconKey` (e.g. "sparkles", "briefcase") to a lucide icon.
@@ -20,6 +21,7 @@ const ICON_KEY_MAP: Record<string, React.FC<{ className?: string }>> = {
   flower: Flower,
   telescope: Telescope,
   star: Star,
+  coins: Coins,
 };
 
 const AVATAR_ACCENT_MAP: Record<string, string> = {
@@ -28,6 +30,7 @@ const AVATAR_ACCENT_MAP: Record<string, string> = {
   relationship_guide: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
   spiritual_guide: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
   astro_sage: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
+  finance_mentor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
 };
 
 const AVATAR_IMAGE_MAP: Record<string, string> = {
@@ -36,6 +39,7 @@ const AVATAR_IMAGE_MAP: Record<string, string> = {
   relationship_guide: '/images/avatars/MEERA_AVATAR.jpeg',
   spiritual_guide: '/images/avatars/ANAND_AVATAR.jpeg',
   astro_sage: '/images/avatars/RISHI_AVATAR.jpeg',
+  finance_mentor: '/images/avatars/VIDYA_AVATAR.jpeg',
 };
 
 export const getAvatarIcon = (
@@ -88,6 +92,7 @@ const AVATAR_THEME_MAP: Record<string, AvatarTheme> = {
   relationship_guide:  { secondary: '#f43f5e', glowColor: 'rgba(244,63,94,0.35)',   flareGold: '#fda4af' },
   spiritual_guide:     { secondary: '#d97706', glowColor: 'rgba(217,119,6,0.35)',   flareGold: '#fcd34d' },
   astro_sage:          { secondary: '#8b5cf6', glowColor: 'rgba(139,92,246,0.35)',  flareGold: '#c4b5fd' },
+  finance_mentor:      { secondary: '#10b981', glowColor: 'rgba(16,185,129,0.35)',  flareGold: '#34d399' },
 };
 
 export const getAvatarTheme = (
