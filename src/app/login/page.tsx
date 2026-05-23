@@ -25,7 +25,7 @@ const LoginContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { success, error: showError, ToastContainer } = useToast();
-  const { showLoading, login: setAuthUser } = useAuth();
+  const { showLoading, login: setAuthUser, isLoggedIn, user, logout } = useAuth();
   const { t } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
@@ -338,6 +338,44 @@ const LoginContent = () => {
           {/* Form body */}
           <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col">
             <div className="m-auto w-full">
+              {/* Already-signed-in banner — shown when a returning user lands on /login
+                  with a valid session (e.g. clicked a shared /login link). Provides a
+                  clear path to the dashboard or to sign out, instead of silently
+                  bouncing them into a feature page. */}
+              {isLoggedIn && user && (
+                <div className="mb-6 mx-2 sm:mx-4 rounded-2xl border border-secondary/30 bg-secondary/5 px-4 py-4 sm:px-5 sm:py-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary/15 border border-secondary/30 text-secondary flex items-center justify-center text-sm font-headline font-bold shrink-0">
+                      {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-secondary">
+                        {t('login.alreadySignedIn')}
+                      </p>
+                      <p className="mt-0.5 text-sm font-headline font-semibold text-primary truncate">
+                        {user.name || user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={() => router.push('/')}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-secondary text-on-primary text-[11px] sm:text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    >
+                      {t('login.goToDashboard')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { void logout('/login?signedOut=1'); }}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-transparent border border-outline-variant/30 text-on-surface-variant text-[11px] sm:text-xs font-bold uppercase tracking-widest hover:border-secondary/40 hover:text-secondary transition-colors"
+                    >
+                      {t('login.signOut')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Header */}
               <div className="px-4 sm:px-6 pb-6 shrink-0">
                 <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5 text-center">

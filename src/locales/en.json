@@ -457,7 +457,10 @@
     "invalidCredentials": "Invalid credentials.",
     "networkError": "Unable to connect to the server. Please check your internet connection and try again.",
     "serverError": "The server is currently unavailable. Please try again later.",
-    "resetLinkSent": "If an account exists, reset instructions have been sent."
+    "resetLinkSent": "If an account exists, reset instructions have been sent.",
+    "alreadySignedIn": "You're already signed in",
+    "goToDashboard": "Go to Dashboard",
+    "signOut": "Sign Out"
   },
   "about": {
     "theTradition": "The Tradition",
