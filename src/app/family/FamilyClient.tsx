@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
@@ -95,6 +96,25 @@ export default function FamilyClient() {
     const [detailMember, setDetailMember] = useState<FamilyMember | null>(null);
     const [deletingMember, setDeletingMember] = useState<FamilyMember | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Deep-link: when arriving via `/family?member=<id>` from the dashboard
+    // strip, auto-open that member's detail view once the members list loads.
+    // Guard ref prevents the effect from re-firing if the user navigates back
+    // to the list and the URL still carries the param.
+    const searchParams = useSearchParams();
+    const memberIdParam = searchParams?.get('member');
+    const autoOpenedRef = useRef(false);
+
+    useEffect(() => {
+        if (autoOpenedRef.current) return;
+        if (!memberIdParam || !members) return;
+        const found = members.find(m => String(m.id) === memberIdParam);
+        if (found) {
+            setDetailMember(found);
+            setView('detail');
+            autoOpenedRef.current = true;
+        }
+    }, [memberIdParam, members]);
 
     const isFreeTier = !tier || tier === 'free';
     const memberCount = members?.length ?? 0;

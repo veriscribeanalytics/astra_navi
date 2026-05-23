@@ -27,7 +27,20 @@ function ChatContent() {
         );
     }
 
-    if (!isLoggedIn) return null;
+    if (!isLoggedIn) {
+        // Middleware should have redirected before we got here, but if the
+        // session expires mid-session or middleware is bypassed, show a
+        // redirect-state UI instead of a blank screen (navbar is hidden on
+        // /chat, so `return null` would leave the user with no UI at all).
+        return (
+            <div className="flex-grow flex flex-col items-center justify-center min-h-[60vh] gap-3">
+                <div className="w-10 h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-secondary animate-pulse" />
+                </div>
+                <p className="text-[14px] text-foreground/40 font-medium">Redirecting to sign in...</p>
+            </div>
+        );
+    }
 
     return <ChatPageClient />;
 }

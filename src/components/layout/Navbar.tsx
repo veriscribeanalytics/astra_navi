@@ -261,7 +261,7 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
 const Navbar: React.FC = () => {
     const pathname = usePathname();
     const router = useRouter();
-    const { isLoggedIn, logout, user } = useAuth();
+    const { isLoggedIn, isLoading, logout, user } = useAuth();
     const { ToastContainer } = useToast();
     const { t } = useTranslation();
     const { tier, totalCredits, isLoaded } = usePaywallContext();
@@ -485,7 +485,9 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center justify-end space-x-4 lg:space-x-5">
                     <LanguagePicker />
                     <ThemeToggle />
-                    {!isLoggedIn ? (
+                    {isLoading ? (
+                        <div className="w-9 h-9 rounded-full bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
+                    ) : !isLoggedIn ? (
                         <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="sm" className="!px-5 shadow-md shadow-secondary/10 text-xs">Login</Button>
                     ) : (
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
@@ -556,7 +558,9 @@ const Navbar: React.FC = () => {
                 {/* Right Section */}
                 <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
                     <ThemeToggle />
-                    {!isLoggedIn ? (
+                    {isLoading ? (
+                        <div className="w-8 h-8 rounded-xl bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
+                    ) : !isLoggedIn ? (
                         <Link href="/login" className="w-8 h-8 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
                             <User className="w-4 h-4" />
                         </Link>
