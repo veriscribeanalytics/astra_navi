@@ -22,23 +22,38 @@ const initialOf = (name: string): string => {
   return trimmed ? trimmed[0].toUpperCase() : '?';
 };
 
+const bandBarClass = (band?: string | null): string => {
+  switch (band) {
+    case 'Excellent':
+      return 'bg-gradient-to-r from-emerald-400 via-emerald-400 to-teal-300 shadow-[0_0_12px_rgba(52,211,153,0.55)]';
+    case 'Good':
+      return 'bg-gradient-to-r from-secondary via-secondary to-amber-300 shadow-[0_0_12px_rgba(212,175,55,0.55)]';
+    case 'Average':
+      return 'bg-gradient-to-r from-amber-400 to-yellow-300 shadow-[0_0_10px_rgba(251,191,36,0.5)]';
+    case 'Challenging':
+      return 'bg-gradient-to-r from-orange-400 to-red-400 shadow-[0_0_10px_rgba(251,146,60,0.5)]';
+    default:
+      return 'bg-gradient-to-r from-secondary to-amber-300 shadow-[0_0_10px_rgba(212,175,55,0.45)]';
+  }
+};
+
 const BondEnergyBar: React.FC<{ score?: number | null; band?: string | null }> = ({ score, band }) => {
   const palette = bandPalette(band ?? '');
   const pct = Math.max(0, Math.min(100, Math.round(score ?? 0)));
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-widest font-bold text-foreground/40">
+        <span className="text-[10px] uppercase tracking-widest font-bold text-foreground/60">
           Bond energy
         </span>
         <span className={`text-[13px] font-headline font-bold tabular-nums ${palette.text}`}>
           {pct}
-          <span className="text-foreground/30 text-[10px] font-body ml-0.5">/100</span>
+          <span className="text-foreground/50 text-[10px] font-body ml-0.5">/100</span>
         </span>
       </div>
-      <div className="h-1.5 rounded-full bg-surface-variant/30 overflow-hidden">
+      <div className="h-2 rounded-full bg-foreground/[0.08] overflow-hidden">
         <div
-          className={`h-full rounded-full ${palette.bg.replace('/10', '/60')}`}
+          className={`h-full rounded-full ${bandBarClass(band)}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -53,13 +68,13 @@ const BondEnergyBar: React.FC<{ score?: number | null; band?: string | null }> =
 
 const BondEnergyHint: React.FC<{ label: string }> = ({ label }) => (
   <div className="space-y-1.5">
-    <span className="text-[10px] uppercase tracking-widest font-bold text-foreground/40">
+    <span className="text-[10px] uppercase tracking-widest font-bold text-foreground/55">
       Bond energy
     </span>
-    <div className="h-1.5 rounded-full bg-surface-variant/20 overflow-hidden">
-      <div className="h-full w-1/3 rounded-full bg-surface-variant/30 animate-pulse" />
+    <div className="h-2 rounded-full bg-foreground/[0.06] overflow-hidden">
+      <div className="h-full w-1/3 rounded-full bg-foreground/[0.18] animate-pulse" />
     </div>
-    <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/30">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/55">
       {label}
     </p>
   </div>
@@ -104,7 +119,7 @@ const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
           <p className="truncate text-[15px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors">
             {member.name || '—'}
           </p>
-          <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/40 font-bold">
+          <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/55 font-bold">
             {formatRelationship(member.relationshipType)}
           </p>
         </div>
@@ -153,7 +168,7 @@ const FamilyConnectionCard: React.FC<{ connection: FamilyConnection }> = ({ conn
           <p className="truncate text-[15px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors">
             {connection.otherName || '—'}
           </p>
-          <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/40 font-bold">
+          <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/55 font-bold">
             {formatRelationship(connection.iSeeThemAs)}
           </p>
         </div>
@@ -192,7 +207,7 @@ const AddMemberCard: React.FC = () => {
       <p className="text-[14px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors">
         {t('dashboard.familyAdd')}
       </p>
-      <p className="mt-1 text-[11px] text-foreground/45 leading-relaxed text-center max-w-[20ch]">
+      <p className="mt-1.5 text-[11px] text-foreground/60 leading-relaxed text-center max-w-[26ch]">
         {t('dashboard.familyAddSubtitle')}
       </p>
       <span className="mt-4 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-bold uppercase tracking-widest group-hover:bg-secondary/20 transition-colors">
@@ -226,7 +241,7 @@ const FamilyStrip: React.FC = () => {
           <h2 className="text-2xl sm:text-3xl font-headline font-bold text-primary tracking-tight mb-2">
             {t('nav.myFamily')}
           </h2>
-          <p className="text-[12px] sm:text-[13px] text-foreground/45 leading-relaxed">
+          <p className="text-[12px] sm:text-[13px] text-foreground/60 leading-relaxed">
             {t('dashboard.familySubtitle')}
           </p>
         </div>
@@ -283,7 +298,7 @@ const FamilyStrip: React.FC = () => {
             <p className="text-sm sm:text-base font-headline font-bold text-foreground group-hover:text-secondary transition-colors">
               {t('dashboard.familyEmptyCta')}
             </p>
-            <p className="mt-1 text-[11px] sm:text-xs text-foreground/45 leading-relaxed">
+            <p className="mt-1 text-[11px] sm:text-xs text-foreground/60 leading-relaxed">
               {t('dashboard.familySubtitle')}
             </p>
           </div>
