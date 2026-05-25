@@ -60,7 +60,7 @@ const AvatarShowcase: React.FC = () => {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.07 }}
-                className="group relative flex flex-col items-center text-center p-5 sm:p-6 rounded-[24px] bg-surface border border-outline-variant/20 hover:border-secondary/40 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(212,175,55,0.08)] transition-all duration-500"
+                className="group relative flex flex-col items-center text-center h-full p-5 sm:p-6 rounded-[24px] bg-surface border border-outline-variant/20 hover:border-secondary/40 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(212,175,55,0.08)] transition-all duration-500"
                 aria-label={`Chat with ${avatar.name}, ${avatar.title}`}
               >
                 <div className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 ${accent} mb-4 group-hover:scale-105 transition-transform duration-500`}>
@@ -84,18 +84,18 @@ const AvatarShowcase: React.FC = () => {
                 <p className="text-[10px] sm:text-[11px] text-foreground/40 uppercase tracking-[0.15em] mt-1 font-bold">
                   {avatar.title}
                 </p>
-                <p className="hidden sm:block text-[11px] text-foreground/50 leading-snug mt-2 line-clamp-2 max-w-[200px]">
+                <p className="hidden sm:block text-[11px] text-foreground/50 leading-snug mt-2 line-clamp-2 overflow-hidden max-w-[200px] min-h-[2.5rem]">
                   {avatar.description}
                 </p>
-                <div className="flex items-center gap-2 mt-3">
+                <div className="mt-auto pt-3 flex flex-col items-center gap-3">
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-2 py-0.5 rounded-full">
                     <Coins className="w-3 h-3" />
                     {avatar.creditCost} {avatar.creditCost === 1 ? t('dashboard.creditSingular') : t('dashboard.creditPlural')}
                   </span>
-                </div>
-                <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-foreground/30 uppercase tracking-widest group-hover:text-secondary transition-colors">
-                  {t('dashboard.startChat')}
-                  <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-foreground/30 uppercase tracking-widest group-hover:text-secondary transition-colors">
+                    {t('dashboard.startChat')}
+                    <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
               </motion.button>
             );

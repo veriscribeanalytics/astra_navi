@@ -230,26 +230,24 @@ const FamilyStrip: React.FC = () => {
 
   return (
     <section className="mt-12 sm:mt-20 mx-auto max-w-6xl">
-      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div className="text-center sm:text-left max-w-2xl">
-          <div className="flex items-center justify-center sm:justify-start gap-3 mb-2">
-            <div className="w-1 h-5 sm:h-6 bg-gradient-to-b from-secondary to-transparent rounded-full" />
-            <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.4em] sm:tracking-[0.6em]">
-              {t('dashboard.familyEyebrow')}
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-headline font-bold text-primary tracking-tight mb-2">
-            {t('nav.myFamily')}
-          </h2>
-          <p className="text-[12px] sm:text-[13px] text-foreground/60 leading-relaxed">
-            {t('dashboard.familySubtitle')}
-          </p>
+      <div className="text-center mb-6 sm:mb-10">
+        <div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
+          <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-secondary to-transparent rounded-full" />
+          <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.4em] sm:tracking-[0.6em]">
+            {t('dashboard.familyEyebrow')}
+          </span>
         </div>
+        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight">
+          {t('nav.myFamily')}
+        </h2>
+        <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-foreground/40 max-w-md mx-auto leading-relaxed px-4">
+          {t('dashboard.familySubtitle')}
+        </p>
         {!isEmpty && (
-          <div className="flex items-center justify-center sm:justify-end gap-2 shrink-0">
+          <div className="mt-5 flex items-center justify-center gap-2">
             <Link
               href="/family"
-              className="hidden sm:inline-flex items-center gap-1 px-3 py-2 rounded-full border border-outline-variant/30 text-[11px] font-bold text-foreground/50 hover:text-secondary hover:border-secondary/40 uppercase tracking-widest transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-2 rounded-full border border-outline-variant/30 text-[11px] font-bold text-foreground/50 hover:text-secondary hover:border-secondary/40 uppercase tracking-widest transition-colors"
             >
               {t('dashboard.familyViewAll')}
               <ChevronRight className="w-3 h-3" />
