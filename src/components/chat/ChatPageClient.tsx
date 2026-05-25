@@ -187,9 +187,16 @@ const ChatPageClient: React.FC = () => {
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 mb-4">
                 <Sparkles className="w-3 h-3 text-secondary" />
                 <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-secondary">
-                  {t('chat.empty.badge')}
+                  {currentAvatar?.title ?? t('chat.empty.badge')}
                 </span>
               </div>
+
+              {/* Personal greeting (per-avatar) */}
+              {currentAvatar?.name && (
+                <p className="text-[13px] sm:text-[14px] font-semibold text-foreground/70 mb-1.5 text-center">
+                  {t('chat.empty.greeting', { name: currentAvatar.name })}
+                </p>
+              )}
 
               {/* Heading */}
               <h1 className="text-2xl sm:text-3xl 3xl:text-4xl font-headline font-bold text-foreground/90 tracking-tight text-center max-w-[18ch] mb-3">
@@ -199,7 +206,7 @@ const ChatPageClient: React.FC = () => {
 
               {/* Subtitle */}
               <p className="text-[13px] sm:text-[14px] text-foreground/45 max-w-[44ch] leading-relaxed text-center mb-1">
-                {t('chat.empty.subtitle')}
+                {currentAvatar?.description ?? t('chat.empty.subtitle')}
               </p>
 
               {/* Today's energy ribbon (if available) */}
