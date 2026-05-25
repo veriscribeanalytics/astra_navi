@@ -591,7 +591,7 @@ const ChatMessages: React.FC = () => {
                             <button
                               type="button"
                               disabled={isRunning || isError}
-                              onClick={() => { haptic(); resolvePendingAction(msg.id, action.memberId); }}
+                              onClick={() => { haptic(); resolvePendingAction(msg.id, action.memberId, action.connectionId); }}
                               className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border transition-colors text-left ${
                                 isRunning || isError
                                   ? 'bg-surface-variant/15 border-outline-variant/15 text-on-surface-variant/40 cursor-not-allowed'

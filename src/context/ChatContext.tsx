@@ -50,6 +50,10 @@ export interface PendingChatAction {
   memberName: string;
   relationshipType: FamilyRelationshipType | string;
   creditCost: number;
+  /** Present when the proposal is for a linked-family connection rather than
+   *  a manually-added member. Backend may send it instead of (or alongside)
+   *  `memberId`; when set we hit /connections/{id}/compatibility. */
+  connectionId?: number;
 }
 
 export interface ResolvedChatAction {
@@ -178,7 +182,7 @@ interface ChatContextType {
   selectedAvatarId: string;
   setSelectedAvatarId: (avatarId: string) => void;
   isLoadingAvatars: boolean;
-  resolvePendingAction: (messageId: string, memberId: number) => Promise<void>;
+  resolvePendingAction: (messageId: string, memberId: number, connectionId?: number) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -898,10 +902,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // ── Resolve a pendingAction the AI proposed ──
-  // Right now only `run_compatibility` exists; the lookup is by `memberId`.
+  // Right now only `run_compatibility` exists. When `connectionId` is set the
+  // proposal is for a linked-family connection (hits /connections/{id}/...);
+  // otherwise we use the manual /members/{id}/... endpoint. The resolved
+  // result is keyed by memberId on the message so the UI can render the
+  // inline result card next to the original action button.
   // 402s route through the same paywall surface as the chat-send endpoint so
   // the UX feels consistent (PaywallCard pops on either flow).
-  const resolvePendingAction = useCallback(async (messageId: string, memberId: number) => {
+  const resolvePendingAction = useCallback(async (messageId: string, memberId: number, connectionId?: number) => {
     const setActionState = (next: ResolvedChatAction) => {
       setActiveChat(prev => prev ? {
         ...prev,
@@ -915,9 +923,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActionState({ status: 'running' });
 
     try {
-      const res = await clientFetch(
-        `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility?lang=${encodeURIComponent(language)}`
-      );
+      const url = connectionId !== undefined
+        ? `/api/family/connections/${encodeURIComponent(String(connectionId))}/compatibility?lang=${encodeURIComponent(language)}`
+        : `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility?lang=${encodeURIComponent(language)}`;
+      const res = await clientFetch(url);
       const body = await res.json().catch(() => ({}));
 
       if (res.ok) {
@@ -929,6 +938,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const paywallData = body.paywall || body.detail?.paywall || body;
         setPaywall(paywallData as PaywallData);
         setActionState({ status: 'error', errorMessage: t('chat.pendingActionError') });
+        return;
+      }
+
+      // SHARING_REQUIRED on linked compat — surface inline as an error
+      // (the linked detail view is where users actually fix this).
+      const code = (body?.code ?? body?.detail?.code) as string | undefined;
+      if (code === 'SHARING_REQUIRED') {
+        setActionState({
+          status: 'error',
+          errorMessage: t('family.sharingRequired') || 'Sharing required on both sides before compatibility can be computed.',
+        });
         return;
       }
 

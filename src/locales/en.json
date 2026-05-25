@@ -15,7 +15,10 @@
     "onlineNow": "Online Now",
     "friend": "Friend",
     "goBack": "Go Back",
-    "returnHome": "Return Home"
+    "returnHome": "Return Home",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Saved"
   },
   "nav": {
     "login": "Login",
@@ -1157,6 +1160,8 @@
     "inviteByEmail": "Invite by Email",
     "inviteEmailLabel": "Email",
     "inviteEmailPlaceholder": "name@example.com",
+    "inviteEmailInvalid": "Enter a valid email",
+    "inviteFormDesc": "Send a link to someone with an AstraNavi account. They'll see the invite next time they sign in.",
     "inviteRelationshipLabel": "Relationship",
     "inviteMessageLabel": "Add a note (optional)",
     "inviteSend": "Send invite",
@@ -1199,6 +1204,10 @@
     "connectionDisconnectBody": "You'll lose linked compatibility access and the connection will be removed from both sides.",
     "connectionDisconnectConfirm": "Disconnect",
     "linkedBadge": "Linked",
+    "manage": "Manage",
+    "sharingTitle": "Sharing",
+    "avatarTitle": "Profile Icon",
+    "notesTitle": "My Notes",
     "sharingRequired": "Both of you need to enable sharing before compatibility can be computed.",
     "inviteErrorGeneric": "Something went wrong. Please try again.",
     "inviteErrorNoAccount": "They don't have an account yet. Ask them to sign up first.",

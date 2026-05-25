@@ -282,6 +282,95 @@ export function useFamilyCompatibility(memberId: number | string | null) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Linked-connection compatibility                                     */
+/* ------------------------------------------------------------------ */
+
+export interface ConnectionCompatibilityFetchResult extends CompatibilityFetchResult {
+    /** True when both sides haven't enabled sharing — UI should prompt
+     *  the user to toggle sharing on, rather than treating it as a hard error. */
+    sharingRequired?: boolean;
+}
+
+export function useFamilyConnectionCompatibility(connectionId: number | string | null) {
+    const [data, setData] = useState<FamilyCompatibilityResponse | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const cacheRef = useRef<Map<string, FamilyCompatibilityResponse>>(new Map());
+
+    const fetchCompatibility = useCallback(
+        async (lang: CompatibilityLang = 'en'): Promise<ConnectionCompatibilityFetchResult> => {
+            if (connectionId === null || connectionId === undefined || connectionId === '') {
+                return { ok: false, status: 0, data: null, error: 'No connection selected' };
+            }
+            const key = `${connectionId}:${lang}`;
+            const cached = cacheRef.current.get(key);
+            if (cached) {
+                setData(cached);
+                return { ok: true, status: 200, data: cached };
+            }
+            setIsLoading(true);
+            setError(null);
+
+            const url = `/api/family/connections/${encodeURIComponent(String(connectionId))}/compatibility?lang=${encodeURIComponent(lang)}`;
+
+            try {
+                for (let attempt = 0; attempt <= PENDING_RETRY_BACKOFFS_MS.length; attempt++) {
+                    const res = await clientFetch(url);
+                    const body = await res.json().catch(() => ({}));
+
+                    if (res.ok) {
+                        const result = body as FamilyCompatibilityResponse;
+                        cacheRef.current.set(key, result);
+                        setData(result);
+                        return { ok: true, status: res.status, data: result, raw: body };
+                    }
+
+                    // SHARING_REQUIRED — not an error to toast; surface inline.
+                    const code = (body?.code ?? body?.detail?.code) as string | undefined;
+                    if (code === 'SHARING_REQUIRED') {
+                        const msg = body.error || body.detail?.error || 'Sharing required';
+                        setError(msg);
+                        return {
+                            ok: false,
+                            status: res.status,
+                            data: null,
+                            error: msg,
+                            raw: body,
+                            sharingRequired: true,
+                        };
+                    }
+
+                    if (res.status === 409 && body?.error === 'reservation_pending') {
+                        if (attempt < PENDING_RETRY_BACKOFFS_MS.length) {
+                            await sleep(PENDING_RETRY_BACKOFFS_MS[attempt]);
+                            continue;
+                        }
+                        const msg = 'Still computing — please try again in a moment.';
+                        setError(msg);
+                        return { ok: false, status: 409, data: null, error: msg, raw: body, stillComputing: true };
+                    }
+
+                    const msg = body.error || body.detail || `Failed (${res.status})`;
+                    setError(msg);
+                    return { ok: false, status: res.status, data: null, error: msg, raw: body };
+                }
+
+                return { ok: false, status: 0, data: null, error: 'Unexpected retry exit' };
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : 'Failed to load compatibility';
+                setError(msg);
+                return { ok: false, status: 0, data: null, error: msg };
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [connectionId]
+    );
+
+    return { data, isLoading, error, fetchCompatibility, reset: () => setData(null) };
+}
+
+/* ------------------------------------------------------------------ */
 /* Mutations                                                           */
 /* ------------------------------------------------------------------ */
 

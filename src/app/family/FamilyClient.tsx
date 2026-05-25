@@ -7,7 +7,7 @@ import {
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
     Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
     ChevronDown, ChevronUp, HandHeart, Sparkles, Compass, FileText,
-    Sun, Moon, Flower, Activity,
+    Sun, Moon, Flower, Activity, Mail, Send, Link2, Settings,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -25,15 +25,22 @@ import {
     useFamilyAvatars,
     useFamilyCompatibilityPreflight,
     useFamilyReports,
+    useFamilyConnections,
+    useFamilyConnectionCompatibility,
+    sendInvite,
+    updateConnection,
+    deleteConnection,
 } from '@/hooks/useFamily';
 import {
     type FamilyMember,
+    type FamilyConnection,
     type FamilyRelationshipType,
     type FamilyGender,
     type CompatibilityLang,
     COMPATIBILITY_CREDIT_COST,
     FAMILY_FREE_TIER_LIMIT,
 } from '@/types/family';
+import { parseInviteErrorByStatus } from '@/lib/familyInviteErrors';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import { bandPalette } from '@/lib/familyStatus';
 import FamilyChartView from '@/components/family/FamilyChartView';
@@ -95,10 +102,12 @@ export default function FamilyClient() {
     const { tier } = usePaywallContext();
     const { success, error: toastError, info } = useToast();
     const { data: members, isLoading, error, refetch } = useFamilyMembers();
+    const { data: connections, refetch: refetchConnections } = useFamilyConnections();
 
-    const [view, setView] = useState<'list' | 'form' | 'detail'>('list');
+    const [view, setView] = useState<'list' | 'form' | 'detail' | 'invite' | 'connectionDetail'>('list');
     const [editing, setEditing] = useState<FamilyMember | null>(null);
     const [detailMember, setDetailMember] = useState<FamilyMember | null>(null);
+    const [detailConnection, setDetailConnection] = useState<FamilyConnection | null>(null);
     const [deletingMember, setDeletingMember] = useState<FamilyMember | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -122,12 +131,18 @@ export default function FamilyClient() {
     }, [memberIdParam, members]);
 
     const isFreeTier = !tier || tier === 'free';
-    const memberCount = members?.length ?? 0;
-    const atFreeCap = isFreeTier && memberCount >= FAMILY_FREE_TIER_LIMIT;
+    const manualCount = members?.length ?? 0;
+    const linkedCount = connections?.length ?? 0;
+    const totalCount = manualCount + linkedCount;
+    const atFreeCap = isFreeTier && totalCount >= FAMILY_FREE_TIER_LIMIT;
 
     const openAdd = () => {
         setEditing(null);
         setView('form');
+    };
+
+    const openInvite = () => {
+        setView('invite');
     };
 
     const openEdit = (m: FamilyMember) => {
@@ -138,6 +153,18 @@ export default function FamilyClient() {
     const openDetail = (m: FamilyMember) => {
         setDetailMember(m);
         setView('detail');
+    };
+
+    const openConnectionDetail = (c: FamilyConnection) => {
+        setDetailConnection(c);
+        setView('connectionDetail');
+    };
+
+    const backToList = () => {
+        setView('list');
+        setEditing(null);
+        setDetailMember(null);
+        setDetailConnection(null);
     };
 
     const handleDelete = async () => {
@@ -177,25 +204,32 @@ export default function FamilyClient() {
                             </p>
                         </div>
                         {view === 'list' && (
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={openAdd}
-                                leftIcon={<Plus className="w-4 h-4" />}
-                                disabled={atFreeCap}
-                            >
-                                {t('family.addMember') || 'Add Member'}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={openInvite}
+                                    leftIcon={<Mail className="w-4 h-4" />}
+                                    disabled={atFreeCap}
+                                >
+                                    {t('family.inviteByEmail') || 'Invite by Email'}
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={openAdd}
+                                    leftIcon={<Plus className="w-4 h-4" />}
+                                    disabled={atFreeCap}
+                                >
+                                    {t('family.addMember') || 'Add Member'}
+                                </Button>
+                            </div>
                         )}
                         {view !== 'list' && (
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                    setView('list');
-                                    setEditing(null);
-                                    setDetailMember(null);
-                                }}
+                                onClick={backToList}
                                 leftIcon={<X className="w-4 h-4" />}
                             >
                                 {t('common.back') || 'Back'}
@@ -208,7 +242,7 @@ export default function FamilyClient() {
                         <div className="mt-4 flex items-center gap-2 text-[11px] text-on-surface-variant/70">
                             <Crown className="w-3.5 h-3.5 text-secondary/70" />
                             <span>
-                                {memberCount} / {FAMILY_FREE_TIER_LIMIT} {t('family.freeTierUsed') || 'members used on Free tier'}
+                                {totalCount} / {FAMILY_FREE_TIER_LIMIT} {t('family.freeTierUsed') || 'members used on Free tier'}
                             </span>
                             {atFreeCap && (
                                 <a href="/plans" className="text-secondary font-bold hover:underline">
@@ -223,9 +257,11 @@ export default function FamilyClient() {
                 {view === 'list' && (
                     <FamilyList
                         members={members}
+                        connections={connections}
                         isLoading={isLoading}
                         error={error}
                         onOpen={openDetail}
+                        onOpenConnection={openConnectionDetail}
                         onEdit={openEdit}
                         onDelete={(m) => setDeletingMember(m)}
                         onAdd={openAdd}
@@ -236,7 +272,7 @@ export default function FamilyClient() {
                 {view === 'form' && (
                     <FamilyMemberForm
                         editing={editing}
-                        onCancel={() => setView('list')}
+                        onCancel={backToList}
                         onSaved={(member, isNew) => {
                             success(
                                 isNew
@@ -258,8 +294,33 @@ export default function FamilyClient() {
                     />
                 )}
 
+                {view === 'invite' && (
+                    <FamilyInviteForm
+                        onCancel={backToList}
+                        onSent={() => {
+                            success(t('family.inviteSent') || 'Invite sent');
+                            setView('list');
+                        }}
+                    />
+                )}
+
                 {view === 'detail' && detailMember && (
                     <FamilyMemberDetail member={detailMember} onEdit={() => openEdit(detailMember)} />
+                )}
+
+                {view === 'connectionDetail' && detailConnection && (
+                    <FamilyConnectionDetail
+                        connection={detailConnection}
+                        onUpdated={(updated) => {
+                            setDetailConnection(updated);
+                            refetchConnections();
+                        }}
+                        onDisconnected={() => {
+                            success(`${detailConnection.otherName} disconnected.`);
+                            refetchConnections();
+                            backToList();
+                        }}
+                    />
                 )}
             </div>
 
@@ -288,17 +349,23 @@ export default function FamilyClient() {
 
 interface FamilyListProps {
     members: FamilyMember[] | null;
+    connections: FamilyConnection[] | null;
     isLoading: boolean;
     error: string | null;
     onOpen: (m: FamilyMember) => void;
+    onOpenConnection: (c: FamilyConnection) => void;
     onEdit: (m: FamilyMember) => void;
     onDelete: (m: FamilyMember) => void;
     onAdd: () => void;
     atFreeCap: boolean;
 }
 
-function FamilyList({ members, isLoading, error, onOpen, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
+function FamilyList({ members, connections, isLoading, error, onOpen, onOpenConnection, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
     const { t } = useTranslation();
+
+    const hasMembers = !!members && members.length > 0;
+    const hasConnections = !!connections && connections.length > 0;
+    const isEmpty = !hasMembers && !hasConnections;
 
     if (isLoading && !members) {
         return (
@@ -321,7 +388,7 @@ function FamilyList({ members, isLoading, error, onOpen, onEdit, onDelete, onAdd
         );
     }
 
-    if (!members || members.length === 0) {
+    if (isEmpty) {
         return (
             <Card variant="default" padding="lg">
                 <div className="text-center py-8">
@@ -345,16 +412,16 @@ function FamilyList({ members, isLoading, error, onOpen, onEdit, onDelete, onAdd
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {members.map((m) => (
-                <Card key={m.id} variant="default" padding="md" hoverable>
+            {(members ?? []).map((m) => (
+                <Card key={`m-${m.id}`} variant="default" padding="md" hoverable>
                     <div className="flex items-start gap-3">
                         {m.avatar ? (
-                            <div 
+                            <div
                                 className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
-                                style={{ 
+                                style={{
                                     color: m.avatar.accentColor || 'var(--secondary)',
                                     borderColor: `${m.avatar.accentColor || 'var(--secondary)'}33`,
-                                    backgroundColor: `${m.avatar.accentColor || 'var(--secondary)'}11` 
+                                    backgroundColor: `${m.avatar.accentColor || 'var(--secondary)'}11`
                                 }}
                             >
                                 {React.createElement(getFamilyIcon(m.avatar.iconKey), { className: 'w-5 h-5' })}
@@ -408,7 +475,68 @@ function FamilyList({ members, isLoading, error, onOpen, onEdit, onDelete, onAdd
                     </div>
                 </Card>
             ))}
+            {(connections ?? []).map((c) => (
+                <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
+            ))}
         </div>
+    );
+}
+
+function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnection; onManage: () => void }) {
+    const { t } = useTranslation();
+    const accent = c.avatar?.accentColor || 'var(--secondary)';
+    return (
+        <Card variant="default" padding="md" hoverable>
+            <div className="flex items-start gap-3">
+                {c.avatar ? (
+                    <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
+                        style={{
+                            color: accent,
+                            borderColor: `${accent}33`,
+                            backgroundColor: `${accent}11`,
+                        }}
+                    >
+                        {React.createElement(getFamilyIcon(c.avatar.iconKey), { className: 'w-5 h-5' })}
+                    </div>
+                ) : (
+                    <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
+                        {c.otherName.charAt(0).toUpperCase()}
+                    </div>
+                )}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-base font-headline font-bold text-primary truncate">{c.otherName}</h3>
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/30">
+                            <Link2 className="w-2.5 h-2.5" />
+                            {t('family.linkedBadge') || 'Linked'}
+                        </span>
+                    </div>
+                    <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
+                        {c.iSeeThemAs}
+                    </p>
+                    <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
+                        <div className="flex items-center gap-1.5 truncate">
+                            <Mail className="w-3 h-3 opacity-50 shrink-0" />
+                            <span className="truncate">{c.otherEmail}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Heart className={`w-3 h-3 ${c.sharingWithThem ? 'text-emerald-400' : 'opacity-40'}`} />
+                            <span className={c.sharingWithThem ? 'text-emerald-400' : 'text-on-surface-variant/50'}>
+                                {c.sharingWithThem
+                                    ? (t('family.connectionSharingOn') || 'Sharing on')
+                                    : (t('family.connectionSharingOff') || 'Sharing off')}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1 mt-4">
+                        <Button variant="primary" size="sm" onClick={onManage} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
+                            {t('family.manage') || 'Manage'}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </Card>
     );
 }
 
@@ -1410,6 +1538,583 @@ function CompatibilityResult({
                     Re-run analysis
                 </Button>
             )}
+        </div>
+    );
+}
+
+/* ====================================================================== */
+/* INVITE FORM (inline on /family)                                        */
+/* ====================================================================== */
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: () => void }) {
+    const { t } = useTranslation();
+    const { error: toastError } = useToast();
+
+    const [email, setEmail] = useState('');
+    const [relationship, setRelationship] = useState<FamilyRelationshipType>('friend');
+    const [message, setMessage] = useState('');
+    const [emailTouched, setEmailTouched] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+
+    const emailValid = EMAIL_REGEX.test(email.trim());
+    const emailError = emailTouched && !emailValid ? (t('family.inviteEmailInvalid') || 'Enter a valid email') : undefined;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setEmailTouched(true);
+        if (!emailValid || isSending) return;
+        setIsSending(true);
+        const res = await sendInvite({
+            email: email.trim(),
+            relationshipType: relationship,
+            message: message.trim() || undefined,
+        });
+        setIsSending(false);
+        if (res.ok) {
+            onSent();
+            return;
+        }
+        toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+    };
+
+    return (
+        <Card variant="default" padding="lg">
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                    <h2 className="text-lg font-headline font-bold text-primary mb-1">
+                        {t('family.inviteByEmail') || 'Invite by Email'}
+                    </h2>
+                    <p className="text-xs text-on-surface-variant/60">
+                        {t('family.inviteFormDesc') ||
+                            "Send a link to someone with an AstraNavi account. They'll see the invite next time they sign in."}
+                    </p>
+                </div>
+
+                <Input
+                    label={t('family.inviteEmailLabel') || 'Email'}
+                    type="email"
+                    icon={<Mail className="w-4 h-4" />}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => setEmailTouched(true)}
+                    placeholder={t('family.inviteEmailPlaceholder') || 'name@example.com'}
+                    required
+                    error={emailError}
+                />
+
+                <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
+                        {t('family.inviteRelationshipLabel') || 'Relationship'}
+                        <span className="text-secondary ml-1">*</span>
+                    </label>
+                    <select
+                        value={relationship}
+                        onChange={(e) => setRelationship(e.target.value as FamilyRelationshipType)}
+                        className="w-full bg-surface border border-outline-variant/30 rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 sm:py-3.5 md:py-4 text-sm sm:text-base text-primary"
+                    >
+                        {RELATIONSHIP_TYPES.map((r) => (
+                            <option key={r.value} value={r.value}>
+                                {r.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
+                        {t('family.inviteMessageLabel') || 'Add a note (optional)'}
+                    </label>
+                    <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        rows={3}
+                        maxLength={500}
+                        placeholder="Hey, let's stay connected on AstraNavi…"
+                        className="w-full bg-surface border border-outline-variant/30 hover:border-secondary/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary outline-none transition-all rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 text-sm text-primary placeholder:text-primary/40 resize-none"
+                    />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                    <Button type="button" variant="ghost" onClick={onCancel} disabled={isSending}>
+                        {t('common.cancel') || 'Cancel'}
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        loading={isSending}
+                        leftIcon={<Send className="w-4 h-4" />}
+                        disabled={!emailValid}
+                    >
+                        {isSending
+                            ? (t('family.inviteSending') || 'Sending…')
+                            : (t('family.inviteSend') || 'Send invite')}
+                    </Button>
+                </div>
+            </form>
+        </Card>
+    );
+}
+
+/* ====================================================================== */
+/* CONNECTION DETAIL — sharing toggle, notes, avatar, disconnect           */
+/* ====================================================================== */
+
+function FamilyConnectionDetail({
+    connection,
+    onUpdated,
+    onDisconnected,
+}: {
+    connection: FamilyConnection;
+    onUpdated: (c: FamilyConnection) => void;
+    onDisconnected: () => void;
+}) {
+    const { t } = useTranslation();
+    const { success, error: toastError, info, warning } = useToast();
+    const { totalCredits } = usePaywallContext();
+    const { data: avatars } = useFamilyAvatars();
+    const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
+
+    const [notes, setNotes] = useState(connection.myNotes ?? '');
+    const [savingNotes, setSavingNotes] = useState(false);
+    const [togglingShare, setTogglingShare] = useState(false);
+    const [savingAvatar, setSavingAvatar] = useState(false);
+    const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+    const [isDisconnecting, setIsDisconnecting] = useState(false);
+    const [lang, setLang] = useState<CompatibilityLang>('en');
+    const [confirmingPurchase, setConfirmingPurchase] = useState(false);
+    const [sharingRequired, setSharingRequired] = useState(false);
+
+    const accent = connection.avatar?.accentColor || 'var(--secondary)';
+    const creditCost = COMPATIBILITY_CREDIT_COST[connection.iSeeThemAs] ?? 5;
+    const alreadyPaidForLang = useMemo(
+        () => compat?.lang === lang,
+        [compat, lang]
+    );
+
+    const persist = async (payload: Parameters<typeof updateConnection>[1]) => {
+        const res = await updateConnection(connection.connectionId, payload);
+        if (!res.ok || !res.data) {
+            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            return false;
+        }
+        onUpdated(res.data);
+        return true;
+    };
+
+    const toggleShare = async () => {
+        setTogglingShare(true);
+        const ok = await persist({ sharingWithThem: !connection.sharingWithThem });
+        setTogglingShare(false);
+        if (ok) {
+            success(!connection.sharingWithThem
+                ? (t('family.connectionSharingOn') || 'Sharing on')
+                : (t('family.connectionSharingOff') || 'Sharing off'));
+            // Clear inline gating so user can retry compat now.
+            if (!connection.sharingWithThem) setSharingRequired(false);
+        }
+    };
+
+    const saveNotes = async () => {
+        setSavingNotes(true);
+        const ok = await persist({ notes });
+        setSavingNotes(false);
+        if (ok) success(t('common.saved') || 'Saved');
+    };
+
+    const selectAvatar = async (key: string) => {
+        if (savingAvatar || key === (connection.myAvatarKey ?? '')) return;
+        setSavingAvatar(true);
+        await persist({ avatarKey: key });
+        setSavingAvatar(false);
+    };
+
+    const handleDisconnect = async () => {
+        setIsDisconnecting(true);
+        const res = await deleteConnection(connection.connectionId);
+        setIsDisconnecting(false);
+        setConfirmDisconnect(false);
+        if (!res.ok) {
+            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            return;
+        }
+        onDisconnected();
+    };
+
+    const runCompatibility = async () => {
+        setConfirmingPurchase(false);
+        setSharingRequired(false);
+        const res = await fetchCompatibility(lang);
+        if (res.ok) {
+            if (res.data?.cached) {
+                info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
+            } else {
+                success(`${creditCost} credits used for compatibility analysis.`);
+            }
+            return;
+        }
+        if (res.sharingRequired) {
+            setSharingRequired(true);
+            warning(t('family.sharingRequired') || 'Sharing required on both sides before compatibility can be computed.');
+            return;
+        }
+        if (res.status === 402) {
+            toastError(`Insufficient credits. You need ${creditCost} credits to run this analysis.`);
+            return;
+        }
+        if (res.status === 409 && res.stillComputing) {
+            info('Still computing — please try again in a few seconds.');
+            return;
+        }
+        toastError(res.error || 'Compatibility request failed.');
+    };
+
+    const startCompatibility = () => {
+        if (alreadyPaidForLang) return;
+        // Pre-check sharing locally; backend will enforce too but this gives instant feedback.
+        if (!connection.sharingWithThem || !connection.theyShareWithMe) {
+            setSharingRequired(true);
+            return;
+        }
+        setConfirmingPurchase(true);
+    };
+
+    const notesDirty = (notes ?? '') !== (connection.myNotes ?? '');
+
+    return (
+        <div className="space-y-6">
+            {/* Header card */}
+            <Card variant="default" padding="lg">
+                <div className="flex items-start gap-4">
+                    {connection.avatar ? (
+                        <div
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border"
+                            style={{
+                                color: accent,
+                                borderColor: `${accent}33`,
+                                backgroundColor: `${accent}11`,
+                            }}
+                        >
+                            {React.createElement(getFamilyIcon(connection.avatar.iconKey), { className: 'w-6 h-6' })}
+                        </div>
+                    ) : (
+                        <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-lg font-bold shrink-0">
+                            {connection.otherName.charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-xl font-headline font-bold text-primary">{connection.otherName}</h2>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/30">
+                                <Link2 className="w-3 h-3" />
+                                {t('family.linkedBadge') || 'Linked'}
+                            </span>
+                        </div>
+                        <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
+                            {connection.iSeeThemAs}
+                        </p>
+                        <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
+                            <div className="flex items-center gap-1.5 truncate">
+                                <Mail className="w-3 h-3 opacity-50 shrink-0" />
+                                <span className="truncate">{connection.otherEmail}</span>
+                            </div>
+                            <p className="text-[11px] text-on-surface-variant/60">
+                                {(t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs)}
+                                {' · '}
+                                {(t('family.connectionTheySeeMeAs') || 'They see you as {label}').replace('{label}', connection.theySeeMeAs)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Sharing controls */}
+            <Card variant="default" padding="lg">
+                <div className="flex items-center gap-2 mb-3">
+                    <Settings className="w-4 h-4 text-secondary" />
+                    <h3 className="text-sm font-headline font-bold text-primary">
+                        {t('family.sharingTitle') || 'Sharing'}
+                    </h3>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-outline-variant/20 bg-surface">
+                        <div className="min-w-0">
+                            <p className="text-[12px] font-bold text-primary">
+                                {t('family.connectionSharingWith') || "I'm sharing with them"}
+                            </p>
+                            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+                                {connection.sharingWithThem
+                                    ? (t('family.connectionSharingOn') || 'Sharing on')
+                                    : (t('family.connectionSharingOff') || 'Sharing off')}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={toggleShare}
+                            disabled={togglingShare}
+                            aria-pressed={connection.sharingWithThem}
+                            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${
+                                connection.sharingWithThem
+                                    ? 'bg-emerald-500/60 border-emerald-400'
+                                    : 'bg-outline-variant/30 border-outline-variant/40'
+                            } ${togglingShare ? 'opacity-60' : ''}`}
+                        >
+                            <span
+                                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                                    connection.sharingWithThem ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                            />
+                        </button>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-outline-variant/15 bg-surface-variant/30">
+                        <div className="min-w-0">
+                            <p className="text-[12px] font-bold text-primary">
+                                {t('family.connectionTheyShareWithMe') || "They're sharing with me"}
+                            </p>
+                            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+                                {connection.theyShareWithMe
+                                    ? (t('family.connectionSharingOn') || 'Sharing on')
+                                    : (t('family.connectionSharingOff') || 'Sharing off')}
+                            </p>
+                        </div>
+                        <span
+                            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${
+                                connection.theyShareWithMe
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                    : 'bg-outline-variant/15 text-on-surface-variant/50 border-outline-variant/30'
+                            }`}
+                        >
+                            {connection.theyShareWithMe ? 'Yes' : 'Waiting'}
+                        </span>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Compatibility */}
+            <Card variant="default" padding="lg">
+                <div className="flex items-center gap-2 mb-3">
+                    <Heart className="w-4 h-4 text-secondary" />
+                    <h3 className="text-sm font-headline font-bold text-primary">
+                        {t('family.compatibility') || 'Compatibility'}
+                    </h3>
+                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
+                        <Coins className="w-3 h-3" /> {creditCost} credits
+                    </span>
+                </div>
+
+                <p className="text-xs text-on-surface-variant/60 mb-4">
+                    {t('family.compatibilityDesc') ||
+                        'First read charges credits. Repeating the same language is free.'}
+                </p>
+
+                {/* Language picker */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {LANGS.map((l) => (
+                        <button
+                            key={l.value}
+                            onClick={() => setLang(l.value)}
+                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
+                                lang === l.value
+                                    ? 'bg-secondary text-white border-secondary'
+                                    : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
+                            }`}
+                        >
+                            {l.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* SHARING_REQUIRED inline gate */}
+                {sharingRequired && !compat && (
+                    <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+                        <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[12px] font-bold text-amber-300">
+                                    {t('family.sharingRequired') ||
+                                        'Both of you need to enable sharing before compatibility can be computed.'}
+                                </p>
+                                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-outline-variant/20 bg-surface">
+                                        <span className="text-[11px] font-bold text-primary">You</span>
+                                        <button
+                                            type="button"
+                                            onClick={toggleShare}
+                                            disabled={togglingShare}
+                                            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border transition-colors ${
+                                                connection.sharingWithThem
+                                                    ? 'bg-emerald-500/60 border-emerald-400'
+                                                    : 'bg-outline-variant/30 border-outline-variant/40'
+                                            } ${togglingShare ? 'opacity-60' : ''}`}
+                                        >
+                                            <span
+                                                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                                                    connection.sharingWithThem ? 'translate-x-4' : 'translate-x-0'
+                                                }`}
+                                            />
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-outline-variant/15 bg-surface-variant/30">
+                                        <span className="text-[11px] font-bold text-primary">{connection.otherName}</span>
+                                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                                            connection.theyShareWithMe
+                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                                : 'bg-outline-variant/15 text-on-surface-variant/50 border-outline-variant/30'
+                                        }`}>
+                                            {connection.theyShareWithMe ? 'On' : 'Waiting'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {!compat && !compatLoading && (
+                    <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
+                        Check Compatibility · {creditCost} credits
+                    </Button>
+                )}
+
+                {compatLoading && (
+                    <div className="text-secondary/60 text-sm flex items-center gap-2">
+                        <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
+                    </div>
+                )}
+
+                {compat && (
+                    <CompatibilityResult result={compat} onRerun={startCompatibility} alreadyPaid={!!alreadyPaidForLang} />
+                )}
+
+                {totalCredits != null && totalCredits < creditCost && !compat && (
+                    <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
+                        <a href="/plans" className="font-bold underline">
+                            Top up
+                        </a>
+                    </div>
+                )}
+            </Card>
+
+            {/* Avatar picker */}
+            {avatars && avatars.length > 0 && (
+                <Card variant="default" padding="lg">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-4 h-4 text-secondary" />
+                        <h3 className="text-sm font-headline font-bold text-primary">
+                            {t('family.avatarTitle') || 'Profile Icon'}
+                        </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-3 p-3 rounded-[24px] border border-outline-variant/30 bg-surface-variant/10">
+                        {avatars.map((av) => {
+                            const isSelected = (connection.myAvatarKey ?? '') === av.key;
+                            return (
+                                <button
+                                    key={av.key}
+                                    type="button"
+                                    disabled={savingAvatar}
+                                    onClick={() => selectAvatar(av.key)}
+                                    className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 ${
+                                        isSelected
+                                            ? 'scale-110 shadow-md border-opacity-100'
+                                            : 'opacity-65 hover:opacity-100 hover:scale-105 border-transparent'
+                                    } ${savingAvatar ? 'opacity-40 cursor-wait' : ''}`}
+                                    style={{
+                                        color: av.accentColor || 'var(--secondary)',
+                                        borderColor: isSelected ? av.accentColor || 'var(--secondary)' : 'transparent',
+                                        backgroundColor: isSelected
+                                            ? `${av.accentColor || 'var(--secondary)'}22`
+                                            : `${av.accentColor || 'var(--secondary)'}08`,
+                                    }}
+                                    title={av.label}
+                                >
+                                    {React.createElement(getFamilyIcon(av.iconKey), { className: 'w-5 h-5' })}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </Card>
+            )}
+
+            {/* Notes */}
+            <Card variant="default" padding="lg">
+                <div className="flex items-center gap-2 mb-3">
+                    <FileText className="w-4 h-4 text-secondary" />
+                    <h3 className="text-sm font-headline font-bold text-primary">
+                        {t('family.notesTitle') || 'My Notes'}
+                    </h3>
+                </div>
+                <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    maxLength={1000}
+                    placeholder="Private — only you will see this."
+                    className="w-full bg-surface border border-outline-variant/30 hover:border-secondary/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary outline-none transition-all rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 text-sm text-primary placeholder:text-primary/40 resize-none"
+                />
+                <div className="mt-3 flex items-center justify-end gap-2">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={saveNotes}
+                        loading={savingNotes}
+                        disabled={!notesDirty || savingNotes}
+                    >
+                        {t('common.save') || 'Save'}
+                    </Button>
+                </div>
+            </Card>
+
+            {/* Disconnect */}
+            <Card variant="bordered" padding="md" className="border-red-500/30">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <p className="text-sm font-bold text-red-400">
+                            {t('family.connectionDisconnect') || 'Disconnect'}
+                        </p>
+                        <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+                            {t('family.connectionDisconnectBody') ||
+                                "You'll lose linked compatibility access and the connection will be removed from both sides."}
+                        </p>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmDisconnect(true)}
+                        leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                        className="text-red-400 hover:text-red-500 shrink-0"
+                    >
+                        {t('family.connectionDisconnect') || 'Disconnect'}
+                    </Button>
+                </div>
+            </Card>
+
+            <ConfirmDialog
+                isOpen={confirmDisconnect}
+                onClose={() => setConfirmDisconnect(false)}
+                onConfirm={handleDisconnect}
+                title={(t('family.connectionDisconnectTitle') || 'Disconnect from {name}?').replace('{name}', connection.otherName)}
+                message={t('family.connectionDisconnectBody') ||
+                    "You'll lose linked compatibility access and the connection will be removed from both sides."}
+                confirmText={t('family.connectionDisconnectConfirm') || 'Disconnect'}
+                cancelText={t('common.cancel') || 'Cancel'}
+                variant="danger"
+                isLoading={isDisconnecting}
+            />
+
+            <ConfirmDialog
+                isOpen={confirmingPurchase}
+                onClose={() => setConfirmingPurchase(false)}
+                onConfirm={runCompatibility}
+                title={`Use ${creditCost} credits?`}
+                message={`This will charge ${creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis with ${connection.otherName}. Repeating the same language later is free.`}
+                confirmText={`Use ${creditCost} credits`}
+                cancelText={t('common.cancel') || 'Cancel'}
+                variant="warning"
+                isLoading={compatLoading}
+            />
         </div>
     );
 }
