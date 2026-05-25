@@ -779,6 +779,7 @@
     },
     "empty": {
       "badge": "Your Personal Vedic Guide",
+      "greeting": "Namaste, I'm {name}.",
       "headingLead": "What would you like to understand",
       "headingAccent": "today?",
       "subtitle": "Ask about your chart, timing, relationships, career, or today's planetary energy.",
@@ -1143,7 +1144,8 @@
   "family": {
     "myFamily": "My Family",
     "subtitle": "Save birth details, view charts, and check compatibility with loved ones.",
-    "addMember": "Add Member",
+    "addMember": "Add Family Member",
+    "addFamilyMember": "Add Family Member",
     "editMember": "Edit Family Member",
     "addFirstMember": "Add Your First Member",
     "empty": "No family members yet",

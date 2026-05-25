@@ -102,6 +102,29 @@ function formatReportDate(value: string | null | undefined): string {
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function formatDob(value: string | null | undefined): string {
+    if (!value) return '—';
+    // Backend yields YYYY-MM-DD. Parse as local date (avoid timezone shifts from `new Date('YYYY-MM-DD')` which is treated as UTC).
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match) return value;
+    const [, y, m, day] = match;
+    const dt = new Date(Number(y), Number(m) - 1, Number(day));
+    if (Number.isNaN(dt.getTime())) return value;
+    return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatTob(value: string | null | undefined): string {
+    if (!value) return '—';
+    const match = /^(\d{1,2}):(\d{2})/.exec(value);
+    if (!match) return value;
+    const h24 = Number(match[1]);
+    const min = match[2];
+    if (Number.isNaN(h24)) return value;
+    const period = h24 >= 12 ? 'PM' : 'AM';
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    return `${String(h12).padStart(2, '0')}:${min} ${period}`;
+}
+
 /* ====================================================================== */
 /* MAIN CLIENT                                                            */
 /* ====================================================================== */
@@ -1051,14 +1074,14 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                             <Calendar className="w-3.5 h-3.5 text-secondary/70" />
                             <div className="flex flex-col leading-tight">
                                 <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">DOB</span>
-                                <span className="font-bold text-primary">{member.dob}</span>
+                                <span className="font-bold text-primary">{formatDob(member.dob)}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <Clock className="w-3.5 h-3.5 text-secondary/70" />
                             <div className="flex flex-col leading-tight">
                                 <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">Time</span>
-                                <span className="font-bold text-primary">{member.tob}</span>
+                                <span className="font-bold text-primary">{formatTob(member.tob)}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 min-w-0">
@@ -1070,8 +1093,8 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 md:ml-auto md:w-56 md:shrink-0">
-                        <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-2 md:ml-auto md:w-64 md:shrink-0">
+                        <div className="grid grid-cols-2 gap-2">
                             <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />} fullWidth>
                                 Edit
                             </Button>
