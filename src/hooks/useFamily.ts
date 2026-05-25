@@ -578,7 +578,22 @@ export function useFamilyReports(memberId: number | string | null) {
                 throw new Error(body.error || body.detail || 'Failed to load reports');
             }
             const reportsList = Array.isArray(body.reports) ? body.reports : (Array.isArray(body) ? body : []);
-            setData(reportsList);
+            const normalized: FamilyReport[] = reportsList
+                .map((r: Record<string, unknown>): FamilyReport | null => {
+                    if (!r || typeof r !== 'object') return null;
+                    const id = (r.id ?? r.report_id) as number | undefined;
+                    if (typeof id !== 'number') return null;
+                    return {
+                        id,
+                        memberId: (r.member_id ?? r.memberId ?? 0) as number,
+                        reportType: (r.report_type ?? r.reportType ?? '') as string,
+                        title: (r.title ?? '') as string,
+                        summary: (r.summary ?? undefined) as string | undefined,
+                        createdAt: (r.created_at ?? r.createdAt ?? '') as string,
+                    };
+                })
+                .filter((r: FamilyReport | null): r is FamilyReport => r !== null);
+            setData(normalized);
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to load reports';
             setError(msg);

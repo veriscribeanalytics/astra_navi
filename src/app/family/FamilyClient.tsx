@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
@@ -91,6 +92,14 @@ function detectLanguageMismatch(
 
     if (!actual || actual === requested) return null;
     return actual;
+}
+
+/** Format an ISO date string safely. Returns null when the value is missing or unparseable. */
+function formatReportDate(value: string | null | undefined): string {
+    if (!value) return '—';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 /* ====================================================================== */
@@ -398,7 +407,7 @@ function FamilyList({ members, connections, isLoading, error, onOpen, onOpenConn
                     <h3 className="text-lg font-headline font-bold text-primary mb-2">
                         {t('family.empty') || 'No family members yet'}
                     </h3>
-                    <p className="text-sm text-on-surface-variant/60 mb-5 max-w-md mx-auto">
+                    <p className="text-sm text-on-surface-variant/75 mb-5 max-w-md mx-auto">
                         {t('family.emptyDesc') ||
                             'Add a parent, partner, or friend to view their chart and check compatibility.'}
                     </p>
@@ -458,14 +467,14 @@ function FamilyList({ members, connections, isLoading, error, onOpen, onOpenConn
                                 </Button>
                                 <button
                                     onClick={() => onEdit(m)}
-                                    className="p-2 rounded-xl text-on-surface-variant/60 hover:text-secondary hover:bg-secondary/5 transition-colors"
+                                    className="p-2 rounded-xl text-on-surface-variant/75 hover:text-secondary hover:bg-secondary/5 transition-colors"
                                     aria-label="Edit"
                                 >
                                     <Pencil className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => onDelete(m)}
-                                    className="p-2 rounded-xl text-on-surface-variant/60 hover:text-red-500 hover:bg-red-500/5 transition-colors"
+                                    className="p-2 rounded-xl text-on-surface-variant/75 hover:text-red-500 hover:bg-red-500/5 transition-colors"
                                     aria-label="Remove"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -522,7 +531,7 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
                         </div>
                         <div className="flex items-center gap-1.5">
                             <Heart className={`w-3 h-3 ${c.sharingWithThem ? 'text-emerald-400' : 'opacity-40'}`} />
-                            <span className={c.sharingWithThem ? 'text-emerald-400' : 'text-on-surface-variant/50'}>
+                            <span className={c.sharingWithThem ? 'text-emerald-400' : 'text-on-surface-variant/70'}>
                                 {c.sharingWithThem
                                     ? (t('family.connectionSharingOn') || 'Sharing on')
                                     : (t('family.connectionSharingOff') || 'Sharing off')}
@@ -699,7 +708,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                             ? t('family.editMember') || 'Edit Family Member'
                             : t('family.addMember') || 'Add Family Member'}
                     </h2>
-                    <p className="text-xs text-on-surface-variant/60">
+                    <p className="text-xs text-on-surface-variant/75">
                         {t('family.formDesc') ||
                             'Use the most accurate birth time and location for reliable charts.'}
                     </p>
@@ -732,7 +741,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                             ))}
                         </select>
                         {isEdit && (
-                            <p className="text-[10px] text-on-surface-variant/50 ml-1">
+                            <p className="text-[10px] text-on-surface-variant/70 ml-1">
                                 Relationship is fixed after creation.
                             </p>
                         )}
@@ -813,7 +822,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
 
                 <div className="space-y-2">
                     <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
-                        Notes <span className="text-on-surface-variant/40 normal-case">(optional)</span>
+                        Notes <span className="text-on-surface-variant/65 normal-case">(optional)</span>
                     </label>
                     <textarea
                         value={state.notes}
@@ -908,8 +917,13 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
     const { data: reports } = useFamilyReports(member.id);
     const { fetchPreflight, isLoading: preflightLoading } = useFamilyCompatibilityPreflight(member.id);
     const [preflightData, setPreflightData] = useState<any>(null);
+    const compatRef = useRef<HTMLDivElement | null>(null);
 
     const creditCost = COMPATIBILITY_CREDIT_COST[member.relationshipType] ?? 5;
+
+    const scrollToCompat = () => {
+        compatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
     const alreadyPaidForLang = useMemo(
         () => compat?.lang === lang && compat?.member_id === member.id,
@@ -1035,10 +1049,29 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                             </div>
                         </div>
                         {member.notes && (
-                            <p className="mt-3 text-[12px] text-on-surface-variant/60 italic">
+                            <p className="mt-3 text-[12px] text-on-surface-variant/75 italic">
                                 &ldquo;{member.notes}&rdquo;
                             </p>
                         )}
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={scrollToCompat}
+                                leftIcon={<Heart className="w-3.5 h-3.5" />}
+                            >
+                                {compat ? 'View Compatibility' : 'Check Compatibility'}
+                            </Button>
+                            <Link href="/chat" className="inline-flex">
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    leftIcon={<MessageCircle className="w-3.5 h-3.5" />}
+                                >
+                                    Ask Navi about {member.name.split(' ')[0]}
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                     <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />}>
                         Edit
@@ -1053,7 +1086,7 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                     <h3 className="text-sm font-headline font-bold text-primary">
                         {t('family.chartTitle') || 'Birth Chart'}
                     </h3>
-                    <span className="ml-auto text-[10px] uppercase tracking-wider text-secondary/70 font-bold">
+                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
                         Free
                     </span>
                 </div>
@@ -1088,12 +1121,8 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                                     <FileText className="w-4 h-4 text-secondary shrink-0" />
                                     <div className="min-w-0">
                                         <p className="text-xs font-bold text-primary truncate">{report.title}</p>
-                                        <p className="text-[10px] text-on-surface-variant/50">
-                                            {new Date(report.createdAt).toLocaleDateString(undefined, {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric'
-                                            })}
+                                        <p className="text-[10px] text-on-surface-variant/70">
+                                            {formatReportDate(report.createdAt)}
                                         </p>
                                     </div>
                                 </div>
@@ -1112,18 +1141,31 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
             )}
 
             {/* Compatibility */}
+            <div ref={compatRef} className="scroll-mt-24">
             <Card variant="default" padding="lg">
                 <div className="flex items-center gap-2 mb-3">
                     <Heart className="w-4 h-4 text-secondary" />
                     <h3 className="text-sm font-headline font-bold text-primary">
                         {t('family.compatibility') || 'Compatibility'}
                     </h3>
-                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
-                        <Coins className="w-3 h-3" /> {creditCost} credits
-                    </span>
+                    <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
+                        {compat?.cached && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                                Cached
+                            </span>
+                        )}
+                        {alreadyPaidForLang && !compat?.cached && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                                Free re-run
+                            </span>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
+                            <Coins className="w-3 h-3" /> {creditCost} credits
+                        </span>
+                    </div>
                 </div>
 
-                <p className="text-xs text-on-surface-variant/60 mb-4">
+                <p className="text-xs text-on-surface-variant/75 mb-4">
                     {t('family.compatibilityDesc') ||
                         'First read charges credits. Repeating the same language is free.'}
                 </p>
@@ -1171,6 +1213,7 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                     </div>
                 )}
             </Card>
+            </div>
 
             <ConfirmDialog
                 isOpen={confirmingPurchase}
@@ -1251,7 +1294,7 @@ function ScoreRing({ score, band, size = 88 }: { score: number; band: string; si
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
                 <span className="text-xl sm:text-2xl font-headline font-bold text-primary">{score}</span>
-                <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/40 mt-0.5">
+                <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/65 mt-0.5">
                     /100
                 </span>
             </div>
@@ -1285,7 +1328,7 @@ function HighlightList({
                     >
                         <div className="flex items-baseline justify-between gap-2 mb-1">
                             <p className={`text-[12px] font-bold ${palette.text}`}>{it.factor}</p>
-                            <span className="text-[10px] font-bold text-on-surface-variant/50 shrink-0">
+                            <span className="text-[10px] font-bold text-on-surface-variant/70 shrink-0">
                                 {Math.round(it.score)}
                             </span>
                         </div>
@@ -1334,14 +1377,14 @@ function FactorsBreakdown({ factors }: { factors: NonNullable<ReturnType<typeof 
                     <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
                         Factor Breakdown
                     </p>
-                    <span className="text-[10px] text-on-surface-variant/40 font-bold">
+                    <span className="text-[10px] text-on-surface-variant/65 font-bold">
                         {factors.length}
                     </span>
                 </div>
                 {expanded ? (
-                    <ChevronUp className="w-4 h-4 text-on-surface-variant/40" />
+                    <ChevronUp className="w-4 h-4 text-on-surface-variant/65" />
                 ) : (
-                    <ChevronDown className="w-4 h-4 text-on-surface-variant/40" />
+                    <ChevronDown className="w-4 h-4 text-on-surface-variant/65" />
                 )}
             </button>
             {expanded && (
@@ -1361,7 +1404,7 @@ function FactorsBreakdown({ factors }: { factors: NonNullable<ReturnType<typeof 
                                         >
                                             {f.status}
                                         </span>
-                                        <span className="text-[11px] font-bold text-on-surface-variant/60 tabular-nums">
+                                        <span className="text-[11px] font-bold text-on-surface-variant/75 tabular-nums">
                                             {Math.round(pct)}%
                                         </span>
                                     </div>
@@ -1437,7 +1480,7 @@ function CompatibilityResult({
             <div className="flex items-center gap-4 flex-wrap">
                 <ScoreRing score={result.score} band={result.band} />
                 <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold">
+                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/75 font-bold">
                         Band
                     </p>
                     <p className={`text-xl font-headline font-bold ${palette.text}`}>{result.band}</p>
@@ -1450,11 +1493,6 @@ function CompatibilityResult({
                         </span>
                     )}
                 </div>
-                {result.cached && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary/70 bg-secondary/10 rounded-full px-2 py-0.5">
-                        Cached
-                    </span>
-                )}
             </div>
 
             {/* Verdict */}
@@ -1464,7 +1502,7 @@ function CompatibilityResult({
 
             {/* Confidence note */}
             {result.confidence?.note && (
-                <p className="text-[11px] text-on-surface-variant/50 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
+                <p className="text-[11px] text-on-surface-variant/70 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
                     {result.confidence.note}
                 </p>
             )}
@@ -1586,7 +1624,7 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                     <h2 className="text-lg font-headline font-bold text-primary mb-1">
                         {t('family.inviteByEmail') || 'Invite by Email'}
                     </h2>
-                    <p className="text-xs text-on-surface-variant/60">
+                    <p className="text-xs text-on-surface-variant/75">
                         {t('family.inviteFormDesc') ||
                             "Send a link to someone with an AstraNavi account. They'll see the invite next time they sign in."}
                     </p>
@@ -1819,7 +1857,7 @@ function FamilyConnectionDetail({
                                 <Mail className="w-3 h-3 opacity-50 shrink-0" />
                                 <span className="truncate">{connection.otherEmail}</span>
                             </div>
-                            <p className="text-[11px] text-on-surface-variant/60">
+                            <p className="text-[11px] text-on-surface-variant/75">
                                 {(t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs)}
                                 {' · '}
                                 {(t('family.connectionTheySeeMeAs') || 'They see you as {label}').replace('{label}', connection.theySeeMeAs)}
@@ -1843,7 +1881,7 @@ function FamilyConnectionDetail({
                             <p className="text-[12px] font-bold text-primary">
                                 {t('family.connectionSharingWith') || "I'm sharing with them"}
                             </p>
-                            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+                            <p className="text-[11px] text-on-surface-variant/75 mt-0.5">
                                 {connection.sharingWithThem
                                     ? (t('family.connectionSharingOn') || 'Sharing on')
                                     : (t('family.connectionSharingOff') || 'Sharing off')}
@@ -1872,7 +1910,7 @@ function FamilyConnectionDetail({
                             <p className="text-[12px] font-bold text-primary">
                                 {t('family.connectionTheyShareWithMe') || "They're sharing with me"}
                             </p>
-                            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+                            <p className="text-[11px] text-on-surface-variant/75 mt-0.5">
                                 {connection.theyShareWithMe
                                     ? (t('family.connectionSharingOn') || 'Sharing on')
                                     : (t('family.connectionSharingOff') || 'Sharing off')}
@@ -1882,7 +1920,7 @@ function FamilyConnectionDetail({
                             className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${
                                 connection.theyShareWithMe
                                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                    : 'bg-outline-variant/15 text-on-surface-variant/50 border-outline-variant/30'
+                                    : 'bg-outline-variant/15 text-on-surface-variant/70 border-outline-variant/30'
                             }`}
                         >
                             {connection.theyShareWithMe ? 'Yes' : 'Waiting'}
@@ -1898,12 +1936,24 @@ function FamilyConnectionDetail({
                     <h3 className="text-sm font-headline font-bold text-primary">
                         {t('family.compatibility') || 'Compatibility'}
                     </h3>
-                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
-                        <Coins className="w-3 h-3" /> {creditCost} credits
-                    </span>
+                    <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
+                        {compat?.cached && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                                Cached
+                            </span>
+                        )}
+                        {alreadyPaidForLang && !compat?.cached && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                                Free re-run
+                            </span>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
+                            <Coins className="w-3 h-3" /> {creditCost} credits
+                        </span>
+                    </div>
                 </div>
 
-                <p className="text-xs text-on-surface-variant/60 mb-4">
+                <p className="text-xs text-on-surface-variant/75 mb-4">
                     {t('family.compatibilityDesc') ||
                         'First read charges credits. Repeating the same language is free.'}
                 </p>
@@ -1960,7 +2010,7 @@ function FamilyConnectionDetail({
                                         <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                                             connection.theyShareWithMe
                                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                                : 'bg-outline-variant/15 text-on-surface-variant/50 border-outline-variant/30'
+                                                : 'bg-outline-variant/15 text-on-surface-variant/70 border-outline-variant/30'
                                         }`}>
                                             {connection.theyShareWithMe ? 'On' : 'Waiting'}
                                         </span>
@@ -2074,7 +2124,7 @@ function FamilyConnectionDetail({
                         <p className="text-sm font-bold text-red-400">
                             {t('family.connectionDisconnect') || 'Disconnect'}
                         </p>
-                        <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+                        <p className="text-[11px] text-on-surface-variant/75 mt-0.5">
                             {t('family.connectionDisconnectBody') ||
                                 "You'll lose linked compatibility access and the connection will be removed from both sides."}
                         </p>
