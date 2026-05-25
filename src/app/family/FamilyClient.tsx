@@ -212,38 +212,40 @@ export default function FamilyClient() {
                                     'Save birth details, view charts, and check compatibility with loved ones.'}
                             </p>
                         </div>
-                        {view === 'list' && (
-                            <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            {view !== 'list' && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={openInvite}
-                                    leftIcon={<Mail className="w-4 h-4" />}
-                                    disabled={atFreeCap}
+                                    onClick={backToList}
+                                    leftIcon={<X className="w-4 h-4" />}
                                 >
-                                    {t('family.inviteByEmail') || 'Invite by Email'}
+                                    {t('common.back') || 'Back'}
                                 </Button>
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={openAdd}
-                                    leftIcon={<Plus className="w-4 h-4" />}
-                                    disabled={atFreeCap}
-                                >
-                                    {t('family.addMember') || 'Add Member'}
-                                </Button>
-                            </div>
-                        )}
-                        {view !== 'list' && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={backToList}
-                                leftIcon={<X className="w-4 h-4" />}
-                            >
-                                {t('common.back') || 'Back'}
-                            </Button>
-                        )}
+                            )}
+                            {(view === 'list' || view === 'detail' || view === 'connectionDetail') && (
+                                <>
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={openAdd}
+                                        leftIcon={<Plus className="w-4 h-4" />}
+                                        disabled={atFreeCap}
+                                    >
+                                        {t('family.addFamilyMember') || 'Add Family Member'}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={openInvite}
+                                        leftIcon={<Mail className="w-4 h-4" />}
+                                        disabled={atFreeCap}
+                                    >
+                                        {t('family.inviteByEmail') || 'Invite by Email'}
+                                    </Button>
+                                </>
+                            )}
+                        </div>
                     </div>
 
                     {/* Free-tier counter */}
@@ -918,12 +920,17 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
     const { fetchPreflight, isLoading: preflightLoading } = useFamilyCompatibilityPreflight(member.id);
     const [preflightData, setPreflightData] = useState<any>(null);
     const compatRef = useRef<HTMLDivElement | null>(null);
+    const chartRef = useRef<HTMLDivElement | null>(null);
+    const reportsRef = useRef<HTMLDivElement | null>(null);
 
     const creditCost = COMPATIBILITY_CREDIT_COST[member.relationshipType] ?? 5;
 
-    const scrollToCompat = () => {
-        compatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const scrollTo = (el: HTMLElement | null) => {
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
+    const scrollToCompat = () => scrollTo(compatRef.current);
+    const scrollToChart = () => scrollTo(chartRef.current);
+    const scrollToReports = () => scrollTo(reportsRef.current);
 
     const alreadyPaidForLang = useMemo(
         () => compat?.lang === lang && compat?.member_id === member.id,
@@ -1012,16 +1019,16 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
 
     return (
         <div className="space-y-6">
-            {/* Header card */}
+            {/* Compact profile card */}
             <Card variant="default" padding="lg">
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
                     {member.avatar ? (
-                        <div 
+                        <div
                             className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border"
-                            style={{ 
+                            style={{
                                 color: member.avatar.accentColor || 'var(--secondary)',
                                 borderColor: `${member.avatar.accentColor || 'var(--secondary)'}33`,
-                                backgroundColor: `${member.avatar.accentColor || 'var(--secondary)'}11` 
+                                backgroundColor: `${member.avatar.accentColor || 'var(--secondary)'}11`
                             }}
                         >
                             {React.createElement(getFamilyIcon(member.avatar.iconKey), { className: 'w-6 h-6' })}
@@ -1031,189 +1038,368 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                             {member.name.charAt(0).toUpperCase()}
                         </div>
                     )}
-                    <div className="flex-1 min-w-0">
+
+                    <div className="min-w-0">
                         <h2 className="text-xl font-headline font-bold text-primary">{member.name}</h2>
                         <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
                             {member.relationshipType} · {member.gender}
                         </p>
-                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[12px] text-on-surface-variant/70">
-                            <div className="flex items-center gap-1.5">
-                                <Calendar className="w-3 h-3 opacity-50" /> {member.dob}
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <Clock className="w-3 h-3 opacity-50" /> {member.tob}
-                            </div>
-                            <div className="flex items-center gap-1.5 truncate">
-                                <MapPin className="w-3 h-3 opacity-50 shrink-0" />
-                                <span className="truncate">{member.pob}</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-on-surface-variant/85 md:ml-2 md:pl-4 md:border-l md:border-outline-variant/20">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-secondary/70" />
+                            <div className="flex flex-col leading-tight">
+                                <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">DOB</span>
+                                <span className="font-bold text-primary">{member.dob}</span>
                             </div>
                         </div>
-                        {member.notes && (
-                            <p className="mt-3 text-[12px] text-on-surface-variant/75 italic">
-                                &ldquo;{member.notes}&rdquo;
+                        <div className="flex items-center gap-2">
+                            <Clock className="w-3.5 h-3.5 text-secondary/70" />
+                            <div className="flex flex-col leading-tight">
+                                <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">Time</span>
+                                <span className="font-bold text-primary">{member.tob}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 min-w-0">
+                            <MapPin className="w-3.5 h-3.5 text-secondary/70 shrink-0" />
+                            <div className="flex flex-col leading-tight min-w-0">
+                                <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">Place</span>
+                                <span className="font-bold text-primary truncate max-w-[180px]">{member.pob}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                        <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />}>
+                            Edit
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={scrollToChart} leftIcon={<BookOpen className="w-3.5 h-3.5" />}>
+                            View Chart
+                        </Button>
+                        <Button variant="primary" size="sm" onClick={scrollToCompat} leftIcon={<Heart className="w-3.5 h-3.5" />}>
+                            {compat ? 'View Compatibility' : 'Compare Compatibility'}
+                        </Button>
+                    </div>
+                </div>
+                {member.notes && (
+                    <p className="mt-4 pt-4 border-t border-outline-variant/15 text-[12px] text-on-surface-variant/80 italic">
+                        &ldquo;{member.notes}&rdquo;
+                    </p>
+                )}
+            </Card>
+
+            {/* ─────────────── Compatibility hero ─────────────── */}
+            <div ref={compatRef} className="scroll-mt-24">
+            {compat ? (
+                <Card variant="default" padding="lg">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="flex justify-center lg:justify-start lg:shrink-0">
+                            <ScoreRing score={compat.score} band={compat.band} size={200} />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/75 font-bold">
+                                {t('family.compatibilityWith') || 'Compatibility with'}
                             </p>
-                        )}
-                        <div className="mt-4 flex flex-wrap gap-2">
+                            <h2 className="text-2xl sm:text-3xl font-headline font-bold text-secondary leading-tight">
+                                {member.name}
+                            </h2>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                <span className={`text-lg font-headline font-bold ${bandPalette(compat.band).text}`}>
+                                    {compat.band}
+                                </span>
+                                {compat.confidence && (
+                                    <>
+                                        <span className="text-on-surface-variant/65">|</span>
+                                        <span
+                                            className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${confidencePalette(compat.confidence.level).bg} ${confidencePalette(compat.confidence.level).text} ${confidencePalette(compat.confidence.level).border}`}
+                                        >
+                                            <Shield className="w-3 h-3" />
+                                            {compat.confidence.label}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                            <p className="mt-3 text-sm text-on-surface-variant/85 leading-relaxed whitespace-pre-line">
+                                {compat.verdict}
+                            </p>
+                            {compat.confidence?.note && (
+                                <p className="mt-2 text-[11px] text-on-surface-variant/70 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
+                                    {compat.confidence.note}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-3 lg:w-56 shrink-0">
+                            <div className="flex items-center gap-1.5 flex-wrap lg:justify-end">
+                                {compat.cached && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                                        Cached
+                                    </span>
+                                )}
+                                {alreadyPaidForLang && !compat.cached && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                                        Free re-run
+                                    </span>
+                                )}
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/85 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
+                                    <Coins className="w-3 h-3" /> {creditCost} credits
+                                </span>
+                            </div>
                             <Button
                                 variant="primary"
-                                size="sm"
-                                onClick={scrollToCompat}
-                                leftIcon={<Heart className="w-3.5 h-3.5" />}
+                                onClick={scrollToReports}
+                                leftIcon={<FileText className="w-4 h-4" />}
                             >
-                                {compat ? 'View Compatibility' : 'Check Compatibility'}
+                                View Full Report
                             </Button>
-                            <Link href="/chat" className="inline-flex">
+                            <Link href="/chat" className="block">
                                 <Button
                                     variant="secondary"
-                                    size="sm"
-                                    leftIcon={<MessageCircle className="w-3.5 h-3.5" />}
+                                    leftIcon={<MessageCircle className="w-4 h-4" />}
+                                    fullWidth
                                 >
-                                    Ask Navi about {member.name.split(' ')[0]}
+                                    Ask Navi
                                 </Button>
                             </Link>
                         </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />}>
-                        Edit
-                    </Button>
-                </div>
-            </Card>
 
-            {/* Chart */}
-            <Card variant="default" padding="lg">
-                <div className="flex items-center gap-2 mb-3">
-                    <BookOpen className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-headline font-bold text-primary">
-                        {t('family.chartTitle') || 'Birth Chart'}
-                    </h3>
-                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                        Free
-                    </span>
-                </div>
-                {chartLoading && (
-                    <div className="text-secondary/60 text-sm flex items-center gap-2">
-                        <Star className="w-4 h-4 animate-pulse" /> Loading chart…
-                    </div>
-                )}
-                {chartError && (
-                    <div className="text-sm text-red-500 flex items-center gap-1.5">
-                        <AlertCircle className="w-4 h-4" /> {chartError}
-                    </div>
-                )}
-                {chart && !chartLoading && !chartError && (
-                    <FamilyChartView chart={chart.chart} />
-                )}
-            </Card>
+                    {compat.relationship_actions && (
+                        <div className="mt-6 pt-6 border-t border-outline-variant/15 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {[
+                                { label: 'Today', text: compat.relationship_actions.today, icon: <Sun className="w-3.5 h-3.5" />, accent: 'text-emerald-400' },
+                                { label: 'This Week', text: compat.relationship_actions.this_week, icon: <Calendar className="w-3.5 h-3.5" />, accent: 'text-sky-400' },
+                                { label: 'Long Term', text: compat.relationship_actions.long_term, icon: <Compass className="w-3.5 h-3.5" />, accent: 'text-secondary' },
+                            ].filter((it) => it.text?.trim()).map((it) => (
+                                <div key={it.label} className="rounded-2xl border border-outline-variant/30 p-4 bg-surface">
+                                    <div className={`flex items-center gap-1.5 mb-1.5 ${it.accent}`}>
+                                        {it.icon}
+                                        <p className="text-[10px] font-bold uppercase tracking-widest">{it.label}</p>
+                                    </div>
+                                    <p className="text-[12px] text-on-surface-variant/85 leading-relaxed">{it.text}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
-            {/* Reports */}
-            {reports && reports.length > 0 && (
+                    <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
+                        <p className="text-[11px] text-on-surface-variant/70">
+                            {(t('family.compatibilityLangNote') || 'Reading in {lang}. Other languages charge {n} credits.')
+                                .replace('{lang}', lang.toUpperCase()).replace('{n}', String(creditCost))}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {LANGS.map((l) => (
+                                <button
+                                    key={l.value}
+                                    onClick={() => setLang(l.value)}
+                                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors border ${
+                                        lang === l.value
+                                            ? 'bg-secondary text-white border-secondary'
+                                            : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
+                                    }`}
+                                >
+                                    {l.label}
+                                </button>
+                            ))}
+                            {!alreadyPaidForLang && (
+                                <Button variant="ghost" size="sm" onClick={startCompatibility}>
+                                    Re-run · {creditCost}
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </Card>
+            ) : (
                 <Card variant="default" padding="lg">
                     <div className="flex items-center gap-2 mb-3">
-                        <TrendingUp className="w-4 h-4 text-secondary" />
+                        <Heart className="w-4 h-4 text-secondary" />
                         <h3 className="text-sm font-headline font-bold text-primary">
-                            Saved Reports
+                            {t('family.compatibility') || 'Compatibility'}
+                        </h3>
+                        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/85 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
+                            <Coins className="w-3 h-3" /> {creditCost} credits
+                        </span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant/75 mb-4">
+                        {t('family.compatibilityDesc') ||
+                            'First read charges credits. Repeating the same language is free.'}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {LANGS.map((l) => (
+                            <button
+                                key={l.value}
+                                onClick={() => setLang(l.value)}
+                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
+                                    lang === l.value
+                                        ? 'bg-secondary text-white border-secondary'
+                                        : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
+                                }`}
+                            >
+                                {l.label}
+                            </button>
+                        ))}
+                    </div>
+                    {!compatLoading && (
+                        <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
+                            Check Compatibility · {creditCost} credits
+                        </Button>
+                    )}
+                    {compatLoading && (
+                        <div className="text-secondary/60 text-sm flex items-center gap-2">
+                            <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
+                        </div>
+                    )}
+                    {totalCredits != null && totalCredits < creditCost && (
+                        <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
+                            <a href="/plans" className="font-bold underline">Top up</a>
+                        </div>
+                    )}
+                </Card>
+            )}
+            </div>
+
+            {/* ─────────────── Strengths + Tensions side-by-side ─────────────── */}
+            {compat && (
+                (compat.strengths && compat.strengths.length > 0) ||
+                (compat.tension_points && compat.tension_points.length > 0)
+            ) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {compat.strengths && compat.strengths.length > 0 && (
+                        <Card variant="default" padding="lg">
+                            <HighlightList
+                                title="Top Strengths"
+                                items={compat.strengths}
+                                icon={<TrendingUp className="w-3.5 h-3.5" />}
+                                variant="strength"
+                            />
+                        </Card>
+                    )}
+                    {compat.tension_points && compat.tension_points.length > 0 && (
+                        <Card variant="default" padding="lg">
+                            <HighlightList
+                                title="Tension Points"
+                                items={compat.tension_points}
+                                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                                variant="tension"
+                            />
+                        </Card>
+                    )}
+                </div>
+            )}
+
+            {/* ─────────────── Guidance grid ─────────────── */}
+            {compat?.advice && (
+                <Card variant="default" padding="lg">
+                    <div className="flex items-center gap-2 mb-4">
+                        <HandHeart className="w-4 h-4 text-secondary" />
+                        <h3 className="text-sm font-headline font-bold text-primary">
+                            {t('family.guidance') || 'Guidance'}
                         </h3>
                     </div>
-                    <div className="space-y-2">
-                        {reports.map((report) => (
-                            <div key={report.id} className="flex items-center justify-between p-3 rounded-2xl border border-outline-variant/15 bg-secondary/5 hover:bg-secondary/10 transition-colors">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <FileText className="w-4 h-4 text-secondary shrink-0" />
-                                    <div className="min-w-0">
-                                        <p className="text-xs font-bold text-primary truncate">{report.title}</p>
-                                        <p className="text-[10px] text-on-surface-variant/70">
-                                            {formatReportDate(report.createdAt)}
-                                        </p>
-                                    </div>
-                                </div>
-                                <a 
-                                    href={`/api/family/reports/${report.id}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-[10px] font-bold uppercase tracking-wider text-secondary hover:underline shrink-0"
-                                >
-                                    Download
-                                </a>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <AdviceCard
+                            icon={<MessageCircle className="w-3 h-3" />}
+                            label="Communication"
+                            text={compat.advice.communication_style}
+                            accent="text-sky-400"
+                        />
+                        <AdviceCard
+                            icon={<HandHeart className="w-3 h-3" />}
+                            label="Best Support"
+                            text={compat.advice.best_support_method}
+                            accent="text-emerald-400"
+                        />
+                        <AdviceCard
+                            icon={<Shield className="w-3 h-3" />}
+                            label="Boundaries"
+                            text={compat.advice.boundaries_or_cautions}
+                            accent="text-amber-400"
+                        />
+                        <AdviceCard
+                            icon={<ArrowRight className="w-3 h-3" />}
+                            label="Next Step"
+                            text={compat.advice.next_step}
+                            accent="text-secondary"
+                        />
                     </div>
                 </Card>
             )}
 
-            {/* Compatibility */}
-            <div ref={compatRef} className="scroll-mt-24">
-            <Card variant="default" padding="lg">
-                <div className="flex items-center gap-2 mb-3">
-                    <Heart className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-headline font-bold text-primary">
-                        {t('family.compatibility') || 'Compatibility'}
-                    </h3>
-                    <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
-                        {compat?.cached && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                                Cached
-                            </span>
-                        )}
-                        {alreadyPaidForLang && !compat?.cached && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                                Free re-run
-                            </span>
-                        )}
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
-                            <Coins className="w-3 h-3" /> {creditCost} credits
+            {/* Factor Breakdown (collapsible) */}
+            {compat?.factors && compat.factors.length > 0 && (
+                <Card variant="default" padding="lg">
+                    <FactorsBreakdown factors={compat.factors} />
+                </Card>
+            )}
+
+            {/* ─────────────── Chart ─────────────── */}
+            <div ref={chartRef} className="scroll-mt-24">
+                <Card variant="default" padding="lg">
+                    <div className="flex items-center gap-2 mb-4">
+                        <BookOpen className="w-4 h-4 text-secondary" />
+                        <h3 className="text-sm font-headline font-bold text-primary">
+                            {t('family.chartTitle') || 'Birth Chart'}
+                        </h3>
+                        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                            Free
                         </span>
                     </div>
-                </div>
-
-                <p className="text-xs text-on-surface-variant/75 mb-4">
-                    {t('family.compatibilityDesc') ||
-                        'First read charges credits. Repeating the same language is free.'}
-                </p>
-
-                {/* Language picker */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {LANGS.map((l) => (
-                        <button
-                            key={l.value}
-                            onClick={() => setLang(l.value)}
-                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
-                                lang === l.value
-                                    ? 'bg-secondary text-white border-secondary'
-                                    : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                            }`}
-                        >
-                            {l.label}
-                        </button>
-                    ))}
-                </div>
-
-                {!compat && !compatLoading && (
-                    <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
-                        Check Compatibility · {creditCost} credits
-                    </Button>
-                )}
-
-                {compatLoading && (
-                    <div className="text-secondary/60 text-sm flex items-center gap-2">
-                        <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
-                    </div>
-                )}
-
-                {compat && (
-                    <CompatibilityResult result={compat} onRerun={startCompatibility} alreadyPaid={!!alreadyPaidForLang} />
-                )}
-
-                {totalCredits != null && totalCredits < creditCost && !compat && (
-                    <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
-                        <a href="/plans" className="font-bold underline">
-                            Top up
-                        </a>
-                    </div>
-                )}
-            </Card>
+                    {chartLoading && (
+                        <div className="text-secondary/60 text-sm flex items-center gap-2">
+                            <Star className="w-4 h-4 animate-pulse" /> Loading chart…
+                        </div>
+                    )}
+                    {chartError && (
+                        <div className="text-sm text-red-500 flex items-center gap-1.5">
+                            <AlertCircle className="w-4 h-4" /> {chartError}
+                        </div>
+                    )}
+                    {chart && !chartLoading && !chartError && (
+                        <FamilyChartView chart={chart.chart} />
+                    )}
+                </Card>
             </div>
+
+            {/* ─────────────── Reports ─────────────── */}
+            {reports && reports.length > 0 && (
+                <div ref={reportsRef} className="scroll-mt-24">
+                    <Card variant="default" padding="lg">
+                        <div className="flex items-center gap-2 mb-3">
+                            <TrendingUp className="w-4 h-4 text-secondary" />
+                            <h3 className="text-sm font-headline font-bold text-primary">
+                                Saved Reports
+                            </h3>
+                        </div>
+                        <div className="space-y-2">
+                            {reports.map((report) => (
+                                <div key={report.id} className="flex items-center justify-between p-3 rounded-2xl border border-outline-variant/15 bg-secondary/5 hover:bg-secondary/10 transition-colors">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <FileText className="w-4 h-4 text-secondary shrink-0" />
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-bold text-primary truncate">{report.title}</p>
+                                            <p className="text-[10px] text-on-surface-variant/70">
+                                                {formatReportDate(report.createdAt)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <a
+                                        href={`/api/family/reports/${report.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[10px] font-bold uppercase tracking-wider text-secondary hover:underline shrink-0"
+                                    >
+                                        Download
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                </div>
+            )}
 
             <ConfirmDialog
                 isOpen={confirmingPurchase}
