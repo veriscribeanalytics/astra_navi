@@ -11,8 +11,7 @@ import ForecastChart, { ChartPoint } from './ForecastChart';
 import MonthGrid, { MonthData } from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
 import ForecastSnapshot from './ForecastSnapshot';
-import { TrendingUp, Sparkles } from 'lucide-react';
-import { motion } from 'motion/react';
+import { TrendingUp } from 'lucide-react';
 
 type TimeRange = '7d' | 'monthly' | 'yearly';
 
@@ -208,11 +207,72 @@ export default function ForecastPage() {
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}>
-              <Sparkles className="w-8 h-8 text-secondary/40 animate-pulse" />
-            </motion.div>
-            <p className="text-xs font-bold text-foreground/30 uppercase tracking-widest">{t('forecast.loading')}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-pulse" aria-busy="true" aria-label={t('forecast.loading')}>
+            {/* Left column skeleton */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              {/* Chart card skeleton */}
+              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/20">
+                <div className="p-4 sm:p-8">
+                  <div className="h-44 sm:h-56 lg:h-64 w-full rounded-xl bg-surface-variant/15" />
+                </div>
+                <div className="px-4 sm:px-8 pb-4 sm:pb-6 flex flex-wrap gap-3 sm:gap-6 border-t border-white/5 pt-4">
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-surface-variant/30" />
+                      <div className="h-3 w-20 rounded bg-surface-variant/20" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Grid selector skeleton — mirrors weekly day strip or month grid */}
+              {range === '7d' ? (
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
+                  {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} className="flex flex-col items-center p-1.5 sm:p-3 rounded-xl border border-white/5 bg-surface/30 gap-1.5">
+                      <div className="h-2.5 w-8 rounded bg-surface-variant/20" />
+                      <div className="h-6 w-6 rounded bg-surface-variant/25" />
+                      <div className="h-2 w-5 rounded bg-surface-variant/15" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div key={i} className="h-20 sm:h-24 rounded-xl border border-white/5 bg-surface/30" />
+                  ))}
+                </div>
+              )}
+
+              {/* Insight skeleton */}
+              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 bg-surface/20">
+                <div className="p-4 sm:p-6 space-y-3">
+                  <div className="h-4 w-32 rounded bg-surface-variant/25" />
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded bg-surface-variant/15" />
+                    <div className="h-3 w-11/12 rounded bg-surface-variant/15" />
+                    <div className="h-3 w-3/4 rounded bg-surface-variant/15" />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Right column skeleton (Snapshot) */}
+            <div className="lg:col-span-4 lg:sticky lg:top-24">
+              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 bg-surface/20">
+                <div className="p-4 sm:p-6 space-y-4">
+                  <div className="h-3 w-20 rounded bg-surface-variant/25" />
+                  <div className="h-8 w-2/3 rounded bg-surface-variant/25" />
+                  <div className="h-px w-full bg-white/5" />
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="h-2.5 w-16 rounded bg-surface-variant/20" />
+                      <div className="h-3 w-full rounded bg-surface-variant/15" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
