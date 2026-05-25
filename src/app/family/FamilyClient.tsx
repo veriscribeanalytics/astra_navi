@@ -1070,14 +1070,16 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 md:ml-auto">
-                        <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />}>
-                            Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={scrollToChart} leftIcon={<BookOpen className="w-3.5 h-3.5" />}>
-                            View Chart
-                        </Button>
-                        <Button variant="primary" size="sm" onClick={scrollToCompat} leftIcon={<Heart className="w-3.5 h-3.5" />}>
+                    <div className="flex flex-col gap-2 md:ml-auto md:w-56 md:shrink-0">
+                        <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />} fullWidth>
+                                Edit
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={scrollToChart} leftIcon={<BookOpen className="w-3.5 h-3.5" />} fullWidth>
+                                View Chart
+                            </Button>
+                        </div>
+                        <Button variant="primary" size="sm" onClick={scrollToCompat} leftIcon={<Heart className="w-3.5 h-3.5" />} fullWidth>
                             {compat ? 'View Compatibility' : 'Compare Compatibility'}
                         </Button>
                     </div>
@@ -1262,71 +1264,77 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
             )}
             </div>
 
-            {/* ─────────────── Strengths + Tensions side-by-side ─────────────── */}
+            {/* ─────────────── Strengths (left) + Tensions/Guidance (right) ─────────────── */}
             {compat && (
                 (compat.strengths && compat.strengths.length > 0) ||
-                (compat.tension_points && compat.tension_points.length > 0)
+                (compat.tension_points && compat.tension_points.length > 0) ||
+                compat.advice
             ) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {/* Left column: Top Strengths */}
                     {compat.strengths && compat.strengths.length > 0 && (
-                        <Card variant="default" padding="lg">
-                            <HighlightList
-                                title="Top Strengths"
-                                items={compat.strengths}
-                                icon={<TrendingUp className="w-3.5 h-3.5" />}
-                                variant="strength"
-                            />
-                        </Card>
+                        <div className="md:col-span-3">
+                            <Card variant="default" padding="lg">
+                                <HighlightList
+                                    title="Top Strengths"
+                                    items={compat.strengths}
+                                    icon={<TrendingUp className="w-3.5 h-3.5" />}
+                                    variant="strength"
+                                />
+                            </Card>
+                        </div>
                     )}
-                    {compat.tension_points && compat.tension_points.length > 0 && (
-                        <Card variant="default" padding="lg">
-                            <HighlightList
-                                title="Tension Points"
-                                items={compat.tension_points}
-                                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                                variant="tension"
-                            />
-                        </Card>
-                    )}
-                </div>
-            )}
 
-            {/* ─────────────── Guidance grid ─────────────── */}
-            {compat?.advice && (
-                <Card variant="default" padding="lg">
-                    <div className="flex items-center gap-2 mb-4">
-                        <HandHeart className="w-4 h-4 text-secondary" />
-                        <h3 className="text-sm font-headline font-bold text-primary">
-                            {t('family.guidance') || 'Guidance'}
-                        </h3>
+                    {/* Right column: Tensions stacked above Guidance */}
+                    <div className="md:col-span-2 space-y-4">
+                        {compat.tension_points && compat.tension_points.length > 0 && (
+                            <Card variant="default" padding="lg">
+                                <HighlightList
+                                    title="Tension Points"
+                                    items={compat.tension_points}
+                                    icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                                    variant="tension"
+                                />
+                            </Card>
+                        )}
+                        {compat.advice && (
+                            <Card variant="default" padding="lg">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <HandHeart className="w-4 h-4 text-secondary" />
+                                    <h3 className="text-sm font-headline font-bold text-primary">
+                                        {t('family.guidance') || 'Guidance'}
+                                    </h3>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <AdviceCard
+                                        icon={<MessageCircle className="w-3 h-3" />}
+                                        label="Communication"
+                                        text={compat.advice.communication_style}
+                                        accent="text-sky-400"
+                                    />
+                                    <AdviceCard
+                                        icon={<HandHeart className="w-3 h-3" />}
+                                        label="Best Support"
+                                        text={compat.advice.best_support_method}
+                                        accent="text-emerald-400"
+                                    />
+                                    <AdviceCard
+                                        icon={<Shield className="w-3 h-3" />}
+                                        label="Boundaries"
+                                        text={compat.advice.boundaries_or_cautions}
+                                        accent="text-amber-400"
+                                    />
+                                    <AdviceCard
+                                        icon={<ArrowRight className="w-3 h-3" />}
+                                        label="Next Step"
+                                        text={compat.advice.next_step}
+                                        accent="text-secondary"
+                                    />
+                                </div>
+                            </Card>
+                        )}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <AdviceCard
-                            icon={<MessageCircle className="w-3 h-3" />}
-                            label="Communication"
-                            text={compat.advice.communication_style}
-                            accent="text-sky-400"
-                        />
-                        <AdviceCard
-                            icon={<HandHeart className="w-3 h-3" />}
-                            label="Best Support"
-                            text={compat.advice.best_support_method}
-                            accent="text-emerald-400"
-                        />
-                        <AdviceCard
-                            icon={<Shield className="w-3 h-3" />}
-                            label="Boundaries"
-                            text={compat.advice.boundaries_or_cautions}
-                            accent="text-amber-400"
-                        />
-                        <AdviceCard
-                            icon={<ArrowRight className="w-3 h-3" />}
-                            label="Next Step"
-                            text={compat.advice.next_step}
-                            accent="text-secondary"
-                        />
-                    </div>
-                </Card>
+                </div>
             )}
 
             {/* Factor Breakdown (collapsible) */}

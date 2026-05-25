@@ -2,15 +2,16 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Users, ChevronRight } from 'lucide-react';
+import { Plus, Users, ChevronRight, Link2 } from 'lucide-react';
 import {
   useFamilyMembers,
+  useFamilyConnections,
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
   useTranslation,
 } from '@/hooks';
-import type { FamilyMember, FamilyCompatibilityBand } from '@/types/family';
+import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from '@/types/family';
 import { computeFamilyMemberStatus } from '@/lib/familyStatus';
 
 const formatRelationship = (rel: FamilyMember['relationshipType']): string =>
@@ -73,12 +74,39 @@ const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
   );
 };
 
+const FamilyConnectionCard: React.FC<{ connection: FamilyConnection }> = ({ connection }) => {
+  return (
+    <Link
+      href="/family"
+      className="group flex flex-col items-center text-center p-3 sm:p-4 rounded-[20px] bg-surface border border-outline-variant/20 hover:border-secondary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(212,175,55,0.08)] transition-all duration-300"
+      aria-label={`Open ${connection.otherName}'s connection`}
+    >
+      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-secondary/10 border border-secondary/20 text-secondary flex items-center justify-center text-base sm:text-lg font-headline font-bold group-hover:scale-105 transition-transform">
+        {initialOf(connection.otherName)}
+      </div>
+      <p className="mt-3 w-full truncate text-[13px] sm:text-sm font-headline font-semibold text-foreground group-hover:text-secondary transition-colors">
+        {connection.otherName || '—'}
+      </p>
+      <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/40 font-bold">
+        {formatRelationship(connection.iSeeThemAs)}
+      </p>
+      <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-widest text-secondary bg-secondary/10 border-secondary/30">
+        <Link2 className="w-2.5 h-2.5" />
+        Linked
+      </span>
+    </Link>
+  );
+};
+
 const FamilyStrip: React.FC = () => {
   const { t } = useTranslation();
   const { data: members, isLoading } = useFamilyMembers();
+  const { data: connections, isLoading: connectionsLoading } = useFamilyConnections();
 
-  const showSkeleton = isLoading && !members;
-  const isEmpty = !showSkeleton && (!members || members.length === 0);
+  const showSkeleton = (isLoading && !members) || (connectionsLoading && !connections);
+  const hasMembers = !!members && members.length > 0;
+  const hasConnections = !!connections && connections.length > 0;
+  const isEmpty = !showSkeleton && !hasMembers && !hasConnections;
 
   return (
     <section className="mt-12 sm:mt-20">
@@ -141,8 +169,11 @@ const FamilyStrip: React.FC = () => {
         </Link>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-          {members!.map((m) => (
-            <FamilyMemberCard key={m.id} member={m} />
+          {members?.map((m) => (
+            <FamilyMemberCard key={`m-${m.id}`} member={m} />
+          ))}
+          {connections?.map((c) => (
+            <FamilyConnectionCard key={`c-${c.connectionId}`} connection={c} />
           ))}
 
           <Link

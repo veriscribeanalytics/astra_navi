@@ -12,7 +12,7 @@ html {
 
 @media (min-width: 2560px) {
   html {
-    font-size: clamp(16px, 0.417vw + 5.33px, 22px);
+    font-size: clamp(18px, 0.5vw + 5px, 28px);
   }
 }
 
@@ -1730,4 +1730,31 @@ html.avatar-theme-pulse body::after {
   z-index: 9999;
   animation: avatar-theme-pulse-kf 400ms ease;
   box-shadow: inset 0 0 200px 50px var(--glow-color);
+}
+
+/* ----------------------------------------------------------------------
+ * Large-screen (≥ 2560px / QHD–4K+) pixel-literal text scaling.
+ *
+ * The codebase has ~1000 occurrences of `text-[Npx]` arbitrary-value
+ * Tailwind utilities for small UI labels. Those are pixel-pinned and do
+ * NOT scale with the html root font-size bump above. Without this block,
+ * a 4K user sees 10–13px labels everywhere — unreadable.
+ *
+ * The overrides below scale 8–19px sizes by roughly 1.4× at ≥ 2560px.
+ * Tailwind utilities live in earlier cascade layers, so these unlayered
+ * rules win on source order without needing !important.
+ * ------------------------------------------------------------------- */
+@media (min-width: 2560px) {
+  .text-\[8px\]  { font-size: 11px; }
+  .text-\[9px\]  { font-size: 13px; }
+  .text-\[10px\] { font-size: 14px; }
+  .text-\[11px\] { font-size: 15px; }
+  .text-\[12px\] { font-size: 17px; }
+  .text-\[13px\] { font-size: 18px; }
+  .text-\[14px\] { font-size: 20px; }
+  .text-\[15px\] { font-size: 21px; }
+  .text-\[16px\] { font-size: 22px; }
+  .text-\[17px\] { font-size: 24px; }
+  .text-\[18px\] { font-size: 25px; }
+  .text-\[19px\] { font-size: 27px; }
 }
