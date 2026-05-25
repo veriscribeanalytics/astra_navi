@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks';
@@ -28,6 +28,15 @@ interface WeeklyResponse {
   summary: { best_day: string; worst_day: string; average_score: number; trend: string };
 }
 
+type CacheEntry =
+  | { kind: 'weekly'; data: WeeklyResponse; timestamp: number }
+  | { kind: 'yearly'; data: YearlyResponse; timestamp: number };
+
+// 10-minute client-side TTL: long enough that flipping tabs back and forth
+// doesn't refetch, short enough that a same-session day-rollover still picks
+// up fresh data when the user reopens.
+const FORECAST_CACHE_TTL = 10 * 60 * 1000;
+
 export default function ForecastPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,6 +60,14 @@ export default function ForecastPage() {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
+  // Cache by `${area}|${range}|${lang}`. Monthly and yearly share an entry
+  // because they hit the same backend endpoint and consume the same shape.
+  const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
+  const cacheKeyFor = useCallback((a: ForecastArea, r: TimeRange, lang: string): string => {
+    const period = r === '7d' ? 'weekly' : 'yearly';
+    return `${a}|${period}|${lang}`;
+  }, []);
+
   useEffect(() => {
     if (!authLoading && !isLoggedIn) {
       router.push('/login?callbackUrl=/horoscope/forecast');
@@ -58,23 +75,41 @@ export default function ForecastPage() {
   }, [authLoading, isLoggedIn, router]);
 
   const fetchData = useCallback(async () => {
+    const key = cacheKeyFor(area, range, language);
+    const cached = cacheRef.current.get(key);
+    if (cached && Date.now() - cached.timestamp < FORECAST_CACHE_TTL) {
+      if (cached.kind === 'weekly') {
+        setWeeklyData(cached.data);
+        const today = cached.data.days?.find(d => d.is_today);
+        setSelectedDay(today?.date || cached.data.days?.[0]?.date || null);
+      } else {
+        setYearlyData(cached.data);
+        const current = cached.data.months?.find(m => m.is_current);
+        setSelectedMonth(current?.month || cached.data.months?.[0]?.month || null);
+      }
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       if (range === '7d') {
         const res = await clientFetch(`/api/forecast/${area}?days_back=3&days_forward=3&lang=${language}`);
         if (res.ok) {
-          const data = await res.json();
+          const data: WeeklyResponse = await res.json();
           setWeeklyData(data);
           const today = data.days?.find((d: { is_today: boolean }) => d.is_today);
           setSelectedDay(today?.date || data.days?.[0]?.date || null);
+          cacheRef.current.set(key, { kind: 'weekly', data, timestamp: Date.now() });
         }
       } else {
-        const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`, { cache: 'no-store' });
+        const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`);
         if (res.ok) {
-          const data = await res.json();
+          const data: YearlyResponse = await res.json();
           setYearlyData(data);
           const current = data.months?.find((m: MonthData) => m.is_current);
           setSelectedMonth(current?.month || data.months?.[0]?.month || null);
+          cacheRef.current.set(key, { kind: 'yearly', data, timestamp: Date.now() });
         }
       }
     } catch (err) {
@@ -82,7 +117,7 @@ export default function ForecastPage() {
     } finally {
       setLoading(false);
     }
-  }, [area, range, language]);
+  }, [area, range, language, cacheKeyFor]);
 
   useEffect(() => {
     if (isLoggedIn) fetchData();
