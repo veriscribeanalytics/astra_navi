@@ -17,6 +17,8 @@ import {
 } from '@/data/consultationTree';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import LocationSearch, { type LocationResult } from '@/components/ui/LocationSearch';
+import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import GlassPanel from '@/components/ui/GlassPanel';
 import Particles from '@/components/ui/Particles';
 import { ChevronRight, ChevronLeft, Sparkles, Send, RefreshCw, Calendar, MapPin, Clock, Languages, MessageSquare, Info } from 'lucide-react';
@@ -52,6 +54,24 @@ const ConsultClient: React.FC = () => {
   const [birthDate, setBirthDate] = useState(user?.dob || '');
   const [birthTime, setBirthTime] = useState(user?.tob || '');
   const [birthPlace, setBirthPlace] = useState(user?.pob || '');
+  const [birthLatitude, setBirthLatitude] = useState<number | undefined>(user?.birthLatitude);
+  const [birthLongitude, setBirthLongitude] = useState<number | undefined>(user?.birthLongitude);
+  const [birthTimezoneName, setBirthTimezoneName] = useState<string | undefined>(user?.birthTimezoneName);
+  const [confirmedLocation, setConfirmedLocation] = useState<LocationResult | null>(() => {
+    if (
+      typeof user?.birthLatitude === 'number' &&
+      typeof user?.birthLongitude === 'number' &&
+      user?.birthTimezoneName
+    ) {
+      return {
+        name: user.birthPlaceName || user.pob || '',
+        lat: user.birthLatitude,
+        lon: user.birthLongitude,
+        timezone: user.birthTimezoneName,
+      };
+    }
+    return null;
+  });
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategory | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState('');
@@ -72,6 +92,21 @@ const ConsultClient: React.FC = () => {
     if (user?.dob) setBirthDate(user.dob);
     if (user?.tob) setBirthTime(user.tob);
     if (user?.pob) setBirthPlace(user.pob);
+    if (typeof user?.birthLatitude === 'number') setBirthLatitude(user.birthLatitude);
+    if (typeof user?.birthLongitude === 'number') setBirthLongitude(user.birthLongitude);
+    if (user?.birthTimezoneName) setBirthTimezoneName(user.birthTimezoneName);
+    if (
+      typeof user?.birthLatitude === 'number' &&
+      typeof user?.birthLongitude === 'number' &&
+      user?.birthTimezoneName
+    ) {
+      setConfirmedLocation({
+        name: user.birthPlaceName || user.pob || '',
+        lat: user.birthLatitude,
+        lon: user.birthLongitude,
+        timezone: user.birthTimezoneName,
+      });
+    }
   }, [user]);
 
   // Handle step 1: Birth Details -> Tree Fetch
@@ -79,6 +114,14 @@ const ConsultClient: React.FC = () => {
     e.preventDefault();
     if (!birthDate || !birthTime || !birthPlace) {
       error("Please provide all birth details for an accurate reading.");
+      return;
+    }
+    if (
+      typeof birthLatitude !== 'number' ||
+      typeof birthLongitude !== 'number' ||
+      !birthTimezoneName
+    ) {
+      error("Please select your exact birth location from the search results.");
       return;
     }
 
@@ -108,6 +151,22 @@ const ConsultClient: React.FC = () => {
   const generateReading = async () => {
     if (!selectedCategory || !selectedSubCategory || !selectedQuestion) return;
 
+    if (
+      typeof birthLatitude !== 'number' ||
+      typeof birthLongitude !== 'number' ||
+      !birthTimezoneName
+    ) {
+      error("Please select your exact birth location from the search results.");
+      setStep('birth');
+      return;
+    }
+    const offset = tzOffsetHoursAt(birthTimezoneName, birthDate, birthTime);
+    if (offset === null) {
+      error("Could not compute birth-time timezone offset. Please re-select the birth location.");
+      setStep('birth');
+      return;
+    }
+
     setStep('reading');
     setIsReading(true);
     setReadingText('');
@@ -126,7 +185,12 @@ const ConsultClient: React.FC = () => {
           secondary_category: selectedSubCategory.key,
           final_question: selectedQuestion,
           response_tone: tone,
-          optional_note: note || undefined
+          optional_note: note || undefined,
+          birthLatitude,
+          birthLongitude,
+          birthTimezoneName,
+          birthTimezoneOffsetAtBirth: offset,
+          birthTimeFold: null,
         }),
       });
 
@@ -343,12 +407,29 @@ const ConsultClient: React.FC = () => {
                   <label className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-foreground/70">
                     <MapPin className="w-3.5 h-3.5 text-secondary" /> Birth Place
                   </label>
-                  <Input 
-                    placeholder="City, State, Country"
-                    value={birthPlace} 
-                    onChange={(e) => setBirthPlace(e.target.value)}
+                  <LocationSearch
+                    label=""
+                    placeholder="Search city, e.g. Mumbai"
+                    value={birthPlace}
+                    confirmedLocation={confirmedLocation}
                     required
-                    className="h-10 text-sm bg-background/60 border-outline-variant/40 focus:border-secondary transition-all"
+                    onSelect={(loc: LocationResult) => {
+                      setBirthPlace(loc.name);
+                      setBirthLatitude(loc.lat);
+                      setBirthLongitude(loc.lon);
+                      setBirthTimezoneName(loc.timezone);
+                      setConfirmedLocation(loc);
+                    }}
+                    onChange={(text: string) => {
+                      setBirthPlace(text);
+                      const stillMatches = confirmedLocation?.name === text;
+                      if (!stillMatches) {
+                        setBirthLatitude(undefined);
+                        setBirthLongitude(undefined);
+                        setBirthTimezoneName(undefined);
+                        setConfirmedLocation(null);
+                      }
+                    }}
                   />
                 </div>
 
