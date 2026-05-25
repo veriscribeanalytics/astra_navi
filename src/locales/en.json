@@ -507,6 +507,7 @@
     "guestPreviewMode": "Preview mode - identity required for Vedic analysis",
     "guestLoginNow": "Login Now",
     "naviWelcome": "Namaste ✦ I'm Navi. Ask me anything.",
+    "guideWelcome": "Namaste ✦ I'm {name}. Ask me anything.",
     "emptyGreeting": "What can I help you understand?",
     "avatarQuestions": {
       "navi": [

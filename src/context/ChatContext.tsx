@@ -632,6 +632,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user?.email) return null;
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
+    const isDefaultAvatar = !selectedAvatarId || selectedAvatarId === DEFAULT_AVATAR_ID;
+    const guide = !isDefaultAvatar ? avatars.find(a => a.avatarId === selectedAvatarId) : null;
+    const welcomeText = guide?.name
+      ? t('chat.guideWelcome', { name: guide.name })
+      : t('chat.naviWelcome');
     const tempChat: Chat = {
       id: tempId,
       userEmail: user.email,
@@ -639,7 +644,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages: [{
         id: generateUUID(),
         type: 'ai',
-        text: t('chat.naviWelcome'),
+        text: welcomeText,
+        avatarId: guide ? selectedAvatarId : null,
+        avatarName: guide?.name,
+        avatarTitle: guide?.title,
         createdAt: now
       }],
       averageRating: null,
@@ -651,7 +659,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserHasManuallyChangedMode(false);
     if (initialMessage) sendMessage(initialMessage, tempId, pageContextSource);
     return tempId;
-  }, [user, sendMessage, isGuest, t, setUserHasManuallyChangedMode]);
+  }, [user, sendMessage, isGuest, t, setUserHasManuallyChangedMode, selectedAvatarId, avatars]);
 
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
