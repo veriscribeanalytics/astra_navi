@@ -7,7 +7,18 @@ import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
 import { Users, Heart, BookOpen, Star } from 'lucide-react';
 
 function FamilyContent() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div className="flex-grow flex flex-col items-center justify-center min-h-[60vh] gap-3">
+                <div className="w-10 h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-secondary animate-pulse" />
+                </div>
+                <p className="text-[14px] text-foreground/40 font-medium">Opening your family...</p>
+            </div>
+        );
+    }
 
     if (!isLoggedIn) {
         return (
