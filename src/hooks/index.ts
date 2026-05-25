@@ -41,6 +41,19 @@ export {
     createFamilyMember,
     updateFamilyMember,
     deleteFamilyMember,
+    useFamilyAvatars,
+    useFamilyCompatibilityPreflight,
+    useFamilyReports,
+    useIncomingInvites,
+    useOutgoingInvites,
+    useFamilyConnections,
+    sendInvite,
+    acceptInvite,
+    acceptInviteMerge,
+    declineInvite,
+    revokeInvite,
+    updateConnection,
+    deleteConnection,
 } from './useFamily';
-export type { CompatibilityFetchResult, MutationResult } from './useFamily';
+export type { CompatibilityFetchResult, MutationResult, FamilyReport } from './useFamily';
 export { useAvatarTheme } from './useAvatarTheme';

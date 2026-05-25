@@ -65,8 +65,8 @@ export const authConfig = {
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isAuthRoute = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
       const isPublicRoute =
-        nextUrl.pathname === "/" || 
-        nextUrl.pathname.startsWith("/blogs") || 
+        nextUrl.pathname === "/" ||
+        nextUrl.pathname.startsWith("/blogs") ||
         nextUrl.pathname.startsWith("/rashis") ||
         nextUrl.pathname.startsWith("/about") ||
         nextUrl.pathname.startsWith("/support") ||
@@ -74,6 +74,8 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/plans") ||
         nextUrl.pathname.startsWith("/kundli") ||
         nextUrl.pathname.startsWith("/consult") ||
+        nextUrl.pathname.startsWith("/chat") ||
+        nextUrl.pathname.startsWith("/horoscope") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||
         nextUrl.pathname.startsWith("/logout");

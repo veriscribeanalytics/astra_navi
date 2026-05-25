@@ -9,6 +9,7 @@ import { useToast } from '@/hooks';
 import { PaywallData } from '@/types/paywall';
 import type { ChatPageContextSource } from '@/lib/schemas';
 import type { ChatAvatar } from '@/types/avatar';
+import type { FamilyCompatibilityResponse, FamilyRelationshipType } from '@/types/family';
 
 const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
@@ -41,6 +42,20 @@ export interface FileAttachment {
   size: number;
   url?: string;
   preview?: string;
+}
+
+export interface PendingChatAction {
+  type: 'run_compatibility';
+  memberId: number;
+  memberName: string;
+  relationshipType: FamilyRelationshipType | string;
+  creditCost: number;
+}
+
+export interface ResolvedChatAction {
+  status: 'running' | 'done' | 'error';
+  result?: FamilyCompatibilityResponse;
+  errorMessage?: string;
 }
 
 export interface ChatMessage {
@@ -81,6 +96,12 @@ export interface ChatMessage {
   avatarName?: string;
   avatarTitle?: string;
   avatarCreditCost?: number;
+  /** AI proposals the user can approve inline (e.g. paid compatibility run). */
+  pendingActions?: PendingChatAction[];
+  /** Backend signals the tool-use loop got stuck — UI shows fallback copy. */
+  toolLoopExceeded?: boolean;
+  /** Local-only: per-pendingAction state once the user has tapped approve. */
+  resolvedActions?: Record<number, ResolvedChatAction>;
   createdAt: string;
 }
 
@@ -108,6 +129,9 @@ export interface ThinkingData {
   mode?: ChatMessage['mode'];
   model?: string;
   answerStyle?: string;
+  /** Tool names from the new `tool_use` SSE event. Non-empty means the AI is
+   *  consulting family data — UI swaps to a family-flavoured thinking copy. */
+  tools?: string[];
 }
 
 interface ChatContextType {
@@ -154,6 +178,7 @@ interface ChatContextType {
   selectedAvatarId: string;
   setSelectedAvatarId: (avatarId: string) => void;
   isLoadingAvatars: boolean;
+  resolvePendingAction: (messageId: string, memberId: number) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -458,13 +483,19 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               const data = JSON.parse(dataStr);
               if (currentEventName === 'thinking') {
-                setThinkingData({
+                setThinkingData(prev => ({
+                  ...(prev ?? {}),
                   topic: data.topic ?? undefined,
                   intent: data.intent ?? undefined,
                   mode: data.mode ?? undefined,
                   model: data.model ?? undefined,
                   answerStyle: data.answerStyle ?? undefined,
-                });
+                }));
+              } else if (currentEventName === 'tool_use') {
+                // The AI is consulting family/relationship data. We just track
+                // the tool names; the indicator decides what copy to show.
+                const tools = Array.isArray(data.tools) ? (data.tools as string[]) : [];
+                setThinkingData(prev => ({ ...(prev ?? {}), tools }));
               } else if (currentEventName === 'metadata') {
                 if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
                   persistedAiMsgId = data.aiMessageId;
@@ -494,6 +525,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     avatarName: data.avatarName ?? m.avatarName,
                     avatarTitle: data.avatarTitle ?? m.avatarTitle,
                     avatarCreditCost: data.avatarCreditCost ?? m.avatarCreditCost,
+                    pendingActions: Array.isArray(data.pendingActions) ? data.pendingActions : m.pendingActions,
+                    toolLoopExceeded: typeof data.toolLoopExceeded === 'boolean' ? data.toolLoopExceeded : m.toolLoopExceeded,
                     errorCode: errorCode ?? m.errorCode,
                     error: errorCode ? true : m.error,
                     errorMessage: errorCode ? (() => {
@@ -864,6 +897,49 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  // ── Resolve a pendingAction the AI proposed ──
+  // Right now only `run_compatibility` exists; the lookup is by `memberId`.
+  // 402s route through the same paywall surface as the chat-send endpoint so
+  // the UX feels consistent (PaywallCard pops on either flow).
+  const resolvePendingAction = useCallback(async (messageId: string, memberId: number) => {
+    const setActionState = (next: ResolvedChatAction) => {
+      setActiveChat(prev => prev ? {
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? {
+          ...m,
+          resolvedActions: { ...(m.resolvedActions ?? {}), [memberId]: next },
+        } : m),
+      } : null);
+    };
+
+    setActionState({ status: 'running' });
+
+    try {
+      const res = await clientFetch(
+        `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility?lang=${encodeURIComponent(language)}`
+      );
+      const body = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        setActionState({ status: 'done', result: body as FamilyCompatibilityResponse });
+        return;
+      }
+
+      if (res.status === 402) {
+        const paywallData = body.paywall || body.detail?.paywall || body;
+        setPaywall(paywallData as PaywallData);
+        setActionState({ status: 'error', errorMessage: t('chat.pendingActionError') });
+        return;
+      }
+
+      const msg = body.error || body.detail || t('chat.pendingActionError');
+      setActionState({ status: 'error', errorMessage: msg });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t('chat.pendingActionError');
+      setActionState({ status: 'error', errorMessage: msg });
+    }
+  }, [language, t]);
+
   // Load initial chats
   useEffect(() => {
     if (!initialLoadDone.current && user?.email && !isGuest) {
@@ -888,7 +964,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inputText, setInputText, attachments, addAttachment, removeAttachment, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall,
       thinkingData,
-      avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars
+      avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars,
+      resolvePendingAction
     }}>
       {children}
     </ChatContext.Provider>

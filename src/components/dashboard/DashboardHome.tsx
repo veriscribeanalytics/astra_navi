@@ -20,6 +20,7 @@ import { clientFetch } from "@/lib/apiClient";
 import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
 import AvatarShowcase from "@/components/dashboard/AvatarShowcase";
 import FamilyStrip from "@/components/dashboard/FamilyStrip";
+import InviteBanner from "@/components/dashboard/InviteBanner";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
@@ -929,6 +930,9 @@ export default function DashboardHome() {
 
                 {/* AVATAR SHOWCASE */}
                 <AvatarShowcase />
+
+                {/* INCOMING FAMILY INVITES */}
+                <InviteBanner />
 
                 {/* MY FAMILY STRIP */}
                 <FamilyStrip />

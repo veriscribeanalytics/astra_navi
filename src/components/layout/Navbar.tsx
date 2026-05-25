@@ -311,6 +311,11 @@ const Navbar: React.FC = () => {
     }, [pathname]);
 
     const isChatPage = pathname?.startsWith('/chat');
+    // Only hide the navbar on /chat when the user is actually signed in
+    // (because the authed chat UI has its own header). Anon users see the
+    // PublicFeatureLanding teaser and must keep the navbar so they can
+    // navigate away.
+    const hideNavbar = isChatPage && isLoggedIn;
     const navSections = getNavSections(isLoggedIn, t);
 
     const handleLogout = () => {
@@ -402,7 +407,7 @@ const Navbar: React.FC = () => {
                 variant="warning"
                 isLoading={isLoggingOut}
             />
-            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden' : ''}`}>
+            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${hideNavbar ? 'hidden' : ''}`}>
             {/* ===== DESKTOP NAVBAR (md+) ===== */}
             <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
@@ -488,7 +493,22 @@ const Navbar: React.FC = () => {
                     {isLoading ? (
                         <div className="w-9 h-9 rounded-full bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
                     ) : !isLoggedIn ? (
-                        <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="sm" className="!px-5 shadow-md shadow-secondary/10 text-xs">Login</Button>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`}
+                                className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/70 hover:text-secondary transition-colors whitespace-nowrap"
+                            >
+                                {t('nav.login')}
+                            </Link>
+                            <Button
+                                href={`/login?action=register&callbackUrl=${encodeURIComponent(pathname || '/')}`}
+                                variant="primary"
+                                size="sm"
+                                className="!px-4 shadow-md shadow-secondary/10 text-xs whitespace-nowrap"
+                            >
+                                {t('nav.signUp')}
+                            </Button>
+                        </div>
                     ) : (
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
                             <button 
@@ -559,10 +579,14 @@ const Navbar: React.FC = () => {
                 <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
                     <ThemeToggle />
                     {isLoading ? (
-                        <div className="w-8 h-8 rounded-xl bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
+                        <div className="h-8 w-[68px] rounded-xl bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
                     ) : !isLoggedIn ? (
-                        <Link href="/login" className="w-8 h-8 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
-                            <User className="w-4 h-4" />
+                        <Link
+                            href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`}
+                            className="h-8 px-3.5 rounded-xl bg-secondary text-on-primary text-[11px] font-bold uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity shadow-sm shadow-secondary/20"
+                        >
+                            <User className="w-3.5 h-3.5" />
+                            {t('nav.login')}
                         </Link>
                     ) : (
                         <div className="relative z-50" ref={mobileUserDropdownRef}>

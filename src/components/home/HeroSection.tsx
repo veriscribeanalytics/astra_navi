@@ -34,9 +34,13 @@ export default function HeroSection({
     const router = useRouter();
 
     return (
-        <section 
+        <section
             onPointerDown={() => setInteractionTick(prev => prev + 1)}
-            className="relative min-h-[500px] sm:min-h-[600px] lg:h-[640px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden border-b border-outline-variant/10 pt-24 sm:pt-20 lg:pt-0"
+            // `lg:min-h-[640px]` (not the previous fixed `lg:h-[640px]`) so the
+            // section can grow when translated text is taller — Tamil, Malayalam,
+            // and other curly scripts produce significantly taller copy and were
+            // being clipped at the top by `overflow-hidden`.
+            className="relative min-h-[500px] sm:min-h-[600px] lg:min-h-[640px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden border-b border-outline-variant/10 pt-24 sm:pt-20 lg:pt-0 pb-12 lg:pb-16"
         >
             <motion.div 
                 initial={{ opacity: 0.1, scale: 0.8 }}
@@ -45,7 +49,7 @@ export default function HeroSection({
                 className="absolute top-[-10%] right-[-10%] w-[250px] lg:w-[600px] h-[250px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] rounded-full -z-10 opacity-30 dark:opacity-60 will-change-transform"
             ></motion.div>
             
-            <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 lg:gap-12 items-center relative z-10 py-6 sm:py-10 lg:py-0 lg:-mt-[120px]">
+            <div className="hero-grid max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 lg:gap-12 items-center relative z-10 py-6 sm:py-10 lg:py-0 lg:-mt-[120px]">
                 
                 {/* Left: Rotating Text Content */}
                 <div className="lg:col-span-6 relative flex flex-col justify-start text-center lg:text-left min-h-[360px] sm:min-h-[440px]">
@@ -65,16 +69,16 @@ export default function HeroSection({
                                 </span>
                             </div>
                             
-                            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-headline font-bold text-primary leading-[1.15]">
+                            <h1 className="hero-h1 text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-headline font-bold text-primary leading-[1.15]">
                                 {slides[activeSlide]?.title}
                             </h1>
-                            
-                            <p className="text-xs sm:text-base md:text-base text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0 opacity-80">
+
+                            <p className="hero-desc text-xs sm:text-base md:text-base text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0 opacity-80">
                                 {slides[activeSlide]?.desc}
                             </p>
                             
-                            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-0 sm:pt-1">
-                                <Button 
+                            <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-0 sm:pt-1">
+                                <Button
                                     onClick={() => {
                                         const action = slides[activeSlide]?.btn1.action;
                                         if (action) {
@@ -82,13 +86,13 @@ export default function HeroSection({
                                         } else {
                                             router.push(slides[activeSlide]?.btn1.href || '/chat');
                                         }
-                                    }} 
-                                    size="lg" 
-                                    className="gold-gradient shadow-xl px-6 sm:px-10 w-full sm:w-auto text-sm sm:text-base"
+                                    }}
+                                    size="lg"
+                                    className="gold-gradient shadow-xl px-6 sm:px-10 w-full sm:w-auto text-sm sm:text-base whitespace-nowrap text-center"
                                 >
                                     {slides[activeSlide]?.btn1.label}
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={() => {
                                         const action = slides[activeSlide]?.btn2.action;
                                         if (action) {
@@ -97,9 +101,9 @@ export default function HeroSection({
                                             router.push(slides[activeSlide]?.btn2.href || '/chat');
                                         }
                                     }}
-                                    variant="ghost" 
-                                    size="lg" 
-                                    className="border border-outline-variant/30 px-6 sm:px-10 w-full sm:w-auto text-primary text-sm sm:text-base"
+                                    variant="ghost"
+                                    size="lg"
+                                    className="border border-outline-variant/30 px-6 sm:px-10 w-full sm:w-auto text-primary text-sm sm:text-base whitespace-nowrap text-center"
                                 >
                                     {slides[activeSlide]?.btn2.label}
                                 </Button>

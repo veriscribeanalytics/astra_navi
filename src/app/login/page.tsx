@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import {
   Orbit, Sparkles, ShieldCheck,
 } from 'lucide-react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -245,6 +244,19 @@ const LoginContent = () => {
     }
   };
 
+  // Respect `?action=register` on mount so deep-links from "Sign Up" CTAs
+  // (navbar, landing-page hero) drop the user straight into the register
+  // form instead of the sign-in form. Runs once: after this the user can
+  // toggle freely without the URL fighting them.
+  const initialActionRef = useRef(false);
+  useEffect(() => {
+    if (initialActionRef.current) return;
+    initialActionRef.current = true;
+    if (searchParams.get('action') === 'register') {
+      setIsRegister(true);
+    }
+  }, [searchParams]);
+
   const [quoteIndex, setQuoteIndex] = useState(0);
   const quotes = [
     'The stars do not pull us, they guide us.',
@@ -263,6 +275,26 @@ const LoginContent = () => {
   const lockedDisplay = lockedUntil
     ? `Locked (${Math.floor(lockedRemaining / 60)}:${(lockedRemaining % 60).toString().padStart(2, '0')})`
     : undefined;
+
+  // Map known protected destinations to a human-readable label so the bounce
+  // banner can tell the user *why* they landed on /login. Unknown / empty
+  // callbackUrls fall through to no banner.
+  const destinationLabel = (() => {
+    const cb = searchParams.get('callbackUrl');
+    if (!cb || cb === '/' || cb.startsWith('/?')) return null;
+    const path = cb.split('?')[0];
+    const map: Record<string, string> = {
+      '/chat': t('nav.chatWithNavi'),
+      '/profile': t('nav.userProfile') || 'Your Profile',
+      '/family': t('nav.myFamily'),
+      '/kundli': t('nav.myKundli'),
+      '/kundli/match': t('nav.chartMatching'),
+      '/horoscope/forecast': t('nav.forecast'),
+      '/consult': t('nav.guidedSessions'),
+      '/plans': t('nav.astraNaviPremium'),
+    };
+    return map[path] || null;
+  })();
 
   return (
     <AuthShell mouseGlow fullHeight className="px-0">
@@ -327,14 +359,6 @@ const LoginContent = () => {
 
         {/* Right Panel: Auth Form */}
         <div className="w-full lg:w-[550px] xl:w-[650px] flex flex-col min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-hidden relative">
-          {/* Mobile-only logo */}
-          <div className="lg:hidden flex justify-center mt-4 mb-2">
-            <div className="flex flex-col items-center gap-1">
-              <Image src="/icons/logo.jpeg" alt="AstraNavi" width={32} height={32} style={{ width: 'auto', height: 'auto' }} className="rounded-lg" />
-              <h2 className="text-base font-headline font-bold text-primary">AstraNavi</h2>
-            </div>
-          </div>
-
           {/* Form body */}
           <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col">
             <div className="m-auto w-full">
@@ -373,6 +397,19 @@ const LoginContent = () => {
                       {t('login.signOut')}
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Bounce-context banner — shown when the proxy/middleware
+                  redirected the user here from a protected route. Tells them
+                  exactly *why* they're seeing the login form. */}
+              {!isLoggedIn && destinationLabel && (
+                <div className="mb-5 mx-2 sm:mx-4 rounded-2xl border border-secondary/20 bg-secondary/[0.04] px-4 py-3 sm:px-5 sm:py-3.5 flex items-start gap-3">
+                  <ShieldCheck className="w-4 h-4 text-secondary mt-0.5 shrink-0" />
+                  <p className="text-[12px] sm:text-[13px] leading-relaxed text-on-surface-variant">
+                    {t('login.signInToContinue')}{' '}
+                    <span className="font-bold text-primary">{destinationLabel}</span>
+                  </p>
                 </div>
               )}
 

@@ -1,37 +1,13 @@
 'use client';
 
-import React, { Suspense, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ChatPageClient from '@/components/chat/ChatPageClient';
-import { Sparkles } from 'lucide-react';
+import PublicFeatureLanding from '@/components/layout/PublicFeatureLanding';
+import { Sparkles, MessageSquare, BookOpen, Brain } from 'lucide-react';
 
 function ChatContent() {
     const { isLoggedIn, isLoading } = useAuth();
-    const router = useRouter();
-    const redirectedRef = useRef(false);
-
-    useEffect(() => {
-        if (isLoading || isLoggedIn) return;
-        if (redirectedRef.current) return;
-        redirectedRef.current = true;
-        // `replace` (not `push`) so the broken /chat URL doesn't sit in history
-        // — otherwise hitting Back from /login would bounce the user right
-        // back into the same redirect path.
-        router.replace('/login?callbackUrl=/chat');
-
-        // Safety net: if for any reason the client-side router navigation
-        // doesn't complete within 2s (e.g. the proxy bounces us back, an
-        // ad blocker intercepts, a service worker stalls), force a hard
-        // navigation. This guarantees the user never sits frozen on a
-        // "Redirecting..." screen.
-        const fallback = window.setTimeout(() => {
-            if (typeof window !== 'undefined' && window.location.pathname === '/chat') {
-                window.location.replace('/login?callbackUrl=/chat');
-            }
-        }, 2000);
-        return () => window.clearTimeout(fallback);
-    }, [isLoading, isLoggedIn, router]);
 
     if (isLoading) {
         return (
@@ -45,24 +21,40 @@ function ChatContent() {
     }
 
     if (!isLoggedIn) {
-        // Middleware should have redirected before we got here, but if the
-        // session expires mid-session show a redirect-state UI instead of a
-        // blank screen (navbar is hidden on /chat, so `return null` would
-        // leave the user with no UI at all). The useEffect above kicks off
-        // the actual redirect and a 2s hard-navigation safety net.
         return (
-            <div className="flex-grow flex flex-col items-center justify-center min-h-[60vh] gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-secondary animate-pulse" />
-                </div>
-                <p className="text-[14px] text-foreground/40 font-medium">Redirecting to sign in...</p>
-                <a
-                    href="/login?callbackUrl=/chat"
-                    className="mt-2 text-[11px] uppercase tracking-widest font-bold text-secondary/70 hover:text-secondary underline-offset-4 hover:underline"
-                >
-                    Click here if you&apos;re not redirected
-                </a>
-            </div>
+            <PublicFeatureLanding
+                title="Chat with Navi — Your Vedic AI Guide"
+                subtitle="AI-powered Jyotish guidance"
+                description="Navi reads your Vedic birth chart and answers questions about career, relationships, timing, remedies, and life direction — grounded in classical Jyotish, not generic advice."
+                hook="Jyotish Shastra reveals what your stars set in motion at the moment of your first breath. Navi blends that ancient science with modern AI so you can ask the questions you've always wanted to ask — and get answers personal to your chart."
+                icon={<MessageSquare className="w-4 h-4" />}
+                ctaLabel="Sign in to Chat"
+                callbackUrl="/chat"
+                features={[
+                    {
+                        title: 'Personal to your chart',
+                        desc: 'Every answer is computed against your Lagna, planets, and Dasha — not stock predictions.',
+                        icon: <Sparkles className="w-5 h-5" />,
+                    },
+                    {
+                        title: 'Classical sources',
+                        desc: 'Grounded in BPHS, Phaladeepika, and other classical Jyotish texts — explainable and traceable.',
+                        icon: <BookOpen className="w-5 h-5" />,
+                    },
+                    {
+                        title: 'Multiple specialist guides',
+                        desc: 'Pick a guide tuned for career, relationships, health, or deep chart analysis. Each one stays in scope.',
+                        icon: <Brain className="w-5 h-5" />,
+                    },
+                ]}
+                benefits={[
+                    'Answers reference your actual planetary placements',
+                    'Suggested questions update with today\'s transits',
+                    'Conversations are private — encrypted end-to-end',
+                    'Free credits to start — no card required',
+                ]}
+                vedicAuthority="Powered by BPHS-grounded chart analysis & specialist AI guides"
+            />
         );
     }
 

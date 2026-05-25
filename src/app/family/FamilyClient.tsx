@@ -6,7 +6,8 @@ import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
     Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
-    ChevronDown, ChevronUp, HandHeart, Sparkles, Compass,
+    ChevronDown, ChevronUp, HandHeart, Sparkles, Compass, FileText,
+    Sun, Moon, Flower, Activity,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -21,6 +22,9 @@ import {
     createFamilyMember,
     updateFamilyMember,
     deleteFamilyMember,
+    useFamilyAvatars,
+    useFamilyCompatibilityPreflight,
+    useFamilyReports,
 } from '@/hooks/useFamily';
 import {
     type FamilyMember,
@@ -31,6 +35,7 @@ import {
     FAMILY_FREE_TIER_LIMIT,
 } from '@/types/family';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
+import { bandPalette } from '@/lib/familyStatus';
 import FamilyChartView from '@/components/family/FamilyChartView';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
@@ -343,9 +348,22 @@ function FamilyList({ members, isLoading, error, onOpen, onEdit, onDelete, onAdd
             {members.map((m) => (
                 <Card key={m.id} variant="default" padding="md" hoverable>
                     <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
-                            {m.name.charAt(0).toUpperCase()}
-                        </div>
+                        {m.avatar ? (
+                            <div 
+                                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
+                                style={{ 
+                                    color: m.avatar.accentColor || 'var(--secondary)',
+                                    borderColor: `${m.avatar.accentColor || 'var(--secondary)'}33`,
+                                    backgroundColor: `${m.avatar.accentColor || 'var(--secondary)'}11` 
+                                }}
+                            >
+                                {React.createElement(getFamilyIcon(m.avatar.iconKey), { className: 'w-5 h-5' })}
+                            </div>
+                        ) : (
+                            <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
+                                {m.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
                         <div className="flex-1 min-w-0">
                             <h3 className="text-base font-headline font-bold text-primary truncate">{m.name}</h3>
                             <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
@@ -417,6 +435,7 @@ interface FormState {
     timezoneName: string;
     notes: string;
     consentAcknowledged: boolean;
+    avatarKey: string;
 }
 
 function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormProps) {
@@ -435,6 +454,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
         longitude: editing?.longitude ?? null,
         timezoneName: '',
         notes: editing?.notes ?? '',
+        avatarKey: editing?.avatarKey ?? '',
         // Consent is locked on existing records; we only send it on create.
         consentAcknowledged: isEdit,
     }));
@@ -452,6 +472,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSaving, setIsSaving] = useState(false);
+    const { data: familyAvatars } = useFamilyAvatars();
 
     const update = <K extends keyof FormState>(k: K, v: FormState[K]) =>
         setState((s) => ({ ...s, [k]: v }));
@@ -496,6 +517,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                     longitude: state.longitude ?? undefined,
                     ...(computedTz !== null ? { timezoneOffset: computedTz } : {}),
                     notes: state.notes.trim() || undefined,
+                    avatarKey: state.avatarKey || undefined,
                 };
                 const res = await updateFamilyMember(editing.id, payload);
                 if (!res.ok || !res.data) {
@@ -522,6 +544,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                 longitude: state.longitude!,
                 timezoneOffset: tz,
                 notes: state.notes.trim() || undefined,
+                avatarKey: state.avatarKey || undefined,
                 consentAcknowledged: true as const,
             };
             const res = await createFamilyMember(payload);
@@ -673,6 +696,43 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                     />
                 </div>
 
+                {familyAvatars && familyAvatars.length > 0 && (
+                    <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
+                            Profile Icon
+                        </label>
+                        <div className="flex flex-wrap gap-3 p-3 rounded-[24px] border border-outline-variant/30 bg-surface-variant/10">
+                            {familyAvatars.map((av) => {
+                                const isSelected = state.avatarKey === av.key;
+                                return (
+                                    <button
+                                        key={av.key}
+                                        type="button"
+                                        onClick={() => update('avatarKey', av.key)}
+                                        className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 ${
+                                            isSelected
+                                                ? 'scale-110 shadow-md border-opacity-100'
+                                                : 'opacity-65 hover:opacity-100 hover:scale-105 border-transparent'
+                                        }`}
+                                        style={{
+                                            color: av.accentColor || 'var(--secondary)',
+                                            borderColor: isSelected 
+                                                ? av.accentColor || 'var(--secondary)' 
+                                                : 'transparent',
+                                            backgroundColor: isSelected
+                                                ? `${av.accentColor || 'var(--secondary)'}22`
+                                                : `${av.accentColor || 'var(--secondary)'}08`
+                                        }}
+                                        title={av.label}
+                                    >
+                                        {React.createElement(getFamilyIcon(av.iconKey), { className: 'w-5 h-5' })}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {!isEdit && (
                     <label className="flex items-start gap-3 cursor-pointer p-3 rounded-2xl border border-outline-variant/30 hover:border-secondary/30 transition-colors">
                         <input
@@ -717,6 +777,9 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
 
     const [lang, setLang] = useState<CompatibilityLang>('en');
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
+    const { data: reports } = useFamilyReports(member.id);
+    const { fetchPreflight, isLoading: preflightLoading } = useFamilyCompatibilityPreflight(member.id);
+    const [preflightData, setPreflightData] = useState<any>(null);
 
     const creditCost = COMPATIBILITY_CREDIT_COST[member.relationshipType] ?? 5;
 
@@ -785,12 +848,24 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
         toastError(res.error || 'Compatibility request failed.');
     };
 
-    const startCompatibility = () => {
+    const startCompatibility = async () => {
         if (alreadyPaidForLang) {
             // No-op — already shown
             return;
         }
-        setConfirmingPurchase(true);
+        const preflight = await fetchPreflight();
+        if (preflight) {
+            if (preflight.cachedResultAvailable) {
+                // Free/cached available! Skip warning and run directly!
+                await runCompatibility();
+            } else {
+                setPreflightData(preflight);
+                setConfirmingPurchase(true);
+            }
+        } else {
+            setPreflightData(null);
+            setConfirmingPurchase(true);
+        }
     };
 
     return (
@@ -798,9 +873,22 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
             {/* Header card */}
             <Card variant="default" padding="lg">
                 <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-lg font-bold shrink-0">
-                        {member.name.charAt(0).toUpperCase()}
-                    </div>
+                    {member.avatar ? (
+                        <div 
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border"
+                            style={{ 
+                                color: member.avatar.accentColor || 'var(--secondary)',
+                                borderColor: `${member.avatar.accentColor || 'var(--secondary)'}33`,
+                                backgroundColor: `${member.avatar.accentColor || 'var(--secondary)'}11` 
+                            }}
+                        >
+                            {React.createElement(getFamilyIcon(member.avatar.iconKey), { className: 'w-6 h-6' })}
+                        </div>
+                    ) : (
+                        <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-lg font-bold shrink-0">
+                            {member.name.charAt(0).toUpperCase()}
+                        </div>
+                    )}
                     <div className="flex-1 min-w-0">
                         <h2 className="text-xl font-headline font-bold text-primary">{member.name}</h2>
                         <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
@@ -855,6 +943,45 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                     <FamilyChartView chart={chart.chart} />
                 )}
             </Card>
+
+            {/* Reports */}
+            {reports && reports.length > 0 && (
+                <Card variant="default" padding="lg">
+                    <div className="flex items-center gap-2 mb-3">
+                        <TrendingUp className="w-4 h-4 text-secondary" />
+                        <h3 className="text-sm font-headline font-bold text-primary">
+                            Saved Reports
+                        </h3>
+                    </div>
+                    <div className="space-y-2">
+                        {reports.map((report) => (
+                            <div key={report.id} className="flex items-center justify-between p-3 rounded-2xl border border-outline-variant/15 bg-secondary/5 hover:bg-secondary/10 transition-colors">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <FileText className="w-4 h-4 text-secondary shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-primary truncate">{report.title}</p>
+                                        <p className="text-[10px] text-on-surface-variant/50">
+                                            {new Date(report.createdAt).toLocaleDateString(undefined, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a 
+                                    href={`/api/family/reports/${report.id}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] font-bold uppercase tracking-wider text-secondary hover:underline shrink-0"
+                                >
+                                    Download
+                                </a>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+            )}
 
             {/* Compatibility */}
             <Card variant="default" padding="lg">
@@ -921,9 +1048,13 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                 isOpen={confirmingPurchase}
                 onClose={() => setConfirmingPurchase(false)}
                 onConfirm={runCompatibility}
-                title={`Use ${creditCost} credits?`}
-                message={`This will charge ${creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis for ${member.name}. Repeating the same language later is free.`}
-                confirmText={`Use ${creditCost} credits`}
+                title={preflightData?.staleDataWarning ? 'Re-run compatibility analysis?' : `Use ${preflightData?.creditCost ?? creditCost} credits?`}
+                message={
+                    preflightData?.staleDataWarning
+                        ? `Birth details for ${member.name} or your profile have changed since the last analysis. Re-running the compatibility check will generate a new analysis and cost ${preflightData?.creditCost ?? creditCost} credits.`
+                        : `This will charge ${preflightData?.creditCost ?? creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis for ${member.name}. Repeating the same language later is free.`
+                }
+                confirmText={preflightData?.staleDataWarning ? 'Re-run analysis' : `Use ${preflightData?.creditCost ?? creditCost} credits`}
                 cancelText="Cancel"
                 variant="warning"
                 isLoading={compatLoading}
@@ -933,21 +1064,6 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
 }
 
 /* ---------- Compatibility helpers ---------- */
-
-function bandPalette(band: string): { ring: string; text: string; bg: string; border: string } {
-    switch (band) {
-        case 'Excellent':
-            return { ring: 'text-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
-        case 'Good':
-            return { ring: 'text-secondary', text: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/30' };
-        case 'Average':
-            return { ring: 'text-amber-400', text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30' };
-        case 'Challenging':
-            return { ring: 'text-orange-400', text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
-        default:
-            return { ring: 'text-secondary', text: 'text-primary', bg: 'bg-secondary/10', border: 'border-secondary/30' };
-    }
-}
 
 function statusPalette(status: string): { text: string; bg: string; border: string; bar: string } {
     switch (status) {
@@ -1297,3 +1413,24 @@ function CompatibilityResult({
         </div>
     );
 }
+
+const FAMILY_ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+    heart: Heart,
+    star: Star,
+    smile: Sparkles,
+    sparkles: Sparkles,
+    user: Users,
+    users: Users,
+    sun: Sun,
+    moon: Moon,
+    compass: Compass,
+    flower: Flower,
+    coins: Coins,
+    activity: Activity,
+};
+
+export function getFamilyIcon(iconKey?: string | null): React.FC<{ className?: string }> {
+    if (!iconKey) return Users;
+    return FAMILY_ICON_MAP[iconKey.toLowerCase()] || Users;
+}
+

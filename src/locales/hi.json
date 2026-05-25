@@ -364,7 +364,11 @@
     "yoga": "योग",
     "startJourneyDesc": "आपकी ब्रह्मांडीय यात्रा यहाँ से शुरू होती है। इसे यहाँ देखने के लिए Navi से परामर्श लें।",
     "unknownSign": "???",
-    "askNaviFab": "Navi से पूछें"
+    "askNaviFab": "Navi से पूछें",
+    "familyEyebrow": "रिश्ते",
+    "familyAdd": "सदस्य जोड़ें",
+    "familyEmptyCta": "अपना पहला परिवार सदस्य जोड़ें",
+    "familyViewAll": "सभी देखें"
   },
   "horoscope": {
     "yourDayToday": "आज आपका दिन",
@@ -453,7 +457,11 @@
     "invalidCredentials": "अमान्य लॉगिन विवरण।",
     "networkError": "सर्वर से कनेक्ट नहीं हो सका। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।",
     "serverError": "सर्वर वर्तमान में अनुपलब्ध है। कृपया कुछ समय बाद पुनः प्रयास करें।",
-    "resetLinkSent": "यदि खाता मौजूद है, तो रीसेट निर्देश भेज दिए गए हैं।"
+    "resetLinkSent": "यदि खाता मौजूद है, तो रीसेट निर्देश भेज दिए गए हैं।",
+    "alreadySignedIn": "आप पहले से साइन इन हैं",
+    "goToDashboard": "डैशबोर्ड पर जाएं",
+    "signOut": "साइन आउट",
+    "signInToContinue": "जारी रखने के लिए साइन इन करें"
   },
   "about": {
     "theTradition": "परंपरा",

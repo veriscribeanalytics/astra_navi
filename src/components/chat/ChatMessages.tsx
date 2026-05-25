@@ -11,8 +11,9 @@ import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
 import { useToast, useTranslation } from '@/hooks';
-import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp } from 'lucide-react';
+import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp, Heart, Loader2 } from 'lucide-react';
 import { getAvatarIcon, getAvatarAccent, getAvatarImage } from '@/utils/avatarStyle';
+import { bandPalette } from '@/lib/familyStatus';
 
 const sanitizedHtmlCache = new Map<string, string>();
 
@@ -83,29 +84,44 @@ const haptic = (light?: boolean) => {
   }
 };
 
-const thinkingStatuses = [
+const DEFAULT_THINKING_STATUSES = [
   'chat.thinkingReadingChart',
   'chat.thinkingConsultingStars',
   'chat.thinkingInterpretingTransits',
   'chat.thinkingAligningPlanetaryData',
 ];
 
+const FAMILY_THINKING_STATUSES = [
+  'chat.thinkingFamilyLookingUp',
+  'chat.thinkingFamilyChecking',
+];
+
+const getThinkingStatuses = (tools?: string[]): string[] =>
+  tools && tools.length > 0 ? FAMILY_THINKING_STATUSES : DEFAULT_THINKING_STATUSES;
+
 const ThinkingIndicator: React.FC = () => {
   const [statusIdx, setStatusIdx] = useState(0);
   const { t } = useTranslation();
-  const { selectedAvatarId, avatars } = useChat();
+  const { selectedAvatarId, avatars, thinkingData } = useChat();
+
+  const statuses = getThinkingStatuses(thinkingData?.tools);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStatusIdx(prev => (prev + 1) % thinkingStatuses.length);
+      setStatusIdx(prev => (prev + 1) % statuses.length);
     }, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [statuses.length]);
+
+  // Reset index when the bucket of statuses changes so we don't index past the end.
+  useEffect(() => {
+    setStatusIdx(0);
+  }, [statuses]);
 
   const currentAvatar = avatars.find(a => a.avatarId === selectedAvatarId);
   const accent = selectedAvatarId && selectedAvatarId !== 'navi' ? getAvatarAccent(selectedAvatarId) : '';
   const avatarName = currentAvatar?.name ?? 'Navi';
-  const statusText = t(thinkingStatuses[statusIdx]);
+  const statusText = t(statuses[statusIdx]);
   const lowerStatusText = statusText.charAt(0).toLowerCase() + statusText.slice(1);
   const thinkingText = `${avatarName} is ${lowerStatusText}`;
 
@@ -139,7 +155,7 @@ const ThinkingIndicator: React.FC = () => {
 
 const ChatMessages: React.FC = () => {
   const { user } = useAuth();
-  const { activeChat, isLoadingMessages, isSending, isFinalizing, createNewChat, rateMessage, regenerateMessage, retryMessage, sendMessage, activeChatId, editMessage, deleteMessage, togglePin, avatars } = useChat();
+  const { activeChat, isLoadingMessages, isSending, isFinalizing, createNewChat, rateMessage, regenerateMessage, retryMessage, sendMessage, activeChatId, editMessage, deleteMessage, togglePin, avatars, resolvePendingAction } = useChat();
   const { success: toastSuccess, info: toastInfo } = useToast();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -374,7 +390,7 @@ const ChatMessages: React.FC = () => {
 
         let mainText = msg.text;
         let thinkingText = '';
-        
+
         if (isAi && msg.text.includes('<tool_call>')) {
           const parts = msg.text.split('mentare');
           if (parts.length > 1) {
@@ -384,6 +400,12 @@ const ChatMessages: React.FC = () => {
             thinkingText = msg.text.replace(' CPS', '').trim();
             mainText = '';
           }
+        }
+
+        // Backend signalled the tool-use loop got stuck — show fallback copy
+        // instead of whatever partial text came through.
+        if (isAi && msg.toolLoopExceeded) {
+          mainText = t('chat.toolLoopFallback');
         }
 
         const isSpeaking = speakingId === msg.id;
@@ -511,6 +533,98 @@ const ChatMessages: React.FC = () => {
                       >
                         {t('chat.retry')}
                       </button>
+                    </div>
+                  )}
+
+                  {msg.pendingActions && msg.pendingActions.length > 0 && (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {msg.pendingActions.map((action) => {
+                        const resolved = msg.resolvedActions?.[action.memberId];
+                        const status = resolved?.status;
+
+                        if (status === 'done' && resolved?.result) {
+                          const palette = bandPalette(resolved.result.band as string);
+                          const topFactors = (resolved.result.factors ?? []).slice(0, 3);
+                          return (
+                            <Card
+                              key={action.memberId}
+                              variant="bordered"
+                              padding="none"
+                              hoverable={false}
+                              className={`!rounded-xl !p-3 !bg-background ${palette.border}`}
+                            >
+                              <div className="flex items-center justify-between gap-3 mb-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Heart className={`w-4 h-4 shrink-0 ${palette.text}`} />
+                                  <p className="text-[13px] font-bold text-on-surface-variant truncate">{action.memberName}</p>
+                                </div>
+                                <span className={`shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-widest ${palette.bg} ${palette.text} ${palette.border}`}>
+                                  {resolved.result.band}
+                                </span>
+                              </div>
+                              <div className="flex items-baseline gap-2 mb-2">
+                                <span className={`text-[22px] font-headline font-bold ${palette.text}`}>{resolved.result.score}</span>
+                                <span className="text-[11px] text-on-surface-variant/40">/ 100</span>
+                              </div>
+                              {resolved.result.verdict && (
+                                <p className="text-[12px] text-on-surface-variant/70 leading-relaxed mb-2">{resolved.result.verdict}</p>
+                              )}
+                              {topFactors.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                                  {topFactors.map((f) => (
+                                    <div key={f.name} className="bg-surface-variant/25 rounded-md px-2 py-1.5">
+                                      <p className="text-[10px] text-on-surface-variant/40 mb-0.5 truncate">{f.label}</p>
+                                      <p className="text-[12px] font-semibold text-on-surface-variant">{Math.round(f.score_percent)}%</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </Card>
+                          );
+                        }
+
+                        const isRunning = status === 'running';
+                        const isError = status === 'error';
+
+                        return (
+                          <div key={action.memberId} className="flex flex-col gap-1.5">
+                            <button
+                              type="button"
+                              disabled={isRunning || isError}
+                              onClick={() => { haptic(); resolvePendingAction(msg.id, action.memberId); }}
+                              className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border transition-colors text-left ${
+                                isRunning || isError
+                                  ? 'bg-surface-variant/15 border-outline-variant/15 text-on-surface-variant/40 cursor-not-allowed'
+                                  : 'bg-amber-500/8 border-amber-500/25 hover:bg-amber-500/15 text-amber-300'
+                              }`}
+                            >
+                              <span className="flex items-center gap-2 min-w-0">
+                                {isRunning ? (
+                                  <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+                                ) : (
+                                  <Heart className="w-4 h-4 shrink-0" />
+                                )}
+                                <span className="flex flex-col min-w-0">
+                                  <span className="text-[13px] font-semibold truncate">
+                                    {isRunning ? t('chat.pendingActionRunning') : t('chat.pendingRunCompat')}
+                                  </span>
+                                  <span className="text-[11px] text-on-surface-variant/40 truncate">
+                                    {action.memberName}
+                                  </span>
+                                </span>
+                              </span>
+                              {!isRunning && (
+                                <span className="shrink-0 text-[11px] font-bold uppercase tracking-widest">
+                                  {t('chat.pendingRunCompatCost', { cost: action.creditCost })}
+                                </span>
+                              )}
+                            </button>
+                            {isError && (
+                              <p className="text-[11px] text-red-300/80 px-1">{resolved?.errorMessage || t('chat.pendingActionError')}</p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 

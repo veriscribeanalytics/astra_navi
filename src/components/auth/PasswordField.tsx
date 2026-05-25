@@ -37,13 +37,13 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
         icon={icon}
         autoComplete={autoComplete}
         disabled={disabled}
-        className={className}
+        className={`!pr-12 sm:!pr-14 ${className ?? ''}`}
       />
       <button
         type="button"
         onClick={() => setShowPassword(!showPassword)}
         disabled={disabled}
-        className="absolute right-4 top-[38px] text-on-surface-variant/40 hover:text-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 rounded"
+        className="absolute right-2 sm:right-3 top-[26px] sm:top-[28px] h-[48px] sm:h-[52px] w-10 flex items-center justify-center text-on-surface-variant/40 hover:text-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 rounded-lg"
         aria-label={showPassword ? 'Hide password' : 'Show password'}
         aria-pressed={showPassword}
       >

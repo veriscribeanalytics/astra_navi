@@ -37,6 +37,20 @@ export const COMPATIBILITY_CREDIT_COST: Record<FamilyRelationshipType, number> =
 
 export const FAMILY_FREE_TIER_LIMIT = 3;
 
+export interface FamilyAvatar {
+  key: string;
+  iconKey: string;
+  accentColor: string;
+  label: string;
+}
+
+export interface FamilyCompatibilityPreflight {
+  cachedResultAvailable: boolean;
+  staleDataWarning: boolean;
+  creditCost: number;
+  relationshipType: FamilyRelationshipType;
+}
+
 /** Server returns numeric id; we keep number | string for flexibility.
  *  Backend response is snake_case; useFamily.ts normalizes into this camelCase
  *  shape before handing to React components. */
@@ -52,6 +66,8 @@ export interface FamilyMember {
   longitude: number;
   timezoneOffset: number; // hours, e.g. 5.5
   notes?: string | null;
+  avatarKey?: string | null;
+  avatar?: FamilyAvatar | null;
   consentAcknowledged?: boolean;
   consentAcknowledgedAt?: string;
   createdAt?: string;
@@ -69,6 +85,7 @@ export interface FamilyMemberCreatePayload {
   longitude: number;
   timezoneOffset: number;
   notes?: string;
+  avatarKey?: string;
   consentAcknowledged: true;
 }
 
@@ -82,6 +99,7 @@ export interface FamilyMemberUpdatePayload {
   longitude?: number;
   timezoneOffset?: number;
   notes?: string;
+  avatarKey?: string | null;
 }
 
 export interface FamilyLagna {
@@ -215,3 +233,90 @@ export interface FamilyReservationPendingError {
   error: 'reservation_pending';
   idempotency_key: string;
 }
+
+/* ------------------------------------------------------------------ */
+/* Invites + linked connections                                        */
+/* ------------------------------------------------------------------ */
+
+export type FamilyInviteStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'revoked';
+
+export interface FamilyInvite {
+  id: number;
+  requesterEmail: string;
+  inviteeEmail: string;
+  requesterRelationshipType: FamilyRelationshipType;
+  message: string | null;
+  status: FamilyInviteStatus;
+  expiresAt: string;
+  createdAt: string;
+  respondedAt: string | null;
+  requesterName: string | null;
+  inviteeName: string | null;
+}
+
+export interface FamilyConnection {
+  connectionId: number;
+  otherEmail: string;
+  otherName: string;
+  iSeeThemAs: FamilyRelationshipType;
+  theySeeMeAs: FamilyRelationshipType;
+  myAvatarKey: string | null;
+  avatar: FamilyAvatar | null;
+  myNotes: string | null;
+  sharingWithThem: boolean;
+  theyShareWithMe: boolean;
+  createdAt: string;
+  disconnectedAt: string | null;
+  disconnected: boolean;
+}
+
+export interface FamilyMergeCandidate {
+  memberId: number;
+  name: string;
+  dob: string;
+}
+
+export interface FamilyInviteAcceptResponse {
+  connection: FamilyConnection;
+  mergeCandidate?: FamilyMergeCandidate;
+}
+
+export interface FamilyInviteSendPayload {
+  email: string;
+  relationshipType: FamilyRelationshipType;
+  message?: string;
+}
+
+export interface FamilyInviteAcceptPayload {
+  relationshipOverride?: FamilyRelationshipType;
+  avatarKey?: string;
+}
+
+export interface FamilyConnectionUpdatePayload {
+  sharingWithThem?: boolean;
+  avatarKey?: string | null;
+  notes?: string;
+  relationshipOverride?: FamilyRelationshipType;
+}
+
+/** Error codes returned on invite/connection endpoints. */
+export const FAMILY_INVITE_ERROR_CODES = [
+  'INVITEE_NO_ACCOUNT',
+  'FAMILY_FREE_TIER_CAP',
+  'ALREADY_CONNECTED',
+  'INVITE_PENDING',
+  'DECLINE_COOLDOWN_ACTIVE',
+  'INVITE_NOT_PENDING',
+  'MERGE_CANDIDATE_MISMATCH',
+  'SHARING_REQUIRED',
+] as const;
+export type FamilyInviteErrorCode = typeof FAMILY_INVITE_ERROR_CODES[number];
+
+/** Body returned by /connections/{id}/compatibility when sharing isn't mutual. */
+export interface FamilySharingRequiredError {
+  code: 'SHARING_REQUIRED';
+  sharing_with_them: boolean;
+  they_share_with_me: boolean;
+  message: string;
+}
+

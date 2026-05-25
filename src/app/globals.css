@@ -318,6 +318,159 @@ body.skip-disabled .skip-to-content:focus-visible {
   font-family: var(--font-noto-gurmukhi), var(--font-inter), var(--font-dm-sans), sans-serif !important;
 }
 
+/* ─── Non-Latin script breathing room ─────────────────────────────────────
+   Devanagari (Hindi, Marathi), Bengali, Gujarati, Gurmukhi (Punjabi), and
+   the South Indian scripts (Tamil, Telugu, Kannada, Malayalam) have
+   characters with vertical strokes, vowel marks above/below, and conjuncts
+   that need more line-height than Latin defaults — otherwise glyph tops
+   get clipped in any container with `overflow: hidden` and dense leading
+   (e.g. Tailwind `leading-[1.15]` on hero headings).
+
+   Specificity (0,1,1) intentionally beats single-class Tailwind utilities
+   like `.leading-tight` / `.leading-[1.15]` (0,1,0). No `:where()` here
+   because we DO want to override those defaults — they were calibrated
+   for Latin glyphs. Component-level overrides that need to win can still
+   raise their specificity. */
+[lang="hi"] h1, [lang="hi"] h2, [lang="hi"] h3, [lang="hi"] h4, [lang="hi"] h5, [lang="hi"] h6,
+[lang="mr"] h1, [lang="mr"] h2, [lang="mr"] h3, [lang="mr"] h4, [lang="mr"] h5, [lang="mr"] h6,
+[lang="bn"] h1, [lang="bn"] h2, [lang="bn"] h3, [lang="bn"] h4, [lang="bn"] h5, [lang="bn"] h6,
+[lang="gu"] h1, [lang="gu"] h2, [lang="gu"] h3, [lang="gu"] h4, [lang="gu"] h5, [lang="gu"] h6,
+[lang="pa"] h1, [lang="pa"] h2, [lang="pa"] h3, [lang="pa"] h4, [lang="pa"] h5, [lang="pa"] h6,
+[lang="ta"] h1, [lang="ta"] h2, [lang="ta"] h3, [lang="ta"] h4, [lang="ta"] h5, [lang="ta"] h6,
+[lang="te"] h1, [lang="te"] h2, [lang="te"] h3, [lang="te"] h4, [lang="te"] h5, [lang="te"] h6,
+[lang="kn"] h1, [lang="kn"] h2, [lang="kn"] h3, [lang="kn"] h4, [lang="kn"] h5, [lang="kn"] h6,
+[lang="ml"] h1, [lang="ml"] h2, [lang="ml"] h3, [lang="ml"] h4, [lang="ml"] h5, [lang="ml"] h6 {
+  line-height: 1.4;
+  padding-block: 0.05em; /* Tiny breathing room above/below for glyphs whose ink
+                            extends past the em-box (Devanagari shirorekha, Tamil
+                            virama marks, etc.). Prevents `overflow: hidden`
+                            ancestors from shaving tops off bold headlines. */
+}
+
+[lang="hi"] button, [lang="hi"] [role="button"],
+[lang="mr"] button, [lang="mr"] [role="button"],
+[lang="bn"] button, [lang="bn"] [role="button"],
+[lang="gu"] button, [lang="gu"] [role="button"],
+[lang="pa"] button, [lang="pa"] [role="button"],
+[lang="ta"] button, [lang="ta"] [role="button"],
+[lang="te"] button, [lang="te"] [role="button"],
+[lang="kn"] button, [lang="kn"] [role="button"],
+[lang="ml"] button, [lang="ml"] [role="button"] {
+  line-height: 1.4;
+}
+
+/* ─── Hero typography scale-down for Indic scripts ─────────────────────────
+   Same content length differs ~30% between scripts (e.g. Tamil description
+   wraps to 4 lines where Korean wraps to 2). Without scaling, hero h1
+   blows out the layout in Tamil/Telugu/Malayalam/Kannada/Bengali/etc.
+
+   These rules shrink ONLY the hero h1 + description (.hero-h1, .hero-desc
+   on the LandingPage hero) — not every heading on the site. `!important` is
+   intentional: it guarantees the override wins against Tailwind's responsive
+   `text-*` utilities at every breakpoint, regardless of cascade order or
+   how Tailwind v4 emits the compiled CSS. */
+[lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+[lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+[lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+[lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+  font-size: 1.5rem !important; /* mobile baseline */
+}
+@media (min-width: 640px) {
+  [lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+  [lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+  [lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+  [lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+    font-size: 1.875rem !important; /* sm: text-3xl */
+  }
+}
+@media (min-width: 768px) {
+  [lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+  [lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+  [lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+  [lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+    font-size: 2.25rem !important; /* md: text-4xl */
+  }
+}
+@media (min-width: 1024px) {
+  [lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+  [lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+  [lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+  [lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+    font-size: 2.5rem !important; /* lg: between text-4xl and text-5xl */
+  }
+}
+
+/* Hero description: slight bump in line-height for breathing room.
+   Don't shrink the text — 16px is the readability floor. */
+[lang="hi"] .hero-desc, [lang="mr"] .hero-desc,
+[lang="bn"] .hero-desc, [lang="gu"] .hero-desc, [lang="pa"] .hero-desc,
+[lang="ta"] .hero-desc, [lang="te"] .hero-desc,
+[lang="kn"] .hero-desc, [lang="ml"] .hero-desc {
+  line-height: 1.65 !important;
+}
+
+/* Cancel the hero grid's `lg:-mt-[120px]` negative margin for Indic scripts.
+   Reason: in English the content fits ~500px in a 640px section, and the
+   -120px margin tightens the visual gap between navbar and hero. In
+   Tamil/Malayalam/etc the content is ~700–800px tall, the section grows to
+   fit it (`min-h-[640px]`), and then the -120px shifts the top of the
+   content ABOVE the section. `overflow-hidden` then chops the heading off.
+   Latin layout is untouched. */
+@media (min-width: 1024px) {
+  [lang="hi"] .hero-grid, [lang="mr"] .hero-grid,
+  [lang="bn"] .hero-grid, [lang="gu"] .hero-grid, [lang="pa"] .hero-grid,
+  [lang="ta"] .hero-grid, [lang="te"] .hero-grid,
+  [lang="kn"] .hero-grid, [lang="ml"] .hero-grid {
+    margin-top: 0 !important;
+  }
+}
+
+/* ─── Generic Indic script safety net (NOT per-component) ──────────────────
+   Applied to every block-level text node inside an Indic-script locale.
+   Together with the line-height bump above, this is the single source of
+   truth for "what makes long Tamil/Telugu/Malayalam strings fit narrow
+   mobile containers without breaking the layout."
+
+   Why each property matters:
+   - `overflow-wrap: anywhere` — last-ditch break authority. Indic compound
+     words (sandhi, conjuncts, no-space loanwords) can be 25+ characters
+     and don't have natural Latin word boundaries. Without `anywhere`,
+     `break-word` is too conservative and lets text overflow.
+   - `word-break: normal` — keeps grapheme clusters intact (vowel signs
+     attached to consonants must NOT split apart). Pairs with `anywhere`.
+   - `text-wrap: pretty` — modern browser line-balancing for the LAST few
+     lines of a wrapped block; avoids orphans/runts in mixed English+script
+     banners like "Sign in to continue to நவியுடன் உரையாடுங்கள்".
+   - `hyphens: auto` — disabled. Auto-hyphenation rules for these scripts
+     are sparse/wrong in most engines; let `overflow-wrap` do the work. */
+:is([lang="hi"], [lang="mr"], [lang="bn"], [lang="gu"], [lang="pa"],
+    [lang="ta"], [lang="te"], [lang="kn"], [lang="ml"])
+  :is(h1, h2, h3, h4, h5, h6, p, span, a, button, label, li) {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-wrap: pretty;
+  hyphens: manual;
+}
+
+/* Korean joins this club for `text-wrap: pretty` only — its scripts wrap
+   at every character anyway, so `overflow-wrap: anywhere` would be
+   redundant, but pretty still helps with mixed Latin/Hangul content. */
+[lang="ko"] :is(h1, h2, h3, h4, h5, h6, p) {
+  text-wrap: pretty;
+}
+
+/* Authentication forms (login/register/forgot-password) on narrow mobile
+   are the highest-risk surface for Indic overflow because every visible
+   string is a translated chunk of UI copy stuffed into a 320–400px column.
+   This bumps min-height on buttons + reserves vertical breathing room on
+   labels so any locale can grow without distorting the form rhythm. */
+:is([lang="hi"], [lang="mr"], [lang="bn"], [lang="gu"], [lang="pa"],
+    [lang="ta"], [lang="te"], [lang="kn"], [lang="ml"])
+  form button[type="submit"] {
+  min-height: 48px;
+  line-height: 1.4;
+}
+
 /* Device tier durations */
 :root[data-device-tier="low"] { --transition-duration: 0ms; }
 :root[data-device-tier="mid"] { --transition-duration: 150ms; }

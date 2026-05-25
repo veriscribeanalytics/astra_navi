@@ -1,10 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Users, ChevronRight } from 'lucide-react';
-import { useFamilyMembers, useTranslation } from '@/hooks';
-import type { FamilyMember } from '@/types/family';
+import {
+  useFamilyMembers,
+  useFamilyCompatibilityPreflight,
+  useFamilyReports,
+  useFamilyCompatibility,
+  useTranslation,
+} from '@/hooks';
+import type { FamilyMember, FamilyCompatibilityBand } from '@/types/family';
+import { computeFamilyMemberStatus } from '@/lib/familyStatus';
 
 const formatRelationship = (rel: FamilyMember['relationshipType']): string =>
   rel ? rel.charAt(0).toUpperCase() + rel.slice(1) : '';
@@ -12,6 +19,58 @@ const formatRelationship = (rel: FamilyMember['relationshipType']): string =>
 const initialOf = (name: string): string => {
   const trimmed = (name ?? '').trim();
   return trimmed ? trimmed[0].toUpperCase() : '?';
+};
+
+const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
+  const { t } = useTranslation();
+  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
+  const { data: reports } = useFamilyReports(member.id);
+  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member.id);
+
+  useEffect(() => {
+    fetchPreflight();
+  }, [fetchPreflight]);
+
+  // Only fetch the full compatibility (for the band) when preflight confirms a
+  // fresh cached result exists — otherwise the call would either charge credits
+  // or surface stale data.
+  useEffect(() => {
+    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning) {
+      fetchCompatibility('en');
+    }
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility]);
+
+  const status = computeFamilyMemberStatus({
+    member,
+    preflight,
+    reports,
+    band: (compat?.band as FamilyCompatibilityBand | undefined) ?? null,
+  });
+
+  return (
+    <Link
+      href={`/family?member=${member.id}`}
+      className="group flex flex-col items-center text-center p-3 sm:p-4 rounded-[20px] bg-surface border border-outline-variant/20 hover:border-secondary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(212,175,55,0.08)] transition-all duration-300"
+      aria-label={`Open ${member.name}'s chart`}
+    >
+      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-secondary/10 border border-secondary/20 text-secondary flex items-center justify-center text-base sm:text-lg font-headline font-bold group-hover:scale-105 transition-transform">
+        {initialOf(member.name)}
+      </div>
+      <p className="mt-3 w-full truncate text-[13px] sm:text-sm font-headline font-semibold text-foreground group-hover:text-secondary transition-colors">
+        {member.name || '—'}
+      </p>
+      <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/40 font-bold">
+        {formatRelationship(member.relationshipType)}
+      </p>
+      {status && (
+        <span
+          className={`mt-2 inline-flex items-center px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-widest ${status.classes}`}
+        >
+          {t(status.labelKey)}
+        </span>
+      )}
+    </Link>
+  );
 };
 
 const FamilyStrip: React.FC = () => {
@@ -83,22 +142,7 @@ const FamilyStrip: React.FC = () => {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {members!.map((m) => (
-            <Link
-              key={m.id}
-              href={`/family?member=${m.id}`}
-              className="group flex flex-col items-center text-center p-3 sm:p-4 rounded-[20px] bg-surface border border-outline-variant/20 hover:border-secondary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(212,175,55,0.08)] transition-all duration-300"
-              aria-label={`Open ${m.name}'s chart`}
-            >
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-secondary/10 border border-secondary/20 text-secondary flex items-center justify-center text-base sm:text-lg font-headline font-bold group-hover:scale-105 transition-transform">
-                {initialOf(m.name)}
-              </div>
-              <p className="mt-3 w-full truncate text-[13px] sm:text-sm font-headline font-semibold text-foreground group-hover:text-secondary transition-colors">
-                {m.name || '—'}
-              </p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/40 font-bold">
-                {formatRelationship(m.relationshipType)}
-              </p>
-            </Link>
+            <FamilyMemberCard key={m.id} member={m} />
           ))}
 
           <Link
