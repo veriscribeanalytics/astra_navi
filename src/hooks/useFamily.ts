@@ -17,6 +17,10 @@ import type {
     FamilyInviteAcceptPayload,
     FamilyInviteAcceptResponse,
     FamilyConnectionUpdatePayload,
+    FamilyMergeCandidate,
+    FamilyMergeMatchScore,
+    FamilySharingBlockedBy,
+    FamilySharingNudgeAction,
 } from '@/types/family';
 
 /* ------------------------------------------------------------------ */
@@ -289,6 +293,13 @@ export interface ConnectionCompatibilityFetchResult extends CompatibilityFetchRe
     /** True when both sides haven't enabled sharing — UI should prompt
      *  the user to toggle sharing on, rather than treating it as a hard error. */
     sharingRequired?: boolean;
+    /** Which side is blocking. Set when sharingRequired is true. */
+    blockedBy?: FamilySharingBlockedBy;
+    /** Current per-side sharing flags from the SHARING_REQUIRED body. */
+    sharingWithThem?: boolean;
+    theyShareWithMe?: boolean;
+    /** Optional nudge metadata for "Ask them to share back" affordances. */
+    nudgeAction?: FamilySharingNudgeAction;
 }
 
 export function useFamilyConnectionCompatibility(connectionId: number | string | null) {
@@ -328,7 +339,18 @@ export function useFamilyConnectionCompatibility(connectionId: number | string |
                     // SHARING_REQUIRED — not an error to toast; surface inline.
                     const code = (body?.code ?? body?.detail?.code) as string | undefined;
                     if (code === 'SHARING_REQUIRED') {
-                        const msg = body.error || body.detail?.error || 'Sharing required';
+                        const msg = body.error || body.message || body.detail?.error || 'Sharing required';
+                        const rawNudge = (body.nudgeAction ?? body.nudge_action) as Record<string, unknown> | undefined;
+                        const nudgeAction = rawNudge && typeof rawNudge === 'object' && typeof rawNudge.target_email === 'string'
+                            ? {
+                                type: (rawNudge.type ?? 'remind') as string,
+                                target_email: rawNudge.target_email,
+                            }
+                            : undefined;
+                        const blockedByRaw = (body.blockedBy ?? body.blocked_by) as string | undefined;
+                        const blockedBy = (blockedByRaw === 'you' || blockedByRaw === 'them' || blockedByRaw === 'both')
+                            ? (blockedByRaw as FamilySharingBlockedBy)
+                            : undefined;
                         setError(msg);
                         return {
                             ok: false,
@@ -337,6 +359,10 @@ export function useFamilyConnectionCompatibility(connectionId: number | string |
                             error: msg,
                             raw: body,
                             sharingRequired: true,
+                            blockedBy,
+                            sharingWithThem: !!(body.sharing_with_them ?? body.sharingWithThem),
+                            theyShareWithMe: !!(body.they_share_with_me ?? body.theyShareWithMe ?? body.sharing_with_user),
+                            ...(nudgeAction ? { nudgeAction } : {}),
                         };
                     }
 
@@ -530,12 +556,7 @@ export function useFamilyCompatibilityPreflight(memberId: number | string | null
             if (!res.ok) {
                 throw new Error(body.error || body.detail || 'Failed to check compatibility preflight');
             }
-            const normalized: FamilyCompatibilityPreflight = {
-                cachedResultAvailable: !!(body.cached_result_available ?? body.cachedResultAvailable),
-                staleDataWarning: !!(body.stale_data_warning ?? body.staleDataWarning),
-                creditCost: Number(body.credit_cost ?? body.creditCost ?? 0),
-                relationshipType: (body.relationship_type ?? body.relationshipType) as any
-            };
+            const normalized = normalizePreflight(body);
             setData(normalized);
             return normalized;
         } catch (err) {
@@ -548,6 +569,59 @@ export function useFamilyCompatibilityPreflight(memberId: number | string | null
     }, [memberId]);
 
     return { data, isLoading, error, fetchPreflight, reset: () => setData(null) };
+}
+
+/** Same shape as the member preflight, but hits the connection endpoint.
+ *  Backend exposes refresh CTA metadata under the same `refresh` block. */
+export function useFamilyConnectionCompatibilityPreflight(connectionId: number | string | null) {
+    const [data, setData] = useState<FamilyCompatibilityPreflight | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchPreflight = useCallback(async () => {
+        if (connectionId === null || connectionId === undefined || connectionId === '') {
+            setData(null);
+            return null;
+        }
+        setIsLoading(true);
+        setError(null);
+        try {
+            const res = await clientFetch(`/api/family/connections/${encodeURIComponent(String(connectionId))}/compatibility/preflight`);
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(body.error || body.detail || 'Failed to check compatibility preflight');
+            }
+            const normalized = normalizePreflight(body);
+            setData(normalized);
+            return normalized;
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Failed to check compatibility preflight';
+            setError(msg);
+            return null;
+        } finally {
+            setIsLoading(false);
+        }
+    }, [connectionId]);
+
+    return { data, isLoading, error, fetchPreflight, reset: () => setData(null) };
+}
+
+function normalizePreflight(body: Record<string, unknown>): FamilyCompatibilityPreflight {
+    const rawRefresh = (body.refresh ?? null) as Record<string, unknown> | null;
+    const refresh = rawRefresh && typeof rawRefresh === 'object'
+        ? {
+            available: !!(rawRefresh.available ?? false),
+            creditCost: Number(rawRefresh.credit_cost ?? rawRefresh.creditCost ?? 0),
+            wouldUseFresh: !!(rawRefresh.would_use_fresh ?? rawRefresh.wouldUseFresh ?? false),
+        }
+        : undefined;
+    return {
+        cachedResultAvailable: !!(body.cached_result_available ?? body.cachedResultAvailable),
+        staleDataWarning: !!(body.stale_data_warning ?? body.staleDataWarning),
+        creditCost: Number(body.credit_cost ?? body.creditCost ?? 0),
+        relationshipType: (body.relationship_type ?? body.relationshipType) as FamilyCompatibilityPreflight['relationshipType'],
+        ...(refresh ? { refresh } : {}),
+    };
 }
 
 export interface FamilyReport {
@@ -624,6 +698,10 @@ function normalizeInvite(raw: unknown): FamilyInvite | null {
     };
     const id = pick<number>('id', 'id');
     if (id === undefined) return null;
+
+    const rawCandidate = pick<unknown>('merge_candidate', 'mergeCandidate');
+    const mergeCandidate = normalizeMergeCandidate(rawCandidate);
+
     return {
         id,
         requesterEmail: (pick<string>('requester_email', 'requesterEmail') ?? '') as string,
@@ -638,6 +716,23 @@ function normalizeInvite(raw: unknown): FamilyInvite | null {
         respondedAt: (pick<string | null>('responded_at', 'respondedAt') ?? null) as string | null,
         requesterName: (pick<string | null>('requester_name', 'requesterName') ?? null) as string | null,
         inviteeName: (pick<string | null>('invitee_name', 'inviteeName') ?? null) as string | null,
+        ...(mergeCandidate ? { mergeCandidate } : {}),
+    };
+}
+
+/** Normalize a merge candidate (returned inline on /incoming invites and inside
+ *  the /accept response). Accepts snake or camel casing; null/undefined → null. */
+export function normalizeMergeCandidate(raw: unknown): FamilyMergeCandidate | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+    const memberId = (r.member_id ?? r.memberId) as number | undefined;
+    if (typeof memberId !== 'number') return null;
+    const matchScore = (r.match_score ?? r.matchScore) as string | undefined;
+    return {
+        memberId,
+        name: (r.name ?? '') as string,
+        dob: (r.dob ?? '') as string,
+        ...(matchScore ? { matchScore: matchScore as FamilyMergeMatchScore } : {}),
     };
 }
 

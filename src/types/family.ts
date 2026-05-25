@@ -49,6 +49,14 @@ export interface FamilyCompatibilityPreflight {
   staleDataWarning: boolean;
   creditCost: number;
   relationshipType: FamilyRelationshipType;
+  /** Optional refresh CTA block. When `staleDataWarning && refresh.available`,
+   *  surface a "Refresh for {creditCost} credits" button next to the cached
+   *  result; tapping it just re-issues the existing compatibility GET. */
+  refresh?: {
+    available: boolean;
+    creditCost: number;
+    wouldUseFresh: boolean;
+  };
 }
 
 /** Server returns numeric id; we keep number | string for flexibility.
@@ -240,6 +248,15 @@ export interface FamilyReservationPendingError {
 
 export type FamilyInviteStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'revoked';
 
+export type FamilyMergeMatchScore = 'exact' | 'high' | 'partial';
+
+export interface FamilyMergeCandidate {
+  memberId: number;
+  name: string;
+  dob: string;
+  matchScore?: FamilyMergeMatchScore;
+}
+
 export interface FamilyInvite {
   id: number;
   requesterEmail: string;
@@ -252,6 +269,9 @@ export interface FamilyInvite {
   respondedAt: string | null;
   requesterName: string | null;
   inviteeName: string | null;
+  /** Backend may inline a merge candidate on incoming pending invites so the
+   *  UI can offer "link them when you accept?" pre-accept. Absence is normal. */
+  mergeCandidate?: FamilyMergeCandidate;
 }
 
 export interface FamilyConnection {
@@ -268,12 +288,6 @@ export interface FamilyConnection {
   createdAt: string;
   disconnectedAt: string | null;
   disconnected: boolean;
-}
-
-export interface FamilyMergeCandidate {
-  memberId: number;
-  name: string;
-  dob: string;
 }
 
 export interface FamilyInviteAcceptResponse {
@@ -312,11 +326,26 @@ export const FAMILY_INVITE_ERROR_CODES = [
 ] as const;
 export type FamilyInviteErrorCode = typeof FAMILY_INVITE_ERROR_CODES[number];
 
-/** Body returned by /connections/{id}/compatibility when sharing isn't mutual. */
+/** Tells the UI which side(s) need to enable sharing before compatibility
+ *  (or chart) can run on a connection. Backend sets this on every
+ *  SHARING_REQUIRED response across connection endpoints. */
+export type FamilySharingBlockedBy = 'you' | 'them' | 'both';
+
+/** Optional hint for surfacing a "nudge the other person" affordance.
+ *  No send endpoint exists yet — UI should display target_email so the
+ *  user can message them out-of-band. */
+export interface FamilySharingNudgeAction {
+  type: string; // e.g. 'remind'
+  target_email: string;
+}
+
+/** Body returned by /connections/{id}/* endpoints when sharing isn't mutual. */
 export interface FamilySharingRequiredError {
   code: 'SHARING_REQUIRED';
+  blockedBy: FamilySharingBlockedBy;
   sharing_with_them: boolean;
   they_share_with_me: boolean;
+  nudgeAction?: FamilySharingNudgeAction;
   message: string;
 }
 

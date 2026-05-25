@@ -8,7 +8,7 @@ import {
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
     Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
     ChevronDown, ChevronUp, HandHeart, Sparkles, Compass, FileText,
-    Sun, Moon, Flower, Activity, Mail, Send, Link2, Settings,
+    Sun, Moon, Flower, Activity, Mail, Send, Link2, Settings, RefreshCw,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -25,6 +25,7 @@ import {
     deleteFamilyMember,
     useFamilyAvatars,
     useFamilyCompatibilityPreflight,
+    useFamilyConnectionCompatibilityPreflight,
     useFamilyReports,
     useFamilyConnections,
     useFamilyConnectionCompatibility,
@@ -38,6 +39,7 @@ import {
     type FamilyRelationshipType,
     type FamilyGender,
     type CompatibilityLang,
+    type FamilyCompatibilityPreflight,
     COMPATIBILITY_CREDIT_COST,
     FAMILY_FREE_TIER_LIMIT,
 } from '@/types/family';
@@ -123,6 +125,16 @@ function formatTob(value: string | null | undefined): string {
     const period = h24 >= 12 ? 'PM' : 'AM';
     const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
     return `${String(h12).padStart(2, '0')}:${min} ${period}`;
+}
+
+/** Derive which side is blocking a connection's compatibility purely from the
+ *  client-side connection record. Used for instant feedback before the backend
+ *  responds; backend response is authoritative when available. */
+function deriveLocalBlockedBy(c: FamilyConnection): 'you' | 'them' | 'both' | null {
+    if (!c.sharingWithThem && !c.theyShareWithMe) return 'both';
+    if (!c.sharingWithThem) return 'you';
+    if (!c.theyShareWithMe) return 'them';
+    return null;
 }
 
 /* ====================================================================== */
@@ -940,13 +952,24 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
     const [lang, setLang] = useState<CompatibilityLang>('en');
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
     const { data: reports } = useFamilyReports(member.id);
-    const { fetchPreflight, isLoading: preflightLoading } = useFamilyCompatibilityPreflight(member.id);
-    const [preflightData, setPreflightData] = useState<any>(null);
+    const { fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
+    const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
     const compatRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
     const reportsRef = useRef<HTMLDivElement | null>(null);
 
     const creditCost = COMPATIBILITY_CREDIT_COST[member.relationshipType] ?? 5;
+
+    // Once compat lands (cached or fresh), refresh preflight in the background so
+    // we know whether the cached result is stale and whether a refresh CTA applies.
+    useEffect(() => {
+        if (!compat) return;
+        let cancelled = false;
+        fetchPreflight().then((pf) => {
+            if (!cancelled) setPreflightData(pf);
+        });
+        return () => { cancelled = true; };
+    }, [compat, fetchPreflight]);
 
     const scrollTo = (el: HTMLElement | null) => {
         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1172,6 +1195,25 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                                     <Coins className="w-3 h-3" /> {creditCost} credits
                                 </span>
                             </div>
+                            {preflightData?.staleDataWarning && preflightData?.refresh?.available && (
+                                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3">
+                                    <p className="text-[11px] text-amber-300 leading-snug mb-2">
+                                        {t('family.compatibilityStaleHint') ||
+                                            'Birth details changed since this reading. Refresh for an updated analysis.'}
+                                    </p>
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={runCompatibility}
+                                        loading={compatLoading}
+                                        leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                                        fullWidth
+                                    >
+                                        {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
+                                            .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
+                                    </Button>
+                                </div>
+                            )}
                             <Button
                                 variant="primary"
                                 onClick={scrollToReports}
@@ -1930,6 +1972,8 @@ function FamilyConnectionDetail({
     const { totalCredits } = usePaywallContext();
     const { data: avatars } = useFamilyAvatars();
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
+    const { fetchPreflight: fetchConnectionPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
+    const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
 
     const [notes, setNotes] = useState(connection.myNotes ?? '');
     const [savingNotes, setSavingNotes] = useState(false);
@@ -1939,7 +1983,11 @@ function FamilyConnectionDetail({
     const [isDisconnecting, setIsDisconnecting] = useState(false);
     const [lang, setLang] = useState<CompatibilityLang>('en');
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
-    const [sharingRequired, setSharingRequired] = useState(false);
+    /** Replaces the previous sharingRequired boolean — captures who's blocking
+     *  and (optionally) the email to nudge when blocked by them. */
+    const [sharingBlocked, setSharingBlocked] = useState<
+        { blockedBy: 'you' | 'them' | 'both'; nudgeEmail?: string } | null
+    >(null);
 
     const accent = connection.avatar?.accentColor || 'var(--secondary)';
     const creditCost = COMPATIBILITY_CREDIT_COST[connection.iSeeThemAs] ?? 5;
@@ -1947,6 +1995,17 @@ function FamilyConnectionDetail({
         () => compat?.lang === lang,
         [compat, lang]
     );
+
+    // Pull preflight in the background once compat lands so we can show the
+    // refresh CTA when the cached result is stale.
+    useEffect(() => {
+        if (!compat) return;
+        let cancelled = false;
+        fetchConnectionPreflight().then((pf) => {
+            if (!cancelled) setPreflightData(pf);
+        });
+        return () => { cancelled = true; };
+    }, [compat, fetchConnectionPreflight]);
 
     const persist = async (payload: Parameters<typeof updateConnection>[1]) => {
         const res = await updateConnection(connection.connectionId, payload);
@@ -1967,7 +2026,7 @@ function FamilyConnectionDetail({
                 ? (t('family.connectionSharingOn') || 'Sharing on')
                 : (t('family.connectionSharingOff') || 'Sharing off'));
             // Clear inline gating so user can retry compat now.
-            if (!connection.sharingWithThem) setSharingRequired(false);
+            if (!connection.sharingWithThem) setSharingBlocked(null);
         }
     };
 
@@ -1999,7 +2058,7 @@ function FamilyConnectionDetail({
 
     const runCompatibility = async () => {
         setConfirmingPurchase(false);
-        setSharingRequired(false);
+        setSharingBlocked(null);
         const res = await fetchCompatibility(lang);
         if (res.ok) {
             if (res.data?.cached) {
@@ -2010,7 +2069,10 @@ function FamilyConnectionDetail({
             return;
         }
         if (res.sharingRequired) {
-            setSharingRequired(true);
+            setSharingBlocked({
+                blockedBy: res.blockedBy ?? deriveLocalBlockedBy(connection) ?? 'both',
+                nudgeEmail: res.nudgeAction?.target_email ?? connection.otherEmail,
+            });
             warning(t('family.sharingRequired') || 'Sharing required on both sides before compatibility can be computed.');
             return;
         }
@@ -2028,8 +2090,9 @@ function FamilyConnectionDetail({
     const startCompatibility = () => {
         if (alreadyPaidForLang) return;
         // Pre-check sharing locally; backend will enforce too but this gives instant feedback.
-        if (!connection.sharingWithThem || !connection.theyShareWithMe) {
-            setSharingRequired(true);
+        const local = deriveLocalBlockedBy(connection);
+        if (local) {
+            setSharingBlocked({ blockedBy: local, nudgeEmail: connection.otherEmail });
             return;
         }
         setConfirmingPurchase(true);
@@ -2192,48 +2255,86 @@ function FamilyConnectionDetail({
                     ))}
                 </div>
 
-                {/* SHARING_REQUIRED inline gate */}
-                {sharingRequired && !compat && (
+                {/* SHARING_REQUIRED inline gate — branches on which side is blocking */}
+                {sharingBlocked && !compat && (
                     <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
                         <div className="flex items-start gap-2">
                             <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                                 <p className="text-[12px] font-bold text-amber-300">
-                                    {t('family.sharingRequired') ||
-                                        'Both of you need to enable sharing before compatibility can be computed.'}
+                                    {sharingBlocked.blockedBy === 'you'
+                                        ? (t('family.sharingBlockedYou') || 'Enable sharing to unlock compatibility.')
+                                        : sharingBlocked.blockedBy === 'them'
+                                            ? (t('family.sharingBlockedThem') || 'Waiting for {name} to enable sharing.')
+                                                .replace('{name}', connection.otherName)
+                                            : (t('family.sharingBlockedBoth') || 'Both of you need to enable sharing before compatibility can be computed.')}
                                 </p>
-                                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-outline-variant/20 bg-surface">
-                                        <span className="text-[11px] font-bold text-primary">You</span>
-                                        <button
-                                            type="button"
+                                {sharingBlocked.blockedBy === 'you' && (
+                                    <div className="mt-3">
+                                        <p className="text-[11px] text-on-surface-variant/75 mb-2">
+                                            {(t('family.sharingBlockedYouHint') ||
+                                                'Turn on sharing with {name} below to compute synastry.')
+                                                .replace('{name}', connection.otherName)}
+                                        </p>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
                                             onClick={toggleShare}
-                                            disabled={togglingShare}
-                                            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border transition-colors ${
-                                                connection.sharingWithThem
-                                                    ? 'bg-emerald-500/60 border-emerald-400'
-                                                    : 'bg-outline-variant/30 border-outline-variant/40'
-                                            } ${togglingShare ? 'opacity-60' : ''}`}
+                                            loading={togglingShare}
+                                            leftIcon={<Heart className="w-3.5 h-3.5" />}
                                         >
-                                            <span
-                                                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                                                    connection.sharingWithThem ? 'translate-x-4' : 'translate-x-0'
-                                                }`}
-                                            />
-                                        </button>
+                                            {t('family.sharingEnable') || 'Enable sharing'}
+                                        </Button>
                                     </div>
-                                    <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-outline-variant/15 bg-surface-variant/30">
-                                        <span className="text-[11px] font-bold text-primary">{connection.otherName}</span>
-                                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                                            connection.theyShareWithMe
-                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                                : 'bg-outline-variant/15 text-on-surface-variant/70 border-outline-variant/30'
-                                        }`}>
-                                            {connection.theyShareWithMe ? 'On' : 'Waiting'}
-                                        </span>
+                                )}
+                                {sharingBlocked.blockedBy === 'them' && (
+                                    <div className="mt-3 text-[11px] text-on-surface-variant/80 leading-relaxed">
+                                        {(t('family.sharingBlockedThemHint') ||
+                                            'Ask them to enable sharing in their family settings. You can reach them at {email}.')
+                                            .replace('{email}', sharingBlocked.nudgeEmail ?? connection.otherEmail)}
                                     </div>
-                                </div>
+                                )}
+                                {sharingBlocked.blockedBy === 'both' && (
+                                    <div className="mt-3">
+                                        <p className="text-[11px] text-on-surface-variant/75 mb-2">
+                                            {t('family.sharingBlockedBothHint') ||
+                                                'Start by turning on your side, then ask them to enable sharing too.'}
+                                        </p>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={toggleShare}
+                                            loading={togglingShare}
+                                            leftIcon={<Heart className="w-3.5 h-3.5" />}
+                                        >
+                                            {t('family.sharingEnableMine') || 'Enable my side'}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Stale-data refresh CTA — shown when preflight reports the cached
+                    result is stale and refresh is available. */}
+                {compat && preflightData?.staleDataWarning && preflightData?.refresh?.available && (
+                    <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                            <p className="text-[12px] text-amber-300">
+                                {t('family.compatibilityStaleHint') ||
+                                    'Birth details changed since this reading. Refresh for an updated analysis.'}
+                            </p>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={runCompatibility}
+                                loading={compatLoading}
+                                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                            >
+                                {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
+                                    .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
+                            </Button>
                         </div>
                     </div>
                 )}

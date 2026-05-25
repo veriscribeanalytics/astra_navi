@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-    Mail, Users, Send, ChevronLeft, Check, X, Loader2, Heart, ChevronDown, Trash2,
+    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, ChevronDown, Trash2, Link2,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -89,24 +89,56 @@ const FamilyInvitesClient: React.FC = () => {
     const [acceptingInviteId, setAcceptingInviteId] = useState<number | null>(null);
     const [mergePrompt, setMergePrompt] = useState<{ inviteId: number; candidate: FamilyMergeCandidate } | null>(null);
     const [isMerging, setIsMerging] = useState(false);
+    /** Per-invite "link them when I accept" checkbox. Defaults to true when an
+     *  invite carries an inline mergeCandidate; user can untick to skip merge. */
+    const [mergeChoice, setMergeChoice] = useState<Record<number, boolean>>({});
+
+    const getMergeChoice = (invite: FamilyInvite): boolean => {
+        if (!invite.mergeCandidate) return false;
+        return mergeChoice[invite.id] ?? true;
+    };
 
     const handleAccept = async (invite: FamilyInvite) => {
         setAcceptingInviteId(invite.id);
+        const preAcceptCandidate = invite.mergeCandidate;
+        const wantsMerge = getMergeChoice(invite);
+
         const res = await acceptInvite(invite.id);
-        setAcceptingInviteId(null);
-        if (res.ok && res.data) {
-            const merge = (res.data as { mergeCandidate?: FamilyMergeCandidate }).mergeCandidate;
-            if (merge) {
-                setMergePrompt({ inviteId: invite.id, candidate: merge });
-            } else {
+
+        if (!res.ok || !res.data) {
+            setAcceptingInviteId(null);
+            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            incoming.refetch();
+            return;
+        }
+
+        const postAcceptCandidate = (res.data as { mergeCandidate?: FamilyMergeCandidate }).mergeCandidate;
+        const candidate = wantsMerge ? (preAcceptCandidate ?? postAcceptCandidate) : null;
+
+        if (candidate) {
+            const mergeRes = await acceptInviteMerge(invite.id, candidate.memberId);
+            setAcceptingInviteId(null);
+            if (mergeRes.ok) {
                 toastSuccess(t('family.inviteStatusAccepted'));
+            } else {
+                toastError(parseInviteErrorByStatus(mergeRes.status, mergeRes.raw, t));
             }
             incoming.refetch();
             connections.refetch();
-        } else {
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
-            incoming.refetch();
+            return;
         }
+
+        setAcceptingInviteId(null);
+
+        // No pre-accept candidate the user chose to merge with: if the backend
+        // surfaced a post-accept candidate (legacy/race path), prompt as before.
+        if (!preAcceptCandidate && postAcceptCandidate) {
+            setMergePrompt({ inviteId: invite.id, candidate: postAcceptCandidate });
+        } else {
+            toastSuccess(t('family.inviteStatusAccepted'));
+        }
+        incoming.refetch();
+        connections.refetch();
     };
 
     const handleConfirmMerge = async () => {
@@ -291,6 +323,10 @@ const FamilyInvitesClient: React.FC = () => {
                                 onDecline={() => handleDecline(invite)}
                                 isAccepting={acceptingInviteId === invite.id}
                                 isDeclining={decliningInviteId === invite.id}
+                                mergeChecked={getMergeChoice(invite)}
+                                onMergeCheckedChange={(next) =>
+                                    setMergeChoice(prev => ({ ...prev, [invite.id]: next }))
+                                }
                             />
                         ))
                     )}
@@ -407,10 +443,14 @@ interface InviteRowProps {
     isAccepting?: boolean;
     isDeclining?: boolean;
     isRevoking?: boolean;
+    /** Incoming-only: state of the "link them when I accept" checkbox. */
+    mergeChecked?: boolean;
+    onMergeCheckedChange?: (next: boolean) => void;
 }
 
 const InviteRow: React.FC<InviteRowProps> = ({
     invite, kind, onAccept, onDecline, onRevoke, isAccepting, isDeclining, isRevoking,
+    mergeChecked, onMergeCheckedChange,
 }) => {
     const { t } = useTranslation();
     const isPending = invite.status === 'pending';
@@ -424,6 +464,7 @@ const InviteRow: React.FC<InviteRowProps> = ({
 
     const counterpartyEmail = kind === 'incoming' ? invite.requesterEmail : invite.inviteeEmail;
     const counterpartyName = kind === 'incoming' ? invite.requesterName : invite.inviteeName;
+    const showMergeOffer = kind === 'incoming' && isPending && !!invite.mergeCandidate;
 
     return (
         <Card variant="bordered" padding="md" hoverable={false} className="!rounded-2xl">
@@ -453,6 +494,33 @@ const InviteRow: React.FC<InviteRowProps> = ({
                         <p className="mt-2 text-[12px] text-on-surface-variant/70 italic border-l-2 border-secondary/30 pl-2">
                             {invite.message}
                         </p>
+                    )}
+                    {showMergeOffer && invite.mergeCandidate && (
+                        <label className="mt-3 flex items-start gap-2 p-2.5 rounded-xl border border-secondary/30 bg-secondary/5 cursor-pointer hover:bg-secondary/10 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={!!mergeChecked}
+                                onChange={(e) => onMergeCheckedChange?.(e.target.checked)}
+                                disabled={isAccepting || isDeclining}
+                                className="mt-0.5 accent-secondary shrink-0"
+                            />
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[12px] font-semibold text-secondary flex items-center gap-1.5">
+                                    <Link2 className="w-3 h-3" />
+                                    {(t('family.inviteMergePreAccept') ||
+                                        'Looks like you already have {name} in your tree — link them when you accept?')
+                                        .replace('{name}', invite.mergeCandidate.name)}
+                                    {invite.mergeCandidate.matchScore === 'exact' && (
+                                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-1.5 py-0.5">
+                                            {t('family.mergeMatchExact') || 'Match'}
+                                        </span>
+                                    )}
+                                </p>
+                                <p className="text-[11px] text-on-surface-variant/70 mt-0.5">
+                                    {invite.mergeCandidate.name} · {invite.mergeCandidate.dob}
+                                </p>
+                            </div>
+                        </label>
                     )}
                 </div>
                 {isPending && (
