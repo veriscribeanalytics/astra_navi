@@ -6,7 +6,7 @@ import { getTierLabel } from "@/types/billing";
 import { 
     Sparkles, MessageSquare, Globe, Heart, 
     ChevronRight, Orbit, TrendingUp,
-    Users, Sun, ArrowUp, Plus, Briefcase, Activity, ArrowRight, Wallet
+    Users, Sun, ArrowUp, Plus, Briefcase, Activity, ArrowRight, Wallet, Clock
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -24,6 +24,7 @@ import InviteBanner from "@/components/dashboard/InviteBanner";
 import { useChat } from "@/context/ChatContext";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "@/hooks";
+import { useTransitsToday } from '@/hooks/useTransitsToday';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 import { topicPills } from '@/data/topicPills';
@@ -324,6 +325,7 @@ export default function DashboardHome() {
     const router = useRouter();
     const pathname = usePathname();
     const { t, language } = useTranslation();
+    const { data: transitsData } = useTransitsToday();
     
     // States
     const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
@@ -1048,16 +1050,27 @@ export default function DashboardHome() {
                                     </div>
                                     <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-emerald-400 transition-colors">{t('dashboard.dailyPulse')}</h3>
                                     <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.realTimeTithi')}</p>
-                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-10">
+                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
                                             <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">{t('dashboard.tithi')}</div>
-                                            <div className="text-xs font-bold text-primary truncate">Pratipada</div>
+                                            <div className="text-xs font-bold text-primary truncate">{transitsData?.panchanga?.tithi || '—'}</div>
                                         </div>
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
                                             <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">{t('dashboard.yoga')}</div>
-                                            <div className="text-xs font-bold text-primary truncate">Siddha</div>
+                                            <div className="text-xs font-bold text-primary truncate">{transitsData?.panchanga?.yoga || '—'}</div>
                                         </div>
                                     </div>
+                                    {transitsData?.panchanga?.rahukaal && (
+                                        <div className="p-3 rounded-xl bg-rose-500/[0.06] border border-rose-500/20 mb-4 sm:mb-6">
+                                            <div className="flex items-center gap-1.5 mb-0.5">
+                                                <Clock className="w-3 h-3 text-rose-400" />
+                                                <div className="text-[9px] text-rose-400 uppercase font-bold">{t('dashboard.rahukaal')}</div>
+                                            </div>
+                                            <div className="text-xs font-bold text-primary truncate">
+                                                {transitsData.panchanga.rahukaal.start} – {transitsData.panchanga.rahukaal.end}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="mt-auto">
                                         <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-emerald-400 uppercase tracking-widest group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all duration-300 shadow-sm">
                                             {t('dashboard.checkPulse')} <ChevronRight className="w-4 h-4" />

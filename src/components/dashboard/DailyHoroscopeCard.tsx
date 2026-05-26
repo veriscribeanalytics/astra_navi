@@ -263,10 +263,10 @@ export default function DailyHoroscopeCard({
         };
         
         return [
-            { label: t('horoscope.categoryCareer'), score: areas.career?.value ?? 0, info: areasText.career?.insight || '---', icon: <Trophy className="w-5 h-5" />, area: "career" },
-            { label: t('horoscope.categoryHealth'), score: areas.health?.value ?? 0, info: areasText.health?.insight || '---', icon: <Sun className="w-5 h-5" />, area: "health" },
-            { label: t('horoscope.categoryLove'), score: areas.love?.value ?? 0, info: areasText.love?.insight || '---', icon: <Heart className="w-5 h-5" />, area: "love" },
-            { label: t('horoscope.categoryFinance'), score: areas.finance?.value ?? 0, info: areasText.finance?.insight || '---', icon: <Gem className="w-5 h-5" />, area: "finance" },
+            { label: t('horoscope.categoryCareer'), score: areas.career?.value ?? 0, info: areasText.career?.insight || '---', icon: <img src="/icons/career.png" alt="Career" className="w-5 h-5 object-contain" />, area: "career" },
+            { label: t('horoscope.categoryHealth'), score: areas.health?.value ?? 0, info: areasText.health?.insight || '---', icon: <img src="/icons/health.png" alt="Health" className="w-5 h-5 object-contain" />, area: "health" },
+            { label: t('horoscope.categoryLove'), score: areas.love?.value ?? 0, info: areasText.love?.insight || '---', icon: <img src="/icons/relationship.png" alt="Relationship" className="w-5 h-5 object-contain" />, area: "love" },
+            { label: t('horoscope.categoryFinance'), score: areas.finance?.value ?? 0, info: areasText.finance?.insight || '---', icon: <img src="/icons/finance.png" alt="Finance" className="w-5 h-5 object-contain" />, area: "finance" },
         ].map(item => {
             const scoreStyle = getScoreStyle(item.score);
             const theme = CATEGORY_THEMES[item.area as keyof typeof CATEGORY_THEMES];
@@ -607,8 +607,8 @@ export default function DailyHoroscopeCard({
                                     <div className="absolute inset-0 bg-gradient-to-t from-secondary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                                     
                                     {/* Icon: Smaller (10% reduction) and stays visible */}
-                                    <div className={`w-[56px] h-[56px] sm:w-[86px] sm:h-[86px] rounded-[20px] sm:rounded-[28px] ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 group-hover:scale-95 transition-all duration-500 relative z-10`}>
-                                        {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, { className: "w-6 h-6 sm:w-10 sm:h-10" })}
+                                    <div className={`w-[56px] h-[56px] sm:w-[86px] sm:h-[86px] rounded-[20px] sm:rounded-[28px] ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 group-hover:scale-95 transition-all duration-500 relative z-10 overflow-hidden`}>
+                                        {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, { className: "w-full h-full object-cover" })}
                                     </div>
 
                                     <div className="flex-1 min-w-0 relative z-10">
@@ -707,8 +707,8 @@ export default function DailyHoroscopeCard({
                                                 <div className="relative z-10 flex flex-col h-full">
                                                     {/* Header with icon + score */}
                                                     <div className="flex items-center gap-4 mb-5 sm:mb-6">
-                                                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${activeModal.bg} flex items-center justify-center shrink-0 shadow-lg shadow-black/20`} style={{ color: activeModal.colorHex }}>
-                                                            {activeModal.icon}
+                                                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${activeModal.bg} flex items-center justify-center shrink-0 shadow-lg shadow-black/20 overflow-hidden`} style={{ color: activeModal.colorHex }}>
+                                                            {React.isValidElement(activeModal.icon) ? React.cloneElement(activeModal.icon as React.ReactElement<{ className?: string }>, { className: "w-full h-full object-cover" }) : activeModal.icon}
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2 mb-1">

@@ -28,7 +28,7 @@ export { usePaywall } from './usePaywall';
 export { usePaywallContext } from '@/context/PaywallContext';
 export { useFocusTrap } from './useFocusTrap';
 export { useTransitsToday } from './useTransitsToday';
-export type { TransitsTodayData } from './useTransitsToday';
+export type { TransitsTodayData, Rahukaal } from './useTransitsToday';
 export { useYearlyForecast } from './useYearlyForecast';
 export type { YearlyForecastData, YearlyMonthSummary, YearlySummary } from './useYearlyForecast';
 export { useChatSummary } from './useChatSummary';
@@ -58,3 +58,4 @@ export {
 } from './useFamily';
 export type { CompatibilityFetchResult, MutationResult, FamilyReport } from './useFamily';
 export { useAvatarTheme } from './useAvatarTheme';
+export { useDailyHoroscope } from './useDailyHoroscope';

@@ -3,7 +3,7 @@ import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
 import { languageCodeToName } from '@/locales';
 
-const VALID_AREAS = ['career', 'love', 'health', 'finance', 'general'];
+const VALID_AREAS = ['career', 'love', 'health', 'finance', 'general', 'spiritual'];
 
 export async function GET(
     req: NextRequest,
