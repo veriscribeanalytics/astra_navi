@@ -362,6 +362,7 @@
     "soulmateMatch": "പൊരുത്തം",
     "tithi": "തിഥി",
     "yoga": "യോഗം",
+    "rahukaal": "രാഹു കാലം",
     "startJourneyDesc": "നിങ്ങളുടെ കോസ്മിക് യാത്ര ഇവിടെ ആരംഭിക്കുന്നു. അത് ഇവിടെ കാണാൻ നവിയോട് ചോദിക്കുക.",
     "unknownSign": "???",
     "askNaviFab": "Navi-യോട് ചോദിക്കുക",
@@ -410,7 +411,8 @@
     "categoryHealth": "ആരോഗ്യം",
     "categoryLove": "പ്രണയം",
     "categoryFinance": "സാമ്പത്തികം",
-    "categoryGeneral": "പൊതുവായത്",
+    "categoryGeneral": "പൊതുവായ കാഴ്ചപ്പാട്",
+    "categorySpiritual": "ആത്മീയ",
     "weeklyForecast": "പ്രതിവാര പ്രവചനം",
     "past": "കഴിഞ്ഞ കാലം",
     "forecast": "പ്രവചനം",
@@ -1667,5 +1669,116 @@
   "support": {
     "title": "സപ്പോർട്ട് സമീപിക്കുക",
     "description": "സഹായം ആവശ്യമുണ്ടോ? മികച്ച സഹായം നൽകുന്നതിനായി ഞങ്ങളുടെ സപ്പോർട്ട് സിസ്റ്റം സജ്ജമാക്കിക്കൊണ്ടിരിക്കുകയാണ്. അടിയന്തിര കാര്യങ്ങൾക്കായി, ദയവായി ഉടൻ തന്നെ വീണ്ടും പരിശോധിക്കുക!"
+  },
+  "newDashboard": {
+    "todaysEnergy": {
+      "title": "Today's Energy",
+      "scoreOutOf": "of 100",
+      "goodTime": "Good Time",
+      "alertTime": "Alert Time",
+      "aiChat": "Ask Navi",
+      "fullReading": "Full Reading"
+    },
+    "weeklyChart": {
+      "title": "Weekly Chart",
+      "best": "Best",
+      "days": {
+        "mon": "MON",
+        "tue": "TUE",
+        "wed": "WED",
+        "thu": "THU",
+        "fri": "FRI",
+        "sat": "SAT",
+        "sun": "SUN"
+      }
+    },
+    "lifeAreas": {
+      "title": "Life Areas",
+      "viewAll": "View All",
+      "love": "Love",
+      "career": "Career",
+      "finance": "Finance",
+      "health": "Health",
+      "general": "General Outlook",
+      "spiritual": "Spiritual",
+      "statusExcellent": "Excellent",
+      "statusGood": "Good",
+      "statusSteadyProgress": "Steady Progress",
+      "statusManageWisely": "Manage Wisely",
+      "statusNeedsAttention": "Needs Patience",
+      "statusCosmicEnergy": "Personal Momentum",
+      "statusIdealForMeditation": "Ideal for Meditation",
+      "comingSoon": "Coming Soon",
+      "bandLegendTitle": "What do these scores mean?",
+      "bandVerySupportive": "Very Supportive",
+      "bandSupportive": "Supportive",
+      "bandMixed": "Mixed",
+      "bandCaution": "Caution",
+      "bandFriction": "Friction",
+      "bandLegendNote": "Scores show guidance intensity — supportive vs. challenging conditions — not guaranteed outcomes."
+    },
+    "panchang": {
+      "title": "Panchang Today",
+      "tithi": "Tithi",
+      "vara": "Vara",
+      "nakshatra": "Nakshatra",
+      "yoga": "Yoga",
+      "karana": "Karana",
+      "rahuKaal": "Rahu Kaal"
+    },
+    "compatibility": {
+      "title": "Compatibility & Match",
+      "viewAll": "View All",
+      "gunaMilanScore": "Guna Milan Score",
+      "excellentMatch": "Excellent Match",
+      "goodMatch": "Good Match",
+      "averageMatch": "Average Match",
+      "challengingMatch": "Challenging Match",
+      "harmony": "Harmony",
+      "trust": "Trust",
+      "understanding": "Understanding",
+      "emptyTitle": "Run your first match",
+      "emptyBody": "Add anyone's birth details to see how your charts align. Partner, friend, family — anyone.",
+      "emptyCta": "Start a Match"
+    },
+    "familyFriends": {
+      "title": "Family & Friends",
+      "viewAll": "View All",
+      "callNow": "Call Now",
+      "premium": "Premium",
+      "bandExcellent": "Excellent",
+      "bandVeryGood": "Very Good",
+      "bandGood": "Good",
+      "bandGreat": "Great",
+      "bandStable": "Stable",
+      "bandAverage": "Average",
+      "bandChallenging": "Challenging",
+      "addMember": "Add Member"
+    },
+    "myChart": {
+      "title": "My Chart",
+      "viewDetails": "View Details",
+      "yourKundli": "Your Kundli",
+      "lagna": "Lagna",
+      "mahadasha": "Mahadasha",
+      "antardasha": "Antardasha",
+      "exploreFullAnalysis": "Explore Full Analysis",
+      "emptyTitle": "Complete your birth details",
+      "emptyBody": "Your kundli unlocks once we have your birth date, time, and location.",
+      "emptyCta": "Update Profile"
+    },
+    "aiAstrologer": {
+      "title": "AI Astrologer",
+      "howItWorks": "How it Works?",
+      "freeFirstQuestion": "Free First Question",
+      "guides": {
+        "navi": { "name": "Navi", "title": "Vedic Expert" },
+        "relationship_guide": { "name": "Meera", "title": "Relationship" },
+        "career_mentor": { "name": "Arya", "title": "Career Expert" },
+        "spiritual_guide": { "name": "Anand", "title": "Wealth Guide" },
+        "finance_mentor": { "name": "Vidya", "title": "Nadi Expert" },
+        "astro_sage": { "name": "Rishi", "title": "KP Specialist" }
+      }
+    }
   }
 }
