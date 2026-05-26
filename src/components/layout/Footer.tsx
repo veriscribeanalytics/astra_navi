@@ -4,19 +4,16 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 import Input from '../ui/Input';
 import { useTranslation } from '@/hooks';
 
+const ComingSoonBadge = ({ t }: { t: (key: string) => string }) => (
+    <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-[8px] font-bold text-secondary uppercase tracking-widest whitespace-nowrap">
+        <Sparkles className="w-2 h-2" />
+        {t('common.comingSoon')}
+    </span>
+);
+
 const Footer = () => {
     const { t } = useTranslation();
     const currentYear = new Date().getFullYear();
-
-    // Reusable "Coming Soon" badge — replaces the `cursor-not-allowed opacity`
-    // pattern which made disabled items look click-able. Visually distinct
-    // and self-explanatory, no hover-tooltip required.
-    const ComingSoonBadge = () => (
-        <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-[8px] font-bold text-secondary uppercase tracking-widest whitespace-nowrap">
-            <Sparkles className="w-2 h-2" />
-            {t('common.comingSoon')}
-        </span>
-    );
 
     return (
         <footer className="w-full pt-8 sm:pt-14 pb-6 sm:pb-8 px-4 sm:px-8 lg:px-12 bg-background border-t border-secondary/10 relative z-20">
@@ -38,7 +35,7 @@ const Footer = () => {
                         <li><Link className="hover:text-secondary transition-colors" href="/kundli">{t('nav.birthChart')}</Link></li>
                         <li className="flex items-center text-on-surface-variant/40">
                             <span>{t('footer.sacredItems')}</span>
-                            <ComingSoonBadge />
+                            <ComingSoonBadge t={t} />
                         </li>
                     </ul>
                 </div>
@@ -50,7 +47,7 @@ const Footer = () => {
                         <li><Link className="hover:text-secondary transition-colors" href="/astrologers">{t('footer.ourAstrologers')}</Link></li>
                         <li className="flex items-center text-on-surface-variant/40">
                             <span>{t('footer.careers')}</span>
-                            <ComingSoonBadge />
+                            <ComingSoonBadge t={t} />
                         </li>
                         <li><Link className="hover:text-secondary transition-colors" href="/support">{t('footer.contactSupport')}</Link></li>
                     </ul>
@@ -71,7 +68,7 @@ const Footer = () => {
                         </button>
                     </div>
                     <div className="mt-2">
-                        <ComingSoonBadge />
+                        <ComingSoonBadge t={t} />
                     </div>
                 </div>
             </div>

@@ -37,7 +37,7 @@ const ChatPageClient: React.FC = () => {
   const {
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
     activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
-    paywall, clearPaywall, selectedAvatarId, avatars
+    paywall, clearPaywall, selectedAvatarId, avatars, setSelectedAvatarId
     } = useChat();
 
   const currentAvatar = useMemo(() => {
@@ -70,6 +70,11 @@ const ChatPageClient: React.FC = () => {
 
     if (!user?.email) return;
 
+    const guide = searchParams.get('guide');
+    if (guide) {
+      setSelectedAvatarId(guide);
+    }
+
     const chatId = searchParams.get('id');
     if (chatId) {
       selectChat(chatId);
@@ -81,7 +86,7 @@ const ChatPageClient: React.FC = () => {
       localStorage.removeItem('astranavi_pending_message');
       createNewChat(pendingMsg);
     }
-  }, [user, isLoggedIn, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading]);
+  }, [user, isLoggedIn, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading, setSelectedAvatarId]);
 
   React.useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {

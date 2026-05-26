@@ -10,7 +10,7 @@ export interface ParsedAuthError {
 /**
  * Utility to parse backend API auth responses and extract structured error information.
  */
-export function parseAuthError(err: any): ParsedAuthError {
+export function parseAuthError(err: unknown): ParsedAuthError {
   if (!err) {
     return {
       code: null,
@@ -23,84 +23,85 @@ export function parseAuthError(err: any): ParsedAuthError {
   }
 
   // If the error is a plain string, try to parse it as JSON first in case it's a stringified JSON object
-  let parsedJson: any = null;
+  let parsedJson: Record<string, unknown> | null = null;
   if (typeof err === 'string') {
     try {
-      parsedJson = JSON.parse(err);
+      parsedJson = JSON.parse(err) as Record<string, unknown>;
     } catch {
       // Not a JSON string
     }
   }
 
-  const data = parsedJson || err;
+  const rawData = parsedJson || err;
+  const data = typeof rawData === 'object' && rawData !== null ? (rawData as Record<string, unknown>) : {};
 
   // Extract error code
   let code: string | null = null;
   if (typeof data.code === 'string') {
     code = data.code;
-  } else if (data.error && typeof data.error.code === 'string') {
-    code = data.error.code;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).code === 'string') {
+    code = (data.error as Record<string, unknown>).code as string;
   } else if (typeof data.error === 'string' && data.error.includes('_')) {
     // Sometimes error string itself might be a code (e.g., 'wrong_password')
     code = data.error;
   } else if (typeof data.detail === 'string' && data.detail.includes('_')) {
     code = data.detail;
-  } else if (data.detail && typeof data.detail.code === 'string') {
-    code = data.detail.code;
+  } else if (data.detail && typeof data.detail === 'object' && typeof (data.detail as Record<string, unknown>).code === 'string') {
+    code = (data.detail as Record<string, unknown>).code as string;
   }
 
   // Extract message
   let message: string | null = null;
   if (typeof data.message === 'string') {
     message = data.message;
-  } else if (data.error && typeof data.error.message === 'string') {
-    message = data.error.message;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).message === 'string') {
+    message = (data.error as Record<string, unknown>).message as string;
   } else if (typeof data.detail === 'string') {
     message = data.detail;
-  } else if (data.detail && typeof data.detail.message === 'string') {
-    message = data.detail.message;
+  } else if (data.detail && typeof data.detail === 'object' && typeof (data.detail as Record<string, unknown>).message === 'string') {
+    message = (data.detail as Record<string, unknown>).message as string;
   }
 
   // Extract error
   let errorVal: string | null = null;
   if (typeof data.error === 'string') {
     errorVal = data.error;
-  } else if (data.error && typeof data.error.error === 'string') {
-    errorVal = data.error.error;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).error === 'string') {
+    errorVal = (data.error as Record<string, unknown>).error as string;
   }
 
   // Extract field
   let field: string | null = null;
   if (typeof data.field === 'string') {
     field = data.field;
-  } else if (data.error && typeof data.error.field === 'string') {
-    field = data.error.field;
-  } else if (data.detail && typeof data.detail.field === 'string') {
-    field = data.detail.field;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).field === 'string') {
+    field = (data.error as Record<string, unknown>).field as string;
+  } else if (data.detail && typeof data.detail === 'object' && typeof (data.detail as Record<string, unknown>).field === 'string') {
+    field = (data.detail as Record<string, unknown>).field as string;
   }
 
   // Extract action
   let action: string | null = null;
   if (typeof data.action === 'string') {
     action = data.action;
-  } else if (data.error && typeof data.error.action === 'string') {
-    action = data.error.action;
-  } else if (data.detail && typeof data.detail.action === 'string') {
-    action = data.detail.action;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).action === 'string') {
+    action = (data.error as Record<string, unknown>).action as string;
+  } else if (data.detail && typeof data.detail === 'object' && typeof (data.detail as Record<string, unknown>).action === 'string') {
+    action = (data.detail as Record<string, unknown>).action as string;
   }
 
   // Extract retryAfterSeconds
   let retryAfterSeconds: number | null = null;
   if (typeof data.retryAfterSeconds === 'number') {
     retryAfterSeconds = data.retryAfterSeconds;
-  } else if (data.error && typeof data.error.retryAfterSeconds === 'number') {
-    retryAfterSeconds = data.error.retryAfterSeconds;
-  } else if (data.detail && typeof data.detail.retryAfterSeconds === 'number') {
-    retryAfterSeconds = data.detail.retryAfterSeconds;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).retryAfterSeconds === 'number') {
+    retryAfterSeconds = (data.error as Record<string, unknown>).retryAfterSeconds as number;
+  } else if (data.detail && typeof data.detail === 'object' && typeof (data.detail as Record<string, unknown>).retryAfterSeconds === 'number') {
+    retryAfterSeconds = (data.detail as Record<string, unknown>).retryAfterSeconds as number;
   } else if (typeof data.retry_after === 'number') {
     retryAfterSeconds = data.retry_after;
-  } else if (data.error && typeof data.error.retry_after === 'number') {
-    retryAfterSeconds = data.error.retry_after;
+  } else if (data.error && typeof data.error === 'object' && typeof (data.error as Record<string, unknown>).retry_after === 'number') {
+    retryAfterSeconds = (data.error as Record<string, unknown>).retry_after as number;
   }
 
   return {
@@ -120,6 +121,7 @@ export function parseAuthError(err: any): ParsedAuthError {
  */
 export function getLocalizedErrorMessage(
   parsed: ParsedAuthError,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: (key: string, vars?: any) => string
 ): string {
   // 1. Try localized code message
