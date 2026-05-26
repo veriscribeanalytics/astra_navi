@@ -1762,17 +1762,38 @@
     "description": "Need help? Our support system is being set up to provide you with the best assistance. For urgent matters, please check back soon!"
   },
   "newDashboard": {
+    "landing": {
+      "title": "The New Dashboard",
+      "subtitle": "Your Celestial Snapshot",
+      "description": "Your full Vedic snapshot at a glance — score, transits, family, and your AI guides, in one place.",
+      "hook": "The positions of the Grahas and their constant movements shape the energy of every single day. The new dashboard serves as your daily Vedic portal, mapping real-time cosmic patterns onto your personal life areas, relationship charts, and daily schedules.",
+      "feature1Title": "Today's Energy Score",
+      "feature1Desc": "Get a real-time personalized score from 0-100 reflecting the aggregate planetary strength of your day.",
+      "feature2Title": "Panchang & Transits",
+      "feature2Desc": "Track active Tithi, Nakshatra, Yoga, Karana, and Rahu Kaal periods to align your actions with favorable timing.",
+      "feature3Title": "AI Astrology Guides",
+      "feature3Desc": "Consult specialized AI astrologers trained in Vedic systems, relationships, wealth, and KP branch.",
+      "benefit1": "Personalized daily scores powered by astronomical transits",
+      "benefit2": "Compatibility scoring for friends and family members",
+      "benefit3": "Mahadasha and Antardasha active planetary period parsing",
+      "benefit4": "Direct consultations with specialized cosmic expert personas"
+    },
     "todaysEnergy": {
       "title": "Today's Energy",
       "scoreOutOf": "of 100",
       "goodTime": "Good Time",
       "alertTime": "Alert Time",
       "aiChat": "Ask Navi",
-      "fullReading": "Full Reading"
+      "fullReading": "Full Reading",
+      "rising": "Rising",
+      "tithi": "TITHI",
+      "nakshatra": "NAKSHATRA",
+      "openingDashboard": "Opening your dashboard..."
     },
     "weeklyChart": {
       "title": "Weekly Chart",
       "best": "Best",
+      "today": "Today",
       "days": {
         "mon": "MON",
         "tue": "TUE",
@@ -1799,6 +1820,14 @@
       "statusNeedsAttention": "Needs Patience",
       "statusCosmicEnergy": "Personal Momentum",
       "statusIdealForMeditation": "Ideal for Meditation",
+      "statusStayFocused": "Stay Focused",
+      "statusPatienceNeeded": "Patience Needed",
+      "statusHarmonious": "Harmonious",
+      "statusMixedSignals": "Mixed Signals",
+      "statusBuilding": "Building",
+      "statusSpendMindfully": "Spend Mindfully",
+      "statusSteady": "Steady",
+      "statusMindYourRoutine": "Mind Your Routine",
       "comingSoon": "Coming Soon",
       "bandLegendTitle": "What do these scores mean?",
       "bandVerySupportive": "Very Supportive",
@@ -1825,6 +1854,8 @@
       "goodMatch": "Good Match",
       "averageMatch": "Average Match",
       "challengingMatch": "Challenging Match",
+      "outOf": "/ 100",
+      "matchSuffix": "Match",
       "harmony": "Harmony",
       "trust": "Trust",
       "understanding": "Understanding",
@@ -1844,7 +1875,16 @@
       "bandStable": "Stable",
       "bandAverage": "Average",
       "bandChallenging": "Challenging",
-      "addMember": "Add Member"
+      "addMember": "Add Member",
+      "relationshipPartner": "Partner",
+      "relationshipMother": "Mother",
+      "relationshipFather": "Father",
+      "relationshipSibling": "Sibling",
+      "relationshipFriend": "Friend",
+      "relationshipSon": "Son",
+      "relationshipDaughter": "Daughter",
+      "relationshipFamily": "Family",
+      "locked": "Locked"
     },
     "myChart": {
       "title": "My Chart",
@@ -1854,6 +1894,7 @@
       "mahadasha": "Mahadasha",
       "antardasha": "Antardasha",
       "exploreFullAnalysis": "Explore Full Analysis",
+      "periodEndsPrefix": "Ends",
       "emptyTitle": "Complete your birth details",
       "emptyBody": "Your kundli unlocks once we have your birth date, time, and location.",
       "emptyCta": "Update Profile"

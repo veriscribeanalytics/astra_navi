@@ -46,20 +46,20 @@ export default function LifeAreasGrid({ horoscope, loading }: Props) {
     switch (area) {
       case 'career':
         if (score >= 70) return t('newDashboard.lifeAreas.statusSteadyProgress');
-        if (score >= 50) return 'Stay Focused';
-        return 'Patience Needed';
+        if (score >= 50) return t('newDashboard.lifeAreas.statusStayFocused');
+        return t('newDashboard.lifeAreas.statusPatienceNeeded');
       case 'love':
-        if (score >= 70) return 'Harmonious';
-        if (score >= 50) return 'Mixed Signals';
+        if (score >= 70) return t('newDashboard.lifeAreas.statusHarmonious');
+        if (score >= 50) return t('newDashboard.lifeAreas.statusMixedSignals');
         return t('newDashboard.lifeAreas.statusNeedsAttention');
       case 'finance':
-        if (score >= 70) return 'Building';
+        if (score >= 70) return t('newDashboard.lifeAreas.statusBuilding');
         if (score >= 50) return t('newDashboard.lifeAreas.statusManageWisely');
-        return 'Spend Mindfully';
+        return t('newDashboard.lifeAreas.statusSpendMindfully');
       case 'health':
         if (score >= 70) return t('newDashboard.lifeAreas.statusGood');
-        if (score >= 50) return 'Steady';
-        return 'Mind Your Routine';
+        if (score >= 50) return t('newDashboard.lifeAreas.statusSteady');
+        return t('newDashboard.lifeAreas.statusMindYourRoutine');
       case 'general':
         return t('newDashboard.lifeAreas.statusCosmicEnergy');
       case 'spiritual':

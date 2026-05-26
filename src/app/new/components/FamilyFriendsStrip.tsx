@@ -42,14 +42,14 @@ const FamilyMemberMiniCard: React.FC<{ member: FamilyMember }> = ({ member }) =>
   // Format relationship title compactly
   const formatCompactRelation = (rel: string): string => {
     switch (rel) {
-      case 'spouse': return 'Partner';
-      case 'mother': return 'Mother';
-      case 'father': return 'Father';
-      case 'sibling': return 'Sibling';
-      case 'friend': return 'Friend';
-      case 'son': return 'Son';
-      case 'daughter': return 'Daughter';
-      default: return 'Family';
+      case 'spouse': return t('newDashboard.familyFriends.relationshipPartner');
+      case 'mother': return t('newDashboard.familyFriends.relationshipMother');
+      case 'father': return t('newDashboard.familyFriends.relationshipFather');
+      case 'sibling': return t('newDashboard.familyFriends.relationshipSibling');
+      case 'friend': return t('newDashboard.familyFriends.relationshipFriend');
+      case 'son': return t('newDashboard.familyFriends.relationshipSon');
+      case 'daughter': return t('newDashboard.familyFriends.relationshipDaughter');
+      default: return t('newDashboard.familyFriends.relationshipFamily');
     }
   };
 
@@ -95,7 +95,7 @@ const FamilyMemberMiniCard: React.FC<{ member: FamilyMember }> = ({ member }) =>
           </div>
         ) : (
           <div className="text-[8px] font-black uppercase tracking-widest text-foreground/30 py-0.5 leading-none">
-            Locked
+            {t('newDashboard.familyFriends.locked')}
           </div>
         )}
       </div>

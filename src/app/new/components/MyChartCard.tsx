@@ -88,7 +88,7 @@ export default function MyChartCard({ user, loading }: Props) {
         const startFormatted = startObj.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         return `${startFormatted} — ${endFormatted}`;
       }
-      return `Ends ${endFormatted}`;
+      return `${t('newDashboard.myChart.periodEndsPrefix')} ${endFormatted}`;
     } catch (e) {
       return '—';
     }

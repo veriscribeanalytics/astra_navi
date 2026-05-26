@@ -161,17 +161,17 @@ export default function CompatibilityCard() {
           {/* Middle Column: Scores & Stars */}
           <div className="flex-grow p-3.5 min-w-0">
             <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/40">
-              {defaultMember.name}&apos;s Match
+              {defaultMember.name}&apos;s {t('newDashboard.compatibility.matchSuffix')}
             </span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-[20px] font-headline font-bold text-foreground tabular-nums">
                 {score}
               </span>
               <span className="text-[10px] font-bold text-foreground/35 uppercase">
-                / 100
+                {t('newDashboard.compatibility.outOf')}
               </span>
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] font-bold uppercase tracking-widest ml-2 ${palette.bg} ${palette.text} ${palette.border}`}>
-                {band} Match
+                {band} {t('newDashboard.compatibility.matchSuffix')}
               </span>
             </div>
 

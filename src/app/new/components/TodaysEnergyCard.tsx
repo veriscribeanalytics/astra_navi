@@ -157,18 +157,18 @@ export default function TodaysEnergyCard({ horoscope, transits, user, loading }:
             {/* Lagna (Ascendant) */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-variant/40 border border-outline-variant/10 text-[11px] font-bold text-foreground">
               <Compass className="w-3 h-3 text-purple-400 shrink-0" />
-              <span>{lagnaSignName} Rising</span>
+              <span>{lagnaSignName} {t('newDashboard.todaysEnergy.rising')}</span>
             </div>
 
             {/* Tithi */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-variant/40 border border-outline-variant/10 text-[11px] font-bold text-foreground">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/40 shrink-0">TITHI</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/40 shrink-0">{t('newDashboard.todaysEnergy.tithi')}</span>
               <span className="truncate max-w-[120px]">{tithiName}</span>
             </div>
 
             {/* Nakshatra */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-variant/40 border border-outline-variant/10 text-[11px] font-bold text-foreground">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/40 shrink-0">NAKSHATRA</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/40 shrink-0">{t('newDashboard.todaysEnergy.nakshatra')}</span>
               <span className="truncate max-w-[120px]">{nakshatraName}</span>
             </div>
           </div>

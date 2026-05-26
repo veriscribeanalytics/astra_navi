@@ -159,7 +159,7 @@ export default function WeeklyChartCard() {
           {forecast.days.map(day => {
             const dateObj = new Date(day.date + 'T00:00:00');
             const dayLabel = day.is_today
-              ? 'TOD'
+              ? t('newDashboard.weeklyChart.today').toUpperCase()
               : dateObj.toLocaleDateString(language || 'en', { weekday: 'short' }).toUpperCase();
 
             return (
