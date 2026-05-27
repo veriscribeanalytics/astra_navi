@@ -25,6 +25,11 @@ export default function ForecastChart({ points, colorHex, activeLabel }: { point
             <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
             <stop offset="100%" stopColor={colorHex} stopOpacity="0.01" />
           </linearGradient>
+          {/* Cosmic energy glow filter */}
+          <filter id={`fc-glow-${id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
 
         {[25, 50, 75].map(v => {
@@ -33,17 +38,54 @@ export default function ForecastChart({ points, colorHex, activeLabel }: { point
         })}
 
         <path d={areaD} fill={`url(#fc-area-${id})`} />
-        <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" />
+        {/* Glow path behind for vibrant cosmic effect */}
+        <path d={pathD} fill="none" stroke={colorHex} strokeWidth="3" strokeLinecap="round" opacity="0.3" filter={`url(#fc-glow-${id})`} />
+        <path d={pathD} fill="none" stroke={colorHex} strokeWidth="1.75" strokeLinecap="round" />
 
         {coords.map((c, i) => {
           const p = points[i];
           const isActive = activeLabel === p.label;
           const isCurrent = p.isCurrent;
+          
+          // Prevent overlapping: only show labels for weekly view (<= 10 points)
+          // or specifically highlight the currently active or today's point in dense views
+          const showLabel = points.length <= 10 || isActive || isCurrent;
+          const dotRadius = isCurrent || isActive ? 3.5 : (points.length > 15 ? 0.8 : 1.8);
+          const strokeWidth = isCurrent || isActive ? 0 : (points.length > 15 ? 0.5 : 1);
+
           return (
             <g key={i}>
-              {(isCurrent || isActive) && <circle cx={c.x} cy={c.y} r="6" fill={colorHex} opacity={0.12} />}
-              <circle cx={c.x} cy={c.y} r={isCurrent || isActive ? 3.5 : 1.8} fill={isCurrent || isActive ? colorHex : 'transparent'} stroke={colorHex} strokeWidth={isCurrent || isActive ? 0 : 1} />
-              <text x={c.x} y={c.y - 8} textAnchor="middle" fill={isActive ? colorHex : 'var(--color-foreground)'} fillOpacity={isActive ? 1 : isCurrent ? 0.6 : 0.3} fontSize="8" fontWeight="bold">{p.score}</text>
+              {(isCurrent || isActive) && (
+                <circle 
+                  cx={c.x} 
+                  cy={c.y} 
+                  r="6" 
+                  fill={colorHex} 
+                  opacity={0.2} 
+                  filter={`url(#fc-glow-${id})`} 
+                />
+              )}
+              <circle 
+                cx={c.x} 
+                cy={c.y} 
+                r={dotRadius} 
+                fill={isCurrent || isActive ? colorHex : 'var(--bg-surface, #1e1b29)'} 
+                stroke={colorHex} 
+                strokeWidth={strokeWidth} 
+              />
+              {showLabel && (
+                <text 
+                  x={c.x} 
+                  y={c.y - (isCurrent || isActive ? 9 : 7)} 
+                  textAnchor="middle" 
+                  fill={isActive ? colorHex : 'var(--color-foreground)'} 
+                  fillOpacity={isActive ? 1 : isCurrent ? 0.8 : 0.4} 
+                  fontSize={isCurrent || isActive ? "8.5" : "7.5"} 
+                  fontWeight={isCurrent || isActive ? "bold" : "medium"}
+                >
+                  {p.score}
+                </text>
+              )}
             </g>
           );
         })}
