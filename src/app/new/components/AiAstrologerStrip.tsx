@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { Star, ChevronRight } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import { useTranslation } from '@/hooks';
+import { useChat } from '@/context/ChatContext';
 import { getAvatarImage } from '@/utils/avatarStyle';
 
 export default function AiAstrologerStrip() {
   const { t } = useTranslation();
+  const { avatars } = useChat();
 
   const GUIDES = [
     'navi',
@@ -37,8 +39,11 @@ export default function AiAstrologerStrip() {
       {/* Responsive Grid layout for even spacing */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5 w-full">
         {GUIDES.map((guide) => {
-          const img = getAvatarImage(guide) || '/placeholder-avatar.png';
-          
+          const catalogEntry = avatars.find(a => a.avatarId === guide);
+          const img = getAvatarImage(guide, catalogEntry) || '/placeholder-avatar.png';
+          const name = catalogEntry?.name || t(`newDashboard.aiAstrologer.guides.${guide}.name`);
+          const title = catalogEntry?.title || t(`newDashboard.aiAstrologer.guides.${guide}.title`);
+
           return (
             <Link
               key={guide}
@@ -50,7 +55,7 @@ export default function AiAstrologerStrip() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img}
-                  alt={t(`newDashboard.aiAstrologer.guides.${guide}.name`)}
+                  alt={name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -58,10 +63,10 @@ export default function AiAstrologerStrip() {
               {/* Details */}
               <div className="min-w-0 w-full flex-grow flex flex-col justify-center mt-1">
                 <div className="font-headline font-bold text-foreground truncate w-full group-hover:text-secondary transition-colors text-[11px] sm:text-[12px] leading-tight">
-                  {t(`newDashboard.aiAstrologer.guides.${guide}.name`)}
+                  {name}
                 </div>
                 <div className="text-[7.5px] sm:text-[8px] uppercase tracking-widest text-foreground/45 font-bold truncate w-full mt-0.5 leading-none">
-                  {t(`newDashboard.aiAstrologer.guides.${guide}.title`)}
+                  {title}
                 </div>
               </div>
 
