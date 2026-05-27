@@ -49,8 +49,8 @@ export default function ForecastSnapshot({ insight, summary, range, theme, t }: 
 
   // Stats
   const dominantPlanet = insight?.dominant_planet || '—';
-  const bestDay = range === '7d' ? (summary?.best_day || '—') : (summary?.best_month || '—');
-  const challengingDay = range === '7d' ? (summary?.worst_day || '—') : (summary?.worst_month || '—');
+  const bestDay = range === 'yearly' ? (summary?.best_month || '—') : (summary?.best_day || '—');
+  const challengingDay = range === 'yearly' ? (summary?.worst_month || '—') : (summary?.worst_day || '—');
 
   // Suggestion text
   let suggestion = '';

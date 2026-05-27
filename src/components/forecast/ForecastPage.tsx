@@ -11,24 +11,30 @@ import ForecastChart, { ChartPoint } from './ForecastChart';
 import MonthGrid, { MonthData } from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
 import ForecastSnapshot from './ForecastSnapshot';
+import MonthlyWeekCards from './MonthlyWeekCards';
+import WeekStrip from './WeekStrip';
 import { TrendingUp } from 'lucide-react';
+import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse } from '@/types/forecast';
+import { todayISO, currentMonthISO } from '@/utils/forecastError';
 
 type TimeRange = '7d' | 'monthly' | 'yearly';
 
-interface YearlyResponse {
-  area: string;
-  months: MonthData[];
-  summary: { best_month: string; worst_month: string; average_score: number; trend: string };
+interface WeeklyResponse extends Omit<WeeklyForecastResponse, 'days'> {
+  days: (WeeklyForecastResponse['days'][number] & { is_today?: boolean; personalized_alerts?: (string | { simple: string; technical?: string })[] })[];
+  summary: { best_day: string; worst_day: string; average_score: number; trend: string };
 }
 
-interface WeeklyResponse {
-  area: string;
-  days: { date: string; is_today: boolean; score: number; text: string; dominant_planet: string; personalized_alerts: unknown[]; transits?: Record<string, { sign: string; house_from_lagna: number }> }[];
+interface MonthlyResponse extends MonthlyForecastResponse {
   summary: { best_day: string; worst_day: string; average_score: number; trend: string };
+}
+
+interface YearlyResponse extends YearlyForecastResponse {
+  summary: { best_month: string; worst_month: string; average_score: number; trend: string };
 }
 
 type CacheEntry =
   | { kind: 'weekly'; data: WeeklyResponse; timestamp: number }
+  | { kind: 'monthly'; data: MonthlyResponse; timestamp: number }
   | { kind: 'yearly'; data: YearlyResponse; timestamp: number };
 
 // 10-minute client-side TTL: long enough that flipping tabs back and forth
@@ -56,15 +62,15 @@ export default function ForecastPage() {
   const [loading, setLoading] = useState(true);
   const [yearlyData, setYearlyData] = useState<YearlyResponse | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyResponse | null>(null);
+  const [monthlyData, setMonthlyData] = useState<MonthlyResponse | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedWeekStart, setSelectedWeekStart] = useState<string | null>(null);
 
-  // Cache by `${area}|${range}|${lang}`. Monthly and yearly share an entry
-  // because they hit the same backend endpoint and consume the same shape.
+  // Cache by `${area}|${range}|${lang}`. Distinct keys for 7d (weekly), monthly, and yearly.
   const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
   const cacheKeyFor = useCallback((a: ForecastArea, r: TimeRange, lang: string): string => {
-    const period = r === '7d' ? 'weekly' : 'yearly';
-    return `${a}|${period}|${lang}`;
+    return `${a}|${r}|${lang}`;
   }, []);
 
   useEffect(() => {
@@ -79,9 +85,18 @@ export default function ForecastPage() {
     if (cached && Date.now() - cached.timestamp < FORECAST_CACHE_TTL) {
       if (cached.kind === 'weekly') {
         setWeeklyData(cached.data);
-        const today = cached.data.days?.find(d => d.is_today);
+        const today = cached.data.days?.find(d => d.is_today || d.date === todayISO());
         setSelectedDay(today?.date || cached.data.days?.[0]?.date || null);
-      } else {
+      } else if (cached.kind === 'monthly') {
+        setMonthlyData(cached.data);
+        // Preserve user's previously-selected week if valid, otherwise select today's week
+        const hasSelected = cached.data.weeks?.some(w => w.start_date === selectedWeekStart);
+        if (!hasSelected) {
+          const today = todayISO();
+          const current = cached.data.weeks?.find(w => today >= w.start_date && today <= w.end_date);
+          setSelectedWeekStart(current?.start_date || cached.data.weeks?.[0]?.start_date || null);
+        }
+      } else if (cached.kind === 'yearly') {
         setYearlyData(cached.data);
         const current = cached.data.months?.find(m => m.is_current);
         setSelectedMonth(current?.month || cached.data.months?.[0]?.month || null);
@@ -97,16 +112,28 @@ export default function ForecastPage() {
         if (res.ok) {
           const data: WeeklyResponse = await res.json();
           setWeeklyData(data);
-          const today = data.days?.find((d: { is_today: boolean }) => d.is_today);
+          const today = data.days?.find(d => d.is_today || d.date === todayISO());
           setSelectedDay(today?.date || data.days?.[0]?.date || null);
           cacheRef.current.set(key, { kind: 'weekly', data, timestamp: Date.now() });
+        }
+      } else if (range === 'monthly') {
+        const month = currentMonthISO();
+        const res = await clientFetch(`/api/forecast/${area}/monthly?month=${month}&lang=${language}`);
+        if (res.ok) {
+          const data: MonthlyResponse = await res.json();
+          setMonthlyData(data);
+          // Default to today's week, falling back to weeks[0]
+          const today = todayISO();
+          const current = data.weeks?.find(w => today >= w.start_date && today <= w.end_date);
+          setSelectedWeekStart(current?.start_date || data.weeks?.[0]?.start_date || null);
+          cacheRef.current.set(key, { kind: 'monthly', data, timestamp: Date.now() });
         }
       } else {
         const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`);
         if (res.ok) {
           const data: YearlyResponse = await res.json();
           setYearlyData(data);
-          const current = data.months?.find((m: MonthData) => m.is_current);
+          const current = data.months?.find(m => m.is_current);
           setSelectedMonth(current?.month || data.months?.[0]?.month || null);
           cacheRef.current.set(key, { kind: 'yearly', data, timestamp: Date.now() });
         }
@@ -116,7 +143,7 @@ export default function ForecastPage() {
     } finally {
       setLoading(false);
     }
-  }, [area, range, language, cacheKeyFor]);
+  }, [area, range, language, cacheKeyFor, selectedWeekStart]);
 
   useEffect(() => {
     if (isLoggedIn) fetchData();
@@ -129,10 +156,17 @@ export default function ForecastPage() {
       return weeklyData.days.map(d => ({
         label: d.date,
         score: d.score,
-        isCurrent: d.is_today,
+        isCurrent: d.is_today || d.date === todayISO(),
       }));
     }
-    if (yearlyData?.months) {
+    if (range === 'monthly' && monthlyData?.weeks) {
+      return monthlyData.weeks.map(w => ({
+        label: w.start_date,
+        score: w.score,
+        isCurrent: w.start_date === selectedWeekStart,
+      }));
+    }
+    if (range === 'yearly' && yearlyData?.months) {
       return yearlyData.months.map(m => ({
         label: m.month,
         score: m.score,
@@ -140,25 +174,44 @@ export default function ForecastPage() {
       }));
     }
     return [];
-  }, [range, weeklyData, yearlyData]);
+  }, [range, weeklyData, monthlyData, yearlyData, selectedWeekStart]);
 
-  const activeLabel = range === '7d' ? selectedDay : selectedMonth;
+  const activeLabel = range === '7d' ? selectedDay : range === 'monthly' ? selectedWeekStart : selectedMonth;
 
   const insightData = useMemo(() => {
     if (range === '7d' && weeklyData?.days && selectedDay) {
       const day = weeklyData.days.find(d => d.date === selectedDay);
       if (!day) return null;
-      return { date: day.date, score: day.score, text: day.text, dominant_planet: day.dominant_planet, alerts: day.personalized_alerts as (string | { simple: string; technical?: string })[], transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined };
+      return { date: day.date, score: day.score, text: day.text, dominant_planet: day.dominant_planet, alerts: (day.alerts || day.personalized_alerts) as (string | { simple: string; technical?: string })[], transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined };
     }
-    if (yearlyData?.months && selectedMonth) {
+    if (range === 'monthly' && monthlyData?.weeks && selectedWeekStart) {
+      const week = monthlyData.weeks.find(w => w.start_date === selectedWeekStart);
+      if (!week) return null;
+      const weekLabel = t('forecast.weekLabel').replace('{n}', String(week.week_index));
+      const s = new Date(week.start_date + 'T00:00:00');
+      const e = new Date(week.end_date + 'T00:00:00');
+      const formattedRange = s.getTime() && e.getTime()
+        ? `${s.toLocaleDateString(language, { month: 'short', day: 'numeric' })} – ${e.toLocaleDateString(language, { month: 'short', day: 'numeric' })}`
+        : `${week.start_date} – ${week.end_date}`;
+
+      return {
+        date: `${weekLabel} (${formattedRange})`,
+        score: week.score,
+        text: week.text || '',
+        dominant_planet: undefined,
+        alerts: week.alerts as (string | { simple: string; technical?: string })[] | undefined,
+        transits: undefined
+      };
+    }
+    if (range === 'yearly' && yearlyData?.months && selectedMonth) {
       const month = yearlyData.months.find(m => m.month === selectedMonth);
       if (!month) return null;
       return { month: month.month, score: month.score, text: month.text || '', dominant_planet: undefined, alerts: month.alerts as (string | { simple: string; technical?: string })[] | undefined, transits: month.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined };
     }
     return null;
-  }, [range, weeklyData, yearlyData, selectedDay, selectedMonth]);
+  }, [range, weeklyData, monthlyData, yearlyData, selectedDay, selectedWeekStart, selectedMonth]);
 
-  const summary = range === '7d' ? weeklyData?.summary : yearlyData?.summary;
+  const summary = range === '7d' ? weeklyData?.summary : range === 'monthly' ? monthlyData?.summary : yearlyData?.summary;
 
   if (authLoading || !isLoggedIn) {
     return (
@@ -287,8 +340,8 @@ export default function ForecastPage() {
                 </div>
                 {summary && (
                   <div className="px-4 sm:px-8 pb-4 sm:pb-6 flex flex-wrap gap-3 sm:gap-6 text-[10px] sm:text-[11px] font-bold border-t border-white/5 pt-4">
-                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.best')}:</span><span className="text-foreground/70">{range === '7d' ? (summary as WeeklyResponse['summary']).best_day : (summary as YearlyResponse['summary']).best_month}</span></div>
-                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.worst')}:</span><span className="text-foreground/70">{range === '7d' ? (summary as WeeklyResponse['summary']).worst_day : (summary as YearlyResponse['summary']).worst_month}</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.best')}:</span><span className="text-foreground/70">{range === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.worst')}:</span><span className="text-foreground/70">{range === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day}</span></div>
                     <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.avg')}:</span><span style={{ color: theme.hex }}>{summary.average_score}</span></div>
                     <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.trend')}:</span><span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span></div>
                   </div>
@@ -296,31 +349,16 @@ export default function ForecastPage() {
               </Card>
 
               {/* Grid selector */}
-              {range !== '7d' && yearlyData?.months && (
-                <MonthGrid months={yearlyData.months} colorHex={theme.hex} selectedMonth={selectedMonth} onSelect={setSelectedMonth} />
+              {range === '7d' && weeklyData?.days && (
+                <WeekStrip days={weeklyData.days} colorHex={theme.hex} selectedDate={selectedDay} onSelect={setSelectedDay} />
               )}
 
-              {range === '7d' && weeklyData?.days && (
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
-                  {weeklyData.days.map(day => {
-                    const isSelected = selectedDay === day.date;
-                    const dateObj = new Date(day.date + 'T00:00:00');
-                    return (
-                      <button key={day.date} onClick={() => setSelectedDay(day.date)}
-                        className={`flex flex-col items-center p-1.5 sm:p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 border-white/5 hover:border-white/10'}`}
-                        style={{ 
-                          borderColor: isSelected ? theme.hex + '50' : undefined,
-                          boxShadow: isSelected ? `0 0 16px ${theme.hex}20` : undefined
-                        }}>
-                        <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider ${isSelected ? '' : 'text-foreground/30'}`} style={{ color: isSelected ? theme.hex : undefined }}>
-                          {day.is_today ? t('forecast.todayShort') : dateObj.toLocaleDateString('en', { weekday: 'short' })}
-                        </span>
-                        <span className={`text-base sm:text-xl lg:text-2xl font-headline font-bold ${isSelected ? 'text-foreground font-black' : 'text-foreground/40'}`}>{dateObj.getDate()}</span>
-                        <span className="text-[8px] font-bold text-foreground/30">{day.score}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+              {range === 'monthly' && monthlyData?.weeks && (
+                <MonthlyWeekCards weeks={monthlyData.weeks} colorHex={theme.hex} selectedWeekStart={selectedWeekStart} onSelect={setSelectedWeekStart} />
+              )}
+
+              {range === 'yearly' && yearlyData?.months && (
+                <MonthGrid months={yearlyData.months} colorHex={theme.hex} selectedMonth={selectedMonth} onSelect={setSelectedMonth} />
               )}
 
               {/* Insight */}
