@@ -22,16 +22,18 @@ export default function NewDashboardClient() {
 
   return (
     <div className="relative w-full flex-grow bg-[var(--bg)] min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-hidden">
-      {/* Decorative cosmic lotus watermark — sits behind the top of the dashboard. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/lotus.svg"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none select-none absolute -top-8 left-1/2 -translate-x-1/2 w-[520px] sm:w-[640px] lg:w-[780px] opacity-25 sm:opacity-30 mix-blend-screen z-0"
-      />
-
       <div className="relative z-10 max-w-[680px] lg:max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 space-y-4 sm:space-y-5">
+        {/* Lotus hero motif — sits above the first card as a glowing centerpiece. */}
+        <div className="flex justify-center -mb-2 sm:-mb-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/lotus.svg"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none select-none w-[180px] sm:w-[220px] lg:w-[260px] drop-shadow-[0_0_40px_rgba(168,85,247,0.35)]"
+          />
+        </div>
+
         {/* §1 — Today's Energy Card */}
         <TodaysEnergyCard
           horoscope={horoscope}
