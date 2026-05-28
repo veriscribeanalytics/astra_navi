@@ -654,7 +654,7 @@ export default function DailyHoroscopeCard({
                 {activeModal && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
                         className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-8" onClick={() => setActiveModal(null)}>
-                        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+                        <div className="absolute inset-0 bg-black/85" />
                         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
                             transition={{ type: "spring", damping: 30, stiffness: 300 }} onClick={e => e.stopPropagation()}
                             className="relative w-full sm:max-w-6xl h-[95dvh] sm:h-full sm:max-h-[85vh] bg-surface rounded-t-[20px] sm:rounded-[32px] border border-outline-variant/20 shadow-2xl overflow-hidden flex flex-col">

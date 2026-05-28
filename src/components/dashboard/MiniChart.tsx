@@ -24,6 +24,11 @@ export default function MiniChart({ days, colorHex, activeDate }: { days: Foreca
     const bestPoint = points[days.reduce((bestIdx, d, i) => d.score > days[bestIdx].score ? i : bestIdx, 0)];
     const worstPoint = points[days.reduce((worstIdx, d, i) => d.score < days[worstIdx].score ? i : worstIdx, 0)];
 
+    // Approximate path length for stroke-dashoffset reveal.
+    // Using a generous over-estimate avoids needing a measured DOM length;
+    // the dash just clips the path and animates to 0.
+    const pathLen = Math.ceil(w * 2);
+
     return (
         <div className="relative">
             <svg viewBox={`-24 -14 ${w + 34} ${h + 20}`} className="w-full h-auto overflow-visible">
@@ -32,11 +37,6 @@ export default function MiniChart({ days, colorHex, activeDate }: { days: Foreca
                         <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
                         <stop offset="100%" stopColor={colorHex} stopOpacity="0.01" />
                     </linearGradient>
-                    <clipPath id={`reveal-${colorHex.replace('#','')}`}>
-                        <rect x="-24" y="-14" width="0" height={h + 30}>
-                            <animate attributeName="width" from="0" to={w + 40} dur="1.2s" fill="freeze" begin="0.3s" />
-                        </rect>
-                    </clipPath>
                 </defs>
 
                 {/* Y-Axis Labels & Grid */}
@@ -57,9 +57,20 @@ export default function MiniChart({ days, colorHex, activeDate }: { days: Foreca
                 <text x={todayX - 4} y="-4" textAnchor="end" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">{t('horoscope.past')}</text>
                 <text x={todayX + 4} y="-4" textAnchor="start" fontSize="5.5" fill="var(--color-foreground)" fillOpacity="0.2" fontWeight="bold" letterSpacing="0.5">{t('horoscope.forecast')}</text>
 
-                <g clipPath={`url(#reveal-${colorHex.replace('#','')})`}>
+                <g>
                     <path d={areaD} fill={`url(#area-${colorHex.replace('#','')})`} />
-                    <path d={pathD} fill="none" stroke={colorHex} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                        d={pathD}
+                        fill="none"
+                        stroke={colorHex}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeDasharray={pathLen}
+                        strokeDashoffset={pathLen}
+                        style={{ animation: 'mini-chart-draw 0.5s ease-out forwards' }}
+                    />
+                    <style>{`@keyframes mini-chart-draw { to { stroke-dashoffset: 0; } }`}</style>
                     {(() => {
                         // Pre-compute which labels are visible (priority: selected > today > best > worst > normal)
                         // and reposition labels that would collide with a higher-priority label
