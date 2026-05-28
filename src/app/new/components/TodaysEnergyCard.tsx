@@ -23,8 +23,8 @@ export default function TodaysEnergyCard({ horoscope, transits, user, loading }:
 
   if (loading || !user) {
     return (
-      <Card padding="md" className="!rounded-[24px]">
-        <div className="space-y-4 animate-pulse">
+      <Card padding="md" className="!rounded-[24px] 2xl:h-full 2xl:flex 2xl:flex-col">
+        <div className="space-y-4 animate-pulse 2xl:flex-1 2xl:flex 2xl:flex-col 2xl:justify-between 2xl:gap-6">
           <div className="flex gap-4">
             <div className="w-24 h-24 rounded-full bg-surface-variant/30 shrink-0" />
             <div className="flex-grow space-y-2 pt-2">
@@ -91,8 +91,8 @@ export default function TodaysEnergyCard({ horoscope, transits, user, loading }:
   }
 
   return (
-    <Card padding="md" className="!rounded-[24px] border border-outline-variant/20 bg-surface">
-      <div className="space-y-4">
+    <Card padding="md" className="!rounded-[24px] border border-outline-variant/20 bg-surface 2xl:h-full 2xl:flex 2xl:flex-col">
+      <div className="space-y-4 2xl:flex-1 2xl:flex 2xl:flex-col 2xl:justify-between 2xl:gap-6">
         {/* Top Row: Score Circle and Header text */}
         <div className="flex gap-4 items-center sm:items-start">
           {/* SVG Circular Score Ring */}

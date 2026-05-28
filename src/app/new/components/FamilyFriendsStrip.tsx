@@ -109,7 +109,7 @@ export default function FamilyFriendsStrip() {
 
   if (isLoading) {
     return (
-      <Card padding="md" className="!rounded-[24px]">
+      <Card padding="md" className="!rounded-[24px] 2xl:h-full 2xl:flex 2xl:flex-col">
         <div className="space-y-3 animate-pulse">
           <div className="flex justify-between items-center">
             <div className="h-4 bg-surface-variant/30 rounded w-1/4" />
@@ -129,7 +129,7 @@ export default function FamilyFriendsStrip() {
   const displayedMembers = members ? members.slice(0, 4) : [];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 2xl:h-full 2xl:flex 2xl:flex-col">
       {/* Header */}
       <div className="flex justify-between items-center">
         <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -144,7 +144,7 @@ export default function FamilyFriendsStrip() {
       </div>
 
       {/* Scroll View */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none flex-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none flex-nowrap -mx-4 px-4 sm:mx-0 sm:px-0 2xl:flex-1 2xl:items-stretch">
         <div className="flex gap-3 shrink-0">
           {/* Display loaded family member cards */}
           {displayedMembers.map(member => (

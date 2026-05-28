@@ -53,7 +53,7 @@ export default function NewDashboardClient() {
         */}
 
         {/* Top block — hero (left) + Weekly/Panchang/Compatibility stack (right) */}
-        <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 sm:gap-5 2xl:items-start">
+        <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 sm:gap-5 2xl:items-stretch">
           {/* §1 — Today's Energy Card (hero) */}
           <TodaysEnergyCard
             horoscope={horoscope}
@@ -85,7 +85,7 @@ export default function NewDashboardClient() {
         />
 
         {/* §6 + §7 — Family & Friends + My Chart (paired 2-col at 2xl) */}
-        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 2xl:items-start">
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 2xl:items-stretch">
           <FamilyFriendsStrip />
 
           <MyChartCard

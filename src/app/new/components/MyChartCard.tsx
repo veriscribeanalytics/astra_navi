@@ -18,7 +18,7 @@ export default function MyChartCard({ user, loading }: Props) {
 
   if (loading || !user) {
     return (
-      <Card padding="md" className="!rounded-[24px]">
+      <Card padding="md" className="!rounded-[24px] 2xl:h-full 2xl:flex 2xl:flex-col">
         <div className="space-y-4 animate-pulse">
           <div className="flex justify-between items-center">
             <div className="h-4 bg-surface-variant/30 rounded w-1/4" />
@@ -40,7 +40,7 @@ export default function MyChartCard({ user, loading }: Props) {
   // If astrology data is missing, render the empty onboarding card
   if (!stats) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 2xl:h-full 2xl:flex 2xl:flex-col">
         {/* Header */}
         <div className="flex justify-between items-center">
           <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -55,8 +55,8 @@ export default function MyChartCard({ user, loading }: Props) {
         </div>
 
         {/* Empty State Onboarding Card */}
-        <Card padding="md" className="!rounded-[24px] border border-outline-variant/20 bg-surface">
-          <div className="flex flex-col items-center text-center p-4">
+        <Card padding="md" className="!rounded-[24px] border border-outline-variant/20 bg-surface 2xl:flex-1 2xl:flex 2xl:flex-col">
+          <div className="flex flex-col items-center text-center p-4 2xl:flex-1 2xl:justify-center">
             <div className="w-12 h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary mb-3">
               <UserCheck className="w-6 h-6" />
             </div>
@@ -98,7 +98,7 @@ export default function MyChartCard({ user, loading }: Props) {
   const antaTime = formatDateRange(stats.antaStart, stats.antaEnd);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 2xl:h-full 2xl:flex 2xl:flex-col">
       {/* Header */}
       <div className="flex justify-between items-center">
         <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -113,8 +113,8 @@ export default function MyChartCard({ user, loading }: Props) {
       </div>
 
       {/* Populated Chart Card */}
-      <Card padding="md" className="!rounded-[24px] border border-outline-variant/20 bg-surface">
-        <div className="space-y-4">
+      <Card padding="md" className="!rounded-[24px] border border-outline-variant/20 bg-surface 2xl:flex-1 2xl:flex 2xl:flex-col">
+        <div className="space-y-4 2xl:flex-1 2xl:flex 2xl:flex-col 2xl:justify-between 2xl:gap-6">
           {/* Three side-by-side tiles */}
           <div className="grid grid-cols-3 gap-2.5">
             {/* Tile 1: Your Kundli */}
