@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
@@ -109,6 +109,39 @@ const ConsultClient: React.FC = () => {
     }
   }, [user]);
 
+  // Fetch the consultation tree based on age and language
+  const fetchTree = useCallback(async (forAge: number, forLang: typeof language) => {
+    setIsLoadingTree(true);
+    try {
+      const res = await clientFetch(`/api/consult/tree?age=${forAge}&lang=${forLang}`);
+      const data = await res.json();
+      if (!data.tree) throw new Error('No tree');
+      setTree(data.tree);
+      // Drop any selections from a previous tree — question text is language-specific
+      setSelectedCategory(null);
+      setSelectedSubCategory(null);
+      setSelectedQuestion('');
+      return true;
+    } catch {
+      error('The analysis is currently unavailable. Please try again later.');
+      return false;
+    } finally {
+      setIsLoadingTree(false);
+    }
+  }, [error]);
+
+  // Refetch on language change, but only after the wizard has moved past birth
+  // (otherwise the user has no age yet) and never while a reading is streaming
+  useEffect(() => {
+    if (!age) return;
+    if (step === 'birth' || step === 'reading') return;
+    // Step user back to 'categories' since old selections are now wrong
+    fetchTree(age, language).then(ok => {
+      if (ok) setStep('categories');
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only react to language
+  }, [language]);
+
   // Handle step 1: Birth Details -> Tree Fetch
   const handleBirthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,21 +163,8 @@ const ConsultClient: React.FC = () => {
     const group = getAgeGroup(calculatedAge);
     setAgeGroupInfo(group);
 
-    setIsLoadingTree(true);
-    try {
-      const res = await clientFetch(`/api/consult/tree?age=${calculatedAge}`);
-      const data = await res.json();
-      if (data.tree) {
-        setTree(data.tree);
-        setStep('categories');
-      } else {
-        throw new Error("Could not fetch the consultation options.");
-      }
-    } catch {
-      error("The analysis is currently unavailable. Please try again later.");
-    } finally {
-      setIsLoadingTree(false);
-    }
+    const ok = await fetchTree(calculatedAge, language);
+    if (ok) setStep('categories');
   };
 
   // Handle Reading Generation (SSE)
@@ -180,6 +200,9 @@ const ConsultClient: React.FC = () => {
           birth_time: birthTime,
           birth_place: birthPlace,
           name: user?.name || 'Friend',
+          // language from context is always one of: 'en', 'hi', 'ta', 'te', 'kn', 'bn',
+          //                                          'mr', 'gu', 'ml', 'pa', 'ko' — never a display name.
+          // This invariant is enforced by LanguageContext (LanguageCode type).
           language,
           primary_category: selectedCategory.key,
           secondary_category: selectedSubCategory.key,

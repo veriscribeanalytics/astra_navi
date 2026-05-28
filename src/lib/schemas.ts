@@ -184,7 +184,7 @@ export const ConsultRequestSchema = z.object({
   language: z.string().max(20).default("en"),
   primary_category: z.string().max(50),
   secondary_category: z.string().max(50),
-  final_question: z.string().max(200),
+  final_question: z.string().max(500),
   response_tone: z.enum(["warm", "emotional", "realistic", "short", "detailed"]).default("warm"),
   optional_note: z.string().max(120).optional(),
   birthLatitude: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
