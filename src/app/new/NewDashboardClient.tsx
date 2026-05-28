@@ -22,9 +22,9 @@ export default function NewDashboardClient() {
 
   return (
     <div className="relative w-full flex-grow bg-[var(--bg)] min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-hidden">
-      <div className="relative z-10 max-w-[680px] lg:max-w-[1100px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 space-y-4 sm:space-y-5 2xl:space-y-0">
+      <div className="relative z-10 max-w-[680px] lg:max-w-[1100px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 space-y-4 sm:space-y-5">
         {/* Lotus hero motif — sits above the first card as a glowing centerpiece. */}
-        <div className="flex justify-center -mb-2 sm:-mb-3 2xl:mb-4">
+        <div className="flex justify-center -mb-2 sm:-mb-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/lotus.svg"
@@ -35,79 +35,67 @@ export default function NewDashboardClient() {
         </div>
 
         {/*
-          2xl+ uses a 2-column "hero-left" grid:
+          At 2xl+ the dashboard becomes three independent blocks stacked vertically:
             ┌──────────────┬───────────┐
-            │   energy     │  weekly   │
-            │   (hero,     ├───────────┤
-            │   spans 3    │  panchang │
-            │   rows)      ├───────────┤
+            │   energy     │  weekly   │  <- hero (left) + right stack
+            │   (hero)     │  panchang │
             │              │  compat   │
             ├──────────────┴───────────┤
-            │       life areas         │
+            │       life areas         │  <- full-width
             ├─────────────┬────────────┤
-            │   family    │  mychart   │
+            │   family    │  mychart   │  <- paired 2-col
             ├─────────────┴────────────┤
-            │       ai astrologer      │
+            │       ai astrologer      │  <- full-width
             └──────────────────────────┘
-          Below 2xl this falls back to the existing single-column space-y rhythm.
+          The right column is a nested flex-col so its three cards keep their
+          natural heights side-by-side with the hero (no fragile row-span math).
+          Below 2xl everything collapses to a single-column space-y rhythm.
         */}
-        <div
-          className="2xl:grid 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] 2xl:gap-5 2xl:auto-rows-min space-y-4 sm:space-y-5 2xl:space-y-0"
-        >
-          {/* §1 — Today's Energy Card (hero, spans 3 rows on 2xl) */}
-          <div className="2xl:row-span-3 2xl:col-start-1">
-            <TodaysEnergyCard
-              horoscope={horoscope}
-              transits={transits}
-              user={user}
-              loading={primaryLoading}
-            />
-          </div>
 
-          {/* §2 — Weekly Chart Card (right column row 1) */}
-          <div className="2xl:col-start-2 2xl:row-start-1">
+        {/* Top block — hero (left) + Weekly/Panchang/Compatibility stack (right) */}
+        <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 sm:gap-5 2xl:items-start">
+          {/* §1 — Today's Energy Card (hero) */}
+          <TodaysEnergyCard
+            horoscope={horoscope}
+            transits={transits}
+            user={user}
+            loading={primaryLoading}
+          />
+
+          {/* Right stack */}
+          <div className="flex flex-col gap-4 sm:gap-5">
+            {/* §2 — Weekly Chart Card */}
             <WeeklyChartCard />
-          </div>
 
-          {/* §4 — Panchang Strip (right column row 2) */}
-          <div className="2xl:col-start-2 2xl:row-start-2">
+            {/* §4 — Panchang Strip */}
             <PanchangStrip
               transits={transits}
               loading={transitsLoading}
             />
-          </div>
 
-          {/* §5 — Compatibility Card (right column row 3) */}
-          <div className="2xl:col-start-2 2xl:row-start-3">
+            {/* §5 — Compatibility Card */}
             <CompatibilityCard />
           </div>
-
-          {/* §3 — Life Areas Grid (full-width row) */}
-          <div className="2xl:col-span-2 2xl:row-start-4">
-            <LifeAreasGrid
-              horoscope={horoscope}
-              loading={horoscopeLoading}
-            />
-          </div>
-
-          {/* §6 — Family & Friends Strip (paired with My Chart on 2xl) */}
-          <div className="2xl:col-start-1 2xl:row-start-5">
-            <FamilyFriendsStrip />
-          </div>
-
-          {/* §7 — My Chart Card (paired with Family on 2xl) */}
-          <div className="2xl:col-start-2 2xl:row-start-5">
-            <MyChartCard
-              user={user}
-              loading={userLoading}
-            />
-          </div>
-
-          {/* §8 — AI Astrologer Strip (full-width row) */}
-          <div className="2xl:col-span-2 2xl:row-start-6">
-            <AiAstrologerStrip />
-          </div>
         </div>
+
+        {/* §3 — Life Areas Grid (full-width) */}
+        <LifeAreasGrid
+          horoscope={horoscope}
+          loading={horoscopeLoading}
+        />
+
+        {/* §6 + §7 — Family & Friends + My Chart (paired 2-col at 2xl) */}
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 2xl:items-start">
+          <FamilyFriendsStrip />
+
+          <MyChartCard
+            user={user}
+            loading={userLoading}
+          />
+        </div>
+
+        {/* §8 — AI Astrologer Strip (full-width) */}
+        <AiAstrologerStrip />
       </div>
     </div>
   );
