@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { auth } from "@/lib/auth";
 import { ALL_FONT_VARIABLES } from "@/lib/fonts";
 import Navbar from "@/components/layout/Navbar";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
@@ -33,6 +34,10 @@ export default async function RootLayout({
   // Read language cookie so server renders in the user's preferred language,
   // eliminating hydration mismatches between SSR and client.
   const languageCookie = cookieStore.get("NEXT_LOCALE")?.value || "en";
+  // Resolve the session on the server so SessionProvider hydrates with the
+  // authenticated state already known — no client-side round-trip, no
+  // logged-out flash on refresh.
+  const session = await auth();
 
   return (
     <html
@@ -53,7 +58,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ErrorBoundary>
-          <SessionProvider refetchInterval={5 * 60}>
+          <SessionProvider session={session} refetchInterval={5 * 60}>
             <LanguageProvider initialLanguage={languageCookie}>
               <AuthProvider>
                 <ChatProvider>

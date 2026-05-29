@@ -75,6 +75,7 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/kundli") ||
         nextUrl.pathname.startsWith("/consult") ||
         nextUrl.pathname.startsWith("/chat") ||
+        nextUrl.pathname.startsWith("/family") ||
         nextUrl.pathname.startsWith("/horoscope") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||
