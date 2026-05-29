@@ -445,16 +445,18 @@ export default function DailyHoroscopeCard({
                                         <circle cx="36" cy="36" r="32" fill="none" strokeWidth="5" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={prog} className="transition-all duration-[1500ms]" style={{ stroke: scoreHex }} />
                                     </svg>
                                     
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 group-hover/score:opacity-0 group-hover/score:scale-95">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 group-hover/score:opacity-0 group-hover/score:scale-95 px-2">
                                         <span className={`text-3xl sm:text-4xl font-bold leading-none ${currentScoreStyle.color}`}>{score}</span>
-                                        <span className="text-[10px] text-foreground/30 font-bold uppercase tracking-wider mt-1">{t('horoscope.categoryGeneral')}</span>
+                                        <span className="text-[8px] sm:text-[9.5px] text-foreground/30 font-bold uppercase tracking-normal sm:tracking-wider mt-1 text-center w-full break-words leading-tight max-w-[76px] sm:max-w-[105px]">{t('horoscope.categoryGeneral')}</span>
                                     </div>
 
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 scale-110 group-hover/score:opacity-100 group-hover/score:scale-100 transition-all duration-500">
-                                        <div className="bg-secondary/10 border border-secondary/20 p-3 rounded-full mb-1">
-                                            <TrendingUp className="w-5 h-5 text-secondary" />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 scale-110 group-hover/score:opacity-100 group-hover/score:scale-100 transition-all duration-500 px-2">
+                                        <div className="bg-secondary/10 border border-secondary/20 p-2 sm:p-3 rounded-full mb-1">
+                                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
                                         </div>
-                                        <span className="text-[9px] font-black text-secondary uppercase tracking-[0.2em] text-center leading-tight">{t('horoscope.weeklyForecast').split(' ').map((w, i) => i === 0 ? w : <br key={i} />)}</span>
+                                        <span className="text-[7.5px] sm:text-[9px] font-black text-secondary uppercase tracking-normal sm:tracking-[0.15em] text-center leading-tight w-full max-w-[76px] sm:max-w-[105px] break-words">
+                                            {t('horoscope.weeklyForecast')}
+                                        </span>
                                     </div>
 
                                     <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover/score:border-secondary/30 transition-colors" />
