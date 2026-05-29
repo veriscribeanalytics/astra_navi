@@ -236,7 +236,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                             className="flex items-center gap-4 sm:gap-10 w-full"
                         >
                             {current.type === 'feature' ? (
-                                <Link href={current.href!} className="flex items-center gap-4 sm:gap-10 w-full sm:pointer-events-none">
+                                <Link href={current.href!} className="flex items-center gap-4 sm:gap-10 w-full">
                                     <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
                                         {current.icon}
                                     </div>
@@ -402,6 +402,14 @@ export default function DashboardHome() {
             createNewChat(text);
         }
     }, [activeChatId, sendMessage, createNewChat]);
+
+    // Pills inside the FeatureSlider start a chat and always navigate to the
+    // full /chat page so the conversation is visible and the behaviour is
+    // consistent across every screen size.
+    const handleSliderQuestion = useCallback((text: string) => {
+        handleSendMessage(text);
+        router.push('/chat');
+    }, [handleSendMessage, router]);
 
     // Effects
     useEffect(() => {
@@ -604,10 +612,10 @@ export default function DashboardHome() {
                         </div>
                     </div>
 
-                    <div className="w-full mb-2">
+                    <div className="w-full mb-2 hidden lg:block">
                         <div className="w-full relative group">
                             <div className="w-full h-[80px] sm:h-[100px] bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
-                                <FeatureSlider onQuestion={handleSendMessage} t={t} />
+                                <FeatureSlider onQuestion={handleSliderQuestion} t={t} />
                             </div>
                         </div>
                     </div>
