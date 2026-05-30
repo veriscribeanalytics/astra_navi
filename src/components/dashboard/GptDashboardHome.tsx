@@ -796,7 +796,7 @@ export default function GptDashboardHome() {
                   </DarkPanel>
                 </div>
 
-                <DarkPanel className="p-5">
+                <DarkPanel className="hidden sm:block p-5">
                   <div className="mb-4 flex items-start gap-3">
                     <Sparkles className="mt-1 h-7 w-7 text-[#ffc43d]" />
                     <div>
