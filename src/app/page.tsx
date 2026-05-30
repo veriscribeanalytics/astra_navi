@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import LandingPage from '@/components/home/LandingPage';
-import GptDashboardHome from '@/components/dashboard/GptDashboardHome';
+import DashboardHome from '@/components/dashboard/DashboardHome';
 import HomeToaster from '@/components/home/HomeToaster';
 
 export default async function Home() {
@@ -9,7 +9,7 @@ export default async function Home() {
   return (
     <main className="flex-grow">
       <HomeToaster />
-      {session?.user && !session?.user?.error ? <GptDashboardHome /> : <LandingPage />}
+      {session?.user && !session?.user?.error ? <DashboardHome /> : <LandingPage />}
     </main>
   );
 }

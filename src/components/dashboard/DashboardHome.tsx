@@ -1,1155 +1,1332 @@
 "use client";
 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Bell,
+  Briefcase,
+  Calendar,
+  Coins,
+  Gem,
+  Globe,
+  Heart,
+  Home,
+  Lock,
+  MessageSquare,
+  Moon,
+  Orbit,
+  ShieldAlert,
+  Sparkles,
+  Star,
+  Sun,
+  Users,
+  Wallet,
+  X,
+  Zap,
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
 import { usePaywallContext } from "@/context/PaywallContext";
-import { getTierLabel } from "@/types/billing";
-import { 
-    Sparkles, MessageSquare, Globe, Heart, 
-    ChevronRight, Orbit, TrendingUp,
-    Users, Sun, ArrowUp, Plus, Briefcase, Activity, ArrowRight, Wallet, Clock
-} from "lucide-react";
-import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import Link from "next/link";
-import Image from "next/image";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useGreeting } from "@/hooks/useGreeting";
-import { getRashiData } from "@/lib/astrology";
-import { clientFetch } from "@/lib/apiClient";
-import DailyHoroscopeCard from "@/components/dashboard/DailyHoroscopeCard";
-import AvatarShowcase from "@/components/dashboard/AvatarShowcase";
-import FamilyStrip from "@/components/dashboard/FamilyStrip";
-import InviteBanner from "@/components/dashboard/InviteBanner";
 import { useChat } from "@/context/ChatContext";
-import { motion, AnimatePresence } from "motion/react";
-import { useTranslation } from "@/hooks";
-import { useTransitsToday } from '@/hooks/useTransitsToday';
-import { LOCALE_BY_LANGUAGE } from '@/locales';
-import { Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
-import { topicPills } from '@/data/topicPills';
+import { getTierLabel } from "@/types/billing";
+import PaywallCard from "@/components/paywall/PaywallCard";
+import type { PaywallFeatureKey, PaywallData } from "@/types/paywall";
+import { useDailyHoroscope, useTranslation, useTransitsToday } from "@/hooks";
+import { useGreeting } from "@/hooks/useGreeting";
+import { LOCALE_BY_LANGUAGE } from "@/locales";
+import { clientFetch } from "@/lib/apiClient";
+import { getRashiData } from "@/lib/astrology";
 import { isProfileComplete } from "@/lib/profileCompleteness";
+import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
+import type { ForecastDay } from "@/components/dashboard/MiniChart";
+import Particles from "@/components/ui/Particles";
+import { catmullRomToBezier, catmullRomArea } from "@/utils/chartCurve";
+import type { HoroscopeData } from "@/types/horoscope";
+import { useFamilyMembers } from "@/hooks/useFamily";
+import { parseKundliStats } from "@/lib/kundliStats";
+import { getAvatarImage } from "@/utils/avatarStyle";
+import { computeFamilyMemberStatus } from "@/lib/familyStatus";
 
-function formatRelativeTime(date: Date, t: (key: string) => string, language?: string) {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return t('dashboard.justNow');
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes} ${t('dashboard.minutesAgo')}`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} ${t('dashboard.hoursAgo')}`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} ${t('dashboard.daysAgo')}`;
-    return date.toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en-IN', { month: 'short', day: 'numeric' });
+interface ForecastData {
+  area: ForecastArea;
+  days: ForecastDay[];
+  summary: {
+    best_day: string;
+    worst_day: string;
+    average_score: number;
+    trend: string;
+  };
 }
 
-// ─── Data Interfaces ─────────────────────────────
-interface KundliStats {
-    nakshatra?: string;
-    nakshatraLord?: string;
-    activeDasha?: string;
-    dashaRemaining?: string;
-    moonPhase?: string;
-    lagnaSign?: string;
+type ChatPrompt = {
+  title: string;
+  message: string;
+};
+
+const areaLabelFallback: Record<ForecastArea, string> = {
+  love: "Love",
+  career: "Career",
+  finance: "Finance",
+  health: "Health",
+  general: "General",
+  spiritual: "Spiritual",
+};
+
+const areaDescriptions: Record<ForecastArea, string> = {
+  love: "Strong connections and understanding.",
+  career: "Good progress and recognition.",
+  finance: "Stable flows, avoid impulsive spending.",
+  health: "Focus on balance and consistent routines.",
+  general: "Positive momentum in your overall journey.",
+  spiritual: "Inner growth and clarity are strong.",
+};
+
+function resolveAreaLabel(t: (key: string) => string, area: ForecastArea) {
+  const key = `newDashboard.lifeAreas.${area}`;
+  const translated = t(key);
+  return translated && translated !== key ? translated : areaLabelFallback[area];
 }
 
-interface DashaPeriod {
-  type: string;
-  planet: string;
-  end?: string;
-  end_date?: string;
+function getAreaScore(horoscope: HoroscopeData | null, area: ForecastArea) {
+  const scoreArea = horoscope?.score?.areas?.[area as keyof NonNullable<HoroscopeData["score"]>["areas"]];
+  if (scoreArea && typeof scoreArea === "object" && "value" in scoreArea) return scoreArea.value;
+  if (horoscope?.today_scores?.[area] != null) return horoscope.today_scores[area];
+
+  const legacy = horoscope as unknown as {
+    areas?: Record<string, { score?: number; text?: string }>;
+  } | null;
+  const legacyKey = area === "love" ? "relationships" : area === "finance" ? "finances" : area;
+  return legacy?.areas?.[legacyKey]?.score ?? (area === "spiritual" ? 76 : 70);
 }
 
-interface DashaData {
-  currentMahaDasha?: string | { planet: string; name: string; value: string };
-  current?: string | { planet: string; name: string; value: string };
-  value?: string | { planet: string; name: string; value: string };
-  remaining?: string;
-  active?: DashaPeriod[];
+function getAreaInsight(horoscope: HoroscopeData | null, area: ForecastArea) {
+  const areasText = horoscope?.areas_text as Partial<Record<ForecastArea, { insight: string; tone: string }>> | undefined;
+  const insight = areasText?.[area]?.insight;
+  if (insight) return insight;
+  const legacy = horoscope as unknown as {
+    areas?: Record<string, { score?: number; text?: string }>;
+  } | null;
+  const legacyKey = area === "love" ? "relationships" : area === "finance" ? "finances" : area;
+  return legacy?.areas?.[legacyKey]?.text || areaDescriptions[area];
 }
 
-interface AstrologyData {
-  planets?: { planet: string; sign: string }[];
-  houses?: { house: number; sign: string }[];
-  chart?: { houses: { house: number; sign: string }[] };
-  ascendant?: { sign: string };
-  nakshatra?: string | { value: string; name: string };
-  nakshatraLord?: string | { value: string; name: string };
-  dasha?: DashaData;
-  planetary?: { active_dasha?: string | DashaData };
-  moonPhase?: string | { value: string };
+function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"]) {
+  const rk = transits?.panchanga?.rahukaal;
+  if (!rk) return "08:34 - 10:25";
+  return `${rk.start} - ${rk.end}`;
 }
 
-// ─── Sub-components ─────────────────────────────
-
-const getFeatures = (t: (key: string) => string) => [
-    { 
-        type: 'feature',
-        label: t('dashboard.janamKundli'), 
-        desc: t('dashboard.janamKundliDesc'), 
-        icon: <Globe className="w-5 h-5" />, 
-        href: "/kundli",
-        color: "text-blue-400"
-    },
-    { 
-        type: 'feature',
-        label: t('dashboard.aiGuidance'), 
-        desc: t('dashboard.aiGuidanceDesc'), 
-        icon: <MessageSquare className="w-5 h-5" />, 
-        href: "/chat",
-        color: "text-secondary"
-    },
-    { 
-        type: 'questions',
-        label: t('dashboard.quickAsk'),
-        desc: t('dashboard.quickAskDesc'),
-        questions: [
-            t('dashboard.qDay'), 
-            t('dashboard.qColor'), 
-            t('dashboard.qCareer'), 
-            t('dashboard.qHealth')
-        ],
-        color: "text-emerald-400"
-    },
-    { 
-        type: 'feature',
-        label: t('dashboard.soulmateSync'), 
-        desc: t('dashboard.soulmateSyncDesc'), 
-        icon: <Heart className="w-5 h-5" />, 
-        href: "/kundli/match",
-        color: "text-rose-400"
-    },
-    { 
-        type: 'feature',
-        label: t('dashboard.guidedConsulting'), 
-        desc: t('dashboard.guidedConsultingDesc'), 
-        icon: <Sparkles className="w-5 h-5" />, 
-        href: "/consult",
-        color: "text-amber-400"
-    },
-    { 
-        type: 'questions',
-        label: t('dashboard.deepDive'),
-        desc: t('dashboard.deepDiveDesc'),
-        questions: [
-            t('dashboard.qWeekly'), 
-            t('dashboard.qLove'), 
-            t('dashboard.qWealth'), 
-            t('dashboard.qSecret')
-        ],
-        color: "text-indigo-400"
-    },
-    { 
-        type: 'feature',
-        label: t('dashboard.cosmicArchive'), 
-        desc: t('dashboard.cosmicArchiveDesc'), 
-        icon: <Sun className="w-5 h-5" />, 
-        href: "/blogs",
-        color: "text-purple-400"
-    }
-];
-
-function FeatureSlider({ onQuestion, t, compact = false }: { onQuestion: (q: string) => void, t: (key: string) => string, compact?: boolean }) {
-    const features = useMemo(() => getFeatures(t), [t]);
-    const [idx, setIdx] = useState(0);
-    const [isHovered, setIsHovered] = useState(false);
-    const touchStartX = useRef<number | null>(null);
-    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const resetTimer = useCallback(() => {
-        if (timerRef.current) clearInterval(timerRef.current);
-        timerRef.current = setInterval(() => {
-            setIdx((prev) => (prev + 1) % features.length);
-        }, 8000);
-    }, [features.length]);
-
-    useEffect(() => {
-        if (isHovered) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            return;
-        }
-        resetTimer();
-        return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }, [isHovered, resetTimer]);
-
-    const goToSlide = useCallback((i: number) => {
-        setIdx(i);
-        resetTimer();
-    }, [resetTimer]);
-
-    const nextSlide = useCallback(() => {
-        setIdx(prev => (prev + 1) % features.length);
-        resetTimer();
-    }, [features.length, resetTimer]);
-
-    const prevSlide = useCallback(() => {
-        setIdx(prev => (prev - 1 + features.length) % features.length);
-        resetTimer();
-    }, [features.length, resetTimer]);
-
-    const handleTouchStart = (e: React.TouchEvent) => {
-        touchStartX.current = e.touches[0].clientX;
-    };
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        if (touchStartX.current === null) return;
-        const diff = touchStartX.current - e.changedTouches[0].clientX;
-        if (diff > 50) nextSlide();
-        else if (diff < -50) prevSlide();
-        touchStartX.current = null;
-    };
-
-    const current = features[idx];
-
-    const dots = (
-        <div className="flex justify-center gap-2">
-            {features.map((_, i) => (
-                <button 
-                    key={i} 
-                    onClick={() => goToSlide(i)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? 'w-5 sm:w-7 bg-[#c8991f]' : 'w-1.5 sm:w-2 bg-white/15 hover:bg-white/30'}`}
-                    style={{ minHeight: 0, minWidth: 0 }}
-                    aria-label={`Go to slide ${i + 1}`}
-                />
-            ))}
-        </div>
-    );
-
-    return (
-        <>
-            <div 
-                className={`w-full h-full flex items-center justify-between cursor-default group ${compact ? 'px-3 xl:px-4' : 'px-4 sm:px-8'}`}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-            >
-                <div className="flex-1 min-w-0">
-                    <AnimatePresence mode="wait">
-                        <motion.div 
-                            key={idx}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            transition={{ duration: 0.5, ease: "easeInOut" }}
-                            className={`flex items-center w-full ${compact ? 'gap-2 xl:gap-3' : 'gap-4 sm:gap-10'}`}
-                        >
-                            {current.type === 'feature' ? (
-                                <Link href={current.href!} className={`flex items-center w-full min-w-0 ${compact ? 'gap-2 xl:gap-3' : 'gap-4 sm:gap-10'}`}>
-                                    <div className={`${compact ? 'w-9 h-9 xl:w-10 xl:h-10 rounded-xl' : 'w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl'} bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
-                                        {current.icon}
-                                    </div>
-                                    <div className={`flex flex-col min-w-0 ${compact ? 'pr-1' : 'pr-2 sm:pr-6'}`}>
-                                        <span className={`${compact ? 'text-[8px] xl:text-[9px] tracking-[0.18em] xl:tracking-[0.24em] mb-1' : 'text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.4em] mb-1.5 sm:mb-3'} font-black uppercase ${current.color} leading-none`}>{current.label}</span>
-                                        <p className={`${compact ? 'text-[11px] xl:text-[12px]' : 'text-[13px] sm:text-[17px]'} font-bold text-foreground leading-tight tracking-tight line-clamp-2`}>{current.desc}</p>
-                                    </div>
-                                </Link>
-                            ) : (
-                                <div className={`flex items-center w-full min-w-0 ${compact ? 'gap-2' : 'gap-2 sm:gap-3'}`}>
-                                    <div className={`${compact ? 'w-9 h-9 xl:w-10 xl:h-10 rounded-xl' : 'w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl'} bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm`}>
-                                        <Sparkles className={`${compact ? 'w-4 h-4 xl:w-5 xl:h-5' : 'w-5 h-5 sm:w-7 sm:h-7'} ${current.color}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <span className={`${compact ? 'text-[8px] xl:text-[9px] tracking-[0.18em] xl:tracking-[0.24em] mb-1' : 'text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.4em] mb-1.5 sm:mb-2'} font-black uppercase ${current.color} leading-none block`}>{current.label}</span>
-                                        <div className={`flex overflow-x-auto scrollbar-hide ${compact ? 'gap-1' : 'gap-1.5 sm:gap-2'}`}>
-                                            {current.questions?.map((q, i) => (
-                                                <button 
-                                                    key={i}
-                                                    onClick={() => onQuestion(q)}
-                                                    className={`${compact ? 'px-2 py-1 rounded-lg text-[9px]' : 'px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-[11px]'} bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 font-bold text-foreground/70 hover:text-secondary transition-all whitespace-nowrap shrink-0`}
-                                                >
-                                                    {q}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-
-                {/* Hover Action for Features */}
-                {!compact && current.type === 'feature' && (
-                    <AnimatePresence>
-                        {isHovered && (
-                            <motion.div
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 10 }}
-                                className="pl-4 sm:pl-6 border-l border-white/5 hidden sm:block"
-                            >
-                                <Link 
-                                    href={current.href!}
-                                    className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-secondary text-background text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:bg-amber-500 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20"
-                                >
-                                    {t('dashboard.explore')} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                </Link>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                )}
-
-                {/* Desktop dots — inside the card at bottom */}
-                <div className={`hidden sm:flex absolute bottom-2 gap-2 ${compact ? 'left-4' : 'left-8'}`}>
-                    {features.map((_, i) => (
-                        <button 
-                            key={i} 
-                            onClick={() => goToSlide(i)}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? 'w-7 bg-[#c8991f]' : 'w-2 bg-white/15 hover:bg-white/30'}`}
-                            style={{ minHeight: 0, minWidth: 0 }}
-                            aria-label={`Go to slide ${i + 1}`}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Mobile dots — outside the card, below it */}
-            <div className="sm:hidden mt-2">
-                {dots}
-            </div>
-        </>
-    );
+function getScoreColor(score: number) {
+  if (score >= 75) return "#34d399";
+  if (score >= 60) return "#f6b400";
+  return "#fb7185";
 }
 
-// ─── Main Component ─────────────────────────────
+function RingScore({ score, size = 132, color }: { score: number; size?: number; color: string }) {
+  const radius = 43;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg className="h-full w-full -rotate-90" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+        <circle
+          cx="55"
+          cy="55"
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="transition-all duration-700"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[42px] font-black leading-none tabular-nums" style={{ color }}>
+          {score}
+        </span>
+        <span className="mt-1 text-sm font-semibold text-white/70">/100</span>
+      </div>
+    </div>
+  );
+}
+
+function WeeklyOutlookChart({ days, colorHex }: { days: ForecastDay[]; colorHex: string }) {
+  const W = 600;
+  const H = 230;
+  const PAD = { top: 26, right: 20, bottom: 44, left: 38 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+
+  // Absolute 0-100 scale so the curve reads against fixed gridlines.
+  const xOf = (i: number) => PAD.left + (i / Math.max(1, days.length - 1)) * plotW;
+  const yOf = (s: number) => PAD.top + (1 - s / 100) * plotH;
+
+  const points = days.map((d, i) => ({ x: xOf(i), y: yOf(d.score) }));
+  const linePath = catmullRomToBezier(points);
+  const areaPath = catmullRomArea(points, PAD.top + plotH);
+
+  const todayIdx = days.findIndex((d) => d.is_today);
+  const todayX = todayIdx !== -1 ? points[todayIdx].x : null;
+  const gid = colorHex.replace("#", "");
+  const dt = (s: string) => new Date(s + "T00:00:00");
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-[230px] w-full">
+      <defs>
+        <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={colorHex} stopOpacity="0.4" />
+          <stop offset="60%" stopColor={colorHex} stopOpacity="0.12" />
+          <stop offset="100%" stopColor={colorHex} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Y-axis gridlines + labels */}
+      {[0, 25, 50, 75, 100].map((v) => {
+        const y = yOf(v);
+        return (
+          <g key={v}>
+            <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+            <text x={PAD.left - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="rgba(255,255,255,0.4)">{v}</text>
+          </g>
+        );
+      })}
+
+      {/* Today marker */}
+      {todayX !== null && (
+        <line x1={todayX} y1={PAD.top} x2={todayX} y2={PAD.top + plotH} stroke={colorHex} strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
+      )}
+
+      {/* Area + line */}
+      <path d={areaPath} fill={`url(#wk-${gid})`} />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={colorHex}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ filter: `drop-shadow(0 4px 10px ${colorHex}55)` }}
+      />
+
+      {/* Points + score labels + x-axis labels */}
+      {points.map((p, i) => {
+        const d = days[i];
+        const isToday = i === todayIdx;
+        const date = dt(d.date);
+        return (
+          <g key={i}>
+            {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
+            <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "#0a0829"} stroke={colorHex} strokeWidth="2" />
+            <text x={p.x} y={p.y - 11} textAnchor="middle" fontSize="11" fontWeight={isToday ? 700 : 600} fill={isToday ? colorHex : "rgba(255,255,255,0.7)"}>
+              {d.score}
+            </text>
+            <text x={p.x} y={H - 24} textAnchor="middle" fontSize="9.5" fontWeight={700} letterSpacing="0.5" fill={isToday ? colorHex : "rgba(255,255,255,0.45)"}>
+              {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
+            </text>
+            <text x={p.x} y={H - 11} textAnchor="middle" fontSize="11" fontWeight={600} fill={isToday ? colorHex : "rgba(255,255,255,0.6)"}>
+              {date.getDate()}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function AreaRing({
+  score,
+  color,
+  children,
+  size = 80,
+}: {
+  score: number;
+  color: string;
+  children: React.ReactNode;
+  size?: number;
+}) {
+  const radius = 33;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.max(0, Math.min(100, score)) / 100) * circumference;
+
+  return (
+    <div className="relative mx-auto" style={{ width: size, height: size }}>
+      <svg className="h-full w-full -rotate-90" viewBox="0 0 76 76">
+        <circle cx="38" cy="38" r={radius} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="5" />
+        <circle
+          cx="38"
+          cy="38"
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="transition-all duration-700"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">{children}</div>
+    </div>
+  );
+}
+
+function DarkPanel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <section className={`rounded-[22px] border border-[#b98224]/30 bg-[#090826]/82 shadow-[0_18px_60px_rgba(0,0,0,0.24)] ${className}`}>
+      {children}
+    </section>
+  );
+}
+
 export default function DashboardHome() {
-    const { user, refreshProfile, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
-    const { tier, totalCredits, isLoaded: paywallLoaded } = usePaywallContext();
-    const { 
-        activeChat, activeChatId,
-        sendMessage, createNewChat, selectChat, resetChat, isSending, 
-        inputText, setInputText, chats 
-    } = useChat();
-    const router = useRouter();
-    const pathname = usePathname();
-    const { t, language } = useTranslation();
-    const { data: transitsData } = useTransitsToday();
-    
-    // States
-    const [kundliStats, setKundliStats] = useState<KundliStats | null>(null);
-    const kundliLoading = userLoading && !!user?.email && !kundliStats;
-    const [sidebarTab, setSidebarTab] = useState<'chat' | 'history' | 'cosmic'>('chat');
-    const greetingKey = useGreeting();
-    const greeting = t(greetingKey);
-    const hasAnalyzedRef = useRef<string | null>(null);
-    const redirectedRef = useRef(false);
-    const profileCompleteFromFields = isProfileComplete({
-        name: user?.name,
-        dob: user?.dob,
-        tob: user?.tob,
-        pob: user?.pob,
-        birthLatitude: user?.birthLatitude,
-        birthLongitude: user?.birthLongitude,
-        birthTimezoneName: user?.birthTimezoneName,
-    });
+  const router = useRouter();
+  const pathname = usePathname();
+  const { t, language } = useTranslation();
+  const greeting = t(useGreeting());
+  const { user, refreshProfile, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
+  const { tier, totalCredits, isLoaded: paywallLoaded, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
+  const [activePaywallData, setActivePaywallData] = useState<PaywallData | null>(null);
+  const { data: horoscope, isLoading: horoscopeLoading, profileLocationRequired } = useDailyHoroscope();
+  const { data: transits, isLoading: transitsLoading } = useTransitsToday();
+  const { setSelectedAvatarId } = useChat();
+  const [activeArea, setActiveArea] = useState<ForecastArea>("general");
+  const [forecast, setForecast] = useState<ForecastData | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(false);
+  const [pendingPrompt, setPendingPrompt] = useState<ChatPrompt | null>(null);
+  const hasAnalyzedRef = useRef<string | null>(null);
+  const redirectedRef = useRef(false);
 
-    // Memos
-    
-  // Extract signs from profile fields with fallback to astrologyData
-  const moonSign = (() => {
-    if (user?.moonSign) return getRashiData(user.moonSign);
-    if (user?.astrologyData) {
-      const data = (typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData) as AstrologyData;
-      const planets = data?.planets;
-      if (Array.isArray(planets)) {
-        const moon = planets.find((p) => p.planet === 'Moon');
-        if (moon?.sign) return getRashiData(moon.sign);
-      }
+  const profileCompleteFromFields = isProfileComplete({
+    name: user?.name,
+    dob: user?.dob,
+    tob: user?.tob,
+    pob: user?.pob,
+    birthLatitude: user?.birthLatitude,
+    birthLongitude: user?.birthLongitude,
+    birthTimezoneName: user?.birthTimezoneName,
+  });
+
+  useEffect(() => {
+    if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
+
+    if (profileFetched && !profileComplete && !profileCompleteFromFields && !redirectedRef.current && pathname !== "/profile") {
+      const timer = setTimeout(() => {
+        if (!profileComplete && !profileCompleteFromFields && !redirectedRef.current) {
+          redirectedRef.current = true;
+          router.push(`/profile?onboarding=true&return=${encodeURIComponent(pathname || "/")}`);
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-    return null;
-  })();
 
-  const sunSign = (() => {
-    if (user?.sunSign) return getRashiData(user.sunSign);
-    if (user?.astrologyData) {
-      const data = (typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData) as AstrologyData;
-      const planets = data?.planets;
-      if (Array.isArray(planets)) {
-        const sun = planets.find((p) => p.planet === 'Sun');
-        if (sun?.sign) return getRashiData(sun.sign);
-      }
+    const hasBirthDetails =
+      user.dob &&
+      user.tob &&
+      user.pob &&
+      typeof user.birthLatitude === "number" &&
+      typeof user.birthLongitude === "number";
+    const hasSigns = user.moonSign || user.sunSign || user.lagnaSign;
+    const hasAstrologyData = !!user.astrologyData;
+
+    if (hasBirthDetails && !hasSigns && !hasAstrologyData) {
+      hasAnalyzedRef.current = user.email;
+      clientFetch("/api/analyze-full", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ force_refresh: false }),
+      })
+        .then(async (res) => {
+          if (res.ok) await refreshProfile();
+        })
+        .catch((err) => console.warn("[GptDashboard] Auto analyze-full failed:", err));
     }
-    return null;
-  })();
+  }, [
+    user?.email,
+    user?.name,
+    user?.dob,
+    user?.tob,
+    user?.pob,
+    user?.birthLatitude,
+    user?.birthLongitude,
+    user?.birthTimezoneName,
+    user?.moonSign,
+    user?.sunSign,
+    user?.lagnaSign,
+    user?.astrologyData,
+    userLoading,
+    refreshProfile,
+    profileComplete,
+    profileCompleteFromFields,
+    profileFetched,
+    router,
+    pathname,
+  ]);
 
-  const ascendantSign = (() => {
-    if (user?.lagnaSign) return getRashiData(user.lagnaSign);
-    if (kundliStats?.lagnaSign) return getRashiData(kundliStats.lagnaSign);
-    if (user?.astrologyData) {
-      const data = (typeof user.astrologyData === 'string' ? JSON.parse(user.astrologyData) : user.astrologyData) as AstrologyData;
-      const ascSign = data?.ascendant?.sign;
-      if (ascSign) return getRashiData(ascSign);
-      const houses = data?.houses || data?.chart?.houses;
-      if (Array.isArray(houses)) {
-        const h1 = houses.find((h) => h.house === 1);
-        if (h1?.sign) return getRashiData(h1.sign);
-      }
-    }
-    return null;
-  })();
-
-    const recentChats = useMemo(() => {
-        return chats.slice(0, 5);
-    }, [chats]);
-
-    const handleSendMessage = useCallback((text: string) => {
-        setSidebarTab('chat');
-        if (activeChatId) {
-            sendMessage(text);
+  useEffect(() => {
+    setForecastLoading(true);
+    clientFetch(`/api/forecast/${activeArea}?days_back=3&days_forward=3&lang=${language}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.days)) {
+          setForecast(data);
         } else {
-            createNewChat(text);
+          setForecast(null);
         }
-    }, [activeChatId, sendMessage, createNewChat]);
+      })
+      .catch((err) => console.warn("[GptDashboard] Weekly forecast failed:", err))
+      .finally(() => setForecastLoading(false));
+  }, [activeArea, language]);
 
-    // Pills inside the FeatureSlider start a chat and always navigate to the
-    // full /chat page so the conversation is visible and the behaviour is
-    // consistent across every screen size.
-    const handleSliderQuestion = useCallback((text: string) => {
-        handleSendMessage(text);
-        router.push('/chat');
-    }, [handleSendMessage, router]);
+  const currentDate = useMemo(
+    () =>
+      new Date().toLocaleDateString(LOCALE_BY_LANGUAGE[language] || "en-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+    [language]
+  );
 
-    // Effects
-    useEffect(() => {
-        if (!user?.email || !user.astrologyData) {
-            return;
-        }
+  const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
+  const overallScore = horoscope?.score?.overall ?? horoscope?.overall_score ?? 73;
+  const scoreColor = getScoreColor(overallScore);
+  const scoreBand = overallScore >= 75 ? "Favorable" : overallScore >= 60 ? "Balanced" : "Caution";
+  const moonSign = getRashiData(user?.moonSign || horoscope?.user?.sign || horoscope?.sign || "Leo");
+  const sunSign = getRashiData(user?.sunSign || "Libra");
+  const ascendantSign = getRashiData(user?.lagnaSign || "Leo");
+  const activeAreaLabel = resolveAreaLabel(t, activeArea);
+  const bestDay = useMemo(() => {
+    const day = forecast?.days?.reduce<ForecastDay | null>((best, item) => (!best || item.score > best.score ? item : best), null);
+    if (!day) return "Thu 74";
+    const label = new Date(day.date + "T00:00:00").toLocaleDateString(LOCALE_BY_LANGUAGE[language] || "en-IN", { weekday: "short" });
+    return `${label} ${day.score}`;
+  }, [forecast, language]);
 
-        if (user.astrologyData) {
-            try {
-                let analysis = user.astrologyData;
-                if (typeof analysis === 'string') {
-                    try {
-                        analysis = JSON.parse(analysis);
-                    } catch (e) {
-                        console.error("Failed to parse analysis string", e);
-                    }
-                }
+  const askInChat = useCallback((title: string, message: string) => {
+    setPendingPrompt({ title, message });
+  }, []);
 
-                const stats: KundliStats = {};
-                const analysisData = analysis as AstrologyData;
-                const houses = analysisData?.houses || analysisData?.chart?.houses;
-                if (Array.isArray(houses)) stats.lagnaSign = houses.find((h) => h.house === 1)?.sign;
-                
-                const nak = analysisData?.nakshatra;
-                stats.nakshatra = typeof nak === 'object' && nak !== null ? (nak.value || nak.name) : nak;
-                if (stats.nakshatra && typeof stats.nakshatra !== 'string') stats.nakshatra = String(stats.nakshatra);
+  const confirmChat = useCallback(() => {
+    if (!pendingPrompt) return;
+    localStorage.setItem("astranavi_pending_message", pendingPrompt.message);
+    setPendingPrompt(null);
+    router.push("/chat");
+  }, [pendingPrompt, router]);
 
-                const lord = analysisData?.nakshatraLord;
-                stats.nakshatraLord = typeof lord === 'object' && lord !== null ? (lord.value || lord.name) : lord;
-                if (stats.nakshatraLord && typeof stats.nakshatraLord !== 'string') stats.nakshatraLord = String(stats.nakshatraLord);
-                
-                const dasha = analysisData?.dasha || analysisData?.planetary?.active_dasha;
-                if (dasha) {
-                    if (typeof dasha === 'string') {
-                        stats.activeDasha = dasha;
-                    } else {
-                        const d = dasha as DashaData;
-                        let dashaName = d.currentMahaDasha || d.current || d.value;
-                        let dashaRemaining = d.remaining;
+  const lifeAreas = AREA_LIST.map((area) => ({
+    area,
+    label: resolveAreaLabel(t, area),
+    score: getAreaScore(horoscope, area),
+    insight: getAreaInsight(horoscope, area),
+    theme: AREA_THEMES[area],
+  }));
 
-                        if ((!dashaName || typeof dashaName === 'object') && d.active && d.active.length > 0) {
-                            const maha = d.active.find((p) => p.type === 'Mahadasha') || d.active[0];
-                            const anta = d.active.find((p) => p.type === 'Antardasha');
-                            dashaName = anta ? `${maha.planet}-${anta.planet}` : maha.planet;
-                            
-                            if (!dashaRemaining && (maha.end || maha.end_date)) {
-                                const end = new Date(maha.end || maha.end_date!);
-                                const now = new Date();
-                                const remDays = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
-                                dashaRemaining = remDays > 365 ? `${(remDays / 365).toFixed(1)} years` : `${remDays} days`;
-                            }
-                        }
+  const topLifeArea = [...lifeAreas].sort((a, b) => b.score - a.score)[0];
+  const headline =
+    horoscope?.alerts?.primary?.simple ||
+    "Your current planetary period is on your side - act on the bigger plan now.";
+  const subtitle =
+    typeof horoscope?.tip === "string"
+      ? horoscope.tip
+      : horoscope?.tip?.text ||
+        "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose.";
 
-                        if (dashaName && typeof dashaName === 'object') {
-                            dashaName = dashaName.planet || dashaName.name || dashaName.value || t('dashboard.defaultDasha');
-                        }
-
-                        stats.activeDasha = typeof dashaName === 'string' ? dashaName : (dashaName ? String(dashaName) : t('dashboard.defaultDasha'));
-                        stats.dashaRemaining = typeof dashaRemaining === 'string' ? dashaRemaining : (dashaRemaining ? String(dashaRemaining) : undefined);
-                    }
-                }
-                
-                const moonPhase = typeof analysisData?.moonPhase === 'object' ? analysisData.moonPhase?.value : analysisData?.moonPhase;
-                if (typeof moonPhase === 'string') stats.moonPhase = moonPhase;
-                
-                if (Object.keys(stats).length > 0) {
-                    setKundliStats(stats);
-                    return;
-                }
-            } catch (error) {
-                console.error("Error setting kundli stats from user object:", error);
-            }
-        }
-    }, [user?.email, user?.astrologyData, t]);
-
-    // Auto-trigger sign calculation if user has birth details but no signs.
-    useEffect(() => {
-        if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
-        
-        // Redirect to onboarding if profile is incomplete
-        // (profileComplete now uses backend flag which considers birth location fields)
-        if (profileFetched && !profileComplete && !profileCompleteFromFields && !userLoading && !redirectedRef.current && pathname !== '/profile') {
-            const timer = setTimeout(() => {
-                // Re-check after delay to allow state to settle
-                if (!profileComplete && !profileCompleteFromFields && !redirectedRef.current) {
-                    redirectedRef.current = true;
-                    // --- DIAGNOSTIC LOG ---
-                    console.log('[DashboardHome] profileComplete is FALSE — redirecting to /profile onboarding');
-                    console.log('[DashboardHome] profileComplete:', profileComplete, 'profileFetched:', profileFetched);
-                    console.log('[DashboardHome] user birth fields:', {
-                        name: !!user?.name, dob: !!user?.dob, tob: !!user?.tob, pob: !!user?.pob,
-                        birthLatitude: user?.birthLatitude, birthLongitude: user?.birthLongitude,
-                        birthTimezoneName: !!user?.birthTimezoneName,
-                    });
-                    router.push(`/profile?onboarding=true&return=${encodeURIComponent(pathname || '/')}`);
-                }
-            }, 1000); // 1s delay to allow AuthContext to settle
-            return () => clearTimeout(timer);
-        }
-
-        const hasBirthDetails = user.dob && user.tob && user.pob &&
-            typeof user.birthLatitude === 'number' && typeof user.birthLongitude === 'number';
-        const hasSigns = user.moonSign || user.sunSign || user.lagnaSign;
-        const hasAstrologyData = !!user.astrologyData;
-        if (hasBirthDetails && !hasSigns && !hasAstrologyData) {
-            hasAnalyzedRef.current = user.email;
-            clientFetch('/api/analyze-full', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ force_refresh: false })
-            }).then(async (res) => {
-                if (res.ok) {
-                    await refreshProfile();
-                }
-            }).catch(err => {
-                console.warn('[Dashboard] Auto analyze-full failed:', err);
-            });
-        }
-    }, [user?.email, user?.name, user?.dob, user?.tob, user?.pob, user?.birthLatitude, user?.birthLongitude, user?.birthTimezoneName, user?.moonSign, user?.sunSign, user?.lagnaSign, user?.astrologyData, userLoading, refreshProfile, profileComplete, profileCompleteFromFields, profileFetched, router, pathname]);
-
-    const currentDate = new Date().toLocaleDateString(LOCALE_BY_LANGUAGE[language || 'en'] || 'en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
-
+  if (profileLocationRequired && !horoscope) {
     return (
-        <div className="w-full flex-grow bg-[var(--bg)] min-h-[calc(100dvh-var(--navbar-height,64px))]">
-            <div className="max-w-[1400px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 pt-0 lg:pt-4 pb-4 lg:pb-6">
-                
-                {/* ZONE 1: IDENTITY BAR */}
-                <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="flex flex-col gap-4 sm:gap-6 lg:gap-3 mb-8 sm:mb-10 lg:mb-6 pt-4 lg:pt-0"
-                >
-                    <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.9fr)_max-content_minmax(280px,1fr)] lg:items-center gap-8 lg:gap-6 w-full">
-                        <div className="space-y-3 text-center lg:text-left pt-4 lg:pt-0 lg:col-start-1 lg:row-start-1 lg:min-w-0">
-                            <div className="flex items-center justify-center lg:justify-start gap-3">
-                                <div className="hidden sm:block h-[1px] w-8 bg-secondary/30" />
-                                <p className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-[0.3em]">{currentDate}</p>
-                                {/* Credit Balance Badge */}
-                                {paywallLoaded && (
-                                    <Link href="/plans" className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/10 border border-secondary/15 hover:bg-secondary/15 hover:border-secondary/25 transition-all">
-                                        <Wallet className="w-3 h-3 text-secondary" />
-                                        <span className="text-[9px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
-                                        <span className="text-[8px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
-                                        <span className="text-[7px] font-bold text-secondary/50 uppercase tracking-wider">{getTierLabel(tier || 'free')}</span>
-                                    </Link>
-                                )}
-                            </div>
-                            <h1 className="text-xl sm:text-3xl lg:text-4xl font-headline font-bold tracking-tight leading-tight flex flex-wrap items-center justify-center lg:justify-start gap-x-3 break-keep break-words">
-                                {greeting},
-                                {userLoading ? (
-                                    <Skeleton height={32} width={180} className="inline-block rounded-xl" />
-                                ) : (
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-amber-500 to-secondary animate-gradient-x capitalize break-keep break-words">
-                                        {user?.name || user?.email?.split('@')[0] || t('common.user')}
-                                    </span>
-                                )}
-                            </h1>
-                        </div>
-
-                        <div className="flex justify-center lg:col-start-2 lg:row-start-1 lg:justify-center gap-3 sm:gap-6 lg:gap-5 xl:gap-7 shrink-0 overflow-x-auto no-scrollbar py-2 lg:py-0">
-                            {[
-                                { label: t('dashboard.moonSign'), data: moonSign, color: "text-blue-400" },
-                                { label: t('dashboard.sunSign'), data: sunSign, color: "text-amber-500" },
-                                { label: t('dashboard.ascendant'), data: ascendantSign, color: "text-purple-400" }
-                            ].map((sign, idx) => (
-                                <Link key={idx} href={sign.data?.id ? `/rashis?sign=${sign.data.id}` : '/rashis'} className="group relative flex flex-col items-center min-w-[80px] sm:min-w-[100px] lg:min-w-[86px] xl:min-w-[100px]">
-                                    <div className="w-16 h-16 sm:w-20 lg:w-20 xl:w-24 sm:h-20 lg:h-20 xl:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden relative">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        {userLoading ? (
-                                            <SkeletonCircle size={48} className="w-12 h-12 sm:w-16 sm:h-16 lg:w-16 lg:h-16 xl:w-20 xl:h-20" />
-                                        ) : sign.data?.icon ? (
-                                            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-                                                <Image 
-                                                    src={sign.data.icon} 
-                                                    alt={sign.data.name} 
-                                                    width={48}
-                                                    height={48}
-                                                    className="w-8 h-8 sm:w-10 lg:w-10 xl:w-12 object-contain transition-transform duration-500 group-hover:scale-110" 
-                                                />
-                                            </motion.div>
-                                        ) : (
-                                            <div className="w-8 h-8 sm:w-10 lg:w-12 flex items-center justify-center">
-                                                <Sparkles className="w-5 h-5 sm:w-6 text-foreground/10" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="mt-2 text-center">
-                                        <p className="text-[8px] sm:text-[9px] font-bold text-foreground/30 uppercase tracking-[0.2em] leading-none mb-1">{sign.label}</p>
-                                        {userLoading ? (
-                                            <Skeleton height={14} width={60} className="mx-auto mt-1" />
-                                        ) : (
-                                            <p className={`text-[10px] sm:text-xs lg:text-sm font-headline font-bold ${sign.color} group-hover:text-amber-500 transition-colors uppercase tracking-[0.1em] whitespace-nowrap`}>
-                                                {sign.data?.name || t('dashboard.unknownSign')}
-                                            </p>
-                                        )}
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-
-                        <div className="w-full hidden lg:block lg:col-start-3 lg:row-start-1 lg:min-w-0">
-                            <div className="w-full relative group">
-                                <div className="w-full h-[80px] sm:h-[100px] lg:h-[82px] bg-surface border border-secondary/20 rounded-[28px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
-                                    <FeatureSlider onQuestion={handleSliderQuestion} t={t} compact />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* ZONE 2: HERO DASHBOARD */}
-                <div className="grid grid-cols-1 min-[1600px]:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="min-[1600px]:col-span-8 flex flex-col gap-4 sm:gap-6">
-                        <DailyHoroscopeCard userLoading={userLoading} />
-                    </div>
-
-                    <div className="hidden min-[1600px]:flex flex-col min-[1600px]:col-span-4 min-h-0">
-                        <Card padding="none" className="!rounded-[24px] sm:!rounded-[32px] border-secondary/20 bg-surface overflow-hidden flex flex-col shadow-[0_0_20px_rgba(212,175,55,0.05)] h-full min-h-0">
-                            <div className="p-2 border-b border-white/5 flex items-center gap-1 shrink-0">
-                                {[
-                                    { id: 'chat' as const, label: t('dashboard.tabChat'), icon: <MessageSquare className="w-4 h-4" /> },
-                                    { id: 'history' as const, label: t('dashboard.tabHistory'), icon: <Users className="w-4 h-4" /> },
-                                    { id: 'cosmic' as const, label: t('dashboard.tabCosmic'), icon: <Orbit className="w-4 h-4" /> }
-                                ].map((tab) => (
-                                    <button 
-                                        key={tab.id}
-                                        onClick={() => setSidebarTab(tab.id)}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                            sidebarTab === tab.id 
-                                            ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-inner' 
-                                            : 'text-foreground/40 hover:text-foreground hover:bg-white/5'
-                                        }`}
-                                    >
-                                        {tab.icon}
-                                        <span>{tab.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="flex-1 flex flex-col min-h-0 relative">
-                                <AnimatePresence mode="wait">
-                                    {sidebarTab === 'chat' && (
-                                        <motion.div 
-                                            key="chat"
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            className="absolute inset-0 flex flex-col"
-                                        >
-                                            {activeChat && activeChat.messages.length > 0 && (
-                                                <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between shrink-0 bg-surface/50">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                        <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">{t('dashboard.liveSession')}</span>
-                                                    </div>
-                                                    <button 
-                                                        onClick={resetChat}
-                                                        className="text-[9px] font-bold text-secondary hover:text-secondary/80 uppercase tracking-widest flex items-center gap-1.5 transition-colors"
-                                                    >
-                                                        <Plus className="w-3 h-3" /> {t('dashboard.newConsultation')}
-                                                    </button>
-                                                </div>
-                                            )}
-
-                                            <div className="flex-1 p-4 space-y-4 overflow-y-auto scrollbar-hide min-h-0">
-                                                {(!activeChat || activeChat.messages.length === 0) ? (
-                                                    <div className="flex flex-col items-center text-center space-y-4 pt-4">
-                                                        <div className="w-12 h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary relative mb-2">
-                                                            <Sparkles className="w-6 h-6" />
-                                                            <div className="absolute inset-0 rounded-full border border-secondary/20 animate-ping opacity-20" />
-                                                        </div>
-                                                        <div className="space-y-1.5 mb-2">
-                                                            <h3 className="text-xl font-headline font-bold text-foreground tracking-tight">{t('dashboard.consultNaviAi')}</h3>
-                                                            <p className="text-xs text-foreground/40 leading-relaxed font-medium max-w-[280px] mx-auto">
-                                                                {t('dashboard.vedicWisdomPowered')}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className="w-full px-1">
-                                                            <div className="flex items-center gap-3 mb-3">
-                                                                <div className="h-[1px] flex-1 bg-white/5" />
-                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.askAbout')}</span>
-                                                                <div className="h-[1px] flex-1 bg-white/5" />
-                                                            </div>
-                                                            <div className="grid grid-cols-2 gap-2 w-full">
-                                                                {topicPills.map((topic, i) => (
-                                                                    <button 
-                                                                        key={i} 
-                                                                        onClick={() => handleSendMessage(t(topic.labelKey))}
-                                                                        className="flex items-center gap-2 py-2 px-3 rounded-xl bg-surface-variant/20 border border-white/5 text-[11px] font-bold text-foreground/70 hover:text-secondary hover:border-secondary/30 hover:bg-surface-variant/40 transition-all text-left group"
-                                                                    >
-                                                                        <span className="text-base shrink-0 group-hover:scale-110 transition-transform">{topic.icon}</span>
-                                                                        <span className="leading-tight truncate">{t(topic.labelKey)}</span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                        <div className="hidden sm:block w-full px-1 mt-1.5">
-                                                            <div className="flex items-center gap-3 mb-2">
-                                                                <div className="h-[1px] flex-1 bg-white/5" />
-                                                                <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.deepDive')}</span>
-                                                                <div className="h-[1px] flex-1 bg-white/5" />
-                                                            </div>
-                                                            <div className="flex flex-col gap-1.5 w-full">
-                                                                {[
-                                                                    { q: t('dashboard.deepQ1'), icon: <Sparkles className="w-3.5 h-3.5" /> },
-                                                                    { q: t('dashboard.deepQ2'), icon: <Briefcase className="w-3.5 h-3.5" /> },
-                                                                    { q: t('dashboard.deepQ3'), icon: <Activity className="w-3.5 h-3.5" /> }
-                                                                ].map((item, i) => (
-                                                                    <button 
-                                                                        key={i}
-                                                                        onClick={() => handleSendMessage(item.q)}
-                                                                        className="flex items-center gap-3 p-3 rounded-xl bg-surface-variant/10 border border-white/5 hover:bg-secondary/[0.08] hover:border-secondary/20 transition-all text-left group/dive"
-                                                                    >
-                                                                        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0 group-hover/dive:scale-110 transition-transform">
-                                                                            {item.icon}
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <p className="text-xs text-foreground/80 leading-relaxed font-bold group-hover/dive:text-foreground">{item.q}</p>
-                                                                        </div>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-4">
-                                                        {activeChat.messages.map((msg, i) => {
-                                                            if (msg.type === 'system') return null;
-                                                            return (
-                                                                <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                                                    <div className={`max-w-[90%] p-4 rounded-[20px] text-[13px] leading-relaxed shadow-sm ${
-                                                                        msg.type === 'user' 
-                                                                        ? 'bg-secondary text-background font-bold rounded-tr-none' 
-                                                                        : 'bg-surface-variant/40 text-foreground/80 border border-white/5 rounded-tl-none'
-                                                                    }`}>
-                                                                        {msg.text.replace(/<think>[\s\S]*?<\/think>/, '').trim()}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
-                                                {isSending && (
-                                                    <div className="flex justify-start">
-                                                        <div className="bg-surface-variant/40 p-4 rounded-[20px] rounded-tl-none border border-white/5 flex items-center gap-1.5">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-secondary/60 animate-bounce" />
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-secondary/60 animate-bounce [animation-delay:0.2s]" />
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-secondary/60 animate-bounce [animation-delay:0.4s]" />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="px-4 pb-4 pt-2 shrink-0 sticky bottom-0 z-10 border-t border-white/5 bg-surface backdrop-blur-sm">
-                                                <div className="relative group mb-3">
-                                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary/20 to-amber-500/20 rounded-full blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
-                                                    <div className="relative flex items-center gap-2 p-2 rounded-full bg-surface-variant/40 border border-white/10 group-focus-within:border-secondary/40 transition-all">
-                                                        <textarea 
-                                                            value={inputText}
-                                                            onChange={(e) => setInputText(e.target.value)}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                                    e.preventDefault();
-                                                                    if (inputText.trim()) {
-                                                                        handleSendMessage(inputText);
-                                                                        setInputText('');
-                                                                    }
-                                                                }
-                                                            }}
-                                                            placeholder={t('dashboard.askNaviPlaceholder')}
-                                                            className="flex-1 bg-transparent border-none outline-none text-[15px] font-medium text-foreground placeholder:text-foreground/20 resize-none min-h-[20px] max-h-[70px] py-1 pl-2"
-                                                            rows={1}
-                                                        />
-                                                        <button 
-                                                            onClick={() => {
-                                                                if (inputText.trim()) {
-                                                                    handleSendMessage(inputText);
-                                                                    setInputText('');
-                                                                }
-                                                            }}
-                                                            disabled={!inputText.trim() || isSending}
-                                                            className="shrink-0 w-10 h-10 min-w-[40px] rounded-full bg-secondary text-background flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-                                                        >
-                                                            <ArrowUp className="w-5 h-5" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center justify-between px-2 pt-1">
-                                                    <p className="text-[11px] font-bold text-foreground/20 uppercase tracking-[0.05em]">{t('dashboard.poweredByVedicAi')}</p>
-                                                    <Link href={activeChat ? `/chat?id=${activeChat.id}` : "/chat"} className="text-[11px] font-bold text-secondary uppercase tracking-[0.04em] hover:text-amber-500 transition-colors flex items-center gap-1 group">
-                                                        {t('dashboard.fullInterface')} <ChevronRight className="w-3 h-3 text-secondary group-hover:translate-x-0.5 transition-transform" />
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {sidebarTab === 'history' && (
-                                        <motion.div 
-                                            key="history"
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            className="p-4 space-y-2.5"
-                                        >
-                                            {recentChats.length > 0 ? (
-                                                <div className="space-y-2.5">
-                                                    <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
-                                                        {t('dashboard.recentConsultations')}
-                                                    </div>
-                                                    {recentChats.map((chat) => (
-                                                        <button 
-                                                            key={chat.id} 
-                                                            onClick={() => {
-                                                                selectChat(chat.id);
-                                                                setSidebarTab('chat');
-                                                            }}
-                                                            className="w-full text-left block p-4 rounded-[20px] bg-surface-variant/20 border border-white/5 hover:border-secondary/20 hover:bg-surface-variant/40 transition-all group"
-                                                        >
-                                                            <div className="flex justify-between items-start gap-4">
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-[13px] font-bold text-foreground/80 group-hover:text-foreground truncate mb-1">{chat.title || t('dashboard.newConsultation')}</p>
-                                                                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{formatRelativeTime(new Date(chat.updatedAt), t, language)}</p>
-                                                                </div>
-                                                                <ChevronRight className="w-3.5 h-3.5 text-foreground/20 group-hover:text-secondary mt-1" />
-                                                            </div>
-                                                        </button>
-                                                    ))}
-                                                    <Link href="/chat" className="block text-center mt-6 text-[10px] font-bold text-secondary uppercase tracking-[0.3em] hover:text-amber-500 transition-colors">{t('dashboard.viewAllConversations')}</Link>
-                                                </div>
-                                            ) : (
-                                                <div className="py-20 flex flex-col items-center text-center px-6">
-                                                    <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
-                                                        <Users className="w-8 h-8 text-foreground/10" />
-                                                    </div>
-                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">{t('dashboard.noHistoryYet')}</p>
-                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">{t('dashboard.startJourneyDesc')}</p>
-                                                    <Button onClick={() => setSidebarTab('chat')} variant="secondary" size="sm" className="mt-6 rounded-full text-[10px] font-bold uppercase tracking-widest">{t('dashboard.startChatting')}</Button>
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    )}
-
-                                    {sidebarTab === 'cosmic' && (
-                                        <motion.div 
-                                            key="cosmic"
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            className="p-5 flex flex-col h-full"
-                                        >
-                                            {kundliLoading ? (
-                                                <div className="space-y-4 pt-4">
-                                                    {[1,2,3,4].map(i => <Skeleton key={i} height={70} className="w-full rounded-[24px]" />)}
-                                                </div>
-                                            ) : kundliStats ? (
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center gap-2 mb-4 px-1 text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
-                                                        {t('dashboard.currentTransitsDasha')}
-                                                    </div>
-                                                    {[
-                                                        { 
-                                                            l: t('dashboard.cosmicNakshatra'), 
-                                                            v: kundliStats.nakshatra, 
-                                                            icon: kundliStats.nakshatra ? (
-                                                                <div className="relative w-full h-full overflow-hidden rounded-lg">
-                                                                    <Image 
-                                                                        src={`/icons/nakshatras/${kundliStats.nakshatra.toLowerCase()}.jpeg`}
-                                                                        alt={kundliStats.nakshatra}
-                                                                        fill
-                                                                        className="object-cover"
-                                                                        onError={(e) => {
-                                                                            (e.target as HTMLImageElement).style.opacity = '0';
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            ) : <Sparkles className="w-3.5 h-3.5" />
-                                                        },
-                                                        { l: t('dashboard.cosmicLord'), v: kundliStats.nakshatraLord, icon: <Orbit className="w-3.5 h-3.5" /> },
-                                                        { l: t('dashboard.cosmicActiveDasha'), v: kundliStats.activeDasha, icon: <TrendingUp className="w-3.5 h-3.5" />, sub: kundliStats.dashaRemaining },
-                                                        { l: t('dashboard.cosmicLagna'), v: kundliStats.lagnaSign, icon: <Globe className="w-3.5 h-3.5" /> }
-                                                    ].map((s, i) => s.v && (
-                                                        <div key={i} className="flex items-center gap-4 p-4 rounded-[24px] bg-surface-variant/20 border border-white/5">
-                                                            <div className="w-10 h-10 rounded-xl bg-transparent flex items-center justify-center text-secondary shrink-0 overflow-hidden">
-                                                                {s.icon}
-                                                            </div>
-                                                            <div className="flex-1 flex justify-between items-center">
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mb-0.5">{s.l}</span>
-                                                                    <span className="text-xs font-bold text-foreground/90">{s.v}</span>
-                                                                </div>
-                                                                {s.sub && (
-                                                                    <div className="px-2.5 py-1 rounded-lg bg-surface/40 border border-white/5">
-                                                                        <span className="text-[9px] font-bold text-secondary uppercase tracking-tighter">{s.sub}</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    <div className="pt-4">
-                                                        <Link href="/kundli" className="w-full flex items-center justify-center gap-2 p-4 rounded-[24px] border border-secondary/20 hover:bg-secondary/5 transition-all group">
-                                                            <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em]">{t('dashboard.compareFullChart')}</span>
-                                                            <ChevronRight className="w-3.5 h-3.5 text-secondary group-hover:translate-x-1 transition-transform" />
-                                                        </Link>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="py-20 flex flex-col items-center text-center px-6">
-                                                    <div className="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center mb-4">
-                                                        <Orbit className="w-8 h-8 text-foreground/10" />
-                                                    </div>
-                                                    <p className="text-sm font-headline font-bold text-foreground/60 mb-1">{t('dashboard.chartPending')}</p>
-                                                    <p className="text-[11px] font-medium text-foreground/30 leading-relaxed">{t('dashboard.completeBirthDetails')}</p>
-                                                    <Link href="/profile" className="mt-6">
-                                                        <Button variant="secondary" size="sm" className="rounded-full text-[10px] font-bold uppercase tracking-widest">{t('dashboard.updateProfile')}</Button>
-                                                    </Link>
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        </Card>
-                    </div>
-                </div>
-
-                {/* AVATAR SHOWCASE */}
-                <AvatarShowcase />
-
-                {/* INCOMING FAMILY INVITES */}
-                <InviteBanner />
-
-                {/* MY FAMILY STRIP */}
-                <FamilyStrip />
-
-                {/* ZONE 3: COSMIC PORTALS */}
-                <div className="mt-12 sm:mt-28">
-                    <div className="text-center mb-8 sm:mb-16">
-                        <div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
-                            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-secondary to-transparent rounded-full" />
-                            <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.4em] sm:tracking-[0.6em]">{t('dashboard.systemHub')}</span>
-                        </div>
-                        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight">{t('dashboard.cosmicPortals')}</h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        <Link href="/chat" className="group">
-                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-secondary/40 !p-0" padding="none">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-secondary/10 transition-colors" />
-                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-6 sm:mb-10 text-secondary group-hover:scale-110 transition-transform duration-500">
-                                        <MessageSquare className="w-5 h-5 sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">{t('landing.chatNaviTitle')}</h3>
-                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('landing.chatNaviDesc')}</p>
-                                    <div className="space-y-3 mb-10 opacity-60 group-hover:opacity-100 transition-opacity">
-                                        <div className="h-1 w-full bg-secondary/10 rounded-full overflow-hidden">
-                                            <div className="h-full bg-secondary w-3/4" />
-                                        </div>
-                                        <div className="flex justify-between text-[10px] font-bold text-secondary/40 uppercase tracking-widest">
-                                            <span>{t('dashboard.processing')}</span>
-                                            <span>85% {t('dashboard.neuralSync')}</span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto">
-                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-widest group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-all duration-300 shadow-sm">
-                                            {t('dashboard.consultAi')} <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-
-                        <Link href="/kundli" className="group">
-                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-blue-500/40 !p-0" padding="none">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-blue-500/10 transition-colors" />
-                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 sm:mb-10 text-blue-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Globe className="w-5 h-5 sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-blue-400 transition-colors">{t('dashboard.janamKundli')}</h3>
-                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.janamKundliDesc')}</p>
-                                    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 mb-6 sm:mb-10">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">{t('dashboard.currentDasha')}</div>
-                                                <div className="text-lg font-bold text-primary">
-                                                    {kundliLoading ? (
-                                                        <Skeleton height={24} width={80} className="mt-1" />
-                                                    ) : (
-                                                        (typeof kundliStats?.activeDasha === 'string' ? kundliStats.activeDasha.split('-')[0] : (kundliStats?.activeDasha || t('dashboard.defaultDasha')))
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="w-10 h-10 border border-blue-400/20 rounded-lg grid grid-cols-2 gap-1 p-1 opacity-40">
-                                                {[1,2,3,4].map(i => <div key={i} className="bg-blue-400 rounded-sm" />)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto">
-                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-blue-400 uppercase tracking-widest group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-300 shadow-sm">
-                                            {t('dashboard.openChart')} <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-
-                        <Link href="/kundli/match" className="group">
-                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-rose-500/40 !p-0" padding="none">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-rose-500/10 transition-colors" />
-                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6 sm:mb-10 text-rose-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Heart className="w-5 h-5 sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-rose-400 transition-colors">{t('dashboard.soulmateSync')}</h3>
-                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.soulmateSyncDesc')}</p>
-                                    <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-10">
-                                        <div className="text-center">
-                                            <div className="text-xl sm:text-2xl font-bold text-primary">28</div>
-                                            <div className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">{t('dashboard.soulmateMatch')}</div>
-                                        </div>
-                                        <div className="w-px h-10 bg-white/10" />
-                                        <div className="flex -space-x-3">
-                                            <div className="w-10 h-10 rounded-full border border-rose-500/30 bg-rose-500/10 flex items-center justify-center"><Users className="w-5 h-5 text-rose-400" /></div>
-                                            <div className="w-10 h-10 rounded-full border border-pink-500/30 bg-pink-500/10 flex items-center justify-center"><Users className="w-5 h-5 text-pink-400" /></div>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto">
-                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-rose-400 uppercase tracking-widest group-hover:bg-rose-500/10 group-hover:border-rose-500/20 transition-all duration-300 shadow-sm">
-                                            {t('dashboard.analyzeMatch')} <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-
-                        <Link href="/horoscope/forecast" className="group">
-                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-emerald-500/40 !p-0" padding="none">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-emerald-500/10 transition-colors" />
-                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 sm:mb-10 text-emerald-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Sun className="w-5 h-5 sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-emerald-400 transition-colors">{t('dashboard.dailyPulse')}</h3>
-                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.realTimeTithi')}</p>
-                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                            <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">{t('dashboard.tithi')}</div>
-                                            <div className="text-xs font-bold text-primary truncate">{transitsData?.panchanga?.tithi || '—'}</div>
-                                        </div>
-                                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                            <div className="text-[9px] text-emerald-400 uppercase font-bold mb-0.5">{t('dashboard.yoga')}</div>
-                                            <div className="text-xs font-bold text-primary truncate">{transitsData?.panchanga?.yoga || '—'}</div>
-                                        </div>
-                                    </div>
-                                    {transitsData?.panchanga?.rahukaal && (
-                                        <div className="p-3 rounded-xl bg-rose-500/[0.06] border border-rose-500/20 mb-4 sm:mb-6">
-                                            <div className="flex items-center gap-1.5 mb-0.5">
-                                                <Clock className="w-3 h-3 text-rose-400" />
-                                                <div className="text-[9px] text-rose-400 uppercase font-bold">{t('dashboard.rahukaal')}</div>
-                                            </div>
-                                            <div className="text-xs font-bold text-primary truncate">
-                                                {transitsData.panchanga.rahukaal.start} – {transitsData.panchanga.rahukaal.end}
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className="mt-auto">
-                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-emerald-400 uppercase tracking-widest group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all duration-300 shadow-sm">
-                                            {t('dashboard.checkPulse')} <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
-                        <div className="hidden lg:block" />
-                        <Link href="/rashis" className="group">
-                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-purple-500/40 !p-0" padding="none">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-purple-500/10 transition-colors" />
-                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 sm:mb-10 text-purple-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Orbit className="w-5 h-5 sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-purple-400 transition-colors">{t('dashboard.rashiLib')}</h3>
-                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.rashiLibDesc')}</p>
-                                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-6 sm:mb-10 opacity-40 group-hover:opacity-100 transition-opacity">
-                                        {['aries', 'leo', 'sagittarius', 'scorpio'].map((s, idx) => (
-                                            <div key={idx} className="aspect-square rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
-                                                <Image src={`/icons/rashi/${s}.png`} alt={s} width={20} height={20} className="w-5 h-5 opacity-60" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="mt-auto">
-                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-purple-400 uppercase tracking-widest group-hover:bg-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 shadow-sm">
-                                            {t('dashboard.openLibrary')} <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-
-                        <Link href="/consult" className="group">
-                            <Card className="h-[340px] sm:h-[440px] bg-surface border border-outline-variant/20 overflow-hidden relative transition-all duration-700 hover:border-amber-500/40 !p-0" padding="none">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/5 blur-[80px] rounded-full -mr-20 -mt-20 group-hover:bg-amber-500/10 transition-colors" />
-                                <div className="p-6 sm:p-10 flex flex-col h-full relative z-10">
-                                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6 sm:mb-10 text-amber-400 group-hover:scale-110 transition-transform duration-500">
-                                        <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h3 className="text-lg sm:text-2xl font-headline font-bold text-primary mb-2 sm:mb-3 group-hover:text-amber-400 transition-colors">{t('dashboard.sessions')}</h3>
-                                    <p className="text-xs sm:text-sm font-medium text-foreground/40 leading-relaxed mb-6 sm:mb-10">{t('dashboard.sessionsDesc')}</p>
-                                    <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-10">
-                                        <div className="flex items-center gap-2">
-                                            {[1,2,3,4].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${s <= 2 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-white/10'}`} />)}
-                                        </div>
-                                        <div className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest text-center">{t('dashboard.inProgress')}</div>
-                                    </div>
-                                    <div className="mt-auto">
-                                        <div className="h-11 sm:h-14 w-full rounded-xl sm:rounded-2xl border border-white/5 bg-white/5 flex items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-widest group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all duration-300 shadow-sm">
-                                            {t('dashboard.joinSession')} <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-                        <div className="hidden lg:block" />
-                    </div>
-                </div>
-            </div>
-
-            {/* Mobile-only "Ask Navi" Floating Action Button */}
-            <Link href="/chat" className="fixed bottom-6 right-5 z-[1000] md:hidden flex items-center gap-2 py-3.5 px-5 rounded-full bg-[#c8991f] text-white font-semibold text-[15px] shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:scale-95 transition-transform">
-                <MessageSquare size={18} />
-                {t('dashboard.askNaviFab')}
-                <ArrowRight size={16} />
-            </Link>
-        </div>
+      <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[#06061f] px-4 py-10 text-white">
+        <DarkPanel className="mx-auto max-w-xl p-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#f2b233]/30 bg-[#f2b233]/10">
+            <ShieldAlert className="h-7 w-7 text-[#f2b233]" />
+          </div>
+          <h1 className="font-headline text-2xl font-bold">Exact birth location required</h1>
+          <p className="mt-3 text-sm leading-6 text-white/60">
+            Please confirm your exact birth location and timezone in your profile for personalized horoscope calculations.
+          </p>
+          <button
+            onClick={() => router.push("/profile?onboarding=true&return=/")}
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f2b233] px-5 py-3 text-sm font-black uppercase tracking-wider text-[#08071f]"
+          >
+            Confirm birth location <ArrowRight className="h-4 w-4" />
+          </button>
+        </DarkPanel>
+      </div>
     );
+  }
+
+  return (
+    <div className="gpt-dashboard-shell relative min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-x-hidden bg-[#05051c] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(154,67,67,0.38),transparent_28%),radial-gradient(circle_at_88%_12%,rgba(61,49,123,0.38),transparent_34%),linear-gradient(180deg,#070828_0%,#060521_48%,#080622_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-80">
+        <Particles
+          particleCount={260}
+          particleColors={["#ffd27a", "#ffffff", "#a78bd2"]}
+          particleBaseSize={70}
+          particleSpread={11}
+          speed={0.08}
+          alphaParticles
+          disableRotation={false}
+        />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2560px]">
+        <header className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+          <div>
+            <div className="flex flex-wrap items-center gap-3 text-[12px] font-bold uppercase tracking-[0.24em] text-white/58">
+              <span className="h-px w-12 bg-[#d99b23]/50" />
+              <span>{currentDate}</span>
+              {paywallLoaded && (
+                <Link href="/plans" className="inline-flex items-center gap-2 rounded-full border border-[#d99b23]/20 bg-[#d99b23]/10 px-3 py-1.5 tracking-normal text-[#e6ad2f]">
+                  <Wallet className="h-3.5 w-3.5" />
+                  <span className="text-sm font-black">{totalCredits ?? 0}</span>
+                  <span className="text-[10px] uppercase text-white/40">Navi Credits</span>
+                  <span className="rounded-full bg-[#d99b23]/10 px-2 py-0.5 text-[10px] uppercase text-[#e6ad2f]">{getTierLabel(tier || "free")}</span>
+                </Link>
+              )}
+            </div>
+            <h1 className="mt-4 font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px]">
+              {greeting},{" "}
+              <span className="bg-gradient-to-r from-[#ffcf66] via-[#f5a500] to-[#dd8d00] bg-clip-text text-transparent">
+                {userLoading ? "..." : userName}
+              </span>
+            </h1>
+            {topLifeArea && (
+              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-white">
+                <Star className="h-4 w-4 fill-[#ffc83d] text-[#ffc83d]" />
+                Your {topLifeArea.label} Score is Impressive! <span className="font-black text-[#34d399]">{topLifeArea.score}%</span>
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            {[
+              { label: "Moon Sign", data: moonSign, fallback: "Leo" },
+              { label: "Sun Sign", data: sunSign, fallback: "Libra" },
+              { label: "Ascendant", data: ascendantSign, fallback: "Leo" },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.data?.id ? `/rashis?sign=${item.data.id}` : "/rashis"}
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.035] px-2 py-3 text-center transition hover:border-[#d99b23]/40 hover:bg-[#d99b23]/8 sm:min-w-[185px] sm:flex-row sm:gap-4 sm:px-4 sm:text-left"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#d99b23]/25 bg-[#05051c] sm:h-[58px] sm:w-[58px]">
+                  {item.data?.icon ? (
+                    <Image src={item.data.icon} alt={item.data.name} width={34} height={34} className="h-7 w-7 object-contain sm:h-9 sm:w-9" />
+                  ) : (
+                    <Sparkles className="h-5 w-5 text-[#d99b23] sm:h-6 sm:w-6" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/55 sm:text-[11px] sm:tracking-[0.22em]">{item.label}</p>
+                  <p className="mt-0.5 truncate font-headline text-sm font-bold text-white sm:mt-1 sm:text-lg">{item.data?.name || item.fallback}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </header>
+
+        <div className="grid gap-5 2xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <div className="space-y-5">
+            <DarkPanel className="p-5 sm:p-7">
+              <div className="grid gap-6 lg:grid-cols-[170px_minmax(0,1fr)_190px] lg:items-center">
+                <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+                  <p className="text-[13px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">Today&apos;s Energy</p>
+                  <div className="mt-5">
+                    <RingScore score={overallScore} color={scoreColor} />
+                  </div>
+                  <span
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
+                    style={{ color: scoreColor, backgroundColor: `${scoreColor}1f` }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: scoreColor }} />
+                    {scoreBand}
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className="font-headline text-2xl font-bold leading-snug sm:text-[28px]">{headline}</h2>
+                  <p className="mt-3 max-w-2xl text-base leading-7 text-white/62">{subtitle}</p>
+                </div>
+
+                <div className="hidden justify-center lg:flex">
+                  <Image src="/images/lotus.svg" alt="" width={180} height={130} className="drop-shadow-[0_0_30px_rgba(168,85,247,0.45)]" />
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                {[
+                  { label: moonSign?.name || "Leo", icon: <Orbit className="h-4 w-4" /> },
+                  { label: `${ascendantSign?.name || "Leo"} Rising`, icon: <Moon className="h-4 w-4" /> },
+                  { label: transits?.panchanga?.tithi || "Purnima", prefix: "Tithi" },
+                  { label: transits?.panchanga?.nakshatra || "Anuradha", prefix: "Nakshatra" },
+                ].map((chip) => (
+                  <div key={`${chip.prefix || chip.label}-${chip.label}`} className="inline-flex items-center gap-2 rounded-full bg-[#21164d]/70 px-4 py-2 text-sm font-bold text-white">
+                    {"icon" in chip && chip.icon}
+                    {"prefix" in chip && <span className="text-[11px] uppercase tracking-[0.18em] text-white/45">{chip.prefix}</span>}
+                    <span>{chip.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                  <div className="flex items-start gap-4">
+                    <Sun className="h-8 w-8 shrink-0 text-[#34d399]" />
+                    <div>
+                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#34d399]">Good Time</p>
+                      <p className="mt-2 text-lg font-bold">19:00 - 20:00</p>
+                      <p className="mt-1 text-sm leading-6 text-white/58">Auspicious window for important work and decisions.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                  <div className="flex items-start gap-4">
+                    <AlertTriangle className="h-8 w-8 shrink-0 fill-[#ffb400]/15 text-[#ffb400]" />
+                    <div>
+                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#ffb400]">Rahu Kaal / Caution Window</p>
+                      <p className="mt-2 text-lg font-bold">{formatRahuKaal(transits)}</p>
+                      <p className="mt-1 text-sm leading-6 text-white/58">Avoid starting new work or making major commitments.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <button
+                  onClick={() => askInChat("Ask Navi about today's energy", `Explain today's energy for me. My overall score is ${overallScore}.`)}
+                  className="rounded-full border border-[#f2ad1d]/60 px-5 py-3 text-sm font-black uppercase tracking-wider text-[#ffc43d] transition hover:bg-[#f2ad1d]/10"
+                >
+                  Ask Navi
+                </button>
+                <Link
+                  href="/horoscope/forecast"
+                  className="rounded-full bg-gradient-to-r from-[#f9a900] via-[#ffbd16] to-[#de8b00] px-5 py-3 text-center text-sm font-black uppercase tracking-wider text-[#08071f] transition hover:brightness-110"
+                >
+                  Full Reading
+                </Link>
+              </div>
+            </DarkPanel>
+
+            <section className="space-y-3">
+              <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-white/70">Life Areas Overview</h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+                {lifeAreas.map(({ area, label, score, insight, theme }) => {
+                  const Icon = theme.icon;
+                  const color = getScoreColor(score);
+                  const isLucide = area === "general" || area === "spiritual";
+                  return (
+                    <Link
+                      key={area}
+                      href={`/horoscope/forecast?area=${area}`}
+                      className="group rounded-2xl border border-white/10 bg-[#0a0829]/78 p-4 text-center transition hover:-translate-y-0.5 hover:border-[#d99b23]/35 hover:bg-[#100b35]"
+                    >
+                      <AreaRing score={score} color={color}>
+                        <span
+                          className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
+                          style={{ color }}
+                        >
+                          <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
+                        </span>
+                        <span className="text-base font-black leading-none tabular-nums" style={{ color }}>
+                          {score}
+                        </span>
+                      </AreaRing>
+                      <p className="mt-3 font-headline text-lg font-bold">{label}</p>
+                      <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-white/58">{insight}</p>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
+            <DarkPanel className="grid gap-4 p-5 md:grid-cols-[160px_1fr_1fr_1fr_1fr]">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-8 w-8 text-[#ffc43d]" />
+                <div>
+                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">Celestial</p>
+                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">Insights</p>
+                </div>
+              </div>
+              {(transits?.notableTransits?.length ? transits.notableTransits : [
+                "Jupiter's transit enhances your gains and stabilizes growth.",
+                "Saturn's transit tests your discipline and builds resilience.",
+                "Rahu's transit destabilizes old patterns - stay grounded.",
+                "Ketu supports letting go and releasing attachments.",
+              ]).slice(0, 4).map((item, idx) => (
+                <p key={idx} className="border-white/10 text-sm leading-6 text-white/65 md:border-l md:pl-5">
+                  <span className="mr-2 text-[#ffc43d]">•</span>
+                  {item}
+                </p>
+              ))}
+            </DarkPanel>
+          </div>
+
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-1">
+            <div className="space-y-5">
+              <DarkPanel className="p-5">
+                <div className="mb-4 flex items-center justify-between gap-4">
+                  <h2 className="text-[14px] font-black uppercase tracking-[0.22em]">Weekly Outlook</h2>
+                  <p className="text-[12px] font-black uppercase tracking-wider text-[#ffc43d]">Best Day: {bestDay}</p>
+                </div>
+                <div className="mb-5 overflow-x-auto">
+                  <div className="flex min-w-max gap-2">
+                    {AREA_LIST.map((area) => {
+                      const theme = AREA_THEMES[area];
+                      const Icon = theme.icon;
+                      const isLucide = area === "general" || area === "spiritual";
+                      const selected = activeArea === area;
+                      return (
+                        <button
+                          key={area}
+                          onClick={() => setActiveArea(area)}
+                          className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+                            selected
+                              ? "border-[#d99b23]/45 bg-[#d99b23]/12 text-[#ffc43d]"
+                              : "border-white/10 bg-white/[0.025] text-white/70 hover:border-white/20"
+                          }`}
+                        >
+                          <Icon className={isLucide ? "h-4 w-4 fill-current" : "h-4 w-4 object-cover"} />
+                          {resolveAreaLabel(t, area)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="relative min-h-[230px] rounded-2xl overflow-hidden">
+                  {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
+                    <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                  ) : forecastLoading || !forecast ? (
+                    <div className="h-[230px] animate-pulse rounded-2xl bg-white/[0.04]" />
+                  ) : (
+                    <WeeklyOutlookChart days={forecast.days} colorHex={AREA_THEMES[activeArea].hex} />
+                  )}
+                </div>
+              </DarkPanel>
+
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <div className="space-y-5">
+                  <DarkPanel className="p-5">
+                    <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">Panchang Today</h2>
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                      {[
+                        { label: "Tithi", value: transits?.panchanga?.tithi || "Purnima", icon: <Moon className="h-4 w-4 text-[#ffc43d]" /> },
+                        { label: "Vara", value: transits?.panchanga?.vara || "Shanivaar", icon: <Calendar className="h-4 w-4 text-[#f59e0b]" /> },
+                        { label: "Nakshatra", value: transits?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-4 w-4 text-[#34d399]" /> },
+                        { label: "Yoga", value: transits?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-4 w-4 text-[#a78bfa]" /> },
+                        { label: "Karana", value: transits?.panchanga?.karana || "Vishti", icon: <Gem className="h-4 w-4 text-[#fb7185]" /> },
+                        { label: "Rahu Kaal", value: formatRahuKaal(transits), icon: <AlertTriangle className="h-4 w-4 text-[#ffc43d]" /> },
+                      ].map((chip) => (
+                        <div key={chip.label} className="flex min-h-[82px] flex-col items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] p-2 text-center">
+                          {chip.icon}
+                          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-white/45">{chip.label}</p>
+                          <p className="w-full truncate font-headline text-[12px] font-bold">{chip.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </DarkPanel>
+
+                  <DarkPanel className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#8b5cf6]/20">
+                        <Heart className="h-7 w-7 fill-[#a78bfa]/20 text-[#a78bfa]" />
+                      </div>
+                      <div>
+                        <h3 className="text-[14px] font-black uppercase tracking-[0.16em]">Compatibility & Match</h3>
+                        <p className="mt-1 max-w-lg text-sm leading-6 text-white/58">Discover your cosmic compatibility with anyone. Find harmony in relationships.</p>
+                      </div>
+                    </div>
+                    <Link href="/kundli/match" className="rounded-xl bg-[#ffc022] px-5 py-3 text-center text-sm font-black uppercase text-[#08071f]">
+                      Start a Match
+                    </Link>
+                  </DarkPanel>
+
+                  {/* DAILY COSMIC INSIGHT */}
+                  <DarkPanel className="p-6">
+                    <div className="mb-5 flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <Sun className="h-5 w-5 text-[#ffc43d]" />
+                        <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">Daily Cosmic Insight</h3>
+                      </div>
+                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[#ffc43d]">
+                        Today • {horoscope?.meta?.date_display || horoscope?.date_display || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    <div className="relative mb-6 px-2 py-3">
+                      <span className="absolute -left-2 -top-3 select-none font-serif text-[56px] leading-none text-[#ffc43d]">&ldquo;</span>
+                      <p className="relative px-6 text-[13px] leading-relaxed text-white/75">
+                        {(typeof horoscope?.tip === 'object' ? horoscope.tip?.text : horoscope?.tip) || "A day to align your actions with your higher purpose. Trust the timing of the universe and take one step forward with clarity."}
+                      </p>
+                      <span className="absolute -bottom-6 -right-2 select-none font-serif text-[56px] leading-none text-[#ffc43d]">&rdquo;</span>
+                    </div>
+                    <div className="mt-8 grid grid-cols-2 gap-3">
+                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-3 text-center sm:text-left min-w-0 w-full">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
+                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-700 shadow-[0_0_16px_rgba(168,85,247,0.6)]" />
+                        </div>
+                        <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">Lucky Color</p>
+                          <p className="font-headline text-[12px] sm:text-sm font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
+                            {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-3 text-center sm:text-left min-w-0 w-full">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#d99b23]/40 bg-[#d99b23]/20 text-lg font-black text-[#ffc43d]">
+                          {(horoscope?.lucky?.number || horoscope?.lucky_number) ?? "7"}
+                        </div>
+                        <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">Lucky Number</p>
+                          <p className="font-headline text-[12px] sm:text-sm font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
+                            {typeof (horoscope?.lucky?.number || horoscope?.lucky_number) === 'number'
+                              ? (horoscope?.lucky?.number || horoscope?.lucky_number)
+                              : ((horoscope?.lucky?.number || horoscope?.lucky_number) ?? "Seven")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </DarkPanel>
+                </div>
+
+                <DarkPanel className="hidden sm:block p-5">
+                  <div className="mb-4 flex items-start gap-3">
+                    <Sparkles className="mt-1 h-7 w-7 text-[#ffc43d]" />
+                    <div>
+                      <h2 className="font-headline text-2xl font-bold">Consult Navi AI</h2>
+                      <p className="text-sm text-white/55">Vedic wisdom powered by advanced AI.</p>
+                    </div>
+                  </div>
+
+                  <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">Ask About</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Career & Finance", icon: <Briefcase className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: "Love & Marriage", icon: <Heart className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: "Health & Wellness", icon: <Activity className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: "Travel & Relocation", icon: <Home className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: "Muhurat & Timing", icon: <Calendar className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: "Current Transits", icon: <Orbit className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                    ].map((item) => {
+                      const isBlocked = isFeatureBlocked(item.requiresFeature);
+                      const paywallData = getFeaturePaywall(item.requiresFeature);
+
+                      return (
+                        <button
+                          key={item.label}
+                          onClick={() => {
+                            if (isBlocked && paywallData) {
+                              setActivePaywallData(paywallData);
+                              return;
+                            }
+                            askInChat(item.label, `I want guidance about ${item.label.toLowerCase()} based on today's horoscope.`);
+                          }}
+                          className={`flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold text-white/78 transition relative overflow-hidden ${
+                            isBlocked
+                              ? "border border-white/5 bg-white/[0.015] text-white/40 cursor-pointer hover:bg-white/5"
+                              : "bg-white/[0.045] hover:bg-[#d99b23]/12 hover:text-[#ffc43d]"
+                          }`}
+                        >
+                          <span className={isBlocked ? "text-white/30" : "text-[#ffc43d]"}>{item.icon}</span>
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {isBlocked && <Lock className="h-3.5 w-3.5 text-white/35 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <p className="mb-3 mt-6 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">Deep Dive</p>
+                  <div className="space-y-3">
+                    {[
+                      "Analyze my weekly forecast in detail",
+                      `Why is my ${activeAreaLabel} score at its current level?`,
+                      "Give me a quick action to improve my score",
+                    ].map((question) => {
+                      const isBlocked = isFeatureBlocked('chat_message');
+                      const paywallData = getFeaturePaywall('chat_message');
+
+                      return (
+                        <button
+                          key={question}
+                          onClick={() => {
+                            if (isBlocked && paywallData) {
+                              setActivePaywallData(paywallData);
+                              return;
+                            }
+                            askInChat("Deep Dive", question);
+                          }}
+                          className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${
+                            isBlocked
+                              ? "border-white/5 bg-white/[0.01] text-white/40 cursor-pointer"
+                              : "border-white/10 bg-white/[0.025] text-white/78 hover:border-[#d99b23]/35 hover:text-[#ffc43d]"
+                          }`}
+                        >
+                          <span className="truncate flex-1">{question}</span>
+                          {isBlocked ? (
+                            <Lock className="h-3.5 w-3.5 text-white/30 shrink-0" />
+                          ) : (
+                            <ArrowRight className="h-4 w-4 text-[#ffc43d] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
+                        setActivePaywallData(getFeaturePaywall('chat_message')!);
+                        return;
+                      }
+                      setSelectedAvatarId("navi");
+                      askInChat("Chat with Navi", "I want to discuss my dashboard and today's horoscope.");
+                    }}
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d99b23]/60 px-4 py-3 text-sm font-black uppercase tracking-wider text-[#ffc43d] transition hover:bg-[#d99b23]/10"
+                  >
+                    {isFeatureBlocked('chat_message') ? <Lock className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+                    Chat with Navi
+                  </button>
+                </DarkPanel>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* EXPLORE YOUR COSMIC NETWORK SECTION */}
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2560px]">
+        {/* Section Header */}
+        <div className="mb-10 text-center">
+          <div className="mb-3 flex items-center justify-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#ffc43d]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ffc43d]">Your Guidance Hub</span>
+          </div>
+          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-white sm:text-[42px]">
+            Explore Your Cosmic Network
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/55">
+            Connect with expert guides, explore your chart, understand your bonds,<br className="hidden sm:inline" />
+            and access powerful astrological tools.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+          {/* LEFT COLUMN */}
+          <div className="space-y-8">
+            {/* MEET YOUR AI ASTROLOGERS */}
+            <DarkPanel className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-5 w-5 items-center justify-center">
+                    <div className="h-2 w-2 rotate-45 border border-[#ffc43d] bg-[#ffc43d]/20" />
+                  </div>
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">Meet Your AI Astrologers</h3>
+                </div>
+                <Link href="/chat" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
+                  View All <ArrowRight className="inline h-3 w-3" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                {[
+                  { name: "Navi", role: "General Vedic Guide", desc: "Balanced Vedic guidance for love, work, timing & life.", credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
+                  { name: "Arya", role: "Career Mentor", desc: "Guidance for jobs, skills, promotion & work decisions.", credits: 2, avatarId: "career_mentor", img: "/images/avatars/ARYA_AVATAR.jpeg" },
+                  { name: "Meera", role: "Relationship Guide", desc: "Insights for love, marriage, compatibility & emotions.", credits: 2, avatarId: "relationship_guide", img: "/images/avatars/MEERA_AVATAR.jpeg" },
+                  { name: "Anand", role: "Health Advisor", desc: "Understand vitality, well-being & health patterns.", credits: 2, avatarId: "spiritual_guide", img: "/images/avatars/ANAND_AVATAR.jpeg" },
+                  { name: "Vidya", role: "Financial Astrologer", desc: "Wealth, investments & financial stability insights.", credits: 2, avatarId: "finance_mentor", img: "/images/avatars/VIDYA_AVATAR.jpeg" },
+                  { name: "Rishi", role: "Deep Chart Sage", desc: "Advanced chart synthesis for deep spiritual insights.", credits: 3, avatarId: "astro_sage", img: "/images/avatars/RISHI_AVATAR.jpeg" },
+                ].map((guide) => {
+                  const isLocked = isFeatureBlocked('chat_message');
+                  const paywallData = getFeaturePaywall('chat_message');
+
+                  return (
+                    <div key={guide.name} className={`group flex flex-col items-center text-center ${isLocked ? 'opacity-60' : ''}`}>
+                      <div className="relative mb-4">
+                        <div className={`h-[92px] w-[92px] overflow-hidden rounded-full border-[3px] bg-[#0a0829] transition-all ${
+                          isLocked
+                            ? 'border-white/20'
+                            : 'border-[#d99b23]/50 group-hover:border-[#d99b23]/80 group-hover:shadow-[0_0_28px_rgba(217,155,35,0.4)]'
+                        }`}>
+                          <Image
+                            src={guide.img}
+                            alt={guide.name}
+                            width={92}
+                            height={92}
+                            className="h-full w-full object-cover"
+                          />
+                          {isLocked && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                              <Lock className="h-6 w-6 text-white/80" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-[#d99b23]/40 bg-[#0a0a1f] px-2.5 py-1 text-[9px] font-bold text-[#ffc43d] shadow-lg">
+                          <Coins className="h-2.5 w-2.5" />
+                          {guide.credits} credit{guide.credits > 1 ? 's' : ''}
+                        </div>
+                      </div>
+                      <h4 className="mb-1 mt-1 font-headline text-base font-bold text-white">{guide.name}</h4>
+                      <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-white/40">{guide.role}</p>
+                      <p className="mb-3 line-clamp-2 min-h-[32px] text-[10.5px] leading-relaxed text-white/45">{guide.desc}</p>
+                      <button
+                        onClick={() => {
+                          if (isLocked && paywallData) {
+                            setActivePaywallData(paywallData);
+                            return;
+                          }
+                          setSelectedAvatarId(guide.avatarId);
+                          askInChat(`Chat with ${guide.name}`, `I want to consult with ${guide.name} about my chart.`);
+                        }}
+                        className={`flex items-center gap-1.5 rounded-xl border-2 px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                          isLocked
+                            ? 'border-white/20 bg-transparent text-white/50 cursor-pointer hover:bg-white/5'
+                            : 'border-[#d99b23]/50 bg-transparent text-[#ffc43d] hover:border-[#d99b23]/70 hover:bg-[#d99b23]/10'
+                        }`}
+                      >
+                        {isLocked ? (
+                          <>
+                            <Lock className="h-3 w-3" />
+                            Locked
+                          </>
+                        ) : (
+                          <>
+                            <MessageSquare className="h-3 w-3" />
+                            Start Chat
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </DarkPanel>
+
+            {/* MY FAMILY & BONDS */}
+            <DarkPanel className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Heart className="h-5 w-5 text-[#fb7185]" />
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">My Family & Bonds</h3>
+                </div>
+                <Link href="/family" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
+                  View All <ArrowRight className="inline h-3 w-3" />
+                </Link>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Example family members */}
+                <div className="flex flex-col gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#d99b23]/20 text-xl font-bold text-[#ffc43d]">
+                      C
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="truncate font-headline text-sm font-bold text-white">Chandrakant</h4>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">Sibling</p>
+                    </div>
+                  </div>
+                  <span className="inline-block self-start rounded-md bg-[#ffb400]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#ffb400]">
+                    Needs Attention
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link href="/family" className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]">
+                      View Bond
+                    </Link>
+                    <button
+                      onClick={() => {
+                        if (isFeatureBlocked('family_compatibility') && getFeaturePaywall('family_compatibility')) {
+                          setActivePaywallData(getFeaturePaywall('family_compatibility')!);
+                          return;
+                        }
+                        router.push('/kundli/match');
+                      }}
+                      className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]"
+                    >
+                      {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
+                      Run Compatibility
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#34d399]/20 text-xl font-bold text-[#34d399]">
+                      A
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="truncate font-headline text-sm font-bold text-white">Ankit Prasad</h4>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">Friend</p>
+                    </div>
+                  </div>
+                  <span className="inline-block self-start rounded-md bg-[#34d399]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#34d399]">
+                    ✓ Linked
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link href="/family" className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]">
+                      View Bond
+                    </Link>
+                    <button
+                      onClick={() => {
+                        if (isFeatureBlocked('family_compatibility') && getFeaturePaywall('family_compatibility')) {
+                          setActivePaywallData(getFeaturePaywall('family_compatibility')!);
+                          return;
+                        }
+                        router.push('/kundli/match');
+                      }}
+                      className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]"
+                    >
+                      {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
+                      Run Compatibility
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#d99b23]/30 bg-[#d99b23]/5 p-4 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[#d99b23]/40 text-[#ffc43d]">
+                    <Users className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <p className="mb-1 text-sm font-bold text-white">Add Member</p>
+                    <p className="text-[10px] leading-relaxed text-white/40">Add family or friends to compare charts</p>
+                  </div>
+                  <button className="flex items-center gap-1.5 rounded-xl border-2 border-[#d99b23]/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-[#ffc43d] transition-all hover:border-[#d99b23]/70 hover:bg-[#d99b23]/10">
+                    <Users className="h-3 w-3" />
+                    Add Member
+                  </button>
+                </div>
+              </div>
+            </DarkPanel>
+
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="space-y-8">
+            {/* MY CHART SNAPSHOT */}
+            <DarkPanel className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-5 w-5 items-center justify-center">
+                    <Orbit className="h-5 w-5 text-[#60a5fa]" />
+                  </div>
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">My Chart Snapshot</h3>
+                </div>
+                <Link href="/kundli" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
+                  View Details <ArrowRight className="inline h-3 w-3" />
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { label: "Kundli", sublabel: "Leo Ascendant", icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
+                  { label: "Mahadasha", sublabel: "Rahu", subtext: "May 2026 — May 2044", icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "#fbbf24", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                  { label: "Antardasha", sublabel: "Rahu", subtext: "May 2026 — Jan 2028", icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "#a78bfa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                ].map((item, idx) => {
+                  const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
+                  const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
+
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        if (isBlocked && paywallData) {
+                          setActivePaywallData(paywallData);
+                          return;
+                        }
+                        router.push(item.href);
+                      }}
+                      className="flex items-center justify-between rounded-2xl border border-white/8 bg-[#0a0a1f] p-4 transition-all hover:border-[#d99b23]/30 hover:bg-[#0f0d2a] cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0"
+                          style={{ backgroundColor: `${item.color}1f`, color: item.color }}
+                        >
+                          {item.icon}
+                        </div>
+                        <div className={isBlocked ? "blur-[2.5px] select-none opacity-50 transition-all duration-300" : ""}>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{item.label}</p>
+                          <p className="font-headline text-sm font-bold text-white">{item.sublabel}</p>
+                          {item.subtext && <p className="text-[10px] text-white/35">{item.subtext}</p>}
+                        </div>
+                      </div>
+                      <button className="flex items-center gap-1 rounded-xl border border-[#d99b23]/40 bg-[#d99b23]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#ffc43d] shrink-0">
+                        {isBlocked ? <Lock className="h-3 w-3 mr-0.5" /> : null}
+                        {isBlocked ? 'Unlock' : 'View'} <ArrowRight className="h-3 w-3" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <Link
+                href="/kundli"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-[#d99b23]/50 bg-[#d99b23]/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-[#ffc43d] transition-all hover:border-[#d99b23]/70 hover:bg-[#d99b23]/15"
+              >
+                <Sparkles className="h-4 w-4" />
+                Explore Full Analysis
+              </Link>
+            </DarkPanel>
+
+
+          </div>
+        </div>
+
+        {/* COSMIC PORTALS — Full Width */}
+        <DarkPanel className="mt-8 p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-5 w-5 items-center justify-center">
+                <div className="h-2 w-2 rotate-45 border border-[#ffc43d] bg-[#ffc43d]/20" />
+              </div>
+              <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">Cosmic Portals</h3>
+            </div>
+            <Link href="/chat" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
+              Explore All Portals <ArrowRight className="inline h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {[
+              { icon: <MessageSquare className="h-5 w-5" />, title: "Chat with Navi", desc: "Ask anything about your Kundli, Dashas, transits, or life guidance.", action: "Consult AI", href: "/chat", color: "#ffc43d", requiresFeature: 'chat_message' as PaywallFeatureKey },
+              { icon: <Globe className="h-5 w-5" />, title: "Janam Kundli", desc: "Detailed birth chart & planetary analysis based on Vedic wisdom.", action: "Open Chart", href: "/kundli", color: "#60a5fa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+              { icon: <Heart className="h-5 w-5" />, title: "Soulmate Sync", desc: "Match compatibility using Guna Milan & karmic insights.", action: "Analyze Match", href: "/kundli/match", color: "#fb7185", requiresFeature: 'match_report' as PaywallFeatureKey },
+              { icon: <Sun className="h-5 w-5" />, title: "Daily Pulse", desc: "Real-time Tithi, Yoga & Vedic energies for your day.", action: "View Today", href: "/horoscope/forecast", color: "#34d399", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
+              { icon: <Orbit className="h-5 w-5" />, title: "Rashi Library", desc: "Explore all 12 zodiac signs with detailed traits & insights.", action: "Open Library", href: "/rashis", color: "#a78bfa" },
+              { icon: <Sparkles className="h-5 w-5" />, title: "Sessions", desc: "Join live sessions & interact with experts and seekers.", action: "Join Session", href: "/consult", color: "#f59e0b", requiresFeature: 'guided_consult' as PaywallFeatureKey },
+            ].map((portal, idx) => {
+              const isLocked = portal.requiresFeature ? isFeatureBlocked(portal.requiresFeature) : false;
+              const paywallData = portal.requiresFeature ? getFeaturePaywall(portal.requiresFeature) : null;
+              const showProBadge = portal.requiresFeature && isLocked && paywallData?.isSoft;
+              const showCreditBadge = portal.requiresFeature && isLocked && !paywallData?.isSoft;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={(e) => {
+                    if (isLocked && paywallData) {
+                      e.preventDefault();
+                      setActivePaywallData(paywallData);
+                    } else {
+                      router.push(portal.href);
+                    }
+                  }}
+                  className={`group relative flex flex-col gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-5 transition-all cursor-pointer ${
+                    isLocked ? 'opacity-60 hover:border-white/10' : 'hover:-translate-y-0.5 hover:border-[#d99b23]/30 hover:bg-[#0f0d2a]'
+                  }`}
+                >
+                  {/* Pro Badge */}
+                  {showProBadge && (
+                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-[#ffc43d] to-[#f59e0b] px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-[#0a0a1f]">
+                      <Zap className="h-2.5 w-2.5" />
+                      Pro
+                    </div>
+                  )}
+
+                  {/* Credit Badge */}
+                  {showCreditBadge && paywallData?.creditsRequired && (
+                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-[#d99b23]/40 bg-[#d99b23]/15 px-2 py-0.5 text-[8px] font-bold text-[#ffc43d]">
+                      <Coins className="h-2.5 w-2.5" />
+                      {paywallData.creditsRequired}
+                    </div>
+                  )}
+
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-xl border"
+                    style={{ backgroundColor: `${portal.color}1f`, borderColor: `${portal.color}33`, color: portal.color }}
+                  >
+                    {portal.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="mb-1.5 font-headline text-base font-bold text-white">{portal.title}</h4>
+                    <p className="line-clamp-3 text-[11px] leading-relaxed text-white/45">{portal.desc}</p>
+                  </div>
+                  <button
+                    className={`mt-auto flex items-center justify-center gap-2 rounded-xl border-2 px-3 py-2 text-[10px] font-black uppercase tracking-wider transition-all`}
+                    style={{ borderColor: `${portal.color}50`, backgroundColor: 'transparent', color: portal.color }}
+                  >
+                    {isLocked && <Lock className="h-3 w-3 mr-1 shrink-0" />}
+                    {isLocked ? 'Unlock' : portal.action} <ArrowRight className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </DarkPanel>
+
+        {/* Privacy Footer */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-center text-[11px] text-white/30">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" />
+            <span>Your data is private and protected.</span>
+          </div>
+          <span>•</span>
+          <span>Secure</span>
+          <span>•</span>
+          <span>Encrypted</span>
+          <span>•</span>
+          <span>Trusted by thousands</span>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {pendingPrompt && (
+          <motion.div
+            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPendingPrompt(null)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+            <motion.div
+              initial={{ y: 18, scale: 0.98 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 12, scale: 0.98 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md rounded-[28px] border border-[#d99b23]/30 bg-[#090826] p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setPendingPrompt(null)}
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-white/70 hover:bg-white/12"
+                aria-label="Close chat confirmation"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d99b23]/30 bg-[#d99b23]/10 text-[#ffc43d]">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              <h2 className="font-headline text-2xl font-bold">Ask Navi in chat?</h2>
+              <p className="mt-2 text-sm leading-6 text-white/60">Navi will open chat with this question so you can continue from there.</p>
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{pendingPrompt.title}</p>
+                <p className="mt-2 text-sm leading-6 text-white/82">{pendingPrompt.message}</p>
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <button onClick={() => setPendingPrompt(null)} className="rounded-2xl border border-white/12 px-4 py-3 text-sm font-bold text-white/75 hover:bg-white/8">
+                  Stay here
+                </button>
+                <button onClick={confirmChat} className="rounded-2xl bg-[#ffc022] px-4 py-3 text-sm font-black text-[#08071f]">
+                  Open chat
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activePaywallData && (
+          <PaywallCard
+            paywall={activePaywallData}
+            variant="modal"
+            onClose={() => setActivePaywallData(null)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
