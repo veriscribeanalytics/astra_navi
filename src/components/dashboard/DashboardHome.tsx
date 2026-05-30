@@ -478,7 +478,7 @@ export default function DashboardHome() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2560px]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2850px]">
         <header className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-3 text-[12px] font-bold uppercase tracking-[0.24em] text-white/58">
@@ -901,7 +901,7 @@ export default function DashboardHome() {
       </div>
 
       {/* EXPLORE YOUR COSMIC NETWORK SECTION */}
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2560px]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2850px]">
         {/* Section Header */}
         <div className="mb-10 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
