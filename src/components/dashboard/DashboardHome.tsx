@@ -478,7 +478,7 @@ export default function DashboardHome() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2850px]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[94%]">
         <header className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-3 text-[12px] font-bold uppercase tracking-[0.24em] text-white/58">
@@ -712,7 +712,7 @@ export default function DashboardHome() {
                 </div>
               </DarkPanel>
 
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] min-[2560px]:grid-cols-[minmax(0,1fr)_480px]">
                 <div className="space-y-5">
                   <DarkPanel className="p-5">
                     <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">Panchang Today</h2>
@@ -901,7 +901,7 @@ export default function DashboardHome() {
       </div>
 
       {/* EXPLORE YOUR COSMIC NETWORK SECTION */}
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[2850px]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[94%]">
         {/* Section Header */}
         <div className="mb-10 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
