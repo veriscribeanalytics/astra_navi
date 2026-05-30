@@ -150,7 +150,7 @@ const getFeatures = (t: (key: string) => string) => [
     }
 ];
 
-function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: (key: string) => string }) {
+function FeatureSlider({ onQuestion, t, compact = false }: { onQuestion: (q: string) => void, t: (key: string) => string, compact?: boolean }) {
     const features = useMemo(() => getFeatures(t), [t]);
     const [idx, setIdx] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
@@ -219,7 +219,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
     return (
         <>
             <div 
-                className="w-full h-full px-4 sm:px-8 flex items-center justify-between cursor-default group"
+                className={`w-full h-full flex items-center justify-between cursor-default group ${compact ? 'px-3 xl:px-4' : 'px-4 sm:px-8'}`}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 onTouchStart={handleTouchStart}
@@ -233,31 +233,31 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.5, ease: "easeInOut" }}
-                            className="flex items-center gap-4 sm:gap-10 w-full"
+                            className={`flex items-center w-full ${compact ? 'gap-2 xl:gap-3' : 'gap-4 sm:gap-10'}`}
                         >
                             {current.type === 'feature' ? (
-                                <Link href={current.href!} className="flex items-center gap-4 sm:gap-10 w-full">
-                                    <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+                                <Link href={current.href!} className={`flex items-center w-full min-w-0 ${compact ? 'gap-2 xl:gap-3' : 'gap-4 sm:gap-10'}`}>
+                                    <div className={`${compact ? 'w-9 h-9 xl:w-10 xl:h-10 rounded-xl' : 'w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl'} bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm group-hover:scale-110 transition-transform duration-500`}>
                                         {current.icon}
                                     </div>
-                                    <div className="flex flex-col min-w-0 pr-2 sm:pr-6">
-                                        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none mb-1.5 sm:mb-3`}>{current.label}</span>
-                                        <p className="text-[13px] sm:text-[17px] font-bold text-foreground leading-tight tracking-tight line-clamp-2">{current.desc}</p>
+                                    <div className={`flex flex-col min-w-0 ${compact ? 'pr-1' : 'pr-2 sm:pr-6'}`}>
+                                        <span className={`${compact ? 'text-[8px] xl:text-[9px] tracking-[0.18em] xl:tracking-[0.24em] mb-1' : 'text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.4em] mb-1.5 sm:mb-3'} font-black uppercase ${current.color} leading-none`}>{current.label}</span>
+                                        <p className={`${compact ? 'text-[11px] xl:text-[12px]' : 'text-[13px] sm:text-[17px]'} font-bold text-foreground leading-tight tracking-tight line-clamp-2`}>{current.desc}</p>
                                     </div>
                                 </Link>
                             ) : (
-                                <div className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
-                                    <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm`}>
-                                        <Sparkles className={`w-5 h-5 sm:w-7 sm:h-7 ${current.color}`} />
+                                <div className={`flex items-center w-full min-w-0 ${compact ? 'gap-2' : 'gap-2 sm:gap-3'}`}>
+                                    <div className={`${compact ? 'w-9 h-9 xl:w-10 xl:h-10 rounded-xl' : 'w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl'} bg-background border border-white/10 flex items-center justify-center shrink-0 ${current.color} shadow-sm`}>
+                                        <Sparkles className={`${compact ? 'w-4 h-4 xl:w-5 xl:h-5' : 'w-5 h-5 sm:w-7 sm:h-7'} ${current.color}`} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] ${current.color} leading-none block mb-1.5 sm:mb-2`}>{current.label}</span>
-                                        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
+                                        <span className={`${compact ? 'text-[8px] xl:text-[9px] tracking-[0.18em] xl:tracking-[0.24em] mb-1' : 'text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.4em] mb-1.5 sm:mb-2'} font-black uppercase ${current.color} leading-none block`}>{current.label}</span>
+                                        <div className={`flex overflow-x-auto scrollbar-hide ${compact ? 'gap-1' : 'gap-1.5 sm:gap-2'}`}>
                                             {current.questions?.map((q, i) => (
                                                 <button 
                                                     key={i}
                                                     onClick={() => onQuestion(q)}
-                                                    className="px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 text-[10px] sm:text-[11px] font-bold text-foreground/70 hover:text-secondary transition-all whitespace-nowrap shrink-0"
+                                                    className={`${compact ? 'px-2 py-1 rounded-lg text-[9px]' : 'px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-[11px]'} bg-background border border-white/10 hover:border-secondary/40 hover:bg-secondary/5 font-bold text-foreground/70 hover:text-secondary transition-all whitespace-nowrap shrink-0`}
                                                 >
                                                     {q}
                                                 </button>
@@ -271,7 +271,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                 </div>
 
                 {/* Hover Action for Features */}
-                {current.type === 'feature' && (
+                {!compact && current.type === 'feature' && (
                     <AnimatePresence>
                         {isHovered && (
                             <motion.div
@@ -292,7 +292,7 @@ function FeatureSlider({ onQuestion, t }: { onQuestion: (q: string) => void, t: 
                 )}
 
                 {/* Desktop dots — inside the card at bottom */}
-                <div className="hidden sm:flex absolute bottom-2 left-8 gap-2">
+                <div className={`hidden sm:flex absolute bottom-2 gap-2 ${compact ? 'left-4' : 'left-8'}`}>
                     {features.map((_, i) => (
                         <button 
                             key={i} 
@@ -541,10 +541,10 @@ export default function DashboardHome() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-10 pt-4 lg:pt-0"
+                    className="flex flex-col gap-4 sm:gap-6 lg:gap-3 mb-8 sm:mb-10 lg:mb-6 pt-4 lg:pt-0"
                 >
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 w-full">
-                        <div className="space-y-3 text-center lg:text-left pt-4 lg:pt-0">
+                    <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,0.9fr)_max-content_minmax(280px,1fr)] lg:items-center gap-8 lg:gap-6 w-full">
+                        <div className="space-y-3 text-center lg:text-left pt-4 lg:pt-0 lg:col-start-1 lg:row-start-1 lg:min-w-0">
                             <div className="flex items-center justify-center lg:justify-start gap-3">
                                 <div className="hidden sm:block h-[1px] w-8 bg-secondary/30" />
                                 <p className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-[0.3em]">{currentDate}</p>
@@ -570,17 +570,17 @@ export default function DashboardHome() {
                             </h1>
                         </div>
 
-                        <div className="flex justify-center lg:justify-end gap-3 sm:gap-6 lg:gap-8 shrink-0 overflow-x-auto no-scrollbar py-2">
+                        <div className="flex justify-center lg:col-start-2 lg:row-start-1 lg:justify-center gap-3 sm:gap-6 lg:gap-5 xl:gap-7 shrink-0 overflow-x-auto no-scrollbar py-2 lg:py-0">
                             {[
                                 { label: t('dashboard.moonSign'), data: moonSign, color: "text-blue-400" },
                                 { label: t('dashboard.sunSign'), data: sunSign, color: "text-amber-500" },
                                 { label: t('dashboard.ascendant'), data: ascendantSign, color: "text-purple-400" }
                             ].map((sign, idx) => (
-                                <Link key={idx} href={sign.data?.id ? `/rashis?sign=${sign.data.id}` : '/rashis'} className="group relative flex flex-col items-center min-w-[80px] sm:min-w-[100px]">
-                                    <div className="w-16 h-16 sm:w-20 lg:w-24 sm:h-20 lg:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden relative">
+                                <Link key={idx} href={sign.data?.id ? `/rashis?sign=${sign.data.id}` : '/rashis'} className="group relative flex flex-col items-center min-w-[80px] sm:min-w-[100px] lg:min-w-[86px] xl:min-w-[100px]">
+                                    <div className="w-16 h-16 sm:w-20 lg:w-20 xl:w-24 sm:h-20 lg:h-20 xl:h-24 rounded-full bg-surface border border-outline-variant/20 flex flex-col items-center justify-center transition-all duration-500 group-hover:border-secondary/50 group-hover:-translate-y-1 group-hover:shadow-[0_0_30px_rgba(255,183,77,0.1)] overflow-hidden relative">
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         {userLoading ? (
-                                            <SkeletonCircle size={48} className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20" />
+                                            <SkeletonCircle size={48} className="w-12 h-12 sm:w-16 sm:h-16 lg:w-16 lg:h-16 xl:w-20 xl:h-20" />
                                         ) : sign.data?.icon ? (
                                             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
                                                 <Image 
@@ -588,7 +588,7 @@ export default function DashboardHome() {
                                                     alt={sign.data.name} 
                                                     width={48}
                                                     height={48}
-                                                    className="w-8 h-8 sm:w-10 lg:w-12 object-contain transition-transform duration-500 group-hover:scale-110" 
+                                                    className="w-8 h-8 sm:w-10 lg:w-10 xl:w-12 object-contain transition-transform duration-500 group-hover:scale-110" 
                                                 />
                                             </motion.div>
                                         ) : (
@@ -610,12 +610,12 @@ export default function DashboardHome() {
                                 </Link>
                             ))}
                         </div>
-                    </div>
 
-                    <div className="w-full mb-2 hidden lg:block">
-                        <div className="w-full relative group">
-                            <div className="w-full h-[80px] sm:h-[100px] bg-surface border border-secondary/20 rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
-                                <FeatureSlider onQuestion={handleSliderQuestion} t={t} />
+                        <div className="w-full hidden lg:block lg:col-start-3 lg:row-start-1 lg:min-w-0">
+                            <div className="w-full relative group">
+                                <div className="w-full h-[80px] sm:h-[100px] lg:h-[82px] bg-surface border border-secondary/20 rounded-[28px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:border-secondary/40 transition-all">
+                                    <FeatureSlider onQuestion={handleSliderQuestion} t={t} compact />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -624,7 +624,7 @@ export default function DashboardHome() {
                 {/* ZONE 2: HERO DASHBOARD */}
                 <div className="grid grid-cols-1 min-[1600px]:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     <div className="min-[1600px]:col-span-8 flex flex-col gap-4 sm:gap-6">
-                        <DailyHoroscopeCard userLoading={userLoading} onSendMessage={handleSendMessage} />
+                        <DailyHoroscopeCard userLoading={userLoading} />
                     </div>
 
                     <div className="hidden min-[1600px]:flex flex-col min-[1600px]:col-span-4 min-h-0">

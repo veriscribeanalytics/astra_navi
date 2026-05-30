@@ -314,7 +314,7 @@ const ChatInput: React.FC = () => {
   const CycleIcon = currentModeOpt?.Icon || Sparkles;
   const cycleLabel = currentModeOpt?.label || 'Normal';
 
- return (
+  return (
     <div ref={containerRef} className="w-full px-2 sm:px-5 3xl:px-6 pb-[calc(0.5rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -363,50 +363,14 @@ const ChatInput: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex items-end gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*,.pdf"
-            className="hidden"
-            onChange={(e) => { handleFileSelect(e.target.files); e.target.value = ''; }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={attachments.length >= MAX_ATTACHMENTS}
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-              attachments.length >= MAX_ATTACHMENTS
-              ? 'text-foreground/15 cursor-not-allowed'
-              : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
-            }`}
-            title={t('chat.input.attachFile')}
-          >
-            <Paperclip className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-          </button>
-
-          <button
-            onClick={toggleListening}
-            disabled={!speechSupported}
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-              !speechSupported
-              ? 'text-foreground/15 cursor-not-allowed'
-              : isListening 
-              ? 'bg-red-500/20 text-red-500 animate-pulse'
-              : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
-            }`}
-            title={!speechSupported ? "Voice input not supported" : isListening ? "Stop listening" : "Voice input"}
-          >
-            {!speechSupported ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : isListening ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
-          </button>
-
+        <div className="flex items-end gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2.5 sm:py-3">
           <textarea
             ref={textareaRef}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={inputText.length > 0 ? '' : activePlaceholder}
-            className="w-full bg-transparent border-none outline-none text-[14px] sm:text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2 sm:py-2.5 px-1 max-h-[150px] min-h-[40px] sm:min-h-0 no-scrollbar"
+            className="w-full bg-transparent border-none outline-none text-[14px] sm:text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-1.5 px-1 max-h-[150px] min-h-[38px] sm:min-h-0 no-scrollbar"
             rows={1}
           />
 
@@ -419,17 +383,6 @@ const ChatInput: React.FC = () => {
               {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           )}
-
-          {/* Mobile-only inline mode toggle (single-row layout) */}
-          <button
-            onClick={cycleMode}
-            className="sm:hidden inline-flex items-center gap-1 px-2 h-8 rounded-lg bg-secondary/15 text-secondary border border-secondary/25 shrink-0 text-[11px] font-bold uppercase tracking-wide"
-            title={`Mode: ${cycleLabel} — tap to cycle`}
-            aria-label={`Mode: ${cycleLabel}`}
-          >
-            <CycleIcon className="w-3.5 h-3.5" />
-            <span>{cycleLabel}</span>
-          </button>
 
           <button
             onClick={handleSend}
@@ -454,9 +407,52 @@ const ChatInput: React.FC = () => {
           </button>
         </div>
 
-        <div className="hidden sm:flex flex-col gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
-            {modeOptions.map(({ value: m, label, Icon }) => (
+        {/* Bottom Toolbar: Attach, Voice, Mode, Char Count */}
+        <div className="flex flex-row items-center justify-between px-2.5 sm:px-3.5 py-1.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 gap-2">
+          {/* Left tools: Paperclip, Voice */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={(e) => { handleFileSelect(e.target.files); e.target.value = ''; }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={attachments.length >= MAX_ATTACHMENTS}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                attachments.length >= MAX_ATTACHMENTS
+                ? 'text-foreground/15 cursor-not-allowed'
+                : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
+              }`}
+              title={t('chat.input.attachFile')}
+            >
+              <Paperclip className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            </button>
+
+            <button
+              onClick={toggleListening}
+              disabled={!speechSupported}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                !speechSupported
+                ? 'text-foreground/15 cursor-not-allowed'
+                : isListening 
+                ? 'bg-red-500/20 text-red-500 animate-pulse'
+                : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
+              }`}
+              title={!speechSupported ? "Voice input not supported" : isListening ? "Stop listening" : "Voice input"}
+            >
+              {!speechSupported ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : isListening ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
+            </button>
+          </div>
+
+          {/* Right/Center: Mode Selector and character count */}
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Desktop Mode Selector */}
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2.5">
+              {modeOptions.map(({ value: m, label, Icon }) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
@@ -470,13 +466,27 @@ const ChatInput: React.FC = () => {
                   {label}
                 </button>
               ))}
-            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden sm:inline ml-1">{t('chat.input.naviUsesChart')}</span>
+            </div>
+
+            {/* Mobile Mode Selector */}
+            <button
+              onClick={cycleMode}
+              className="sm:hidden inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg bg-secondary/15 text-secondary border border-secondary/25 shrink-0 text-[11px] font-bold uppercase tracking-wide"
+              title={`Mode: ${cycleLabel} — tap to cycle`}
+              aria-label={`Mode: ${cycleLabel}`}
+            >
+              <CycleIcon className="w-3.5 h-3.5" />
+              <span>{cycleLabel}</span>
+            </button>
+
+            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden md:inline ml-1">{t('chat.input.naviUsesChart')}</span>
+            
+            {showCharCount && (
+              <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'} ml-2`}>
+                {charCount}/{MAX_CHARS}
+              </p>
+            )}
           </div>
-          {showCharCount && (
-            <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'}`}>
-              {charCount}/{MAX_CHARS}
-            </p>
-          )}
         </div>
       </div>
     </div>

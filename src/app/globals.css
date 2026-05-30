@@ -1588,6 +1588,34 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
   display: flex; flex-direction: column; overflow: hidden; z-index: 10;
 }
 
+/* GPT-style logged-in dashboard shell */
+body:has(.gpt-dashboard-shell) {
+  background: #05051c;
+}
+
+body:has(.gpt-dashboard-shell) nav {
+  background: rgba(7, 8, 40, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff;
+}
+
+body:has(.gpt-dashboard-shell) nav a,
+body:has(.gpt-dashboard-shell) nav button {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body:has(.gpt-dashboard-shell) nav [class*="text-primary"] {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+body:has(.gpt-dashboard-shell) nav [class*="text-on-surface-variant"] {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+body:has(.gpt-dashboard-shell) footer {
+  display: none;
+}
+
 /* CELESTIAL ANIMATIONS */
 /* --- SHIMMER ANIMATION --- */
 @keyframes shimmer-sweep {

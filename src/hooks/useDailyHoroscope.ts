@@ -44,6 +44,12 @@ export function useDailyHoroscope({ sign, isGeneral }: Options = {}) {
         throw new Error(ed?.error || 'Failed to load horoscope');
       }
       const parsed = await res.json();
+      if (parsed?.profile_location_required || parsed?.calculation_unavailable) {
+        setProfileLocationRequired(true);
+        setData(null);
+        setError(null);
+        return;
+      }
       setData(parsed);
       setError(null);
     } catch (err) {

@@ -77,13 +77,11 @@ interface ModalData {
 export default function DailyHoroscopeCard({ 
     sign, 
     isGeneral, 
-    userLoading, 
-    onSendMessage 
+    userLoading
 }: { 
     sign?: string; 
     isGeneral?: boolean; 
     userLoading?: boolean;
-    onSendMessage?: (msg: string) => void;
 }) {
     const router = useRouter();
     const { t, language } = useTranslation();
@@ -101,6 +99,7 @@ export default function DailyHoroscopeCard({
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
     const [activeAlertIdx, setActiveAlertIdx] = useState(0);
     const [paywallData, setPaywallData] = useState<PaywallData | null>(null);
+    const [pendingChatPrompt, setPendingChatPrompt] = useState<{ title: string; message: string } | null>(null);
     
     // Optimization Refs
     const currentSign = horoscope?.user?.sign || sign || 'Aries';
@@ -306,8 +305,25 @@ export default function DailyHoroscopeCard({
             .finally(() => setForecastLoading(false));
     };
 
+    const requestChatPrompt = useCallback((message: string, title?: string) => {
+        setPendingChatPrompt({
+            title: title || t('horoscope.askNavi'),
+            message,
+        });
+    }, [t]);
+
     const handleConsult = (topic: string) => {
-        localStorage.setItem('astranavi_pending_message', `Tell me more about my ${topic.toLowerCase()} forecast for today`);
+        requestChatPrompt(
+            `Tell me more about my ${topic.toLowerCase()} forecast for today`,
+            `${t('horoscope.askNavi')}: ${topic}`
+        );
+    };
+
+    const confirmChatPrompt = () => {
+        if (!pendingChatPrompt) return;
+        localStorage.setItem('astranavi_pending_message', pendingChatPrompt.message);
+        setPendingChatPrompt(null);
+        setActiveModal(null);
         router.push('/chat');
     };
 
@@ -350,6 +366,7 @@ export default function DailyHoroscopeCard({
     const _displayDate = horoscope?.meta?.date_display || horoscope?.date_display || dateString;
     
     const highlightMetric = [...metrics].sort((a,b) => b.score - a.score)[0];
+    const signLearnHref = normalizedSignId ? `/rashis?sign=${encodeURIComponent(normalizedSignId)}` : '/rashis';
 
     return (
         <Card padding="none" className="!rounded-[24px] sm:!rounded-[40px] overflow-hidden relative bg-surface border-secondary/10 flex flex-col h-full min-h-[400px] sm:min-h-[600px]">
@@ -469,7 +486,7 @@ export default function DailyHoroscopeCard({
                     <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/5 grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 items-stretch">
                         {/* LEFT: Sign & Cramped Stats */}
                         <div className="md:col-span-2 flex flex-col justify-between">
-                            <div className="mb-4 group/sign cursor-pointer overflow-hidden relative" onClick={() => onSendMessage?.(`Tell me more about ${normalizedSignId} characteristics and what they mean for me.`)}>
+                            <Link href={signLearnHref} className="mb-4 group/sign cursor-pointer overflow-hidden relative block" aria-label={`Learn more about ${translatedSign}`}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <TrendingUp className="w-4 h-4 text-secondary" />
                                     <span className="text-[12px] font-bold text-secondary uppercase tracking-[0.2em]">{t('horoscope.personalizedForecast')}</span>
@@ -484,7 +501,7 @@ export default function DailyHoroscopeCard({
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
 
                             {/* CRAMPED STATS GRID */}
                             <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-4 border-t border-white/5">
@@ -496,7 +513,10 @@ export default function DailyHoroscopeCard({
                                 ].map((s, i) => (
                                     <button 
                                         key={i} 
-                                        onClick={() => onSendMessage?.(`My ${s.l} today is ${s.v}. What does this mean for my day and how should I use it?`)}
+                                        onClick={() => requestChatPrompt(
+                                            `My ${s.l} today is ${s.v}. What does this mean for my day and how should I use it?`,
+                                            `${t('horoscope.analyze')} ${s.l}`
+                                        )}
                                         className="flex flex-col gap-0.5 text-left group/stat hover:bg-white/[0.03] p-2.5 -m-2 rounded-xl transition-all duration-300 relative overflow-hidden"
                                     >
                                         <div className="relative h-9">
@@ -628,14 +648,23 @@ export default function DailyHoroscopeCard({
 
                                             <div className="absolute inset-0 flex items-center gap-1 sm:gap-4 translate-y-0 sm:translate-y-4 group-hover:translate-y-0 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-auto sm:pointer-events-none group-hover:pointer-events-auto">
                                                 <button 
-                                                    onClick={() => openModal({ label: item.label, score: item.score, info: item.info, icon: item.icon, color: item.iconColor, bg: item.iconBg, colorHex: item.scoreHex, area: item.area })}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openModal({ label: item.label, score: item.score, info: item.info, icon: item.icon, color: item.iconColor, bg: item.iconBg, colorHex: item.scoreHex, area: item.area });
+                                                    }}
                                                     className="flex-1 px-2 sm:px-4 py-2 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-foreground font-black text-[9px] sm:text-[11px] uppercase tracking-wider hover:bg-white/10 transition-all flex items-center justify-center gap-1 sm:gap-2"
                                                 >
                                                     {t('horoscope.detailedForecast')} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 </button>
                                                 
                                                 <button 
-                                                    onClick={() => onSendMessage?.(`${t('horoscope.askNaviAboutToday')} ${item.label}`)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        requestChatPrompt(
+                                                            `${t('horoscope.askNaviAboutToday')} ${item.label}`,
+                                                            `${t('horoscope.askNaviAboutToday')} ${item.label}`
+                                                        );
+                                                    }}
                                                     className="flex-[1.5] px-3 sm:px-6 py-2 sm:py-3.5 rounded-xl sm:rounded-2xl bg-secondary text-background font-black text-[9px] sm:text-[11px] uppercase tracking-widest hover:scale-105 hover:bg-amber-500 transition-all flex items-center justify-center gap-1 sm:gap-2"
                                                 >
                                                     {t('horoscope.askNaviAboutToday')} {item.label} <MessageSquare className="w-3.5 h-3.5" />
@@ -829,6 +858,72 @@ export default function DailyHoroscopeCard({
                                         </>
                                     );
                                 })()}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {pendingChatPrompt && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+                        onClick={() => setPendingChatPrompt(null)}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="daily-chat-confirm-title"
+                    >
+                        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+                        <motion.div
+                            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                            transition={{ type: "spring", damping: 28, stiffness: 320 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="relative w-full max-w-md rounded-[28px] border border-secondary/20 bg-surface p-6 shadow-2xl"
+                        >
+                            <button
+                                onClick={() => setPendingChatPrompt(null)}
+                                className="absolute right-4 top-4 w-9 h-9 rounded-full bg-surface-variant/30 flex items-center justify-center hover:bg-surface-variant/50 transition-colors"
+                                aria-label="Close chat confirmation"
+                            >
+                                <X className="w-4 h-4 text-foreground/70" />
+                            </button>
+
+                            <div className="w-12 h-12 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary mb-4">
+                                <MessageSquare className="w-6 h-6" />
+                            </div>
+                            <h2 id="daily-chat-confirm-title" className="text-xl font-headline font-bold text-foreground mb-2">
+                                Ask Navi in chat?
+                            </h2>
+                            <p className="text-sm text-foreground/60 leading-relaxed mb-4">
+                                Navi will open chat with this question so you can continue from there.
+                            </p>
+                            <div className="rounded-2xl bg-surface-variant/20 border border-outline-variant/15 p-4 mb-5">
+                                <p className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-2">
+                                    {pendingChatPrompt.title}
+                                </p>
+                                <p className="text-sm font-medium text-foreground/80 leading-relaxed">
+                                    {pendingChatPrompt.message}
+                                </p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <button
+                                    onClick={() => setPendingChatPrompt(null)}
+                                    className="flex-1 px-4 py-3 rounded-2xl border border-outline-variant/20 text-foreground/70 font-bold text-sm hover:bg-surface-variant/20 transition-colors"
+                                >
+                                    Stay here
+                                </button>
+                                <button
+                                    onClick={confirmChatPrompt}
+                                    className="flex-1 px-4 py-3 rounded-2xl bg-secondary text-background font-bold text-sm hover:bg-amber-500 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    Open chat <ArrowRight className="w-4 h-4" />
+                                </button>
                             </div>
                         </motion.div>
                     </motion.div>

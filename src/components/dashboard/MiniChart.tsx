@@ -14,7 +14,10 @@ export interface ForecastDay {
 export default function MiniChart({ days, colorHex, activeDate }: { days: ForecastDay[]; colorHex: string; activeDate?: string }) {
     const { t } = useTranslation();
     const h = 60, w = 220;
-    const points = days.map((d, i) => ({ x: (i / (days.length - 1)) * w, y: h - (d.score / 100) * h }));
+    const yOf = (score: number) => h - (score / 100) * h;
+    const gridValues = [25, 50, 75];
+
+    const points = days.map((d, i) => ({ x: (i / (days.length - 1)) * w, y: yOf(d.score) }));
     const pathD = catmullRomToBezier(points);
     const areaD = catmullRomArea(points, h);
 
@@ -40,8 +43,8 @@ export default function MiniChart({ days, colorHex, activeDate }: { days: Foreca
                 </defs>
 
                 {/* Y-Axis Labels & Grid */}
-                {[25, 50, 75].map(v => {
-                    const gridY = h - (v / 100) * h;
+                {gridValues.map(v => {
+                    const gridY = yOf(v);
                     return (
                         <g key={v}>
                             <line x1="0" y1={gridY} x2={w} y2={gridY} stroke="var(--color-foreground)" strokeOpacity="0.1" strokeWidth="0.5" />
