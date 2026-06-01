@@ -92,7 +92,7 @@ export default function TermsPage() {
         {/* 5. Limitation of Liability */}
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">5. Limitation of Liability</h2>
-          <p className="text-sm sm:text-base text-primary/80 leading-relaxed text-primary/80">
+          <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             To the maximum extent permitted by applicable law, <strong>[LEGAL_ENTITY_NAME]</strong> and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, arising out of your access to or use of, or inability to access or use, the Service. Our total cumulative liability shall not exceed the amount paid by you to us in the preceding six months.
           </p>
         </div>

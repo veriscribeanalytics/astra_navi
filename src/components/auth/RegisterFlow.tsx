@@ -417,44 +417,15 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false 
                     required
                   />
                   <span className="text-xs text-primary/70 leading-relaxed font-medium font-body">
-                    {t('login.consentLabel') ? (
-                      t('login.consentLabel').includes('Privacy Policy') && t('login.consentLabel').includes('Terms & Conditions') ? (
-                        (() => {
-                          const parts1 = t('login.consentLabel').split('Privacy Policy');
-                          const partBeforePrivacy = parts1[0];
-                          const parts2 = parts1[1].split('Terms & Conditions');
-                          const partBetween = parts2[0];
-                          const partAfterTerms = parts2[1];
-                          return (
-                            <>
-                              {partBeforePrivacy}
-                              <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
-                                {t('footer.privacyPolicy') || 'Privacy Policy'}
-                              </Link>
-                              {partBetween}
-                              <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
-                                {t('footer.terms') || 'Terms & Conditions'}
-                              </Link>
-                              {partAfterTerms}
-                            </>
-                          );
-                        })()
-                      ) : (
-                        t('login.consentLabel')
-                      )
-                    ) : (
-                      <>
-                        I confirm I am 18 or older and agree to the{' '}
-                        <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
-                          Privacy Policy
-                        </Link>{' '}
-                        and{' '}
-                        <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
-                          Terms & Conditions
-                        </Link>
-                        .
-                      </>
-                    )}
+                    {t('login.consentPart1') || 'I confirm I am 18 or older and agree to the'}{' '}
+                    <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                      {t('footer.privacyPolicy') || 'Privacy Policy'}
+                    </Link>{' '}
+                    {t('login.consentPart2') || 'and'}{' '}
+                    <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                      {t('footer.terms') || 'Terms & Conditions'}
+                    </Link>
+                    .
                   </span>
                 </label>
               </div>

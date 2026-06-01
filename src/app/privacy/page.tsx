@@ -104,7 +104,7 @@ export default function PrivacyPage() {
 
         {/* 6. Children's Data */}
         <div className="space-y-4">
-          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">6. Children's Data (18+ Age Restricton)</h2>
+          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">6. Children's Data (18+ Age Restriction)</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             In compliance with DPDP rules governing children's data, Astra Navi does not offer services to, or knowingly collect personal data from, individuals under the age of 18. An age validation gate is active during registration. If we learn we have collected data from a child under 18 without parental consent, we will delete it immediately.
           </p>

@@ -446,6 +446,8 @@
     "serverError": "The server is currently unavailable. Please try again later.",
     "resetLinkSent": "If an account exists, reset instructions have been sent.",
     "consentLabel": "I confirm I am 18 or older and agree to the Privacy Policy and Terms & Conditions.",
+    "consentPart1": "I confirm I am 18 or older and agree to the",
+    "consentPart2": "and",
     "mustBe18": "You must be 18 or older to use Astra Navi."
   },
   "about": {
