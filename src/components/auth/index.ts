@@ -6,3 +6,5 @@ export { default as AuthErrorBanner } from './AuthErrorBanner';
 export { default as RegisterStepIndicator } from './RegisterStepIndicator';
 export { default as SignInForm } from './SignInForm';
 export { default as RegisterFlow } from './RegisterFlow';
+export { default as GoogleSignInButton } from './GoogleSignInButton';
+export { default as PhoneOtpForm } from './PhoneOtpForm';

@@ -488,7 +488,7 @@ export default function DashboardHome() {
                 <Link href="/plans" className="inline-flex items-center gap-2 rounded-full border border-[#d99b23]/20 bg-[#d99b23]/10 px-3 py-1.5 tracking-normal text-[#e6ad2f]">
                   <Wallet className="h-3.5 w-3.5" />
                   <span className="text-sm font-black">{totalCredits ?? 0}</span>
-                  <span className="text-[10px] uppercase text-white/40">Navi Credits</span>
+                  <span className="text-[10px] uppercase text-white/40">{t('plans.naviCredits') || "Navi Credits"}</span>
                   <span className="rounded-full bg-[#d99b23]/10 px-2 py-0.5 text-[10px] uppercase text-[#e6ad2f]">{getTierLabel(tier || "free")}</span>
                 </Link>
               )}
@@ -502,16 +502,16 @@ export default function DashboardHome() {
             {topLifeArea && (
               <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-white">
                 <Star className="h-4 w-4 fill-[#ffc83d] text-[#ffc83d]" />
-                Your {topLifeArea.label} Score is Impressive! <span className="font-black text-[#34d399]">{topLifeArea.score}%</span>
+                {t('newDashboard.todaysEnergy.scoreImpressive', { label: topLifeArea.label }) || `Your ${topLifeArea.label} Score is Impressive!`} <span className="font-black text-[#34d399]">{topLifeArea.score}%</span>
               </p>
             )}
           </div>
 
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {[
-              { label: "Moon Sign", data: moonSign, fallback: "Leo" },
-              { label: "Sun Sign", data: sunSign, fallback: "Libra" },
-              { label: "Ascendant", data: ascendantSign, fallback: "Leo" },
+              { label: t('dashboard.moonSign') || "Moon Sign", data: moonSign, fallback: "Leo" },
+              { label: t('dashboard.sunSign') || "Sun Sign", data: sunSign, fallback: "Libra" },
+              { label: t('dashboard.ascendant') || "Ascendant", data: ascendantSign, fallback: "Leo" },
             ].map((item) => (
               <Link
                 key={item.label}
@@ -539,7 +539,7 @@ export default function DashboardHome() {
             <DarkPanel className="p-5 sm:p-7">
               <div className="grid gap-6 lg:grid-cols-[170px_minmax(0,1fr)_190px] lg:items-center">
                 <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-                  <p className="text-[13px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">Today&apos;s Energy</p>
+                  <p className="text-[13px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{t('newDashboard.todaysEnergy.title') || "Today's Energy"}</p>
                   <div className="mt-5">
                     <RingScore score={overallScore} color={scoreColor} />
                   </div>
@@ -565,9 +565,9 @@ export default function DashboardHome() {
               <div className="mt-6 flex flex-wrap gap-3">
                 {[
                   { label: moonSign?.name || "Leo", icon: <Orbit className="h-4 w-4" /> },
-                  { label: `${ascendantSign?.name || "Leo"} Rising`, icon: <Moon className="h-4 w-4" /> },
-                  { label: transits?.panchanga?.tithi || "Purnima", prefix: "Tithi" },
-                  { label: transits?.panchanga?.nakshatra || "Anuradha", prefix: "Nakshatra" },
+                  { label: `${ascendantSign?.name || "Leo"} ${t('newDashboard.todaysEnergy.rising') || "Rising"}`, icon: <Moon className="h-4 w-4" /> },
+                  { label: transits?.panchanga?.tithi || "Purnima", prefix: t('newDashboard.panchang.tithi') || "Tithi" },
+                  { label: transits?.panchanga?.nakshatra || "Anuradha", prefix: t('newDashboard.panchang.nakshatra') || "Nakshatra" },
                 ].map((chip) => (
                   <div key={`${chip.prefix || chip.label}-${chip.label}`} className="inline-flex items-center gap-2 rounded-full bg-[#21164d]/70 px-4 py-2 text-sm font-bold text-white">
                     {"icon" in chip && chip.icon}
@@ -582,9 +582,9 @@ export default function DashboardHome() {
                   <div className="flex items-start gap-4">
                     <Sun className="h-8 w-8 shrink-0 text-[#34d399]" />
                     <div>
-                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#34d399]">Good Time</p>
+                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#34d399]">{t('newDashboard.todaysEnergy.goodTime') || "Good Time"}</p>
                       <p className="mt-2 text-lg font-bold">19:00 - 20:00</p>
-                      <p className="mt-1 text-sm leading-6 text-white/58">Auspicious window for important work and decisions.</p>
+                      <p className="mt-1 text-sm leading-6 text-white/58">{t('newDashboard.todaysEnergy.goodTimeDesc') || "Auspicious window for important work and decisions."}</p>
                     </div>
                   </div>
                 </div>
@@ -592,9 +592,13 @@ export default function DashboardHome() {
                   <div className="flex items-start gap-4">
                     <AlertTriangle className="h-8 w-8 shrink-0 fill-[#ffb400]/15 text-[#ffb400]" />
                     <div>
-                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#ffb400]">Rahu Kaal / Caution Window</p>
+                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#ffb400]">
+                        {t('newDashboard.panchang.rahuKaal') && t('newDashboard.todaysEnergy.alertTime')
+                          ? `${t('newDashboard.panchang.rahuKaal')} / ${t('newDashboard.todaysEnergy.alertTime')}`
+                          : "Rahu Kaal / Caution Window"}
+                      </p>
                       <p className="mt-2 text-lg font-bold">{formatRahuKaal(transits)}</p>
-                      <p className="mt-1 text-sm leading-6 text-white/58">Avoid starting new work or making major commitments.</p>
+                      <p className="mt-1 text-sm leading-6 text-white/58">{t('newDashboard.todaysEnergy.cautionTimeDesc') || "Avoid starting new work or making major commitments."}</p>
                     </div>
                   </div>
                 </div>
@@ -602,22 +606,22 @@ export default function DashboardHome() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <button
-                  onClick={() => askInChat("Ask Navi about today's energy", `Explain today's energy for me. My overall score is ${overallScore}.`)}
+                  onClick={() => askInChat(t('newDashboard.todaysEnergy.aiChat') || "Ask Navi", t('newDashboard.todaysEnergy.explainMsg', { score: overallScore }) || `Explain today's energy for me. My overall score is ${overallScore}.`)}
                   className="rounded-full border border-[#f2ad1d]/60 px-5 py-3 text-sm font-black uppercase tracking-wider text-[#ffc43d] transition hover:bg-[#f2ad1d]/10"
                 >
-                  Ask Navi
+                  {t('newDashboard.todaysEnergy.aiChat') || "Ask Navi"}
                 </button>
                 <Link
                   href="/horoscope/forecast"
                   className="rounded-full bg-gradient-to-r from-[#f9a900] via-[#ffbd16] to-[#de8b00] px-5 py-3 text-center text-sm font-black uppercase tracking-wider text-[#08071f] transition hover:brightness-110"
                 >
-                  Full Reading
+                  {t('newDashboard.todaysEnergy.fullReading') || "Full Reading"}
                 </Link>
               </div>
             </DarkPanel>
 
             <section className="space-y-3">
-              <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-white/70">Life Areas Overview</h2>
+              <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-white/70">{t('newDashboard.lifeAreas.title') || "Life Areas"}</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                 {lifeAreas.map(({ area, label, score, insight, theme }) => {
                   const Icon = theme.icon;
@@ -652,15 +656,15 @@ export default function DashboardHome() {
               <div className="flex items-center gap-3">
                 <Sparkles className="h-8 w-8 text-[#ffc43d]" />
                 <div>
-                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">Celestial</p>
-                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">Insights</p>
+                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">{t('newDashboard.celestial') || "Celestial"}</p>
+                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">{t('newDashboard.insights') || "Insights"}</p>
                 </div>
               </div>
               {(transits?.notableTransits?.length ? transits.notableTransits : [
-                "Jupiter's transit enhances your gains and stabilizes growth.",
-                "Saturn's transit tests your discipline and builds resilience.",
-                "Rahu's transit destabilizes old patterns - stay grounded.",
-                "Ketu supports letting go and releasing attachments.",
+                t('newDashboard.notableTransits.jupiter') || "Jupiter's transit enhances your gains and stabilizes growth.",
+                t('newDashboard.notableTransits.saturn') || "Saturn's transit tests your discipline and builds resilience.",
+                t('newDashboard.notableTransits.rahu') || "Rahu's transit destabilizes old patterns - stay grounded.",
+                t('newDashboard.notableTransits.ketu') || "Ketu supports letting go and releasing attachments.",
               ]).slice(0, 4).map((item, idx) => (
                 <p key={idx} className="border-white/10 text-sm leading-6 text-white/65 md:border-l md:pl-5">
                   <span className="mr-2 text-[#ffc43d]">•</span>
@@ -674,8 +678,8 @@ export default function DashboardHome() {
             <div className="space-y-5">
               <DarkPanel className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 className="text-[14px] font-black uppercase tracking-[0.22em]">Weekly Outlook</h2>
-                  <p className="text-[12px] font-black uppercase tracking-wider text-[#ffc43d]">Best Day: {bestDay}</p>
+                  <h2 className="text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.weeklyChart.title') || "Weekly Chart"}</h2>
+                  <p className="text-[12px] font-black uppercase tracking-wider text-[#ffc43d]">{t('newDashboard.weeklyChart.best') || "Best Day"}: {bestDay}</p>
                 </div>
                 <div className="mb-5 overflow-x-auto">
                   <div className="flex min-w-max gap-2">
@@ -715,15 +719,15 @@ export default function DashboardHome() {
               <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] min-[2560px]:grid-cols-[minmax(0,1fr)_480px]">
                 <div className="space-y-5">
                   <DarkPanel className="p-5">
-                    <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">Panchang Today</h2>
+                    <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.panchang.title') || "Panchang Today"}</h2>
                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                       {[
-                        { label: "Tithi", value: transits?.panchanga?.tithi || "Purnima", icon: <Moon className="h-4 w-4 text-[#ffc43d]" /> },
-                        { label: "Vara", value: transits?.panchanga?.vara || "Shanivaar", icon: <Calendar className="h-4 w-4 text-[#f59e0b]" /> },
-                        { label: "Nakshatra", value: transits?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-4 w-4 text-[#34d399]" /> },
-                        { label: "Yoga", value: transits?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-4 w-4 text-[#a78bfa]" /> },
-                        { label: "Karana", value: transits?.panchanga?.karana || "Vishti", icon: <Gem className="h-4 w-4 text-[#fb7185]" /> },
-                        { label: "Rahu Kaal", value: formatRahuKaal(transits), icon: <AlertTriangle className="h-4 w-4 text-[#ffc43d]" /> },
+                        { label: t('newDashboard.panchang.tithi') || "Tithi", value: transits?.panchanga?.tithi || "Purnima", icon: <Moon className="h-4 w-4 text-[#ffc43d]" /> },
+                        { label: t('newDashboard.panchang.vara') || "Vara", value: transits?.panchanga?.vara || "Shanivaar", icon: <Calendar className="h-4 w-4 text-[#f59e0b]" /> },
+                        { label: t('newDashboard.panchang.nakshatra') || "Nakshatra", value: transits?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-4 w-4 text-[#34d399]" /> },
+                        { label: t('newDashboard.panchang.yoga') || "Yoga", value: transits?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-4 w-4 text-[#a78bfa]" /> },
+                        { label: t('newDashboard.panchang.karana') || "Karana", value: transits?.panchanga?.karana || "Vishti", icon: <Gem className="h-4 w-4 text-[#fb7185]" /> },
+                        { label: t('newDashboard.panchang.rahuKaal') || "Rahu Kaal", value: formatRahuKaal(transits), icon: <AlertTriangle className="h-4 w-4 text-[#ffc43d]" /> },
                       ].map((chip) => (
                         <div key={chip.label} className="flex min-h-[82px] flex-col items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] p-2 text-center">
                           {chip.icon}
@@ -740,12 +744,12 @@ export default function DashboardHome() {
                         <Heart className="h-7 w-7 fill-[#a78bfa]/20 text-[#a78bfa]" />
                       </div>
                       <div>
-                        <h3 className="text-[14px] font-black uppercase tracking-[0.16em]">Compatibility & Match</h3>
-                        <p className="mt-1 max-w-lg text-sm leading-6 text-white/58">Discover your cosmic compatibility with anyone. Find harmony in relationships.</p>
+                        <h3 className="text-[14px] font-black uppercase tracking-[0.16em]">{t('newDashboard.compatibility.title') || "Compatibility & Match"}</h3>
+                        <p className="mt-1 max-w-lg text-sm leading-6 text-white/58">{t('newDashboard.compatibility.desc') || "Discover your cosmic compatibility with anyone. Find harmony in relationships."}</p>
                       </div>
                     </div>
                     <Link href="/kundli/match" className="rounded-xl bg-[#ffc022] px-5 py-3 text-center text-sm font-black uppercase text-[#08071f]">
-                      Start a Match
+                      {t('newDashboard.compatibility.emptyCta') || "Start a Match"}
                     </Link>
                   </DarkPanel>
 
@@ -754,10 +758,10 @@ export default function DashboardHome() {
                     <div className="mb-5 flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <Sun className="h-5 w-5 text-[#ffc43d]" />
-                        <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">Daily Cosmic Insight</h3>
+                        <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.cosmicInsight.title') || "Daily Cosmic Insight"}</h3>
                       </div>
                       <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[#ffc43d]">
-                        Today • {horoscope?.meta?.date_display || horoscope?.date_display || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {t('horoscope.today') || "Today"} • {horoscope?.meta?.date_display || horoscope?.date_display || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </span>
                     </div>
                     <div className="relative mb-6 px-2 py-3">
@@ -773,7 +777,7 @@ export default function DashboardHome() {
                           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-700 shadow-[0_0_16px_rgba(168,85,247,0.6)]" />
                         </div>
                         <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
-                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">Lucky Color</p>
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.cosmicInsight.luckyColor') || "Lucky Color"}</p>
                           <p className="font-headline text-[12px] sm:text-sm font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
                             {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
                           </p>
@@ -784,7 +788,7 @@ export default function DashboardHome() {
                           {(horoscope?.lucky?.number || horoscope?.lucky_number) ?? "7"}
                         </div>
                         <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
-                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">Lucky Number</p>
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.cosmicInsight.luckyNumber') || "Lucky Number"}</p>
                           <p className="font-headline text-[12px] sm:text-sm font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
                             {typeof (horoscope?.lucky?.number || horoscope?.lucky_number) === 'number'
                               ? (horoscope?.lucky?.number || horoscope?.lucky_number)
@@ -800,20 +804,20 @@ export default function DashboardHome() {
                   <div className="mb-4 flex items-start gap-3">
                     <Sparkles className="mt-1 h-7 w-7 text-[#ffc43d]" />
                     <div>
-                      <h2 className="font-headline text-2xl font-bold">Consult Navi AI</h2>
-                      <p className="text-sm text-white/55">Vedic wisdom powered by advanced AI.</p>
+                      <h2 className="font-headline text-2xl font-bold">{t('dashboard.consultNaviAi') || "Consult Navi AI"}</h2>
+                      <p className="text-sm text-white/55">{t('dashboard.vedicWisdomPowered') || "Vedic wisdom powered by advanced AI."}</p>
                     </div>
                   </div>
 
-                  <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">Ask About</p>
+                  <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{t('dashboard.askAbout') || "Ask About"}</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "Career & Finance", icon: <Briefcase className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: "Love & Marriage", icon: <Heart className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: "Health & Wellness", icon: <Activity className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: "Travel & Relocation", icon: <Home className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: "Muhurat & Timing", icon: <Calendar className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: "Current Transits", icon: <Orbit className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.careerFinance") || "Career & Finance", icon: <Briefcase className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.loveMarriage") || "Love & Marriage", icon: <Heart className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.healthWellness") || "Health & Wellness", icon: <Activity className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.travelRelocation") || "Travel & Relocation", icon: <Home className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.muhuratTiming") || "Muhurat & Timing", icon: <Calendar className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.currentTransits") || "Current Transits", icon: <Orbit className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
                     ].map((item) => {
                       const isBlocked = isFeatureBlocked(item.requiresFeature);
                       const paywallData = getFeaturePaywall(item.requiresFeature);
@@ -842,12 +846,12 @@ export default function DashboardHome() {
                     })}
                   </div>
 
-                  <p className="mb-3 mt-6 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">Deep Dive</p>
+                  <p className="mb-3 mt-6 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{t('newDashboard.deepDive.title') || "Deep Dive"}</p>
                   <div className="space-y-3">
                     {[
-                      "Analyze my weekly forecast in detail",
-                      `Why is my ${activeAreaLabel} score at its current level?`,
-                      "Give me a quick action to improve my score",
+                      t('newDashboard.deepDive.deepDiveQ1') || "Analyze my weekly forecast in detail",
+                      t('newDashboard.deepDive.deepDiveQ2', { area: activeAreaLabel }) || `Why is my ${activeAreaLabel} score at its current level?`,
+                      t('newDashboard.deepDive.deepDiveQ3') || "Give me a quick action to improve my score",
                     ].map((question) => {
                       const isBlocked = isFeatureBlocked('chat_message');
                       const paywallData = getFeaturePaywall('chat_message');
@@ -860,7 +864,7 @@ export default function DashboardHome() {
                               setActivePaywallData(paywallData);
                               return;
                             }
-                            askInChat("Deep Dive", question);
+                            askInChat(t('newDashboard.deepDive.title') || "Deep Dive", question);
                           }}
                           className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${
                             isBlocked
@@ -886,12 +890,12 @@ export default function DashboardHome() {
                         return;
                       }
                       setSelectedAvatarId("navi");
-                      askInChat("Chat with Navi", "I want to discuss my dashboard and today's horoscope.");
+                      askInChat(t('chatWithNavi') || "Chat with Navi", t('newDashboard.todaysEnergy.discussMsg') || "I want to discuss my dashboard and today's horoscope.");
                     }}
                     className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d99b23]/60 px-4 py-3 text-sm font-black uppercase tracking-wider text-[#ffc43d] transition hover:bg-[#d99b23]/10"
                   >
                     {isFeatureBlocked('chat_message') ? <Lock className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-                    Chat with Navi
+                    {t('chatWithNavi') || "Chat with Navi"}
                   </button>
                 </DarkPanel>
               </div>
@@ -906,14 +910,13 @@ export default function DashboardHome() {
         <div className="mb-10 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
             <Sparkles className="h-4 w-4 text-[#ffc43d]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ffc43d]">Your Guidance Hub</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ffc43d]">{t('newDashboard.guidanceHub') || "Your Guidance Hub"}</span>
           </div>
           <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-white sm:text-[42px]">
-            Explore Your Cosmic Network
+            {t('newDashboard.exploreCosmicNetwork') || "Explore Your Cosmic Network"}
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-white/55">
-            Connect with expert guides, explore your chart, understand your bonds,<br className="hidden sm:inline" />
-            and access powerful astrological tools.
+            {t('newDashboard.cosmicNetworkDesc') || "Connect with expert guides, explore your chart, understand your bonds, and access powerful astrological tools."}
           </p>
         </div>
 
@@ -927,20 +930,20 @@ export default function DashboardHome() {
                   <div className="flex h-5 w-5 items-center justify-center">
                     <div className="h-2 w-2 rotate-45 border border-[#ffc43d] bg-[#ffc43d]/20" />
                   </div>
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">Meet Your AI Astrologers</h3>
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.meetYourAiAstrologers') || "Meet Your AI Astrologers"}</h3>
                 </div>
                 <Link href="/chat" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-                  View All <ArrowRight className="inline h-3 w-3" />
+                  {t('newDashboard.lifeAreas.viewAll') || "View All"} <ArrowRight className="inline h-3 w-3" />
                 </Link>
               </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {[
-                  { name: "Navi", role: "General Vedic Guide", desc: "Balanced Vedic guidance for love, work, timing & life.", credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
-                  { name: "Arya", role: "Career Mentor", desc: "Guidance for jobs, skills, promotion & work decisions.", credits: 2, avatarId: "career_mentor", img: "/images/avatars/ARYA_AVATAR.jpeg" },
-                  { name: "Meera", role: "Relationship Guide", desc: "Insights for love, marriage, compatibility & emotions.", credits: 2, avatarId: "relationship_guide", img: "/images/avatars/MEERA_AVATAR.jpeg" },
-                  { name: "Anand", role: "Health Advisor", desc: "Understand vitality, well-being & health patterns.", credits: 2, avatarId: "spiritual_guide", img: "/images/avatars/ANAND_AVATAR.jpeg" },
-                  { name: "Vidya", role: "Financial Astrologer", desc: "Wealth, investments & financial stability insights.", credits: 2, avatarId: "finance_mentor", img: "/images/avatars/VIDYA_AVATAR.jpeg" },
-                  { name: "Rishi", role: "Deep Chart Sage", desc: "Advanced chart synthesis for deep spiritual insights.", credits: 3, avatarId: "astro_sage", img: "/images/avatars/RISHI_AVATAR.jpeg" },
+                  { name: "Navi", role: t('newDashboard.guides.navi.role') || "General Vedic Guide", desc: t('newDashboard.guides.navi.desc') || "Balanced Vedic guidance for love, work, timing & life.", credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
+                  { name: "Arya", role: t('newDashboard.guides.arya.role') || "Career Mentor", desc: t('newDashboard.guides.arya.desc') || "Guidance for jobs, skills, promotion & work decisions.", credits: 2, avatarId: "career_mentor", img: "/images/avatars/ARYA_AVATAR.jpeg" },
+                  { name: "Meera", role: t('newDashboard.guides.meera.role') || "Relationship Guide", desc: t('newDashboard.guides.meera.desc') || "Insights for love, marriage, compatibility & emotions.", credits: 2, avatarId: "relationship_guide", img: "/images/avatars/MEERA_AVATAR.jpeg" },
+                  { name: "Anand", role: t('newDashboard.guides.anand.role') || "Health Advisor", desc: t('newDashboard.guides.anand.desc') || "Understand vitality, well-being & health patterns.", credits: 2, avatarId: "spiritual_guide", img: "/images/avatars/ANAND_AVATAR.jpeg" },
+                  { name: "Vidya", role: t('newDashboard.guides.vidya.role') || "Financial Astrologer", desc: t('newDashboard.guides.vidya.desc') || "Wealth, investments & financial stability insights.", credits: 2, avatarId: "finance_mentor", img: "/images/avatars/VIDYA_AVATAR.jpeg" },
+                  { name: "Rishi", role: t('newDashboard.guides.rishi.role') || "Deep Chart Sage", desc: t('newDashboard.guides.rishi.desc') || "Advanced chart synthesis for deep spiritual insights.", credits: 3, avatarId: "astro_sage", img: "/images/avatars/RISHI_AVATAR.jpeg" },
                 ].map((guide) => {
                   const isLocked = isFeatureBlocked('chat_message');
                   const paywallData = getFeaturePaywall('chat_message');
@@ -968,7 +971,7 @@ export default function DashboardHome() {
                         </div>
                         <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-[#d99b23]/40 bg-[#0a0a1f] px-2.5 py-1 text-[9px] font-bold text-[#ffc43d] shadow-lg">
                           <Coins className="h-2.5 w-2.5" />
-                          {guide.credits} credit{guide.credits > 1 ? 's' : ''}
+                          {guide.credits} {guide.credits > 1 ? (t('dashboard.creditPlural') || 'credits') : (t('dashboard.creditSingular') || 'credit')}
                         </div>
                       </div>
                       <h4 className="mb-1 mt-1 font-headline text-base font-bold text-white">{guide.name}</h4>
@@ -981,7 +984,7 @@ export default function DashboardHome() {
                             return;
                           }
                           setSelectedAvatarId(guide.avatarId);
-                          askInChat(`Chat with ${guide.name}`, `I want to consult with ${guide.name} about my chart.`);
+                          askInChat(t('chatWithNavi') || `Chat with ${guide.name}`, `I want to consult with ${guide.name} about my chart.`);
                         }}
                         className={`flex items-center gap-1.5 rounded-xl border-2 px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
                           isLocked
@@ -992,12 +995,12 @@ export default function DashboardHome() {
                         {isLocked ? (
                           <>
                             <Lock className="h-3 w-3" />
-                            Locked
+                            {t('newDashboard.guides.locked') || "Locked"}
                           </>
                         ) : (
                           <>
                             <MessageSquare className="h-3 w-3" />
-                            Start Chat
+                            {t('dashboard.startChat') || "Start Chat"}
                           </>
                         )}
                       </button>
@@ -1012,10 +1015,10 @@ export default function DashboardHome() {
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Heart className="h-5 w-5 text-[#fb7185]" />
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">My Family & Bonds</h3>
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.familyFriends.title') || "Family & Friends"}</h3>
                 </div>
                 <Link href="/family" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-                  View All <ArrowRight className="inline h-3 w-3" />
+                  {t('newDashboard.lifeAreas.viewAll') || "View All"} <ArrowRight className="inline h-3 w-3" />
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1027,15 +1030,15 @@ export default function DashboardHome() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="truncate font-headline text-sm font-bold text-white">Chandrakant</h4>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">Sibling</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.familyFriends.relationshipSibling') || "Sibling"}</p>
                     </div>
                   </div>
                   <span className="inline-block self-start rounded-md bg-[#ffb400]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#ffb400]">
-                    Needs Attention
+                    {t('dashboard.familyStatusNeedsAttention') || "Needs Attention"}
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     <Link href="/family" className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]">
-                      View Bond
+                      {t('dashboard.familyViewBond') || "View Bond"}
                     </Link>
                     <button
                       onClick={() => {
@@ -1048,7 +1051,7 @@ export default function DashboardHome() {
                       className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]"
                     >
                       {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-                      Run Compatibility
+                      {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
                     </button>
                   </div>
                 </div>
@@ -1060,15 +1063,15 @@ export default function DashboardHome() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="truncate font-headline text-sm font-bold text-white">Ankit Prasad</h4>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">Friend</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.familyFriends.relationshipFriend') || "Friend"}</p>
                     </div>
                   </div>
                   <span className="inline-block self-start rounded-md bg-[#34d399]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#34d399]">
-                    ✓ Linked
+                    {t('newDashboard.linked') || "✓ Linked"}
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     <Link href="/family" className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]">
-                      View Bond
+                      {t('dashboard.familyViewBond') || "View Bond"}
                     </Link>
                     <button
                       onClick={() => {
@@ -1081,7 +1084,7 @@ export default function DashboardHome() {
                       className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]"
                     >
                       {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-                      Run Compatibility
+                      {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
                     </button>
                   </div>
                 </div>
@@ -1091,12 +1094,12 @@ export default function DashboardHome() {
                     <Users className="h-7 w-7" />
                   </div>
                   <div>
-                    <p className="mb-1 text-sm font-bold text-white">Add Member</p>
-                    <p className="text-[10px] leading-relaxed text-white/40">Add family or friends to compare charts</p>
+                    <p className="mb-1 text-sm font-bold text-white">{t('newDashboard.familyFriends.addMember') || "Add Member"}</p>
+                    <p className="text-[10px] leading-relaxed text-white/40">{t('dashboard.familyAddSubtitle') || "Add family or friends to compare charts"}</p>
                   </div>
                   <button className="flex items-center gap-1.5 rounded-xl border-2 border-[#d99b23]/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-[#ffc43d] transition-all hover:border-[#d99b23]/70 hover:bg-[#d99b23]/10">
                     <Users className="h-3 w-3" />
-                    Add Member
+                    {t('newDashboard.familyFriends.addMember') || "Add Member"}
                   </button>
                 </div>
               </div>
@@ -1113,17 +1116,17 @@ export default function DashboardHome() {
                   <div className="flex h-5 w-5 items-center justify-center">
                     <Orbit className="h-5 w-5 text-[#60a5fa]" />
                   </div>
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">My Chart Snapshot</h3>
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.weeklyChart.chartSnapshot') || "My Chart Snapshot"}</h3>
                 </div>
                 <Link href="/kundli" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-                  View Details <ArrowRight className="inline h-3 w-3" />
+                  {t('newDashboard.myChart.viewDetails') || "View Details"} <ArrowRight className="inline h-3 w-3" />
                 </Link>
               </div>
               <div className="space-y-3">
                 {[
-                  { label: "Kundli", sublabel: "Leo Ascendant", icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
-                  { label: "Mahadasha", sublabel: "Rahu", subtext: "May 2026 — May 2044", icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "#fbbf24", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-                  { label: "Antardasha", sublabel: "Rahu", subtext: "May 2026 — Jan 2028", icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "#a78bfa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                  { label: t('newDashboard.myChart.yourKundli') || "Kundli", sublabel: `${ascendantSign?.name || "Leo"} ${t('dashboard.ascendant') || "Ascendant"}`, icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
+                  { label: t('newDashboard.myChart.mahadasha') || "Mahadasha", sublabel: "Rahu", subtext: "May 2026 — May 2044", icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "#fbbf24", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                  { label: t('newDashboard.myChart.antardasha') || "Antardasha", sublabel: "Rahu", subtext: "May 2026 — Jan 2028", icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "#a78bfa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
                 ].map((item, idx) => {
                   const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
                   const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
@@ -1155,7 +1158,7 @@ export default function DashboardHome() {
                       </div>
                       <button className="flex items-center gap-1 rounded-xl border border-[#d99b23]/40 bg-[#d99b23]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#ffc43d] shrink-0">
                         {isBlocked ? <Lock className="h-3 w-3 mr-0.5" /> : null}
-                        {isBlocked ? 'Unlock' : 'View'} <ArrowRight className="h-3 w-3" />
+                        {isBlocked ? (t('newDashboard.unlock') || 'Unlock') : (t('newDashboard.view') || 'View')} <ArrowRight className="h-3 w-3" />
                       </button>
                     </div>
                   );
@@ -1166,7 +1169,7 @@ export default function DashboardHome() {
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-[#d99b23]/50 bg-[#d99b23]/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-[#ffc43d] transition-all hover:border-[#d99b23]/70 hover:bg-[#d99b23]/15"
               >
                 <Sparkles className="h-4 w-4" />
-                Explore Full Analysis
+                {t('newDashboard.myChart.exploreFullAnalysis') || "Explore Full Analysis"}
               </Link>
             </DarkPanel>
 
@@ -1181,20 +1184,20 @@ export default function DashboardHome() {
               <div className="flex h-5 w-5 items-center justify-center">
                 <div className="h-2 w-2 rotate-45 border border-[#ffc43d] bg-[#ffc43d]/20" />
               </div>
-              <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">Cosmic Portals</h3>
+              <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('dashboard.cosmicPortals') || "Cosmic Portals"}</h3>
             </div>
             <Link href="/chat" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-              Explore All Portals <ArrowRight className="inline h-3 w-3" />
+              {t('newDashboard.exploreAllPortals') || "Explore All Portals"} <ArrowRight className="inline h-3 w-3" />
             </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {[
-              { icon: <MessageSquare className="h-5 w-5" />, title: "Chat with Navi", desc: "Ask anything about your Kundli, Dashas, transits, or life guidance.", action: "Consult AI", href: "/chat", color: "#ffc43d", requiresFeature: 'chat_message' as PaywallFeatureKey },
-              { icon: <Globe className="h-5 w-5" />, title: "Janam Kundli", desc: "Detailed birth chart & planetary analysis based on Vedic wisdom.", action: "Open Chart", href: "/kundli", color: "#60a5fa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-              { icon: <Heart className="h-5 w-5" />, title: "Soulmate Sync", desc: "Match compatibility using Guna Milan & karmic insights.", action: "Analyze Match", href: "/kundli/match", color: "#fb7185", requiresFeature: 'match_report' as PaywallFeatureKey },
-              { icon: <Sun className="h-5 w-5" />, title: "Daily Pulse", desc: "Real-time Tithi, Yoga & Vedic energies for your day.", action: "View Today", href: "/horoscope/forecast", color: "#34d399", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
-              { icon: <Orbit className="h-5 w-5" />, title: "Rashi Library", desc: "Explore all 12 zodiac signs with detailed traits & insights.", action: "Open Library", href: "/rashis", color: "#a78bfa" },
-              { icon: <Sparkles className="h-5 w-5" />, title: "Sessions", desc: "Join live sessions & interact with experts and seekers.", action: "Join Session", href: "/consult", color: "#f59e0b", requiresFeature: 'guided_consult' as PaywallFeatureKey },
+              { icon: <MessageSquare className="h-5 w-5" />, title: t('dashboard.consultNaviAi') || "Chat with Navi", desc: t('newDashboard.portalChatDesc') || "Ask anything about your Kundli, Dashas, transits, or life guidance.", action: t('dashboard.consultAi') || "Consult AI", href: "/chat", color: "#ffc43d", requiresFeature: 'chat_message' as PaywallFeatureKey },
+              { icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli') || "Janam Kundli", desc: t('dashboard.janamKundliDesc') || "Detailed birth chart & planetary analysis based on Vedic wisdom.", action: t('dashboard.openChart') || "Open Chart", href: "/kundli", color: "#60a5fa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+              { icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync') || "Soulmate Sync", desc: t('newDashboard.portalSoulmateDesc') || "Match compatibility using Guna Milan & karmic insights.", action: t('dashboard.analyzeMatch') || "Analyze Match", href: "/kundli/match", color: "#fb7185", requiresFeature: 'match_report' as PaywallFeatureKey },
+              { icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse') || "Daily Pulse", desc: t('newDashboard.portalPulseDesc') || "Real-time Tithi, Yoga & Vedic energies for your day.", action: t('newDashboard.viewToday') || "View Today", href: "/horoscope/forecast", color: "#34d399", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
+              { icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary') || "Rashi Library", desc: t('newDashboard.portalRashiDesc') || "Explore all 12 zodiac signs with detailed traits & insights.", action: t('dashboard.openLibrary') || "Open Library", href: "/rashis", color: "#a78bfa" },
+              { icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions') || "Sessions", desc: t('newDashboard.portalSessionsDesc') || "Join live sessions & interact with experts and seekers.", action: t('dashboard.joinSession') || "Join Session", href: "/consult", color: "#f59e0b", requiresFeature: 'guided_consult' as PaywallFeatureKey },
             ].map((portal, idx) => {
               const isLocked = portal.requiresFeature ? isFeatureBlocked(portal.requiresFeature) : false;
               const paywallData = portal.requiresFeature ? getFeaturePaywall(portal.requiresFeature) : null;
@@ -1247,7 +1250,7 @@ export default function DashboardHome() {
                     style={{ borderColor: `${portal.color}50`, backgroundColor: 'transparent', color: portal.color }}
                   >
                     {isLocked && <Lock className="h-3 w-3 mr-1 shrink-0" />}
-                    {isLocked ? 'Unlock' : portal.action} <ArrowRight className="h-3 w-3" />
+                    {isLocked ? (t('newDashboard.unlock') || 'Unlock') : portal.action} <ArrowRight className="h-3 w-3" />
                   </button>
                 </div>
               );
@@ -1259,14 +1262,14 @@ export default function DashboardHome() {
         <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-center text-[11px] text-white/30">
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4" />
-            <span>Your data is private and protected.</span>
+            <span>{t('newDashboard.privacy.protected') || "Your data is private and protected."}</span>
           </div>
           <span>•</span>
-          <span>Secure</span>
+          <span>{t('newDashboard.privacy.secure') || "Secure"}</span>
           <span>•</span>
-          <span>Encrypted</span>
+          <span>{t('newDashboard.privacy.encrypted') || "Encrypted"}</span>
           <span>•</span>
-          <span>Trusted by thousands</span>
+          <span>{t('newDashboard.privacy.trusted') || "Trusted by thousands"}</span>
         </div>
       </div>
 
@@ -1299,18 +1302,18 @@ export default function DashboardHome() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d99b23]/30 bg-[#d99b23]/10 text-[#ffc43d]">
                 <MessageSquare className="h-6 w-6" />
               </div>
-              <h2 className="font-headline text-2xl font-bold">Ask Navi in chat?</h2>
-              <p className="mt-2 text-sm leading-6 text-white/60">Navi will open chat with this question so you can continue from there.</p>
+              <h2 className="font-headline text-2xl font-bold">{t('newDashboard.todaysEnergy.askNaviInChat') || "Ask Navi in chat?"}</h2>
+              <p className="mt-2 text-sm leading-6 text-white/60">{t('newDashboard.todaysEnergy.askNaviConfirmDesc') || "Navi will open chat with this question so you can continue from there."}</p>
               <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{pendingPrompt.title}</p>
                 <p className="mt-2 text-sm leading-6 text-white/82">{pendingPrompt.message}</p>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <button onClick={() => setPendingPrompt(null)} className="rounded-2xl border border-white/12 px-4 py-3 text-sm font-bold text-white/75 hover:bg-white/8">
-                  Stay here
+                  {t('newDashboard.todaysEnergy.stayHere') || "Stay here"}
                 </button>
                 <button onClick={confirmChat} className="rounded-2xl bg-[#ffc022] px-4 py-3 text-sm font-black text-[#08071f]">
-                  Open chat
+                  {t('newDashboard.todaysEnergy.openChat') || "Open chat"}
                 </button>
               </div>
             </motion.div>
