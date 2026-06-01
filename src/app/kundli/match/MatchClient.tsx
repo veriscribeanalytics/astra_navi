@@ -191,11 +191,11 @@ export default function MatchClient() {
     tob: user?.tob || '',
     place: user?.pob || '',
     gender: 'male',
-    birthPlaceName: user?.birthPlaceName,
-    birthLatitude: user?.birthLatitude,
-    birthLongitude: user?.birthLongitude,
-    birthTimezoneName: user?.birthTimezoneName,
-    birthTimezoneOffsetAtBirth: user?.birthTimezoneOffsetAtBirth,
+    birthPlaceName: user?.birthPlaceName ?? undefined,
+    birthLatitude: user?.birthLatitude ?? undefined,
+    birthLongitude: user?.birthLongitude ?? undefined,
+    birthTimezoneName: user?.birthTimezoneName ?? undefined,
+    birthTimezoneOffsetAtBirth: user?.birthTimezoneOffsetAtBirth ?? undefined,
   });
 
   const [person2, setPerson2] = useState<PersonDetails>({
@@ -232,11 +232,11 @@ export default function MatchClient() {
         tob: user.tob || '',
         place: user.pob || '',
         gender: 'male',
-        birthPlaceName: user.birthPlaceName,
-        birthLatitude: user.birthLatitude,
-        birthLongitude: user.birthLongitude,
-        birthTimezoneName: user.birthTimezoneName,
-        birthTimezoneOffsetAtBirth: user.birthTimezoneOffsetAtBirth,
+        birthPlaceName: user.birthPlaceName ?? undefined,
+        birthLatitude: user.birthLatitude ?? undefined,
+        birthLongitude: user.birthLongitude ?? undefined,
+        birthTimezoneName: user.birthTimezoneName ?? undefined,
+        birthTimezoneOffsetAtBirth: user.birthTimezoneOffsetAtBirth ?? undefined,
       });
       if (
         typeof user.birthLatitude === 'number' &&

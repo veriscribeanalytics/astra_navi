@@ -18,6 +18,7 @@ import {
   RegisterFlow,
   GoogleSignInButton,
   PhoneOtpForm,
+  EmailOtpForm,
 } from '@/components/auth';
 import { isProfileComplete } from '@/lib/profileCompleteness';
 import { ParsedAuthError, parseAuthError } from '@/utils/authErrorParser';
@@ -29,7 +30,7 @@ const LoginContent = () => {
   const { showLoading, login: setAuthUser, isLoggedIn, user, logout } = useAuth();
   const { t } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
-  const [signInMethod, setSignInMethod] = useState<'email' | 'phone'>('email');
+  const [signInMethod, setSignInMethod] = useState<'email' | 'phone' | 'email-otp'>('email');
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lockedRemaining, setLockedRemaining] = useState<number>(0);
   const recoveryStartedRef = useRef(false);
@@ -164,23 +165,48 @@ const LoginContent = () => {
     }
   };
 
-  // --- Phone OTP verified handler (template) ---
-  const handlePhoneVerified = async (verifyResponse: unknown) => {
-    // ─── TODO(backend): complete the session from the OTP verify response ───
-    // `verifyResponse` is whatever /api/auth/otp/verify returns (tokens + user).
-    // Complete the next-auth session the same way handleRegister does, e.g.:
-    //   const v = verifyResponse as { user: { id: string; email: string; name?: string };
-    //     accessToken: string; refreshToken: string; expiresIn: number };
-    //   const result = await signIn('credentials', {
-    //     redirect: false, isOtpLogin: 'true', id: v.user.id, email: v.user.email,
-    //     accessToken: v.accessToken, refreshToken: v.refreshToken, expiresIn: v.expiresIn,
-    //   });
-    //   if (result?.error) throw new Error(result.error);
-    //   setAuthUser(v.user.email, { ...v.user });
-    void verifyResponse;
+  // --- Phone/Email OTP verified handler ---
+  const handleOtpVerified = async (verifyResponse: unknown) => {
+    const v = verifyResponse as {
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+      profileComplete: boolean;
+      user: {
+        id: string;
+        email?: string | null;
+        phoneNumber?: string | null;
+        name?: string | null;
+      };
+    };
+
+    const result = await signIn('credentials', {
+      redirect: false,
+      isRegistration: 'true',
+      id: v.user.id,
+      email: v.user.email || '',
+      name: v.user.name || '',
+      phoneNumber: v.user.phoneNumber || '',
+      accessToken: v.accessToken,
+      refreshToken: v.refreshToken,
+      expiresIn: String(v.expiresIn),
+    });
+
+    if (result?.error) {
+      throw new Error(result.error);
+    }
+
+    setAuthUser(v.user.email || '', {
+      id: v.user.id,
+      email: v.user.email || null,
+      phoneNumber: v.user.phoneNumber || null,
+      name: v.user.name || null,
+    });
+
     showLoading(t('login.signingYouIn'), 1500);
+    const destination = v.profileComplete ? getCallbackUrl() : '/profile?onboarding=true';
     setTimeout(() => {
-      router.push(getCallbackUrl());
+      router.push(destination);
     }, 1500);
   };
 
@@ -449,22 +475,24 @@ const LoginContent = () => {
               <AuthFormCard>
                 {!isRegister ? (
                   <>
-                    {/* Sign-in method switcher: Email | Phone */}
-                    <div className="flex gap-2 p-1 rounded-xl bg-surface-variant/20 border border-outline-variant/10 mb-4">
-                      {(['email', 'phone'] as const).map((m) => (
+                    {/* Sign-in method switcher: Password | Phone OTP | Email OTP */}
+                    <div className="flex gap-1.5 p-1 rounded-xl bg-surface-variant/20 border border-outline-variant/10 mb-4">
+                      {(['email', 'phone', 'email-otp'] as const).map((m) => (
                         <button
                           key={m}
                           type="button"
                           onClick={() => setSignInMethod(m)}
-                          className={`flex-1 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${
+                          className={`flex-1 py-2 rounded-lg text-[10px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                             signInMethod === m
-                              ? 'bg-secondary/10 text-secondary'
-                              : 'text-on-surface-variant/40 hover:text-on-surface-variant/70'
+                              ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-sm'
+                              : 'text-on-surface-variant/40 hover:text-on-surface-variant/70 border border-transparent'
                           }`}
                         >
                           {m === 'email'
-                            ? (t('auth.method.email') || 'Email')
-                            : (t('auth.method.phone') || 'Phone')}
+                            ? (t('auth.method.password') || 'Password')
+                            : m === 'phone'
+                            ? (t('auth.method.phone') || 'Phone OTP')
+                            : (t('auth.method.emailOtp') || 'Email OTP')}
                         </button>
                       ))}
                     </div>
@@ -477,8 +505,10 @@ const LoginContent = () => {
                         onForgotPassword={() => router.push('/forgot-password')}
                         onActionClick={handleActionClick}
                       />
+                    ) : signInMethod === 'phone' ? (
+                      <PhoneOtpForm onVerified={handleOtpVerified} disabled={!!lockedUntil} />
                     ) : (
-                      <PhoneOtpForm onVerified={handlePhoneVerified} disabled={!!lockedUntil} />
+                      <EmailOtpForm onVerified={handleOtpVerified} disabled={!!lockedUntil} />
                     )}
 
                     {/* Social sign-in */}

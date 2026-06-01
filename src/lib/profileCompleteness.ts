@@ -1,6 +1,6 @@
 export interface ProfileLike {
   id?: string;
-  email?: string;
+  email?: string | null;
   name?: string | null;
   dob?: string | null;
   tob?: string | null;

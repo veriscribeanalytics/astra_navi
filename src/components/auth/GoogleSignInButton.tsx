@@ -1,8 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import Button from '@/components/ui/Button';
+import React, { useEffect, useRef, useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useTranslation } from '@/hooks';
+
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
 
 interface GoogleSignInButtonProps {
   /** Where to send the user after a successful Google auth. */
@@ -12,21 +18,10 @@ interface GoogleSignInButtonProps {
   onError?: (message: string) => void;
 }
 
-/** Google's official 4-color "G" mark. */
-const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" />
-    <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853" />
-    <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
-    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" />
-  </svg>
-);
-
 /**
- * "Continue with Google" button — UI template.
- *
- * The actual sign-in is stubbed out below. When the backend Google flow is
- * ready, replace the body of {@link handleGoogleSignIn} with the real call.
+ * Premium Google Sign-In Button.
+ * Uses Google's latest Identity Services SDK for a secure, localized iframe button,
+ * plus optional Google One Tap for seamless login.
  */
 const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   callbackUrl = '/',
@@ -35,44 +30,130 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      // ─── TODO(backend): wire up Google sign-in ─────────────────────────────
-      // Most likely once a Google provider is configured in the next-auth setup:
-      //
-      //   import { signIn } from 'next-auth/react';
-      //   await signIn('google', { callbackUrl });
-      //
-      // If the backend issues its OWN JWT (exchanges the Google credential),
-      // call that endpoint here, then complete the session via
-      //   signIn('credentials', { accessToken, refreshToken, ... }).
-      // Remove the throw below once wired.
-      void callbackUrl;
-      throw new Error(t('auth.google.notConfigured') || 'Google sign-in is not available yet.');
-    } catch (err) {
-      onError?.(err instanceof Error ? err.message : 'Google sign-in failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  // 1. Dynamically load Google's newer Identity Services client library
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.google?.accounts?.id) {
+      setScriptLoaded(true);
+      return;
     }
-  };
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setScriptLoaded(true);
+    script.onerror = () => {
+      console.error('Failed to load Google Identity Services SDK.');
+    };
+    document.body.appendChild(script);
+  }, []);
+
+  // 2. Initialize Google Sign-in and render the official button
+  useEffect(() => {
+    if (!scriptLoaded || !clientId || !buttonContainerRef.current) return;
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response: any) => {
+          setIsLoading(true);
+          try {
+            // Call our Next.js API Proxy which validates via FastAPI
+            const res = await fetch('/api/auth/google', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ idToken: response.credential }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+              throw new Error(data.error || 'Google verification failed.');
+            }
+
+            // Establish the session in NextAuth using the pre-verified tokens
+            const result = await signIn('credentials', {
+              redirect: false,
+              isRegistration: 'true',
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.name,
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+              expiresIn: data.expiresIn,
+            });
+
+            if (result?.error) {
+              throw new Error(result.error);
+            }
+
+            // Trigger safe redirection to onboarding if profile is incomplete
+            const redirectTarget = data.profileComplete ? callbackUrl : '/profile?onboarding=true';
+            window.location.href = redirectTarget;
+          } catch (err: any) {
+            console.error('Google sign-in error:', err);
+            onError?.(err instanceof Error ? err.message : 'Google sign-in failed. Please try again.');
+          } finally {
+            setIsLoading(false);
+          }
+        },
+        auto_select: false,
+      });
+
+      // Render official Google button, responsive to its wrapper's width
+      window.google.accounts.id.renderButton(buttonContainerRef.current, {
+        theme: 'outline', // 'outline' | 'filled_blue' | 'filled_black'
+        size: 'large',
+        shape: 'rectangular',
+        width: buttonContainerRef.current.offsetWidth || 340,
+        text: 'continue_with',
+        logo_alignment: 'left',
+      });
+
+      // Optional: Activate One Tap prompt in addition to the button
+      window.google.accounts.id.prompt();
+    } catch (err) {
+      console.error('Error rendering Google Sign-In button:', err);
+    }
+  }, [scriptLoaded, clientId, callbackUrl, onError]);
+
+  // Developer reminder helper if Client ID is missing
+  if (!clientId) {
+    return (
+      <div className="w-full p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-center text-xs text-red-400">
+        Google Client ID not configured. Add <code className="bg-red-500/10 px-1 py-0.5 rounded font-mono">NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> to your .env.local
+      </div>
+    );
+  }
 
   return (
-    <Button
-      type="button"
-      variant="secondary"
-      fullWidth
-      size="lg"
-      loading={isLoading}
-      disabled={disabled || isLoading}
-      onClick={handleGoogleSignIn}
-      leftIcon={!isLoading ? <GoogleIcon /> : undefined}
-      className="!rounded-xl font-bold text-[12px] uppercase tracking-widest bg-surface"
-    >
-      {t('auth.google.continueWithGoogle') || 'Continue with Google'}
-    </Button>
+    <div className="w-full flex flex-col items-center justify-center min-h-[44px] relative">
+      {/* Mount point for the official Google Identity Services button */}
+      <div 
+        ref={buttonContainerRef} 
+        className="w-full flex justify-center"
+        style={{ display: isLoading ? 'none' : 'flex' }}
+      />
+      
+      {/* Elegant loading fallback / pulse skeleton */}
+      {(isLoading || !scriptLoaded) && (
+        <div className="w-full h-[44px] flex items-center justify-center rounded-xl bg-surface border border-border animate-pulse text-xs text-text-muted gap-2">
+          <svg className="animate-spin h-4 w-4 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {t('login.signingYouIn') || 'Signing you in...'}
+        </div>
+      )}
+    </div>
   );
 };
 
 export default GoogleSignInButton;
+

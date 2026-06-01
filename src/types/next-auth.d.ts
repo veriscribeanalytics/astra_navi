@@ -4,8 +4,12 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
+      email?: string | null;
+      phoneNumber?: string | null;
+      accessToken?: string;
+      refreshToken?: string;
       error?: string;
-    } & DefaultSession['user'];
+    } & Omit<DefaultSession['user'], 'email'>;
   }
 
   interface User {
@@ -13,6 +17,8 @@ declare module 'next-auth' {
     accessToken?: string;
     refreshToken?: string;
     accessTokenExpires?: number;
+    email?: string | null;
+    phoneNumber?: string | null;
   }
 }
 
@@ -22,6 +28,8 @@ declare module 'next-auth/jwt' {
     accessToken: string;
     refreshToken: string;
     accessTokenExpires: number;
+    email?: string | null;
+    phoneNumber?: string | null;
     error?: string;
   }
 }

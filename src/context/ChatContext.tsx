@@ -629,7 +629,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createNewChat = useCallback(async (initialMessage?: string, pageContextSource?: ChatPageContextSource) => {
     if (isGuest) return 'guest-session';
-    if (!user?.email) return null;
+    if (!user?.id) return null;
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
     const isDefaultAvatar = !selectedAvatarId || selectedAvatarId === DEFAULT_AVATAR_ID;
@@ -639,7 +639,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       : t('chat.naviWelcome');
     const tempChat: Chat = {
       id: tempId,
-      userEmail: user.email,
+      userEmail: user.email || '',
       title: initialMessage?.slice(0,30) || t('chat.newConversation'),
       messages: [{
         id: generateUUID(),

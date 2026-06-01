@@ -11,28 +11,28 @@ import { isProfileComplete, normalizeProfileUser, resolveProfileComplete } from 
 
 export interface User {
     id?: string;
-    email: string;
-    name?: string;
-    dob?: string;
-    tob?: string;
-    pob?: string;
-    birthPlaceName?: string;
-    birthLatitude?: number;
-    birthLongitude?: number;
-    birthTimezoneName?: string;
-    birthTimezoneOffsetAtBirth?: number;
-    phoneNumber?: string;
-    gender?: string;
-    maritalStatus?: string;
-    occupation?: string;
-    moonSign?: string;
-    sunSign?: string;
-    lagnaSign?: string;
-    astrologyData?: Record<string, unknown>;
-    chartContext?: string;
-    tier?: string;
+    email?: string | null;
+    name?: string | null;
+    dob?: string | null;
+    tob?: string | null;
+    pob?: string | null;
+    birthPlaceName?: string | null;
+    birthLatitude?: number | null;
+    birthLongitude?: number | null;
+    birthTimezoneName?: string | null;
+    birthTimezoneOffsetAtBirth?: number | null;
+    phoneNumber?: string | null;
+    gender?: string | null;
+    maritalStatus?: string | null;
+    occupation?: string | null;
+    moonSign?: string | null;
+    sunSign?: string | null;
+    lagnaSign?: string | null;
+    astrologyData?: Record<string, unknown> | null;
+    chartContext?: string | null;
+    tier?: string | null;
     image?: string | null;
-    language?: string;
+    language?: string | null;
     preferences?: {
         horoscope?: boolean;
         notifications?: boolean;
@@ -88,20 +88,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isLoggedIn = status === 'authenticated' && !hasSessionError;
     const isSessionLoading = status === 'loading';
     const sessionUserFallback: User | null =
-        isLoggedIn && session?.user?.email
+        isLoggedIn && session?.user?.id
             ? {
                 id: session.user.id,
-                email: session.user.email,
-                name: session.user.name || undefined,
-                image: session.user.image ?? null,
+                email: session.user.email ?? null,
+                phoneNumber: session.user.phoneNumber ?? null,
+                name: (session.user as any).name || undefined,
+                image: (session.user as any).image ?? null,
             }
             : null;
     const effectiveUser = user ?? sessionUserFallback;
-    const effectiveEmail = effectiveUser?.email;
 
     useEffect(() => {
         if (session?.user) {
-            const sessionUser = session.user;
+            const sessionUser = session.user as any;
             
 // Handle NextAuth refresh errors.
             // TokenReuseError and RefreshAccessTokenError are now persisted in the
@@ -136,31 +136,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return;
             }
 
-            // Initial set from session
-            if (sessionUser.email) {
+            // Initial set from session using user ID as stable identifier
+            if (sessionUser.id) {
                 // If it's a different user, reset profile state
-                if (prevEmailRef.current && prevEmailRef.current !== sessionUser.email) {
+                if (prevEmailRef.current && prevEmailRef.current !== sessionUser.id) {
                     setProfileFetched(false);
                     fetchInProgressRef.current = false;
                     setUser({
                         id: sessionUser.id,
-                        email: sessionUser.email!,
+                        email: sessionUser.email ?? null,
+                        phoneNumber: sessionUser.phoneNumber ?? null,
                         name: sessionUser.name || undefined,
                     });
                 } else if (!user) {
                     setUser({
                         id: sessionUser.id,
-                        email: sessionUser.email!,
+                        email: sessionUser.email ?? null,
+                        phoneNumber: sessionUser.phoneNumber ?? null,
                         name: sessionUser.name || undefined,
                     });
                 }
                 
-                prevEmailRef.current = sessionUser.email;
+                prevEmailRef.current = sessionUser.id;
 
                 // Sync full profile from DB if we haven't fetched it yet this session
                 if (!profileFetched && !fetchInProgressRef.current) {
                     fetchInProgressRef.current = true;
-                    clientFetch(`/api/user/profile?email=${encodeURIComponent(sessionUser.email)}`)
+                    clientFetch(`/api/user/profile`)
                         .then(res => {
                             if (!res.ok) {
                                 console.warn(`[AuthContext] Profile fetch returned ${res.status}. Will use session data only.`);
@@ -225,20 +227,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [session, status, profileFetched]); // Removed user from dependencies
 
     const login = useCallback((email?: string, profile?: Partial<User>) => {
-        if (email) {
-            setUser(prev => {
-                if (!prev) {
-                    const nextUser = { email, ...profile } as User;
-                    if (isProfileComplete(nextUser)) setProfileComplete(true);
-                    return nextUser;
-                }
-                const isSame = prev.email === email && 
-                    Object.keys(profile || {}).every(k => prev[k as keyof User] === (profile as Record<string, unknown>)[k]);
-                const nextUser = isSame ? prev : { ...prev, email, ...profile };
+        setUser(prev => {
+            if (!prev) {
+                const nextUser = { email, ...profile } as User;
                 if (isProfileComplete(nextUser)) setProfileComplete(true);
                 return nextUser;
-            });
-        }
+            }
+            const isSame = prev.email === email && prev.id === profile?.id && 
+                Object.keys(profile || {}).every(k => prev[k as keyof User] === (profile as Record<string, unknown>)[k]);
+            const nextUser = isSame ? prev : { ...prev, email, ...profile };
+            if (isProfileComplete(nextUser)) setProfileComplete(true);
+            return nextUser;
+        });
     }, []);
 
     const logout = useCallback(async (callbackUrl: string = '/?logout=success') => {
@@ -272,9 +272,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const refreshProfile = useCallback(async () => {
-        if (!effectiveEmail) return;
         try {
-            const res = await clientFetch(`/api/user/profile?email=${encodeURIComponent(effectiveEmail)}`);
+            const res = await clientFetch(`/api/user/profile`);
             if (!res.ok) return;
             const data = await res.json();
             if (data?.user) {
@@ -285,7 +284,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
             console.error('[AuthContext] refreshProfile failed:', err);
         }
-    }, [effectiveEmail]);
+    }, []);
 
     // Listen for language changes from LanguageContext.setLanguage().
     // When a user manually changes their language via the language picker,

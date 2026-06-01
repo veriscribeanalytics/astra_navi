@@ -8,3 +8,4 @@ export { default as SignInForm } from './SignInForm';
 export { default as RegisterFlow } from './RegisterFlow';
 export { default as GoogleSignInButton } from './GoogleSignInButton';
 export { default as PhoneOtpForm } from './PhoneOtpForm';
+export { default as EmailOtpForm } from './EmailOtpForm';

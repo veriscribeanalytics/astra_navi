@@ -54,9 +54,9 @@ const ConsultClient: React.FC = () => {
   const [birthDate, setBirthDate] = useState(user?.dob || '');
   const [birthTime, setBirthTime] = useState(user?.tob || '');
   const [birthPlace, setBirthPlace] = useState(user?.pob || '');
-  const [birthLatitude, setBirthLatitude] = useState<number | undefined>(user?.birthLatitude);
-  const [birthLongitude, setBirthLongitude] = useState<number | undefined>(user?.birthLongitude);
-  const [birthTimezoneName, setBirthTimezoneName] = useState<string | undefined>(user?.birthTimezoneName);
+  const [birthLatitude, setBirthLatitude] = useState<number | undefined>(user?.birthLatitude ?? undefined);
+  const [birthLongitude, setBirthLongitude] = useState<number | undefined>(user?.birthLongitude ?? undefined);
+  const [birthTimezoneName, setBirthTimezoneName] = useState<string | undefined>(user?.birthTimezoneName ?? undefined);
   const [confirmedLocation, setConfirmedLocation] = useState<LocationResult | null>(() => {
     if (
       typeof user?.birthLatitude === 'number' &&

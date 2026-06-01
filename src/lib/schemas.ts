@@ -193,3 +193,23 @@ export const ConsultRequestSchema = z.object({
   birthTimezoneOffsetAtBirth: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
   birthTimeFold: z.number().int().min(0).max(1).nullable().optional(),
 });
+
+// --- PHONE & EMAIL OTP ---
+
+export const PhoneStartSchema = z.object({
+  phoneNumber: z.string().regex(/^\+[1-9]\d{6,14}$/, "Invalid phone number format. Must be E.164 (e.g. +919876543210)"),
+});
+
+export const PhoneVerifySchema = z.object({
+  phoneNumber: z.string().regex(/^\+[1-9]\d{6,14}$/, "Invalid phone number format. Must be E.164 (e.g. +919876543210)"),
+  code: z.string().regex(/^\d{6}$/, "Verification code must be exactly 6 digits"),
+});
+
+export const EmailOtpStartSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const EmailOtpVerifySchema = z.object({
+  email: z.string().email("Invalid email address"),
+  code: z.string().regex(/^\d{6}$/, "Verification code must be exactly 6 digits"),
+});

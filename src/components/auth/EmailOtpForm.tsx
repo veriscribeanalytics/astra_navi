@@ -1,16 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Phone, KeyRound, ArrowRight, ArrowLeft } from 'lucide-react';
-import PhoneInput from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
-
+import { Mail, KeyRound, ArrowRight, ArrowLeft } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import AuthErrorBanner from './AuthErrorBanner';
 import { useTranslation } from '@/hooks';
 
-interface PhoneOtpFormProps {
+interface EmailOtpFormProps {
   /**
    * Called after the OTP is successfully verified. Receives whatever the
    * verify endpoint returns (tokens / user) so the parent can complete the
@@ -20,14 +17,14 @@ interface PhoneOtpFormProps {
   disabled?: boolean;
 }
 
-type Step = 'phone' | 'otp';
+type Step = 'email' | 'otp';
 
 const OTP_LENGTH = 6;
 
-const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = false }) => {
+const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = false }) => {
   const { t } = useTranslation();
-  const [step, setStep] = useState<Step>('phone');
-  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState<Step>('email');
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +37,12 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     return () => clearInterval(id);
   }, [resendIn]);
 
-  /** POST /api/auth/phone/start  body: { phoneNumber: "+91..." }  ->  { sent: true, expiresIn: 300 } */
-  const sendOtp = async (phoneNumber: string): Promise<number> => {
-    const res = await fetch('/api/auth/phone/start', {
+  /** POST /api/auth/email-otp/start  body: { email: "x@y.com" }  ->  { sent: true, expiresIn: 300 } */
+  const sendOtp = async (emailAddress: string): Promise<number> => {
+    const res = await fetch('/api/auth/email-otp/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber }),
+      body: JSON.stringify({ email: emailAddress }),
     });
     
     const data = await res.json();
@@ -60,12 +57,12 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     return data.expiresIn || 300;
   };
 
-  /** POST /api/auth/phone/verify  body: { phoneNumber, code }  ->  session envelope */
-  const verifyOtp = async (phoneNumber: string, code: string): Promise<unknown> => {
-    const res = await fetch('/api/auth/phone/verify', {
+  /** POST /api/auth/email-otp/verify  body: { email, code }  ->  session envelope */
+  const verifyOtp = async (emailAddress: string, code: string): Promise<unknown> => {
+    const res = await fetch('/api/auth/email-otp/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber, code }),
+      body: JSON.stringify({ email: emailAddress, code }),
     });
     
     const data = await res.json();
@@ -73,32 +70,31 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
       const errCode = data.code;
       const msg = data.message || data.error || 'Invalid code.';
       if (errCode === 'otp_expired') {
-        throw new Error(t('auth.phone.otpExpired') || 'Code expired — resend');
+        throw new Error(t('auth.email.otpExpired') || 'Code expired — resend');
       } else if (errCode === 'otp_incorrect') {
-        throw new Error(t('auth.phone.otpIncorrect') || 'Incorrect code');
+        throw new Error(t('auth.email.otpIncorrect') || 'Incorrect code');
       } else if (errCode === 'otp_locked') {
-        throw new Error(t('auth.phone.otpLocked') || 'Too many incorrect attempts. Please request a new code.');
+        throw new Error(t('auth.email.otpLocked') || 'Too many incorrect attempts. Please request a new code.');
       }
       throw new Error(msg);
     }
     return data;
   };
 
-  // E.164 Regex Validation
-  const phoneRegex = /^\+[1-9]\d{6,14}$/;
-  const isValidPhone = !!phone && phoneRegex.test(phone);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isValidEmail = !!email && emailRegex.test(email);
   const isValidOtp = otp.replace(/\D/g, '').length === OTP_LENGTH;
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!isValidPhone) {
-      setError(t('auth.phone.invalidPhone') || 'Please enter a valid phone number with country code (e.g. +91...).');
+    if (!isValidEmail) {
+      setError(t('auth.email.invalidEmail') || 'Please enter a valid email address.');
       return;
     }
     setIsSubmitting(true);
     try {
-      const expiresIn = await sendOtp(phone.trim());
+      const expiresIn = await sendOtp(email.trim());
       setStep('otp');
       setResendIn(expiresIn);
     } catch (err) {
@@ -117,7 +113,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     }
     setIsSubmitting(true);
     try {
-      const res = await verifyOtp(phone.trim(), otp.trim());
+      const res = await verifyOtp(email.trim(), otp.trim());
       await onVerified(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid or expired code. Please try again.');
@@ -130,7 +126,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     if (resendIn > 0 || isSubmitting) return;
     setError(null);
     try {
-      const expiresIn = await sendOtp(phone.trim());
+      const expiresIn = await sendOtp(email.trim());
       setResendIn(expiresIn);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not resend the code.');
@@ -141,53 +137,46 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     <div className="space-y-4">
       {error && <AuthErrorBanner message={error} onDismiss={() => setError(null)} />}
 
-      {step === 'phone' ? (
+      {step === 'email' ? (
         <form onSubmit={handleSendOtp} className="space-y-4" noValidate>
-          <div className="space-y-2 w-full text-left">
-            <label className="text-[10px] sm:text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body block">
-              {t('auth.phone.phoneLabel') || 'Phone Number'}
-              <span className="text-secondary ml-1">*</span>
-            </label>
-            <div className="relative flex items-center">
-              <PhoneInput
-                defaultCountry="IN"
-                placeholder={t('auth.phone.phonePlaceholder') || '+91 98765 43210'}
-                value={phone}
-                onChange={(val) => {
-                  setPhone(val || '');
-                  if (error) setError(null);
-                }}
-                disabled={disabled || isSubmitting}
-                className="flex items-center w-full bg-surface border border-outline-variant/30 hover:border-secondary/30 focus-within:ring-2 focus-within:ring-secondary/30 focus-within:border-secondary transition-all rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 sm:py-3.5 md:py-4 text-sm sm:text-base text-primary outline-none"
-                numberInputProps={{
-                  className: "w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/40 font-body pl-2",
-                }}
-              />
-            </div>
-          </div>
+          <Input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            label={t('auth.email.emailLabel') || 'Email Address'}
+            placeholder={t('auth.email.emailPlaceholder') || 'you@example.com'}
+            icon={<Mail size={16} className="text-secondary" />}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError(null);
+            }}
+            disabled={disabled || isSubmitting}
+            required
+          />
           <Button
             type="submit"
             fullWidth
             size="lg"
             loading={isSubmitting}
-            disabled={disabled || isSubmitting || !isValidPhone}
+            disabled={disabled || isSubmitting || !isValidEmail}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
-            {t('auth.phone.sendCode') || 'Send Code'}
+            {t('auth.email.sendCode') || 'Send Code'}
             {!isSubmitting && <ArrowRight size={14} />}
           </Button>
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="space-y-4" noValidate>
           <p className="text-xs text-on-surface-variant/60 text-center font-body">
-            {(t('auth.phone.codeSentTo') || 'We sent a code to')} <span className="font-bold text-primary font-headline">{phone}</span>
+            {(t('auth.email.codeSentTo') || 'We sent a code to')} <span className="font-bold text-primary font-headline">{email}</span>
           </p>
           <Input
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={OTP_LENGTH}
-            label={t('auth.phone.otpLabel') || 'Verification Code'}
+            label={t('auth.email.otpLabel') || 'Verification Code'}
             placeholder={'•'.repeat(OTP_LENGTH)}
             icon={<KeyRound size={16} className="text-secondary" />}
             value={otp}
@@ -207,19 +196,19 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
             disabled={disabled || isSubmitting || !isValidOtp}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
-            {t('auth.phone.verify') || 'Verify & Sign In'}
+            {t('auth.email.verify') || 'Verify & Sign In'}
             {!isSubmitting && <ArrowRight size={14} />}
           </Button>
 
           <div className="flex items-center justify-between pt-1">
             <button
               type="button"
-              onClick={() => { setStep('phone'); setOtp(''); setError(null); }}
+              onClick={() => { setStep('email'); setOtp(''); setError(null); }}
               disabled={isSubmitting}
               className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 hover:text-secondary transition-colors"
             >
               <ArrowLeft size={12} />
-              {t('auth.phone.changeNumber') || 'Change number'}
+              {t('auth.email.changeEmail') || 'Change Email'}
             </button>
             <button
               type="button"
@@ -228,8 +217,8 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
               className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 hover:text-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {resendIn > 0
-                ? `${t('auth.phone.resendIn') || 'Resend in'} ${resendIn}s`
-                : (t('auth.phone.resendCode') || 'Resend code')}
+                ? `${t('auth.email.resendIn') || 'Resend in'} ${resendIn}s`
+                : (t('auth.email.resendCode') || 'Resend code')}
             </button>
           </div>
         </form>
@@ -238,4 +227,4 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
   );
 };
 
-export default PhoneOtpForm;
+export default EmailOtpForm;

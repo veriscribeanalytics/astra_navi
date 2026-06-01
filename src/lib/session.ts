@@ -86,7 +86,7 @@ export async function getAuthSession() {
   // Lazy import to avoid circular dependency
   const { auth } = await import("@/lib/auth");
   const session = await auth();
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return null;
   }
   return session;
@@ -131,8 +131,8 @@ export async function getAuthContext(req: Request | NextRequest) {
     return null;
   }
 
-  if (!token.email) {
-    console.error("[getAuthContext] JWT decoded but email is missing! Token keys:", Object.keys(token));
+  if (!token.id) {
+    console.error("[getAuthContext] JWT decoded but user id is missing! Token keys:", Object.keys(token));
     return null;
   }
 
@@ -171,7 +171,8 @@ export async function getAuthContext(req: Request | NextRequest) {
   return {
     user: {
       id: token.id as string,
-      email: token.email as string,
+      email: token.email as string | undefined,
+      phoneNumber: token.phoneNumber as string | undefined,
       name: token.name as string | undefined,
     },
     accessToken,

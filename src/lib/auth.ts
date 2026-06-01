@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { authConfig } from "@/auth.config";
 import { JWT } from "next-auth/jwt";
 
@@ -88,6 +89,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   // NO database adapter - using pure JWT session strategy
   providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -96,6 +101,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         isRegistration: { type: "hidden" },
         id: { type: "hidden" },
         name: { type: "hidden" },
+        phoneNumber: { type: "hidden" },
         accessToken: { type: "hidden" },
         refreshToken: { type: "hidden" },
         expiresIn: { type: "hidden" },
@@ -104,7 +110,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (credentials?.isRegistration === "true") {
            return {
               id: credentials.id as string,
-              email: credentials.email as string,
+              email: credentials.email as string | null | undefined,
+              phoneNumber: credentials.phoneNumber as string | null | undefined,
               name: credentials.name as string,
               accessToken: credentials.accessToken as string,
               refreshToken: credentials.refreshToken as string,
@@ -189,11 +196,60 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // 30 days — session cookie lifetime
   },
   callbacks: {
-    async jwt({ token, user, account }) {
-      if (user && account) {
+    async signIn({ user, account }) {
+      if (account?.provider === 'google') {
+        try {
+          const backendUrl = process.env.AI_BACKEND_URL;
+          if (!backendUrl) {
+            console.error("[Auth] AI_BACKEND_URL is not configured for Google Sign-In");
+            return false;
+          }
+
+          const response = await fetch(`${backendUrl}/api/auth/google`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': process.env.AI_BACKEND_API_KEY || '',
+            },
+            body: JSON.stringify({ idToken: account.id_token }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error("[Auth] Google signIn backend exchange failed:", data);
+            return false;
+          }
+
+          // Mutate the user object so the jwt callback can see the tokens
+          const expiresIn = (typeof data.expiresIn === 'number' && data.expiresIn > 0)
+            ? data.expiresIn
+            : 3600;
+
+          user.id = data.user.id;
+          user.email = data.user.email;
+          user.phoneNumber = data.user.phoneNumber;
+          user.name = data.user.name;
+          user.accessToken = data.accessToken;
+          user.refreshToken = data.refreshToken;
+          user.accessTokenExpires = Date.now() + expiresIn * 1000;
+
+          return true;
+        } catch (error) {
+          console.error("[Auth] Google exchange error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user }) {
+      if (user) {
         return {
           ...token,
           id: user.id as string,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          name: user.name,
           accessToken: user.accessToken as string,
           refreshToken: user.refreshToken as string,
           accessTokenExpires: user.accessTokenExpires as number,
@@ -245,6 +301,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
+        (session.user as any).email = token.email;
+        session.user.phoneNumber = token.phoneNumber;
+        session.user.accessToken = token.accessToken;
+        session.user.refreshToken = token.refreshToken;
         session.user.error = token.error;
       }
       return session;
