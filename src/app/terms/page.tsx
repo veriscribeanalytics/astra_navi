@@ -28,7 +28,7 @@ export default function TermsPage() {
         {/* Intro */}
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Welcome to Astra Navi, operated by <strong>[LEGAL_ENTITY_NAME]</strong> ("we", "us", or "our"). These Terms & Conditions govern your access to and use of our website, mobile application, AI chat services, and premium astrological offerings (collectively, the "Service").
+            Welcome to Astra Navi, operated by <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> ("we", "us", or "our"). These Terms & Conditions govern your access to and use of our website, mobile application, AI chat services, and premium astrological offerings (collectively, the "Service").
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             By registering for an account or using any part of the Service, you represent that you are at least 18 years of age and agree to be bound by these Terms. If you do not agree to these terms, please do not use the Service.
@@ -93,7 +93,7 @@ export default function TermsPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">5. Limitation of Liability</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            To the maximum extent permitted by applicable law, <strong>[LEGAL_ENTITY_NAME]</strong> and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, arising out of your access to or use of, or inability to access or use, the Service. Our total cumulative liability shall not exceed the amount paid by you to us in the preceding six months.
+            To the maximum extent permitted by applicable law, <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, arising out of your access to or use of, or inability to access or use, the Service. Our total cumulative liability shall not exceed the amount paid by you to us in the preceding six months.
           </p>
         </div>
 
@@ -101,7 +101,7 @@ export default function TermsPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">6. Governing Law & Dispute Resolution</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            These Terms & Conditions and any disputes arising out of them shall be governed by and construed in accordance with the laws of <strong>India</strong>. Any legal action or proceeding arising under these Terms shall be subject to the exclusive jurisdiction of the courts located in <strong>[JURISDICTION]</strong>.
+            These Terms & Conditions and any disputes arising out of them shall be governed by and construed in accordance with the laws of <strong>India</strong>. Any legal action or proceeding arising under these Terms shall be subject to the exclusive jurisdiction of the courts located in <strong>Gurugram, Haryana, India</strong>.
           </p>
         </div>
 
@@ -120,8 +120,8 @@ export default function TermsPage() {
             If you have any questions or require clarification regarding these Terms & Conditions, please contact us at:
           </p>
           <div className="bg-background/40 p-4 border border-outline-variant/20 rounded-xl space-y-1.5 text-xs sm:text-sm text-primary/80">
-            <p><strong>Entity:</strong> [LEGAL_ENTITY_NAME]</p>
-            <p><strong>Email:</strong> <a href="mailto:[CONTACT_EMAIL]" className="text-secondary hover:underline font-bold">[CONTACT_EMAIL]</a></p>
+            <p><strong>Entity:</strong> Veriscribe Analytics & AI Pvt. Ltd.</p>
+            <p><strong>Email:</strong> <a href="mailto:contact@veriscribeanalytics.com" className="text-secondary hover:underline font-bold">contact@veriscribeanalytics.com</a></p>
           </div>
         </div>
 

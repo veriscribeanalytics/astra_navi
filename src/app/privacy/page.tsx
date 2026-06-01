@@ -29,7 +29,7 @@ export default function PrivacyPage() {
         {/* Intro */}
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Welcome to Astra Navi. Your privacy is of paramount importance to us. This Privacy Policy explains how <strong>[LEGAL_ENTITY_NAME]</strong> ("we", "us", or "our") collects, uses, discloses, and safeguards your personal data when you use our services, in strict compliance with the **Digital Personal Data Protection (DPDP) Act, 2023** of India and other global standards.
+            Welcome to Astra Navi. Your privacy is of paramount importance to us. This Privacy Policy explains how <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> ("we", "us", or "our") collects, uses, discloses, and safeguards your personal data when you use our services, in strict compliance with the <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong> of India and other global standards.
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             Please read this policy carefully. By registering for or using Astra Navi, you provide your explicit, unambiguous, and revocable consent to the collection and processing of your personal data as described herein.
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">3. Legal Basis for Processing & Consent</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Under India's DPDP Act 2023, the sole legal basis for processing your personal data is your **freely given, specific, informed, unconditional, and unambiguous consent**. You confirm this consent by checking our consent box during signup.
+            Under India's DPDP Act 2023, the sole legal basis for processing your personal data is your <strong>freely given, specific, informed, unconditional, and unambiguous consent</strong>. You confirm this consent by checking our consent box during signup.
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             <strong>Right to Withdraw Consent:</strong> You have the right to withdraw your consent at any time. Withdrawal of consent will not affect the lawfulness of processing based on consent before its withdrawal. To withdraw your consent, you may delete your account.
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">7. Data Retention Period</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            We retain your personal data only as long as necessary to fulfill the services you signed up for. Once you delete your account or withdraw consent, your personal data is completely erased or irreversibly anonymized from our database within <strong>[DATA_RETENTION_PERIOD]</strong>, subject to statutory backups or legal compliance.
+            We retain your personal data only as long as necessary to fulfill the services you signed up for. Once you delete your account or withdraw consent, your personal data is completely erased or irreversibly anonymized from our database within <strong>30 days</strong>, subject to statutory backups or legal compliance.
           </p>
         </div>
 
@@ -125,9 +125,9 @@ export default function PrivacyPage() {
             If you have any questions, concerns, or grievances regarding this Privacy Policy or your personal data processing, you may reach out to our designated Grievance Officer:
           </p>
           <div className="bg-background/40 p-4 border border-outline-variant/20 rounded-xl space-y-1.5 text-xs sm:text-sm text-primary/80">
-            <p><strong>Grievance Officer:</strong> [GRIEVANCE_OFFICER_NAME]</p>
-            <p><strong>Address/Jurisdiction:</strong> [JURISDICTION]</p>
-            <p><strong>Email:</strong> <a href="mailto:[CONTACT_EMAIL]" className="text-secondary hover:underline font-bold">[CONTACT_EMAIL]</a></p>
+            <p><strong>Grievance Officer:</strong> Munna Bhai MBBS</p>
+            <p><strong>Address/Jurisdiction:</strong> Gurugram, Haryana, India</p>
+            <p><strong>Email:</strong> <a href="mailto:contact@veriscribeanalytics.com" className="text-secondary hover:underline font-bold">contact@veriscribeanalytics.com</a></p>
           </div>
         </div>
 
