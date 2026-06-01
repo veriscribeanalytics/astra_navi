@@ -1,0 +1,172 @@
+{
+  "profile": {
+    "page": {
+      "title": "User Profile",
+      "description": "Manage your birth details to ensure your personalized readings are always accurate.",
+      "errors": {
+        "fixErrors": "Please fix the errors before saving",
+        "noEmailSession": "No email found in session. Please logout and login again.",
+        "dstConflict": "Your birth time falls during a DST transition. Please select which occurrence was your actual birth time.",
+        "updateFailed": "Update failed. Please try again."
+      },
+      "messages": {
+        "profileUpdated": "Profile updated successfully!"
+      },
+      "buttons": {
+        "updating": "Updating...",
+        "saveAndContinue": "Save & Continue to Dashboard",
+        "saveChanges": "Save Changes",
+        "reset": "Reset",
+        "backToHome": "Back to Home"
+      },
+      "securitySection": {
+        "title": "Security Settings",
+        "description": "Manage your password and active sessions.",
+        "button": "Manage Security Settings"
+      }
+    },
+    "fields": {
+      "email": "Email Address",
+      "emailHelper": "Your email cannot be changed",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "fullNameHelper": "Your full name as per birth certificate",
+      "dateOfBirth": "Date of Birth",
+      "dateOfBirthHelper": "Your birth date",
+      "timeOfBirth": "Time of Birth",
+      "timeOfBirthHelper": "Exact time for precision",
+      "placeOfBirth": "Place of Birth",
+      "placeOfBirthPlaceholder": "Search city, e.g. Delhi",
+      "placeOfBirthHelper": "Search and select your exact birth location",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "+1234567890",
+      "phoneNumberHelper": "Optional phone number",
+      "gender": "Gender",
+      "genderPlaceholder": "Select Gender",
+      "genderOptions": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "notSpecified": "Not Specified"
+      },
+      "maritalStatus": "Marital Status",
+      "maritalStatusPlaceholder": "Select Status",
+      "maritalOptions": {
+        "single": "Single",
+        "married": "Married",
+        "divorced": "Divorced",
+        "widowed": "Widowed",
+        "separated": "Separated",
+        "notSpecified": "Prefer not to say"
+      },
+      "occupation": "Occupation",
+      "occupationPlaceholder": "Select Occupation",
+      "occupationOptions": {
+        "student": "Student",
+        "business": "Business Owner",
+        "employed": "Employed / Salaried",
+        "homemaker": "Homemaker",
+        "retired": "Retired",
+        "unemployed": "Unemployed",
+        "notSpecified": "Prefer not to say"
+      },
+      "errors": {
+        "nameTooShort": "Name must be at least 2 characters",
+        "nameTooLong": "Name is too long",
+        "dobInFuture": "Birth date cannot be in the future",
+        "dobInvalid": "Please enter a valid birth date",
+        "pobInvalid": "Please enter a valid place",
+        "pobTooLong": "Place name is too long",
+        "nameRequired": "Name is required",
+        "dobRequired": "Date of birth is required",
+        "tobRequired": "Time of birth is required",
+        "pobRequired": "Place of birth is required",
+        "pobSelectRequired": "Please select your exact birth location from the search results"
+      }
+    },
+    "onboarding": {
+      "steps": {
+        "name": {
+          "label": "Full Name",
+          "hint": "Your name as per birth certificate"
+        },
+        "dob": {
+          "label": "Date of Birth",
+          "hint": "Determines your planetary positions (Nakshatra)"
+        },
+        "tob": {
+          "label": "Time of Birth",
+          "hint": "Pinpoints your ascendant (Lagna) and house cusps"
+        },
+        "pob": {
+          "label": "Accurate Birth Location",
+          "hint": "Search your city & select from the dropdown for precise coordinates"
+        }
+      },
+      "mobile": {
+        "complete": "All set! Your celestial profile is complete ✨",
+        "remaining": "{n} step{plural} remaining",
+        "completeHint": "Press Save & Continue to return",
+        "remainingHint": "Tap to see what's needed"
+      },
+      "sidebar": {
+        "title": "Complete Your Celestial Identity",
+        "description": "Your birth details are the foundation of every cosmic insight — they unlock personalized horoscopes, kundli analysis, and AI-powered Vedic readings.",
+        "checklistLabel": "Profile Checklist",
+        "completeMessage": "All set! Your celestial profile is complete. Press Save & Continue to return to the dashboard.",
+        "progressLabel": "Profile Completion"
+      }
+    },
+    "preferences": {
+      "language": "Preferred Language",
+      "cosmicPreferences": "Cosmic Preferences",
+      "horoscopeTitle": "Daily Horoscope",
+      "horoscopeDescription": "Receive daily cosmic insights",
+      "notificationsTitle": "Notifications",
+      "notificationsDescription": "Alerts for planetary transits"
+    },
+    "security": {
+      "pageTitle": "Security Settings",
+      "pageDescription": "Manage your password, active sessions, and account data.",
+      "backButton": "Back to Profile",
+      "changePasswordTitle": "Change Password",
+      "changePasswordWarning": "Changing your password will automatically log you out of all active sessions, including this one.",
+      "currentPasswordLabel": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "updatePasswordButton": "Update Password",
+      "sessionManagementTitle": "Session Management",
+      "sessionManagementDescription": "Log out from all other devices where your account is currently signed in. This device will remain logged in.",
+      "logoutAllButton": "Log Out All Other Devices",
+      "dangerZoneTitle": "Danger Zone",
+      "dangerZoneDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteAccountButton": "Delete Account",
+      "deleteAccountModal": {
+        "title": "Delete Account",
+        "description": "This action is permanent and will securely erase all your birth details, generated horoscopes, and preferences. Please confirm with your password to proceed.",
+        "passwordPlaceholder": "Enter your password to confirm",
+        "cancelButton": "Cancel",
+        "confirmButton": "Delete Forever"
+      },
+      "logoutConfirmDialog": {
+        "title": "Log Out All Devices?",
+        "message": "This will sign out your account from all other devices. Your current session will remain active.",
+        "confirmButton": "Log Out Others",
+        "cancelButton": "Cancel"
+      },
+      "errors": {
+        "passwordMinLength": "New password must be at least 10 characters.",
+        "passwordMismatch": "New passwords do not match.",
+        "passwordRequired": "Please enter your password to confirm deletion."
+      },
+      "messages": {
+        "passwordChanged": "Password changed successfully. You will be logged out of all devices.",
+        "logoutAllSuccess": "Successfully logged out from all other devices.",
+        "accountDeleted": "Account successfully deleted. Goodbye."
+      }
+    }
+  }
+}

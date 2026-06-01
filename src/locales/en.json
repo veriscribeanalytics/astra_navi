@@ -1802,7 +1802,16 @@
       "rising": "Rising",
       "tithi": "TITHI",
       "nakshatra": "NAKSHATRA",
-      "openingDashboard": "Opening your dashboard..."
+      "openingDashboard": "Opening your dashboard...",
+      "scoreImpressive": "Your {label} Score is Impressive!",
+      "goodTimeDesc": "Auspicious window for important work and decisions.",
+      "cautionTimeDesc": "Avoid starting new work or making major commitments.",
+      "askNaviInChat": "Ask Navi in chat?",
+      "askNaviConfirmDesc": "Navi will open chat with this question so you can continue from there.",
+      "stayHere": "Stay here",
+      "openChat": "Open chat",
+      "explainMsg": "Explain today's energy for me. My overall score is {score}.",
+      "discussMsg": "I want to discuss my dashboard and today's horoscope."
     },
     "weeklyChart": {
       "title": "Weekly Chart",
@@ -1862,6 +1871,7 @@
     },
     "compatibility": {
       "title": "Compatibility & Match",
+      "desc": "Discover your cosmic compatibility with anyone. Find harmony in relationships.",
       "viewAll": "View All",
       "gunaMilanScore": "Guna Milan Score",
       "excellentMatch": "Excellent Match",
@@ -1925,6 +1935,71 @@
         "finance_mentor": { "name": "Vidya", "title": "Nadi Expert" },
         "astro_sage": { "name": "Rishi", "title": "KP Specialist" }
       }
-    }
+    },
+    "guidanceHub": "Your Guidance Hub",
+    "exploreCosmicNetwork": "Explore Your Cosmic Network",
+    "cosmicNetworkDesc": "Connect with expert guides, explore your chart, understand your bonds, and access powerful astrological tools.",
+    "meetYourAiAstrologers": "Meet Your AI Astrologers",
+    "guides": {
+      "navi": {
+        "role": "General Vedic Guide",
+        "desc": "Balanced Vedic guidance for love, work, timing & life."
+      },
+      "arya": {
+        "role": "Career Mentor",
+        "desc": "Guidance for jobs, skills, promotion & work decisions."
+      },
+      "meera": {
+        "role": "Relationship Guide",
+        "desc": "Insights for love, marriage, compatibility & emotions."
+      },
+      "anand": {
+        "role": "Health Advisor",
+        "desc": "Understand vitality, well-being & health patterns."
+      },
+      "vidya": {
+        "role": "Financial Astrologer",
+        "desc": "Wealth, investments & financial stability insights."
+      },
+      "rishi": {
+        "role": "Deep Chart Sage",
+        "desc": "Advanced chart synthesis for deep spiritual insights."
+      },
+      "locked": "Locked"
+    },
+    "notableTransits": {
+      "jupiter": "Jupiter's transit enhances your gains and stabilizes growth.",
+      "saturn": "Saturn's transit tests your discipline and builds resilience.",
+      "rahu": "Rahu's transit destabilizes old patterns - stay grounded.",
+      "ketu": "Ketu supports letting go and releasing attachments."
+    },
+    "cosmicInsight": {
+      "title": "Daily Cosmic Insight",
+      "luckyColor": "Lucky Color",
+      "luckyNumber": "Lucky Number"
+    },
+    "deepDive": {
+      "title": "Deep Dive",
+      "deepDiveQ1": "Analyze my weekly forecast in detail",
+      "deepDiveQ2": "Why is my {area} score at its current level?",
+      "deepDiveQ3": "Give me a quick action to improve my score"
+    },
+    "privacy": {
+      "protected": "Your data is private and protected.",
+      "secure": "Secure",
+      "encrypted": "Encrypted",
+      "trusted": "Trusted by thousands"
+    },
+    "linked": "✓ Linked",
+    "celestial": "Celestial",
+    "insights": "Insights",
+    "exploreAllPortals": "Explore All Portals",
+    "viewToday": "View Today",
+    "rashiLibrary": "Rashi Library",
+    "portalChatDesc": "Ask anything about your Kundli, Dashas, transits, or life guidance.",
+    "portalSoulmateDesc": "Match compatibility using Guna Milan & karmic insights.",
+    "portalPulseDesc": "Real-time Tithi, Yoga & Vedic energies for your day.",
+    "portalRashiDesc": "Explore all 12 zodiac signs with detailed traits & insights.",
+    "portalSessionsDesc": "Join live sessions & interact with experts and seekers."
   }
 }

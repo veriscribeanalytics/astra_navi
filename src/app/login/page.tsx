@@ -16,6 +16,8 @@ import {
   AuthFormCard,
   SignInForm,
   RegisterFlow,
+  GoogleSignInButton,
+  PhoneOtpForm,
 } from '@/components/auth';
 import { isProfileComplete } from '@/lib/profileCompleteness';
 import { ParsedAuthError, parseAuthError } from '@/utils/authErrorParser';
@@ -27,6 +29,7 @@ const LoginContent = () => {
   const { showLoading, login: setAuthUser, isLoggedIn, user, logout } = useAuth();
   const { t } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
+  const [signInMethod, setSignInMethod] = useState<'email' | 'phone'>('email');
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lockedRemaining, setLockedRemaining] = useState<number>(0);
   const recoveryStartedRef = useRef(false);
@@ -159,6 +162,26 @@ const LoginContent = () => {
     } catch (err: unknown) {
       return { parsedError: parseAuthError(err) };
     }
+  };
+
+  // --- Phone OTP verified handler (template) ---
+  const handlePhoneVerified = async (verifyResponse: unknown) => {
+    // ─── TODO(backend): complete the session from the OTP verify response ───
+    // `verifyResponse` is whatever /api/auth/otp/verify returns (tokens + user).
+    // Complete the next-auth session the same way handleRegister does, e.g.:
+    //   const v = verifyResponse as { user: { id: string; email: string; name?: string };
+    //     accessToken: string; refreshToken: string; expiresIn: number };
+    //   const result = await signIn('credentials', {
+    //     redirect: false, isOtpLogin: 'true', id: v.user.id, email: v.user.email,
+    //     accessToken: v.accessToken, refreshToken: v.refreshToken, expiresIn: v.expiresIn,
+    //   });
+    //   if (result?.error) throw new Error(result.error);
+    //   setAuthUser(v.user.email, { ...v.user });
+    void verifyResponse;
+    showLoading(t('login.signingYouIn'), 1500);
+    setTimeout(() => {
+      router.push(getCallbackUrl());
+    }, 1500);
   };
 
   // --- Register handler ---
@@ -425,13 +448,49 @@ const LoginContent = () => {
 
               <AuthFormCard>
                 {!isRegister ? (
-                  <SignInForm
-                    onSubmit={handleSignIn}
-                    disabled={!!lockedUntil}
-                    disabledReason={lockedDisplay}
-                    onForgotPassword={() => router.push('/forgot-password')}
-                    onActionClick={handleActionClick}
-                  />
+                  <>
+                    {/* Sign-in method switcher: Email | Phone */}
+                    <div className="flex gap-2 p-1 rounded-xl bg-surface-variant/20 border border-outline-variant/10 mb-4">
+                      {(['email', 'phone'] as const).map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setSignInMethod(m)}
+                          className={`flex-1 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${
+                            signInMethod === m
+                              ? 'bg-secondary/10 text-secondary'
+                              : 'text-on-surface-variant/40 hover:text-on-surface-variant/70'
+                          }`}
+                        >
+                          {m === 'email'
+                            ? (t('auth.method.email') || 'Email')
+                            : (t('auth.method.phone') || 'Phone')}
+                        </button>
+                      ))}
+                    </div>
+
+                    {signInMethod === 'email' ? (
+                      <SignInForm
+                        onSubmit={handleSignIn}
+                        disabled={!!lockedUntil}
+                        disabledReason={lockedDisplay}
+                        onForgotPassword={() => router.push('/forgot-password')}
+                        onActionClick={handleActionClick}
+                      />
+                    ) : (
+                      <PhoneOtpForm onVerified={handlePhoneVerified} disabled={!!lockedUntil} />
+                    )}
+
+                    {/* Social sign-in */}
+                    <div className="flex items-center gap-4 py-3">
+                      <div className="h-[1px] flex-1 bg-outline-variant/10" />
+                      <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
+                        {t('auth.method.orContinueWith') || 'or'}
+                      </span>
+                      <div className="h-[1px] flex-1 bg-outline-variant/10" />
+                    </div>
+                    <GoogleSignInButton callbackUrl={getCallbackUrl()} onError={(m) => showError(m)} />
+                  </>
                 ) : (
                   <RegisterFlow
                     onSubmit={handleRegister}
