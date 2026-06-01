@@ -279,7 +279,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [t]);
 
   const loadChats = useCallback(async () => {
-    if (!user?.email || isGuest) return;
+    if (!user?.id || isGuest) return;
     setIsLoadingChats(true);
     try {
       const res = await clientFetch(`/api/chat?limit=20`);
@@ -295,10 +295,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingChats(false);
     }
-  }, [user?.email, isGuest]);
+  }, [user?.id, isGuest]);
 
   const loadMoreChats = useCallback(async () => {
-    if (!user?.email || !nextCursor || isLoadingChats || isGuest) return;
+    if (!user?.id || !nextCursor || isLoadingChats || isGuest) return;
     setIsLoadingChats(true);
     try {
       const res = await clientFetch(`/api/chat?limit=20&cursor=${nextCursor}`);
@@ -314,7 +314,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingChats(false);
     }
-  }, [user?.email, nextCursor, isLoadingChats, isGuest]);
+  }, [user?.id, nextCursor, isLoadingChats, isGuest]);
 
   const selectChat = useCallback(async (chatId: string) => {
     if (!chatId || isGuest) return;
@@ -360,7 +360,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    if (!targetId || !text.trim() || !user?.email) return;
+    if (!targetId || !text.trim() || !user?.id) return;
     if (isSending) return;
     
     setIsSending(true);
@@ -970,18 +970,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load initial chats
   useEffect(() => {
-    if (!initialLoadDone.current && user?.email && !isGuest) {
+    if (!initialLoadDone.current && user?.id && !isGuest) {
       initialLoadDone.current = true;
       loadChats();
     }
-  }, [user?.email, loadChats, isGuest]);
+  }, [user?.id, loadChats, isGuest]);
 
   // Load avatars initially and when language or auth state changes
   useEffect(() => {
-    if (user?.email && !isGuest) {
+    if (user?.id && !isGuest) {
       loadAvatars();
     }
-  }, [user?.email, loadAvatars, isGuest]);
+  }, [user?.id, loadAvatars, isGuest]);
 
   return (
     <ChatContext.Provider value={{

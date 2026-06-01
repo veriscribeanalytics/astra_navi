@@ -1,18 +1,19 @@
 import { NextResponse } from 'next/server';
 import { backendFetch } from '@/lib/backendClient';
-import { auth } from '@/lib/auth';
+import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 
-export async function POST(_req: Request) {
+export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.accessToken) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const authContext = await getAuthContext(req);
+        if (!authContext) {
+            return unauthorizedResponse();
         }
+        const { accessToken } = authContext;
 
         const response = await backendFetch('/api/auth/logout-all', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${session.user.accessToken}`
+                'Authorization': `Bearer ${accessToken}`
             }
         });
 

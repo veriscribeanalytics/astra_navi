@@ -1,20 +1,21 @@
 import { NextResponse } from 'next/server';
 import { backendFetch } from '@/lib/backendClient';
-import { auth } from '@/lib/auth';
+import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 
 export async function DELETE(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.accessToken) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const authContext = await getAuthContext(req);
+        if (!authContext) {
+            return unauthorizedResponse();
         }
+        const { accessToken } = authContext;
 
         const body = await req.json();
         
         const response = await backendFetch('/api/auth/account', {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${session.user.accessToken}`,
+                'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body) // { password: '...' }

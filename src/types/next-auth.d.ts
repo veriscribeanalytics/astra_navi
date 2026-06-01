@@ -6,8 +6,6 @@ declare module 'next-auth' {
       id: string;
       email?: string | null;
       phoneNumber?: string | null;
-      accessToken?: string;
-      refreshToken?: string;
       error?: string;
     } & Omit<DefaultSession['user'], 'email'>;
   }
