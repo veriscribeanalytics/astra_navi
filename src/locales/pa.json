@@ -1303,6 +1303,12 @@
       "successTitle": "ਪਾਸਵਰਡ ਰੀਸੈਟ ਸਫਲ",
       "successSubtitle": "ਤੁਹਾਡਾ ਪਾਸਵਰਡ ਸਫਲਤਾਪੂਰਵਕ ਰੀਸੈਟ ਹੋ ਗਿਆ ਹੈ।",
       "proceedToLogin": "ਲੌਗਇਨ ਤੇ ਜਾਓ"
+    },
+    "method": {
+      "password": "ਪਾਸਵਰਡ",
+      "phone": "ਫ਼ੋਨ OTP",
+      "emailOtp": "ਈਮੇਲ OTP",
+      "orContinueWith": "ਜਾਂ"
     }
   },
   "home": {

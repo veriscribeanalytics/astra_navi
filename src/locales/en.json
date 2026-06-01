@@ -1395,6 +1395,12 @@
       "successTitle": "Password Reset Successful",
       "successSubtitle": "Your password has been successfully reset.",
       "proceedToLogin": "Proceed to Login"
+    },
+    "method": {
+      "password": "Password",
+      "phone": "Phone OTP",
+      "emailOtp": "Email OTP",
+      "orContinueWith": "or"
     }
   },
   "home": {

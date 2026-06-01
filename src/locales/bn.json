@@ -1303,6 +1303,12 @@
       "successTitle": "পাসওয়ার্ড রিসেট সফল",
       "successSubtitle": "আপনার পাসওয়ার্ড সফলভাবে রিসেট করা হয়েছে।",
       "proceedToLogin": "লগইন এ এগিয়ে যান"
+    },
+    "method": {
+      "password": "পাসওয়ার্ড",
+      "phone": "ফোন ওটিপি",
+      "emailOtp": "ইমেল ওটিপি",
+      "orContinueWith": "অথবা"
     }
   },
   "home": {

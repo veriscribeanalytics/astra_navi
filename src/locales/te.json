@@ -1303,6 +1303,12 @@
       "successTitle": "పాస్‌వర్డ్ రీసెట్ విజయవంతమైంది",
       "successSubtitle": "మీ పాస్‌వర్డ్ విజయవంతంగా రీసెట్ చేయబడింది.",
       "proceedToLogin": "లాగిన్‌కి వెళ్ళండి"
+    },
+    "method": {
+      "password": "పాస్‌వర్డ్",
+      "phone": "ఫోన్ OTP",
+      "emailOtp": "ఇమెయిల్ OTP",
+      "orContinueWith": "లేదా"
     }
   },
   "home": {

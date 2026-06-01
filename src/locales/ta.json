@@ -1303,6 +1303,12 @@
       "successTitle": "கடவுச்சொல் மீட்டமைப்பு வெற்றி",
       "successSubtitle": "உங்கள் கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது.",
       "proceedToLogin": "உள்நுழைவுக்குச் செல்லவும்"
+    },
+    "method": {
+      "password": "கடவுச்சொல்",
+      "phone": "தொலைபேசி OTP",
+      "emailOtp": "மின்னஞ்சல் OTP",
+      "orContinueWith": "அல்லது"
     }
   },
   "home": {

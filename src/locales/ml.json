@@ -1303,6 +1303,12 @@
       "successTitle": "പാസ്‌വേഡ് റീസെറ്റ് വിജയകരം",
       "successSubtitle": "നിങ്ങളുടെ പാസ്‌വേഡ് വിജയകരമായി റീസെറ്റ് ചെയ്‌തു.",
       "proceedToLogin": "ലോഗിനിലേക്ക് പോകുക"
+    },
+    "method": {
+      "password": "പാസ്‌വേഡ്",
+      "phone": "ഫോൺ OTP",
+      "emailOtp": "ഇമെയിൽ OTP",
+      "orContinueWith": "അല്ലെങ്കിൽ"
     }
   },
   "home": {

@@ -1303,6 +1303,12 @@
       "successTitle": "비밀번호 재설정 완료",
       "successSubtitle": "비밀번호가 성공적으로 재설정되었습니다.",
       "proceedToLogin": "로그인으로 이동"
+    },
+    "method": {
+      "password": "비밀번호",
+      "phone": "휴대폰 OTP",
+      "emailOtp": "이메일 OTP",
+      "orContinueWith": "또는"
     }
   },
   "home": {

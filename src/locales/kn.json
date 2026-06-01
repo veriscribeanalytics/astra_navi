@@ -1303,6 +1303,12 @@
       "successTitle": "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವಿಕೆ ಯಶಸ್ವಿ",
       "successSubtitle": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ಮರುಹೊಂದಿಸಲ್ಪಟ್ಟಿದೆ.",
       "proceedToLogin": "ಲಾಗಿನ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ"
+    },
+    "method": {
+      "password": "ಪಾಸ್‌ವರ್ಡ್",
+      "phone": "ಫೋನ್ OTP",
+      "emailOtp": "ಇಮೇಲ್ OTP",
+      "orContinueWith": "ಅಥವಾ"
     }
   },
   "home": {
