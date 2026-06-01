@@ -1811,7 +1811,12 @@
       "stayHere": "Stay here",
       "openChat": "Open chat",
       "explainMsg": "Explain today's energy for me. My overall score is {score}.",
-      "discussMsg": "I want to discuss my dashboard and today's horoscope."
+      "discussMsg": "I want to discuss my dashboard and today's horoscope.",
+      "bandFavorable": "Favorable",
+      "bandBalanced": "Balanced",
+      "bandCaution": "Caution",
+      "defaultHeadline": "Your current planetary period is on your side - act on the bigger plan now.",
+      "defaultSubtitle": "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose."
     },
     "weeklyChart": {
       "title": "Weekly Chart",

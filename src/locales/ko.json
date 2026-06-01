@@ -369,7 +369,20 @@
     "familyEyebrow": "유대",
     "familyAdd": "회원 추가",
     "familyEmptyCta": "첫 가족 구성원 추가",
-    "familyViewAll": "전체 보기"
+    "familyViewAll": "전체 보기",
+    "familySubtitle": "가장 가까운 사람들과의 감정적, 카르마적 조화와 궁합 패턴을 확인하세요.",
+    "familyAddSubtitle": "가족이나 친구를 추가하여 차트와 감정 패턴을 비교해보세요.",
+    "familyBondEnergy": "유대 에너지",
+    "familyViewBond": "유대 보기",
+    "familyRunCompatibility": "궁합 분석",
+    "familyCompatibilityPending": "분석 대기 중",
+    "familyStatusIncomplete": "미완성",
+    "familyStatusNeedsAttention": "주의 필요",
+    "familyStatusStable": "안정적",
+    "familyStatusNew": "새로운",
+    "familyInviteBanner": "{count}개의 가족 초대가 대기 중입니다",
+    "familyInviteBannerPlural": "{count}개의 가족 초대가 대기 중입니다",
+    "familyInviteReview": "검토"
   },
   "horoscope": {
     "yourDayToday": "오늘 당신의 하루",
@@ -1706,7 +1719,12 @@
       "stayHere": "여기에 머물기",
       "openChat": "채팅 열기",
       "explainMsg": "오늘의 에너지를 설명해 주세요. 내 종합 점수는 {score}점입니다.",
-      "discussMsg": "대시보드와 오늘의 운세에 대해 이야기하고 싶습니다."
+      "discussMsg": "대시보드와 오늘의 운세에 대해 이야기하고 싶습니다.",
+      "bandFavorable": "우호적",
+      "bandBalanced": "균형적",
+      "bandCaution": "주의",
+      "defaultHeadline": "현재 행성 주기가 귀하의 편입니다 - 지금 큰 계획을 실행하세요.",
+      "defaultSubtitle": "지금은 기세를 올리고, 신중하게 움직이며, 더 큰 목적에 정렬할 수 있는 강력한 기회입니다."
     },
     "weeklyChart": {
       "title": "주간 차트",

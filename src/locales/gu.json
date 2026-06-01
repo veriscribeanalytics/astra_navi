@@ -288,7 +288,7 @@
     "guidesSubtitle": "વ્યક્તિગત માર્ગદર્શન માટે નિષ્ણાત પસંદ કરો — કારકિર્દીથી લઈને સંબંધો અને ગહન ચાર્ટ વિશ્લેષણ સુધી.",
     "startChat": "ચેટ શરૂ કરો",
     "creditSingular": "ક્રેડિટ",
-    "creditPlural": "ક્રેડિટ્સ",
+    "creditPlural": "ક્રેડિટส์",
     "janamKundli": "જન્મ કુંડળી",
     "janamKundliDesc": "વૈદિક શાણપણ દ્વારા સંચાલિત વિગતવાર જન્મ ચાર્ટ અને ગ્રહોનું વિશ્લેષણ.",
     "aiGuidance": "AI માર્ગદર્શન",
@@ -369,7 +369,20 @@
     "familyEyebrow": "બંધન",
     "familyAdd": "સભ્ય ઉમેરો",
     "familyEmptyCta": "તમારો પ્રથમ પરિવારનો સભ્ય ઉમેરો",
-    "familyViewAll": "બધા જુઓ"
+    "familyViewAll": "બધા જુઓ",
+    "familySubtitle": "તમારા નજીકના લોકો સાથે ભાવનાત્મક, કર્મ અને અનુકૂળતા પેટર્નને ટ્રૅક કરો.",
+    "familyAddSubtitle": "ચાર્ટ અને ભાવનાત્મક પેટર્નની તુલના કરવા માટે કુટુંબ અથવા મિત્રોને ઉમેરો.",
+    "familyBondEnergy": "બોન્ડ ઉર્જા",
+    "familyViewBond": "બોન્ડ જુઓ",
+    "familyRunCompatibility": "અનુકૂળતા તપાસો",
+    "familyCompatibilityPending": "પરામર્શની રાહ જોવાય છે",
+    "familyStatusIncomplete": "અપૂર્ણ",
+    "familyStatusNeedsAttention": "ધ્યાન આપવાની જરૂર છે",
+    "familyStatusStable": "સ્થિર",
+    "familyStatusNew": "નવું",
+    "familyInviteBanner": "તમારી પાસે {count} પારિવારિક આમંત્રણ બાકી છે",
+    "familyInviteBannerPlural": "તમારી પાસે {count} પારિવારિક આમંત્રણો બાકી છે",
+    "familyInviteReview": "સમીક્ષા કરો"
   },
   "horoscope": {
     "yourDayToday": "આજે તમારો દિવસ",
@@ -1706,7 +1719,12 @@
       "stayHere": "અહીં જ રહો",
       "openChat": "ચેટ ખોલો",
       "explainMsg": "મારા માટે આજની ઉર્જા સમજાવો. મારો એકંદર સ્કોર {score} છે.",
-      "discussMsg": "હું મારા ડેશબોર્ડ અને આજના રાશિફળની ચર્ચા કરવા માંગુ છું."
+      "discussMsg": "હું મારા ડેશબોર્ડ અને આજના રાશિફળની ચર્ચા કરવા માંગુ છું.",
+      "bandFavorable": "અનુકૂળ",
+      "bandBalanced": "સંતુલિત",
+      "bandCaution": "સાવધાની",
+      "defaultHeadline": "તમારી વર્તમાન ગ્રહોની સ્થિતિ તમારી તરફેણમાં છે - હવે મોટી યોજના પર કામ કરો.",
+      "defaultSubtitle": "આ ગતિ વધારવા, વિચારશીલ પગલાં લેવા અને તમારા ઉચ્ચ હેતુ સાથે સુસંગત થવા માટે એક શક્તિશાલી સમય છે."
     },
     "weeklyChart": {
       "title": "સાપ્તાહિક ચાર્ટ",

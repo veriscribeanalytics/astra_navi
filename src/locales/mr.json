@@ -369,7 +369,20 @@
     "familyEyebrow": "बंध",
     "familyAdd": "सदस्य जोडा",
     "familyEmptyCta": "तुमचा पहिला कुटुंब सदस्य जोडा",
-    "familyViewAll": "सर्व पहा"
+    "familyViewAll": "सर्व पहा",
+    "familySubtitle": "तुमच्या जवळच्या लोकांशी भावनिक, कर्म आणि सुसंगतता पॅटर्नचा मागोवा घ्या.",
+    "familyAddSubtitle": "पत्रिका आणि भावनिक पॅटर्नची तुलना करण्यासाठी कुटुंब किंवा मित्रांना जोडा.",
+    "familyBondEnergy": "नातेसंबंध ऊर्जा",
+    "familyViewBond": "नातेसंबंध पहा",
+    "familyRunCompatibility": "सुसंगतता तपासा",
+    "familyCompatibilityPending": "परामर्श प्रलंबित",
+    "familyStatusIncomplete": "अपूर्ण",
+    "familyStatusNeedsAttention": "लक्ष देणे आवश्यक",
+    "familyStatusStable": "स्थिर",
+    "familyStatusNew": "नवीन",
+    "familyInviteBanner": "तुमच्याकडे {count} कौटुंबिक आमंत्रण प्रलंबित आहे",
+    "familyInviteBannerPlural": "तुमच्याकडे {count} कौटुंबिक आमंत्रणे प्रलंबित आहेत",
+    "familyInviteReview": "पुनरावलोकन"
   },
   "horoscope": {
     "yourDayToday": "आजचा तुमचा दिवस",
@@ -1706,7 +1719,12 @@
       "stayHere": "इथेच राहा",
       "openChat": "चॅट उघडा",
       "explainMsg": "माझ्यासाठी आजच्या ऊर्जेचे स्पष्टीकरण द्या. माझा एकूण स्कोअर {score} आहे.",
-      "discussMsg": "मला माझ्या डॅशबोर्ड आणि आजच्या राशीभविष्यावर चर्चा करायची आहे."
+      "discussMsg": "मला माझ्या डॅशबोर्ड आणि आजच्या राशीभविष्यावर चर्चा करायची आहे.",
+      "bandFavorable": "अनुकूल",
+      "bandBalanced": "संतुलित",
+      "bandCaution": "सावधगिरी",
+      "defaultHeadline": "तुमची सध्याची ग्रहांची दशा तुमच्या बाजूने आहे - आता मोठ्या योजनेवर काम करा.",
+      "defaultSubtitle": "हा वेग वाढवण्याचा, विचारपूर्वक पावले उचलण्याचा आणि तुमच्या मोठ्या ध्येयाशी जुळवून घेण्याचा एक शक्तिशाली वेळ आहे."
     },
     "weeklyChart": {
       "title": "साप्ताहिक चार्ट",

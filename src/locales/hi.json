@@ -369,7 +369,20 @@
     "familyEyebrow": "रिश्ते",
     "familyAdd": "सदस्य जोड़ें",
     "familyEmptyCta": "अपना पहला परिवार सदस्य जोड़ें",
-    "familyViewAll": "सभी देखें"
+    "familyViewAll": "सभी देखें",
+    "familySubtitle": "अपने करीबी लोगों के साथ भावनात्मक, कर्म और अनुकूलता पैटर्न को ट्रैक करें।",
+    "familyAddSubtitle": "चार्ट और भावनात्मक पैटर्न की तुलना करने के लिए परिवार या दोस्तों को जोड़ें।",
+    "familyBondEnergy": "बंधन ऊर्जा",
+    "familyViewBond": "बंधन देखें",
+    "familyRunCompatibility": "अनुकूलता चलाएं",
+    "familyCompatibilityPending": "परामर्श की प्रतीक्षा है",
+    "familyStatusIncomplete": "अधूरा",
+    "familyStatusNeedsAttention": "ध्यान देने की आवश्यकता है",
+    "familyStatusStable": "स्थिर",
+    "familyStatusNew": "नया",
+    "familyInviteBanner": "आपके पास {count} पारिवारिक आमंत्रण लंबित है",
+    "familyInviteBannerPlural": "आपके पास {count} पारिवारिक आमंत्रण लंबित हैं",
+    "familyInviteReview": "समीक्षा करें"
   },
   "horoscope": {
     "yourDayToday": "आज आपका दिन",
@@ -1706,7 +1719,12 @@
       "stayHere": "यहीं रहें",
       "openChat": "चैट खोलें",
       "explainMsg": "मेरे लिए आज की ऊर्जा की व्याख्या करें। मेरा कुल स्कोर {score} है।",
-      "discussMsg": "मैं अपने डैशबोर्ड और आज के राशिफल पर चर्चा करना चाहता हूं।"
+      "discussMsg": "मैं अपने डैशबोर्ड और आज के राशिफल पर चर्चा करना चाहता हूं।",
+      "bandFavorable": "अनुकूल",
+      "bandBalanced": "संतुलित",
+      "bandCaution": "सतर्क रहें",
+      "defaultHeadline": "आपकी वर्तमान ग्रहीय अवधि आपके पक्ष में है - अब बड़ी योजना पर काम करें।",
+      "defaultSubtitle": "यह गति बनाने, विचारशील कदम उठाने और अपने बड़े उद्देश्य के साथ संरेखित करने के लिए एक शक्तिशाली समय है।"
     },
     "weeklyChart": {
       "title": "साप्ताहिक चार्ट",

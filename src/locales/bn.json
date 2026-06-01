@@ -369,7 +369,20 @@
     "familyEyebrow": "বন্ধন",
     "familyAdd": "সদস্য যোগ করুন",
     "familyEmptyCta": "আপনার প্রথম পরিবারের সদস্য যোগ করুন",
-    "familyViewAll": "সব দেখুন"
+    "familyViewAll": "সব দেখুন",
+    "familySubtitle": "আপনার প্রিয়জনদের সাথে মানসিক, কর্মফল এবং সামঞ্জস্যের ধরণগুলি ট্র্যাক করুন।",
+    "familyAddSubtitle": "চার্ট এবং মানসিক ধরণ তুলনা করতে পরিবার বা বন্ধুদের যোগ করুন।",
+    "familyBondEnergy": "বন্ধন শক্তি",
+    "familyViewBond": "বন্ধন দেখুন",
+    "familyRunCompatibility": "সামঞ্জস্যের পরীক্ষা করুন",
+    "familyCompatibilityPending": "পরামর্শের অপেক্ষায়",
+    "familyStatusIncomplete": "অসম্পূর্ণ",
+    "familyStatusNeedsAttention": "মনোযোগ প্রয়োজন",
+    "familyStatusStable": "স্থিতিশীল",
+    "familyStatusNew": "নতুন",
+    "familyInviteBanner": "আপনার {count}টি পারিবারিক আমন্ত্রণ অমীমাংসিত রয়েছে",
+    "familyInviteBannerPlural": "আপনার {count}টি পারিবারিক আমন্ত্রণ অমীমাংসিত রয়েছে",
+    "familyInviteReview": "পর্যালোচনা"
   },
   "horoscope": {
     "yourDayToday": "আজ আপনার দিন",
@@ -1706,7 +1719,12 @@
       "stayHere": "এখানেই থাকুন",
       "openChat": "চ্যাট খুলুন",
       "explainMsg": "আমার জন্য আজকের শক্তি ব্যাখ্যা করুন। আমার সামগ্রিক স্কোর {score}।",
-      "discussMsg": "আমি আমার ড্যাশবোর্ড এবং আজকের রাশিফল নিয়ে আলোচনা করতে চাই।"
+      "discussMsg": "আমি আমার ড্যাশবোর্ড এবং আজকের রাশিফল নিয়ে আলোচনা করতে চাই।",
+      "bandFavorable": "অনুকূল",
+      "bandBalanced": "ভারসাম্যপূর্ণ",
+      "bandCaution": "সতর্কতা",
+      "defaultHeadline": "আপনার বর্তমান গ্রহের দশা আপনার অনুকূলে আছে - এখন বড় পরিকল্পনার উপর কাজ করুন।",
+      "defaultSubtitle": "গতি তৈরি করতে, চিন্তাশীল পদক্ষেপ নিতে এবং আপনার বৃহত্তর উদ্দেশ্যের সাথে সামঞ্জस्य রাখতে এটি একটি শক্তিশালী সময়।"
     },
     "weeklyChart": {
       "title": "সাপ্তাহিক চার্ট",

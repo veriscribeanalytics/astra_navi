@@ -400,7 +400,11 @@ export default function DashboardHome() {
   const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
   const overallScore = horoscope?.score?.overall ?? horoscope?.overall_score ?? 73;
   const scoreColor = getScoreColor(overallScore);
-  const scoreBand = overallScore >= 75 ? "Favorable" : overallScore >= 60 ? "Balanced" : "Caution";
+  const scoreBand = overallScore >= 75
+    ? (t('newDashboard.todaysEnergy.bandFavorable') || "Favorable")
+    : overallScore >= 60
+      ? (t('newDashboard.todaysEnergy.bandBalanced') || "Balanced")
+      : (t('newDashboard.todaysEnergy.bandCaution') || "Caution");
   const moonSign = getRashiData(user?.moonSign || horoscope?.user?.sign || horoscope?.sign || "Leo");
   const sunSign = getRashiData(user?.sunSign || "Libra");
   const ascendantSign = getRashiData(user?.lagnaSign || "Leo");
@@ -432,14 +436,23 @@ export default function DashboardHome() {
   }));
 
   const topLifeArea = [...lifeAreas].sort((a, b) => b.score - a.score)[0];
-  const headline =
+  const rawHeadline =
     horoscope?.alerts?.primary?.simple ||
     "Your current planetary period is on your side - act on the bigger plan now.";
-  const subtitle =
-    typeof horoscope?.tip === "string"
+  const headline =
+    rawHeadline === "Your current planetary period is on your side - act on the bigger plan now."
+      ? (t('newDashboard.todaysEnergy.defaultHeadline') || rawHeadline)
+      : rawHeadline;
+
+  const rawSubtitle =
+    (typeof horoscope?.tip === "string"
       ? horoscope.tip
-      : horoscope?.tip?.text ||
-        "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose.";
+      : horoscope?.tip?.text) ||
+    "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose.";
+  const subtitle =
+    rawSubtitle === "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose."
+      ? (t('newDashboard.todaysEnergy.defaultSubtitle') || rawSubtitle)
+      : rawSubtitle;
 
   if (profileLocationRequired && !horoscope) {
     return (

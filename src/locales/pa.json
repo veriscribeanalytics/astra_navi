@@ -287,8 +287,8 @@
     "meetYourGuides": "ਆਪਣੇ ਗਾਈਡਾਂ ਨੂੰ ਮਿਲੋ",
     "guidesSubtitle": "ਵਿਅਕਤੀਗਤ ਮਾਰਗਦਰਸ਼ਨ ਲਈ ਇੱਕ ਮਾਹਰ ਚੁਣੋ — ਕਰੀਅਰ ਤੋਂ ਲੈ ਕੇ ਰਿਸ਼ਤਿਆਂ ਤੱਕ ਅਤੇ ਡੂੰਘੇ ਚਾਰਟ ਵਿਸ਼ਲੇਸ਼ਣ ਤੱਕ।",
     "startChat": "ਚੈਟ ਸ਼ੁਰੂ ਕਰੋ",
-    "creditSingular": "ਕ੍ਰੈਡਿਟ",
-    "creditPlural": "ਕ੍ਰੈਡਿਟ",
+    "creditSingular": "ਕਰੈਡਿਟ",
+    "creditPlural": "ਕਰੈਡਿਟ",
     "janamKundli": "ਜਨਮ ਕੁੰਡਲੀ",
     "janamKundliDesc": "ਵੈਦਿਕ ਗਿਆਨ ਦੁਆਰਾ ਸੰਚਾਲਿਤ ਵਿਸਤ੍ਰਿਤ ਜਨਮ ਚਾਰਟ ਅਤੇ ਗ੍ਰਹਿ ਵਿਸ਼ਲੇਸ਼ਣ।",
     "aiGuidance": "AI ਮਾਰਗਦਰਸ਼ਨ",
@@ -369,7 +369,20 @@
     "familyEyebrow": "ਰਿਸ਼ਤੇ",
     "familyAdd": "ਮੈਂਬਰ ਜੋੜੋ",
     "familyEmptyCta": "ਆਪਣਾ ਪਹਿਲਾ ਪਰਿਵਾਰਕ ਮੈਂਬਰ ਜੋੜੋ",
-    "familyViewAll": "ਸਾਰੇ ਦੇਖੋ"
+    "familyViewAll": "ਸਾਰੇ ਦੇਖੋ",
+    "familySubtitle": "ਆਪਣੇ ਨਜ਼ਦੀਕੀ ਲੋਕਾਂ ਨਾਲ ਭਾਵਨਾਤਮਮਕ, ਕਰਮ ਅਤੇ ਅਨੁਕੂਲਤਾ ਦੇ ਪੈਟਰਨਾਂ ਨੂੰ ਟਰੈਕ ਕਰੋ।",
+    "familyAddSubtitle": "ਪੱਤਰੀ ਅਤੇ ਭਾਵਨਾਤਮਕ ਪੈਟਰਨਾਂ ਦੀ ਤੁਲਨਾ ਕਰਨ ਲਈ ਪਰਿਵਾਰ ਜਾਂ ਦੋਸਤਾਂ ਨੂੰ ਜੋੜੋ।",
+    "familyBondEnergy": "ਰਿਸ਼ਤਾ ਊਰਜਾ",
+    "familyViewBond": "ਰਿਸ਼ਤਾ ਦੇਖੋ",
+    "familyRunCompatibility": "ਅਨੁਕੂਲਤਾ ਚਲਾਓ",
+    "familyCompatibilityPending": "ਸਲਾਹ ਦੀ ਉਡੀਕ",
+    "familyStatusIncomplete": "ਅਧੂਰਾ",
+    "familyStatusNeedsAttention": "ਧਿਆਨ ਦੇਣ ਦੀ ਲੋੜ",
+    "familyStatusStable": "ਸਥਿਰ",
+    "familyStatusNew": "ਨਵਾਂ",
+    "familyInviteBanner": "ਤੁਹਾਡੇ ਕੋਲ {count} ਪਰਿਵਾਰਕ ਸੱਦਾ ਲੰਬਿਤ ਹੈ",
+    "familyInviteBannerPlural": "ਤੁਹਾਡੇ ਕੋਲ {count} ਪਰਿਵਾਰਕ ਸੱਦੇ ਲੰਬਿਤ ਹਨ",
+    "familyInviteReview": "ਸਮੀਖਿਆ"
   },
   "horoscope": {
     "yourDayToday": "ਅੱਜ ਤੁਹਾਡਾ ਦਿਨ",
@@ -1706,7 +1719,12 @@
       "stayHere": "ਇੱਥੇ ਹੀ ਰਹੋ",
       "openChat": "ਚੈਟ ਖੋਲ੍ਹੋ",
       "explainMsg": "ਮੇਰੇ ਲਈ ਅੱਜ ਦੀ ਊਰਜਾ ਦੀ ਵਿਆਖਿਆ ਕਰੋ। ਮੇਰਾ ਕੁੱਲ ਸਕੋਰ {score} ਹੈ।",
-      "discussMsg": "ਮੈਂ ਆਪਣੇ ਡੈਸ਼ਬੋਰਡ ਅਤੇ ਅੱਜ ਦੇ ਰਾਸ਼ੀਫਲ ਬਾਰੇ ਚਰਚਾ ਕਰਨਾ ਚਾਹੁੰਦਾ ਹਾਂ।"
+      "discussMsg": "ਮੈਂ ਆਪਣੇ ਡੈਸ਼ਬੋਰਡ ਅਤੇ ਅੱਜ ਦੇ ਰਾਸ਼ੀਫਲ ਬਾਰੇ ਚਰਚਾ ਕਰਨਾ ਚਾਹੁੰਦਾ ਹਾਂ।",
+      "bandFavorable": "ਅਨੁਕੂਲ",
+      "bandBalanced": "ਸੰਤੁਲਿਤ",
+      "bandCaution": "ਸਾਵਧਾਨ",
+      "defaultHeadline": "ਤੁਹਾਡੀ ਮੌਜੂਦਾ ਗ੍ਰਹਿ ਦਸ਼ਾ ਤੁਹਾਡੇ ਪੱਖ ਵਿੱਚ ਹੈ - ਹੁਣ ਵੱਡੀ ਯੋਜਨਾ 'ਤੇ ਕੰਮ ਕਰੋ।",
+      "defaultSubtitle": "ਇਹ ਗਤੀ ਬਣਾਉਣ, ਸੋਚ ਸਮਝ ਕੇ ਕਦਮ ਚੁੱਕਣ ਅਤੇ ਆਪਣੇ ਵੱਡੇ ਉਦੇਸ਼ ਨਾਲ ਇਕਸਾਰ ਹੋਣ ਦਾ ਇੱਕ ਸ਼ਕਤੀਸ਼ਾਲੀ ਸਮਾਂ ਹੈ।"
     },
     "weeklyChart": {
       "title": "ਹਫ਼ਤਾਵਾਰੀ ਚਾਰਟ",
