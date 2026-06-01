@@ -31,6 +31,8 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [scriptError, setScriptError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const buttonContainerRef = useRef<HTMLDivElement>(null);
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -40,19 +42,51 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     if (typeof window === 'undefined') return;
     if (window.google?.accounts?.id) {
       setScriptLoaded(true);
+      setScriptError(false);
       return;
+    }
+
+    setScriptError(false);
+
+    // Remove any existing script elements that might have failed to load or are hung
+    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (existingScript) {
+      existingScript.remove();
     }
 
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
-    script.onload = () => setScriptLoaded(true);
-    script.onerror = () => {
-      console.error('Failed to load Google Identity Services SDK.');
+
+    // 6-second timeout fallback in case of CSP block or network failure
+    const timeoutId = setTimeout(() => {
+      if (!window.google?.accounts?.id) {
+        console.error('Google Identity Services SDK load timeout (CSP or network block).');
+        setScriptError(true);
+        onError?.(t('login.googleLoadError') || 'Google Sign-In script failed to load. Please check your connection or disable adblockers.');
+      }
+    }, 6000);
+
+    script.onload = () => {
+      clearTimeout(timeoutId);
+      setScriptLoaded(true);
+      setScriptError(false);
     };
+
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      console.error('Failed to load Google Identity Services SDK.');
+      setScriptError(true);
+      onError?.(t('login.googleLoadError') || 'Google Sign-In script failed to load. Please check your connection or disable adblockers.');
+    };
+
     document.body.appendChild(script);
-  }, []);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [retryCount, onError, t]);
 
   // 2. Initialize Google Sign-in and render the official button
   useEffect(() => {
@@ -128,6 +162,23 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     return (
       <div className="w-full p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-center text-xs text-red-400">
         Google Client ID not configured. Add <code className="bg-red-500/10 px-1 py-0.5 rounded font-mono">NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> to your .env.local
+      </div>
+    );
+  }
+
+  if (scriptError) {
+    return (
+      <div className="w-full p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-center flex flex-col items-center gap-2">
+        <div className="text-xs text-red-400 font-medium">
+          {t('login.googleLoadError') || 'Google Sign-In is blocked or failed to load. Please check your connection or disable adblockers.'}
+        </div>
+        <button
+          type="button"
+          onClick={() => setRetryCount(prev => prev + 1)}
+          className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-red-500"
+        >
+          {t('chat.retry') || 'Retry'}
+        </button>
       </div>
     );
   }
