@@ -1697,7 +1697,16 @@
       "rising": "상승 중",
       "tithi": "티티",
       "nakshatra": "낙샤트라",
-      "openingDashboard": "대시보드를 여는 중..."
+      "openingDashboard": "대시보드를 여는 중...",
+      "scoreImpressive": "귀하의 {label} 점수가 매우 인상적입니다!",
+      "goodTimeDesc": "중요한 업무와 결정을 내리기에 상서로운 시간입니다.",
+      "cautionTimeDesc": "새로운 일을 시작하거나 큰 약속을 하는 것을 피하세요.",
+      "askNaviInChat": "채팅에서 Navi에게 물어볼까요?",
+      "askNaviConfirmDesc": "대화를 이어서 진행할 수 있도록 Navi가 이 질문으로 채팅창을 엽니다.",
+      "stayHere": "여기에 머물기",
+      "openChat": "채팅 열기",
+      "explainMsg": "오늘의 에너지를 설명해 주세요. 내 종합 점수는 {score}점입니다.",
+      "discussMsg": "대시보드와 오늘의 운세에 대해 이야기하고 싶습니다."
     },
     "weeklyChart": {
       "title": "주간 차트",
@@ -1837,6 +1846,141 @@
           "name": "Rishi",
           "title": "KP 전문가"
         }
+      }
+    },
+    "unlock": "잠금 해제",
+    "view": "보기",
+    "chartSnapshot": "나의 차트 스냅샷",
+    "guidanceHub": "나의 가이드 센터",
+    "exploreCosmicNetwork": "우주 네트워크 탐색",
+    "cosmicNetworkDesc": "전문 가이드와 연결하고, 내 차트를 탐색하며, 관계를 이해하고 강력한 점성술 도구에 액세스하세요.",
+    "meetYourAiAstrologers": "AI 점성술사 만나기",
+    "linked": "✓ 연결됨",
+    "celestial": "천체의",
+    "insights": "통찰",
+    "exploreAllPortals": "모든 포털 탐색",
+    "viewToday": "오늘 보기",
+    "rashiLibrary": "라시 라이브러리",
+    "portalChatDesc": "쿤들리, 다샤, 행성 이동 또는 삶의 가이드에 대해 무엇이든 물어보세요.",
+    "portalSoulmateDesc": "구나 밀란 및 카르마 통찰력을 사용해 궁합을 매칭해 보세요.",
+    "portalPulseDesc": "오늘 하루의 실시간 티티, 요가 및 베딕 에너지입니다.",
+    "portalRashiDesc": "상세한 특징과 통찰력으로 12개 별자리를 모두 탐색해 보세요.",
+    "portalSessionsDesc": "라이브 세션에 참여하고 전문가 및 탐구자들과 소통하세요.",
+    "guides": {
+      "navi": {
+        "role": "일반 베딕 가이드",
+        "desc": "사랑, 일, 타이밍, 삶에 대한 균형 잡힌 베딕 안내를 제공합니다."
+      },
+      "arya": {
+        "role": "커리어 멘토",
+        "desc": "직업, 기술, 승진 및 업무 결정에 대한 안내를 제공합니다."
+      },
+      "meera": {
+        "role": "관계 가이드",
+        "desc": "사랑, 결혼, 궁합, 감정에 대한 통찰을 제공합니다."
+      },
+      "anand": {
+        "role": "건강 고문",
+        "desc": "활력, 웰빙 및 건강 패턴을 분석합니다."
+      },
+      "vidya": {
+        "role": "금융 점성술사",
+        "desc": "부, 투자 및 금융 안정성에 대한 통찰을 제공합니다."
+      },
+      "rishi": {
+        "role": "심층 차트 현자",
+        "desc": "깊은 영적 통찰을 위한 고급 차트 종합 분석을 제공합니다."
+      },
+      "locked": "잠김"
+    },
+    "notableTransits": {
+      "jupiter": "목성의 이동은 이익을 증대시키고 성장을 안정시킵니다.",
+      "saturn": "토성의 이동은 규율을 시험하고 회복 탄력성을 구축합니다.",
+      "rahu": "라후의 이동은 오래된 패턴을 흔들어 놓습니다 - 중심을 잡으세요.",
+      "ketu": "케투는 집착을 내려놓고 마음을 비우는 것을 돕습니다."
+    },
+    "cosmicInsight": {
+      "title": "오늘의 우주 통찰",
+      "luckyColor": "행운의 색상",
+      "luckyNumber": "행운의 숫자"
+    },
+    "deepDive": {
+      "title": "심층 분석",
+      "deepDiveQ1": "내 주간 예측을 자세히 분석해 주세요",
+      "deepDiveQ2": "내 {area} 점수가 현재 수준인 이유는 무엇인가요?",
+      "deepDiveQ3": "내 점수를 개선하기 위한 빠른 팁을 주세요"
+    },
+    "privacy": {
+      "protected": "귀하의 데이터는 안전하게 보호됩니다.",
+      "secure": "보안",
+      "encrypted": "암호화됨",
+      "trusted": "수천 명의 신뢰를 받는"
+    }
+  },
+  "paywall": {
+    "credits": "크레딧",
+    "creditsRequired": "크레딧 필요",
+    "creditSingle": "크레딧",
+    "creditPlural": "크레딧",
+    "required": "필수",
+    "creditsRequiredLabel": "크레딧 필요",
+    "currentTier": "현재 등급: {tier}",
+    "viewPlansUpgrade": "요금제 보기 및 업그레이드",
+    "viewPlans": "요금제 보기",
+    "products": {
+      "pro_monthly": "Pro 월간 요금제",
+      "credit_pack_10": "10 크레딧 팩"
+    },
+    "features": {
+      "chat_message": {
+        "title": "AI 채팅 크레딧",
+        "description": "전문 베딕 AI 점성술사와 상담하세요. 메시지당 1크레딧이 사용됩니다."
+      },
+      "full_daily_horoscope": {
+        "title": "전체 일일 운세",
+        "description": "나의 차트를 기반으로 한 개인 맞춤형 생활 영역 분석, 행성 이동 및 일일 알림을 받아보세요."
+      },
+      "tomorrow_horoscope": {
+        "title": "내일의 운세",
+        "description": "내일의 우주 흐름을 미리 확인하고 하루를 계획하세요."
+      },
+      "guided_consult": {
+        "title": "가이드 세션",
+        "description": "개인 맞춤형 심층 1:1 인생 컨설팅을 경험하세요."
+      },
+      "match_report": {
+        "title": "궁합 분석 리포트",
+        "description": "상세한 36점 구나 밀란, 파트너 동기화 및 관계 조화 분석을 확인하세요."
+      },
+      "kundli_premium": {
+        "title": "프리미엄 쿤들리",
+        "description": "고급 행성 주기 분석, 아쉬타카바르가, 실시간 트랜싯 및 주요 테마를 해제하세요."
+      },
+      "family_compatibility": {
+        "title": "가족 궁합",
+        "description": "가족 및 친구들과의 정서적, 카르마적 조화와 궁합 패턴을 확인하세요."
+      }
+    },
+    "custom": {
+      "premiumdashaanalysis": {
+        "title": "프리미엄 다샤 분석",
+        "description": "상세한 다샤 시기 분석은 프리미엄 요금제가 필요합니다."
+      },
+      "ashtakavargaanalysis": {
+        "title": "아쉬타카바르가 분석",
+        "description": "Pro 요금제로 아쉬타카바르가 상세 점수를 확인하세요."
+      },
+      "planetstrengthranking": {
+        "title": "행성 강도 랭킹",
+        "description": "Pro 요금제로 행성별 정밀한 강도 분석을 해제하세요."
+      },
+      "currenttransits": {
+        "title": "현재 행성 이동",
+        "description": "Pro 요금제로 현재 실시간 행성 이동 분석을 확인하세요."
+      },
+      "keylifethemes": {
+        "title": "주요 인생 테마",
+        "description": "Pro 요금제로 주요 인생 테마와 통찰을 해제하세요."
       }
     }
   }

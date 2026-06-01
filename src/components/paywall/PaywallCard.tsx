@@ -34,10 +34,21 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
   const { t, language } = useTranslation();
   const modalRef = useFocusTrap<HTMLDivElement>(variant === 'modal');
 
-  // Pick title/description based on language
+  // Pick title/description based on language, check local translations first
   const isHindi = language === 'hi';
-  const title = (isHindi && paywall.titleHi) ? paywall.titleHi : paywall.title;
-  const description = (isHindi && paywall.descriptionHi) ? paywall.descriptionHi : paywall.description;
+  
+  // Clean up title to generate a potential custom section lookup key
+  const sanitizedTitleKey = paywall.title ? paywall.title.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+  const customTitle = sanitizedTitleKey ? t(`paywall.custom.${sanitizedTitleKey}.title`) : '';
+  const customDesc = sanitizedTitleKey ? t(`paywall.custom.${sanitizedTitleKey}.description`) : '';
+
+  // Feature key standard translations
+  const featureTitle = t(`paywall.features.${paywall.featureKey}.title`);
+  const featureDesc = t(`paywall.features.${paywall.featureKey}.description`);
+
+  // Resolution order: custom localized -> feature localized -> backend language-specific -> default backend English
+  const title = customTitle || featureTitle || ((isHindi && paywall.titleHi) ? paywall.titleHi : paywall.title);
+  const description = customDesc || featureDesc || ((isHindi && paywall.descriptionHi) ? paywall.descriptionHi : paywall.description);
 
   // The paywall icon (emoji) from backend, or fallback to Lock/Sparkles based on isSoft
   const paywallIcon = paywall.icon || null;
@@ -50,9 +61,12 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
     products.length > 0 ? `&product=${encodeURIComponent(products[0].productId)}` : ''
   }`;
 
-  // Helper: get product name based on language
-  const getProductName = (product: SuggestedProduct) =>
-    (isHindi && product.nameHi) ? product.nameHi : product.nameEn;
+  // Helper: get product name based on language/dictionary
+  const getProductName = (product: SuggestedProduct) => {
+    const localizedName = t(`paywall.products.${product.productId}`);
+    if (localizedName) return localizedName;
+    return (isHindi && product.nameHi) ? product.nameHi : product.nameEn;
+  };
 
   // Helper: format product price
   const getProductPrice = (product: SuggestedProduct) => {
@@ -109,8 +123,8 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
               <CreditCard className="w-4 h-4 text-foreground/40" />
               <span className="text-[11px] font-bold text-foreground/50">
                 {paywall.credits !== undefined
-                  ? `Credits: ${paywall.credits ?? 0} / ${paywall.creditsRequired ?? '?'}`
-                  : `Required: ${paywall.creditsRequired} credits`}
+                  ? `${t('paywall.credits') || "Credits"}: ${paywall.credits ?? 0} / ${paywall.creditsRequired ?? '?'}`
+                  : `${t('paywall.required') || "Required"}: ${paywall.creditsRequired} ${t('paywall.creditPlural') || "credits"}`}
               </span>
             </div>
           )}
@@ -136,7 +150,9 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                         <p className="text-[10px] text-foreground/40 font-bold">{getProductPrice(product)}</p>
                       )}
                       {product.credits > 0 && (
-                        <p className="text-[10px] text-foreground/30 font-bold">{product.credits} credits</p>
+                        <p className="text-[10px] text-foreground/30 font-bold">
+                          {product.credits} {product.credits === 1 ? (t('paywall.creditSingle') || "credit") : (t('paywall.creditPlural') || "credits")}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -154,7 +170,7 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
           {/* Tier info */}
           {paywall.tier && (
             <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">
-              Current tier: {paywall.tier}
+              {t('paywall.currentTier') ? t('paywall.currentTier').replace('{tier}', paywall.tier) : `Current tier: ${paywall.tier}`}
             </p>
           )}
 
@@ -166,7 +182,7 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             fullWidth
             className="mt-2 rounded-[16px]"
           >
-            View Plans & Upgrade <ArrowRight className="w-4 h-4 ml-1" />
+            {t('paywall.viewPlansUpgrade') || "View Plans & Upgrade"} <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
 
           {/* Payment notice */}
@@ -224,8 +240,8 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
               <CreditCard className="w-3.5 h-3.5 text-foreground/40" />
               <span className="text-[10px] font-bold text-foreground/50">
                 {paywall.credits !== undefined
-                  ? `${paywall.credits ?? 0}/${paywall.creditsRequired ?? '?'} credits`
-                  : `${paywall.creditsRequired} credits required`}
+                  ? `${paywall.credits ?? 0}/${paywall.creditsRequired ?? '?'} ${t('paywall.creditPlural') || "credits"}`
+                  : `${paywall.creditsRequired} ${t('paywall.creditsRequiredLabel') || "credits required"}`}
               </span>
             </div>
           )}
@@ -252,7 +268,7 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
           )}
 
           <Button href={ctaHref} variant="primary" size="sm" className="rounded-xl">
-            View Plans <ArrowRight className="w-3 h-3 ml-1" />
+            {t('paywall.viewPlans') || "View Plans"} <ArrowRight className="w-3 h-3 ml-1" />
           </Button>
         </div>
       </motion.div>
@@ -329,8 +345,8 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                   <CreditCard className="w-4 h-4 text-foreground/40" />
                   <span className="text-[11px] font-bold text-foreground/50">
                     {paywall.credits !== undefined
-                      ? `Credits: ${paywall.credits ?? 0} / ${paywall.creditsRequired ?? '?'}`
-                      : `Required: ${paywall.creditsRequired} credits`}
+                      ? `${t('paywall.credits') || "Credits"}: ${paywall.credits ?? 0} / ${paywall.creditsRequired ?? '?'}`
+                      : `${t('paywall.required') || "Required"}: ${paywall.creditsRequired} ${t('paywall.creditPlural') || "credits"}`}
                   </span>
                 </div>
               )}
@@ -356,7 +372,9 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                             <p className="text-[10px] text-foreground/40 font-bold">{getProductPrice(product)}</p>
                           )}
                           {product.credits > 0 && (
-                            <p className="text-[10px] text-foreground/30 font-bold">{product.credits} credits</p>
+                            <p className="text-[10px] text-foreground/30 font-bold">
+                              {product.credits} {product.credits === 1 ? (t('paywall.creditSingle') || "credit") : (t('paywall.creditPlural') || "credits")}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -374,7 +392,7 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
               {/* Tier info */}
               {paywall.tier && (
                 <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">
-                  Current tier: {paywall.tier}
+                  {t('paywall.currentTier') ? t('paywall.currentTier').replace('{tier}', paywall.tier) : `Current tier: ${paywall.tier}`}
                 </p>
               )}
 
@@ -386,7 +404,7 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                 fullWidth
                 className="rounded-[16px] mt-2"
               >
-                View Plans & Upgrade <ArrowRight className="w-4 h-4 ml-2" />
+                {t('paywall.viewPlansUpgrade') || "View Plans & Upgrade"} <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
 
               {/* Payment notice */}
