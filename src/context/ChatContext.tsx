@@ -10,14 +10,13 @@ import { PaywallData } from '@/types/paywall';
 import type { ChatPageContextSource } from '@/lib/schemas';
 import type { ChatAvatar } from '@/types/avatar';
 
-const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
 const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage'];
 
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
   try {
-    const v = localStorage.getItem(AVATAR_STORAGE_KEY);
+    const v = localStorage.getItem('astranavi_selected_avatar');
     return v && VALID_IDS.includes(v) ? v : DEFAULT_AVATAR_ID;
   } catch {
     return DEFAULT_AVATAR_ID;
@@ -177,7 +176,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedAvatarIdState(avatarId);
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(AVATAR_STORAGE_KEY, avatarId);
+        localStorage.setItem('astranavi_selected_avatar', avatarId);
       } catch {}
     }
   }, []);
@@ -722,12 +721,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAvatars(list);
 
       if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem(AVATAR_STORAGE_KEY);
+        const stored = localStorage.getItem('astranavi_selected_avatar');
         if (stored && list.some(a => a.avatarId === stored)) {
           setSelectedAvatarIdState(stored);
         } else if (stored) {
           // Stored id no longer exists in catalog — clean up.
-          localStorage.removeItem(AVATAR_STORAGE_KEY);
+          localStorage.removeItem('astranavi_selected_avatar');
         }
       }
     } catch (err) {
