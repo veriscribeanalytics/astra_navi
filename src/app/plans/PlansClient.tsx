@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { RazorpayCheckoutHandler } from '@/components/billing/RazorpayCheckoutHandler';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, Clock, Shield, Star } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -17,9 +18,23 @@ import { useTranslation } from '@/hooks';
 
 export default function PlansClient() {
   const { isLoggedIn, user } = useAuth();
-  const { tier, totalCredits, balance, isLoading: paywallLoading } = usePaywallContext();
+  const { tier, totalCredits, balance, isLoading: paywallLoading, refresh: refreshPaywall } = usePaywallContext();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
+
+  const razorpayHandler = useMemo(() => {
+    if (!isLoggedIn) return null;
+    return new RazorpayCheckoutHandler(
+      {
+        name: user?.name,
+        email: user?.email,
+        phoneNumber: (user as any)?.phoneNumber || '',
+      },
+      async () => {
+        await refreshPaywall();
+      }
+    );
+  }, [isLoggedIn, user, refreshPaywall]);
 
   // Highlight product from query params: ?product=pro_monthly or ?feature=chat_message
   const highlightProductId = searchParams?.get('product') || null;
@@ -161,7 +176,7 @@ export default function PlansClient() {
         isOpen={showCheckout}
         onClose={() => setShowCheckout(false)}
         product={selectedProduct}
-        checkoutHandler={null}
+        checkoutHandler={razorpayHandler}
       />
     </div>
   );
