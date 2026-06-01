@@ -476,7 +476,8 @@
     "alreadySignedIn": "আপনি ইতিমধ্যে সাইন ইন আছেন",
     "goToDashboard": "ড্যাশবোর্ডে যান",
     "signOut": "সাইন আউট",
-    "signInToContinue": "চালিয়ে যেতে সাইন ইন করুন"
+    "signInToContinue": "চালিয়ে যেতে সাইন ইন করুন",
+    "loadingGoogle": "লোড হচ্ছে..."
   },
   "about": {
     "theTradition": "ঐতিহ্য",

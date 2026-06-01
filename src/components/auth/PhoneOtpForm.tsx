@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, KeyRound, ArrowRight, ArrowLeft } from 'lucide-react';
 import PhoneInput from 'react-phone-number-input';
+import flags from 'react-phone-number-input/flags';
 import 'react-phone-number-input/style.css';
 
 import Input from '@/components/ui/Input';
@@ -139,6 +140,22 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
 
   return (
     <div className="space-y-4">
+      <style>{`
+        .PhoneInputCountrySelect {
+          background-color: #121214 !important;
+          color: #ffffff !important;
+        }
+        .PhoneInputCountrySelect option {
+          background-color: #1e1e22 !important;
+          color: #ffffff !important;
+        }
+        .PhoneInputCountrySelect:focus {
+          outline: none !important;
+        }
+        .PhoneInputCountryIcon img {
+          border-radius: 2px !important;
+        }
+      `}</style>
       {error && <AuthErrorBanner message={error} onDismiss={() => setError(null)} />}
 
       {step === 'phone' ? (
@@ -151,6 +168,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
             <div className="relative flex items-center">
               <PhoneInput
                 defaultCountry="IN"
+                flags={flags}
                 placeholder={t('auth.phone.phonePlaceholder') || '+91 98765 43210'}
                 value={phone}
                 onChange={(val) => {

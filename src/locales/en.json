@@ -487,7 +487,8 @@
     "alreadySignedIn": "You're already signed in",
     "goToDashboard": "Go to Dashboard",
     "signOut": "Sign Out",
-    "signInToContinue": "Sign in to continue to"
+    "signInToContinue": "Sign in to continue to",
+    "loadingGoogle": "Loading..."
   },
   "about": {
     "theTradition": "The Tradition",

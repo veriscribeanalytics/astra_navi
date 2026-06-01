@@ -476,7 +476,8 @@
     "alreadySignedIn": "ನೀವು ಈಗಾಗಲೇ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ",
     "goToDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹೋಗಿ",
     "signOut": "ಸೈನ್ ಔಟ್",
-    "signInToContinue": "ಮುಂದುವರಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ"
+    "signInToContinue": "ಮುಂದುವರಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    "loadingGoogle": "ಲೋಡ್ ಆಗುತ್ತಿದೆ..."
   },
   "about": {
     "theTradition": "ಸಂಪ್ರದಾಯ",

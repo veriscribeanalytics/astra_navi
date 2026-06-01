@@ -476,7 +476,8 @@
     "alreadySignedIn": "이미 로그인되어 있습니다",
     "goToDashboard": "대시보드로 이동",
     "signOut": "로그아웃",
-    "signInToContinue": "계속하려면 로그인하세요"
+    "signInToContinue": "계속하려면 로그인하세요",
+    "loadingGoogle": "로드 중..."
   },
   "about": {
     "theTradition": "전통",

@@ -476,7 +476,8 @@
     "alreadySignedIn": "మీరు ఇప్పటికే సైన్ ఇన్ అయ్యారు",
     "goToDashboard": "డాష్‌బోర్డ్‌కి వెళ్లండి",
     "signOut": "సైన్ అవుట్",
-    "signInToContinue": "కొనసాగించడానికి సైన్ ఇన్ చేయండి"
+    "signInToContinue": "కొనసాగించడానికి సైన్ ఇన్ చేయండి",
+    "loadingGoogle": "లోడ్ అవుతోంది..."
   },
   "about": {
     "theTradition": "సంప్రదాయం",

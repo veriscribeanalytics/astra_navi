@@ -476,7 +476,8 @@
     "alreadySignedIn": "तुम्ही आधीच साइन इन आहात",
     "goToDashboard": "डॅशबोर्डवर जा",
     "signOut": "साइन आउट",
-    "signInToContinue": "सुरू ठेवण्यासाठी साइन इन करा"
+    "signInToContinue": "सुरू ठेवण्यासाठी साइन इन करा",
+    "loadingGoogle": "लोड होत आहे..."
   },
   "about": {
     "theTradition": "परंपरा",

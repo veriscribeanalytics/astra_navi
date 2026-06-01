@@ -476,7 +476,8 @@
     "alreadySignedIn": "நீங்கள் ஏற்கனவே உள்நுழைந்துள்ளீர்கள்",
     "goToDashboard": "டாஷ்போர்டுக்குச் செல்க",
     "signOut": "வெளியேறு",
-    "signInToContinue": "தொடர உள்நுழைக"
+    "signInToContinue": "தொடர உள்நுழைக",
+    "loadingGoogle": "ஏற்றப்படுகிறது..."
   },
   "about": {
     "theTradition": "பாரம்பரியம்",
