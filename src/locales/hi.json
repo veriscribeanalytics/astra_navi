@@ -1309,6 +1309,32 @@
       "phone": "फ़ोन ओटीपी",
       "emailOtp": "ईमेल ओटीपी",
       "orContinueWith": "या"
+    },
+    "phone": {
+      "phoneLabel": "फ़ोन नंबर",
+      "phonePlaceholder": "+91 98765 43210",
+      "sendCode": "कोड भेजें",
+      "otpLabel": "सत्यापन कोड",
+      "verify": "सत्यापित करें और साइन इन करें",
+      "changeNumber": "नंबर बदलें",
+      "resendIn": "पुनः भेजें ",
+      "resendCode": "कोड पुनः भेजें",
+      "otpExpired": "कोड समाप्त हो गया - पुनः भेजें",
+      "otpIncorrect": "गलत कोड",
+      "otpLocked": "बहुत सारे गलत प्रयास। कृपया एक नए कोड का अनुरोध करें।"
+    },
+    "email": {
+      "emailLabel": "ईमेल पता",
+      "emailPlaceholder": "you@example.com",
+      "sendCode": "कोड भेजें",
+      "otpLabel": "सत्यापन कोड",
+      "verify": "सत्यापित करें और साइन इन करें",
+      "changeEmail": "ईमेल बदलें",
+      "resendIn": "पुनः भेजें ",
+      "resendCode": "कोड पुनः भेजें",
+      "otpExpired": "कोड समाप्त हो गया - पुनः भेजें",
+      "otpIncorrect": "गलत कोड",
+      "otpLocked": "बहुत सारे गलत प्रयास। कृपया एक नए कोड का अनुरोध करें।"
     }
   },
   "home": {

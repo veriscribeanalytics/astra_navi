@@ -1309,6 +1309,32 @@
       "phone": "ਫ਼ੋਨ OTP",
       "emailOtp": "ਈਮੇਲ OTP",
       "orContinueWith": "ਜਾਂ"
+    },
+    "phone": {
+      "phoneLabel": "ਫ਼ੋਨ ਨੰਬਰ",
+      "phonePlaceholder": "+91 98765 43210",
+      "sendCode": "ਕੋਡ ਭੇਜੋ",
+      "otpLabel": "ਵੈਰੀਫਿਕੇਸ਼ਨ ਕੋਡ",
+      "verify": "ਤਸਦੀਕ ਕਰੋ ਅਤੇ ਸਾਈਨ ਇਨ ਕਰੋ",
+      "changeNumber": "ਨੰਬਰ ਬਦਲੋ",
+      "resendIn": "ਦੁਬਾਰਾ ਭੇਜੋ ",
+      "resendCode": "ਕੋਡ ਦੁਬਾਰਾ ਭੇਜੋ",
+      "otpExpired": "ਕੋਡ ਦੀ ਮਿਆਦ ਖਤਮ — ਦੁਬਾਰਾ ਭੇਜੋ",
+      "otpIncorrect": "ਗਲਤ ਕੋਡ",
+      "otpLocked": "ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਨਵੇਂ ਕੋਡ ਦੀ ਬੇਨਤੀ ਕਰੋ।"
+    },
+    "email": {
+      "emailLabel": "ਈਮੇਲ ਪਤਾ",
+      "emailPlaceholder": "you@example.com",
+      "sendCode": "ਕੋਡ ਭੇਜੋ",
+      "otpLabel": "ਤਸਦੀਕ ਕਰੋ ਅਤੇ ਸਾਈਨ ਇਨ ਕਰੋ",
+      "verify": "ਤਸਦੀਕ ਕਰੋ ਅਤੇ ਸਾਈਨ ਇਨ ਕਰੋ",
+      "changeEmail": "ਈਮੇਲ ਬਦਲੋ",
+      "resendIn": "ਦੁਬਾਰਾ ਭੇਜੋ ",
+      "resendCode": "ਕੋਡ ਦੁਬਾਰา ਭੇਜੋ",
+      "otpExpired": "ਕੋਡ ਦੀ ਮਿਆਦ ਖਤਮ — ਦੁਬਾਰਾ ਭੇਜੋ",
+      "otpIncorrect": "ਗਲਤ ਕੋਡ",
+      "otpLocked": "ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਨਵੇਂ ਕੋਡ ਦੀ ਬੇਨਤੀ ਕਰੋ।"
     }
   },
   "home": {

@@ -1401,6 +1401,32 @@
       "phone": "Phone OTP",
       "emailOtp": "Email OTP",
       "orContinueWith": "or"
+    },
+    "phone": {
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "+91 98765 43210",
+      "sendCode": "Send Code",
+      "otpLabel": "Verification Code",
+      "verify": "Verify & Sign In",
+      "changeNumber": "Change number",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "otpExpired": "Code expired — resend",
+      "otpIncorrect": "Incorrect code",
+      "otpLocked": "Too many incorrect attempts. Please request a new code."
+    },
+    "email": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "sendCode": "Send Code",
+      "otpLabel": "Verification Code",
+      "verify": "Verify & Sign In",
+      "changeEmail": "Change Email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "otpExpired": "Code expired — resend",
+      "otpIncorrect": "Incorrect code",
+      "otpLocked": "Too many incorrect attempts. Please request a new code."
     }
   },
   "home": {

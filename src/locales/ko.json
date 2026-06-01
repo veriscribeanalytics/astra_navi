@@ -1309,6 +1309,32 @@
       "phone": "휴대폰 OTP",
       "emailOtp": "이메일 OTP",
       "orContinueWith": "또는"
+    },
+    "phone": {
+      "phoneLabel": "휴대폰 번호",
+      "phonePlaceholder": "+91 98765 43210",
+      "sendCode": "인증번호 전송",
+      "otpLabel": "인증 번호",
+      "verify": "인증 및 로그인",
+      "changeNumber": "번호 변경",
+      "resendIn": "재전송 ",
+      "resendCode": "인증번호 재전송",
+      "otpExpired": "인증번호 만료 — 재전송",
+      "otpIncorrect": "잘못된 인증번호",
+      "otpLocked": "잘못된 시도가 너무 많습니다. 새 코드를 요청하세요."
+    },
+    "email": {
+      "emailLabel": "이메일 주소",
+      "emailPlaceholder": "you@example.com",
+      "sendCode": "인증번호 전송",
+      "otpLabel": "인증 번호",
+      "verify": "인증 및 로그인",
+      "changeEmail": "이메일 변경",
+      "resendIn": "재전송 ",
+      "resendCode": "인증번호 재전송",
+      "otpExpired": "인증번호 만료 — 재전송",
+      "otpIncorrect": "잘못된 인증번호",
+      "otpLocked": "잘못된 시도가 너무 많습니다. 새 코드를 요청하세요."
     }
   },
   "home": {

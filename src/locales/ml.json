@@ -1309,6 +1309,32 @@
       "phone": "ഫോൺ OTP",
       "emailOtp": "ഇമെയിൽ OTP",
       "orContinueWith": "അല്ലെങ്കിൽ"
+    },
+    "phone": {
+      "phoneLabel": "ഫോൺ നമ്പർ",
+      "phonePlaceholder": "+91 98765 43210",
+      "sendCode": "കോഡ് അയയ്ക്കുക",
+      "otpLabel": "വെരിഫിക്കേഷൻ കോഡ്",
+      "verify": "വെരിഫൈ ചെയ്തു ലോഗിൻ ചെയ്യുക",
+      "changeNumber": "നമ്പർ മാറ്റുക",
+      "resendIn": "വീണ്ടും അയയ്ക്കുക ",
+      "resendCode": "കോഡ് വീണ്ടും അയയ്ക്കുക",
+      "otpExpired": "കോഡ് കാലഹരണപ്പെട്ടു — വീണ്ടും അയയ്ക്കുക",
+      "otpIncorrect": "തെറ്റായ കോഡ്",
+      "otpLocked": "പല തെറ്റായ ശ്രമങ്ങൾ. പുതിയ കോഡ് ആവശ്യപ്പെടുക."
+    },
+    "email": {
+      "emailLabel": "ഇമെയിൽ വിലാസം",
+      "emailPlaceholder": "you@example.com",
+      "sendCode": "കോഡ് അയയ്ക്കുക",
+      "otpLabel": "വെരിഫിക്കേഷൻ കോഡ്",
+      "verify": "വെരിഫൈ ചെയ്തു ലോഗിൻ ചെയ്യുക",
+      "changeEmail": "ഇമെയിൽ മാറ്റുക",
+      "resendIn": "വീണ്ടും അയയ്ക്കുക ",
+      "resendCode": "കോഡ് വീണ്ടും അയയ്ക്കുക",
+      "otpExpired": "കോഡ് കാലഹരണപ്പെട്ടു — വീണ്ടും അയയ്ക്കുക",
+      "otpIncorrect": "തെറ്റായ കോഡ്",
+      "otpLocked": "പല തെറ്റായ ശ്രമങ്ങൾ. പുതിയ കോഡ് ആവശ്യപ്പെടുക."
     }
   },
   "home": {
