@@ -44,6 +44,8 @@ const Footer = () => {
                     <h5 className="font-bold text-primary mb-3 sm:mb-5 uppercase tracking-widest text-[10px] sm:text-xs">{t('footer.companyInfo')}</h5>
                     <ul className="space-y-2 sm:space-y-3 font-body text-xs sm:text-sm text-primary/60 font-medium">
                         <li><Link className="hover:text-secondary transition-colors" href="/about">{t('footer.aboutUs')}</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/privacy">{t('footer.privacyPolicy') || 'Privacy Policy'}</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/terms">{t('footer.terms') || 'Terms & Conditions'}</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/astrologers">{t('footer.ourAstrologers')}</Link></li>
                         <li className="flex items-center text-on-surface-variant/40">
                             <span>{t('footer.careers')}</span>

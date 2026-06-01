@@ -27,7 +27,7 @@ const FALLBACK_DEFAULT_MODES: Record<string, "quick" | "normal" | "deep"> = {
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
   try {
-    const v = localStorage.getItem(AVATAR_STORAGE_KEY);
+    const v = localStorage.getItem('astranavi_selected_avatar');
     return v && VALID_IDS.includes(v) ? v : DEFAULT_AVATAR_ID;
   } catch {
     return DEFAULT_AVATAR_ID;
@@ -224,7 +224,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedAvatarIdState(avatarId);
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(AVATAR_STORAGE_KEY, avatarId);
+        localStorage.setItem('astranavi_selected_avatar', avatarId);
       } catch {}
     }
     if (!userHasManuallyChangedMode) {

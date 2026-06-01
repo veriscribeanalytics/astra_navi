@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Mail, Lock, ShieldCheck, User as UserIcon, Calendar, Clock,
@@ -56,6 +57,7 @@ const hasSpecial = (p: string) => /[^A-Za-z0-9]/.test(p);
 const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false, onActionClick }) => {
   const { t, language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
   const [step, setStep] = useState(0);
+  const [consentGiven, setConsentGiven] = useState(false);
   const [data, setData] = useState<RegisterData>({
     email: '', password: '', confirmPassword: '', name: '', gender: '',
     phoneNumber: '', maritalStatus: '', occupation: '',
@@ -101,7 +103,11 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
       case 2: {
         if (data.dob) {
           const d = new Date(data.dob);
-          if (d > new Date()) return t('auth.register.validation.dobFuture');
+          const now = new Date();
+          if (d > now) return t('auth.register.validation.dobFuture');
+          // 18+ age gate (DPDP children's-data rule)
+          const eighteenAgo = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate());
+          if (d > eighteenAgo) return t('login.mustBe18') || 'You must be 18 or older to use Astra Navi.';
         }
         if (data.tob && !/^\d{2}:\d{2}$/.test(data.tob)) return t('auth.register.validation.tobFormat');
         if (data.pob && data.pob.length < 2) return t('auth.register.validation.pobLength');
@@ -468,6 +474,31 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
                   ))}
                 </div>
               </div>
+
+              {/* Required Consent Checkbox */}
+              <div className="pt-3 border-t border-outline-variant/10">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    id="consent-checkbox"
+                    type="checkbox"
+                    checked={consentGiven}
+                    onChange={(e) => setConsentGiven(e.target.checked)}
+                    className="mt-1 w-4.5 h-4.5 rounded border-outline-variant/30 bg-surface text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
+                    required
+                  />
+                  <span className="text-xs text-primary/70 leading-relaxed font-medium font-body">
+                    {t('login.consentPart1') || 'I confirm I am 18 or older and agree to the'}{' '}
+                    <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                      {t('footer.privacyPolicy') || 'Privacy Policy'}
+                    </Link>{' '}
+                    {t('login.consentPart2') || 'and'}{' '}
+                    <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                      {t('footer.terms') || 'Terms & Conditions'}
+                    </Link>
+                    .
+                  </span>
+                </label>
+              </div>
             </div>
           )}
         </motion.div>
@@ -504,7 +535,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
             fullWidth
             size="md"
             loading={isSubmitting}
-            disabled={disabled || isSubmitting}
+            disabled={disabled || isSubmitting || !consentGiven}
             onClick={handleSubmit}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
