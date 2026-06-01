@@ -70,6 +70,8 @@
     "newsletterDesc": "Receive planetary insights in your inbox.",
     "sacredItems": "Sacred Items",
     "aboutUs": "About Us",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms & Conditions",
     "ourAstrologers": "Our Astrologers",
     "careers": "Careers",
     "contactSupport": "Contact Support",
@@ -442,7 +444,9 @@
     "invalidCredentials": "Invalid credentials.",
     "networkError": "Unable to connect to the server. Please check your internet connection and try again.",
     "serverError": "The server is currently unavailable. Please try again later.",
-    "resetLinkSent": "If an account exists, reset instructions have been sent."
+    "resetLinkSent": "If an account exists, reset instructions have been sent.",
+    "consentLabel": "I confirm I am 18 or older and agree to the Privacy Policy and Terms & Conditions.",
+    "mustBe18": "You must be 18 or older to use Astra Navi."
   },
   "about": {
     "theTradition": "The Tradition",
@@ -802,6 +806,14 @@
     "filterPurchase": "Purchases",
     "filterCycleReset": "Cycle Reset",
     "oneTimeReports": "One-Time Reports"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated"
+  },
+  "terms": {
+    "title": "Terms & Conditions",
+    "lastUpdated": "Last updated"
   },
   "family": {
     "myFamily": "My Family",
