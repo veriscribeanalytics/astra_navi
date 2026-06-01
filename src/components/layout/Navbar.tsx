@@ -13,7 +13,7 @@ import { useToast, useTranslation } from "@/hooks";
 import {
     User, LogOut, Menu, X, ChevronDown, Sparkles,
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard,
-    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp
+    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users
 } from "lucide-react";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { getTierLabel } from "@/types/billing";
@@ -49,6 +49,12 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                         href: "/horoscope/forecast",
                         icon: <TrendingUp className="w-4 h-4" />,
                         desc: t('nav.forecastDesc')
+                    },
+                    {
+                        label: t('nav.myFamily'),
+                        href: "/family",
+                        icon: <Users className="w-4 h-4" />,
+                        desc: t('nav.myFamilyDesc')
                     },
                 ]
             },
@@ -255,7 +261,7 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
 const Navbar: React.FC = () => {
     const pathname = usePathname();
     const router = useRouter();
-    const { isLoggedIn, logout, user } = useAuth();
+    const { isLoggedIn, isLoading, logout, user } = useAuth();
     const { ToastContainer } = useToast();
     const { t } = useTranslation();
     const { tier, totalCredits, isLoaded } = usePaywallContext();
@@ -305,6 +311,11 @@ const Navbar: React.FC = () => {
     }, [pathname]);
 
     const isChatPage = pathname?.startsWith('/chat');
+    // Only hide the navbar on /chat when the user is actually signed in
+    // (because the authed chat UI has its own header). Anon users see the
+    // PublicFeatureLanding teaser and must keep the navbar so they can
+    // navigate away.
+    const hideNavbar = isChatPage && isLoggedIn;
     const navSections = getNavSections(isLoggedIn, t);
 
     const handleLogout = () => {
@@ -396,11 +407,11 @@ const Navbar: React.FC = () => {
                 variant="warning"
                 isLoading={isLoggingOut}
             />
-            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${isChatPage ? 'hidden' : ''}`}>
-            {/* ===== DESKTOP NAVBAR (md+) ===== */}
-            <div className="hidden md:grid grid-cols-3 items-center px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
+            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${hideNavbar ? 'hidden' : ''}`}>
+            {/* ===== DESKTOP NAVBAR (lg+) ===== */}
+            <div className="hidden lg:flex items-center justify-between px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
-                <div className="flex justify-start">
+                <div className="flex justify-start shrink-0">
                     <Link href="/" aria-label="Astra Navi Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
                         <Image src="/icons/logo.jpeg" alt="" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
                         Astra Navi
@@ -408,7 +419,7 @@ const Navbar: React.FC = () => {
                 </div>
 
                 {/* Center: Navigation Dropdowns */}
-                <div className="flex items-center justify-center space-x-1 lg:space-x-3" role="menubar" onKeyDown={handleMenuKeyDown}>
+                <div className="flex items-center justify-center space-x-1.5 lg:space-x-3 flex-1 px-4" role="menubar" onKeyDown={handleMenuKeyDown}>
                     {navSections.map((section) => (
                         <div 
                             key={section.id}
@@ -479,8 +490,25 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center justify-end space-x-4 lg:space-x-5">
                     <LanguagePicker />
                     <ThemeToggle />
-                    {!isLoggedIn ? (
-                        <Button href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`} variant="primary" size="sm" className="!px-5 shadow-md shadow-secondary/10 text-xs">Login</Button>
+                    {isLoading ? (
+                        <div className="w-9 h-9 rounded-full bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
+                    ) : !isLoggedIn ? (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`}
+                                className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/70 hover:text-secondary transition-colors whitespace-nowrap"
+                            >
+                                {t('nav.login')}
+                            </Link>
+                            <Button
+                                href={`/login?action=register&callbackUrl=${encodeURIComponent(pathname || '/')}`}
+                                variant="primary"
+                                size="sm"
+                                className="!px-4 shadow-md shadow-secondary/10 text-xs whitespace-nowrap"
+                            >
+                                {t('nav.signUp')}
+                            </Button>
+                        </div>
                     ) : (
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
                             <button 
@@ -500,11 +528,13 @@ const Navbar: React.FC = () => {
                                     </div>
                                     {/* Credit Balance */}
                                     {isLoggedIn && isLoaded && (
-                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center gap-2.5">
-                                            <Wallet className="w-3.5 h-3.5 text-secondary" />
-                                            <span className="text-[10px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
-                                            <span className="text-[9px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
-                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{getTierLabel(tier || 'free')}</span>
+                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <Wallet className="w-3.5 h-3.5 text-secondary shrink-0" />
+                                                <span className="text-[10px] font-bold text-secondary tabular-nums whitespace-nowrap shrink-0">{totalCredits ?? 0}</span>
+                                                <span className="text-[9px] text-foreground/30 uppercase tracking-wider whitespace-nowrap truncate">{t('plans.naviCredits')}</span>
+                                            </div>
+                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15 whitespace-nowrap shrink-0">{getTierLabel(tier || 'free')}</span>
                                         </div>
                                     )}
                                     <div className="space-y-0.5">
@@ -525,8 +555,8 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
 
-            {/* ===== MOBILE NAVBAR (<md) ===== */}
-            <div className="flex md:hidden items-center px-4 py-2 w-full relative h-[56px]">
+            {/* ===== MOBILE NAVBAR (<lg) ===== */}
+            <div className="flex lg:hidden items-center px-4 py-2 w-full relative h-[56px]">
                 {/* Left Section (33%) */}
                 <div className="flex-[1] flex justify-start">
                     <button 
@@ -537,20 +567,26 @@ const Navbar: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Center Section */}
+                {/* Center Section - Prevent overlap on extra-narrow screens by hiding "Astra Navi" text below 390px */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
                     <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tighter text-primary font-headline">
                         <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
-                        <span className="whitespace-nowrap">Astra Navi</span>
+                        <span className="whitespace-nowrap hidden min-[390px]:inline">Astra Navi</span>
                     </Link>
                 </div>
 
                 {/* Right Section */}
                 <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
                     <ThemeToggle />
-                    {!isLoggedIn ? (
-                        <Link href="/login" className="w-8 h-8 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
-                            <User className="w-4 h-4" />
+                    {isLoading ? (
+                        <div className="h-8 w-[68px] rounded-xl bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
+                    ) : !isLoggedIn ? (
+                        <Link
+                            href={`/login?callbackUrl=${encodeURIComponent(pathname || '/')}`}
+                            className="h-8 px-3.5 rounded-xl bg-secondary text-on-primary text-[11px] font-bold uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity shadow-sm shadow-secondary/20"
+                        >
+                            <User className="w-3.5 h-3.5" />
+                            {t('nav.login')}
                         </Link>
                     ) : (
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
@@ -566,11 +602,13 @@ const Navbar: React.FC = () => {
                                     </div>
                                     {/* Credit Balance */}
                                     {isLoggedIn && isLoaded && (
-                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center gap-2.5">
-                                            <Wallet className="w-3.5 h-3.5 text-secondary" />
-                                            <span className="text-[10px] font-bold text-secondary tabular-nums">{totalCredits ?? 0}</span>
-                                            <span className="text-[9px] text-foreground/30 uppercase tracking-wider">{t('plans.naviCredits')}</span>
-                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{getTierLabel(tier || 'free')}</span>
+                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <Wallet className="w-3.5 h-3.5 text-secondary shrink-0" />
+                                                <span className="text-[10px] font-bold text-secondary tabular-nums whitespace-nowrap shrink-0">{totalCredits ?? 0}</span>
+                                                <span className="text-[9px] text-foreground/30 uppercase tracking-wider whitespace-nowrap truncate">{t('plans.naviCredits')}</span>
+                                            </div>
+                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15 whitespace-nowrap shrink-0">{getTierLabel(tier || 'free')}</span>
                                         </div>
                                     )}
                                     <div className="space-y-0.5">
@@ -592,9 +630,9 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* ===== SITE MENU OVERLAY (Mobile) ===== */}
-            <div className={`md:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
+            <div className={`lg:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
             
-            <div className={`md:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 max-h-[calc(100vh-var(--navbar-height,56px))] bg-surface border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
+            <div className={`lg:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 max-h-[calc(100vh-var(--navbar-height,56px))] bg-surface border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
                 <div className="p-5 space-y-7 pb-12">
                     {navSections.map((section) => (
                         <div key={section.id} className="space-y-3">
@@ -622,6 +660,12 @@ const Navbar: React.FC = () => {
                             </div>
                         </div>
                     ))}
+
+                    {/* Preferences Row (Language Picker) on Mobile */}
+                    <div className="pt-5 border-t border-outline-variant/30 flex items-center justify-between">
+                        <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">{t('profile.basicInfo.language') || 'Language'}</span>
+                        <LanguagePicker />
+                    </div>
 
                     {!isLoggedIn && (
                         <div className="pt-2">

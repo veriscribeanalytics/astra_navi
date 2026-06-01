@@ -20,6 +20,9 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("Forgot password error:", error);
-        return NextResponse.json({ error: "Failed to process request. Please try again later." }, { status: 500 });
+        return NextResponse.json({ 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
+        }, { status: 500 });
     }
 }

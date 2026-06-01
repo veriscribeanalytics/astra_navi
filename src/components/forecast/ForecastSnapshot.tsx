@@ -49,8 +49,8 @@ export default function ForecastSnapshot({ insight, summary, range, theme, t }: 
 
   // Stats
   const dominantPlanet = insight?.dominant_planet || '—';
-  const bestDay = range === '7d' ? (summary?.best_day || '—') : (summary?.best_month || '—');
-  const challengingDay = range === '7d' ? (summary?.worst_day || '—') : (summary?.worst_month || '—');
+  const bestDay = range === 'yearly' ? (summary?.best_month || '—') : (summary?.best_day || '—');
+  const challengingDay = range === 'yearly' ? (summary?.worst_month || '—') : (summary?.worst_day || '—');
 
   // Suggestion text
   let suggestion = '';
@@ -60,12 +60,12 @@ export default function ForecastSnapshot({ insight, summary, range, theme, t }: 
   } else if (insight?.text) {
     suggestion = insight.text.slice(0, 140) + (insight.text.length > 140 ? '...' : '');
   } else {
-    suggestion = 'Align your activities with the current celestial rhythms for optimal outcome.';
+    suggestion = t('forecast.snapshot.defaultSuggestion');
   }
 
   // Pre-filled chat prompts
-  const whyPrompt = `Why is my forecast score ${score} today?`;
-  const planPrompt = `Help me plan my day based on today's forecast details.`;
+  const whyPrompt = t('forecast.snapshot.whyPrompt').replace('{score}', String(score));
+  const planPrompt = t('forecast.snapshot.planPrompt');
 
   const handleCtaClick = (prompt: string) => {
     if (typeof window !== 'undefined') {

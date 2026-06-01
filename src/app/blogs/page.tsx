@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { BookOpen, Sparkles, Calendar, Users, Gem, Heart, Brain, Clock, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useTranslation } from '@/hooks';
 
 const blogCategories = [
     {
@@ -157,6 +158,7 @@ const item = {
 } as const;
 
 export default function BlogsPage() {
+    const { t } = useTranslation();
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => setMounted(true), []);
 
@@ -183,14 +185,14 @@ export default function BlogsPage() {
                         >
                             <BookOpen className="w-4 h-4" />
                         </motion.div>
-                        The Library of Wisdom
+                        {t('blogs.index.badge')}
                     </div>
                     <h1 className="text-4xl sm:text-6xl lg:text-8xl font-headline font-bold text-foreground mb-6 tracking-tight break-words">
-                        Ancient Science, <br />
-                        <span className="text-secondary italic">Modern</span> Insight
+                        {t('blogs.index.title')} <br />
+                        <span className="text-secondary italic">{t('blogs.index.subtitle')}</span>
                     </h1>
                     <p className="text-lg sm:text-xl text-foreground/50 max-w-3xl mx-auto leading-relaxed">
-                        Journey through the vast ocean of Vedic knowledge. From planetary movements to spiritual remedies, discover the keys to your cosmic existence.
+                        {t('blogs.index.description')}
                     </p>
                 </motion.div>
 
@@ -275,7 +277,7 @@ export default function BlogsPage() {
                                                     
                                                     {category.status === 'available' && (
                                                         <span className="text-xs font-bold text-foreground/40 group-hover:text-foreground transition-colors">
-                                                            Read Story
+                                                            {t('blogs.index.readStory')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -306,20 +308,20 @@ export default function BlogsPage() {
                                 <Brain className="w-10 h-10 text-secondary" />
                             </div>
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-bold text-white mb-6">
-                                Can&apos;t find what you&apos;re <br />
-                                <span className="text-secondary italic">looking for?</span>
+                                {t('blogs.index.ctaHeading')} <br />
+                                <span className="text-secondary italic">{t('blogs.index.ctaSubheading')}</span>
                             </h2>
                             <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto">
-                                Our Celestial Library is expanding every week. If you have a specific question about your chart, Navi has the answers ready for you now.
+                                {t('blogs.index.ctaDescription')}
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-sm mx-auto sm:max-w-none">
                                 <Link href="/chat" className="w-full sm:w-auto">
                                     <button className="w-full justify-center px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-secondary text-white font-bold hover:bg-secondary/90 transition-all shadow-[0_10px_30px_rgba(200,136,10,0.3)] hover:scale-105 active:scale-95 flex items-center gap-2">
-                                        Ask Navi Anything <Sparkles className="w-5 h-5" />
+                                        {t('blogs.index.askNavi')} <Sparkles className="w-5 h-5" />
                                     </button>
                                 </Link>
                                 <button className="w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-white/5 text-white font-bold border border-white/10 hover:bg-white/10 transition-all">
-                                    Subscribe for Updates
+                                    {t('blogs.index.subscribe')}
                                 </button>
                             </div>
                         </div>
@@ -328,7 +330,7 @@ export default function BlogsPage() {
 
                 {/* Footer Info */}
                 <p className="text-center mt-12 text-sm text-foreground/30 font-medium tracking-wide">
-                    © 2026 ASTRANAVI · THE COSMIC ARCHIVE
+                    {t('blogs.index.footer')}
                 </p>
             </div>
         </div>

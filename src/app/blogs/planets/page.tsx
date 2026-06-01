@@ -4,12 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Card from '@/components/ui/Card';
-import { 
+import {
     ArrowLeft, Shield, Scale, Activity, Info,
     Lock, CheckCircle2, AlertCircle, Sparkles, Zap, Dna, BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks';
 
 
 const PLANET_COLORS: Record<string, string> = {
@@ -236,6 +237,7 @@ const planets = [
 ];
 
 export default function PlanetsPage() {
+    const { t } = useTranslation();
     const [selectedPlanet, setSelectedPlanet] = useState(planets[0]);
     const [viewMode, setViewMode] = useState<'encyclopedia' | 'detail'>('encyclopedia');
     const router = useRouter();
@@ -257,7 +259,7 @@ export default function PlanetsPage() {
                             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
                         <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
-                            Navagraha <span className="text-secondary italic">Archetypes</span>
+                            {t('blogs.planets.title')} <span className="text-secondary italic">{t('blogs.planets.subtitle')}</span>
                         </h1>
                     </div>
 
@@ -273,12 +275,12 @@ export default function PlanetsPage() {
                                 <BookOpen className={`w-4 h-4 ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/50'}`} />
                             </div>
                             <div>
-                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>Encyclopedia</h3>
-                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">Introduction</p>
+                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>{t('blogs.planets.encyclopediaTitle')}</h3>
+                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">{t('blogs.planets.introduction')}</p>
                             </div>
                         </button>
 
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">The Nine Planets</div>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">{t('blogs.planets.sidebarLabel')}</div>
                         <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
                             {planets.map((p) => {
                                 const isActive = viewMode === 'detail' && selectedPlanet.id === p.id;
@@ -321,13 +323,13 @@ export default function PlanetsPage() {
                             >
                                 <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
                                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
-                                        <BookOpen className="w-3 h-3" /> Core Concepts
+                                        <BookOpen className="w-3 h-3" /> {t('blogs.planets.coreConcepts')}
                                     </div>
                                     <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-2">
-                                        Understanding the <span className="text-secondary italic">Navagraha</span>
+                                        {t('blogs.planets.understanding')} <span className="text-secondary italic">{t('blogs.planets.navagraha')}</span>
                                     </h2>
                                     <p className="text-sm sm:text-base text-foreground/70 leading-relaxed max-w-3xl mb-6">
-                                        In Vedic Astrology, the Navagraha (Nine Planets) are the cosmic agents of karma. They act as the dynamic forces that trigger events, shape your psychology, and guide the soul&apos;s evolutionary journey through time and space.
+                                        {t('blogs.planets.description')}
                                     </p>
 
                                     <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">
@@ -455,7 +457,7 @@ export default function PlanetsPage() {
                                             <div className="col-span-7 space-y-8">
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <Info className="w-4 h-4" /> Cosmic Archetype
+                                                        <Info className="w-4 h-4" /> {t('blogs.planets.cosmicArchetype')}
                                                     </h3>
                                                     <p className="text-[17px] font-light leading-relaxed text-foreground/80 pr-6">
                                                         {selectedPlanet.deepDive}
@@ -464,7 +466,7 @@ export default function PlanetsPage() {
 
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <Zap className="w-4 h-4" /> Signatures
+                                                        <Zap className="w-4 h-4" /> {t('blogs.planets.signatures')}
                                                     </h3>
                                                     <div className="flex flex-wrap gap-3">
                                                         {selectedPlanet.traits.map(t => (
@@ -480,7 +482,7 @@ export default function PlanetsPage() {
                                                             <Sparkles className="w-24 h-24" />
                                                         </div>
                                                         <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-2">
-                                                            <Activity className="w-4 h-4" /> Functional Impact
+                                                            <Activity className="w-4 h-4" /> {t('blogs.planets.functionalImpact')}
                                                         </h3>
                                                         <p className="text-[13px] font-medium text-foreground/70 leading-relaxed relative z-10">
                                                             {selectedPlanet.functional}
@@ -498,7 +500,7 @@ export default function PlanetsPage() {
                                             <div className="col-span-5 space-y-4">
                                                 <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
                                                     <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-3">
-                                                        <Shield className="w-4 h-4" /> Planetary Governance
+                                                        <Shield className="w-4 h-4" /> {t('blogs.planets.planetaryGovernance')}
                                                     </h3>
                                                     <p className="text-[14px] font-medium leading-relaxed text-foreground/90">
                                                         {selectedPlanet.represents}
@@ -508,18 +510,18 @@ export default function PlanetsPage() {
                                                         <div className="bg-surface rounded-2xl p-5 border border-outline-variant/5 shadow-sm">
                                                             <div className="flex items-center gap-2 mb-2 text-emerald-500">
                                                                 <CheckCircle2 className="w-4 h-4" />
-                                                                <span className="text-[9px] font-bold uppercase tracking-widest">Exaltation</span>
+                                                                <span className="text-[9px] font-bold uppercase tracking-widest">{t('blogs.planets.exaltation')}</span>
                                                             </div>
                                                             <p className="text-[15px] font-bold text-foreground">{selectedPlanet.exaltation.split('(')[0]}</p>
-                                                            <span className="text-[9px] opacity-40 uppercase">Highest Potential</span>
+                                                            <span className="text-[9px] opacity-40 uppercase">{t('blogs.planets.highestPotential')}</span>
                                                         </div>
                                                         <div className="bg-surface rounded-2xl p-5 border border-outline-variant/5 shadow-sm">
                                                             <div className="flex items-center gap-2 mb-2 text-red-500">
                                                                 <AlertCircle className="w-4 h-4" />
-                                                                <span className="text-[9px] font-bold uppercase tracking-widest">Debilitation</span>
+                                                                <span className="text-[9px] font-bold uppercase tracking-widest">{t('blogs.planets.debilitation')}</span>
                                                             </div>
                                                             <p className="text-[15px] font-bold text-foreground">{selectedPlanet.debilitation.split('(')[0]}</p>
-                                                            <span className="text-[9px] opacity-40 uppercase">Lowest Vitality</span>
+                                                            <span className="text-[9px] opacity-40 uppercase">{t('blogs.planets.lowestVitality')}</span>
                                                         </div>
                                                     </div>
                                                 <div className="bg-surface rounded-2xl p-5 border border-outline-variant/5 shadow-sm">
@@ -528,7 +530,7 @@ export default function PlanetsPage() {
                                                             <Scale className="w-4 h-4" />
                                                             <span className="text-[9px] font-bold uppercase tracking-widest">Mooltrikona</span>
                                                         </div>
-                                                        <span className="text-[8px] bg-secondary/10 text-secondary px-2 py-0.5 rounded uppercase font-bold">Primary Office</span>
+                                                        <span className="text-[8px] bg-secondary/10 text-secondary px-2 py-0.5 rounded uppercase font-bold">{t('blogs.planets.primaryOffice')}</span>
                                                     </div>
                                                     <p className="text-[15px] font-bold text-foreground">{selectedPlanet.mooltrikona || 'Varies by position'}</p>
                                                 </div>
@@ -539,8 +541,8 @@ export default function PlanetsPage() {
                                                         <PlanetIcon planet={selectedPlanet.id} size="w-full h-full" withGlow={false} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[12px] font-bold text-foreground">Aligning with {selectedPlanet.nameEn}</p>
-                                                        <p className="text-[9px] opacity-40 uppercase tracking-widest">Discover how this planet influences your chart</p>
+                                                        <p className="text-[12px] font-bold text-foreground">{t('blogs.planets.aligningWith', { planet: selectedPlanet.nameEn })}</p>
+                                                        <p className="text-[9px] opacity-40 uppercase tracking-widest">{t('blogs.planets.discoverInfluence')}</p>
                                                     </div>
                                                 </div>
                                             </div>

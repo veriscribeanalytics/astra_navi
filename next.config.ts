@@ -29,6 +29,20 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Proxy backend static assets (e.g. avatar images) through the frontend
+  // origin so `imageUrl` paths returned by /api/chat/avatars resolve without
+  // the client needing to know the API host. The backend serves these from
+  // /static/avatars/{NAME}_AVATAR.webp.
+  async rewrites() {
+    const backendUrl = process.env.AI_BACKEND_URL || 'https://api.veriscribeanalytics.com';
+    return [
+      {
+        source: '/static/avatars/:path*',
+        destination: `${backendUrl.replace(/\/$/, '')}/static/avatars/:path*`,
+      },
+    ];
+  },
+
   // Security Headers
   async headers() {
     return [

@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks';
 import { LanguageCode, locales } from '@/locales';
 import { isProfileComplete, normalizeProfileUser, resolveProfileComplete } from '@/lib/profileCompleteness';
 
-interface User {
+export interface User {
     id?: string;
     email: string;
     name?: string;

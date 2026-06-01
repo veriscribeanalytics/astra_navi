@@ -1,0 +1,117 @@
+{
+  "locale": "mr",
+  "issues": [
+    {
+      "key": "chat.avatarQuestions.spiritual_guide[1]",
+      "en": "Which spiritual practices suit my nature?",
+      "current": "माझ्या स्वभावाला कोणत्या आध्यात्मिक पद्धती सुटतात?",
+      "issue": "Wrong word with wrong meaning",
+      "explanation": "'सुटतात' means 'are released/freed' — completely wrong for 'suit'. The verb does not match the intended sense of suitability.",
+      "suggested": "माझ्या स्वभावाला कोणत्या आध्यात्मिक पद्धती योग्य आहेत?"
+    },
+    {
+      "key": "blogs.houses.trikona",
+      "en": "Trikona (Trinal) Houses",
+      "current": "त्रिकोण (त्रैमासिक) भाव",
+      "issue": "Wrong word / wrong astrological term",
+      "explanation": "'त्रैमासिक' means 'quarterly' (a three-month period). The English 'Trinal' refers to triangular/trine — should be 'त्रिकोणीय' or 'त्रिकोणात्मक'.",
+      "suggested": "त्रिकोण (त्रिकोणीय) भाव"
+    },
+    {
+      "key": "blogs.houses.upachayaDesc",
+      "en": "...Malefic planets (Saturn, Mars, Sun) placed here actually give excellent results as they provide the drive to overcome competition.",
+      "current": "...येथे ठेवलेले दुष्ट ग्रह (शनि, मंगळ, सूर्य) प्रतिस्पर्धा मात्र करण्याची ड्राइव प्रदान करत उत्कृष्ट परिणाम देतात.",
+      "issue": "Typo / wrong word",
+      "explanation": "'प्रतिस्पर्धा मात्र करण्याची' uses 'मात्र' (meaning 'but/only'), which is nonsensical. It should be 'मात' (to defeat/overcome). The phrase should read 'प्रतिस्पर्धेवर मात करण्याची'.",
+      "suggested": "...दुष्ट ग्रह (शनि, मंगळ, सूर्य) प्रतिस्पर्धेवर मात करण्याची प्रेरणा देत उत्कृष्ट परिणाम देतात."
+    },
+    {
+      "key": "blogs.planets.karmicDesc",
+      "en": "...Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.",
+      "current": "...गुरु आणि शुक्र जसके लाभकारी सहज आणि कृपा आणतात, तर शनि आणि मंगळ जसके दुष्ट आवश्यक, अनेकदा कठीण, धडे लागू करतात.",
+      "issue": "Non-Marathi word (Hindi) used",
+      "explanation": "'जसके' is a Hindi construction (जैसे के). In Marathi it should be 'जसे' or 'सारखे'. Appears twice in this string.",
+      "suggested": "...गुरु आणि शुक्रासारखे लाभकारी ग्रह सहजता आणि कृपा आणतात, तर शनि आणि मंगळासारखे क्रूर ग्रह आवश्यक, अनेकदा कठीण धडे देतात."
+    },
+    {
+      "key": "blogs.yogas.dhanaDesc",
+      "en": "...the native is destined for immense financial prosperity.",
+      "current": "...तेव्हा देशज विशाल आर्थिक समृद्धीसाठी निर्धारित असतो.",
+      "issue": "Wrong astrological term",
+      "explanation": "'देशज' means 'indigenous/native to a country' — not the astrological 'native' (the chart holder / jataka). Standard Marathi/Sanskrit astrological term is 'जातक'.",
+      "suggested": "...तेव्हा जातक विशाल आर्थिक समृद्धीसाठी नियत असतो."
+    },
+    {
+      "key": "blogs.yogas.cancellationDesc",
+      "en": "Not all bad yogas are permanent...",
+      "current": "सर्व बुरे योग स्थायी नाहीत...",
+      "issue": "Non-Marathi word (Hindi)",
+      "explanation": "'बुरे' is Hindi. The Marathi word for 'bad' is 'वाईट'.",
+      "suggested": "सर्व वाईट योग स्थायी नसतात..."
+    },
+    {
+      "key": "blogs.index.ctaDescription",
+      "en": "...If you have a specific question about your chart, Navi has the answers ready for you now.",
+      "current": "...जर तुम्हाला तुमच्या कुंडलीबद्दल कोणीही विशिष्ट प्रश्न असेल तर नवी आपणासाठी उत्तरे तयार आहेत.",
+      "issue": "Wrong word",
+      "explanation": "'कोणीही' means 'anyone' (used for people). For 'any (question)' it should be 'कोणताही'. The current reading is ungrammatical.",
+      "suggested": "...जर तुम्हाला तुमच्या कुंडलीबद्दल कोणताही विशिष्ट प्रश्न असेल तर नवीकडे तुमच्यासाठी उत्तरे तयार आहेत."
+    },
+    {
+      "key": "blogs.index.subscribe",
+      "en": "Subscribe for Updates",
+      "current": "अपडेट्सचे लिहा घ्या",
+      "issue": "Broken syntax / non-word phrase",
+      "explanation": "'अपडेट्सचे लिहा घ्या' is nonsensical — literally 'write take of updates'. There is no Marathi verb 'लिहा घ्या' for 'subscribe'.",
+      "suggested": "अपडेट्ससाठी सबस्क्राइब करा"
+    },
+    {
+      "key": "profile.security.messages.passwordChanged",
+      "en": "Password changed successfully. You will be logged out of all devices.",
+      "current": "पासवर्ड यशस्वीपणे बदला गेला. आपण सर्व डिव्हाइससमधून लॉगआउट केले जाईल.",
+      "issue": "Verb form / agreement error",
+      "explanation": "'बदला गेला' is incorrect conjugation; correct passive past form is 'बदलला गेला'. Also 'आपण ... केले जाईल' is wrong agreement — should be 'आपणास ... केले जाईल' or 'तुम्हाला लॉगआउट केले जाईल'.",
+      "suggested": "पासवर्ड यशस्वीपणे बदलला गेला. तुम्हाला सर्व डिव्हाइसवरून लॉगआउट केले जाईल."
+    },
+    {
+      "key": "profile.security.logoutConfirmDialog.message",
+      "en": "This will sign out your account from all other devices. Your current session will remain active.",
+      "current": "हे तुमच्या खाते सर्व इतर डिव्हाइससमधून साइन आउट करेल. आपल्या वर्तमान सत्र सक्रिय राहील.",
+      "issue": "Gender/agreement errors (multiple)",
+      "explanation": "'तुमच्या खाते' is ungrammatical — 'खाते' is neuter, so it should be 'तुमचे खाते'. Similarly 'आपल्या वर्तमान सत्र' should be 'आपले वर्तमान सत्र' (or 'आपले सध्याचे सत्र').",
+      "suggested": "हे तुमचे खाते इतर सर्व डिव्हाइसवरून साइन आउट करेल. तुमचे सध्याचे सत्र सक्रिय राहील."
+    },
+    {
+      "key": "profile.onboarding.steps.pob.hint",
+      "en": "Search your city & select from the dropdown for precise coordinates",
+      "current": "आपल्या शहर शोधा आणि अचूक निर्देशांकांसाठी ड्रॉपडाउनमधून निवडा",
+      "issue": "Gender/agreement error",
+      "explanation": "'आपल्या शहर' is ungrammatical — 'शहर' is neuter, so possessive should be 'आपले शहर'.",
+      "suggested": "आपले शहर शोधा आणि अचूक निर्देशांकांसाठी ड्रॉपडाउनमधून निवडा"
+    },
+    {
+      "key": "blogs.houses.kendraDesc",
+      "en": "...Planets placed here have the maximum power to shape your worldly existence and initiate massive action.",
+      "current": "...येथे ठेवलेले ग्रह तुमच्या जागतिक अस्तित्वाला आकार देण्याची आणि मोठी कारवाई सुरू करण्याची सर्वाधिक शक्ती असते.",
+      "issue": "Broken syntax / agreement error",
+      "explanation": "Subject-verb agreement broken: 'ग्रह ... शक्ती असते' is ungrammatical. Should be 'ग्रहांकडे ... शक्ती असते' or 'ग्रहांना ... शक्ती असते'. Also 'जागतिक अस्तित्व' ('global existence') is unidiomatic for 'worldly existence' — 'ऐहिक/लौकिक जीवन' fits better.",
+      "suggested": "...येथे ठेवलेल्या ग्रहांकडे तुमच्या ऐहिक जीवनाला आकार देण्याची आणि मोठी कृती सुरू करण्याची सर्वाधिक शक्ती असते."
+    },
+    {
+      "key": "blogs.nakshatras.subtitle",
+      "en": "Mansions",
+      "current": "मन्वन्तर",
+      "issue": "Wrong astrological term",
+      "explanation": "'मन्वन्तर' means 'Manvantara' — a vast cosmological epoch ruled by a Manu. It is unrelated to lunar mansions (Nakshatras). The English title pair is 'Lunar Mansions'; the Marathi rendering of 'mansions' here should denote the 27 nakshatra divisions, e.g., 'भवने' or simply omit and use a faithful term.",
+      "suggested": "भवने"
+    },
+    {
+      "key": "profile.preferences.language",
+      "en": "Preferred Language",
+      "current": "पसंदीचे भाषा",
+      "issue": "Wrong word + agreement error",
+      "explanation": "'पसंद' is Hindi; Marathi is 'पसंती'. Also 'भाषा' is feminine so the adjective should be 'पसंतीची', not 'पसंदीचे'. Other keys in the same file correctly use 'पसंतीची भाषा'.",
+      "suggested": "पसंतीची भाषा"
+    }
+  ]
+}

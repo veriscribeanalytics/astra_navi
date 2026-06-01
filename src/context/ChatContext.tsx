@@ -9,9 +9,20 @@ import { useToast } from '@/hooks';
 import { PaywallData } from '@/types/paywall';
 import type { ChatPageContextSource } from '@/lib/schemas';
 import type { ChatAvatar } from '@/types/avatar';
+import type { FamilyCompatibilityResponse, FamilyRelationshipType } from '@/types/family';
 
+const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
-const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage'];
+const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
+
+const FALLBACK_DEFAULT_MODES: Record<string, "quick" | "normal" | "deep"> = {
+  navi: 'quick',
+  relationship_guide: 'normal',
+  career_mentor: 'normal',
+  finance_mentor: 'normal',
+  spiritual_guide: 'normal',
+  astro_sage: 'deep',
+};
 
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
@@ -31,6 +42,24 @@ export interface FileAttachment {
   size: number;
   url?: string;
   preview?: string;
+}
+
+export interface PendingChatAction {
+  type: 'run_compatibility';
+  memberId: number;
+  memberName: string;
+  relationshipType: FamilyRelationshipType | string;
+  creditCost: number;
+  /** Present when the proposal is for a linked-family connection rather than
+   *  a manually-added member. Backend may send it instead of (or alongside)
+   *  `memberId`; when set we hit /connections/{id}/compatibility. */
+  connectionId?: number;
+}
+
+export interface ResolvedChatAction {
+  status: 'running' | 'done' | 'error';
+  result?: FamilyCompatibilityResponse;
+  errorMessage?: string;
 }
 
 export interface ChatMessage {
@@ -65,10 +94,18 @@ export interface ChatMessage {
   contextUsed?: boolean;
   contextSource?: ChatPageContextSource;
   contextChars?: number;
-  avatarId?: string;
+  /** Set by backend on AI messages — identifies which avatar produced this response.
+   *  Null/undefined for user, system, historical, and welcome messages. */
+  avatarId?: string | null;
   avatarName?: string;
   avatarTitle?: string;
   avatarCreditCost?: number;
+  /** AI proposals the user can approve inline (e.g. paid compatibility run). */
+  pendingActions?: PendingChatAction[];
+  /** Backend signals the tool-use loop got stuck — UI shows fallback copy. */
+  toolLoopExceeded?: boolean;
+  /** Local-only: per-pendingAction state once the user has tapped approve. */
+  resolvedActions?: Record<number, ResolvedChatAction>;
   createdAt: string;
 }
 
@@ -96,6 +133,9 @@ export interface ThinkingData {
   mode?: ChatMessage['mode'];
   model?: string;
   answerStyle?: string;
+  /** Tool names from the new `tool_use` SSE event. Non-empty means the AI is
+   *  consulting family data — UI swaps to a family-flavoured thinking copy. */
+  tools?: string[];
 }
 
 interface ChatContextType {
@@ -142,6 +182,7 @@ interface ChatContextType {
   selectedAvatarId: string;
   setSelectedAvatarId: (avatarId: string) => void;
   isLoadingAvatars: boolean;
+  resolvePendingAction: (messageId: string, memberId: number, connectionId?: number) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -164,7 +205,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallData | null>(null);
-  const [mode, setMode] = useState<"quick" | "normal" | "deep">("normal");
+  const [mode, setModeState] = useState<"quick" | "normal" | "deep">("normal");
+  const [userHasManuallyChangedMode, setUserHasManuallyChangedMode] = useState(false);
+
+  const setMode = useCallback((action: React.SetStateAction<"quick" | "normal" | "deep">) => {
+    setModeState(action);
+    setUserHasManuallyChangedMode(true);
+  }, []);
+
   const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
   const [avatars, setAvatars] = useState<ChatAvatar[]>([]);
   const [isLoadingAvatars, setIsLoadingAvatars] = useState(false);
@@ -179,7 +227,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('astranavi_selected_avatar', avatarId);
       } catch {}
     }
-  }, []);
+    if (!userHasManuallyChangedMode) {
+      const avatar = avatars.find(a => a.avatarId === avatarId);
+      const resolvedMode = avatar?.defaultMode || FALLBACK_DEFAULT_MODES[avatarId] || 'normal';
+      setModeState(resolvedMode);
+    }
+  }, [avatars, userHasManuallyChangedMode]);
 
   // Guest State
   const [isGuest, setIsGuest] = useState(false);
@@ -434,13 +487,19 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               const data = JSON.parse(dataStr);
               if (currentEventName === 'thinking') {
-                setThinkingData({
+                setThinkingData(prev => ({
+                  ...(prev ?? {}),
                   topic: data.topic ?? undefined,
                   intent: data.intent ?? undefined,
                   mode: data.mode ?? undefined,
                   model: data.model ?? undefined,
                   answerStyle: data.answerStyle ?? undefined,
-                });
+                }));
+              } else if (currentEventName === 'tool_use') {
+                // The AI is consulting family/relationship data. We just track
+                // the tool names; the indicator decides what copy to show.
+                const tools = Array.isArray(data.tools) ? (data.tools as string[]) : [];
+                setThinkingData(prev => ({ ...(prev ?? {}), tools }));
               } else if (currentEventName === 'metadata') {
                 if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
                   persistedAiMsgId = data.aiMessageId;
@@ -470,6 +529,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     avatarName: data.avatarName ?? m.avatarName,
                     avatarTitle: data.avatarTitle ?? m.avatarTitle,
                     avatarCreditCost: data.avatarCreditCost ?? m.avatarCreditCost,
+                    pendingActions: Array.isArray(data.pendingActions) ? data.pendingActions : m.pendingActions,
+                    toolLoopExceeded: typeof data.toolLoopExceeded === 'boolean' ? data.toolLoopExceeded : m.toolLoopExceeded,
                     errorCode: errorCode ?? m.errorCode,
                     error: errorCode ? true : m.error,
                     errorMessage: errorCode ? (() => {
@@ -571,6 +632,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user?.email) return null;
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
+    const isDefaultAvatar = !selectedAvatarId || selectedAvatarId === DEFAULT_AVATAR_ID;
+    const guide = !isDefaultAvatar ? avatars.find(a => a.avatarId === selectedAvatarId) : null;
+    const welcomeText = guide?.name
+      ? t('chat.guideWelcome', { name: guide.name })
+      : t('chat.naviWelcome');
     const tempChat: Chat = {
       id: tempId,
       userEmail: user.email,
@@ -578,7 +644,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages: [{
         id: generateUUID(),
         type: 'ai',
-        text: t('chat.naviWelcome'),
+        text: welcomeText,
+        avatarId: guide ? selectedAvatarId : null,
+        avatarName: guide?.name,
+        avatarTitle: guide?.title,
         createdAt: now
       }],
       averageRating: null,
@@ -587,9 +656,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setActiveChat(tempChat);
     setActiveChatId(tempId);
+    setUserHasManuallyChangedMode(false);
     if (initialMessage) sendMessage(initialMessage, tempId, pageContextSource);
     return tempId;
-  }, [user, sendMessage, isGuest, t]);
+  }, [user, sendMessage, isGuest, t, setUserHasManuallyChangedMode, selectedAvatarId, avatars]);
 
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
@@ -610,15 +680,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const regenerateMessage = useCallback(async (messageId: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-') || isSending) return;
     setIsSending(true);
-    setActiveChat(prev => prev ? {
-      ...prev,
-      messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null } : m),
-    } : null);
+
+    // Preserve the avatar that originally produced this message so a regenerate
+    // doesn't silently switch personas (per backend handoff). Fall back to the
+    // currently selected avatar if the historical message has no avatarId.
+    let avatarIdForRegen: string | undefined;
+    setActiveChat(prev => {
+      if (!prev) return null;
+      const target = prev.messages.find(m => m.id === messageId);
+      avatarIdForRegen = target?.avatarId ?? selectedAvatarId ?? undefined;
+      return {
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null } : m),
+      };
+    });
+
     try {
       const res = await clientFetch(`/api/chat/${activeChatId}/message/${messageId}/regenerate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language, mode }),
+        body: JSON.stringify({
+          language,
+          mode,
+          ...(avatarIdForRegen ? { avatarId: avatarIdForRegen } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.detail || 'Regenerate failed');
@@ -650,7 +735,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t]);
+  }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t, selectedAvatarId]);
 
   const retryMessage = useCallback(async (messageId: string) => {
     if (isGuest || isSending) return;
@@ -704,7 +789,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveChat(null);
     setActiveChatId(null);
     setPaywall(null);
-  }, []);
+    setUserHasManuallyChangedMode(false);
+  }, [setUserHasManuallyChangedMode]);
 
   const clearPaywall = useCallback(() => {
     setPaywall(null);
@@ -714,19 +800,52 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isGuest) return;
     setIsLoadingAvatars(true);
     try {
-      const res = await clientFetch('/api/chat/avatars');
+      const lang = language || 'en';
+      const res = await clientFetch(`/api/chat/avatars?lang=${encodeURIComponent(lang)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load avatars');
+      
+      const getLocalizedValue = (key: string, fallbackVal: string) => {
+        const val = t(key);
+        return val === key ? fallbackVal : val;
+      };
+
       const list: ChatAvatar[] = Array.isArray(data.avatars) ? data.avatars : [];
-      setAvatars(list);
+      
+      const mappedList = list.map(avatar => {
+        if (avatar.avatarId === 'spiritual_guide') {
+          return {
+            ...avatar,
+            name: getLocalizedValue('chat.avatars.spiritual_guide.name', avatar.name || 'Anand'),
+            title: getLocalizedValue('chat.avatars.spiritual_guide.title', avatar.title || 'Health Guide'),
+            description: getLocalizedValue('chat.avatars.spiritual_guide.description', avatar.description || 'Gain insights into your health and well-being.')
+          };
+        }
+        if (avatar.avatarId === 'finance_mentor') {
+          return {
+            ...avatar,
+            name: getLocalizedValue('chat.avatars.finance_mentor.name', avatar.name || 'Vidya'),
+            title: getLocalizedValue('chat.avatars.finance_mentor.title', avatar.title || 'Finance Guide'),
+            description: getLocalizedValue('chat.avatars.finance_mentor.description', avatar.description || 'Optimize your wealth and financial stability.')
+          };
+        }
+        return avatar;
+      });
+
+      setAvatars(mappedList);
 
       if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('astranavi_selected_avatar');
-        if (stored && list.some(a => a.avatarId === stored)) {
-          setSelectedAvatarIdState(stored);
-        } else if (stored) {
-          // Stored id no longer exists in catalog — clean up.
-          localStorage.removeItem('astranavi_selected_avatar');
+        const stored = localStorage.getItem(AVATAR_STORAGE_KEY);
+        const activeId = (stored && mappedList.some(a => a.avatarId === stored)) ? stored : DEFAULT_AVATAR_ID;
+        if (stored && !mappedList.some(a => a.avatarId === stored)) {
+          localStorage.removeItem(AVATAR_STORAGE_KEY);
+        }
+        setSelectedAvatarIdState(activeId);
+        
+        if (!userHasManuallyChangedMode) {
+          const avatar = mappedList.find(a => a.avatarId === activeId);
+          const resolvedMode = avatar?.defaultMode || FALLBACK_DEFAULT_MODES[activeId] || 'normal';
+          setModeState(resolvedMode);
         }
       }
     } catch (err) {
@@ -734,7 +853,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoadingAvatars(false);
     }
-  }, [isGuest]);
+  }, [isGuest, language, t, userHasManuallyChangedMode]);
 
   const editMessage = useCallback(async (messageId: string, newText: string) => {
     if (isGuest || !activeChatId || isSending) return;
@@ -790,13 +909,79 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  // ── Resolve a pendingAction the AI proposed ──
+  // Right now only `run_compatibility` exists. When `connectionId` is set the
+  // proposal is for a linked-family connection (hits /connections/{id}/...);
+  // otherwise we use the manual /members/{id}/... endpoint. The resolved
+  // result is keyed by memberId on the message so the UI can render the
+  // inline result card next to the original action button.
+  // 402s route through the same paywall surface as the chat-send endpoint so
+  // the UX feels consistent (PaywallCard pops on either flow).
+  const resolvePendingAction = useCallback(async (messageId: string, memberId: number, connectionId?: number) => {
+    const setActionState = (next: ResolvedChatAction) => {
+      setActiveChat(prev => prev ? {
+        ...prev,
+        messages: prev.messages.map(m => m.id === messageId ? {
+          ...m,
+          resolvedActions: { ...(m.resolvedActions ?? {}), [memberId]: next },
+        } : m),
+      } : null);
+    };
+
+    setActionState({ status: 'running' });
+
+    try {
+      const url = connectionId !== undefined
+        ? `/api/family/connections/${encodeURIComponent(String(connectionId))}/compatibility?lang=${encodeURIComponent(language)}`
+        : `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility?lang=${encodeURIComponent(language)}`;
+      const res = await clientFetch(url);
+      const body = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        setActionState({ status: 'done', result: body as FamilyCompatibilityResponse });
+        return;
+      }
+
+      if (res.status === 402) {
+        const paywallData = body.paywall || body.detail?.paywall || body;
+        setPaywall(paywallData as PaywallData);
+        setActionState({ status: 'error', errorMessage: t('chat.pendingActionError') });
+        return;
+      }
+
+      // SHARING_REQUIRED on linked compat — surface inline as an error
+      // (the linked detail view is where users actually fix this).
+      const code = (body?.code ?? body?.detail?.code) as string | undefined;
+      if (code === 'SHARING_REQUIRED') {
+        setActionState({
+          status: 'error',
+          errorMessage: t('family.sharingRequired') || 'Sharing required on both sides before compatibility can be computed.',
+        });
+        return;
+      }
+
+      const msg = body.error || body.detail || t('chat.pendingActionError');
+      setActionState({ status: 'error', errorMessage: msg });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t('chat.pendingActionError');
+      setActionState({ status: 'error', errorMessage: msg });
+    }
+  }, [language, t]);
+
+  // Load initial chats
   useEffect(() => {
     if (!initialLoadDone.current && user?.email && !isGuest) {
       initialLoadDone.current = true;
       loadChats();
+    }
+  }, [user?.email, loadChats, isGuest]);
+
+  // Load avatars initially and when language or auth state changes
+  useEffect(() => {
+    if (user?.email && !isGuest) {
       loadAvatars();
     }
-  }, [user?.email, loadChats, loadAvatars, isGuest]);
+  }, [user?.email, loadAvatars, isGuest]);
 
   return (
     <ChatContext.Provider value={{
@@ -807,7 +992,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inputText, setInputText, attachments, addAttachment, removeAttachment, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall,
       thinkingData,
-      avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars
+      avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars,
+      resolvePendingAction
     }}>
       {children}
     </ChatContext.Provider>

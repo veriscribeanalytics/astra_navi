@@ -91,7 +91,7 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
                         </span>
                         <div className="flex flex-col items-center mt-1">
                             <span className="text-[8px] sm:text-[9px] text-foreground/45 font-bold uppercase tracking-[0.15em]">
-                                {label || (maxScore === 100 ? 'Overall' : `/ ${maxScore}`)}
+                                {label || (maxScore === 100 ? 'General Outlook' : `/ ${maxScore}`)}
                             </span>
                         </div>
                     </div>

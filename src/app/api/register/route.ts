@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.detail || "Registration failed. Please try again." }, { status: response.status });
+            return NextResponse.json(data, { status: response.status });
         }
 
         let user = normalizeProfileUser({
@@ -114,6 +114,9 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("Registration error:", error);
-        return NextResponse.json({ error: "Registration failed. Please try again later." }, { status: 500 });
+        return NextResponse.json({ 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
+        }, { status: 500 });
     }
 }

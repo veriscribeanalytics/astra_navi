@@ -12,7 +12,7 @@ html {
 
 @media (min-width: 2560px) {
   html {
-    font-size: clamp(16px, 0.417vw + 5.33px, 22px);
+    font-size: clamp(18px, 0.5vw + 5px, 28px);
   }
 }
 
@@ -223,21 +223,35 @@ button:focus-visible:not(.chat-input-icon-btn),
 
 /* Skip to content link */
 .skip-to-content {
-  position: absolute;
-  top: -40px;
+  position: fixed;
+  top: -60px;
   left: 0;
   background: var(--secondary);
   color: var(--on-primary);
-  padding: 8px 16px;
+  padding: 10px 18px;
   text-decoration: none;
   z-index: 9999;
-  border-radius: 0 0 4px 0;
+  border-radius: 0 0 6px 0;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: top 0.2s ease;
 }
 
-.skip-to-content:focus {
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
   top: 0;
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+/* Once the user does anything other than press Tab first, hide the skip link
+   permanently until the next page refresh. SkipLink.tsx toggles this class. */
+body.skip-disabled .skip-to-content,
+body.skip-disabled .skip-to-content:focus,
+body.skip-disabled .skip-to-content:focus-visible {
+  top: -200px !important;
+  pointer-events: none;
 }
 
 :root {
@@ -302,6 +316,159 @@ button:focus-visible:not(.chat-input-icon-btn),
 }
 [lang="pa"] body {
   font-family: var(--font-noto-gurmukhi), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+}
+
+/* ─── Non-Latin script breathing room ─────────────────────────────────────
+   Devanagari (Hindi, Marathi), Bengali, Gujarati, Gurmukhi (Punjabi), and
+   the South Indian scripts (Tamil, Telugu, Kannada, Malayalam) have
+   characters with vertical strokes, vowel marks above/below, and conjuncts
+   that need more line-height than Latin defaults — otherwise glyph tops
+   get clipped in any container with `overflow: hidden` and dense leading
+   (e.g. Tailwind `leading-[1.15]` on hero headings).
+
+   Specificity (0,1,1) intentionally beats single-class Tailwind utilities
+   like `.leading-tight` / `.leading-[1.15]` (0,1,0). No `:where()` here
+   because we DO want to override those defaults — they were calibrated
+   for Latin glyphs. Component-level overrides that need to win can still
+   raise their specificity. */
+[lang="hi"] h1, [lang="hi"] h2, [lang="hi"] h3, [lang="hi"] h4, [lang="hi"] h5, [lang="hi"] h6,
+[lang="mr"] h1, [lang="mr"] h2, [lang="mr"] h3, [lang="mr"] h4, [lang="mr"] h5, [lang="mr"] h6,
+[lang="bn"] h1, [lang="bn"] h2, [lang="bn"] h3, [lang="bn"] h4, [lang="bn"] h5, [lang="bn"] h6,
+[lang="gu"] h1, [lang="gu"] h2, [lang="gu"] h3, [lang="gu"] h4, [lang="gu"] h5, [lang="gu"] h6,
+[lang="pa"] h1, [lang="pa"] h2, [lang="pa"] h3, [lang="pa"] h4, [lang="pa"] h5, [lang="pa"] h6,
+[lang="ta"] h1, [lang="ta"] h2, [lang="ta"] h3, [lang="ta"] h4, [lang="ta"] h5, [lang="ta"] h6,
+[lang="te"] h1, [lang="te"] h2, [lang="te"] h3, [lang="te"] h4, [lang="te"] h5, [lang="te"] h6,
+[lang="kn"] h1, [lang="kn"] h2, [lang="kn"] h3, [lang="kn"] h4, [lang="kn"] h5, [lang="kn"] h6,
+[lang="ml"] h1, [lang="ml"] h2, [lang="ml"] h3, [lang="ml"] h4, [lang="ml"] h5, [lang="ml"] h6 {
+  line-height: 1.4;
+  padding-block: 0.05em; /* Tiny breathing room above/below for glyphs whose ink
+                            extends past the em-box (Devanagari shirorekha, Tamil
+                            virama marks, etc.). Prevents `overflow: hidden`
+                            ancestors from shaving tops off bold headlines. */
+}
+
+[lang="hi"] button, [lang="hi"] [role="button"],
+[lang="mr"] button, [lang="mr"] [role="button"],
+[lang="bn"] button, [lang="bn"] [role="button"],
+[lang="gu"] button, [lang="gu"] [role="button"],
+[lang="pa"] button, [lang="pa"] [role="button"],
+[lang="ta"] button, [lang="ta"] [role="button"],
+[lang="te"] button, [lang="te"] [role="button"],
+[lang="kn"] button, [lang="kn"] [role="button"],
+[lang="ml"] button, [lang="ml"] [role="button"] {
+  line-height: 1.4;
+}
+
+/* ─── Hero typography scale-down for Indic scripts ─────────────────────────
+   Same content length differs ~30% between scripts (e.g. Tamil description
+   wraps to 4 lines where Korean wraps to 2). Without scaling, hero h1
+   blows out the layout in Tamil/Telugu/Malayalam/Kannada/Bengali/etc.
+
+   These rules shrink ONLY the hero h1 + description (.hero-h1, .hero-desc
+   on the LandingPage hero) — not every heading on the site. `!important` is
+   intentional: it guarantees the override wins against Tailwind's responsive
+   `text-*` utilities at every breakpoint, regardless of cascade order or
+   how Tailwind v4 emits the compiled CSS. */
+[lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+[lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+[lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+[lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+  font-size: 1.5rem !important; /* mobile baseline */
+}
+@media (min-width: 640px) {
+  [lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+  [lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+  [lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+  [lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+    font-size: 1.875rem !important; /* sm: text-3xl */
+  }
+}
+@media (min-width: 768px) {
+  [lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+  [lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+  [lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+  [lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+    font-size: 2.25rem !important; /* md: text-4xl */
+  }
+}
+@media (min-width: 1024px) {
+  [lang="hi"] .hero-h1, [lang="mr"] .hero-h1,
+  [lang="bn"] .hero-h1, [lang="gu"] .hero-h1, [lang="pa"] .hero-h1,
+  [lang="ta"] .hero-h1, [lang="te"] .hero-h1,
+  [lang="kn"] .hero-h1, [lang="ml"] .hero-h1 {
+    font-size: 2.5rem !important; /* lg: between text-4xl and text-5xl */
+  }
+}
+
+/* Hero description: slight bump in line-height for breathing room.
+   Don't shrink the text — 16px is the readability floor. */
+[lang="hi"] .hero-desc, [lang="mr"] .hero-desc,
+[lang="bn"] .hero-desc, [lang="gu"] .hero-desc, [lang="pa"] .hero-desc,
+[lang="ta"] .hero-desc, [lang="te"] .hero-desc,
+[lang="kn"] .hero-desc, [lang="ml"] .hero-desc {
+  line-height: 1.65 !important;
+}
+
+/* Cancel the hero grid's `lg:-mt-[120px]` negative margin for Indic scripts.
+   Reason: in English the content fits ~500px in a 640px section, and the
+   -120px margin tightens the visual gap between navbar and hero. In
+   Tamil/Malayalam/etc the content is ~700–800px tall, the section grows to
+   fit it (`min-h-[640px]`), and then the -120px shifts the top of the
+   content ABOVE the section. `overflow-hidden` then chops the heading off.
+   Latin layout is untouched. */
+@media (min-width: 1024px) {
+  [lang="hi"] .hero-grid, [lang="mr"] .hero-grid,
+  [lang="bn"] .hero-grid, [lang="gu"] .hero-grid, [lang="pa"] .hero-grid,
+  [lang="ta"] .hero-grid, [lang="te"] .hero-grid,
+  [lang="kn"] .hero-grid, [lang="ml"] .hero-grid {
+    margin-top: 0 !important;
+  }
+}
+
+/* ─── Generic Indic script safety net (NOT per-component) ──────────────────
+   Applied to every block-level text node inside an Indic-script locale.
+   Together with the line-height bump above, this is the single source of
+   truth for "what makes long Tamil/Telugu/Malayalam strings fit narrow
+   mobile containers without breaking the layout."
+
+   Why each property matters:
+   - `overflow-wrap: anywhere` — last-ditch break authority. Indic compound
+     words (sandhi, conjuncts, no-space loanwords) can be 25+ characters
+     and don't have natural Latin word boundaries. Without `anywhere`,
+     `break-word` is too conservative and lets text overflow.
+   - `word-break: normal` — keeps grapheme clusters intact (vowel signs
+     attached to consonants must NOT split apart). Pairs with `anywhere`.
+   - `text-wrap: pretty` — modern browser line-balancing for the LAST few
+     lines of a wrapped block; avoids orphans/runts in mixed English+script
+     banners like "Sign in to continue to நவியுடன் உரையாடுங்கள்".
+   - `hyphens: auto` — disabled. Auto-hyphenation rules for these scripts
+     are sparse/wrong in most engines; let `overflow-wrap` do the work. */
+:is([lang="hi"], [lang="mr"], [lang="bn"], [lang="gu"], [lang="pa"],
+    [lang="ta"], [lang="te"], [lang="kn"], [lang="ml"])
+  :is(h1, h2, h3, h4, h5, h6, p, span, a, button, label, li) {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-wrap: pretty;
+  hyphens: manual;
+}
+
+/* Korean joins this club for `text-wrap: pretty` only — its scripts wrap
+   at every character anyway, so `overflow-wrap: anywhere` would be
+   redundant, but pretty still helps with mixed Latin/Hangul content. */
+[lang="ko"] :is(h1, h2, h3, h4, h5, h6, p) {
+  text-wrap: pretty;
+}
+
+/* Authentication forms (login/register/forgot-password) on narrow mobile
+   are the highest-risk surface for Indic overflow because every visible
+   string is a translated chunk of UI copy stuffed into a 320–400px column.
+   This bumps min-height on buttons + reserves vertical breathing room on
+   labels so any locale can grow without distorting the form rhythm. */
+:is([lang="hi"], [lang="mr"], [lang="bn"], [lang="gu"], [lang="pa"],
+    [lang="ta"], [lang="te"], [lang="kn"], [lang="ml"])
+  form button[type="submit"] {
+  min-height: 48px;
+  line-height: 1.4;
 }
 
 /* Device tier durations */
@@ -953,14 +1120,27 @@ html:has(.chat-layout) body {
 }
 
 .chat-layout {
-  display: grid;
-  grid-template-columns: minmax(0, clamp(220px, 18vw, 300px)) minmax(0, 1fr);
+  --chat-header-height: 52px;
+  --chat-sidebar-width: clamp(220px, 18vw, 300px);
+  display: flex;
+  flex-direction: column;
   flex: 1;
   overflow: hidden;
   height: 100%;
   min-height: 0;
   position: relative;
   isolation: isolate;
+}
+
+.chat-body {
+  display: grid;
+  grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .chat-layout::before {
@@ -976,7 +1156,7 @@ html:has(.chat-layout) body {
 }
 
 @media (max-width: 1280px) {
-  .chat-layout { grid-template-columns: minmax(0, clamp(200px, 20vw, 260px)) minmax(0, 1fr); }
+  .chat-layout { --chat-sidebar-width: clamp(200px, 20vw, 260px); }
 }
 
 @media (min-width: 1280px) {
@@ -992,17 +1172,18 @@ html:has(.chat-layout) body {
 }
 
 @media (max-width: 1024px) {
-  .chat-layout { grid-template-columns: 1fr; }
-  
+  .chat-body { grid-template-columns: 1fr; }
+
   .chat-left-sidebar {
     display: flex !important;
     position: fixed !important;
-    top: 0; bottom: 0;
+    top: var(--chat-header-height, 52px);
+    bottom: 0;
     z-index: 999 !important;
     transform: none !important;
     flex-direction: column;
   }
-  
+
   .chat-left-sidebar {
     left: calc(min(86vw, 320px) * -1); width: min(86vw, 320px);
     border-top-right-radius: 20px;
@@ -1010,7 +1191,7 @@ html:has(.chat-layout) body {
     transition: left 0.3s ease;
     pointer-events: none;
   }
-  
+
   .chat-left-sidebar.mobile-open { left: 0; display: flex; pointer-events: auto; }
 }
 
@@ -1169,7 +1350,8 @@ html:has(.chat-layout) body {
   grid-column: 3;
   grid-row: 1;
   position: fixed !important;
-  top: 0; bottom: 0;
+  top: var(--chat-header-height, 52px);
+  bottom: 0;
   right: 0; width: min(92vw, 400px);
   z-index: 999 !important;
   background: color-mix(in srgb, var(--surface) 90%, transparent);
@@ -1211,27 +1393,84 @@ html:has(.chat-layout) body {
   letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;
 }
 
-.chat-main-area { 
+.chat-main-area {
   grid-column: 2;
   grid-row: 1;
-  display: flex; 
-  flex-direction: column; 
-  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-x: hidden;
   height: 100%;
   min-height: 0;
   min-width: 0;
+  max-width: 100%;
+}
+
+/* Mobile/tablet: sidebar is position:fixed (out of grid). Move the main
+   area into column 1 so it doesn't sit in an implicit second column.
+   This rule MUST come after the .chat-main-area default above. */
+@media (max-width: 1024px) {
+  .chat-main-area {
+    grid-column: 1 / -1;
+  }
 }
 
 .chat-main-header {
   border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 25%, transparent);
-  padding: 8px 14px; display: flex; align-items: center; justify-content: space-between;
   background: var(--background);
-  min-height: 44px;
+  height: var(--chat-header-height, 52px);
+  min-height: var(--chat-header-height, 52px);
+  flex-shrink: 0;
   min-width: 0;
+  position: relative;
+  z-index: 40;
+  /* Match the chat-body grid so the back zone lines up with the sidebar */
+  display: grid;
+  grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.chat-header-back-zone {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border-right: 1px solid color-mix(in srgb, var(--secondary) 10%, var(--outline-variant));
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chat-header-main-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  min-width: 0;
+  gap: 8px;
+}
+
+@media (max-width: 1280px) {
+  .chat-main-header { grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .chat-main-header { grid-template-columns: auto minmax(0, 1fr); }
+  .chat-header-back-zone {
+    border-right: none;
+    padding: 0;
+  }
+  .chat-header-main-zone {
+    padding-left: 8px;
+  }
 }
 
 @media (max-width: 768px) {
-  .chat-main-header { padding: 8px 10px; }
+  .chat-header-back-zone {
+    padding: 0;
+  }
+  .chat-header-main-zone {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 }
 
 .chat-center-column {
@@ -1286,6 +1525,59 @@ html:has(.chat-layout) body {
   }
 }
 
+/* New empty-state layout: hero centers in remaining space, input pins to bottom */
+.chat-empty-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.chat-empty-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
+  max-width: clamp(560px, 44vw, 860px);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 1rem;
+  overflow-y: auto;
+}
+
+.chat-empty-footer {
+  width: 100%;
+  max-width: clamp(560px, 44vw, 860px);
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .chat-empty-hero {
+    justify-content: flex-start;
+    padding: clamp(1.25rem, 6vh, 2.5rem) 0.75rem 0.75rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .chat-empty-hero {
+    justify-content: flex-start;
+    padding-top: 1rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .chat-empty-hero,
+  .chat-empty-footer {
+    max-width: clamp(900px, 55vw, 1500px);
+  }
+}
+
 /* DASHBOARD SHELL */
 html:has(.dashboard-shell), html:has(.dashboard-shell) body { height: 100vh; overflow: hidden; }
 body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
@@ -1294,6 +1586,34 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
   position: fixed; top: var(--navbar-height, 85px);
   left: 0; right: 0; bottom: 0;
   display: flex; flex-direction: column; overflow: hidden; z-index: 10;
+}
+
+/* GPT-style logged-in dashboard shell */
+body:has(.gpt-dashboard-shell) {
+  background: #05051c;
+}
+
+body:has(.gpt-dashboard-shell) nav {
+  background: rgba(7, 8, 40, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff;
+}
+
+body:has(.gpt-dashboard-shell) nav a,
+body:has(.gpt-dashboard-shell) nav button {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body:has(.gpt-dashboard-shell) nav [class*="text-primary"] {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+body:has(.gpt-dashboard-shell) nav [class*="text-on-surface-variant"] {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+body:has(.gpt-dashboard-shell) footer {
+  display: none;
 }
 
 /* CELESTIAL ANIMATIONS */
@@ -1421,7 +1741,6 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
 @media (min-width: 2560px) {
   .glass-panel { border-radius: 40px; }
   .chat-input-container { font-size: 17px; }
-  .chat-main-header { padding: 10px 20px; min-height: 52px; }
   .chat-empty-center .chat-empty-greeting { font-size: 28px; }
   .chat-empty-center .chat-empty-icon { width: 56px; height: 56px; font-size: 24px; }
 }
@@ -1439,4 +1758,31 @@ html.avatar-theme-pulse body::after {
   z-index: 9999;
   animation: avatar-theme-pulse-kf 400ms ease;
   box-shadow: inset 0 0 200px 50px var(--glow-color);
+}
+
+/* ----------------------------------------------------------------------
+ * Large-screen (≥ 2560px / QHD–4K+) pixel-literal text scaling.
+ *
+ * The codebase has ~1000 occurrences of `text-[Npx]` arbitrary-value
+ * Tailwind utilities for small UI labels. Those are pixel-pinned and do
+ * NOT scale with the html root font-size bump above. Without this block,
+ * a 4K user sees 10–13px labels everywhere — unreadable.
+ *
+ * The overrides below scale 8–19px sizes by roughly 1.4× at ≥ 2560px.
+ * Tailwind utilities live in earlier cascade layers, so these unlayered
+ * rules win on source order without needing !important.
+ * ------------------------------------------------------------------- */
+@media (min-width: 2560px) {
+  .text-\[8px\]  { font-size: 11px; }
+  .text-\[9px\]  { font-size: 13px; }
+  .text-\[10px\] { font-size: 14px; }
+  .text-\[11px\] { font-size: 15px; }
+  .text-\[12px\] { font-size: 17px; }
+  .text-\[13px\] { font-size: 18px; }
+  .text-\[14px\] { font-size: 20px; }
+  .text-\[15px\] { font-size: 21px; }
+  .text-\[16px\] { font-size: 22px; }
+  .text-\[17px\] { font-size: 24px; }
+  .text-\[18px\] { font-size: 25px; }
+  .text-\[19px\] { font-size: 27px; }
 }

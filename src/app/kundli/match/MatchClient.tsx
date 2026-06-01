@@ -10,6 +10,8 @@ import PaywallCard from '@/components/paywall/PaywallCard';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import LocationSearch, { type LocationResult } from '@/components/ui/LocationSearch';
+import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import { 
   Heart, Sparkles, ArrowLeftRight, 
   RotateCcw, ShieldCheck, ChevronRight, Lock
@@ -28,6 +30,11 @@ interface PersonDetails {
   tob: string;
   place: string;
   gender: 'male' | 'female';
+  birthPlaceName?: string;
+  birthLatitude?: number;
+  birthLongitude?: number;
+  birthTimezoneName?: string;
+  birthTimezoneOffsetAtBirth?: number;
 }
 
 interface KootResult {
@@ -184,6 +191,11 @@ export default function MatchClient() {
     tob: user?.tob || '',
     place: user?.pob || '',
     gender: 'male',
+    birthPlaceName: user?.birthPlaceName,
+    birthLatitude: user?.birthLatitude,
+    birthLongitude: user?.birthLongitude,
+    birthTimezoneName: user?.birthTimezoneName,
+    birthTimezoneOffsetAtBirth: user?.birthTimezoneOffsetAtBirth,
   });
 
   const [person2, setPerson2] = useState<PersonDetails>({
@@ -194,6 +206,23 @@ export default function MatchClient() {
     gender: 'female',
   });
 
+  const [confirmedLocationP1, setConfirmedLocationP1] = useState<LocationResult | null>(() => {
+    if (
+      typeof user?.birthLatitude === 'number' &&
+      typeof user?.birthLongitude === 'number' &&
+      user?.birthTimezoneName
+    ) {
+      return {
+        name: user.birthPlaceName || user.pob || '',
+        lat: user.birthLatitude,
+        lon: user.birthLongitude,
+        timezone: user.birthTimezoneName,
+      };
+    }
+    return null;
+  });
+  const [confirmedLocationP2, setConfirmedLocationP2] = useState<LocationResult | null>(null);
+
   // Pre-fill person 1 if user data becomes available
   useEffect(() => {
     if (user && !person1.name) {
@@ -203,7 +232,24 @@ export default function MatchClient() {
         tob: user.tob || '',
         place: user.pob || '',
         gender: 'male',
+        birthPlaceName: user.birthPlaceName,
+        birthLatitude: user.birthLatitude,
+        birthLongitude: user.birthLongitude,
+        birthTimezoneName: user.birthTimezoneName,
+        birthTimezoneOffsetAtBirth: user.birthTimezoneOffsetAtBirth,
       });
+      if (
+        typeof user.birthLatitude === 'number' &&
+        typeof user.birthLongitude === 'number' &&
+        user.birthTimezoneName
+      ) {
+        setConfirmedLocationP1({
+          name: user.birthPlaceName || user.pob || '',
+          lat: user.birthLatitude,
+          lon: user.birthLongitude,
+          timezone: user.birthTimezoneName,
+        });
+      }
     }
   }, [user, person1.name]);
 
@@ -212,6 +258,9 @@ export default function MatchClient() {
     const p2 = { ...person2 };
     setPerson1({ ...p2, gender: p1.gender });
     setPerson2({ ...p1, gender: p2.gender });
+    const loc1 = confirmedLocationP1;
+    setConfirmedLocationP1(confirmedLocationP2);
+    setConfirmedLocationP2(loc1);
   };
 
   const handleMatch = async () => {
@@ -220,14 +269,53 @@ export default function MatchClient() {
       return;
     }
 
+    const missingCoords = (p: PersonDetails) =>
+      typeof p.birthLatitude !== 'number' ||
+      typeof p.birthLongitude !== 'number' ||
+      !p.birthTimezoneName;
+    if (missingCoords(person1)) {
+      error("Please select Person 1's exact birth location from the search results.");
+      return;
+    }
+    if (missingCoords(person2)) {
+      error("Please select Person 2's exact birth location from the search results.");
+      return;
+    }
+
+    const offsetP1 = person1.birthTimezoneOffsetAtBirth
+      ?? tzOffsetHoursAt(person1.birthTimezoneName, person1.dob, person1.tob);
+    const offsetP2 = person2.birthTimezoneOffsetAtBirth
+      ?? tzOffsetHoursAt(person2.birthTimezoneName, person2.dob, person2.tob);
+    if (offsetP1 === null || offsetP2 === null) {
+      error("Could not compute birth-time timezone offset. Please re-select the birth location.");
+      return;
+    }
+
     setPhase('loading');
     setIsSending(true);
 
     try {
+      const buildPayload = (p: PersonDetails, offset: number) => ({
+        name: p.name,
+        dob: p.dob,
+        tob: p.tob,
+        place: p.place,
+        gender: p.gender,
+        birthPlaceName: p.birthPlaceName || p.place,
+        birthLatitude: p.birthLatitude,
+        birthLongitude: p.birthLongitude,
+        birthTimezoneName: p.birthTimezoneName,
+        birthTimezoneOffsetAtBirth: offset,
+        birthTimeFold: null,
+      });
+
       const res = await clientFetch('/api/match?narrative=true', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ person1, person2 }),
+        body: JSON.stringify({
+          person1: buildPayload(person1, offsetP1),
+          person2: buildPayload(person2, offsetP2),
+        }),
       });
 
       // ── 402 Paywall detection ──
@@ -398,11 +486,37 @@ export default function MatchClient() {
                               onChange={(e) => setPerson1({...person1, tob: e.target.value})}
                             />
                           </div>
-                          <Input 
-                            label="Place of Birth" 
-                            placeholder="e.g. New Delhi, India"
-                            value={person1.place}
-                            onChange={(e) => setPerson1({...person1, place: e.target.value})}
+                          <LocationSearch
+                            label="Place of Birth"
+                            placeholder="Search city, e.g. New Delhi"
+                            value={person1.place || person1.birthPlaceName}
+                            confirmedLocation={confirmedLocationP1}
+                            required
+                            onSelect={(loc: LocationResult) => {
+                              setPerson1({
+                                ...person1,
+                                place: loc.name,
+                                birthPlaceName: loc.name,
+                                birthLatitude: loc.lat,
+                                birthLongitude: loc.lon,
+                                birthTimezoneName: loc.timezone,
+                                birthTimezoneOffsetAtBirth: undefined,
+                              });
+                              setConfirmedLocationP1(loc);
+                            }}
+                            onChange={(text: string) => {
+                              const stillMatches = confirmedLocationP1?.name === text;
+                              setPerson1({
+                                ...person1,
+                                place: text,
+                                birthPlaceName: stillMatches ? confirmedLocationP1?.name : undefined,
+                                birthLatitude: stillMatches ? confirmedLocationP1?.lat : undefined,
+                                birthLongitude: stillMatches ? confirmedLocationP1?.lon : undefined,
+                                birthTimezoneName: stillMatches ? confirmedLocationP1?.timezone : undefined,
+                                birthTimezoneOffsetAtBirth: undefined,
+                              });
+                              if (!stillMatches) setConfirmedLocationP1(null);
+                            }}
                           />
                         </div>
                       </Card>
@@ -449,11 +563,37 @@ export default function MatchClient() {
                               onChange={(e) => setPerson2({...person2, tob: e.target.value})}
                             />
                           </div>
-                          <Input 
-                            label="Place of Birth" 
-                            placeholder="e.g. Mumbai, India"
-                            value={person2.place}
-                            onChange={(e) => setPerson2({...person2, place: e.target.value})}
+                          <LocationSearch
+                            label="Place of Birth"
+                            placeholder="Search city, e.g. Mumbai"
+                            value={person2.place || person2.birthPlaceName}
+                            confirmedLocation={confirmedLocationP2}
+                            required
+                            onSelect={(loc: LocationResult) => {
+                              setPerson2({
+                                ...person2,
+                                place: loc.name,
+                                birthPlaceName: loc.name,
+                                birthLatitude: loc.lat,
+                                birthLongitude: loc.lon,
+                                birthTimezoneName: loc.timezone,
+                                birthTimezoneOffsetAtBirth: undefined,
+                              });
+                              setConfirmedLocationP2(loc);
+                            }}
+                            onChange={(text: string) => {
+                              const stillMatches = confirmedLocationP2?.name === text;
+                              setPerson2({
+                                ...person2,
+                                place: text,
+                                birthPlaceName: stillMatches ? confirmedLocationP2?.name : undefined,
+                                birthLatitude: stillMatches ? confirmedLocationP2?.lat : undefined,
+                                birthLongitude: stillMatches ? confirmedLocationP2?.lon : undefined,
+                                birthTimezoneName: stillMatches ? confirmedLocationP2?.timezone : undefined,
+                                birthTimezoneOffsetAtBirth: undefined,
+                              });
+                              if (!stillMatches) setConfirmedLocationP2(null);
+                            }}
                           />
                         </div>
                       </Card>

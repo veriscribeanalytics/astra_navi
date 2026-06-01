@@ -153,18 +153,63 @@ export const getAvatarQuestions = (avatarId: string, ageBracket: AgeBracket): st
       "How can I deepen my emotional connections?"
     ],
     spiritual_guide: [
-      "What is my soul's purpose in this life?",
-      "Which spiritual practices suit my nature?",
-      "How can I find inner peace right now?",
-      "What past-life karma am I working through?"
+      "What does my birth chart reveal about my overall health?",
+      "When will my physical energy and vitality improve?",
+      "Which planetary alignments are currently affecting my well-being?",
+      "What astrological remedies can support my physical and mental health?"
     ],
     astro_sage: [
       "Explain my Mahadasha and what it means.",
       "What does my Lagna reveal about me?",
       "Walk me through my key planetary aspects.",
       "Which yogas are present in my chart?"
+    ],
+    finance_mentor: [
+      "What does my chart say about my wealth potential?",
+      "When will my financial situation improve?",
+      "Is this a good time to make major investments?",
+      "How can I enhance my financial stability?"
     ]
   };
 
   return avatarQuestionsMap[avatarId] || avatarQuestionsMap.navi;
+};
+
+export type StarterIconKey = 'sun' | 'briefcase' | 'orbit' | 'heart' | 'compass' | 'sparkles' | 'star' | 'gem';
+
+export interface StarterCard {
+  title: string;
+  description: string;
+  question: string;
+  icon: StarterIconKey;
+}
+
+export const getAvatarStarterCards = (avatarId: string, t: (key: string) => string): StarterCard[] => {
+  const iconsByAvatar: Record<string, StarterIconKey[]> = {
+    navi: ['sun', 'briefcase', 'orbit', 'heart'],
+    career_mentor: ['compass', 'briefcase', 'star', 'gem'],
+    relationship_guide: ['heart', 'sparkles', 'orbit', 'star'],
+    spiritual_guide: ['sparkles', 'gem', 'compass', 'orbit'],
+    astro_sage: ['orbit', 'sun', 'star', 'gem'],
+    finance_mentor: ['gem', 'briefcase', 'sun', 'star'],
+  };
+
+  const selectedAvatarId = iconsByAvatar[avatarId] ? avatarId : 'navi';
+  const icons = iconsByAvatar[selectedAvatarId];
+
+  const cards: StarterCard[] = [];
+  for (let i = 0; i < 4; i++) {
+    const titleKey = `chat.starterCards.${selectedAvatarId}.${i}.title`;
+    const descKey = `chat.starterCards.${selectedAvatarId}.${i}.description`;
+    const questionKey = `chat.starterCards.${selectedAvatarId}.${i}.question`;
+
+    cards.push({
+      title: t(titleKey),
+      description: t(descKey),
+      question: t(questionKey),
+      icon: icons[i],
+    });
+  }
+
+  return cards;
 };

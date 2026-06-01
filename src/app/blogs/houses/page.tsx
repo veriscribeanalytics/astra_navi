@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { useTranslation } from '@/hooks';
 import { 
     ArrowLeft, User, DollarSign, MessageSquare, Home, 
     Lightbulb, Shield, Heart, Eye, Compass, Briefcase, 
@@ -196,6 +197,7 @@ const houses = [
 ];
 
 export default function HousesPage() {
+    const { t } = useTranslation();
     const [selectedHouse, setSelectedHouse] = useState(houses[0]);
     const [viewMode, setViewMode] = useState<'encyclopedia' | 'detail'>('encyclopedia');
     const router = useRouter();
@@ -217,7 +219,7 @@ export default function HousesPage() {
                             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Library</span>
                         </Link>
                         <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
-                            The 12 <span className="text-secondary italic">Bhavas</span>
+                            {t('blogs.houses.title')} <span className="text-secondary italic">{t('blogs.houses.titleSanskrit')}</span>
                         </h1>
                     </div>
 
@@ -233,12 +235,12 @@ export default function HousesPage() {
                                 <BookOpen className={`w-4 h-4 ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/50'}`} />
                             </div>
                             <div>
-                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>Encyclopedia</h3>
-                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">Introduction</p>
+                                <h3 className={`text-sm font-bold ${viewMode === 'encyclopedia' ? 'text-secondary' : 'text-foreground/70'}`}>{t('blogs.houses.encyclopediaTitle')}</h3>
+                                <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-widest">{t('blogs.houses.introduction')}</p>
                             </div>
                         </button>
 
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">The 12 Bhavas</div>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/30 px-2 mb-2">{t('blogs.houses.sidebarLabel')}</div>
                         <div className="grid grid-cols-6 lg:grid-cols-2 gap-1.5 sm:gap-2">
                             {houses.map((house) => {
                                 const isActive = viewMode === 'detail' && selectedHouse.id === house.id;
@@ -282,13 +284,13 @@ export default function HousesPage() {
                                 <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
                                     <div className="p-8 lg:p-10 flex-grow flex flex-col">
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
-                                            <BookOpen className="w-3 h-3" /> Core Concepts
+                                            <BookOpen className="w-3 h-3" /> {t('blogs.houses.coreConcepts')}
                                         </div>
                                         <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-2">
-                                            Understanding the <span className="text-secondary italic">Bhavas</span>
+                                            {t('blogs.houses.understanding')} <span className="text-secondary italic">{t('blogs.houses.bhavas')}</span>
                                         </h2>
                                         <p className="text-sm sm:text-base text-foreground/70 leading-relaxed max-w-3xl mb-6">
-                                            In Vedic Astrology, the 12 Houses (Bhavas) represent the 12 domains of human life. While planets provide the energy and signs provide the environment, the houses are the actual fields of experience where karma is enacted.
+                                            {t('blogs.houses.description')}
                                         </p>
 
                                         <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">
@@ -299,9 +301,9 @@ export default function HousesPage() {
                                                         <Activity className="w-5 h-5 text-primary" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Kendra (Angular) Houses</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{t('blogs.houses.kendra')}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Houses 1, 4, 7, and 10 form the pillars of life. They govern self, home, partnerships, and career. Planets placed here have the maximum power to shape your worldly existence and initiate massive action.
+                                                            {t('blogs.houses.kendraDesc')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -311,9 +313,9 @@ export default function HousesPage() {
                                                         <Dna className="w-5 h-5 text-emerald-500" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Trikona (Trinal) Houses</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{t('blogs.houses.trikona')}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Houses 1, 5, and 9 are the houses of Dharma and pure blessing. They represent past life merits (Purva Punya), intelligence, and divine grace. Planets here provide natural luck and spiritual evolution.
+                                                            {t('blogs.houses.trikonaDesc')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -326,9 +328,9 @@ export default function HousesPage() {
                                                         <Shield className="w-5 h-5 text-rose-500" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Dusthana (Difficult) Houses</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{t('blogs.houses.dusthana')}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Houses 6, 8, and 12 govern obstacles, transformation, and loss. While challenging for material pursuits, they are essential for burning karma, building resilience, and achieving ultimate spiritual liberation (Moksha).
+                                                            {t('blogs.houses.dusthanaDesc')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -338,9 +340,9 @@ export default function HousesPage() {
                                                         <TrendingUp className="w-5 h-5 text-amber-500" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-base font-bold text-foreground mb-1">Upachaya (Growing) Houses</h4>
+                                                        <h4 className="text-base font-bold text-foreground mb-1">{t('blogs.houses.upachaya')}</h4>
                                                         <p className="text-[13px] text-foreground/60 leading-relaxed">
-                                                            Houses 3, 6, 10, and 11 represent areas of life that improve over time through conscious effort. Malefic planets (Saturn, Mars, Sun) placed here actually give excellent results as they provide the drive to overcome competition.
+                                                            {t('blogs.houses.upachayaDesc')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -386,19 +388,19 @@ export default function HousesPage() {
                                                 {/* Top Metrics Grid */}
                                                 <div className="grid grid-cols-4 gap-8 pt-2">
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Sanskrit</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.houses.sanskrit')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90">{selectedHouse.sanskrit}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Significator</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.houses.significator')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90">{selectedHouse.karaka}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Nature</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.houses.nature')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedHouse.nature}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Body Matrix</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.houses.bodyMatrix')}</span>
                                                         <p className="text-[14px] font-bold text-secondary uppercase">{selectedHouse.bodyParts}</p>
                                                     </div>
                                                 </div>
@@ -411,7 +413,7 @@ export default function HousesPage() {
                                             <div className="col-span-7 space-y-8">
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <BookOpen className="w-4 h-4" /> House Essence
+                                                        <BookOpen className="w-4 h-4" /> {t('blogs.houses.houseEssence')}
                                                     </h3>
                                                     <p className="text-[16px] font-light leading-relaxed text-foreground/80 pr-6">
                                                         {selectedHouse.deepDive}
@@ -420,7 +422,7 @@ export default function HousesPage() {
 
                                                 <div className="space-y-4">
                                                     <h3 className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                                                        <Zap className="w-4 h-4" /> Dominions
+                                                        <Zap className="w-4 h-4" /> {t('blogs.houses.dominions')}
                                                     </h3>
                                                     <div className="flex flex-wrap gap-3">
                                                         {selectedHouse.traits.map(t => (
@@ -434,7 +436,7 @@ export default function HousesPage() {
                                             <div className="col-span-5 space-y-4">
                                                 <div className="bg-secondary/5 rounded-[24px] p-5 border border-secondary/5">
                                                     <h3 className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2 mb-3">
-                                                        <Shield className="w-4 h-4" /> Life Governance
+                                                        <Shield className="w-4 h-4" /> {t('blogs.houses.lifeGovernance')}
                                                     </h3>
                                                     <p className="text-[14px] font-medium leading-relaxed text-foreground/90">
                                                         {selectedHouse.represents}
@@ -462,11 +464,11 @@ export default function HousesPage() {
                                                     <Dna className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-sm font-bold text-foreground">Bhavat Bhavam Logic</h3>
-                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">How {selectedHouse.nameEn} affects derivative life domains</p>
+                                                    <h3 className="text-sm font-bold text-foreground">{t('blogs.houses.bhavLogic')}</h3>
+                                                    <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">{t('blogs.houses.howAffects', { house: selectedHouse.nameEn })}</p>
                                                 </div>
                                             </div>
-                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">Analyze Alignment ✦</Button>
+                                            <Button onClick={() => router.push('/chat')} variant="secondary" className="!px-6 !py-2.5 !rounded-xl !font-bold !text-[11px]">{t('blogs.houses.analyzeBtn2')} ✦</Button>
                                         </div>
                                     </div>
                                 </Card>

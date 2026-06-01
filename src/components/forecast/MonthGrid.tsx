@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from '@/hooks';
 
 export interface MonthData {
   month: string;
@@ -12,7 +13,7 @@ export interface MonthData {
   transits?: Record<string, unknown>;
 }
 
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
 export default function MonthGrid({ months, colorHex, selectedMonth, onSelect }: {
   months: MonthData[];
@@ -20,12 +21,13 @@ export default function MonthGrid({ months, colorHex, selectedMonth, onSelect }:
   selectedMonth: string | null;
   onSelect: (month: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2 sm:gap-3 lg:gap-4">
       {months.map((m) => {
         const date = new Date(m.month + '-01');
         const monthIdx = date.getMonth();
-        const label = MONTH_LABELS[monthIdx] || m.month.slice(5);
+        const label = t(`forecast.monthsShort.${MONTH_KEYS[monthIdx]}`) || m.month.slice(5);
         const isSelected = selectedMonth === m.month;
         const isHigh = m.score >= 75;
         const isLow = m.score <= 45;

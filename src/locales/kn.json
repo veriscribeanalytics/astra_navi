@@ -1,7 +1,7 @@
 {
   "common": {
-    "login": "లಾಗಿన్",
-    "logout": "ಲಾಗ్ಔಟ್",
+    "login": "ಲಾಗಿನ್",
+    "logout": "ಲಾಗ್‌ಔಟ್",
     "getStarted": "ಪ್ರಾರಂಭಿಸಿ",
     "comingSoon": "ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ",
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
@@ -13,7 +13,9 @@
     "howItWorks": "ಇದು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ",
     "online": "ಆನ್‌ಲೈನ್",
     "onlineNow": "ಈಗ ಆನ್‌ಲೈನ್",
-    "friend": "ಸ್ನೇಹಿತ"
+    "friend": "ಸ್ನೇಹಿತ",
+    "goBack": "ಹಿಂದೆ ಹೋಗಿ",
+    "returnHome": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ"
   },
   "nav": {
     "myJourney": "ನನ್ನ ಪ್ರಯಾಣ",
@@ -23,6 +25,10 @@
     "myKundliDesc": "ಚಾರ್ಟ್ ವಿವರಗಳಿಗೆ ಆಳವಾಗಿ ಧುಮುಕಿ.",
     "chartMatching": "ಚಾರ್ಟ್ ಹೊಂದಾಣಿಕೆ",
     "chartMatchingDesc": "ವೈದಿಕ ಹೊಂದಾಣಿಕೆ ಮತ್ತು ಸಂಬಂಧ ವಿಶ್ಲೇಷಣೆ.",
+    "forecast": "ಮುನ್ಸೂಚನೆ",
+    "forecastDesc": "ಮಾಸಿಕ ಮತ್ತು ವಾರ್ಷಿಕ ಜ್ಯೋತಿಷ ಭವಿಷ್ಯಗಳು.",
+    "myFamily": "ನನ್ನ ಕುಟುಂಬ",
+    "myFamilyDesc": "ಪ್ರೀತಿಪಾತ್ರರ ಜನ್ಮ ವಿವರಗಳನ್ನು ಉಳಿಸಿ, ಜಾತಕಗಳನ್ನು ವೀಕ್ಷಿಸಿ, ಹೊಂದಾಣಿಕೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
     "consultNavi": "Navi ಅನ್ನು ಸಂಪರ್ಕಿಸಿ",
     "guidedSessions": "ಮಾರ್ಗದರ್ಶಿ ಅವಧಿಗಳು",
     "guidedSessionsDesc": "ನಿಮಗಾಗಿ ಕಸ್ಟಮೈಸ್ ಮಾಡಿದ ಹಂತ-ಹಂತದ ಜೀವನ ಮಾರ್ಗದರ್ಶನ.",
@@ -81,7 +87,7 @@
         "btn1": "ನನ್ನ ಜನನ ಕುಂಡಲಿಯನ್ನು ಪಡೆಯಿರಿ",
         "btn2": "AI ಮಾರ್ಗದರ್ಶಿಯನ್ನು ಅನ್ವೇಷಿಸಿ",
         "stat1v": "30 ಸೆ",
-        "stat1l": "ಉಚಿತ ಕುండಲಿ",
+        "stat1l": "ಉಚಿತ ಕುಂಡಲಿ",
         "stat2v": "16 ವರ್ಗ",
         "stat2l": "ಚಾರ್ಟ್‌ಗಳು",
         "stat3v": "ನಿಖರವಾದ",
@@ -252,7 +258,18 @@
         "desc": "ಎಡ್ಜ್-ಆಧಾರಿತ ಕಂಪ್ಯೂಟಿಂಗ್ ಗೋಚಾರ ಟ್ರ್ಯಾಕಿಂಗ್‌ಗಾಗಿ ಹೆಚ್ಚಿನ ಲಭ್ಯತೆಯನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ.",
         "sub": "99.9% ಅಪ್‌ಟೈಮ್"
       }
-    ]
+    ],
+    "hero": {
+      "bphsCertified": "BPHS ಪ್ರಮಾಣೀಕೃತ",
+      "authenticJyotish": "ಅಪ್ಪಟ ಜ್ಯೋತಿಷ್ಯ",
+      "scripturalInsight": "ಶಾಸ್ತ್ರೀಯ ಒಳನೋಟ",
+      "askNavi": "Navi ಅನ್ನು ಕೇಳಿ...",
+      "ashtakootMilan": "ಅಷ್ಟಕೂಟ ಮಿಲನ",
+      "gunaMatching": "ಗುಣ ಹೊಂದಾಣಿಕೆ",
+      "highCompatibility": "ಹೆಚ್ಚಿನ ಹೊಂದಾಣಿಕೆ",
+      "dailyAlignment": "ದೈನಂದಿನ ಹೊಂದಾಣಿಕೆ",
+      "transitTip": "ಗೋಚಾರ ಸಲಹೆ"
+    }
   },
   "dashboard": {
     "greetingMorning": "ಶುಭೋದಯ",
@@ -266,6 +283,12 @@
     "yesterday": "ನಿನ್ನೆ",
     "systemHub": "ಸಿಸ್ಟಮ್ ಹಬ್",
     "cosmicPortals": "ಕಾಸ್ಮಿಕ್ ಪೋರ್ಟಲ್ಸ್",
+    "yourGuides": "ನಿಮ್ಮ ಮಾರ್ಗದರ್ಶಕರು",
+    "meetYourGuides": "ನಿಮ್ಮ ಮಾರ್ಗದರ್ಶಕರನ್ನು ಭೇಟಿಯಾಗಿ",
+    "guidesSubtitle": "ವೈಯಕ್ತಿಕ ಮಾರ್ಗದರ್ಶನಕ್ಕಾಗಿ ತಜ್ಞರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ — ವೃತ್ತಿಜೀವನದಿಂದ ಸಂಬಂಧಗಳವರೆಗೆ ಮತ್ತು ಆಳವಾದ ಜಾತಕ ವಿಶ್ಲೇಷಣೆಯವರೆಗೆ.",
+    "startChat": "ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ",
+    "creditSingular": "ಕ್ರೆಡಿಟ್",
+    "creditPlural": "ಕ್ರೆಡಿಟ್‌ಗಳು",
     "janamKundli": "ಜನನ ಕುಂಡಲಿ",
     "janamKundliDesc": "ವೈದಿಕ ಜ್ಞಾನದಿಂದ ನಡೆಸಲ್ಪಡುವ ವಿವರವಾದ ಜನನ ಚಾರ್ಟ್ ಮತ್ತು ಗ್ರಹಗಳ ವಿಶ್ಲೇಷಣೆ.",
     "aiGuidance": "AI ಮಾರ್ಗದರ್ಶನ",
@@ -339,7 +362,14 @@
     "soulmateMatch": "ಹೊಂದಾಣಿಕೆ",
     "tithi": "ತಿಥಿ",
     "yoga": "ಯೋಗ",
-    "startJourneyDesc": "ನಿಮ್ಮ ಕಾಸ್ಮಿಕ್ ಪ್ರಯಾಣವು ಇಲ್ಲಿಂದ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ. ಅದನ್ನು ಇಲ್ಲಿ ನೋಡಲು Navi ಯನ್ನು ಸಂಪರ್ಕಿಸಿ."
+    "rahukaal": "ರಾಹು ಕಾಲ",
+    "startJourneyDesc": "ನಿಮ್ಮ ಕಾಸ್ಮಿಕ್ ಪ್ರಯಾಣವು ಇಲ್ಲಿಂದ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ. ಅದನ್ನು ಇಲ್ಲಿ ನೋಡಲು Navi ಯನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    "unknownSign": "???",
+    "askNaviFab": "Navi ಕೇಳಿ",
+    "familyEyebrow": "ಬಂಧಗಳು",
+    "familyAdd": "ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
+    "familyEmptyCta": "ನಿಮ್ಮ ಮೊದಲ ಕುಟುಂಬ ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
+    "familyViewAll": "ಎಲ್ಲವನ್ನೂ ನೋಡಿ"
   },
   "horoscope": {
     "yourDayToday": "ಇಂದು ನಿಮ್ಮ ದಿನ",
@@ -352,6 +382,7 @@
     "cosmicTiming": "ಕಾಸ್ಮಿಕ್ ಸಮಯ",
     "celestialInsights": "ಖಗೋಳ ಒಳನೋಟಗಳು",
     "detailedForecast": "ವಿವರವಾದ ಮುನ್ಸೂಚನೆ",
+    "viewFullForecast": "ಸಂಪೂರ್ಣ ಮುನ್ಸೂಚನೆಯನ್ನು ವೀಕ್ಷಿಸಿ",
     "askNaviAboutToday": "ಇಂದಿನ ಬಗ್ಗೆ Navi ಯನ್ನು ಕೇಳಿ",
     "aligningStars": "ನಕ್ಷತ್ರಗಳನ್ನು ಜೋಡಿಸಲಾಗುತ್ತಿದೆ",
     "calculatingTransits": "ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಗ್ರಹಗಳ ಗೋಚಾರಗಳನ್ನು ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತಿದೆ...",
@@ -380,7 +411,8 @@
     "categoryHealth": "ಆರೋಗ್ಯ",
     "categoryLove": "ಪ್ರೀತಿ",
     "categoryFinance": "ಹಣಕಾಸು",
-    "categoryGeneral": "ಸಾಮಾನ್ಯ",
+    "categoryGeneral": "ಸಾಮಾನ್ಯ ದೃಷ್ಟಿಕೋನ",
+    "categorySpiritual": "ಆಧ್ಯಾತ್ಮಿಕ",
     "weeklyForecast": "ಸಾಪ್ತಾಹಿಕ ಮುನ್ಸೂಚನೆ",
     "past": "ಹಿಂದೆ",
     "forecast": "ಮುನ್ಸೂಚನೆ",
@@ -426,7 +458,12 @@
     "statNakshatras": "ನಕ್ಷತ್ರಗಳು",
     "invalidCredentials": "ಅಮಾನ್ಯವಾದ ಲಾಗಿನ್ ರುಜುವಾತುಗಳು.",
     "networkError": "ಸರ್ವರ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
-    "serverError": "ಸರ್ವರ್ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."
+    "serverError": "ಸರ್ವರ್ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
+    "resetLinkSent": "ಖಾತೆ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದರೆ, ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ.",
+    "alreadySignedIn": "ನೀವು ಈಗಾಗಲೇ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ",
+    "goToDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹೋಗಿ",
+    "signOut": "ಸೈನ್ ಔಟ್",
+    "signInToContinue": "ಮುಂದುವರಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ"
   },
   "about": {
     "theTradition": "ಸಂಪ್ರದಾಯ",
@@ -448,18 +485,434 @@
     "privacyDesc": "ನಿಮ್ಮ ಜನನ ಚಾರ್ಟ್ ನಿಮ್ಮ ಆತ್ಮದ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಆಗಿದೆ. ನಾವು ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಎಂಡ್-ಟು-ಎಂಡ್ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡುತ್ತೇವೆ. ನಿಮ್ಮ ಕಾಸ್ಮಿಕ್ ಬ್ಲೂಪ್ರಿಂಟ್ ನಿಮ್ಮದು ಮಾತ್ರ."
   },
   "chat": {
+    "empty": {
+      "badge": "ನಿಮ್ಮ ವ್ಯಕ್ತಿಗತ ವೈದಿಕ ಮಾರ್ಗದರ್ಶಕ",
+      "headingLead": "ನೀವು ಯಾವುದನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೀರಿ",
+      "headingAccent": "ಇಂದು?",
+      "subtitle": "ನಿಮ್ಮ ಜಾತಕ, ಸಮಯ, ಸಂಬಂಧ, ಕ್ಯಾರಿಯರ್ ಅಥವಾ ಇಂದಿನ ಗ್ರಹ ಶಕ್ತಿ ಬಗ್ಗೆ ಕೇಳಿ.",
+      "dataPrivate": "ನಿಮ್ಮ ಡೇಟಾ ಖಾಸಗಿ ಮತ್ತು ಸುರಕ್ಷಿತ"
+    },
     "guestWelcome": "ನಮಸ್ತೆ ✦ ನೀವು ಪ್ರಸ್ತುತ ಪೂರ್ವವೀಕ್ಷಣೆ ಮೋಡ್‌ನಲ್ಲಿದ್ದೀರಿ. Navi ಯನ್ನು ಸಂಪರ್ಕಿಸಲು ಮತ್ತು ಆಳವಾದ ವೈದಿಕ ವಿಶ್ಲೇಷಣೆಯನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಖಾತೆಗೆ ಲಾಗಿನ್ ಮಾಡಿ.",
     "guestLoginRequired": "Navi ಯನ್ನು ಸಂಪರ್ಕಿಸಲು ಖಾತೆಯ ಅಗತ್ಯವಿದೆ. ಪೂರ್ಣ ವೈದಿಕ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಗ್ರಹಗಳ ಒಳನೋಟಗಳಿಗಾಗಿ ಲಾಗಿನ್ ಮಾಡಿ.",
+    "guestExpired": "ಪೂರ್ವವೀಕ್ಷಣೆ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "guestPreviewMode": "ಪೂರ್ವವೀಕ್ಷಣೆ ಮೋಡ್ - ವೈದಿಕ ವಿಶ್ಲೇಷಣೆಗಾಗಿ ಗುರುತು ಅಗತ್ಯವಿದೆ",
+    "guestLoginNow": "ಈಗಲೇ ಲಾಗಿನ್ ಮಾಡಿ",
     "naviWelcome": "ನಮಸ್ತೆ ✦ ನಾನು Navi. ನನ್ನನ್ನು ಯಾವುದನ್ನಾದರೂ ಕೇಳಿ.",
+    "emptyGreeting": "ನಿಮಗೆ ಏನನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ನಾನು ಸಹಾಯ ಮಾಡಲಿ?",
+    "avatarQuestions": {
+      "navi": [
+        "ಇಂದಿನ ಗ್ರಹಗಳ ಜೋಡಣೆ ನನಗೆ ಏನು ಸೂಚಿಸುತ್ತದೆ?",
+        "ಈ ತಿಂಗಳು ನನ್ನ ಜೀವನದ ಯಾವ ಭಾಗದ ಕಡೆಗೆ ನಾನು ಗಮನ ಹರಿಸಬೇಕು?",
+        "ನನ್ನ ಪ್ರಸ್ತುತ ಜೀವನದ ಪಾಠ ಏನು?",
+        "ನನ್ನ ಪ್ರಮುಖ ಗ್ರಹಗಳ ಶಕ್ತಿಗಳ ಬಗ್ಗೆ ತಿಳಿಸಿ."
+      ],
+      "career_mentor": [
+        "ನನ್ನ ಜಾತಕಕ್ಕೆ ಯಾವ ವೃತ್ತಿ ಮಾರ್ಗವು ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ?",
+        "ಬಡ್ತಿ ಕೇಳಲು ಉತ್ತಮ ಸಮಯ ಯಾವುದು?",
+        "ನನ್ನ ಪ್ರಸ್ತುತ ಕ್ಷೇತ್ರದಲ್ಲಿ ನನಗೆ ಯಶಸ್ಸು ಸಿಗಲಿದೆಯೇ?",
+        "ನನ್ನಲ್ಲಿರುವ ಗುಪ್ತ ವೃತ್ತಿಪರ ಸಾಮರ್ಥ್ಯಗಳು ಯಾವುವು?"
+      ],
+      "relationship_guide": [
+        "ನನ್ನ ಜೀವನ ಸಂಗಾತಿಯನ್ನು ನಾನು ಯಾವಾಗ ಭೇಟಿಯಾಗುತ್ತೇನೆ?",
+        "ನನ್ನ ಪ್ರಸ್ತುತ ಸಂಬಂಧವು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತದೆಯೇ?",
+        "ನನ್ನ ಸಂಬಂಧಗಳಲ್ಲಿ ಪದೇ ಪದೇ ಯಾವ ಮಾದರಿಗಳು ಕಂಡುಬರುತ್ತಿವೆ?",
+        "ನನ್ನ ಭಾವನಾತ್ಮಕ ಸಂಬಂಧಗಳನ್ನು ನಾನು ಹೇಗೆ ಗಟ್ಟಿಗೊಳಿಸಬಹುದು?"
+      ],
+      "spiritual_guide": [
+        "ನನ್ನ ಜನ್ಮ ಕುಂಡಲಿ ನನ್ನ ಒಟ್ಟಾರೆ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?",
+        "ನನ್ನ ದೈಹಿಕ ಶಕ್ತಿ ಮತ್ತು ಚೈತನ್ಯ ಯಾವಾಗ ಸುಧಾರಿಸುತ್ತದೆ?",
+        "ಪ್ರಸ್ತುತ ಯಾವ ಗ್ರಹಗಳ ಜೋಡಣೆಗಳು ನನ್ನ ಆರೋಗ್ಯದ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತಿವೆ?",
+        "ನನ್ನ ದೈಹಿಕ ಮತ್ತು ಮಾನಸಿಕ ಆರೋಗ್ಯಕ್ಕೆ ಯಾವ ಜ್ಯೋತಿಷ್ಯ ಪರಿಹಾರಗಳು ಸಹಕರಿಸಬಹುದು?"
+      ],
+      "astro_sage": [
+        "ನನ್ನ ಮಹಾದಶಾವನ್ನು ವಿವರಿಸಿ ಮತ್ತು ಅದರ ಅರ್ಥವೇನು ಎಂದು ತಿಳಿಸಿ.",
+        "ನನ್ನ ಲಗ್ನವು ನನ್ನ ಬಗ್ಗೆ ಏನನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ?",
+        "ನನ್ನ ಪ್ರಮುಖ ಗ್ರಹಗಳ ದೃಷ್ಟಿಗಳ ಬಗ್ಗೆ ತಿಳಿಸಿಕೊಡಿ.",
+        "ನನ್ನ ಜಾತಕದಲ್ಲಿ ಯಾವ ಯೋಗಗಳು ಇವೆ?"
+      ],
+      "finance_mentor": [
+        "ನನ್ನ ಕುಂಡಲಿ ನನ್ನ ಸಂಪತ್ತಿನ ಸಾಮರ್ಥ್ಯದ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?",
+        "ನನ್ನ ಹಣಕಾಸಿನ ಪರಿಸ್ಥಿತಿ ಯಾವಾಗ ಸುಧಾರಿಸುತ್ತದೆ?",
+        "ದೊಡ್ಡ ಹೂಡಿಕೆಗಳನ್ನು ಮಾಡಲು ಇದು ಸೂಕ್ತ ಸಮಯವೇ?",
+        "ನನ್ನ ಹಣಕಾಸಿನ ಸ್ಥಿರತೆಯನ್ನು ನಾನು ಹೇಗೆ ಹೆಚ್ಚಿಸಬಹುದು?"
+      ]
+    },
+    "avatarIntros": {
+      "navi": "ಇಂದು ಬ್ರಹ್ಮಾಂಡವು ನಿಮಗಾಗಿ ಏನನ್ನು ಸಿದ್ಧಪಡಿಸಿದೆ?",
+      "career_mentor": "ನಿಮ್ಮ ವೃತ್ತಿಪರ ಪ್ರಯಾಣದ ಬಗ್ಗೆ ಮಾತನಾಡೋಣ.",
+      "relationship_guide": "ನಿಮ್ಮ ಹೃದಯದಲ್ಲಿ ಏನಿದೆ?",
+      "spiritual_guide": "ವೇದ ಜ್ಯೋತಿಷ್ಯದ ಜ್ಞಾನವನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಆರೋಗ್ಯ, ಚೈತನ್ಯ ಮತ್ತು ದೈಹಿಕ ಯೋಗಕ್ಷೇಮವನ್ನು ಅನ್ವೇಷಿಸೋಣ.",
+      "astro_sage": "ನಿಮ್ಮ ಜಾತಕವನ್ನು ತೋರಿಸಿ — ಗ್ರಹಗಳು ಏನನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತವೆ ಎಂದು ನೋಡೋಣ.",
+      "finance_mentor": "ಗ್ರಹಗಳನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಹಣಕาสಿನ ಭವಿಷ್ಯ ಮತ್ತು ಸಂಪತ್ತಿನ ಸಾಮರ್ಥ್ಯವನ್ನು ಉತ್ತಮಗೊಳಿಸೋಣ."
+    },
     "newConversation": "ಹೊಸ ಸಂಭಾಷಣೆ",
     "errorSending": "ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
     "networkError": "ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕ ಕಳೆದುಹೋಗಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
+    "failedResponse": "ಪ್ರತಿಕ್ರಿಯೆ ಪಡೆಯಲು ವಿಫಲವಾಗಿದೆ",
     "ratingSuccess": "ರೇಟಿಂಗ್ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ. ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ಧನ್ಯವಾದಗಳು!",
     "ratingError": "ರೇಟಿಂಗ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
     "deleteSuccess": "ಸಂಭಾಷಣೆಯನ್ನು ಅಳಿಸಲಾಗಿದೆ.",
     "deleteError": "ಸಂಭಾಷಣೆಯನ್ನು ಅಳಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
     "workInProgressTitle": "ಕಾರ್ಯ ಪ್ರಗತಿಯಲ್ಲಿದೆ",
-    "workInProgressDesc": "ಈ ವೈಶಿಷ್ಟ್ಯವು ಪ್ರಸ್ತುತ ಅಭಿವೃದ್ಧಿಯಲ್ಲಿದೆ. ನಿಮಗಾಗಿ ಅದ್ಭುತವಾದ ಅನುಭವವನ್ನು ತರಲು ನಾವು ಶ್ರಮಿಸುತ್ತಿದ್ದೇವೆ!"
+    "workInProgressDesc": "ಈ ವೈಶಿಷ್ಟ್ಯವು ಪ್ರಸ್ತುತ ಅಭಿವೃದ್ಧಿಯಲ್ಲಿದೆ. ನಿಮಗಾಗಿ ಅದ್ಭುತವಾದ ಅನುಭವವನ್ನು ತರಲು ನಾವು ಶ್ರಮಿಸುತ್ತಿದ್ದೇವೆ!",
+    "messageEdited": "ಸಂದೇಶವನ್ನು ಸಂಪಾದಿಸಲಾಗಿದೆ.",
+    "messageDeleted": "ಸಂದೇಶವನ್ನು ಅಳಿಸಲಾಗಿದೆ.",
+    "messagePinned": "ಸಂದೇಶವನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ.",
+    "messageUnpinned": "ಸಂದೇಶವನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲಾಗಿದೆ.",
+    "searchPlaceholder": "ಸಂಭಾಷಣೆಯನ್ನು ಹುಡುಕಿ...",
+    "searchMessages": "ಸಂದೇಶಗಳನ್ನು ಹುಡುಕಿ",
+    "searchPrevious": "ಹಿಂದಿನ ಹೊಂದಾಣಿಕೆ",
+    "searchNext": "ಮುಂದಿನ ಹೊಂದಾಣಿಕೆ",
+    "searchClose": "ಹುಡುಕಾಟವನ್ನು ಮುಚ್ಚಿ",
+    "noSearchResults": "ಯಾವುದೇ ಫಲಿತಾಂಶಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "confirmDeleteMsg": "ಈ ಸಂದೇಶವನ್ನು ಅಳಿಸಬೇಕೇ?",
+    "confirmDeleteYes": "ಹೌದು",
+    "confirmDeleteNo": "ಇಲ್ಲ",
+    "editMessage": "ಸಂದೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "saveEdit": "ಉಳಿಸಿ",
+    "cancelEdit": "ರದ್ದುಮಾಡಿ",
+    "editedLabel": "(ಸಂಪಾದಿಸಲಾಗಿದೆ)",
+    "exportTXT": "TXT ಆಗಿ ರಫ್ತು ಮಾಡಿ",
+    "exportJSON": "JSON ಆಗಿ ರಫ್ತು ಮಾಡಿ",
+    "copiedToClipboard": "ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ",
+    "speaking": "ಮಾತನಾಡಲಾಗುತ್ತಿದೆ...",
+    "speechStopped": "ಮಾತು ನಿಲ್ಲಿಸಲಾಗಿದೆ",
+    "newResponseArriving": "ಹೊಸ ಪ್ರತಿಕ್ರಿಯೆ ಬರುತ್ತಿದೆ...",
+    "thinkingReadingChart": "ನಿಮ್ಮ ಜಾತಕವನ್ನು ಓದಲಾಗುತ್ತಿದೆ...",
+    "thinkingConsultingStars": "ನಕ್ಷತ್ರಗಳನ್ನು ಸಮಾಲೋಚಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingInterpretingTransits": "ಗೋಚಾರ ಫಲಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingAligningPlanetaryData": "ಗ್ರಹಗಳ ಡೇಟಾವನ್ನು ಜೋಡಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingCareer": "ನಿಮ್ಮ ವೃತ್ತಿಜೀವನದ ಭವಿಷ್ಯವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingLove": "ನಿಮ್ಮ ಸಂಬಂಧದ ಒಳನೋಟಗಳನ್ನು ಅನ್ವೇಷಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingStudy": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ಮಾರ್ಗವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingFinance": "ನಿಮ್ಮ ಹಣಕಾಸಿನ ಸೂಚಕಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingHealth": "ನಿಮ್ಮ ಆರೋಗ್ಯ ಮತ್ತು ಚೈತನ್ಯವನ್ನು ನಿರ್ಣಯಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingTiming": "ಅತ್ಯುತ್ತಮ ಸಮಯವನ್ನು ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತಿದೆ...",
+    "thinkingRemedy": "ನಿಮಗಾಗಿ ಪರಿಹಾರಗಳನ್ನು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ...",
+    "thinkingGeneral": "ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ನಕ್ಷೆಯನ್ನು ಸಮಾಲೋಚಿಸಲಾಗುತ್ತಿದೆ...",
+    "thoughtProcess": "ಚಿಂತನೆಯ ಪ್ರಕ್ರಿಯೆ",
+    "chartFactors": "ಈ ವಿಶ್ಲೇಷಣೆಯ ಜಾತಕದ ಅಂಶಗಳು",
+    "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+    "copy": "ನಕಲಿಸಿ",
+    "pin": "ಪಿನ್ ಮಾಡಿ",
+    "unpin": "ಅನ್‌ಪಿನ್ ಮಾಡಿ",
+    "pinMessage": "ಸಂದೇಶವನ್ನು ಪಿನ್ ಮಾಡಿ",
+    "unpinMessage": "ಸಂದೇಶವನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಿ",
+    "regenerate": "ಮತ್ತೆ ರಚಿಸಿ",
+    "speak": "ಮಾತನಾಡಿ",
+    "stop": "ನಿಲ್ಲಿಸಿ",
+    "dashaNow": "ಈಗ",
+    "newMessage": "ಹೊಸ",
+    "newMessages": "ಹೊಸ",
+    "sidebar": {
+      "newChat": "ಹೊಸ ಚಾಟ್",
+      "searchPlaceholder": "ಚಾಟ್‌ಗಳನ್ನು ಹುಡುಕಿ...",
+      "today": "ಇಂದು",
+      "yesterday": "ನಿನ್ನೆ",
+      "previous7Days": "ಹಿಂದಿನ 7 ದಿನಗಳು",
+      "older": "ಹಳೆಯದು",
+      "noChatsYet": "ಇನ್ನೂ ಯಾವುದೇ ಚಾಟ್‌ಗಳಿಲ್ಲ",
+      "noMatchingChats": "ಹೊಂದುವ ಚಾಟ್‌ಗಳಿಲ್ಲ",
+      "tryDifferentSearch": "ಬೇರೆ ಪದದಿಂದ ಹುಡುಕಲು ಪ್ರಯತ್ನಿಸಿ.",
+      "startNewConversation": "ಮೇಲೆ ಹೊಸ ಸಂಭಾಷಣೆಯನ್ನು ಪ್ರಾರಂಭಿಸಿ.",
+      "historyLocked": "ಇತಿಹಾಸವನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ",
+      "loginToSave": "ನಿಮ್ಮ ಸಂಭಾಷಣೆಗಳನ್ನು ಉಳಿಸಲು ಲಾಗಿನ್ ಮಾಡಿ.",
+      "loginToUnlock": "ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಲಾಗಿನ್ ಮಾಡಿ",
+      "downloadTxt": "TXT",
+      "downloadJson": "JSON",
+      "delete": "ಅಳಿಸಿ",
+      "loadMore": "ಇನ್ನಷ್ಟು ಲೋಡ್ ಮಾಡಿ",
+      "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+      "deleteChatForever": "ಚಾಟ್ ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ಅಳಿಸಬೇಕೇ?",
+      "deletePermanentWarning": "ಇದು ಶಾಶ್ವತವಾಗಿ ಅಳಿಸುತ್ತದೆ",
+      "wantBackupFirst": "ಮೊದಲು ಬ್ಯಾಕಪ್ ಬೇಕೇ?",
+      "saveAndDownload": "ಉಳಿಸಿ ಮತ್ತು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+      "downloading": "ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+      "cancel": "ರದ್ದುಮಾಡಿ",
+      "deleting": "ಅಳಿಸಲಾಗುತ್ತಿದೆ...",
+      "deleteConfirm": "ಅಳಿಸಿ",
+      "downloadHeaderPrefix": "AstraNavi ಚಾಟ್ —",
+      "downloadDateLabel": "ದಿನಾಂಕ:",
+      "downloadRoleYou": "ನೀವು",
+      "downloadRoleNavi": "Navi",
+      "close": "ಸೈಡ್‌ಬಾರ್ ಮುಚ್ಚಿ"
+    },
+    "detail": {
+      "moonSign": "ಚಂದ್ರ ರಾಶಿ",
+      "sunSign": "ಸೂರ್ಯ ರಾಶಿ",
+      "lagna": "ಲಗ್ನ",
+      "birthDate": "ಜನ್ಮ ದಿನಾಂಕ",
+      "birthTime": "ಜನ್ಮ ಸಮಯ",
+      "birthPlace": "ಜನ್ಮ ಸ್ಥಳ",
+      "notSet": "ಹೊಂದಿಸಿಲ್ಲ",
+      "identityRequired": "ಗುರುತು ಅಗತ್ಯವಿದೆ",
+      "chartContext": "ಜಾತಕದ ಸಂದರ್ಭ",
+      "edit": "ಸಂಪಾದಿಸಿ",
+      "view": "ವೀಕ್ಷಿಸಿ",
+      "chatRating": "ಚಾಟ್ ರೇಟಿಂಗ್",
+      "rateResponsesToSeeAverage": "ಇಲ್ಲಿ ಸರಾಸರಿಯನ್ನು ನೋಡಲು ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ರೇಟ್ ಮಾಡಿ",
+      "conversationStats": "ಸಂಭಾಷಣೆಯ ಅಂಕಿಅಂಶಗಳು",
+      "messages": "ಸಂದೇಶಗಳು",
+      "questions": "ಪ್ರಶ್ನೆಗಳು",
+      "topics": "ವಿಷಯಗಳು",
+      "noTopicsYet": "ಇನ್ನೂ ಯಾವುದೇ ವಿಷಯಗಳಿಲ್ಲ",
+      "birthChart": "ಜನ್ಮ ಜಾತಕ",
+      "chart": "ಜಾತಕ",
+      "closeChartContext": "ಜಾತಕ ಸಂದರ್ಭವನ್ನು ಮುಚ್ಚಿ",
+      "openLargerBirthChart": "ದೊಡ್ಡ ಜನ್ಮ ಜಾತಕವನ್ನು ತೆರೆಯಿರಿ",
+      "expandedBirthChart": "ವಿಸ್ತರಿಸಿದ ಜನ್ಮ ಜಾತಕ",
+      "closeExpandedChart": "ವಿಸ್ತರಿಸಿದ ಜಾತಕವನ್ನು ಮುಚ್ಚಿ",
+      "chatSummary": "ಚಾಟ್ ಸಾರಾಂಶ",
+      "summaryLoading": "ಸಾರಾಂಶವನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+      "noSummaryYet": "ಸಾರಾಂಶವನ್ನು ರಚಿಸಲು ಕೆಲವು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ.",
+      "todayEnergy": "ಇಂದಿನ ಶಕ್ತಿ",
+      "todayEnergyLoading": "ಇಂದಿನ ಶಕ್ತಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+      "transitPlanets": "ಸಕ್ರಿಯ ಗ್ರಹಗಳು",
+      "transitPanchanga": "ಪಂಚಾಂಗ",
+      "notableTransits": "ಪ್ರಮುಖ ಗೋಚಾರಗಳು"
+    },
+    "avatarPicker": {
+      "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+      "defaultName": "Navi",
+      "ariaAvatar": "Avatar: {name}{title}. ಬದಲಾಯಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ.",
+      "ariaChooseAvatar": "ಅವತಾರವನ್ನು ಆರಿಸಿ",
+      "chooseGuide": "ನಿಮ್ಮ ಮಾರ್ಗದರ್ಶಿಯನ್ನು ಆರಿಸಿ",
+      "creditsNotice": "ವಿವಿಧ ಅವತಾರಗಳಿಗೆ ಪ್ರತಿ ಸಂದೇಶಕ್ಕೆ ವಿಭಿನ್ನ ಕ್ರೆಡಿಟ್‌ಗಳು ವೆಚ್ಚವಾಗುತ್ತವೆ.",
+      "creditSingle": "{n} ಕ್ರೆಡಿಟ್",
+      "creditPlural": "{n} ಕ್ರೆಡಿಟ್‌ಗಳು",
+      "default": "ಡೀಫಾಲ್ಟ್"
+    },
+    "header": {
+      "viewHistory": "ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಿ",
+      "online": "ಆನ್‌ಲೈನ್",
+      "viewChartContext": "ಜಾತಕದ ಸಂದರ್ಭ ವೀಕ್ಷಿಸಿ",
+      "closeChat": "ಚಾಟ್ ಮುಚ್ಚಿ",
+      "back": "ಹಿಂದೆ"
+    },
+    "feedback": {
+      "ratingLabels": {
+        "1": "ಅಸಮತೋಲನ",
+        "2": "ಸುಧಾರಿಸಬೇಕಾಗಿದೆ",
+        "3": "ಭಾಗಶಃ ಸ್ಪಷ್ಟತೆ",
+        "4": "ದಾಖಲೆಯ ಹತ್ತಿರ",
+        "5": "ಬ್ರಹ್ಮಾಂಡದಂತೆ ಸಮತೋಲನಗೊಂಡಿದೆ"
+      },
+      "tagSectionLabels": {
+        "1": "ಈ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ ಏನು ತಪ್ಪಾಗಿದೆ?",
+        "2": "ವಿಶ್ಲೇಷಣೆ ಎಲ್ಲಿ ಕೊರತೆಯಾಯಿತು?",
+        "3": "ಈ ಒಳನೋಟದಲ್ಲಿ ಏನನ್ನು ಸುಧಾರಿಸಬಹುದು?",
+        "4": "ಯಾವ ಸಣ್ಣ ವಿಷಯವು ತಪ್ಪಿಹೋಗಿದೆ?",
+        "5": "ಈ ವಿಶ್ಲೇಷಣೆಯನ್ನು ಅದ್ಭುತವಾಗಿಸಿದ್ದು ಯಾವುದು?"
+      },
+      "placeholders": {
+        "1": "ಇಲ್ಲಿ ನಕ್ಷತ್ರಗಳು ಸಂಪೂರ್ಣವಾಗಿ ಅಸಮತೋಲನದಲ್ಲಿದ್ದವು - ಏನು ತಪ್ಪು ಅನಿಸಿತು?",
+        "2": "ಓದಿನ ಯಾವ ಭಾಗವು ಗುರಿ ತಪ್ಪಿದೆ?",
+        "3": "ಈ ಓದಿನಲ್ಲಿ ಯಾವ ಬ್ರಹ್ಮಾಂಡದ ಒಳನೋಟವು ಕಾಣೆಯಾಗಿತ್ತು?",
+        "4": "ದಾಖಲೆಯ ಹತ್ತಿರ - ಈ ಓದನ್ನು ಪರಿಪೂರ್ಣವಾಗಿಸಲು ಏನು ಬೇಕು?",
+        "5": "ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಪ್ರಯಾಣದಲ್ಲಿ ಯಾವುದು ಹೆಚ್ಚು ಪ್ರತಿಧ್ವನಿಸಿತು?"
+      },
+      "tags": {
+        "1": {
+          "0": "ಧ್ವನಿಯು ಕಡೆಗಣಿಸುವ ಅಥವಾ ಒರಟಾಗಿದ್ದಂತೆ ಅನಿಸಿತು",
+          "1": "ಸಂಪೂರ್ಣವಾಗಿ ತಪ್ಪು ಮುನ್ಸೂಚನೆ",
+          "2": "ಗ್ರಹಗಳ ಸ್ಥಾನಗಳು ತಪ್ಪಾಗಿದ್ದವು",
+          "3": "Dasha ವಿಶ್ಲೇಷಣೆಯು ತುಂಬಾ ತಪ್ಪಾಗಿತ್ತು",
+          "4": "ನನ್ನ ಜನ್ಮ ಜಾತಕಕ್ಕೆ (Kundli) ಅಪ್ರಸ್ತುತ",
+          "5": "ಇತರೆ"
+        },
+        "2": {
+          "0": "ಧ್ವನಿಯು ರೋಬೋಟಿಕ್ ಅಥವಾ ವೈಯಕ್ತಿಕವಲ್ಲದಂತೆ ಅನಿಸಿತು",
+          "1": "ನನ್ನ ಜನ್ಮ ಜಾತಕದ ವಿವರಗಳನ್ನು ತಪ್ಪಾಗಿ ಓದಿದೆ",
+          "2": "ತಪ್ಪು ಗ್ರಹಗಳ ಗೋಚಾರಗಳನ್ನು ಉಲ್ಲೇಖಿಸಲಾಗಿದೆ",
+          "3": "ಸಮಯದ ಅಂದಾಜುಗಳು ನಿಖರವಾಗಿರಲಿಲ್ಲ",
+          "4": "ನನ್ನ ನಿಜವಾದ ಪ್ರಶ್ನೆಯನ್ನು ನಿರ್ಲಕ್ಷಿಸಿದೆ",
+          "5": "ಇತರೆ"
+        },
+        "3": {
+          "0": "ಧ್ವನಿಯು ಇನ್ನಷ್ಟು ಸಹಾನುಭೂತಿಯಿಂದ ಇರಬಹುದಿತ್ತು",
+          "1": "ಭಾಗಶಃ ನಿಖರ ಆದರೆ ಪ್ರಮುಖ ಅಂಶಗಳನ್ನು ತಪ್ಪಿಸಿದೆ",
+          "2": "ಗ್ರಹಗಳ ಸಂಯೋಜನೆಗಳನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ವಿವರಿಸಲಾಗಿಲ್ಲ",
+          "3": "ಸಮಯದ ಅಂದಾಜುಗಳು ಅಸ್ಪಷ್ಟವಾಗಿ ಅನಿಸಿದವು",
+          "4": "ಪರಿಹಾರಗಳು (Remedies) ತುಂಬಾ ಸಾಮಾನ್ಯವಾಗಿದ್ದವು",
+          "5": "ಇತರೆ"
+        },
+        "4": {
+          "0": "ಧ್ವನಿಯು ಬೆಚ್ಚಗಿನ ಮತ್ತು ಬೆಂಬಲದಾಯಕವಾಗಿತ್ತು",
+          "1": "ಜಾತಕದ ವಿವರಗಳಲ್ಲಿ ಸಣ್ಣ ತಪ್ಪು",
+          "2": "ಗೋಚಾರ (Transit) ವಿಶ್ಲೇಷಣೆಯು ಇನ್ನು ಆಳವಾಗಿರಬಹುದಿತ್ತು",
+          "3": "Dasha ಒಳನೋಟಗಳು ಸಂಕ್ಷಿಪ್ತವಾಗಿದ್ದವು",
+          "4": "ಹೆಚ್ಚು ನಿರ್ದಿಷ್ಟ ಪರಿಹಾರಗಳನ್ನು ಬಯಸಿದ್ದೆ",
+          "5": "ಇತರೆ"
+        },
+        "5": {
+          "0": "ಧ್ವನಿಯು ಸಹಾನುಭೂತಿ ಮತ್ತು ಬುದ್ಧಿವಂತಿಕೆಯಿಂದ ಕೂಡಿತ್ತು",
+          "1": "ಖಚಿತವಾದ ಮುನ್ಸೂಚನೆ ನಿಖರತೆ",
+          "2": "ಅತ್ಯುತ್ತಮ ಗ್ರಹಗಳ ವಿಶ್ಲೇಷಣೆ",
+          "3": "ನಿಖರವಾದ ಸಮಯದ ಒಳನೋಟ",
+          "4": "ಪರಿಹಾರಗಳು ಪ್ರಾಯೋಗಿಕ ಮತ್ತು ಉಪಯುಕ್ತವಾಗಿದ್ದವು",
+          "5": "ಇತರೆ"
+        }
+      },
+      "shareFeedback": "ಅಭಿಪ್ರಾಯವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
+      "commentPlaceholder": "ವಿವರಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ (ಐಚ್ಛಿಕ)",
+      "disclaimer": "ನಿಮ್ಮ ಅಭಿಪ್ರಾಯವು Navi ತನ್ನ ವೈದಿಕ ಬುದ್ಧಿವಂತಿಕೆಯನ್ನು ಸುಧಾರಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ. ಎಲ್ಲಾ ಪ್ರತಿಕ್ರಿಯೆಗಳು ಅನಾಮಧೇಯವಾಗಿರುತ್ತವೆ ಮತ್ತು AstraNavi ಮಾರ್ಗದರ್ಶನವನ್ನು ಸುಧಾರಿಸಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.",
+      "submit": "ಅಭಿಪ್ರಾಯವನ್ನು ಸಲ್ಲಿಸಿ"
+    },
+    "input": {
+      "dropFiles": "ಫೈಲ್‌ಗಳನ್ನು ಇಲ್ಲಿ ಹಾಕಿ",
+      "preview": "ಪೂರ್ವಾವಲೋಕನ",
+      "attachFile": "ಫೈಲ್ ಲಗತ್ತಿಸಿ",
+      "naviUsesChart": "Navi ನಿಮ್ಮ ಜನ್ಮ ಕುಂಡಲಿಯನ್ನು ಬಳಸುತ್ತದೆ"
+    },
+    "messages": {
+      "scrollToLatest": "ಇತ್ತೀಚಿನ ಸಂದೇಶಕ್ಕೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ"
+    },
+    "starterCards": {
+      "navi": [
+        {
+          "title": "ಇಂದಿನ ಶಕ್ತಿ",
+          "description": "ಇಂದಿನ ಗ್ರಹಗಳ ಜೋಡಣೆ ನನಗೆ ಏನು ಸೂಚಿಸುತ್ತದೆ?",
+          "question": "ಇಂದಿನ ಗ್ರಹಗಳ ಜೋಡಣೆ ನನಗೆ ಏನು ಸೂಚಿಸುತ್ತದೆ?"
+        },
+        {
+          "title": "ಕೆರಿಯರ್ ಸಮಯ",
+          "description": "ಈ ತಿಂಗಳು ನಾನು ಯಾವ ಕೆಲಸದ ಕ್ಷೇತ್ರದ ಕಡೆಗೆ ಗಮನ ಹರಿಸಬೇಕು?",
+          "question": "ಈ ತಿಂಗಳು ನಾನು ಯಾವ ಕೆಲಸದ ಕ್ಷೇತ್ರದ ಕಡೆಗೆ ಗಮನ ಹರಿಸಬೇಕು?"
+        },
+        {
+          "title": "ಜೀವನದ ಪಾಠ",
+          "description": "ನನ್ನ ಪ್ರಸ್ತುತ ಜೀವನದ ಪಾಠ ಅಥವಾ ಆತ್ಮದ ಬೆಳವಣಿಗೆ ಏನು?",
+          "question": "ನನ್ನ ಪ್ರಸ್ತುತ ಜೀವನದ ಪಾಠ ಏನು?"
+        },
+        {
+          "title": "ಸಂಬಂಧಗಳು",
+          "description": "ಪ್ರೀತಿಯ ಬಗ್ಗೆ ನಾನು ಈಗ ಏನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕು?",
+          "question": "ಪ್ರೀತಿಯ ಬಗ್ಗೆ ನಾನು ಈಗ ಏನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕು?"
+        }
+      ],
+      "career_mentor": [
+        {
+          "title": "ಕೆರಿಯರ್ ಮಾರ್ಗ",
+          "description": "ನನ್ನ ಜಾತಕಕ್ಕೆ ಯಾವ ದಿಕ್ಕು ಉತ್ತಮವಾಗಿ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ?",
+          "question": "ನನ್ನ ಜಾತಕಕ್ಕೆ ಯಾವ ಕೆರಿಯರ್ ಮಾರ್ಗ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ?"
+        },
+        {
+          "title": "ಬಡ್ತಿ ಸಮಯ",
+          "description": "ಬಡ್ತಿ ಕೇಳಲು ಸರಿಯಾದ ಸಮಯ ಯಾವುದು?",
+          "question": "ಬಡ್ತಿ ಕೇಳಲು ಸರಿಯಾದ ಸಮಯ ಯಾವುದು?"
+        },
+        {
+          "title": "ಅಡಗಿರುವ ಸಾಮರ್ಥ್ಯ",
+          "description": "ನಾನು ನಿರ್ಲಕ್ಷಿಸುತ್ತಿರುವ ವೃತ್ತಿಪರ ಸಾಮರ್ಥ್ಯಗಳು ಯಾವುವು?",
+          "question": "ನನ್ನ ಅಡಗಿರುವ ವೃತ್ತಿಪರ ಸಾಮರ್ಥ್ಯಗಳು ಯಾವುವು?"
+        },
+        {
+          "title": "ಯಶಸ್ಸಿನ ದೃಷ್ಟಿಕೋನ",
+          "description": "ನನ್ನ ಪ್ರಸ್ತುತ ಕ್ಷೇತ್ರದಲ್ಲಿ ನಾನು ಯಶಸ್ಸು ಸಾಧಿಸುವನೇ?",
+          "question": "ನನ್ನ ಪ್ರಸ್ತುತ ಕ್ಷೇತ್ರದಲ್ಲಿ ನಾನು ಯಶಸ್ಸು ಸಾಧಿಸುವನೇ?"
+        }
+      ],
+      "relationship_guide": [
+        {
+          "title": "ಸಂಗಾತಿಯ ಭೇಟಿ",
+          "description": "ನನ್ನ ಜೀವನ ಸಂಗಾತಿಯನ್ನು ನಾನು ಯಾವಾಗ ಭೇಟಿಯಾಗುವೆ?",
+          "question": "ನನ್ನ ಜೀವನ ಸಂಗಾತಿಯನ್ನು ನಾನು ಯಾವಾಗ ಭೇಟಿಯಾಗುವೆ?"
+        },
+        {
+          "title": "ಹೊಂದಾಣಿಕೆ",
+          "description": "ನನ್ನ ಪ್ರಸ್ತುತ ಸಂಬಂಧ ನನ್ನ ಜಾತಕಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆಯೇ?",
+          "question": "ನನ್ನ ಪ್ರಸ್ತುತ ಸಂಬಂಧ ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತದೆಯೇ?"
+        },
+        {
+          "title": "ಮರುಕಳಿಸುವ ಮಾದರಿಗಳು",
+          "description": "ನನ್ನ ಸಂಬಂಧಗಳಲ್ಲಿ ಯಾವುದು ಪದೇ ಪದೇ ಮರುಕಳಿಸುತ್ತಿದೆ?",
+          "question": "ನನ್ನ ಸಂಬಂಧಗಳಲ್ಲಿ ಪದೇ ಪದೇ ಮರುಕಳಿಸುವ ಮಾದರಿಗಳು ಯಾವುವು?"
+        },
+        {
+          "title": "ಆಳವಾದ ಬಾಂಧವ್ಯ",
+          "description": "ನನ್ನ ಭಾವನಾತ್ಮಕ ಬಾಂಧವ್ಯವನ್ನು ನಾನು ಹೇಗೆ ಗಟ್ಟಿಗೊಳಿಸಬಹುದು?",
+          "question": "ನನ್ನ ಭಾವನಾತ್ಮಕ ಬಾಂಧವ್ಯವನ್ನು ನಾನು ಹೇಗೆ ಗಟ್ಟಿಗೊಳಿಸಬಹುದು?"
+        }
+      ],
+      "spiritual_guide": [
+        {
+          "title": "ಒಟ್ಟಾರೆ ಆರೋಗ್ಯ",
+          "description": "ನನ್ನ ಕುಂಡಲಿ ನನ್ನ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?",
+          "question": "ನನ್ನ ಜನ್ಮ ಕುಂಡಲಿ ನನ್ನ ಒಟ್ಟಾರೆ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?"
+        },
+        {
+          "title": "ಚೈತನ್ಯ & ಶಕ್ತಿ",
+          "description": "ನನ್ನ ದೈಹಿಕ ಶಕ್ತಿ ಯಾವಾಗ ಸುಧಾರಿಸುತ್ತದೆ?",
+          "question": "ನನ್ನ ದೈಹಿಕ ಶಕ್ತಿ ಮತ್ತು ಚೈತನ್ಯ ಯಾವಾಗ ಸುಧಾರಿಸುತ್ತದೆ?"
+        },
+        {
+          "title": "ಗ್ರಹಗಳ ಜೋಡಣೆ",
+          "description": "ಪ್ರಸ್ತುತ ಯಾವ ಗ್ರಹಗಳು ನನ್ನ ಆರೋಗ್ಯದ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತಿವೆ?",
+          "question": "ಪ್ರಸ್ತುತ ಯಾವ ಗ್ರಹಗಳ ಜೋಡಣೆಗಳು ನನ್ನ ಆರೋಗ್ಯದ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತಿವೆ?"
+        },
+        {
+          "title": "ಆರೋಗ್ಯ ಪರಿಹಾರಗಳು",
+          "description": "ನನ್ನ ಆರೋಗ್ಯಕ್ಕೆ ಯಾವ ಪರಿಹಾರಗಳು ಸಹಕರಿಸುತ್ತವೆ?",
+          "question": "ನನ್ನ ದೈಹಿಕ ಮತ್ತು ಮಾನಸಿಕ ಆರೋಗ್ಯಕ್ಕೆ ಯಾವ ಜ್ಯೋತಿಷ್ಯ ಪರಿಹಾರಗಳು ಸಹಕರಿಸಬಹುದು?"
+        }
+      ],
+      "astro_sage": [
+        {
+          "title": "ಮಹಾದಶ",
+          "description": "ನಾನು ಪ್ರಸ್ತುತ ಯಾವ ಗ್ರಹ ದಶೆಯಲ್ಲಿದ್ದೇನೆ?",
+          "question": "ನನ್ನ ಮಹಾದಶದ ಬಗ್ಗೆ ವಿವರಿಸಿ."
+        },
+        {
+          "title": "ನನ್ನ ಲಗ್ನ",
+          "description": "ನನ್ನ ಲಗ್ನ ನನ್ನ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?",
+          "question": "ನನ್ನ ಲಗ್ನ ನನ್ನ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?"
+        },
+        {
+          "title": "ಗ್ರಹಗಳ ದೃಷ್ಟಿ",
+          "description": "ನನ್ನ ಪ್ರಮುಖ ಗ್ರಹಗಳ ದೃಷ್ಟಿಯನ್ನು ವಿವರಿಸಿ.",
+          "question": "ನನ್ನ ಪ್ರಮುಖ ಗ್ರಹಗಳ ದೃಷ್ಟಿಯನ್ನು ವಿವರಿಸಿ."
+        },
+        {
+          "title": "ಜಾತಕದಲ್ಲಿ ಯೋಗಗಳು",
+          "description": "ನನ್ನ ಜಾತಕದಲ್ಲಿ ಯಾವ ರೀತಿಯ ಯೋಗಗಳಿವೆ?",
+          "question": "ನನ್ನ ಜಾತಕದಲ್ಲಿ ಯಾವ ರೀತಿಯ ಯೋಗಗಳಿವೆ?"
+        }
+      ],
+      "finance_mentor": [
+        {
+          "title": "ಸಂಪತ್ತಿನ ಸಾಮರ್ಥ್ಯ",
+          "description": "ನನ್ನ ಕುಂಡಲಿ ನನ್ನ ಸಂಪತ್ತಿನ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?",
+          "question": "ನನ್ನ ಕುಂಡಲಿ ನನ್ನ ಸಂಪತ್ತಿನ ಸಾಮರ್ಥ್ಯದ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತದೆ?"
+        },
+        {
+          "title": "ಹಣಕಾಸಿನ ಪ್ರಗತಿ",
+          "description": "ನನ್ನ ಹಣಕಾಸಿನ ಪರಿಸ್ಥಿತಿ ಯಾವಾಗ ಸುಧಾರಿಸುತ್ತದೆ?",
+          "question": "ನನ್ನ ಹಣಕಾಸಿನ ಪರಿಸ್ಥಿತಿ ಯಾವಾಗ ಸುಧಾರಿಸುತ್ತದೆ?"
+        },
+        {
+          "title": "ಹೂಡಿಕೆಯ ಸಮಯ",
+          "description": "ದೊಡ್ಡ ಹೂಡಿಕೆಗಳನ್ನು ಮಾಡಲು ಇದು ಸರಿಯಾದ ಸಮಯವೇ?",
+          "question": "ದೊಡ್ಡ ಹೂಡಿಕೆಗಳನ್ನು ಮಾಡಲು ಇದು ಸೂಕ್ತ ಸಮಯವೇ?"
+        },
+        {
+          "title": "ಹಣಕಾಸಿನ ಸ್ಥಿರತೆ",
+          "description": "ನನ್ನ ಸ್ಥಿರತೆಯನ್ನು ಹೇಗೆ ಹೆಚ್ಚಿಸುವುದು?",
+          "question": "ನನ್ನ ಹಣಕಾಸಿನ ಸ್ಥಿರತೆಯನ್ನು ನಾನು ಹೇಗೆ ಹೆಚ್ಚಿಸಬಹುದು?"
+        }
+      ]
+    },
+    "avatars": {
+      "spiritual_guide": {
+        "name": "ಆನಂದ್",
+        "title": "ಆರೋಗ್ಯ ಸಲಹೆಗಾರ",
+        "description": "ನಿಮ್ಮ ಆರೋಗ್ಯ, ಚೈತನ್ಯ ಮತ್ತು ದೈಹಿಕ ಯೋಗಕ್ಷೇಮದ ಬಗ್ಗೆ ಒಳನೋಟಗಳನ್ನು ಪಡೆಯಿರಿ."
+      },
+      "finance_mentor": {
+        "name": "ವಿದ್ಯಾ",
+        "title": "ಹಣಕาสು ಜ್ಯೋತಿಷಿ",
+        "description": "ನಿಮ್ಮ ಸಂಪತ್ತು, ಹೂಡಿಕೆಗಳು ಮತ್ತು ಹಣಕาสಿನ ಸ್ಥಿರತೆಯನ್ನು ಉತ್ತಮಗೊಳಿಸಿ."
+      }
+    }
   },
   "healthForecast": {
     "title": "ಆರೋಗ್ಯ ಮುನ್ಸೂಚನೆ",
@@ -524,108 +977,867 @@
     }
   ],
   "forecast": {
-    "title": "Forecast",
-    "heading": "Your Cosmic Forecast",
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "loading": "Calculating planetary positions...",
-    "best": "Best",
-    "worst": "Challenging",
-    "avg": "Average",
-    "trend": "Trend",
-    "todaysSnapshot": "Today's Cosmic Snapshot",
-    "labelFavorable": "Favorable",
-    "labelStable": "Stable but Pressured",
-    "labelChallenging": "Challenging",
-    "bestDay": "Best Day",
-    "challengingDay": "Challenging Day",
-    "naviSuggestion": "Navi Suggests",
-    "ctaAskNavi": "Ask Navi Why",
-    "ctaPlanDay": "Plan My Day",
-    "mainForecast": "Main Forecast",
-    "whatItMeans": "What It Means",
-    "whatItMeansBody": "{planet} is the dominant influence right now. A score of {score} suggests how strongly that energy shapes your day-to-day choices.",
-    "alerts": "Alerts",
-    "planetReason": "Planet Reason"
+    "title": "ಮುನ್ಸೂಚನೆ",
+    "heading": "ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಮುನ್ಸೂಚನೆ",
+    "monthly": "ಮಾಸಿಕ",
+    "yearly": "ವಾರ್ಷಿಕ",
+    "loading": "ಗ್ರಹಗಳ ಸ್ಥಾನಗಳನ್ನು ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತಿದೆ...",
+    "best": "ಅತ್ಯುತ್ತಮ",
+    "worst": "ಸವಾಲಿನ",
+    "avg": "ಸರಾಸರಿ",
+    "trend": "ಒಲವು",
+    "todaysSnapshot": "ಇಂದಿನ ಬ್ರಹ್ಮಾಂಡದ ಚಿತ್ರಣ",
+    "labelFavorable": "ಅನುಕೂಲಕರ",
+    "labelStable": "ಸ್ಥಿರ ಆದರೆ ಒತ್ತಡದಾಯಕ",
+    "labelChallenging": "ಸವಾಲಿನ",
+    "bestDay": "ಅತ್ಯುತ್ತಮ ದಿನ",
+    "challengingDay": "ಸವಾಲಿನ ದಿನ",
+    "naviSuggestion": "Navi ಸಲಹೆಗಳು",
+    "ctaAskNavi": "ಕಾರಣವನ್ನು Navi ಯನ್ನು ಕೇಳಿ",
+    "ctaPlanDay": "ನನ್ನ ದಿನವನ್ನು ಯೋಜಿಸಿ",
+    "mainForecast": "ಮುಖ್ಯ ಮುನ್ಸೂಚನೆ",
+    "whatItMeans": "ಇದರ ಅರ್ಥವೇನು",
+    "whatItMeansBody": "{planet} ಪ್ರಸ್ತುತ ಪ್ರಮುಖ ಪ್ರಭಾವವನ್ನು ಬೀರುತ್ತಿದೆ. {score} ಅಂಕಗಳು ಆ ಶಕ್ತಿಯು ನಿಮ್ಮ ದೈನಂದಿನ ಆಯ್ಕೆಗಳನ್ನು ಎಷ್ಟು ಬಲವಾಗಿ ರೂಪಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಸೂಚಿಸುತ್ತದೆ.",
+    "alerts": "ಎಚ್ಚರಿಕೆಗಳು",
+    "planetReason": "ಗ್ರಹದ ಕಾರಣ",
+    "next": "ಮುಂದಿನ",
+    "previous": "ಹಿಂದಿನ",
+    "overviewLabel": "ಅವಲೋಕನ",
+    "today": "ಇಂದು",
+    "weekLabel": "ವಾರ {n}",
+    "legendHigh": "75+",
+    "legendAverage": "45–74",
+    "legendChallenging": "< 45",
+    "weekdays": {
+      "sun": "ಭಾನು",
+      "mon": "ಸೋಮ",
+      "tue": "ಮಂಗಳ",
+      "wed": "ಬುಧ",
+      "thu": "ಗುರು",
+      "fri": "ಶುಕ್ರ",
+      "sat": "ಶನಿ"
+    },
+    "monthsShort": {
+      "jan": "ಜನೆ",
+      "feb": "ಫೆಬ್ರ",
+      "mar": "ಮಾರ್ಚ್",
+      "apr": "ಏಪ್ರಿ",
+      "may": "ಮೇ",
+      "jun": "ಜೂನ್",
+      "jul": "ಜುಲೈ",
+      "aug": "ಆಗ",
+      "sep": "ಸೆಪ್ಟೆ",
+      "oct": "ಅಕ್ಟೋ",
+      "nov": "ನವೆಂ",
+      "dec": "ಡಿಸೆಂ"
+    },
+    "snapshot": {
+      "defaultSuggestion": "ಉತ್ತಮ ಫಲಿತಾಂಶಗಳಿಗಾಗಿ ನಿಮ್ಮ ಚಟುವಟಿಕೆಗಳನ್ನು ಪ್ರಸ್ತುತ ಗ್ರಹಗಳ ಚಲನೆಗೆ ಅನುಗುಣವಾಗಿ ಹೊಂದಿಸಿಕೊಳ್ಳಿ.",
+      "whyPrompt": "ಇಂದು ನನ್ನ ಮುನ್ಸೂಚನೆ ಸ್ಕೋರ್ {score} ಏಕೆ ಇದೆ?",
+      "planPrompt": "ಇಂದಿನ ಮುನ್ಸೂಚನೆಯ ವಿವರಗಳ ಆಧಾರದ ಮೇಲೆ ನನ್ನ ದಿನವನ್ನು ಯೋಜಿಸಲು ನನಗೆ ಸಹಾಯ ಮಾಡಿ."
+    },
+    "ariaDay": "{weekday} {date}, ಸ್ಕೋರ್ {score}",
+    "todayShort": "ಇಂದು",
+    "weekly": "7ದಿನ"
   },
   "plans": {
-    "title": "Unlock Your Cosmic Potential",
-    "subtitle": "Choose the plan that matches your journey. From daily insights to deep kundli analysis — Navi credits power every feature.",
-    "creditBalance": "Navi Credits",
-    "naviCredits": "Navi Credits",
-    "currentPlan": "Current Plan",
-    "currentPlanButton": "Current Plan",
-    "selectPlan": "Select Plan",
-    "buyCredits": "Buy Credits",
-    "subscriptions": "Subscription Plans",
-    "creditPacks": "Credit Packs",
-    "subscription": "Subscription",
-    "creditPack": "Credit Pack",
-    "price": "Price",
-    "credits": "Credits",
-    "validity": "Validity",
-    "tier": "Tier",
-    "oneYear": "1 Year",
-    "oneMonth": "1 Month",
-    "days": "days",
-    "month": "month",
-    "year": "year",
-    "subscriptionExpires": "Subscription expires",
-    "creditsExpire": "Credits expire",
-    "upgradeForFeature": "Upgrade to unlock",
-    "catalogUnavailable": "Product catalog is currently unavailable. Please try again later.",
-    "noProductsAvailable": "No plans available yet. Stay tuned for upcoming subscription and credit pack options.",
-    "noCreditHistory": "No Credit Activity Yet",
-    "noCreditHistoryDesc": "When you use premium features like chat, consult, or kundli analysis, your credit usage will appear here.",
-    "creditUsageHistory": "Credit Usage History",
-    "paymentComingSoon": "Payment Coming Soon",
-    "paymentIntegrationNotice": "Razorpay, App Store, and Play Store integration is under development. Your selected plan will be saved for quick purchase when payments launch.",
-    "buyButtonDisabled": "Payment Integration Coming Soon",
-    "backToPlans": "Back to Plans",
-    "betaNoticeTitle": "Early Adopter Benefits",
-    "betaNoticeDesc": "As a beta tester, you'll shape the future of AstraNavi. When we launch, early supporters will receive exclusive benefits, special pricing, and lifetime recognition as founding members.",
-    "earlyAdopter": "Early Adopter",
-    "featureUnlimitedChat": "Unlimited Navi consultations",
-    "featureExtendedChat": "Extended daily chat access",
-    "featureFullHoroscope": "Full personalized daily horoscope",
-    "featureTomorrowHoroscope": "Tomorrow's forecast — plan ahead",
-    "featureBasicConsult": "Guided consult sessions",
-    "featureGuidedConsult": "Unlimited guided consult sessions",
-    "featureMatchReport": "Complete match compatibility reports",
-    "featureKundliPremium": "Full Kundli premium sections",
-    "featureKundliBasicPremium": "Basic Kundli premium access",
-    "featureDashaAnalysis": "Dasha period analysis & Ashtakavarga",
-    "featurePriorityAccess": "Priority access to new features",
-    "featureChatMessages": "Navi chat messages",
-    "featureGuidedConsults": "guided consult sessions",
-    "featureMatchReports": "match compatibility reports",
-    "featureHoroscopeAccess": "Full horoscope & forecast access",
-    "featureNoExpiry": "Credits valid for days",
-    "subscriptionCredits": "subscription",
-    "packCredits": "pack",
-    "activePacks": "active pack(s)",
-    "nextRenewal": "Next renewal",
-    "nearestPackExpiry": "Pack expires",
-    "saleBadge": "Sale",
-    "featuredBadge": "Featured",
-    "creditGrant": "Credit Grant",
-    "creditRefund": "Credit Refund",
-    "creditConsume": "Credit Used",
-    "creditReserve": "Reserved",
-    "creditExpire": "Expired",
-    "balanceAfter": "balance",
-    "filterAll": "All",
-    "filterConsume": "Usage",
-    "filterGrant": "Grants",
-    "filterRefund": "Refunds",
-    "currentSubscription": "Current Subscription",
-    "currentCreditPacks": "Credit Packs",
-    "noSubscription": "No active subscription",
-    "noCreditPacks": "No active credit packs",
-    "packExpires": "expires",
-    "packRemaining": "remaining",
-    "filterPurchase": "Purchases",
-    "filterCycleReset": "Cycle Reset",
-    "oneTimeReports": "One-Time Reports"
+    "title": "ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಸಾಮರ್ಥ್ಯವನ್ನು ಅನಾವರಣಗೊಳಿಸಿ",
+    "subtitle": "ನಿಮ್ಮ ಪ್ರಯಾಣಕ್ಕೆ ಸೂಕ್ತವಾದ ಯೋಜನೆಯನ್ನು ಆರಿಸಿ. ದೈನಂದಿನ ಒಳನೋಟಗಳಿಂದ ಹಿಡಿದು ಆಳವಾದ ಕುಂಡ್ಲಿ ವಿಶ್ಲೇಷಣೆಯವರೆಗೆ — ಪ್ರತಿ ವೈಶಿಷ್ಟ್ಯಕ್ಕೂ Navi ಕ್ರೆಡಿಟ್‌ಗಳು ಶಕ್ತಿ ನೀಡುತ್ತವೆ.",
+    "creditBalance": "Navi ಕ್ರೆಡಿಟ್‌ಗಳು",
+    "naviCredits": "Navi ಕ್ರೆಡಿಟ್‌ಗಳು",
+    "currentPlan": "ಪ್ರಸ್ತುತ ಯೋಜನೆ",
+    "currentPlanButton": "ಪ್ರಸ್ತುತ ಯೋಜನೆ",
+    "selectPlan": "ಯೋಜನೆಯನ್ನು ಆರಿಸಿ",
+    "buyCredits": "ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಖರೀದಿಸಿ",
+    "subscriptions": "ಚಂದಾದಾರಿಕೆ ಯೋಜನೆಗಳು",
+    "creditPacks": "ಕ್ರೆಡಿಟ್ ಪ್ಯಾಕ್‌ಗಳು",
+    "subscription": "ಚಂದಾದಾರಿಕೆ",
+    "creditPack": "ಕ್ರೆಡಿಟ್ ಪ್ಯಾಕ್",
+    "price": "ಬೆಲೆ",
+    "credits": "ಕ್ರೆಡಿಟ್‌ಗಳು",
+    "validity": "ಸಿಂಧುತ್ವ",
+    "tier": "ಹಂತ",
+    "oneYear": "1 ವರ್ಷ",
+    "oneMonth": "1 ತಿಂಗಳು",
+    "days": "ದಿನಗಳು",
+    "month": "ತಿಂಗಳು",
+    "year": "ವರ್ಷ",
+    "subscriptionExpires": "ಚಂದಾದಾರಿಕೆ ಅವಧಿ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ",
+    "creditsExpire": "ಕ್ರೆಡಿಟ್‌ಗಳ ಅವಧಿ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ",
+    "upgradeForFeature": "ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ",
+    "catalogUnavailable": "ಉತ್ಪನ್ನಗಳ ಪಟ್ಟಿ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+    "noProductsAvailable": "ಯಾವುದೇ ಯೋಜನೆಗಳು ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ. ಮುಂಬರುವ ಚಂದಾದಾರಿಕೆ ಮತ್ತು ಕ್ರೆಡಿಟ್ ಪ್ಯಾಕ್ ಆಯ್ಕೆಗಳಿಗಾಗಿ ಕಾಯುತ್ತಿರಿ.",
+    "noCreditHistory": "ಇನ್ನೂ ಯಾವುದೇ ಕ್ರೆಡಿಟ್ ಚಟುವಟಿಕೆ ಇಲ್ಲ",
+    "noCreditHistoryDesc": "ಚಾಟ್, ಸಮಾಲೋಚನೆ ಅಥವಾ ಕುಂಡ್ಲಿ ವಿಶ್ಲೇಷಣೆಯಂತಹ ಪ್ರೀಮಿಯಂ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನೀವು ಬಳಸಿದಾಗ, ನಿಮ್ಮ ಕ್ರೆಡಿಟ್ ಬಳಕೆಯ ವಿವರಗಳು ಇಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ.",
+    "creditUsageHistory": "ಕ್ರೆಡಿಟ್ ಬಳಕೆಯ ಇತಿಹಾಸ",
+    "paymentComingSoon": "ಪಾವತಿ ವ್ಯವಸ್ಥೆ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ",
+    "paymentIntegrationNotice": "Razorpay, App Store ಮತ್ತು Play Store ಸಂಯೋಜನೆಯು ಪ್ರಗತಿಯಲ್ಲಿದೆ. ಪಾವತಿ ವ್ಯವಸ್ಥೆಗಳು ಪ್ರಾರಂಭವಾದಾಗ ತ್ವರಿತ ಖರೀದಿಗಾಗಿ ನಿಮ್ಮ ಆಯ್ಕೆಮಾಡಿದ ಯೋಜನೆಯನ್ನು ಉಳಿಸಲಾಗುತ್ತದೆ.",
+    "buyButtonDisabled": "ಪಾವತಿ ಸಂಯೋಜನೆ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ",
+    "backToPlans": "ಯೋಜನೆಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    "betaNoticeTitle": "ಆರಂಭಿಕ ಬಳಕೆದಾರರ ಪ್ರಯೋಜನಗಳು",
+    "betaNoticeDesc": "ಬೀಟಾ ಪರೀಕ್ಷಕರಾಗಿ, ನೀವು AstraNavi ನ ಭವಿಷ್ಯವನ್ನು ರೂಪಿಸುತ್ತೀರಿ. ನಾವು ಅಧಿಕೃತವಾಗಿ ಪ್ರಾರಂಭಿಸಿದಾಗ, ಆರಂಭಿಕ ಬೆಂಬಲಿಗರು ವಿಶೇಷ ಪ್ರಯೋಜನಗಳು, ರಿಯಾಯಿತಿ ದರಗಳು ಮತ್ತು ಸ್ಥಾಪಕ ಸದಸ್ಯರಾಗಿ ಜೀವಿತಾವಧಿಯ ಮಾನ್ಯತೆಯನ್ನು ಪಡೆಯುತ್ತಾರೆ.",
+    "earlyAdopter": "ಆರಂಭಿಕ ಬಳಕೆದಾರ",
+    "featureUnlimitedChat": "ಅನಿಯಮಿತ Navi ಸಮಾಲೋಚನೆಗಳು",
+    "featureExtendedChat": "ವಿಸ್ತೃತ ದೈನಂದಿನ ಚಾಟ್ ಪ್ರವೇಶ",
+    "featureFullHoroscope": "ಸಂಪೂರ್ಣ ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ದೈನಂದಿನ ಜಾತಕ",
+    "featureTomorrowHoroscope": "ನಾಳೆಯ ಮುನ್ಸೂಚನೆ — ಮುಂಚಿತವಾಗಿ ಯೋಜನೆ ರೂಪಿಸಿ",
+    "featureBasicConsult": "ಮಾರ್ಗದರ್ಶಿ ಸಮಾಲೋಚನೆ ಸೆಷನ್‌ಗಳು",
+    "featureGuidedConsult": "ಅನಿಯಮಿತ ಮಾರ್ಗದರ್ಶಿ ಸಮಾಲೋಚನೆ ಸೆಷನ್‌ಗಳು",
+    "featureMatchReport": "ಸಂಪೂರ್ಣ ಹೊಂದಾಣಿಕೆ ಹೊಂದಾಣಿಕೆಯ ವರದಿಗಳು",
+    "featureKundliPremium": "ಸಂಪೂರ್ಣ ಕುಂಡ್ಲಿ ಪ್ರೀಮಿಯಂ ವಿಭಾಗಗಳು",
+    "featureKundliBasicPremium": "ಮೂಲ ಕುಂಡ್ಲಿ ಪ್ರೀಮಿಯಂ ಪ್ರವೇಶ",
+    "featureDashaAnalysis": "ದಶಾ ಅವಧಿಯ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಅಷ್ಟಕವರ್ಗ",
+    "featurePriorityAccess": "ಹೊಸ ವೈಶಿಷ್ಟ್ಯಗಳಿಗೆ ಆದ್ಯತೆಯ ಪ್ರವೇಶ",
+    "featureChatMessages": "Navi ಚಾಟ್ ಸಂದೇಶಗಳು",
+    "featureGuidedConsults": "ಮಾರ್ಗದರ್ಶಿ ಸಮಾಲೋಚನೆ ಸೆಷನ್‌ಗಳು",
+    "featureMatchReports": "ಹೊಂದಾಣಿಕೆ ಹೊಂದಾಣಿಕೆಯ ವರದಿಗಳು",
+    "featureHoroscopeAccess": "ಸಂಪೂರ್ಣ ಜಾತಕ ಮತ್ತು ಮುನ್ಸೂಚನೆ ಪ್ರವೇಶ",
+    "featureNoExpiry": "ದಿನಗಳವರೆಗೆ ಕ್ರೆಡಿಟ್‌ಗಳು ಸಿಂಧುವಾಗಿವೆ",
+    "subscriptionCredits": "ಚಂದಾದಾರಿಕೆ",
+    "packCredits": "ಪ್ಯಾಕ್",
+    "activePacks": "ಸಕ್ರಿಯ ಪ್ಯಾಕ್(ಗಳು)",
+    "nextRenewal": "ಮುಂದಿನ ನವೀಕರಣ",
+    "nearestPackExpiry": "ಪ್ಯಾಕ್ ಅವಧಿ ಮುಕ್ತಾಯ",
+    "saleBadge": "ಸೇಲ್",
+    "featuredBadge": "ವಿಶೇಷ",
+    "creditGrant": "ಕ್ರೆಡಿಟ್ ಮಂಜೂರಾತಿ",
+    "creditRefund": "ಕ್ರೆಡಿಟ್ ಮರುಪಾವತಿ",
+    "creditConsume": "ಬಳಸಿದ ಕ್ರೆಡಿಟ್",
+    "creditReserve": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+    "creditExpire": "ಅವಧಿ ಮುಗಿದಿದೆ",
+    "balanceAfter": "ಬಾಕಿ",
+    "filterAll": "ಎಲ್ಲಾ",
+    "filterConsume": "ಬಳಕೆ",
+    "filterGrant": "ಮಂಜೂರಾತಿಗಳು",
+    "filterRefund": "ಮರುಪಾವತಿಗಳು",
+    "currentSubscription": "ಪ್ರಸ್ತುತ ಚಂದಾದಾರಿಕೆ",
+    "currentCreditPacks": "ಕ್ರೆಡಿಟ್ ಪ್ಯಾಕ್‌ಗಳು",
+    "noSubscription": "ಯಾವುದೇ ಸಕ್ರಿಯ ಚಂದಾದಾರಿಕೆ ಇಲ್ಲ",
+    "noCreditPacks": "ಯಾವುದೇ ಸಕ್ರಿಯ ಕ್ರೆಡಿಟ್ ಪ್ಯಾಕ್‌ಗಳು ಇಲ್ಲ",
+    "packExpires": "ಅವಧಿ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ",
+    "packRemaining": "ಉಳಿದಿದೆ",
+    "filterPurchase": "ಖರೀದಿಗಳು",
+    "filterCycleReset": "ಸೈಕಲ್ ಮರುಹೊಂದಿಸುವಿಕೆ",
+    "oneTimeReports": "ಒಂದು ಬಾರಿಯ ವರದಿಗಳು"
+  },
+  "family": {
+    "myFamily": "ನನ್ನ ಕುಟುಂಬ",
+    "subtitle": "ಪ್ರೀತಿಪಾತ್ರರ ಜನ್ಮ ವಿವರಗಳನ್ನು ಉಳಿಸಿ, ಜಾತಕಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಹೊಂದಾಣಿಕೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
+    "addMember": "ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
+    "editMember": "ಕುಟುಂಬದ ಸದಸ್ಯರನ್ನು ಸಂಪಾದಿಸಿ",
+    "addFirstMember": "ನಿಮ್ಮ ಮೊದಲ ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
+    "empty": "ಇನ್ನೂ ಯಾವುದೇ ಕುಟುಂಬ ಸದಸ್ಯರಿಲ್ಲ",
+    "emptyDesc": "ಜಾತಕ ವೀಕ್ಷಿಸಲು ಮತ್ತು ಹೊಂದಾಣಿಕೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಪೋಷಕರು, ಸಂಗಾತಿ ಅಥವಾ ಸ್ನೇಹಿತರನ್ನು ಸೇರಿಸಿ.",
+    "freeTierUsed": "ಉಚಿತ ಯೋಜನೆಯಲ್ಲಿ ಬಳಸಲಾದ ಸದಸ್ಯರು",
+    "freeTierCapMessage": "ಉಚಿತ ಯೋಜನೆಯು 3 ಸದಸ್ಯರವರೆಗೆ ಬೆಂಬಲಿಸುತ್ತದೆ. ಇನ್ನಷ್ಟು ಸೇರಿಸಲು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ.",
+    "upgrade": "ಇನ್ನಷ್ಟು ಪಡೆಯಲು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ",
+    "removeTitle": "ಕುಟುಂಬದ ಸದಸ್ಯರನ್ನು ತೆಗೆದುಹಾಕಬೇಕೇ?",
+    "removeConfirm": "ತೆಗೆದುಹಾಕಿ",
+    "formDesc": "ನಂಬಲರ್ಹ ಜಾತಕಗಳಿಗಾಗಿ ಅತ್ಯಂತ ನಿಖರವಾದ ಜನ್ಮ ಸಮಯ ಮತ್ತು ಸ್ಥಳವನ್ನು ಬಳಸಿ.",
+    "chartTitle": "ಜನ್ಮ ಜಾತಕ",
+    "compatibility": "ಹೊಂದಾಣಿಕೆ",
+    "compatibilityDesc": "ಮೊದಲ ಬಾರಿಯ ಓದುವಿಕೆಗೆ ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತದೆ. ಅದೇ ಭಾಷೆಯನ್ನು ಪುನರಾವರ್ತಿಸುವುದು ಉಚಿತವಾಗಿದೆ."
+  },
+  "match": {
+    "mangal": {
+      "cancelled": "ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ",
+      "present": "ಉಂಟು",
+      "absent": "ಇಲ್ಲ",
+      "title": "Mangal Dosha ವಿಶ್ಲೇಷಣೆ",
+      "subtitle": "ಕುಜ ದೋಷ ಹೊಂದಾಣಿಕೆ ತಪಾಸಣೆ",
+      "severity": "ತೀವ್ರತೆ",
+      "verdictLabel": "ಹೊಂದಾಣಿಕೆಯ ತೀರ್ಪು",
+      "severityLevels": {
+        "none": "ಯಾವುದೂ ಇಲ್ಲ",
+        "low": "ಕಡಿಮೆ",
+        "medium": "ಮಧ್ಯಮ",
+        "high": "ಹೆಚ್ಚು"
+      }
+    },
+    "additional": {
+      "title": "ಹೆಚ್ಚುವರಿ ತಪಾಸಣೆಗಳು",
+      "subtitle": "ಪ್ರಮುಖ ದೋಷಗಳು ಮತ್ತು ಹೊಂದಾಣಿಕೆಗಳು",
+      "clear": "ಸ್ಪಷ್ಟ",
+      "present": "ಉಂಟು",
+      "notice": "ಈ ತಪಾಸಣೆಗಳು ದಕ್ಷಿಣ ಭಾರತದ ಸಂಪ್ರದಾಯಗಳಲ್ಲಿ ಪ್ರಮುಖವಾಗಿವೆ ಮತ್ತು ಸುರಕ್ಷಿತ ಹೊಂದಾಣಿಕೆಗಾಗಿ 36-ಅಂಶಗಳ ಹೊಂದಾಣಿಕೆಗೆ (Guna Milan) ಪೂರಕವಾಗಿವೆ."
+    },
+    "person": {
+      "unknownSign": "ಅಜ್ಞಾತ ರಾಶಿ",
+      "unknown": "ತಿಳಿದಿಲ್ಲ"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "emailRequired": "ಇಮೇಲ್ ಅತ್ಯಗತ್ಯ.",
+      "emailInvalid": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಇಮೇಲ್ ಅನ್ನು ನಮೂದಿಸಿ.",
+      "passwordRequired": "ಪಾಸ್‌ವರ್ಡ್ ಅತ್ಯಗತ್ಯ.",
+      "emailLabel": "ಇಮೇಲ್",
+      "emailPlaceholder": "ನಿಮ್ಮ ಇಮೇಲ್ ನಮೂದಿಸಿ",
+      "passwordLabel": "ಪಾಸ್‌ವರ್ಡ್",
+      "passwordPlaceholder": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+      "showPassword": "ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ",
+      "hidePassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆಮಾಡಿ",
+      "forgotPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?",
+      "submit": "ಸೈನ್ ಇನ್"
+    },
+    "register": {
+      "steps": {
+        "account": "ಖಾತೆ",
+        "personal": "ವೈಯಕ್ತಿಕ",
+        "birth": "ಜನನ",
+        "preferences": "ಆದ್ಯತೆಗಳು"
+      },
+      "validation": {
+        "emailInvalid": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ.",
+        "passwordLength": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು.",
+        "passwordMismatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.",
+        "passwordUpper": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದು ದೊಡ್ಡ ಅಕ್ಷರ (uppercase) ಇರಬೇಕು.",
+        "passwordLower": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದು ಸಣ್ಣ ಅಕ್ಷರ (lowercase) ಇರಬೇಕು.",
+        "passwordDigit": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದು ಸಂಖ್ಯೆ ಇರಬೇಕು.",
+        "passwordSpecial": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದು ವಿಶೇಷ ಅಕ್ಷರ (special character) ಇರಬೇಕು.",
+        "nameLength": "ಹೆಸರು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು.",
+        "dobFuture": "ಜನ್ಮ ದಿನಾಂಕವು ಭವಿಷ್ಯದಲ್ಲಿ ಇರಲು ಸಾಧ್ಯವಿಲ್ಲ.",
+        "tobFormat": "ಸಮಯವು HH:MM ರೂಪದಲ್ಲಿರಬೇಕು.",
+        "pobLength": "ಸ್ಥಳದ ಹೆಸರು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು.",
+        "failed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."
+      },
+      "reqs": {
+        "title": "ಪಾಸ್‌ವರ್ಡ್ ನಿಯಮಗಳು",
+        "length": "10+ ಅಕ್ಷರಗಳು",
+        "upper": "ದೊಡ್ಡ ಅಕ್ಷರ",
+        "lower": "ಸಣ್ಣ ಅಕ್ಷರ",
+        "digit": "ಸಂಖ್ಯೆ",
+        "special": "ವಿಶೇಷ ಅಕ್ಷರ"
+      },
+      "emailLabel": "ಇಮೇಲ್",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "ಪಾಸ್‌ವರ್ಡ್",
+      "passwordPlaceholder": "ಬಲವಾದ ಪಾಸ್‌ವರ್ಡ್ ರಚಿಸಿ",
+      "confirmPasswordLabel": "ಪಾಸ್‌ವರ್ಡ್ ಖಚಿತಪಡಿಸಿ",
+      "confirmPasswordPlaceholder": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ನಮೂದಿಸಿ",
+      "fullNameLabel": "ಪೂರ್ಣ ಹೆಸರು",
+      "fullNamePlaceholder": "ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರನ್ನು ನಮೂದಿಸಿ",
+      "genderLabel": "ಲಿಂಗ",
+      "selectOption": "ಆರಿಸಿ",
+      "genderMale": "ಪುರುಷ",
+      "genderFemale": "ಮಹಿಳೆ",
+      "genderOther": "ಇತರೆ",
+      "genderNotSpecified": "ಉಲ್ಲೇಖಿಸಿಲ್ಲ",
+      "maritalStatusLabel": "ವೈವಾಹಿಕ ಸ್ಥಿತಿ",
+      "maritalSingle": "ಅವಿವಾಹಿತ",
+      "maritalMarried": "ವಿವಾಹಿತ",
+      "maritalDivorced": "ವಿಚ್ಛೇದಿತ",
+      "maritalWidowed": "ವಿಧವೆ/ವಿಧುರ",
+      "maritalSeparated": "ಬೇರ್ಪಟ್ಟ",
+      "maritalNotSpecified": "ಹೇಳಲು ಇಷ್ಟವಿಲ್ಲ",
+      "occupationLabel": "ಉದ್ಯೋಗ",
+      "occupationStudent": "ವಿದ್ಯಾರ್ಥಿ",
+      "occupationBusiness": "ವ್ಯಾಪಾರಿ",
+      "occupationEmployed": "ಉದ್ಯೋಗಿ / ಸಂಬಳ ಪಡೆಯುವವರು",
+      "occupationHomemaker": "ಗೃಹಿಣಿ",
+      "occupationRetired": "ನಿವೃತ್ತ",
+      "occupationUnemployed": "ನಿರುದ್ಯೋಗಿ",
+      "occupationNotSpecified": "ಹೇಳಲು ಇಷ್ಟವಿಲ್ಲ",
+      "phoneNumberLabel": "ಫೋನ್ ಸಂಖ್ಯೆ",
+      "phoneNumberPlaceholder": "ಫೋನ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ (ಐಚ್ಛಿಕ)",
+      "dobLabel": "ಜನ್ಮ ದಿನಾಂಕ",
+      "tobLabel": "ಜನ್ಮ ಸಮಯ",
+      "pobLabel": "ಜನ್ಮ ಸ್ಥಳ",
+      "pobPlaceholder": "ನಗರವನ್ನು ಹುಡುಕಿ, ಉದಾ. ಬೆಂಗಳೂರು",
+      "pobHelperText": "ನಿಮ್ಮ ನಿಖರವಾದ ಜನ್ಮ ಸ್ಥಳವನ್ನು ಹುಡುಕಿ ಮತ್ತು ಆರಿಸಿ",
+      "languageLabel": "ಆದ್ಯತೆಯ ಭಾಷೆ",
+      "preferencesLabel": "ಆದ್ಯತೆಗಳು",
+      "prefHoroscope": "ದೈನಂದಿನ ಜಾತಕವನ್ನು ಪಡೆಯಿರಿ",
+      "prefNotifications": "ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
+      "continue": "ಮುಂದುವರಿಯಿರಿ",
+      "submit": "ಖಾತೆಯನ್ನು ರಚಿಸಿ"
+    },
+    "errorBanner": {
+      "dismiss": "ದೋಷವನ್ನು ತಳ್ಳಿಹಾಕಿ"
+    },
+    "errors": {
+      "email_not_registered": "ಈ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ.",
+      "wrong_password": "ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "account_locked": "ಹೆಚ್ಚಿನ ವಿಫಲ ಯತ್ನಗಳ ಕಾರಣದಿಂದಾಗಿ ಖಾತೆಯನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ.",
+      "email_already_registered": "ಈ ಇಮೇಲ್ ವಿಳಾಸವು ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲ್ಪಟ್ಟಿದೆ.",
+      "registration_failed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "token_invalid": "ದೃಢೀಕರಣ ಟೋಕನ್ ಅಮಾನ್ಯವಾಗಿದೆ.",
+      "token_expired": "ದೃಢೀಕರಣ ಟೋಕನ್ ಅವಧಿ ಮೀರಿದೆ.",
+      "token_reuse_detected": "ಭದ್ರತಾ ಎಚ್ಚರಿಕೆ: ಸೆಷನ್ ಟೋಕನ್ ಮರುಬಳಕೆಯನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ.",
+      "password_reset_unavailable": "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವಿಕೆ ಪ್ರಸ್ತುत ಲಭ್ಯವಿಲ್ಲ.",
+      "reset_token_invalid": "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಲಿಂಕ್ ಅಮಾನ್ಯವಾಗಿದೆ ಅಥವಾ ಅವಧಿ ಮೀರಿದೆ.",
+      "user_not_found": "ಈ ಇಮೇಲ್ ವಿಳಾಸದೊಂದಿಗೆ ಯಾವುದೇ ಖಾತೆ ಕಂಡುಬಂದಿಲ್ಲ.",
+      "incorrect_password": "ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "rate_limited": "ಹೆಚ್ಚಿನ ವಿನಂತಿಗಳು ಬಂದಿವೆ. ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+      "invalid_email": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮૂदಿಸಿ.",
+      "missing_email": "ಇಮೇಲ್ ವಿಳಾಸದ ಅಗತ್ಯವಿದೆ.",
+      "missing_password": "ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ.",
+      "weak_password": "ಪಾಸ್‌ವರ್ಡ್ ತೀರಾ ದುರ್ಬಲವಾಗಿದೆ.",
+      "password_too_short": "ಪಾಸ್‌ವರ್ಡ್ ತೀರಾ ಚಿಕ್ಕದಾಗಿದೆ.",
+      "password_too_long": "ಪಾಸ್‌ವರ್ಡ್ ತೀರಾ ಉದ್ದವಾಗಿದೆ.",
+      "generic": "ಅನಿರೀಕ್ಷಿತ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "retry_after": "ದಯವಿಟ್ಟು {minutes}ನಿಮಿಷ {seconds}ಸೆಕೆಂಡುಗಳ ನಂತರ ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "server_down": "ಸರ್ವರ್ ಡೌನ್ ಆಗಿದೆ, ದಯವಿಟ್ಟು ಡೆವಲಪರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ."
+    },
+    "resetPassword": {
+      "title": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ರಚಿಸಿ",
+      "subtitle": "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಕೆಳಗೆ ನಮೂದಿಸಿ.",
+      "newPasswordLabel": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್",
+      "newPasswordPlaceholder": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+      "confirmPasswordLabel": "ಪಾಸ್‌ವರ್ಡ್ ಖಚಿತಪಡಿಸಿ",
+      "confirmPasswordPlaceholder": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ನಮೂದಿಸಿ",
+      "submit": "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸಿ",
+      "successTitle": "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವಿಕೆ ಯಶಸ್ವಿ",
+      "successSubtitle": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ಮರುಹೊಂದಿಸಲ್ಪಟ್ಟಿದೆ.",
+      "proceedToLogin": "ಲಾಗಿನ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ"
+    }
+  },
+  "home": {
+    "portals": {
+      "validation": {
+        "nameLength": "ಹೆಸರು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
+        "nameLetters": "ಹೆಸರು ಕೇವಲ ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
+        "dobFuture": "ಜನ್ಮ ದಿನಾಂಕವು ಭವಿಷ್ಯದಲ್ಲಿ ಇರಲು ಸಾಧ್ಯವಿಲ್ಲ",
+        "pobInvalid": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಸ್ಥಳವನ್ನು ನಮೂದಿಸಿ"
+      },
+      "placeholders": {
+        "fullName": "ಪೂರ್ಣ ಹೆಸರು",
+        "pob": "ಹುಟ್ಟಿದ ಸ್ಥಳ",
+        "yourName": "ನಿಮ್ಮ ಹೆಸರು",
+        "partnerName": "ಸಂಗಾತಿಯ ಹೆಸರು"
+      }
+    }
+  },
+  "pricing": {
+    "plans": {
+      "seeker": {
+        "title": "Astra Seeker",
+        "price": "₹0",
+        "period": "/ಯಾವಾಗಲೂ",
+        "buttonText": "ಪ್ರಯಾಣವನ್ನು ಪ್ರಾರಂಭಿಸಿ",
+        "features": {
+          "0": "ಸಂಪೂರ್ಣ ಜನ್ಮ ಕುಂಡಲಿ (Kundli) ತಯಾರಿಕೆ",
+          "1": "ದೈನಂದಿನ ರಾಶಿ ಮುನ್ಸೂಚನೆಗಳು",
+          "2": "ಸೀಮಿತ ಸಮಾಲೋಚನೆ (ದಿನಕ್ಕೆ 5 ನಿಮಿಷ)",
+          "3": "ಪ್ರಾಥಮಿಕ ಗ್ರಹಗಳ ಒಳನೋಟ"
+        }
+      },
+      "devotee": {
+        "title": "Devotee",
+        "price": "₹299",
+        "period": "/ತಿಂಗಳು",
+        "badge": "ಹೆಚ್ಚು ಆಯ್ದುಕೊಳ್ಳಲಾಗಿದೆ",
+        "buttonText": "Devotee ಆಯ್ಕೆ ಮಾಡಿ",
+        "features": {
+          "0": "ಅನ್ಲಿಮಿಟೆಡ್ Navi ಸಮಾಲೋಚನೆಗಳು",
+          "1": "ವಿವರವಾದ ಜಾತಕ ವರದಿಗಳು (PDF)",
+          "2": "Dasha ಅವಧಿಯ ವಿಶ್ಲೇಷಣೆ",
+          "3": "ಪರಿಹಾರ ರತ್ನಗಳ ಮಾರ್ಗದರ್ಶನ"
+        }
+      },
+      "disciple": {
+        "title": "Disciple",
+        "price": "₹2,999",
+        "period": "/ವರ್ಷ",
+        "badge": "ಉತ್ತಮ ಮೌಲ್ಯ",
+        "buttonText": "ಸಂಪೂರ್ಣವಾಗಿ ಬದ್ಧರಾಗಿ",
+        "features": {
+          "0": "ಎಲ್ಲಾ Devotee ವೈಶಿಷ್ಟ್ಯಗಳು",
+          "1": "ವರ್ಷಕ್ಕೆ ₹589 ಉಳಿಸಿ",
+          "2": "ಶಾಶ್ವತ ಜಾತಕ ದಾಖಲೆ",
+          "3": "ಹೊಂದಾಣಿಕೆಯ ವಿಶ್ಲೇಷಣೆ"
+        }
+      }
+    }
+  },
+  "blogs": {
+    "index": {
+      "badge": "ಜ್ಞಾನದ ಗ್ರಂಥಾಲಯ",
+      "title": "ಪ್ರಾಚೀನ ವಿಜ್ಞಾನ,",
+      "subtitle": "ಆಧುನಿಕ ಒಳನೋಟ",
+      "description": "ವೈದಿಕ ಜ್ಞಾನದ ವಿಶಾಲ ಸಾಗರದ ಮೂಲಕ ಪ್ರಯಾಣ ಮಾಡಿ. ಗ್ರಹಗಳ ಚಲನೆಯಿಂದ ಆಧ್ಯಾತ್ಮಿಕ ಪರಿಹಾರಗಳವರೆಗೆ, ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಅಸ್ತಿತ್ವದ ಕೀಲಿಗಳನ್ನು ಅನ್ವೇಷಿಸಿ.",
+      "liveGuide": "ಲೈವ್ ಮಾರ್ಗದರ್ಶಿ",
+      "inProduction": "ತಯಾರಿಕೆಯಲ್ಲಿ",
+      "readStory": "ಕಥೆ ಓದಿ",
+      "ctaHeading": "ನೀವು ಹುಡುಕುತ್ತಿರುವುದು",
+      "ctaSubheading": "ಸಿಗುತ್ತಿಲ್ಲವೇ?",
+      "ctaDescription": "ನಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಗ್ರಂಥಾಲಯವು ಪ್ರತಿ ವಾರ ವಿಸ್ತರಿಸುತ್ತಿದೆ. ನಿಮ್ಮ ಕುಂಡಲಿಯ ಬಗ್ಗೆ ನಿಮಗೆ ನಿರ್ದಿಷ್ಟ ಪ್ರಶ್ನೆ ಇದ್ದರೆ, Navi ಬಳಿ ಈಗಲೇ ನಿಮಗಾಗಿ ಉತ್ತರಗಳು ಸಿದ್ಧವಾಗಿವೆ.",
+      "askNavi": "Navi ಯನ್ನು ಏನು ಬೇಕಾದರೂ ಕೇಳಿ",
+      "subscribe": "ನವೀಕರಣಗಳಿಗಾಗಿ ಚಂದಾದಾರರಾಗಿ",
+      "footer": "© 2026 ASTRANAVI · ದ ಕಾಸ್ಮಿಕ್ ಆರ್ಕೈವ್"
+    },
+    "houses": {
+      "title": "12",
+      "titleSanskrit": "ಭಾವಗಳು",
+      "encyclopediaTitle": "ವಿಶ್ವಕೋಶ",
+      "introduction": "ಪರಿಚಯ",
+      "sidebarLabel": "12 ಭಾವಗಳು",
+      "coreConcepts": "ಮೂಲ ಪರಿಕಲ್ಪನೆಗಳು",
+      "understanding": "ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದು",
+      "bhavas": "ಭಾವಗಳು",
+      "description": "ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯದಲ್ಲಿ, 12 ಮನೆಗಳು (ಭಾವಗಳು) ಮಾನವ ಜೀವನದ 12 ಕ್ಷೇತ್ರಗಳನ್ನು ಪ್ರತಿನಿಧಿಸುತ್ತವೆ. ಗ್ರಹಗಳು ಶಕ್ತಿಯನ್ನು ಒದಗಿಸುತ್ತವೆ ಮತ್ತು ರಾಶಿಗಳು ಪರಿಸರವನ್ನು ಒದಗಿಸುತ್ತವೆ, ಆದರೆ ಭಾವಗಳು ಕರ್ಮವು ಜಾರಿಗೆ ಬರುವ ನಿಜವಾದ ಅನುಭವ ಕ್ಷೇತ್ರಗಳಾಗಿವೆ.",
+      "kendra": "ಕೇಂದ್ರ (ಕೋನೀಯ) ಭಾವಗಳು",
+      "kendraDesc": "1, 4, 7 ಮತ್ತು 10 ನೇ ಮನೆಗಳು ಜೀವನದ ಸ್ತಂಭಗಳಾಗಿವೆ. ಅವು ಸ್ವಯಂ, ಮನೆ, ಪಾಲುದಾರಿಕೆ ಮತ್ತು ವೃತ್ತಿಜೀವನವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತವೆ. ಇಲ್ಲಿ ನೆಲೆಗೊಂಡಿರುವ ಗ್ರಹಗಳು ನಿಮ್ಮ ಲೌಕಿಕ ಅಸ್ತಿತ್ವವನ್ನು ರೂಪಿಸಲು ಮತ್ತು ಭಾರೀ ಕ್ರಿಯೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಗರಿಷ್ಠ ಶಕ್ತಿಯನ್ನು ಹೊಂದಿವೆ.",
+      "trikona": "ತ್ರಿಕೋಣ (ತ್ರೈಣ) ಭಾವಗಳು",
+      "trikonaDesc": "1, 5 ಮತ್ತು 9 ನೇ ಮನೆಗಳು ಧರ್ಮ ಮತ್ತು ಶುದ್ಧ ಆಶೀರ್ವಾದದ ಮನೆಗಳಾಗಿವೆ. ಅವು ಪೂರ್ವಜನ್ಮದ ಪುಣ್ಯ (ಪೂರ್ವ ಪುಣ್ಯ), ಬುದ್ಧಿಮತ್ತೆ ಮತ್ತು ದೈವಿಕ ಕೃಪೆಯನ್ನು ಪ್ರತಿನಿಧಿಸುತ್ತವೆ. ಇಲ್ಲಿನ ಗ್ರಹಗಳು ಸಹಜ ಅದೃಷ್ಟ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆಯನ್ನು ಒದಗಿಸುತ್ತವೆ.",
+      "dusthana": "ದುಸ್ಥಾನ (ಕಷ್ಟಕರ) ಭಾವಗಳು",
+      "dusthanaDesc": "6, 8 ಮತ್ತು 12 ನೇ ಮನೆಗಳು ಅಡೆತಡೆಗಳು, ಪರಿವರ್ತನೆ ಮತ್ತು ನಷ್ಟವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತವೆ. ಭೌತಿಕ ಅನ್ವೇಷಣೆಗಳಿಗೆ ಸವಾಲಾಗಿದ್ದರೂ, ಕರ್ಮವನ್ನು ಸುಡಲು, ಸ್ಥಿತಿಸ್ಥಾಪಕತೆಯನ್ನು ನಿರ್ಮಿಸಲು ಮತ್ತು ಅಂತಿಮ ಆಧ್ಯಾತ್ಮಿಕ ವಿಮೋಚನೆಯನ್ನು (ಮೋಕ್ಷ) ಸಾಧಿಸಲು ಅವು ಅಗತ್ಯವಾಗಿವೆ.",
+      "upachaya": "ಉಪಚಯ (ಬೆಳೆಯುತ್ತಿರುವ) ಭಾವಗಳು",
+      "upachayaDesc": "3, 6, 10 ಮತ್ತು 11 ನೇ ಮನೆಗಳು ಪ್ರಜ್ಞಾಪೂರ್ವಕ ಪ್ರಯತ್ನದ ಮೂಲಕ ಕಾಲಾನಂತರದಲ್ಲಿ ಸುಧಾರಿಸುವ ಜೀವನದ ಪ್ರದೇಶಗಳನ್ನು ಪ್ರತಿನಿಧಿಸುತ್ತವೆ. ಇಲ್ಲಿ ನೆಲೆಗೊಂಡಿರುವ ಪಾಪ ಗ್ರಹಗಳು (ಶನಿ, ಮಂಗಳ, ಸೂರ್ಯ) ಸ್ಪರ್ಧೆಯನ್ನು ಜಯಿಸುವ ಪ್ರೇರಣೆಯನ್ನು ಒದಗಿಸುವುದರಿಂದ ವಾಸ್ತವವಾಗಿ ಅತ್ಯುತ್ತಮ ಫಲಿತಾಂಶಗಳನ್ನು ನೀಡುತ್ತವೆ.",
+      "analyzeBtn": "ಭಾವವನ್ನು ವಿಶ್ಲೇಷಿಸಿ",
+      "sanskrit": "ಸಂಸ್ಕೃತ",
+      "significator": "ಕಾರಕ",
+      "nature": "ಸ್ವಭಾವ",
+      "bodyMatrix": "ದೇಹ ರಚನೆ",
+      "houseEssence": "ಭಾವದ ಸಾರ",
+      "dominions": "ಆಧಿಪತ್ಯಗಳು",
+      "lifeGovernance": "ಜೀವನ ಆಡಳಿತ",
+      "bhavaMechanics": "ಭಾವ ಯಾಂತ್ರಿಕತೆ",
+      "bhavLogic": "ಭಾವತ್ ಭಾವಂ ತರ್ಕ",
+      "howAffects": "{house} ವ್ಯುತ್ಪನ್ನ ಜೀವನ ಕ್ಷೇತ್ರಗಳ ಮೇಲೆ ಹೇಗೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ",
+      "analyzeBtn2": "ಜೋಡಣೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಿ"
+    },
+    "nakshatras": {
+      "title": "ಚಂದ್ರ",
+      "subtitle": "ಮಂದಿರಗಳು",
+      "sidebarLabel": "27 ನಕ್ಷತ್ರಗಳು",
+      "analyzeBtn": "ನಕ್ಷತ್ರವನ್ನು ವಿಶ್ಲೇಷಿಸಿ",
+      "rulerLabel": "ಅಧಿಪತಿ (ಲಾರ್ಡ್)",
+      "symbol": "ಸಂಕೇತ",
+      "gana": "ಗಣ",
+      "yoni": "ಪ್ರಾಣಿ (ಯೋನಿ)",
+      "karmicDeepDive": "ಕರ್ಮಿಕ ಆಳವಾದ ಅಧ್ಯಯನ",
+      "fundamentalTrait": "ಮೂಲಭೂತ ಗುಣ",
+      "shakti": "ನಕ್ಷತ್ರ ಶಕ್ತಿ",
+      "nadi": "ನಾಡಿ (ಆಯುರ್ವೇದಿಕ್)",
+      "purushartha": "ಪುರುಷಾರ್ಥ",
+      "padaD9Logic": "ಪಾದ (D9) ತರ್ಕ",
+      "subconscious": "ಉಪಪ್ರಜ್ಞೆಯ ನೀಲನಕ್ಷೆ",
+      "discoverJanma": "ನಿಮ್ಮ ಮೂಲ ಜನ್ಮ ನಕ್ಷತ್ರವನ್ನು ಅನ್ವೇಷಿಸಿ",
+      "analyzeChart": "ಕುಂಡಲಿಯನ್ನು ವಿಶ್ಲೇಷಿಸಿ"
+    },
+    "planets": {
+      "title": "ನವಗ್ರಹ",
+      "subtitle": "ಆದ್ಯ ರೂಪಗಳು",
+      "encyclopediaTitle": "ವಿಶ್ವಕೋಶ",
+      "introduction": "ಪರಿಚಯ",
+      "sidebarLabel": "ಒಂಬತ್ತು ಗ್ರಹಗಳು",
+      "coreConcepts": "ಮೂಲ ಪರಿಕಲ್ಪನೆಗಳು",
+      "understanding": "ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದು",
+      "navagraha": "ನವಗ್ರಹ",
+      "description": "ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯದಲ್ಲಿ, ನವಗ್ರಹಗಳು (ಒಂಬತ್ತು ಗ್ರಹಗಳು) ಕರ್ಮದ ಬ್ರಹ್ಮಾಂಡದ ದೂತರಾಗಿದ್ದಾರೆ. ಅವು ಘಟನೆಗಳನ್ನು ಪ್ರಚೋದಿಸುವ, ನಿಮ್ಮ ಮನೋವಿಜ್ಞಾನವನ್ನು ರೂಪಿಸುವ ಮತ್ತು ಕಾಲ ಮತ್ತು ಅಂತರಿಕ್ಷದ ಮೂಲಕ ಆತ್ಮದ ವಿಕಸನೀಯ ಪ್ರಯಾಣವನ್ನು ಮಾರ್ಗದರ್ಶನ ಮಾಡುವ ಕ್ರಿಯಾತ್ಮಕ ಶಕ್ತಿಗಳಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ.",
+      "karmicDeliverers": "ಕರ್ಮ ತಲುಪಿಸುವವರು",
+      "karmicDesc": "ಗ್ರಹಗಳು ಕೇವಲ ಗುಣಲಕ್ಷಣಗಳನ್ನು ಸಂಕೇತಿಸುವುದಿಲ್ಲ; ಅವು ನಿಮ್ಮ ಹಿಂದಿನ ಕ್ರಿಯೆಗಳ ಫಲಗಳನ್ನು ಸಕ್ರಿಯವಾಗಿ ತಲುಪಿಸುತ್ತವೆ. ಗುರು ಮತ್ತು ಶುಕ್ರನಂತಹ ಶುಭಗ್ರಹಗಳು ಸುಲಭತೆ ಮತ್ತು ಕೃಪೆಯನ್ನು ತರುತ್ತವೆ, ಆದರೆ ಶನಿ ಮತ್ತು ಮಂಗಳನಂತಹ ಪಾಪಗ್ರಹಗಳು ಅಗತ್ಯ, ಆಗಾಗ್ಗೆ ಕಠಿಣ ಪಾಠಗಳನ್ನು ಜಾರಿಗೊಳಿಸುತ್ತವೆ.",
+      "avasthas": "ಅವಸ್ಥೆಗಳು (ಗ್ರಹಗಳ ಸ್ಥಿತಿಗಳು)",
+      "avasthasDesc": "ಒಂದು ಗ್ರಹದ ಶಕ್ತಿಯು ಅದರ ಸ್ಥಿತಿಯ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿರುತ್ತದೆ. ಉಚ್ಚಸ್ಥಾನದಲ್ಲಿರುವ ಗ್ರಹವು ತನ್ನ ಅತ್ಯುನ್ನತ, ಶುದ್ಧ ಸಾಮರ್ಥ್ಯವನ್ನು ವ್ಯಕ್ತಪಡಿಸುತ್ತದೆ, ಆದರೆ ನೀಚಸ್ಥಾನದಲ್ಲಿರುವ ಗ್ರಹವು ಆತ್ಮವು ಸಹಜ ದೌರ್ಬಲ್ಯಗಳನ್ನು ಜಯಿಸಲು ಹೆಚ್ಚು ಶ್ರಮಿಸಬೇಕಾದ ಪ್ರದೇಶಗಳನ್ನು ಸೂಚಿಸುತ್ತದೆ.",
+      "shadowNodes": "ಛಾಯಾ ಬಿಂದುಗಳು",
+      "shadowNodesDesc": "ರಾಹು ಮತ್ತು ಕೇತು ಭೌತಿಕ ದ್ರವ್ಯರಾಶಿಗಳಲ್ಲ, ಬದಲಿಗೆ ಗ್ರಹಣಗಳು ಸಂಭವಿಸುವ ಗಣಿತ ಬಿಂದುಗಳಾಗಿವೆ. ದೇಹಗಳಿಲ್ಲದಿದ್ದರೂ, ಈ ಬಿಂದುಗಳು ಹಠಾತ್ ವಿಧಿ, ಗೀಳು ಮತ್ತು ಅಂತಿಮ ಆಧ್ಯಾತ್ಮಿಕ ವಿಮೋಚನೆಯ ಆಳವಾದ ಪ್ರಚೋದಕಗಳಾಗಿವೆ.",
+      "functionalNature": "ಕ್ರಿಯಾತ್ಮಕ ಸ್ವಭಾವ",
+      "functionalDesc": "ಸಹಜ ಗುಣಲಕ್ಷಣಗಳನ್ನು ಮೀರಿ, ಒಂದು ಗ್ರಹವು ನಿಮ್ಮ ನಿರ್ದಿಷ್ಟ ಲಗ್ನವನ್ನು ಆಧರಿಸಿ ಸ್ನೇಹಿತ ಅಥವಾ ಶತ್ರುವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ. ಮೇಷ ಲಗ್ನಕ್ಕೆ ಕಷ್ಟ ತರುವ ಅದೇ ಶನಿ, ವೃಷಭ ಲಗ್ನಕ್ಕೆ ಶ್ರೇಷ್ಠ ಉಪಕಾರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಾನೆ.",
+      "analyzeBtn": "ಜೋಡಣೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಿ",
+      "cosmicArchetype": "ಬ್ರಹ್ಮಾಂಡದ ಆದ್ಯ ರೂಪ",
+      "signatures": "ಸಹಿಗಳು",
+      "functionalImpact": "ಕ್ರಿಯಾತ್ಮಕ ಪ್ರಭಾವ",
+      "planetaryGovernance": "ಗ್ರಹ ಆಡಳಿತ",
+      "exaltation": "ಉಚ್ಚ ಸ್ಥಾನ",
+      "highestPotential": "ಅತ್ಯುನ್ನತ ಸಾಮರ್ಥ್ಯ",
+      "debilitation": "ನೀಚ ಸ್ಥಾನ",
+      "lowestVitality": "ಕನಿಷ್ಠ ಚೈತನ್ಯ",
+      "mooltrikona": "ಮೂಲತ್ರಿಕೋಣ",
+      "primaryOffice": "ಪ್ರಾಥಮಿಕ ಕಚೇರಿ",
+      "aligningWith": "{planet} ಜೊತೆ ಜೋಡಣೆ",
+      "discoverInfluence": "ಈ ಗ್ರಹವು ನಿಮ್ಮ ಕುಂಡಲಿಯನ್ನು ಹೇಗೆ ಪ್ರಭಾವಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಅನ್ವೇಷಿಸಿ"
+    },
+    "yogas": {
+      "title": "ಗ್ರಹಗಳ",
+      "subtitle": "ಯೋಗಗಳು",
+      "encyclopediaTitle": "ವಿಶ್ವಕೋಶ",
+      "introduction": "ಪರಿಚಯ",
+      "sidebarLabel": "ಪವಿತ್ರ ಸಂಯೋಜನೆಗಳು",
+      "coreConcepts": "ಮೂಲ ಪರಿಕಲ್ಪನೆಗಳು",
+      "understanding": "ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದು",
+      "yogasLabel": "ಯೋಗಗಳು",
+      "description": "ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯದಲ್ಲಿ, \"ಯೋಗ\" ಎಂದರೆ ಸಂಯೋಜನೆ. ಇದು ಶಕ್ತಿಯುತ, ವಿಧಿನಿಯಾಮಕ ಪರಿಣಾಮಗಳನ್ನು ಸೃಷ್ಟಿಸಲು ಒಟ್ಟಿಗೆ ಬಂಧಿಸುವ ನಿರ್ದಿಷ್ಟ ಗ್ರಹ ಸಂಯೋಜನೆಗಳು ಮತ್ತು ಜೋಡಣೆಗಳನ್ನು ಸೂಚಿಸುತ್ತದೆ. ಈ ಬ್ರಹ್ಮಾಂಡದ ಸಹಿಗಳು ಕುಂಡಲಿಯಲ್ಲಿ ಸಂಪತ್ತು, ಶಕ್ತಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ವಿಮೋಚನೆಯ ಎತ್ತರವನ್ನು ನಿರ್ಧರಿಸುತ್ತವೆ.",
+      "rajaYogas": "ರಾಜ ಯೋಗಗಳು",
+      "rajaDesc": "ಸಂಯೋಜನೆಗಳ ರಾಜರು. ಕೇಂದ್ರ (ಕ್ರಿಯೆ) ಭಾವಗಳ ಅಧಿಪತಿಗಳು ತ್ರಿಕೋಣ (ಅದೃಷ್ಟ) ಭಾವಗಳ ಅಧಿಪತಿಗಳೊಂದಿಗೆ ಒಂದಾದಾಗ ರೂಪುಗೊಳ್ಳುತ್ತವೆ. ಸಕ್ರಿಯಗೊಂಡಾಗ ಅವು ಸ್ಥಾನಮಾನ, ಅಧಿಕಾರ ಮತ್ತು ಭಾರಿ ಯಶಸ್ಸನ್ನು ಖಾತರಿಪಡಿಸುತ್ತವೆ.",
+      "dhanaYogas": "ಧನ ಯೋಗಗಳು",
+      "dhanaDesc": "ಸಂಪೂರ್ಣ ಸಂಪತ್ತಿಗಾಗಿ ಸಂಯೋಜನೆಗಳು. ಗಳಿಕೆಯ ಮನೆಗಳು (2ನೇ) ಮತ್ತು ಲಾಭಗಳ ಮನೆಗಳು (11ನೇ) ವಿಧಿಯ ಮನೆಗಳೊಂದಿಗೆ (5ನೇ, 9ನೇ) ಆಳವಾಗಿ ಸಂಪರ್ಕಗೊಂಡಾಗ, ಜಾತಕನು ಅಪಾರ ಆರ್ಥಿಕ ಸಮೃದ್ಧಿಗೆ ವಿಧಿಬದ್ಧನಾಗುತ್ತಾನೆ.",
+      "activation": "ಸಕ್ರಿಯಗೊಳಿಸುವಿಕೆ (ದಶೆಗಳು)",
+      "activationDesc": "ವಿಂಶೋತ್ತರಿ ದಶೆಯಿಂದ (ಕಾಲ ಅವಧಿ) ಅವುಗಳ ಗ್ರಹ ಅಧಿಪತಿಗಳು ಸಕ್ರಿಯಗೊಳ್ಳುವವರೆಗೆ ಯೋಗಗಳು ಕುಂಡಲಿಯಲ್ಲಿ ಸುಪ್ತವಾಗಿರುತ್ತವೆ. ಯೋಗಕಾರಕ ಗ್ರಹದ ದಶೆಯು ಪ್ರಾರಂಭವಾದಾಗ, ಪರಿಣಾಮಗಳು ವಾಸ್ತವದಲ್ಲಿ ತೀವ್ರವಾಗಿ ಪ್ರಕಟಗೊಳ್ಳುತ್ತವೆ.",
+      "cancellation": "ರದ್ದತಿ (ಭಂಗ)",
+      "cancellationDesc": "ಎಲ್ಲಾ ಕೆಟ್ಟ ಯೋಗಗಳು ಶಾಶ್ವತವಲ್ಲ. ಒಂದು ನೀಚ (ದುರ್ಬಲ) ಗ್ರಹವು ಬಲವಾದ ಜೋಡಣೆಗಳಿಂದ ಬೆಂಬಲಿತವಾದಾಗ ನೀಚಭಂಗ ಸಂಭವಿಸುತ್ತದೆ, ದೌರ್ಬಲ್ಯವನ್ನು ರದ್ದುಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಆಗಾಗ್ಗೆ ಭಾರಿ ಹೋರಾಟವನ್ನು ದೊಡ್ಡ ಯಶಸ್ಸಿನಂತೆ ಮಾಡುತ್ತದೆ.",
+      "analyzeBtn": "ಯೋಗಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಿ",
+      "formationTheory": "ರಚನೆಯ ಸಿದ್ಧಾಂತ",
+      "archetypeTraits": "ಆದ್ಯ ರೂಪದ ಗುಣಲಕ್ಷಣಗಳು",
+      "manifestation": "ಪ್ರಕಟೀಕರಣ",
+      "activationPath": "ಸಕ್ರಿಯಗೊಳಿಸುವ ಮಾರ್ಗ",
+      "activationPathDesc": "ಪ್ರಾಥಮಿಕವಾಗಿ ಸಂಬಂಧಿಸಿದ ಗ್ರಹಗಳ ಪ್ರಮುಖ ದಶೆ / ಭುಕ್ತಿ ಅವಧಿಗಳಲ್ಲಿ ಪ್ರಚೋದಿಸುತ್ತದೆ.",
+      "yogaAnalysisScan": "ಯೋಗ ವಿಶ್ಲೇಷಣೆ ಸ್ಕ್ಯಾನ್",
+      "discoverCombinations": "ನಿಮ್ಮ ಕುಂಡಲಿಯಲ್ಲಿ ಗುಪ್ತ ಸಂಯೋಜನೆಗಳನ್ನು ಅನ್ವೇಷಿಸಿ",
+      "scanChart": "ನನ್ನ ಕುಂಡಲಿಯನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"
+    },
+    "remedies": {
+      "title": "ಪವಿತ್ರ",
+      "subtitle": "ಪರಿಹಾರಗಳು",
+      "tagline": "ಜೋಡಣೆಯ ವಿಜ್ಞಾನ",
+      "logic": "ತರ್ಕ",
+      "target": "ಗುರಿ",
+      "intensity": "ತೀವ್ರತೆ",
+      "entity": "ಅಸ್ತಿತ್ವ",
+      "remedialTheory": "ಪರಿಹಾರ ಸಿದ್ಧಾಂತ",
+      "operationalRole": "ಕಾರ್ಯಾಚರಣಾ ಪಾತ್ರ",
+      "efficacyScale": "ಪರಿಣಾಮಕಾರಿತ್ವದ ಮಾಪಕ",
+      "primaryLogic": "ಪ್ರಾಥಮಿಕ ತರ್ಕ",
+      "safetyLevel": "ಸುರಕ್ಷತೆಯ ಮಟ್ಟ",
+      "highNonInvasive": "ಹೆಚ್ಚು (ಆಕ್ರಮಣಶೀಲವಲ್ಲದ)",
+      "keyExamples": "ಪ್ರಮುಖ ಉದಾಹರಣೆಗಳು",
+      "personalizedScan": "ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ಪರಿಹಾರ ಸ್ಕ್ಯಾನ್",
+      "discoverSpecific": "ನಿಮ್ಮ ಕುಂಡಲಿಗೆ ಅಗತ್ಯವಿರುವ ನಿರ್ದಿಷ್ಟ ಜೋಡಣೆಗಳನ್ನು ಅನ್ವೇಷಿಸಿ",
+      "consultNavi": "Navi ಯನ್ನು ಸಂಪರ್ಕಿಸಿ"
+    }
+  },
+  "profile": {
+    "page": {
+      "title": "ಬಳಕೆದಾರ ಪ್ರೊಫೈಲ್",
+      "description": "ನಿಮ್ಮ ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ಓದುವಿಕೆಗಳು ಯಾವಾಗಲೂ ನಿಖರವಾಗಿರುವುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು ನಿಮ್ಮ ಜನ್ಮ ವಿವರಗಳನ್ನು ನಿರ್ವಹಿಸಿ.",
+      "errors": {
+        "fixErrors": "ಉಳಿಸುವ ಮೊದಲು ದಯವಿಟ್ಟು ದೋಷಗಳನ್ನು ಸರಿಪಡಿಸಿ",
+        "noEmailSession": "ಸೆಷನ್‌ನಲ್ಲಿ ಯಾವುದೇ ಇಮೇಲ್ ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ಲಾಗ್‌ಔಟ್ ಮಾಡಿ ಮತ್ತು ಮತ್ತೆ ಲಾಗಿನ್ ಮಾಡಿ.",
+        "dstConflict": "ನಿಮ್ಮ ಜನ್ಮ ಸಮಯವು DST ಪರಿವರ್ತನೆಯ ಸಮಯದಲ್ಲಿ ಬರುತ್ತದೆ. ದಯವಿಟ್ಟು ಯಾವ ಸಂಭವವು ನಿಮ್ಮ ನಿಜವಾದ ಜನ್ಮ ಸಮಯ ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+        "updateFailed": "ನವೀಕರಣ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+      },
+      "messages": {
+        "profileUpdated": "ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ!"
+      },
+      "buttons": {
+        "updating": "ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ...",
+        "saveAndContinue": "ಉಳಿಸಿ ಮತ್ತು ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ",
+        "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+        "reset": "ಮರುಹೊಂದಿಸಿ",
+        "backToHome": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ"
+      },
+      "securitySection": {
+        "title": "ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+        "description": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಮತ್ತು ಸಕ್ರಿಯ ಸೆಷನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ.",
+        "button": "ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"
+      }
+    },
+    "fields": {
+      "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+      "emailHelper": "ನಿಮ್ಮ ಇಮೇಲ್ ಅನ್ನು ಬದಲಾಯಿಸಲಾಗುವುದಿಲ್ಲ",
+      "fullName": "ಪೂರ್ಣ ಹೆಸರು",
+      "fullNamePlaceholder": "ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರನ್ನು ನಮೂದಿಸಿ",
+      "fullNameHelper": "ಜನ್ಮ ಪ್ರಮಾಣಪತ್ರದ ಪ್ರಕಾರ ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು",
+      "dateOfBirth": "ಜನ್ಮ ದಿನಾಂಕ",
+      "dateOfBirthHelper": "ನಿಮ್ಮ ಜನ್ಮ ದಿನಾಂಕ",
+      "timeOfBirth": "ಜನ್ಮ ಸಮಯ",
+      "timeOfBirthHelper": "ನಿಖರತೆಗಾಗಿ ನಿಖರವಾದ ಸಮಯ",
+      "placeOfBirth": "ಜನ್ಮ ಸ್ಥಳ",
+      "placeOfBirthPlaceholder": "ನಗರವನ್ನು ಹುಡುಕಿ, ಉದಾ. ದೆಹಲಿ",
+      "placeOfBirthHelper": "ನಿಮ್ಮ ನಿಖರವಾದ ಜನ್ಮ ಸ್ಥಳವನ್ನು ಹುಡುಕಿ ಮತ್ತು ಆಯ್ಕೆಮಾಡಿ",
+      "phoneNumber": "ಫೋನ್ ಸಂಖ್ಯೆ",
+      "phoneNumberPlaceholder": "+1234567890",
+      "phoneNumberHelper": "ಐಚ್ಛಿಕ ಫೋನ್ ಸಂಖ್ಯೆ",
+      "gender": "ಲಿಂಗ",
+      "genderPlaceholder": "ಲಿಂಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "genderOptions": {
+        "male": "ಪುರುಷ",
+        "female": "ಸ್ತ್ರೀ",
+        "other": "ಇತರೆ",
+        "notSpecified": "ನಿರ್ದಿಷ್ಟಪಡಿಸಿಲ್ಲ"
+      },
+      "maritalStatus": "ವೈವಾಹಿಕ ಸ್ಥಿತಿ",
+      "maritalStatusPlaceholder": "ಸ್ಥಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "maritalOptions": {
+        "single": "ಅವಿವಾಹಿತ",
+        "married": "ವಿವಾಹಿತ",
+        "divorced": "ವಿಚ್ಛೇದಿತ",
+        "widowed": "ವಿಧವೆ/ವಿಧುರ",
+        "separated": "ಬೇರ್ಪಟ್ಟಿರುವ",
+        "notSpecified": "ಹೇಳಲು ಇಷ್ಟವಿಲ್ಲ"
+      },
+      "occupation": "ಉದ್ಯೋಗ",
+      "occupationPlaceholder": "ಉದ್ಯೋಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "occupationOptions": {
+        "student": "ವಿದ್ಯಾರ್ಥಿ",
+        "business": "ವ್ಯಾಪಾರ ಮಾಲೀಕ",
+        "employed": "ಉದ್ಯೋಗಸ್ಥ / ಸಂಬಳದಾರ",
+        "homemaker": "ಗೃಹಿಣಿ",
+        "retired": "ನಿವೃತ್ತ",
+        "unemployed": "ನಿರುದ್ಯೋಗಿ",
+        "notSpecified": "ಹೇಳಲು ಇಷ್ಟವಿಲ್ಲ"
+      },
+      "errors": {
+        "nameTooShort": "ಹೆಸರು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳಾಗಿರಬೇಕು",
+        "nameTooLong": "ಹೆಸರು ತುಂಬಾ ಉದ್ದವಾಗಿದೆ",
+        "dobInFuture": "ಜನ್ಮ ದಿನಾಂಕವು ಭವಿಷ್ಯದಲ್ಲಿರಲು ಸಾಧ್ಯವಿಲ್ಲ",
+        "dobInvalid": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಜನ್ಮ ದಿನಾಂಕವನ್ನು ನಮೂದಿಸಿ",
+        "pobInvalid": "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಸ್ಥಳವನ್ನು ನಮೂದಿಸಿ",
+        "pobTooLong": "ಸ್ಥಳದ ಹೆಸರು ತುಂಬಾ ಉದ್ದವಾಗಿದೆ",
+        "nameRequired": "ಹೆಸರು ಅಗತ್ಯವಿದೆ",
+        "dobRequired": "ಜನ್ಮ ದಿನಾಂಕ ಅಗತ್ಯವಿದೆ",
+        "tobRequired": "ಜನ್ಮ ಸಮಯ ಅಗತ್ಯವಿದೆ",
+        "pobRequired": "ಜನ್ಮ ಸ್ಥಳ ಅಗತ್ಯವಿದೆ",
+        "pobSelectRequired": "ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಿಂದ ನಿಮ್ಮ ನಿಖರವಾದ ಜನ್ಮ ಸ್ಥಳವನ್ನು ಆಯ್ಕೆಮಾಡಿ"
+      }
+    },
+    "onboarding": {
+      "steps": {
+        "name": {
+          "label": "ಪೂರ್ಣ ಹೆಸರು",
+          "hint": "ಜನ್ಮ ಪ್ರಮಾಣಪತ್ರದ ಪ್ರಕಾರ ನಿಮ್ಮ ಹೆಸರು"
+        },
+        "dob": {
+          "label": "ಜನ್ಮ ದಿನಾಂಕ",
+          "hint": "ನಿಮ್ಮ ಗ್ರಹಗಳ ಸ್ಥಾನಗಳನ್ನು (ನಕ್ಷತ್ರ) ನಿರ್ಧರಿಸುತ್ತದೆ"
+        },
+        "tob": {
+          "label": "ಜನ್ಮ ಸಮಯ",
+          "hint": "ನಿಮ್ಮ ಲಗ್ನ ಮತ್ತು ಭಾವ ಸಂಧಿಗಳನ್ನು ನಿಖರವಾಗಿ ಗುರುತಿಸುತ್ತದೆ"
+        },
+        "pob": {
+          "label": "ನಿಖರವಾದ ಜನ್ಮ ಸ್ಥಳ",
+          "hint": "ನಿಖರವಾದ ನಿರ್ದೇಶಾಂಕಗಳಿಗಾಗಿ ನಿಮ್ಮ ನಗರವನ್ನು ಹುಡುಕಿ ಮತ್ತು ಡ್ರಾಪ್‌ಡೌನ್‌ನಿಂದ ಆಯ್ಕೆಮಾಡಿ"
+        }
+      },
+      "mobile": {
+        "complete": "ಎಲ್ಲವೂ ಸಿದ್ಧ! ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಂಡಿದೆ ✨",
+        "remaining": "{n} ಹಂತ{plural} ಬಾಕಿ ಉಳಿದಿದೆ",
+        "completeHint": "ಹಿಂತಿರುಗಲು ಉಳಿಸಿ ಮತ್ತು ಮುಂದುವರಿಯಿರಿ ಒತ್ತಿರಿ",
+        "remainingHint": "ಏನು ಬೇಕು ಎಂಬುದನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
+      },
+      "sidebar": {
+        "title": "ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಗುರುತನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ",
+        "description": "ನಿಮ್ಮ ಜನ್ಮ ವಿವರಗಳು ಪ್ರತಿ ಬ್ರಹ್ಮಾಂಡದ ಒಳನೋಟದ ಆಧಾರವಾಗಿವೆ — ಅವು ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ಜಾತಕಗಳು, ಕುಂಡಲಿ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು AI-ಚಾಲಿತ ವೈದಿಕ ಓದುವಿಕೆಗಳನ್ನು ಅನಾವರಣಗೊಳಿಸುತ್ತವೆ.",
+        "checklistLabel": "ಪ್ರೊಫೈಲ್ ಪರಿಶೀಲನಾಪಟ್ಟಿ",
+        "completeMessage": "ಎಲ್ಲವೂ ಸಿದ್ಧ! ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಂಡಿದೆ. ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಲು ಉಳಿಸಿ ಮತ್ತು ಮುಂದುವರಿಯಿರಿ ಒತ್ತಿರಿ.",
+        "progressLabel": "ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ"
+      }
+    },
+    "preferences": {
+      "language": "ಆದ್ಯತೆಯ ಭಾಷೆ",
+      "cosmicPreferences": "ಬ್ರಹ್ಮಾಂಡದ ಆದ್ಯತೆಗಳು",
+      "horoscopeTitle": "ದೈನಂದಿನ ಜಾತಕ",
+      "horoscopeDescription": "ದೈನಂದಿನ ಬ್ರಹ್ಮಾಂಡದ ಒಳನೋಟಗಳನ್ನು ಸ್ವೀಕರಿಸಿ",
+      "notificationsTitle": "ಅಧಿಸೂಚನೆಗಳು",
+      "notificationsDescription": "ಗ್ರಹಗಳ ಸಂಚಾರಗಳಿಗೆ ಎಚ್ಚರಿಕೆಗಳು"
+    },
+    "security": {
+      "pageTitle": "ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+      "pageDescription": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್, ಸಕ್ರಿಯ ಸೆಷನ್‌ಗಳು ಮತ್ತು ಖಾತೆ ಡೇಟಾವನ್ನು ನಿರ್ವಹಿಸಿ.",
+      "backButton": "ಪ್ರೊಫೈಲ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+      "changePasswordTitle": "ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸಿ",
+      "changePasswordWarning": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸುವುದರಿಂದ ಈ ಸೆಷನ್ ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಸೆಷನ್‌ಗಳಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಲಾಗ್‌ಔಟ್ ಆಗುತ್ತೀರಿ.",
+      "currentPasswordLabel": "ಪ್ರಸ್ತುತ ಪಾಸ್‌ವರ್ಡ್",
+      "currentPasswordPlaceholder": "ಪ್ರಸ್ತುತ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+      "newPasswordLabel": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್",
+      "newPasswordPlaceholder": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+      "confirmPasswordLabel": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ",
+      "confirmPasswordPlaceholder": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ",
+      "updatePasswordButton": "ಪಾಸ್‌ವರ್ಡ್ ನವೀಕರಿಸಿ",
+      "sessionManagementTitle": "ಸೆಷನ್ ನಿರ್ವಹಣೆ",
+      "sessionManagementDescription": "ನಿಮ್ಮ ಖಾತೆಯು ಪ್ರಸ್ತುತ ಸೈನ್ ಇನ್ ಆಗಿರುವ ಎಲ್ಲಾ ಇತರ ಸಾಧನಗಳಿಂದ ಲಾಗ್‌ಔಟ್ ಮಾಡಿ. ಈ ಸಾಧನವು ಲಾಗ್ ಇನ್ ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ.",
+      "logoutAllButton": "ಎಲ್ಲಾ ಇತರ ಸಾಧನಗಳಿಂದ ಲಾಗ್‌ಔಟ್ ಮಾಡಿ",
+      "dangerZoneTitle": "ಅಪಾಯ ವಲಯ",
+      "dangerZoneDescription": "ನಿಮ್ಮ ಖಾತೆ ಮತ್ತು ಸಂಬಂಧಿತ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಶಾಶ್ವತವಾಗಿ ಅಳಿಸಿ. ಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
+      "deleteAccountButton": "ಖಾತೆ ಅಳಿಸಿ",
+      "deleteAccountModal": {
+        "title": "ಖಾತೆ ಅಳಿಸಿ",
+        "description": "ಈ ಕ್ರಿಯೆಯು ಶಾಶ್ವತವಾಗಿದೆ ಮತ್ತು ನಿಮ್ಮ ಎಲ್ಲಾ ಜನ್ಮ ವಿವರಗಳು, ರಚಿಸಲಾದ ಜಾತಕಗಳು ಮತ್ತು ಆದ್ಯತೆಗಳನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ಅಳಿಸುತ್ತದೆ. ಮುಂದುವರಿಯಲು ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಮೂಲಕ ದೃಢೀಕರಿಸಿ.",
+        "passwordPlaceholder": "ದೃಢೀಕರಿಸಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+        "cancelButton": "ರದ್ದುಮಾಡಿ",
+        "confirmButton": "ಶಾಶ್ವತವಾಗಿ ಅಳಿಸಿ"
+      },
+      "logoutConfirmDialog": {
+        "title": "ಎಲ್ಲಾ ಸಾಧನಗಳಿಂದ ಲಾಗ್‌ಔಟ್ ಮಾಡುವುದೇ?",
+        "message": "ಇದು ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಎಲ್ಲಾ ಇತರ ಸಾಧನಗಳಿಂದ ಸೈನ್ ಔಟ್ ಮಾಡುತ್ತದೆ. ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸೆಷನ್ ಸಕ್ರಿಯವಾಗಿಯೇ ಇರುತ್ತದೆ.",
+        "confirmButton": "ಇತರರಿಂದ ಲಾಗ್‌ಔಟ್ ಮಾಡಿ",
+        "cancelButton": "ರದ್ದುಮಾಡಿ"
+      },
+      "errors": {
+        "passwordMinLength": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳಾಗಿರಬೇಕು.",
+        "passwordMismatch": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ.",
+        "passwordRequired": "ಅಳಿಸುವಿಕೆಯನ್ನು ದೃಢೀಕರಿಸಲು ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ."
+      },
+      "messages": {
+        "passwordChanged": "ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ಬದಲಾಯಿಸಲಾಗಿದೆ. ನೀವು ಎಲ್ಲಾ ಸಾಧನಗಳಿಂದ ಲಾಗ್‌ಔಟ್ ಆಗುತ್ತೀರಿ.",
+        "logoutAllSuccess": "ಎಲ್ಲಾ ಇತರ ಸಾಧನಗಳಿಂದ ಯಶಸ್ವಿಯಾಗಿ ಲಾಗ್‌ಔಟ್ ಮಾಡಲಾಗಿದೆ.",
+        "accountDeleted": "ಖಾತೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ. ವಿದಾಯ."
+      }
+    }
+  },
+  "support": {
+    "title": "ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ",
+    "description": "ಸಹಾಯ ಬೇಕೇ? ನಿಮಗೆ ಅತ್ಯುತ್ತಮ ಸಹಾಯವನ್ನು ಒದಗಿಸಲು ನಮ್ಮ ಬೆಂಬಲ ವ್ಯವಸ್ಥೆಯನ್ನು ಹೊಂದಿಸಲಾಗುತ್ತಿದೆ. ತುರ್ತು ವಿಷಯಗಳಿಗಾಗಿ, ದಯವಿಟ್ಟು ಶೀಘ್ರದಲ್ಲೇ ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ!"
+  },
+  "newDashboard": {
+    "landing": {
+      "title": "ಹೊಸ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "subtitle": "ನಿಮ್ಮ ಖಗೋಳ ಸ್ನಾಪ್‌ಶಾಟ್",
+      "description": "ನಿಮ್ಮ ಸಂಪೂರ್ಣ ವೈದಿಕ ಸ್ನಾಪ್‌ಶಾಟ್ ಒಂದು ನೋಟದಲ್ಲಿ — ಸ್ಕೋರ್, ಗೋಚರ, कुटुंब ಮತ್ತು ನಿಮ್ಮ AI ಮಾರ್ಗದರ್ಶಕರು, ಎಲ್ಲವೂ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ.",
+      "hook": "ಗ್ರಹಗಳ ಸ್ಥಿತಿಗಳು ಮತ್ತು ಅವುಗಳ ನಿರಂತರ ಚಲನೆಗಳು ಪ್ರತಿ ದಿನದ ಶಕ್ತಿಯನ್ನು ರೂಪಿಸುತ್ತವೆ. ಹೊಸ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ನಿಮ್ಮ ದೈನಂದಿನ ವೈದಿಕ ಪೋರ್ಟಲ್ ಆಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ, ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಜೀವನ ಕ್ಷೇತ್ರಗಳು, ಸಂಬಂಧದ ಚಾರ್ಟ್‌ಗಳು ಮತ್ತು ದೈನಂದಿನ ವೇಳಾಪಟ್ಟಿಗಳ ಮೇಲೆ ರಿಯಲ್-ಟೈಮ್ ಬ್ರಹ್ಮಾಂಡದ ಮಾದರಿಗಳನ್ನು ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ.",
+      "feature1Title": "ಇಂದಿನ ಶಕ್ತಿ ಸ್ಕೋರ್",
+      "feature1Desc": "ನಿಮ್ಮ ದಿನದ ಒಟ್ಟು ಗ್ರಹಗಳ ಬಲವನ್ನು ಪ್ರತಿಬಿಂಬಿಸುವ 0-100 ರಿಂದ ರಿಯಲ್-ಟೈಮ್ ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ಸ್ಕೋರ್ ಪಡೆಯಿರಿ.",
+      "feature2Title": "ಪಂಚಾಂಗ ಮತ್ತು ಗೋಚರ",
+      "feature2Desc": "ಅನುಕೂಲಕರ ಸಮಯದೊಂದಿಗೆ ನಿಮ್ಮ ಕ್ರಿಯೆಗಳನ್ನು ಹೊಂದಿಸಲು ಸಕ್ರಿಯ ತಿಥಿ, ನಕ್ಷತ್ರ, ಯೋಗ, ಕರಣ ಮತ್ತು ರಾಹು ಕಾಲ ಅವಧಿಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.",
+      "feature3Title": "AI ಜ್ಯೋತಿಷ್ಯ ಮಾರ್ಗದರ್ಶಕರು",
+      "feature3Desc": "ವೈದಿಕ ವ್ಯವಸ್ಥೆಗಳು, ಸಂಬಂಧಗಳು, ಸಂಪತ್ತು ಮತ್ತು KP ಶಾಖೆಯಲ್ಲಿ ತರಬೇತಿ ಪಡೆದ ವಿಶೇಷ AI ಜ್ಯೋತಿಷಿಗಳನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+      "benefit1": "ಖಗೋಳ ಗೋಚರಗಳಿಂದ ನಡೆಸಲ್ಪಡುವ ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ದೈನಂದಿನ ಸ್ಕೋರ್‌ಗಳು",
+      "benefit2": "ಸ್ನೇಹಿತರು ಮತ್ತು ಕುಟುಂಬದ ಸದಸ್ಯರಿಗಾಗಿ ಹೊಂದಾಣಿಕೆ ಸ್ಕೋರಿಂಗ್",
+      "benefit3": "ಮಹಾದಶ ಮತ್ತು ಅಂತರ್ದಶ ಸಕ್ರಿಯ ಗ್ರಹಗಳ ಅವಧಿ ಪಾರ್ಸಿಂಗ್",
+      "benefit4": "ವಿಶೇಷ ಖಗೋಳ ತಜ್ಞರ ವ್ಯಕ್ತಿತ್ವಗಳೊಂದಿಗೆ ನೇರ ಸಮಾಲೋಚನೆಗಳು"
+    },
+    "todaysEnergy": {
+      "title": "ಇಂದಿನ ಶಕ್ತಿ",
+      "scoreOutOf": "100 ರಲ್ಲಿ",
+      "goodTime": "ಒಳ್ಳೆಯ ಸಮಯ",
+      "alertTime": "ಎಚ್ಚರಿಕೆಯ ಸಮಯ",
+      "aiChat": "Navi ಗೆ ಕೇಳಿ",
+      "fullReading": "ಸಂಪೂರ್ಣ ಓದುವಿಕೆ",
+      "rising": "ಉದಯಿಸುತ್ತಿದೆ",
+      "tithi": "ತಿಥಿ",
+      "nakshatra": "ನಕ್ಷತ್ರ",
+      "openingDashboard": "ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ..."
+    },
+    "weeklyChart": {
+      "title": "ಸಾಪ್ತಾಹಿಕ ಚಾರ್ಟ್",
+      "best": "ಅತ್ಯುತ್ತಮ",
+      "days": {
+        "mon": "ಸೋಮ",
+        "tue": "ಮಂಗಳ",
+        "wed": "ಬುಧ",
+        "thu": "ಗುರು",
+        "fri": "ಶುಕ್ರ",
+        "sat": "ಶನಿ",
+        "sun": "ಭಾನು"
+      },
+      "today": "ಇಂದು"
+    },
+    "lifeAreas": {
+      "title": "ಜೀವನ ಕ್ಷೇತ್ರಗಳು",
+      "viewAll": "ಎಲ್ಲವನ್ನೂ ವೀಕ್ಷಿಸಿ",
+      "love": "ಪ್ರೀತಿ",
+      "career": "ವೃತ್ತಿ",
+      "finance": "ಹಣಕಾಸು",
+      "health": "ಆರೋಗ್ಯ",
+      "general": "ಸಾಮಾನ್ಯ ದೃಷ್ಟಿಕೋನ",
+      "spiritual": "ಆಧ್ಯಾತ್ಮಿಕ",
+      "statusExcellent": "ಅತ್ಯುತ್ತಮ",
+      "statusGood": "ಉತ್ತಮ",
+      "statusSteadyProgress": "ಸ್ಥಿರ ಪ್ರಗತಿ",
+      "statusManageWisely": "ಬುದ್ಧಿವಂತಿಕೆಯಿಂದ ನಿರ್ವಹಿಸಿ",
+      "statusNeedsAttention": "ತಾಳ್ಮೆ ಅಗತ್ಯವಿದೆ",
+      "statusCosmicEnergy": "ವೈಯಕ್ತಿಕ ಆವೇಗ",
+      "statusIdealForMeditation": "ಧ್ಯಾನಕ್ಕೆ ಸೂಕ್ತವಾಗಿದೆ",
+      "comingSoon": "ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ",
+      "bandLegendTitle": "ಈ ಅಂಕಗಳ ಅರ್ಥವೇನು?",
+      "bandVerySupportive": "ಬಹಳ ಪೂರಕ",
+      "bandSupportive": "ಪೂರಕ",
+      "bandMixed": "ಮಿಶ್ರ",
+      "bandCaution": "ಎಚ್ಚರಿಕೆ",
+      "bandFriction": "ಘರ್ಷಣೆ",
+      "bandLegendNote": "ಅಂಕಗಳು ಮಾರ್ಗದರ್ಶನದ ತೀವ್ರತೆಯನ್ನು ತೋರಿಸುತ್ತವೆ — ಪೂರಕ ಮತ್ತು ಸವಾಲಿನ ಪರಿಸ್ಥಿಷಿಗಳು — ಗ್ಯಾರಂಟಿ ಫಲಿತಾಂಶಗಳಲ್ಲ.",
+      "statusStayFocused": "ಗಮನ ಹರಿಸಿ",
+      "statusPatienceNeeded": "ತಾಳ್ಮೆ ಅಗತ್ಯವಿದೆ",
+      "statusHarmonious": "ಸಾಮರಸ್ಯದ",
+      "statusMixedSignals": "ಮಿಶ್ರ ಸಂಕೇತಗಳು",
+      "statusBuilding": "ನಿರ್ಮಾಣ ಹಂತ",
+      "statusSpendMindfully": "ಎಚ್ಚರಿಕೆಯಿಂದ ಖರ್ಚು ಮಾಡಿ",
+      "statusSteady": "ಸ್ಥಿರ",
+      "statusMindYourRoutine": "ನಿಮ್ಮ ದಿನಚರಿಯನ್ನು ಗಮನಿಸಿ"
+    },
+    "panchang": {
+      "title": "ಇಂದಿನ ಪಂಚಾಂಗ",
+      "tithi": "ತಿಥಿ",
+      "vara": "ವಾರ",
+      "nakshatra": "ನಕ್ಷತ್ರ",
+      "yoga": "ಯೋಗ",
+      "karana": "ಕರಣ",
+      "rahuKaal": "ರಾಹು ಕಾಲ"
+    },
+    "compatibility": {
+      "title": "ಹೊಂದಾಣಿಕೆ ಮತ್ತು ಮಿಲನ",
+      "viewAll": "ಎಲ್ಲವನ್ನೂ ವೀಕ್ಷಿಸಿ",
+      "gunaMilanScore": "ಗುಣ ಮಿಲನ ಸ್ಕೋರ್",
+      "excellentMatch": "ಅತ್ಯುತ್ತಮ ಹೊಂದಾಣಿಕೆ",
+      "goodMatch": "ಉತ್ತಮ ಹೊಂದಾಣಿಕೆ",
+      "averageMatch": "ಸರಾಸರಿ ಹೊಂದಾಣಿಕೆ",
+      "challengingMatch": "ಸವಾಲಿನ ಹೊಂದಾಣಿಕೆ",
+      "harmony": "ಸಾಮರಸ್ಯ",
+      "trust": "ನಂಬಿಕೆ",
+      "understanding": "ತಿಳುವಳಿಕೆ",
+      "emptyTitle": "ನಿಮ್ಮ ಮೊದಲ ಮಿಲನ ರನ್ ಮಾಡಿ",
+      "emptyBody": "ನಿಮ್ಮ ಚಾರ್ಟ್‌ಗಳು ಹೇಗೆ ಹೊಂದಿಕೊಳ್ಳುತ್ತವೆ ಎಂಬುದನ್ನು ನೋಡಲು ಯಾರೊಬ್ಬರ ಜನನ ವಿವರಗಳನ್ನು ಸೇರಿಸಿ. ಸಂಗಾತಿ, ಸ್ನೇಹಿತರು, ಕುಟುಂಬ — ಯಾರಾದರೂ.",
+      "emptyCta": "ಮಿಲನ ಪ್ರಾರಂಭಿಸಿ",
+      "outOf": "/ 100",
+      "matchSuffix": "ಹೊಂದಾಣಿಕೆ"
+    },
+    "familyFriends": {
+      "title": "ಕುಟುಂಬ ಮತ್ತು ಸ್ನೇಹಿತರು",
+      "viewAll": "ಎಲ್ಲವನ್ನೂ ವೀಕ್ಷಿಸಿ",
+      "callNow": "ಈಗ ಕರೆ ಮಾಡಿ",
+      "premium": "ಪ್ರೀಮಿಯಂ",
+      "bandExcellent": "ಅತ್ಯುತ್ತಮ",
+      "bandVeryGood": "ಬಹಳ ಉತ್ತಮ",
+      "bandGood": "ಉತ್ತಮ",
+      "bandGreat": "ಅದ್ಭುತ",
+      "bandStable": "ಸ್ಥಿರ",
+      "bandAverage": "ಸರಾಸರಿ",
+      "bandChallenging": "ಸವಾಲಿನ",
+      "addMember": "ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
+      "relationshipPartner": "ಸಂಗಾತಿ",
+      "relationshipMother": "ತಾಯಿ",
+      "relationshipFather": "ತಂದೆ",
+      "relationshipSibling": "ಸಹೋದರ/ಸಹೋದರಿ",
+      "relationshipFriend": "ಸ್ನೇಹಿತ",
+      "relationshipSon": "ಮಗ",
+      "relationshipDaughter": "ಮಗಳು",
+      "relationshipFamily": "ಕುಟುಂಬ",
+      "locked": "ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"
+    },
+    "myChart": {
+      "title": "ನನ್ನ ಚಾರ್ಟ್",
+      "viewDetails": "ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
+      "yourKundli": "ನಿಮ್ಮ ಕುಂಡಲಿ",
+      "lagna": "ಲಗ್ನ",
+      "mahadasha": "ಮಹಾದಶ",
+      "antardasha": "ಅಂತರ್ದಶ",
+      "exploreFullAnalysis": "ಸಂಪೂರ್ಣ ವಿಶ್ಲೇಷಣೆ ಅನ್ವೇಷಿಸಿ",
+      "emptyTitle": "ನಿಮ್ಮ ಜನನ ವಿವರಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ",
+      "emptyBody": "ನಿಮ್ಮ ಜನನ ದಿನಾಂಕ, ಸಮಯ ಮತ್ತು ಸ್ಥಳವನ್ನು ನಾವು ಪಡೆದ ನಂತರ ನಿಮ್ಮ ಕುಂಡಲಿ ಅನ್ಲಾಕ್ ಆಗುತ್ತದೆ.",
+      "emptyCta": "ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಿ",
+      "periodEndsPrefix": "ಕೊನೆಗೊಳ್ಳುತ್ತದೆ"
+    },
+    "aiAstrologer": {
+      "title": "AI ಜ್ಯೋತಿಷಿ",
+      "howItWorks": "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ?",
+      "freeFirstQuestion": "ಮೊದಲ ಪ್ರಶ್ನೆ ಉಚಿತ",
+      "guides": {
+        "navi": {
+          "name": "Navi",
+          "title": "ವೈದಿಕ ತಜ್ಞ"
+        },
+        "relationship_guide": {
+          "name": "Meera",
+          "title": "ಸಂಬಂಧಗಳು"
+        },
+        "career_mentor": {
+          "name": "Arya",
+          "title": "ವೃತ್ತಿ ತಜ್ಞ"
+        },
+        "spiritual_guide": {
+          "name": "Anand",
+          "title": "ಸಂಪತ್ತು ಮಾರ್ಗದರ್ಶಿ"
+        },
+        "finance_mentor": {
+          "name": "Vidya",
+          "title": "ನಾಡಿ ತಜ್ಞ"
+        },
+        "astro_sage": {
+          "name": "Rishi",
+          "title": "KP ತಜ್ಞ"
+        }
+      }
+    }
   }
 }

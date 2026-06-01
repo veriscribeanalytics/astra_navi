@@ -13,7 +13,8 @@ export type PaywallFeatureKey =
   | 'tomorrow_horoscope'
   | 'guided_consult'
   | 'match_report'
-  | 'kundli_premium';
+  | 'kundli_premium'
+  | 'family_compatibility';
 
 /** A product suggestion shown in the PaywallCard (backend sends array). */
 export interface SuggestedProduct {

@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Forward to backend — stream the response back
-    const response = await backendFetch('/api/consult', {
+    const lang = validation.data.language || 'en';
+    const response = await backendFetch(`/api/consult?lang=${encodeURIComponent(lang)}`, {
       method: 'POST',
       body: JSON.stringify({ ...validation.data, name: user?.name || 'Friend' }),
       userEmail: email as string,

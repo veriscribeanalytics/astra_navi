@@ -10,7 +10,9 @@ interface LanguageContextType {
    *  Updates state, localStorage, NEXT_LOCALE cookie, and <html lang>
    *  but does NOT PUT to /api/user/profile — avoids sync loops. */
   syncLanguageFromProfile: (code: LanguageCode) => void;
-  t: (key: string) => string;
+  /** Resolve a dotted i18n key, optionally interpolating {placeholders}
+   *  from the values object (e.g. t('greeting', { name: 'Alex' })). */
+  t: (key: string, vars?: Record<string, string | number>) => string;
   availableLanguages: typeof languages;
 }
 
@@ -110,10 +112,18 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children, in
     // not a user-initiated change.  AuthContext already has the correct value.
   }, [applyLanguageLocally, language]);
 
-  const t = useCallback((key: string): string => {
+  const t = useCallback((key: string, vars?: Record<string, string | number>): string => {
     const keys = key.split('.');
     let current = locales[language] as Record<string, unknown>;
-    
+
+    const interpolate = (str: string): string => {
+      if (!vars) return str;
+      return str.replace(/\{(\w+)\}/g, (_match, name) => {
+        const v = vars[name];
+        return v === undefined || v === null ? `{${name}}` : String(v);
+      });
+    };
+
     for (const k of keys) {
       if (current[k] === undefined) {
         // Fallback to English if key missing in current language
@@ -122,12 +132,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children, in
             if (fallback[fk] === undefined) return key;
             fallback = fallback[fk] as Record<string, unknown>;
         }
-        return typeof fallback === 'string' ? fallback : key;
+        return typeof fallback === 'string' ? interpolate(fallback) : key;
       }
       current = current[k] as Record<string, unknown>;
     }
-    
-    return typeof current === 'string' ? current : key;
+
+    return typeof current === 'string' ? interpolate(current) : key;
   }, [language]);
 
   return (

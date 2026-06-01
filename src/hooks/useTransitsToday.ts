@@ -1,9 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { clientFetch } from '@/lib/apiClient';
 
+export interface Rahukaal {
+  date: string;
+  weekday: string;
+  start: string;
+  end: string;
+  startIso: string;
+  endIso: string;
+  durationMinutes: number;
+  segment: number;
+  source: string;
+}
+
 export interface TransitsTodayData {
   planets: { name: string; sign: string; house: number | null; isRetrograde?: boolean }[];
-  panchanga: { tithi: string; nakshatra: string; yoga: string; karana: string; vara: string };
+  panchanga: { tithi: string; nakshatra: string; yoga: string; karana: string; vara: string; rahukaal?: Rahukaal };
   notableTransits: string[];
   suggestedQuestions: string[];
   todayEnergy: string;

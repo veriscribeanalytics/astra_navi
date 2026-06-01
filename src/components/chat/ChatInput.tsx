@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
-import { useTranslation, useIsMobile } from '@/hooks';
+import { useTranslation, useIsMobile, useResponsive } from '@/hooks';
 import { 
     Mic, MicOff, 
     ArrowUp, Zap, Sparkles, Gem,
@@ -28,15 +28,31 @@ const AVATAR_PLACEHOLDERS: Record<string, string[]> = {
     "Type your question about relationships...",
   ],
   spiritual_guide: [
-    "Ask Anand for inner guidance...",
-    "What is your soul asking?",
-    "Type your spiritual question...",
+    "Ask Anand about health...",
+    "What guidance do you seek for your health?",
+    "Type your question about well-being...",
   ],
   astro_sage: [
     "Ask Rishi about your chart...",
     "Which planet are you curious about?",
     "Type your question about astrology...",
   ],
+  finance_mentor: [
+    "Ask Vidya about finance...",
+    "What's holding back your financial growth?",
+    "Type your question about wealth...",
+  ],
+};
+
+/** Short single-line placeholders for narrow viewports (≤480px) where the
+ *  long versions wrap and stretch the textarea. */
+const AVATAR_PLACEHOLDERS_SHORT: Record<string, string> = {
+  navi: "Ask Navi…",
+  career_mentor: "Ask Arya…",
+  relationship_guide: "Ask Meera…",
+  spiritual_guide: "Ask Anand…",
+  astro_sage: "Ask Rishi…",
+  finance_mentor: "Ask Vidya…",
 };
 
 interface SpeechRecognitionEvent extends Event {
@@ -61,9 +77,9 @@ interface SpeechRecognition extends EventTarget {
 const modeCycleOrder: Array<'quick' | 'normal' | 'deep'> = ['quick', 'normal', 'deep'];
 
 const modeOptionMap: Record<string, { label: string; Icon: React.FC<{ className?: string }> }> = {
-  quick: { label: 'Quick', Icon: Zap },
-  normal: { label: 'Normal', Icon: Sparkles },
-  deep: { label: 'Deep', Icon: Gem },
+  quick: { label: 'Instant', Icon: Zap },
+  normal: { label: 'Standard', Icon: Sparkles },
+  deep: { label: 'Deep Analysis', Icon: Gem },
 };
 
 const ChatInput: React.FC = () => {
@@ -73,8 +89,10 @@ const ChatInput: React.FC = () => {
     mode, setMode, attachments, addAttachment, removeAttachment,
     selectedAvatarId
   } = useChat();
-  const { language } = useTranslation();
+  const { t, language } = useTranslation();
   const isMobile = useIsMobile();
+  const { width: viewportWidth } = useResponsive();
+  const isNarrowViewport = viewportWidth > 0 && viewportWidth <= 480;
   
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
@@ -168,12 +186,16 @@ const ChatInput: React.FC = () => {
   };
 
   const modeOptions = [
-    { value: "quick" as const, label: "Quick", Icon: Zap },
-    { value: "normal" as const, label: "Normal", Icon: Sparkles },
-    { value: "deep" as const, label: "Deep", Icon: Gem },
+    { value: "quick" as const, label: "Instant", Icon: Zap },
+    { value: "normal" as const, label: "Standard", Icon: Sparkles },
+    { value: "deep" as const, label: "Deep Analysis", Icon: Gem },
   ];
 
   const currentPlaceholders = AVATAR_PLACEHOLDERS[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS.navi;
+  const shortPlaceholder = AVATAR_PLACEHOLDERS_SHORT[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS_SHORT.navi;
+  const activePlaceholder = isNarrowViewport
+    ? shortPlaceholder
+    : currentPlaceholders[placeholderIdx % currentPlaceholders.length];
 
   useEffect(() => {
     setPlaceholderIdx(0);
@@ -292,8 +314,8 @@ const ChatInput: React.FC = () => {
   const CycleIcon = currentModeOpt?.Icon || Sparkles;
   const cycleLabel = currentModeOpt?.label || 'Normal';
 
- return (
-    <div ref={containerRef} className="w-full px-3 sm:px-5 3xl:px-6 pb-[calc(0.75rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
+  return (
+    <div ref={containerRef} className="w-full px-2 sm:px-5 3xl:px-6 pb-[calc(0.5rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -302,7 +324,7 @@ const ChatInput: React.FC = () => {
         <div className="absolute inset-0 z-50 bg-secondary/10 border-2 border-secondary rounded-2xl flex items-center justify-center backdrop-blur-sm">
           <div className="text-center">
             <Paperclip className="w-8 h-8 text-secondary mx-auto mb-2" />
-            <p className="text-sm font-semibold text-secondary">Drop files here</p>
+            <p className="text-sm font-semibold text-secondary">{t('chat.input.dropFiles')}</p>
             <p className="text-xs text-on-surface-variant/50">Images & PDFs only</p>
           </div>
         </div>
@@ -335,56 +357,20 @@ const ChatInput: React.FC = () => {
       <div className="chat-input-container relative flex flex-col overflow-hidden transition-all">
         {showPreview && inputText.length > 0 && (
           <div className="px-4 py-3 border-b border-outline-variant/15 max-h-[150px] overflow-y-auto text-[15px] text-foreground">
-            <p className="text-[11px] font-bold text-on-surface-variant/40 uppercase tracking-wider mb-1">Preview</p>
+            <p className="text-[11px] font-bold text-on-surface-variant/40 uppercase tracking-wider mb-1">{t('chat.input.preview')}</p>
             <div className="ai-message-content leading-[1.8] break-words" style={{ whiteSpace: 'pre-wrap' }}>
               {inputText}
             </div>
           </div>
         )}
-        <div className="flex items-end gap-1.5 sm:gap-2 px-3.5 py-3 sm:py-2.5">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*,.pdf"
-            className="hidden"
-            onChange={(e) => { handleFileSelect(e.target.files); e.target.value = ''; }}
-          />
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={attachments.length >= MAX_ATTACHMENTS}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-              attachments.length >= MAX_ATTACHMENTS
-              ? 'text-foreground/15 cursor-not-allowed'
-              : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
-            }`}
-            title="Attach file"
-          >
-            <Paperclip className="w-4.5 h-4.5" />
-          </button>
-
-          <button 
-            onClick={toggleListening}
-            disabled={!speechSupported}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-              !speechSupported
-              ? 'text-foreground/15 cursor-not-allowed'
-              : isListening 
-              ? 'bg-red-500/20 text-red-500 animate-pulse'
-              : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
-            }`}
-            title={!speechSupported ? "Voice input not supported" : isListening ? "Stop listening" : "Voice input"}
-          >
-            {!speechSupported ? <MicOff className="w-4.5 h-4.5" /> : isListening ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
-          </button>
-
+        <div className="flex items-end gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2.5 sm:py-3">
           <textarea
             ref={textareaRef}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={inputText.length > 0 ? '' : currentPlaceholders[placeholderIdx % currentPlaceholders.length]}
-            className="w-full bg-transparent border-none outline-none text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-2.5 px-1 max-h-[150px] min-h-[44px] sm:min-h-0 no-scrollbar"
+            placeholder={inputText.length > 0 ? '' : activePlaceholder}
+            className="w-full bg-transparent border-none outline-none text-[14px] sm:text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-1.5 px-1 max-h-[150px] min-h-[38px] sm:min-h-0 no-scrollbar"
             rows={1}
           />
 
@@ -398,13 +384,13 @@ const ChatInput: React.FC = () => {
             </button>
           )}
 
-          <button 
+          <button
             onClick={handleSend}
             disabled={!inputText.trim() || isSending || isOverLimit}
-            className={`ripple-btn w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+            className={`ripple-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all gold-gradient text-on-primary shadow-md shadow-secondary/25 ${
               !inputText.trim() || isSending || isOverLimit
-              ? 'bg-surface-variant/50 text-foreground/15 cursor-not-allowed'
-              : 'gold-gradient text-on-primary hover:opacity-90 hover:scale-105 active:scale-95 shadow-md shadow-secondary/25'
+              ? 'opacity-60 cursor-not-allowed'
+              : 'hover:opacity-90 hover:scale-105 active:scale-95'
             }`}
           >
             <AnimatePresence mode="wait">
@@ -421,19 +407,52 @@ const ChatInput: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex flex-col gap-2 px-3.5 py-2.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
-            {isMobile ? (
-              <button
-                onClick={cycleMode}
-                className={`chat-mode-cycle-btn bg-secondary/20 text-secondary border border-secondary/30 shadow-sm shadow-secondary/10`}
-                title={`Mode: ${cycleLabel} — tap to cycle`}
-              >
-                <CycleIcon className="w-3.5 h-3.5" />
-                {cycleLabel}
-              </button>
-            ) : (
-              modeOptions.map(({ value: m, label, Icon }) => (
+        {/* Bottom Toolbar: Attach, Voice, Mode, Char Count */}
+        <div className="flex flex-row items-center justify-between px-2.5 sm:px-3.5 py-1.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 gap-2">
+          {/* Left tools: Paperclip, Voice */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={(e) => { handleFileSelect(e.target.files); e.target.value = ''; }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={attachments.length >= MAX_ATTACHMENTS}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                attachments.length >= MAX_ATTACHMENTS
+                ? 'text-foreground/15 cursor-not-allowed'
+                : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
+              }`}
+              title={t('chat.input.attachFile')}
+            >
+              <Paperclip className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            </button>
+
+            <button
+              onClick={toggleListening}
+              disabled={!speechSupported}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                !speechSupported
+                ? 'text-foreground/15 cursor-not-allowed'
+                : isListening 
+                ? 'bg-red-500/20 text-red-500 animate-pulse'
+                : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
+              }`}
+              title={!speechSupported ? "Voice input not supported" : isListening ? "Stop listening" : "Voice input"}
+            >
+              {!speechSupported ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : isListening ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
+            </button>
+          </div>
+
+          {/* Right/Center: Mode Selector and character count */}
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Desktop Mode Selector */}
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2.5">
+              {modeOptions.map(({ value: m, label, Icon }) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
@@ -446,15 +465,28 @@ const ChatInput: React.FC = () => {
                   <Icon className="w-3.5 h-3.5" />
                   {label}
                 </button>
-              ))
+              ))}
+            </div>
+
+            {/* Mobile Mode Selector */}
+            <button
+              onClick={cycleMode}
+              className="sm:hidden inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg bg-secondary/15 text-secondary border border-secondary/25 shrink-0 text-[11px] font-bold uppercase tracking-wide"
+              title={`Mode: ${cycleLabel} — tap to cycle`}
+              aria-label={`Mode: ${cycleLabel}`}
+            >
+              <CycleIcon className="w-3.5 h-3.5" />
+              <span>{cycleLabel}</span>
+            </button>
+
+            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden md:inline ml-1">{t('chat.input.naviUsesChart')}</span>
+            
+            {showCharCount && (
+              <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'} ml-2`}>
+                {charCount}/{MAX_CHARS}
+              </p>
             )}
-            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden sm:inline ml-1">Navi uses your birth chart</span>
           </div>
-          {showCharCount && (
-            <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'}`}>
-              {charCount}/{MAX_CHARS}
-            </p>
-          )}
         </div>
       </div>
     </div>

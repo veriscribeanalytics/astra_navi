@@ -13,7 +13,9 @@
     "howItWorks": "কিভাবে কাজ করে",
     "online": "অনলাইন",
     "onlineNow": "এখন অনলাইন",
-    "friend": "বন্ধু"
+    "friend": "বন্ধু",
+    "goBack": "পিছনে ফিরুন",
+    "returnHome": "বাড়িতে ফিরুন"
   },
   "nav": {
     "myJourney": "আমার যাত্রা",
@@ -23,6 +25,10 @@
     "myKundliDesc": "চার্টের বিবরণে গভীরে প্রবেশ করুন।",
     "chartMatching": "চার্ট ম্যাচিং",
     "chartMatchingDesc": "বৈদিক সামঞ্জস্য এবং সম্পর্ক বিশ্লেষণ।",
+    "forecast": "পূর্বাভাস",
+    "forecastDesc": "মাসিক এবং বার্ষিক জ্যোতিষশাস্ত্রীয় ভবিষ্যদ্বাণী।",
+    "myFamily": "আমার পরিবার",
+    "myFamilyDesc": "প্রিয়জনদের জন্মের বিবরণ সংরক্ষণ করুন, চার্ট দেখুন এবং সামঞ্জস্য পরীক্ষা করুন।",
     "consultNavi": "Navi-এর পরামর্শ নিন",
     "guidedSessions": "নির্দেশিত সেশন",
     "guidedSessionsDesc": "আপনার জন্য কাস্টমাইজড ধাপে ধাপে জীবন নির্দেশিকা।",
@@ -41,7 +47,7 @@
     "the27NakshatrasDesc": "চন্দ্র প্রাসাদ এবং মহাজাগতিক আর্কিটাইপ।",
     "planetaryYogas": "গ্রহ যোগ",
     "planetaryYogasDesc": "আপনার সম্ভাবনাকে সংজ্ঞায়িত করে এমন শক্তিশালী সংমিশ্রণ।",
-    "community": "সম্প্রদায়",
+    "community": "সম্প্রদায় or কমিউনিটি",
     "naviAiModels": "Navi AI মডেল",
     "naviAiModelsDesc": "ডোমেন-নির্দিষ্ট বৈদিক ইন্টেলিজেন্স এজেন্ট।",
     "helpSupport": "সাহায্য এবং সমর্থন",
@@ -181,7 +187,7 @@
     "askAiGuide": "জ্যোতিষশাস্ত্র সম্পর্কে আমাদের AI গাইড Navi-কে জিজ্ঞাসা করুন।",
     "readyToAlign": "আপনি কি মহাবিশ্বের সাথে ",
     "readyToAlignHighlight": "সারিবদ্ধ হতে প্রস্তুত?",
-    "finalCtaDesc": "হাজার হাজার মানুষের সাথে যোগ দিন যারা বৈদিক জ্যোতিষশাস্ত্রের প্রাচীন কোডগুলির মাধ্যমে স্পষ্টতা খুঁজে পেয়েছেন।",
+    "finalCtaDesc": "হাজার হাজার মানুষের সাথে যোগ দিন যিনি বৈদিক জ্যোতিষশাস্ত্রের প্রাচীন কোডগুলির মাধ্যমে স্পষ্টতা পেয়েছেন।",
     "beginJourney": "যাত্রা শুরু করুন",
     "learnMethod": "আমাদের পদ্ধতি শিখুন",
     "vargaCharts": "১৬+ বর্গ চার্ট",
@@ -200,7 +206,7 @@
     "dashasTitle": "দশা এবং চক্র",
     "dashasDesc": "গ্রহের সময় চক্র বুঝুন।",
     "timeMapping": "টাইম ম্যাপিং",
-    "predictiveAi": "প্রেডিকটিভ AI",
+    "predictiveAi": "প্রেডিকティブ AI",
     "remediesTitle": "প্রতিকার এবং রত্ন",
     "remediesDesc": "ভারসাম্যের জন্য খাঁটি প্রতিকার।",
     "vedicCure": "বৈদিক নিরাময়",
@@ -222,8 +228,8 @@
       },
       {
         "title": "দশা টাইমলাইন",
-        "desc": "আপনার ব্যক্তিগত সময় প্রভুদের আনলক করতে বিংশোত্তরী চক্র গণনা।",
-        "detail": "প্রেডিকটিভ"
+        "desc": "আপনার ব্যক্তিগত কাল-প্রভুদের উন্মোচন করতে বিংশোত্তরী দশা গণনা করা হচ্ছে।",
+        "detail": "প্রেডিকティブ"
       },
       {
         "title": "Navi বিশ্লেষণ",
@@ -252,7 +258,18 @@
         "desc": "এজ-ভিত্তিক কম্পিউটিং গোচর ট্র্যাকিংয়ের জন্য উচ্চ প্রাপ্যতা নিশ্চিত করে।",
         "sub": "99.9% আপটাইম"
       }
-    ]
+    ],
+    "hero": {
+      "bphsCertified": "BPHS শংসাপত্রপ্রাপ্ত",
+      "authenticJyotish": "খাঁটি জ্যোতিষ",
+      "scripturalInsight": "শাস্ত্রীয় অন্তর্দৃষ্টি",
+      "askNavi": "Navi কে জিজ্ঞাসা করুন...",
+      "ashtakootMilan": "অষ্টকূট মিলন",
+      "gunaMatching": "গুণ মিলন",
+      "highCompatibility": "উচ্চ সামঞ্জস্যতা",
+      "dailyAlignment": "দৈনিক প্রান্তিককরণ",
+      "transitTip": "গোচর পরামর্শ"
+    }
   },
   "dashboard": {
     "greetingMorning": "শুভ সকাল",
@@ -266,6 +283,12 @@
     "yesterday": "গতকাল",
     "systemHub": "সিস্টেম হাব",
     "cosmicPortals": "কসমিক পোর্টাল",
+    "yourGuides": "আপনার গাইড",
+    "meetYourGuides": "আপনার গাইডদের সাথে পরিচিত হন",
+    "guidesSubtitle": "ব্যক্তিগত নির্দেশনার জন্য একজন বিশেষজ্ঞ বেছে নিন — ক্যারিয়ার থেকে সম্পর্ক বা গভীর চার্ট বিশ্লেষণ।",
+    "startChat": "চ্যাট শুরু করুন",
+    "creditSingular": "ক্রেডিট",
+    "creditPlural": "ক্রেডিট",
     "janamKundli": "জন্ম কুণ্ডলী",
     "janamKundliDesc": "বৈদিক জ্ঞানে চালিত বিস্তারিত জন্ম চার্ট এবং গ্রহের বিশ্লেষণ।",
     "aiGuidance": "AI নির্দেশিকা",
@@ -278,7 +301,7 @@
     "guidedConsultingDesc": "ক্যারিয়ার, বিবাহ এবং জীবনের সিদ্ধান্তের জন্য কাঠামোগত পরামর্শ।",
     "deepDive": "ডিপ ডাইভ",
     "deepDiveDesc": "আপনার মহাজাগতিক টাইমলাইনের গভীর অন্তর্দৃষ্টি আনলক করুন:",
-    "cosmicArchive": "কসমিক আর্কাইভ",
+    "cosmicArchive": "মহাজাগতিক সংরক্ষণাগার",
     "cosmicArchiveDesc": "নক্ষত্র, যোগ এবং বৈদিক বিজ্ঞান সম্পর্কে গভীর নিবন্ধগুলি অন্বেষণ করুন।",
     "explore": "অন্বেষণ করুন",
     "moonSign": "চন্দ্র রাশি",
@@ -339,7 +362,14 @@
     "soulmateMatch": "ম্যাচ",
     "tithi": "তিথি",
     "yoga": "যোগ",
-    "startJourneyDesc": "আপনার মহাজাগতিক যাত্রা এখানে শুরু হয়। এটি এখানে দেখতে Navi এর পরামর্শ নিন।"
+    "rahukaal": "রাহুকাল",
+    "startJourneyDesc": "আপনার মহাজাগতিক যাত্রা এখানে শুরু হচ্ছে। এটি এখানে দেখতে নাভির সাথে পরামর্শ করুন।",
+    "unknownSign": "???",
+    "askNaviFab": "Navi-কে জিজ্ঞাসা করুন",
+    "familyEyebrow": "বন্ধন",
+    "familyAdd": "সদস্য যোগ করুন",
+    "familyEmptyCta": "আপনার প্রথম পরিবারের সদস্য যোগ করুন",
+    "familyViewAll": "সব দেখুন"
   },
   "horoscope": {
     "yourDayToday": "আজ আপনার দিন",
@@ -352,6 +382,7 @@
     "cosmicTiming": "কসমিক টাইমিং",
     "celestialInsights": "মহাজাগতিক অন্তর্দৃষ্টি",
     "detailedForecast": "বিস্তারিত পূর্বাভাস",
+    "viewFullForecast": "সম্পূর্ণ পূর্বাভাস দেখুন",
     "askNaviAboutToday": "আজকের সম্পর্কে Navi-কে জিজ্ঞাসা করুন",
     "aligningStars": "তারকাদের সারিবদ্ধ করা হচ্ছে",
     "calculatingTransits": "আপনার ব্যক্তিগত গ্রহের গোচর গণনা করা হচ্ছে...",
@@ -380,7 +411,8 @@
     "categoryHealth": "স্বাস্থ্য",
     "categoryLove": "প্রেম",
     "categoryFinance": "অর্থ",
-    "categoryGeneral": "সাধারণ",
+    "categoryGeneral": "সাধারণ দৃষ্টিভঙ্গি",
+    "categorySpiritual": "আধ্যাত্মিক",
     "weeklyForecast": "সাপ্তাহিক পূর্বাভাস",
     "past": "অতীত",
     "forecast": "পূর্বাভাস",
@@ -426,14 +458,19 @@
     "statNakshatras": "নক্ষত্র",
     "invalidCredentials": "অবৈধ লগইন শংসাপত্র।",
     "networkError": "সার্ভারের সাথে সংযুক্ত হতে পারেনি। অনুগ্রহ করে আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।",
-    "serverError": "সার্ভারটি বর্তমানে অনুপলব্ধ। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।"
+    "serverError": "সার্ভারটি বর্তমানে অনুপলব্ধ। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+    "resetLinkSent": "যদি অ্যাকাউন্টটি থেকে থাকে, তবে রিসেট করার নির্দেশাবলী পাঠানো হয়েছে।",
+    "alreadySignedIn": "আপনি ইতিমধ্যে সাইন ইন আছেন",
+    "goToDashboard": "ড্যাশবোর্ডে যান",
+    "signOut": "সাইন আউট",
+    "signInToContinue": "চালিয়ে যেতে সাইন ইন করুন"
   },
   "about": {
     "theTradition": "ঐতিহ্য",
     "scienceTitle": "৫,০০০ বছরের পুরনো মহাজাগতিক বিজ্ঞান",
     "traditionDesc": "জ্যোতিষ শাস্ত্র (আলোর বিজ্ঞান) সময়ের চক্রের মাধ্যমে রাজা, ঋষি এবং সাধকদের পথপ্রদর্শন করেছে। AstraNavi এই প্রাচীন গাণিতিক ঐতিহ্য সংরক্ষণ করে, এটি আধুনিক বিশ্বের কাছে অ্যাক্সেসযোগ্য করে তোলে।",
     "moreThanSigns": "শুধুমাত্র সূর্য রাশির চেয়ে অনেক বেশি",
-    "signsDesc1": "পাশ্চাত্য জ্যোতিষশাস্ত্র আপনাকে একটিমাত্র সূর্য রাশিতে সীমাবদ্ধ করে। জ্যোতিষশাস্ত্র সম্পূর্ণ চিত্রটি দেখে: ৯টি গ্রহ, ১২টি ভাব, ২৭টি নক্ষত্র এবং আপনার প্রথম নিঃশ্বাস নেওয়ার সময় লগ্নের সঠিক ডিগ্রি।",
+    "signsDesc1": "৯টি গ্রহ (Grahas) and ২৭টি নক্ষত্র (চন্দ্র প্রাসাদ)",
     "signsDesc2": "Navi তাৎক্ষণিকভাবে এই জটিল নিদর্শনগুলি গণনা করে, গ্রহের যোগ, দশা চক্র এবং গোচর বিশ্লেষণ করে, তারপরে বৃহৎ পরাশর হোরা শাস্ত্র এবং ফলদীপিকার মতো শাস্ত্রীয় গ্রন্থগুলির লেন্সের মাধ্যমে তাদের ব্যাখ্যা করে।",
     "whatNaviKnows": "Navi যা জানে",
     "naviKnows1": "মহাদশা এবং অন্তর্দ্দশা চক্র - গ্রহের টাইমলাইন যা জীবনের পর্যায়গুলি পরিচালনা করে।",
@@ -448,18 +485,434 @@
     "privacyDesc": "আপনার জন্ম চার্ট আপনার আত্মার ফিঙ্গারপ্রিন্ট। আমরা সমস্ত ডেটা এন্ড-টু-এন্ড এনক্রিপ্ট করি। আপনার কসমিক ব্লুপ্রিন্ট শুধুমাত্র আপনার।"
   },
   "chat": {
+    "empty": {
+      "badge": "আপনার ব্যক্তিগত বৈদিক নির্দেশক",
+      "headingLead": "আপনি কি বুঝতে চান",
+      "headingAccent": "আজ?",
+      "subtitle": "আপনার চার্ট, সময়, সম্পর্ক, ক্যারিয়ার বা আজকের গ্রহের শক্তি সম্পর্কে জিজ্ঞাসা করুন।",
+      "dataPrivate": "আপনার ডেটা ব্যক্তিগত এবং সুরক্ষিত"
+    },
     "guestWelcome": "নমস্তে ✦ আপনি বর্তমানে প্রিভিউ মোডে আছেন। Navi এর পরামর্শ নিতে এবং গভীর বৈদিক বিশ্লেষণ পেতে আপনার অ্যাকাউন্টে লগইন করুন।",
     "guestLoginRequired": "Navi এর পরামর্শ নিতে একটি অ্যাকাউন্ট প্রয়োজন। সম্পূর্ণ বৈদিক বিশ্লেষণ এবং গ্রহের অন্তর্দৃষ্টির জন্য লগইন করুন।",
+    "guestExpired": "পূর্বরূপের মেয়াদ শেষ",
+    "guestPreviewMode": "পূর্বরূপ মোড - বৈদিক বিশ্লেষণের জন্য পরিচয় প্রয়োজন",
+    "guestLoginNow": "এখনই লগইন করুন",
     "naviWelcome": "নমস্তে ✦ আমি Navi। আমাকে যে কোন কিছু জিজ্ঞাসা করুন।",
+    "emptyGreeting": "আপনাকে কী বুঝতে সাহায্য করতে পারি?",
+    "avatarQuestions": {
+      "navi": [
+        "আজকের গ্রহের অবস্থান আমার জন্য কী অর্থ বহন করে?",
+        "এই মাসে আমার জীবনের কোন ক্ষেত্রে মনোযোগ দেওয়া উচিত?",
+        "আমার বর্তমান জীবনের শিক্ষা কী?",
+        "আমার প্রভাবশালী গ্রহের শক্তি সম্পর্কে বলুন।"
+      ],
+      "career_mentor": [
+        "আমার চার্টের সাথে কোন ক্যারিয়ার পথটি সারিবদ্ধ?",
+        "পদোন্নতির জন্য জিজ্ঞাসা করার উপযুক্ত সময় কখন?",
+        "আমি কি আমার বর্তমান ক্ষেত্রে সাফল্য পাব?",
+        "আমার লুকানো পেশাগত শক্তিগুলি কী কী?"
+      ],
+      "relationship_guide": [
+        "আমি কখন আমার জীবনসঙ্গীর দেখা পাব?",
+        "আমার বর্তমান সম্পর্কটি কি সামঞ্জস্যপূর্ণ?",
+        "আমার সম্পর্কগুলিতে বারবার কোন ধরণের প্যাটার্ন বা ধরণ দেখা যাচ্ছে?",
+        "আমি কীভাবে আমার মানসিক বন্ধন আরও গভীর করতে পারি?"
+      ],
+      "spiritual_guide": [
+        "আমার জন্মকুণ্ডলী আমার সামগ্রিক স্বাস্থ্য সম্পর্কে কী প্রকাশ করে?",
+        "আমার শারীরিক শক্তি এবং জীবনীশক্তি কখন উন্নত হবে?",
+        "বর্তমানে কোন গ্রহের অবস্থান আমার স্বাস্থ্যকে প্রভাবিত করছে?",
+        "কোন জ্যোতিষীয় প্রতিকার আমার শারীরিক ও মানসিক স্বাস্থ্যকে সমর্থন করতে পারে?"
+      ],
+      "astro_sage": [
+        "আমার মহাদশা এবং এর অর্থ ব্যাখ্যা করুন।",
+        "আমার লগ্ন আমার সম্পর্কে কী প্রকাশ করে?",
+        "আমাকে আমার মূল গ্রহের প্রভাবগুলির মধ্য দিয়ে নিয়ে চলুন।",
+        "আমার চার্টে কোন যোগসমূহ উপস্থিত রয়েছে?"
+      ],
+      "finance_mentor": [
+        "আমার কুণ্ডলী আমার সম্পদের সম্ভাবনা সম্পর্কে কী বলে?",
+        "আমার আর্থিক অবস্থার কখন উন্নতি হবে?",
+        "বড় বিনিয়োগ করার জন্য এটি কি সঠিক সময়?",
+        "আমি কীভাবে আমার আর্থিক স্থিতিশীলতা বাড়াতে পারি?"
+      ]
+    },
+    "avatarIntros": {
+      "navi": "আজ মহাবিশ্ব আপনার জন্য কী সঞ্চয় করে রেখেছে?",
+      "career_mentor": "আসুন আপনার পেশাদার যাত্রা সম্পর্কে কথা বলি।",
+      "relationship_guide": "আপনার মনে কী রয়েছে?",
+      "spiritual_guide": "আসুন বৈদিক জ্যোতিষশাস্ত্রের জ্ঞানের মাধ্যমে আপনার স্বাস্থ্য, জীবনীশক্তি এবং শারীরিক সুস্থতা বিশ্লেষণ করি।",
+      "astro_sage": "আমাকে আপনার চার্ট দেখান — আসুন দেখি গ্রহরা কী প্রকাশ করে।",
+      "finance_mentor": "আসুন গ্রহের অবস্থানের সাহায্যে আপনার আর্থিক ভবিষ্যৎ এবং সম্পদের সম্ভাবনাকে আরও উন্নত করি।"
+    },
     "newConversation": "নতুন কথোপকথন",
     "errorSending": "বার্তা পাঠাতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "networkError": "নেটওয়ার্ক সংযোগ বিচ্ছিন্ন হয়েছে। অনুগ্রহ করে আপনার ইন্টারনেট পরীক্ষা করুন এবং আবার চেষ্টা করুন।",
+    "failedResponse": "উত্তর পেতে ব্যর্থ হয়েছে",
     "ratingSuccess": "রেটিং সংরক্ষিত হয়েছে। আপনার মতামতের জন্য ধন্যবাদ!",
     "ratingError": "রেটিং সংরক্ষণ করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "deleteSuccess": "কথোপকথন মুছে ফেলা হয়েছে।",
     "deleteError": "কথোপকথন মুছে ফেলতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "workInProgressTitle": "কাজ চলছে",
-    "workInProgressDesc": "এই বৈশিষ্ট্যটি বর্তমানে বিকাশাধীন। আমরা আপনার জন্য একটি আশ্চর্যজনক অভিজ্ঞতা আনতে কঠোর পরিশ্রম করছি!"
+    "workInProgressDesc": "এই বৈশিষ্ট্যটি বর্তমানে বিকাশাধীন। আমরা আপনার জন্য একটি আশ্চর্যজনক অভিজ্ঞতা আনতে কঠোর পরিশ্রম করছি!",
+    "messageEdited": "বার্তা সম্পাদিত হয়েছে।",
+    "messageDeleted": "বার্তা মুছে ফেলা হয়েছে।",
+    "messagePinned": "বার্তা পিন করা হয়েছে।",
+    "messageUnpinned": "বার্তা আনপিন করা হয়েছে।",
+    "searchPlaceholder": "কথোপকথন খুঁজুন...",
+    "searchMessages": "বার্তা খুঁজুন",
+    "searchPrevious": "পূর্ববর্তী মিল",
+    "searchNext": "পরবর্তী মিল",
+    "searchClose": "অনুসন্ধান বন্ধ করুন",
+    "noSearchResults": "কোনো ফলাফল পাওয়া যায়নি।",
+    "confirmDeleteMsg": "এই বার্তাটি মুছে ফেলতে চান?",
+    "confirmDeleteYes": "হ্যাঁ",
+    "confirmDeleteNo": "না",
+    "editMessage": "বার্তা সম্পাদনা করুন",
+    "saveEdit": "সংরক্ষণ করুন",
+    "cancelEdit": "বাতিল করুন",
+    "editedLabel": "(সম্পাদিত)",
+    "exportTXT": "TXT হিসেবে এক্সপোর্ট করুন",
+    "exportJSON": "JSON হিসেবে এক্সপোর্ট করুন",
+    "copiedToClipboard": "ক্লিপবোর্ডে কপি করা হয়েছে",
+    "speaking": "কথা বলছে...",
+    "speechStopped": "কথা বলা বন্ধ করা হয়েছে",
+    "newResponseArriving": "নতুন উত্তর আসছে...",
+    "thinkingReadingChart": "আপনার চার্ট পড়া হচ্ছে...",
+    "thinkingConsultingStars": "তারকাদের পরামর্শ নেওয়া হচ্ছে...",
+    "thinkingInterpretingTransits": "গোচর ব্যাখ্যা করা হচ্ছে...",
+    "thinkingAligningPlanetaryData": "গ্রহের উপাত্ত সাজানো হচ্ছে...",
+    "thinkingCareer": "আপনার ক্যারিয়ারের সম্ভাবনা বিশ্লেষণ করা হচ্ছে...",
+    "thinkingLove": "আপনার সম্পর্কের অন্তর্দৃষ্টি অন্বেষণ করা হচ্ছে...",
+    "thinkingStudy": "আপনার পড়াশোনা এবং শেখার পথ পর্যালোচনা করা হচ্ছে...",
+    "thinkingFinance": "আপনার আর্থিক সূচকসমূহ পরীক্ষা করা হচ্ছে...",
+    "thinkingHealth": "আপনার স্বাস্থ্য এবং জীবনীশক্তি মূল্যায়ন করা হচ্ছে...",
+    "thinkingTiming": "অনুকূল সময় গণনা করা হচ্ছে...",
+    "thinkingRemedy": "আপনার জন্য প্রতিকার প্রস্তুত করা হচ্ছে...",
+    "thinkingGeneral": "আপনার কসমিক ব্লুপ্রিন্টের পরামর্শ নেওয়া হচ্ছে...",
+    "thoughtProcess": "চিন্তা প্রক্রিয়া",
+    "chartFactors": "এই পাঠের জন্য চার্টের কারণসমূহ",
+    "retry": "আবার চেষ্টা করুন",
+    "copy": "কপি করুন",
+    "pin": "পিন করুন",
+    "unpin": "আনপিন করুন",
+    "pinMessage": "বার্তা পিন করুন",
+    "unpinMessage": "বার্তা আনপিন করুন",
+    "regenerate": "পুনরায় তৈরি করুন",
+    "speak": "বলুন",
+    "stop": "থামুন",
+    "dashaNow": "এখন",
+    "newMessage": "নতুন",
+    "newMessages": "নতুন",
+    "sidebar": {
+      "newChat": "নতুন চ্যাট",
+      "searchPlaceholder": "চ্যাট খুঁজুন...",
+      "today": "আজ",
+      "yesterday": "গতকাল",
+      "previous7Days": "গত ৭ দিন",
+      "older": "পুরানো",
+      "noChatsYet": "এখনও কোনো চ্যাট নেই",
+      "noMatchingChats": "কোনো মানানসই চ্যাট পাওয়া যায়নি",
+      "tryDifferentSearch": "ভিন্ন কোনো অনুসন্ধান শব্দ চেষ্টা করুন।",
+      "startNewConversation": "উপরে একটি নতুন কথোপকথন শুরু করুন।",
+      "historyLocked": "ইতিহাস লক করা হয়েছে",
+      "loginToSave": "আপনার কথোপকথন সংরক্ষণ করতে লগইন করুন।",
+      "loginToUnlock": "আনলক করতে লগইন করুন",
+      "downloadTxt": "TXT",
+      "downloadJson": "JSON",
+      "delete": "মুছে ফেলুন",
+      "loadMore": "আরও লোড করুন",
+      "loading": "লোড হচ্ছে...",
+      "deleteChatForever": "চ্যাট কি চিরতরে মুছে ফেলবেন?",
+      "deletePermanentWarning": "এটি স্থায়ীভাবে মুছে ফেলবে",
+      "wantBackupFirst": "প্রথমে ব্যাকআপ নিতে চান?",
+      "saveAndDownload": "সংরক্ষণ ও ডাউনলোড করুন",
+      "downloading": "ডাউনলোড হচ্ছে...",
+      "cancel": "বাতিল করুন",
+      "deleting": "মুছে ফেলা হচ্ছে...",
+      "deleteConfirm": "মুছে ফেলুন",
+      "downloadHeaderPrefix": "AstraNavi চ্যাট —",
+      "downloadDateLabel": "তারিখ:",
+      "downloadRoleYou": "আপনি",
+      "downloadRoleNavi": "Navi",
+      "close": "সাইডবার বন্ধ করুন"
+    },
+    "detail": {
+      "moonSign": "চন্দ্র রাশি",
+      "sunSign": "সূর্য রাশি",
+      "lagna": "লগ্ন",
+      "birthDate": "জন্ম তারিখ",
+      "birthTime": "জন্ম সময়",
+      "birthPlace": "জন্মস্থান",
+      "notSet": "সেট করা হয়নি",
+      "identityRequired": "পরিচয় প্রয়োজন",
+      "chartContext": "চার্ট প্রসঙ্গ",
+      "edit": "সম্পাদনা করুন",
+      "view": "দেখুন",
+      "chatRating": "চ্যাট রেটিং",
+      "rateResponsesToSeeAverage": "এখানে গড় দেখতে প্রতিক্রিয়াগুলি রেট করুন",
+      "conversationStats": "কথোপকথনের পরিসংখ্যান",
+      "messages": "বার্তা",
+      "questions": "প্রশ্ন",
+      "topics": "বিষয়",
+      "noTopicsYet": "এখনও কোনো বিষয় নেই",
+      "birthChart": "জন্ম চার্ট",
+      "chart": "চার্ট",
+      "closeChartContext": "চার্ট প্রসঙ্গ বন্ধ করুন",
+      "openLargerBirthChart": "বৃহত্তর জন্ম চার্ট খুলুন",
+      "expandedBirthChart": "সম্প্রসারিত জন্ম চার্ট",
+      "closeExpandedChart": "সম্প্রসারিত চার্ট বন্ধ করুন",
+      "chatSummary": "চ্যাট সারসংক্ষেপ",
+      "summaryLoading": "সারসংক্ষেপ তৈরি করা হচ্ছে...",
+      "noSummaryYet": "সারসংক্ষেপ তৈরি করতে কিছু বার্তা পাঠান।",
+      "todayEnergy": "আজকের শক্তি",
+      "todayEnergyLoading": "আজকের শক্তি লোড করা হচ্ছে...",
+      "transitPlanets": "সক্রিয় গ্রহসমূহ",
+      "transitPanchanga": "পঞ্চাঙ্গ",
+      "notableTransits": "উল্লেখযোগ্য গোচরসমূহ"
+    },
+    "avatarPicker": {
+      "loading": "লোড হচ্ছে…",
+      "defaultName": "Navi",
+      "ariaAvatar": "Avatar: {name}{title}। পরিবর্তন করতে ক্লিক করুন।",
+      "ariaChooseAvatar": "অবতার চয়ন করুন",
+      "chooseGuide": "আপনার পথপ্রদর্শক চয়ন করুন",
+      "creditsNotice": "বিভিন্ন অবতারের জন্য বার্তা প্রতি বিভিন্ন ক্রেডিট খরচ হয়।",
+      "creditSingle": "{n} ক্রেডিট",
+      "creditPlural": "{n} ক্রেডিট",
+      "default": "ডিফল্ট"
+    },
+    "header": {
+      "viewHistory": "ইতিহাস দেখুন",
+      "online": "অনলাইন",
+      "viewChartContext": "কোষ্ঠী প্রসঙ্গ দেখুন",
+      "closeChat": "চ্যাট বন্ধ করুন",
+      "back": "পিছনে"
+    },
+    "feedback": {
+      "ratingLabels": {
+        "1": "অসঙ্গতিপূর্ণ",
+        "2": "উন্নতি প্রয়োজন",
+        "3": "আংশিক স্পষ্টতা",
+        "4": "প্রায় প্রস্তুত",
+        "5": "মহাজাগতিকভাবে সামঞ্জস্যপূর্ণ"
+      },
+      "tagSectionLabels": {
+        "1": "এই পাঠে কী ভুল হয়েছে?",
+        "2": "পাঠটি কোথায় কম পড়েছে?",
+        "3": "এই অন্তর্দৃষ্টিতে কী উন্নতি করা যেতে পারে?",
+        "4": "কোন ছোট জিনিসটি বাদ পড়েছে?",
+        "5": "এই পাঠটিকে কী অসাধারণ করে তুলেছে?"
+      },
+      "placeholders": {
+        "1": "এখানে নক্ষত্রগুলি সম্পূর্ণ অসঙ্গতিপূর্ণ ছিল - কী ভুল মনে হয়েছে?",
+        "2": "পাঠের কোন অংশটি লক্ষ্যভ্রষ্ট হয়েছে?",
+        "3": "এই পাঠে কোন মহাজাগতিক অন্তর্দৃষ্টি অনুপস্থিত ছিল?",
+        "4": "প্রায় সামঞ্জস্যপূর্ণ - কী এই পাঠটিকে নিখুঁত করে তুলবে?",
+        "5": "আপনার মহাজাগতিক যাত্রায় কোনটি সবচেয়ে বেশি অনুরণিত হয়েছে?"
+      },
+      "tags": {
+        "1": {
+          "0": "সুরটি অবজ্ঞাপূর্ণ বা অভদ্র মনে হয়েছে",
+          "1": "সম্পূর্ণ ভুল ভবিষ্যদ্বাণী",
+          "2": "গ্রহের অবস্থানগুলি ভুল ছিল",
+          "3": "Dasha বিশ্লেষণ সম্পূর্ণ ভুল ছিল",
+          "4": "আমার জন্মকুণ্ডলীর (Kundli) জন্য অপ্রাসঙ্গিক",
+          "5": "অন্যান্য"
+        },
+        "2": {
+          "0": "সুরটি যান্ত্রিক বা ব্যক্তহীন মনে হয়েছে",
+          "1": "আমার জন্মকুণ্ডলীর বিবরণ ভুল পড়েছে",
+          "2": "ভুল গ্রহের গোচর উল্লেখ করা হয়েছে",
+          "3": "সময়ের ভবিষ্যদ্বাণীগুলি সঠিক ছিল না",
+          "4": "আমার আসল প্রশ্নটি উপেক্ষা করেছে",
+          "5": "অন্যান্য"
+        },
+        "3": {
+          "0": "সুরটি আরও সহানুভূতিশীল হতে পারত",
+          "1": "আংশিকভাবে সঠিক কিন্তু মূল দিকগুলি মিস করেছে",
+          "2": "গ্রহের সংমিশ্রণগুলি সম্পূর্ণরূপে ব্যাখ্যা করা হয়নি",
+          "3": "সময়ের ভবিষ্যদ্বাণীগুলি অস্পষ্ট মনে হয়েছে",
+          "4": "প্রতিকারগুলি (Remedies) খুব সাধারণ ছিল",
+          "5": "অন্যান্য"
+        },
+        "4": {
+          "0": "সুরটি উষ্ণ এবং সহায়ক ছিল",
+          "1": "ছক বিবরণে সামান্য ভুল",
+          "2": "গোচর (Transit) বিশ্লেষণ আরও গভীর হতে পারত",
+          "3": "Dasha অন্তর্দৃষ্টি সংক্ষিপ্ত ছিল",
+          "4": "আরও নির্দিষ্ট প্রতিকার চেয়েছিলাম",
+          "5": "অন্যান্য"
+        },
+        "5": {
+          "0": "সুরটি সহানুভূতিশীল এবং বিজ্ঞতাপূর্ণ ছিল",
+          "1": "সঠিক ভবিষ্যদ্বাণী",
+          "2": "চমৎকার গ্রহের বিশ্লেষণ",
+          "3": "নির্ভুল সময়ের অন্তর্দৃষ্টি",
+          "4": "প্রতিকারগুলি ব্যবহারিক এবং সহায়ক ছিল",
+          "5": "অন্যান্য"
+        }
+      },
+      "shareFeedback": "মতামত শেয়ার করুন",
+      "commentPlaceholder": "বিস্তারিত শেয়ার করুন (ঐচ্ছিক)",
+      "disclaimer": "আপনার মতামত Navi-কে তার বৈদিক প্রজ্ঞাকে আরও উন্নত করতে সাহায্য করে। সমস্ত প্রতিক্রিয়া বেনামী এবং শুধুমাত্র AstraNavi-এর মহাজাগতিক দিকনির্দেশনা উন্নত করতে ব্যবহৃত হয়।",
+      "submit": "মতামত জমা দিন"
+    },
+    "input": {
+      "dropFiles": "এখানে ফাইল ড্রপ করুন",
+      "preview": "পূর্বরূপ",
+      "attachFile": "ফাইল যুক্ত করুন",
+      "naviUsesChart": "Navi আপনার জন্ম কুণ্ডলী ব্যবহার করে"
+    },
+    "messages": {
+      "scrollToLatest": "সর্বশেষ বার্তায় যান"
+    },
+    "starterCards": {
+      "navi": [
+        {
+          "title": "আজকের শক্তি",
+          "description": "আজকের গ্রহের অবস্থান আমার জন্য কী অর্থ বহন করে?",
+          "question": "আজকের গ্রহের অবস্থান আমার জন্য কী অর্থ বহন করে?"
+        },
+        {
+          "title": "কেরিয়ার সময়",
+          "description": "এই মাসে আমার কোন কাজের ক্ষেত্রে মনোযোগ দেওয়া উচিত?",
+          "question": "এই মাসে আমার কোন কাজের ক্ষেত্রে মনোযোগ দেওয়া উচিত?"
+        },
+        {
+          "title": "জীবনের পাঠ",
+          "description": "আমার বর্তমান জীবনের পাঠ বা আত্মিক উন্নতি কী?",
+          "question": "আমার বর্তমান জীবনের পাঠ কী?"
+        },
+        {
+          "title": "সম্পর্ক",
+          "description": "ভালবাসা সম্পর্কে আমার এখন কী বোঝা উচিত?",
+          "question": "ভালবাসা সম্পর্কে আমার এখন কী বোঝা উচিত?"
+        }
+      ],
+      "career_mentor": [
+        {
+          "title": "কেরিয়ার পথ",
+          "description": "আমার ছক অনুযায়ী কোন দিকটি সবচেয়ে মানানসই?",
+          "question": "আমার ছক অনুযায়ী কোন কেরিয়ার পথটি মানানসই?"
+        },
+        {
+          "title": "পদোন্নতির সময়",
+          "description": "পদোন্নতি চাওয়ার সঠিক সময় কখন?",
+          "question": "পদোন্নতি চাওয়ার সঠিক সময় কখন?"
+        },
+        {
+          "title": "লুকানো শক্তি",
+          "description": "আমি কোন পেশাদার গুণাবলী উপেক্ষা করছি?",
+          "question": "আমার লুকানো পেশাগত শক্তিগুলি কী কী?"
+        },
+        {
+          "title": "সাফল্যের সম্ভাবনা",
+          "description": "আমি কি আমার বর্তমান ক্ষেত্রে সাফল্য পাব?",
+          "question": "আমি কি আমার বর্তমান ক্ষেত্রে সাফল্য পাব?"
+        }
+      ],
+      "relationship_guide": [
+        {
+          "title": "সঙ্গীর সাথে দেখা",
+          "description": "কখন আমার জীবনসঙ্গীর সাথে দেখা হবে?",
+          "question": "কখন আমার জীবনসঙ্গীর সাথে দেখা হবে?"
+        },
+        {
+          "title": "সামঞ্জস্যতা",
+          "description": "আমার বর্তমান সম্পর্ক কি আমার ছক অনুযায়ী ঠিক আছে?",
+          "question": "আমার বর্তমান সম্পর্ক কি সামঞ্জস্যপূর্ণ?"
+        },
+        {
+          "title": "বারংবার ঘটা প্যাটার্ন",
+          "description": "আমার সম্পর্কের মধ্যে কোন বিষয়টি বারবার ফিরে আসছে?",
+          "question": "আমার সম্পর্কের মধ্যে বারবার ফিরে আসা প্যাটার্নগুলি কী কী?"
+        },
+        {
+          "title": "গভীর বন্ধন",
+          "description": "আমি কীভাবে আমার মানসিক বন্ধন আরও গভীর করতে পারি?",
+          "question": "আমি কীভাবে আমার মানসিক বন্ধন আরও গভীর করতে পারি?"
+        }
+      ],
+      "spiritual_guide": [
+        {
+          "title": "সামগ্রিক স্বাস্থ্য",
+          "description": "আমার কুণ্ডলী আমার স্বাস্থ্য সম্পর্কে কী বলে?",
+          "question": "আমার জন্মকুণ্ডলী আমার সামগ্রিক স্বাস্থ্য সম্পর্কে কী প্রকাশ করে?"
+        },
+        {
+          "title": "জীবনীশক্তি ও শক্তি",
+          "description": "আমার শারীরিক শক্তি কখন উন্নত হবে?",
+          "question": "আমার শারীরিক শক্তি এবং জীবনীশক্তি কখন উন্নত হবে?"
+        },
+        {
+          "title": "গ্রহের অবস্থান",
+          "description": "বর্তমানে কোন গ্রহগুলি আমার স্বাস্থ্যকে প্রভাবিত করছে?",
+          "question": "বর্তমানে কোন গ্রহের অবস্থান আমার স্বাস্থ্যকে প্রভাবিত করছে?"
+        },
+        {
+          "title": "স্বাস্থ্য প্রতিকার",
+          "description": "কোন প্রতিকার আমার স্বাস্থ্যকে সমর্থন করতে পারে?",
+          "question": "কোন জ্যোতিষীয় প্রতিকার আমার শারীরিক ও মানসিক স্বাস্থ্যকে সমর্থন করতে পারে?"
+        }
+      ],
+      "astro_sage": [
+        {
+          "title": "মহাদশা",
+          "description": "আমি বর্তমানে কোন গ্রহের দশায় আছি?",
+          "question": "আমার মহাদশা সম্পর্কে বিস্তারিত বলুন।"
+        },
+        {
+          "title": "আমার লগ্ন",
+          "description": "আমার লগ্ন আমার সম্পর্কে কী প্রকাশ করে?",
+          "question": "আমার লগ্ন আমার সম্পর্কে কী প্রকাশ করে?"
+        },
+        {
+          "title": "গ্রহের দৃষ্টি",
+          "description": "আমার প্রধান গ্রহের দৃষ্টিগুলি ব্যাখ্যা করুন।",
+          "question": "আমার প্রধান গ্রহের দৃষ্টিগুলি ব্যাখ্যা করুন।"
+        },
+        {
+          "title": "কোষ্ঠীতে যোগ",
+          "description": "আমার কোষ্ঠীতে কী কী যোগ রয়েছে?",
+          "question": "আমার কোষ্ঠীতে কী কী যোগ রয়েছে?"
+        }
+      ],
+      "finance_mentor": [
+        {
+          "title": "সম্পদের সম্ভাবনা",
+          "description": "আমার কুণ্ডলী আমার সম্পদ সম্পর্কে কী বলে?",
+          "question": "আমার কুণ্ডলী আমার সম্পদের সম্ভাবনা সম্পর্কে কী বলে?"
+        },
+        {
+          "title": "আর্থিক প্রবৃদ্ধি",
+          "description": "আমার আর্থিক অবস্থার কখন উন্নতি হবে?",
+          "question": "আমার আর্থিক অবস্থার কখন উন্নতি হবে?"
+        },
+        {
+          "title": "বিনিয়োগের সময়",
+          "description": "বড় বিনিয়োগ করার জন্য এটি কি ভালো সময়?",
+          "question": "বড় বিনিয়োগ করার জন্য এটি কি সঠিক সময়?"
+        },
+        {
+          "title": "আর্থিক স্থিতিশীলতা",
+          "description": "আমি কীভাবে আমার স্থিতিশীলতা বাড়াতে পারি?",
+          "question": "আমি কীভাবে আমার আর্থিক স্থিতিশীলতা বাড়াতে পারি?"
+        }
+      ]
+    },
+    "avatars": {
+      "spiritual_guide": {
+        "name": "আনন্দ",
+        "title": "स्वास्थ्य উপদেষ্টা",
+        "description": "আপনার স্বাস্থ্য, জীবনীশক্তি এবং শারীরিক সুস্থতা সম্পর্কে গভীর ধারণা লাভ করুন।"
+      },
+      "finance_mentor": {
+        "name": "বিদ্যা",
+        "title": "আর্থিক জ্যোতিষী",
+        "description": "আপনার সম্পদ, বিনিয়োগ এবং আর্থিক স্থিতিশীলতা উন্নত করুন।"
+      }
+    }
   },
   "healthForecast": {
     "title": "স্বাস্থ্য পূর্বাভাস",
@@ -504,7 +957,7 @@
   "faqs": [
     {
       "q": "বৈদিক জ্যোতিষশাস্ত্র পশ্চিমা জ্যোতিষশাস্ত্র থেকে কীভাবে আলাদা?",
-      "a": "জ্যোতিষ (বৈদিক জ্যোতিষ) প্রকৃত নক্ষত্রের অবস্থানগুলি ট্র্যাক করার জন্য সাইডরিয়াল রাশিচক্র ব্যবহার করে এবং আপনার চন্দ্র রাশি (রাশি), কর্মের নিদর্শন এবং জীবনের ঘটনাগুলির সময় ভবিষ্যদ্বাণী করতে গ্রহের সময়ের চক্রের (দশা) উপর জোর দেয়। পশ্চিমা জ্যোতিষশাস্ত্র ক্রান্তীয় রাশিচক্র ব্যবহার করে এবং সূর্য রাশির মনোবিজ্ঞানের উপর জোর দেয়। বৈদিক জ্যোতিষশাস্ত্র ভবিষ্যদ্বাণীমূলক; পশ্চিমা হল বর্ণনামূলক।"
+      "a": "Restructure for clarity: জ্যোতিষ সাইডরিয়াল রাশিচক্র ব্যবহার করে... আপনার চন্দ্র রাশি, কর্মিক প্যাটার্ন এবং গ্রহের দশা চক্রের উপর জোর দেয়।"
     },
     {
       "q": "Navi কীভাবে আমার চার্ট ব্যাখ্যা করে?",
@@ -524,108 +977,867 @@
     }
   ],
   "forecast": {
-    "title": "Forecast",
-    "heading": "Your Cosmic Forecast",
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "loading": "Calculating planetary positions...",
-    "best": "Best",
-    "worst": "Challenging",
-    "avg": "Average",
-    "trend": "Trend",
-    "todaysSnapshot": "Today's Cosmic Snapshot",
-    "labelFavorable": "Favorable",
-    "labelStable": "Stable but Pressured",
-    "labelChallenging": "Challenging",
-    "bestDay": "Best Day",
-    "challengingDay": "Challenging Day",
-    "naviSuggestion": "Navi Suggests",
-    "ctaAskNavi": "Ask Navi Why",
-    "ctaPlanDay": "Plan My Day",
-    "mainForecast": "Main Forecast",
-    "whatItMeans": "What It Means",
-    "whatItMeansBody": "{planet} is the dominant influence right now. A score of {score} suggests how strongly that energy shapes your day-to-day choices.",
-    "alerts": "Alerts",
-    "planetReason": "Planet Reason"
+    "title": "পূর্বাভাস",
+    "heading": "আপনার মহাজাগতিক পূর্বাভাস",
+    "monthly": "মাসিক",
+    "yearly": "বার্ষিক",
+    "loading": "গ্রহের অবস্থান গণনা করা হচ্ছে...",
+    "best": "সেরা",
+    "worst": "চ্যালেঞ্জিং",
+    "avg": "গড়",
+    "trend": "ট্রেন্ড",
+    "todaysSnapshot": "আজকের মহাজাগতিক চিত্র",
+    "labelFavorable": "অনুকূল",
+    "labelStable": "স্থিতিশীল কিন্তু চাপযুক্ত",
+    "labelChallenging": "চ্যালেঞ্জিং",
+    "bestDay": "সেরা দিন",
+    "challengingDay": "চ্যালেঞ্জিং দিন",
+    "naviSuggestion": "Navi পরামর্শ দিচ্ছে",
+    "ctaAskNavi": "Navi-কে জিজ্ঞাসা করুন কেন",
+    "ctaPlanDay": "আমার দিনটি পরিকল্পনা করুন",
+    "mainForecast": "প্রধান পূর্বাভাস",
+    "whatItMeans": "এর মানে কী",
+    "whatItMeansBody": "বর্তমানে {planet} সবচেয়ে প্রভাবশালী। {score} স্কোরটি নির্দেশ করে যে এই শক্তি আপনার দৈনন্দিন সিদ্ধান্তগুলিকে কতটা দৃঢ়ভাবে প্রভাবিত করছে।",
+    "alerts": "সতর্কতা",
+    "planetReason": "গ্রহের কারণ",
+    "next": "পরবর্তী",
+    "previous": "পূর্ববর্তী",
+    "overviewLabel": "সারসংক্ষেপ",
+    "today": "আজ",
+    "weekLabel": "সপ্তাহ {n}",
+    "legendHigh": "৭৫+",
+    "legendAverage": "৪৫–৭৪",
+    "legendChallenging": "< ৪৫",
+    "weekdays": {
+      "sun": "রবি",
+      "mon": "সোম",
+      "tue": "মঙ্গ (to match abbreviation pattern)",
+      "wed": "বুধ",
+      "thu": "বৃহস্পতি",
+      "fri": "শুক্র",
+      "sat": "শনি"
+    },
+    "monthsShort": {
+      "jan": "জানু",
+      "feb": "ফেব্রু",
+      "mar": "মার্চ",
+      "apr": "এপ্রিল",
+      "may": "মে",
+      "jun": "জুন",
+      "jul": "জুলাই",
+      "aug": "আগস্ট",
+      "sep": "সেপ্টে",
+      "oct": "অক্টো",
+      "nov": "নভে",
+      "dec": "ডিসে"
+    },
+    "snapshot": {
+      "defaultSuggestion": "সর্বোত্তম ফলাফলের জন্য আপনার ক্রিয়াকলাপগুলিকে বর্তমান মহাজাগতিক ছন্দের সাথে সারিবদ্ধ করুন।",
+      "whyPrompt": "আজ আমার পূর্বাভাসের স্কোর {score} কেন?",
+      "planPrompt": "আজকের পূর্বাভাসের বিবরণের উপর ভিত্তি করে আমার দিনটি পরিকল্পনা করতে আমাকে সাহায্য করুন।"
+    },
+    "ariaDay": "{weekday} {date}, স্কোর {score}",
+    "todayShort": "আজ",
+    "weekly": "৭ দিন"
   },
   "plans": {
-    "title": "Unlock Your Cosmic Potential",
-    "subtitle": "Choose the plan that matches your journey. From daily insights to deep kundli analysis — Navi credits power every feature.",
-    "creditBalance": "Navi Credits",
-    "naviCredits": "Navi Credits",
-    "currentPlan": "Current Plan",
-    "currentPlanButton": "Current Plan",
-    "selectPlan": "Select Plan",
-    "buyCredits": "Buy Credits",
-    "subscriptions": "Subscription Plans",
-    "creditPacks": "Credit Packs",
-    "subscription": "Subscription",
-    "creditPack": "Credit Pack",
-    "price": "Price",
-    "credits": "Credits",
-    "validity": "Validity",
-    "tier": "Tier",
-    "oneYear": "1 Year",
-    "oneMonth": "1 Month",
-    "days": "days",
-    "month": "month",
-    "year": "year",
-    "subscriptionExpires": "Subscription expires",
-    "creditsExpire": "Credits expire",
-    "upgradeForFeature": "Upgrade to unlock",
-    "catalogUnavailable": "Product catalog is currently unavailable. Please try again later.",
-    "noProductsAvailable": "No plans available yet. Stay tuned for upcoming subscription and credit pack options.",
-    "noCreditHistory": "No Credit Activity Yet",
-    "noCreditHistoryDesc": "When you use premium features like chat, consult, or kundli analysis, your credit usage will appear here.",
-    "creditUsageHistory": "Credit Usage History",
-    "paymentComingSoon": "Payment Coming Soon",
-    "paymentIntegrationNotice": "Razorpay, App Store, and Play Store integration is under development. Your selected plan will be saved for quick purchase when payments launch.",
-    "buyButtonDisabled": "Payment Integration Coming Soon",
-    "backToPlans": "Back to Plans",
-    "betaNoticeTitle": "Early Adopter Benefits",
-    "betaNoticeDesc": "As a beta tester, you'll shape the future of AstraNavi. When we launch, early supporters will receive exclusive benefits, special pricing, and lifetime recognition as founding members.",
-    "earlyAdopter": "Early Adopter",
-    "featureUnlimitedChat": "Unlimited Navi consultations",
-    "featureExtendedChat": "Extended daily chat access",
-    "featureFullHoroscope": "Full personalized daily horoscope",
-    "featureTomorrowHoroscope": "Tomorrow's forecast — plan ahead",
-    "featureBasicConsult": "Guided consult sessions",
-    "featureGuidedConsult": "Unlimited guided consult sessions",
-    "featureMatchReport": "Complete match compatibility reports",
-    "featureKundliPremium": "Full Kundli premium sections",
-    "featureKundliBasicPremium": "Basic Kundli premium access",
-    "featureDashaAnalysis": "Dasha period analysis & Ashtakavarga",
-    "featurePriorityAccess": "Priority access to new features",
-    "featureChatMessages": "Navi chat messages",
-    "featureGuidedConsults": "guided consult sessions",
-    "featureMatchReports": "match compatibility reports",
-    "featureHoroscopeAccess": "Full horoscope & forecast access",
-    "featureNoExpiry": "Credits valid for days",
-    "subscriptionCredits": "subscription",
-    "packCredits": "pack",
-    "activePacks": "active pack(s)",
-    "nextRenewal": "Next renewal",
-    "nearestPackExpiry": "Pack expires",
-    "saleBadge": "Sale",
-    "featuredBadge": "Featured",
-    "creditGrant": "Credit Grant",
-    "creditRefund": "Credit Refund",
-    "creditConsume": "Credit Used",
-    "creditReserve": "Reserved",
-    "creditExpire": "Expired",
-    "balanceAfter": "balance",
-    "filterAll": "All",
-    "filterConsume": "Usage",
-    "filterGrant": "Grants",
-    "filterRefund": "Refunds",
-    "currentSubscription": "Current Subscription",
-    "currentCreditPacks": "Credit Packs",
-    "noSubscription": "No active subscription",
-    "noCreditPacks": "No active credit packs",
-    "packExpires": "expires",
-    "packRemaining": "remaining",
-    "filterPurchase": "Purchases",
-    "filterCycleReset": "Cycle Reset",
-    "oneTimeReports": "One-Time Reports"
+    "title": "আপনার মহাজাগতিক সম্ভাবনা উন্মোচন করুন",
+    "subtitle": "আপনার যাত্রার সাথে সামঞ্জস্যপূর্ণ প্ল্যানটি বেছে নিন। দৈনিক অন্তর্দৃষ্টি থেকে শুরু করে গভীর কুন্ডলী বিশ্লেষণ পর্যন্ত।",
+    "creditBalance": "Navi ক্রেডিট",
+    "naviCredits": "Navi ক্রেডিট",
+    "currentPlan": "বর্তমান প্ল্যান",
+    "currentPlanButton": "বর্তমান প্ল্যান",
+    "selectPlan": "প্ল্যান নির্বাচন করুন",
+    "buyCredits": "ক্রেডিট কিনুন",
+    "subscriptions": "সাবস্ক্রিপশন প্ল্যানসমূহ",
+    "creditPacks": "ক্রেডিট প্যাকসমূহ",
+    "subscription": "সাবস্ক্রিপশন",
+    "creditPack": "ক্রেডিট প্যাক",
+    "price": "মূল্য",
+    "credits": "ক্রেডিট",
+    "validity": "মেয়াদ",
+    "tier": "টিয়ার",
+    "oneYear": "১ বছর",
+    "oneMonth": "১ মাস",
+    "days": "দিন",
+    "month": "মাস",
+    "year": "বছর",
+    "subscriptionExpires": "সাবস্ক্রিপশনের মেয়াদ শেষ হবে",
+    "creditsExpire": "ক্রেডিটের মেয়াদ শেষ হবে",
+    "upgradeForFeature": "আনলক করতে আপগ্রেড করুন",
+    "catalogUnavailable": "পণ্য ক্যাটালগ বর্তমানে অনুপলব্ধ। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
+    "noProductsAvailable": "এখনও কোনো প্ল্যান উপলব্ধ নেই। আসন্ন সাবস্ক্রিপশন এবং ক্রেডিট প্যাক অপশনের জন্য চোখ রাখুন।",
+    "noCreditHistory": "এখনও কোনো ক্রেডিট অ্যাক্টিভিটি নেই",
+    "noCreditHistoryDesc": "আপনি যখন চ্যাট, পরামর্শ বা কুণ্ডলী বিশ্লেষণের মতো প্রিমিয়াম ফিচারগুলি ব্যবহার করবেন, তখন আপনার ক্রেডিট ব্যবহারের বিবরণ এখানে প্রদর্শিত হবে।",
+    "creditUsageHistory": "ক্রেডিট ব্যবহারের ইতিহাস",
+    "paymentComingSoon": "পেমেন্ট শীঘ্রই আসছে",
+    "paymentIntegrationNotice": "Razorpay, App Store এবং Play Store ইন্টিগ্রেশন বর্তমানে প্রক্রিয়াধীন রয়েছে। পেমেন্ট ব্যবস্থা চালু হলে দ্রুত কেনাকাটার জন্য আপনার নির্বাচিত প্ল্যানটি সংরক্ষণ করা হবে।",
+    "buyButtonDisabled": "পেমেন্ট ইন্টিগ্রেশন শীঘ্রই আসছে",
+    "backToPlans": "প্ল্যানে ফিরে যান",
+    "betaNoticeTitle": "আর্লি এডপ্টার সুবিধাসমূহ",
+    "betaNoticeDesc": "বিটা টেস্টার হিসেবে আপনি AstraNavi-এর ভবিষ্যৎ গঠনে সাহায্য করবেন। আমরা যখন এটি লঞ্চ করব, তখন প্রথম দিকের সমর্থকরা একচেটিয়া সুবিধা, বিশেষ মূল্য নির্ধারণ এবং প্রতিষ্ঠাতা সদস্য হিসেবে আজীবন স্বীকৃতি পাবেন।",
+    "earlyAdopter": "আর্লি এডপ্টার",
+    "featureUnlimitedChat": "আনলিমিটেড Navi পরামর্শ",
+    "featureExtendedChat": "বর্ধিত দৈনিক চ্যাট অ্যাক্সেস",
+    "featureFullHoroscope": "সম্পূর্ণ ব্যক্তিগতকৃত দৈনিক রাশিফল",
+    "featureTomorrowHoroscope": "আগামীকালের পূর্বাভাস — আগে থেকেই পরিকল্পনা করুন",
+    "featureBasicConsult": "নির্দেশিত পরামর্শ সেশন",
+    "featureGuidedConsult": "আনলিমিটেড নির্দেশিত পরামর্শ সেশন",
+    "featureMatchReport": "সম্পূর্ণ ম্যাচ সামঞ্জস্যতা রিপোর্ট",
+    "featureKundliPremium": "সম্পূর্ণ কুণ্ডলী প্রিমিয়াম সেকশনসমূহ",
+    "featureKundliBasicPremium": "বেসিক কুণ্ডলী প্রিমিয়াম অ্যাক্সেস",
+    "featureDashaAnalysis": "দশা চক্র বিশ্লেষণ এবং অষ্টকবর্গ",
+    "featurePriorityAccess": "নতুন ফিচারে অগ্রাধিকারমূলক অ্যাক্সেস",
+    "featureChatMessages": "Navi চ্যাট বার্তাসমূহ",
+    "featureGuidedConsults": "নির্দেশিত পরামর্শ সেশন",
+    "featureMatchReports": "ম্যাচ সামঞ্জস্যতা রিপোর্ট",
+    "featureHoroscopeAccess": "সম্পূর্ণ রাশিফল এবং পূর্বাভাস অ্যাক্সেস",
+    "featureNoExpiry": "ক্রেডিট নির্দিষ্ট দিন পর্যন্ত বৈধ",
+    "subscriptionCredits": "সাবস্ক্রিপশন",
+    "packCredits": "প্যাক",
+    "activePacks": "সক্রিয় প্যাক(সমূহ)",
+    "nextRenewal": "পরবর্তী পুনর্নবীকরণ",
+    "nearestPackExpiry": "প্যাকের মেয়াদ শেষ হবে",
+    "saleBadge": "সেল",
+    "featuredBadge": "ফিচার্ড",
+    "creditGrant": "ক্রেডিট প্রদান",
+    "creditRefund": "ক্রেডিট রিফান্ড",
+    "creditConsume": "ব্যবহৃত ক্রেডিট",
+    "creditReserve": "সংরক্ষিত",
+    "creditExpire": "মেয়াদোত্তীর্ণ",
+    "balanceAfter": "ব্যালেন্স",
+    "filterAll": "সব",
+    "filterConsume": "ব্যবহার",
+    "filterGrant": "প্রদান",
+    "filterRefund": "রিফান্ডসমূহ",
+    "currentSubscription": "বর্তমান সাবস্ক্রিপশন",
+    "currentCreditPacks": "ক্রেডিট প্যাকসমূহ",
+    "noSubscription": "কোনো সক্রিয় সাবস্ক্রিপশন নেই",
+    "noCreditPacks": "কোনো সক্রিয় ক্রেডিট প্যাক নেই",
+    "packExpires": "মেয়াদ শেষ হবে",
+    "packRemaining": "অবশিষ্ট",
+    "filterPurchase": "ক্রয়সমূহ",
+    "filterCycleReset": "সাইকেল রিসেট",
+    "oneTimeReports": "এককালীন রিপোর্টসমূহ"
+  },
+  "family": {
+    "myFamily": "আমার পরিবার",
+    "subtitle": "প্রিয়জনদের জন্মের বিবরণ সংরক্ষণ করুন, চার্ট দেখুন এবং সামঞ্জস্য পরীক্ষা করুন।",
+    "addMember": "সদস্য যুক্ত করুন",
+    "editMember": "পারিবারিক সদস্য সম্পাদনা করুন",
+    "addFirstMember": "আপনার প্রথম সদস্য যুক্ত করুন",
+    "empty": "এখনও কোনো পারিবারিক সদস্য নেই",
+    "emptyDesc": "তাদের চার্ট দেখতে এবং সামঞ্জস্য পরীক্ষা করতে পিতা-মাতা, সঙ্গী বা বন্ধু যুক্ত করুন।",
+    "freeTierUsed": "সদস্য বিনামূল্যে স্তরে ব্যবহৃত হয়েছে",
+    "freeTierCapMessage": "ফ্রি প্ল্যানে সর্বোচ্চ ৩ জন সদস্য যুক্ত করা যাবে। আরও যোগ করতে আপগ্রেড করুন।",
+    "upgrade": "আরওর জন্য আপগ্রেড করুন",
+    "removeTitle": "পারিবারিক সদস্য মুছে ফেলবেন?",
+    "removeConfirm": "মুছে ফেলুন",
+    "formDesc": "নির্ভরযোগ্য চার্টের জন্য সবচেয়ে সঠিক জন্ম সময় এবং স্থান ব্যবহার করুন।",
+    "chartTitle": "জন্ম চার্ট",
+    "compatibility": "সামঞ্জস্য",
+    "compatibilityDesc": "প্রথমবার দেখার জন্য ক্রেডিট চার্জ প্রযোজ্য। একই ভাষা পুনরায় দেখার জন্য কোনো চার্জ লাগবে না।"
+  },
+  "match": {
+    "mangal": {
+      "cancelled": "বাতিল",
+      "present": "বিদ্যমান",
+      "absent": "অনুপস্থিত",
+      "title": "Mangal Dosha বিশ্লেষণ",
+      "subtitle": "মঙ্গল সামঞ্জস্যতা পরীক্ষা",
+      "severity": "তীব্রতা",
+      "verdictLabel": "সামঞ্জস্যতার রায়",
+      "severityLevels": {
+        "none": "কিছুই না",
+        "low": "কম",
+        "medium": "মাঝারি",
+        "high": "উচ্চ"
+      }
+    },
+    "additional": {
+      "title": "অতিরিক্ত পরীক্ষা",
+      "subtitle": "গুরুত্বপূর্ণ দোষ এবং সামঞ্জস্য",
+      "clear": "মুক্ত",
+      "present": "বিদ্যমান",
+      "notice": "এই পরীক্ষাগুলি দক্ষিণ ভারতীয় ঐতিহ্যে অত্যন্ত গুরুত্বপূর্ণ এবং নিরাপদ মিলনের জন্য ৩৬-পয়েন্ট পদ্ধতির (Guna Milan) পরিপূরক।"
+    },
+    "person": {
+      "unknownSign": "অজ্ঞাত রাশি",
+      "unknown": "অজানা"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "emailRequired": "ইমেল প্রয়োজন।",
+      "emailInvalid": "অনুগ্রহ করে একটি বৈধ ইমেল লিখুন।",
+      "passwordRequired": "পাসওয়ার্ড প্রয়োজন।",
+      "emailLabel": "ইমেল",
+      "emailPlaceholder": "আপনার ইমেল লিখুন",
+      "passwordLabel": "পাসওয়ার্ড",
+      "passwordPlaceholder": "আপনার পাসওয়ার্ড লিখুন",
+      "showPassword": "পাসওয়ার্ড দেখান",
+      "hidePassword": "পাসওয়ার্ড লুকান",
+      "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+      "submit": "সাইন ইন করুন"
+    },
+    "register": {
+      "steps": {
+        "account": "অ্যাকাউন্ট",
+        "personal": "ব্যক্তিগত",
+        "birth": "জন্ম",
+        "preferences": "পছন্দসমূহ"
+      },
+      "validation": {
+        "emailInvalid": "অনুগ্রহ করে একটি বৈধ ইমেল ঠিকানা লিখুন।",
+        "passwordLength": "পাসওয়ার্ড কমপক্ষে ১০ অক্ষরের হতে হবে।",
+        "passwordMismatch": "পাসওয়ার্ড মিলছে না।",
+        "passwordUpper": "পাসওয়ার্ডে অন্তত একটি বড় হাতের অক্ষর (uppercase) থাকতে হবে।",
+        "passwordLower": "পাসওয়ার্ডে অন্তত একটি ছোট হাতের অক্ষর (lowercase) থাকতে হবে।",
+        "passwordDigit": "পাসওয়ার্ডে অন্তত একটি সংখ্যা থাকতে হবে।",
+        "passwordSpecial": "পাসওয়ার্ডে অন্তত একটি বিশেষ অক্ষর (special character) থাকতে হবে।",
+        "nameLength": "নাম কমপক্ষে ২ অক্ষরের হতে হবে।",
+        "dobFuture": "জন্ম তারিখ ভবিষ্যতে হতে পারে না।",
+        "tobFormat": "সময় HH:MM ফর্ম্যাটে হতে হবে।",
+        "pobLength": "স্থানের নাম কমপক্ষে ২ অক্ষরের হতে হবে।",
+        "failed": "নিবন্ধন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+      },
+      "reqs": {
+        "title": "পাসওয়ার্ডের প্রয়োজনীয়তা",
+        "length": "১০+ অক্ষর",
+        "upper": "বড় হাতের অক্ষর",
+        "lower": "ছোট হাতের অক্ষর",
+        "digit": "সংখ্যা",
+        "special": "বিশেষ অক্ষর"
+      },
+      "emailLabel": "ইমেল",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "পাসওয়ার্ড",
+      "passwordPlaceholder": "একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন",
+      "confirmPasswordLabel": "পাসওয়ার্ড নিশ্চিত করুন",
+      "confirmPasswordPlaceholder": "আপনার পাসওয়ার্ড পুনরায় লিখুন",
+      "fullNameLabel": "সম্পূর্ণ নাম",
+      "fullNamePlaceholder": "আপনার সম্পূর্ণ নাম লিখুন",
+      "genderLabel": "লিঙ্গ",
+      "selectOption": "নির্বাচন করুন",
+      "genderMale": "পুরুষ",
+      "genderFemale": "মহিলা",
+      "genderOther": "অন্যান্য",
+      "genderNotSpecified": "নির্দিষ্ট নয়",
+      "maritalStatusLabel": "বৈবাহিক অবস্থা",
+      "maritalSingle": "অবিবাহিত",
+      "maritalMarried": "বিবাহিত",
+      "maritalDivorced": "তালাকপ্রাপ্ত",
+      "maritalWidowed": "বিধবা/বিপত্নীক",
+      "maritalSeparated": "বিচ্ছিন্ন",
+      "maritalNotSpecified": "বলতে অনিচ্ছুক",
+      "occupationLabel": "পেশা",
+      "occupationStudent": "ছাত্র",
+      "occupationBusiness": "ব্যবসায়ী",
+      "occupationEmployed": "চাকরিজীবী / বেতনভোগী",
+      "occupationHomemaker": "গৃহিণী",
+      "occupationRetired": "অবসরপ্রাপ্ত",
+      "occupationUnemployed": "বেকার",
+      "occupationNotSpecified": "বলতে অনিচ্ছুক",
+      "phoneNumberLabel": "ফোন নম্বর",
+      "phoneNumberPlaceholder": "ফোন নম্বর লিখুন (ঐচ্ছিক)",
+      "dobLabel": "জন্ম তারিখ",
+      "tobLabel": "জন্মের সময়",
+      "pobLabel": "জন্ম স্থান",
+      "pobPlaceholder": "শহর খুঁজুন, যেমন ঢাকা",
+      "pobHelperText": "আপনার সঠিক জন্ম স্থান খুঁজুন এবং নির্বাচন করুন",
+      "languageLabel": "পছন্দসই ভাষা",
+      "preferencesLabel": "পছন্দসমূহ",
+      "prefHoroscope": "দৈনিক রাশিফল পান",
+      "prefNotifications": "বিজ্ঞপ্তি সক্ষম করুন",
+      "continue": "চালিয়ে যান",
+      "submit": "অ্যাকাউন্ট তৈরি করুন"
+    },
+    "errorBanner": {
+      "dismiss": "ত্রুটি বাতিল করুন"
+    },
+    "errors": {
+      "email_not_registered": "এই ইমেল ঠিকানাটি নিবন্ধিত নয়।",
+      "wrong_password": "ভুল পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।",
+      "account_locked": "অত্যধিক ব্যর্থ চেষ্টার কারণে অ্যাকাউন্ট লক করা হয়েছে।",
+      "email_already_registered": "এই ইমেল ঠিকানাটি ইতিমধ্যেই নিবন্ধিত রয়েছে।",
+      "registration_failed": "নিবন্ধন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+      "token_invalid": "অনুমোদন টোকেনটি অবৈধ।",
+      "token_expired": "অনুমোদন টোকেনটির মেয়াদ শেষ হয়ে গেছে।",
+      "token_reuse_detected": "নিরাপত্তা সতর্কতা: সেশন টোকেন পুনরায় ব্যবহার সনাক্ত করা হয়েছে।",
+      "password_reset_unavailable": "পাসওয়ার্ড রিসেট বর্তমানে অনুপলব্ধ।",
+      "reset_token_invalid": "পাসওয়ার্ড রিসেট লিঙ্কটি অবৈধ বা মেয়াদোত্তীর্ণ।",
+      "user_not_found": "এই ইমেল ঠিকানার সাথে কোনো অ্যাকাউন্ট পাওয়া যায়নি।",
+      "incorrect_password": "ভুল পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।",
+      "rate_limited": "অত্যধিক অনুরোধ। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
+      "invalid_email": "অনুগ্রহ করে একটি বৈধ ইমেল ঠিকানা লিখুন।",
+      "missing_email": "ইমেল ঠিকানা প্রয়োজন।",
+      "missing_password": "পাসওয়ার্ড প্রয়োজন।",
+      "weak_password": "পাসওয়ার্ডটি খুব দুর্বল।",
+      "password_too_short": "পাসওয়ার্ডটি খুব ছোট।",
+      "password_too_long": "পাসওয়ার্ডটি খুব দীর্ঘ।",
+      "generic": "একটি অপ্রত্যাশিত ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+      "retry_after": "অনুগ্রহ করে {minutes} মিনিট {seconds} সেকেন্ডের মধ্যে আবার চেষ্টা করুন।",
+      "server_down": "সার্ভার ডাউন আছে, দয়া করে ডেভেলপারের সাথে যোগাযোগ করুন।"
+    },
+    "resetPassword": {
+      "title": "নতুন পাসওয়ার্ড তৈরি করুন",
+      "subtitle": "অনুগ্রহ করে নিচে আপনার নতুন পাসওয়ার্ডটি লিখুন।",
+      "newPasswordLabel": "নতুন পাসওয়ার্ড",
+      "newPasswordPlaceholder": "নতুন পাসওয়ার্ড লিখুন",
+      "confirmPasswordLabel": "পাসওয়ার্ড নিশ্চিত করুন",
+      "confirmPasswordPlaceholder": "নতুন পাসওয়ার্ডটি আবার লিখুন",
+      "submit": "পাসওয়ার্ড রিসেট করুন",
+      "successTitle": "পাসওয়ার্ড রিসেট সফল",
+      "successSubtitle": "আপনার পাসওয়ার্ড সফলভাবে রিসেট করা হয়েছে।",
+      "proceedToLogin": "লগইন এ এগিয়ে যান"
+    }
+  },
+  "home": {
+    "portals": {
+      "validation": {
+        "nameLength": "নাম কমপক্ষে ২ অক্ষরের হতে হবে",
+        "nameLetters": "নামে কেবল অক্ষর থাকতে পারে",
+        "dobFuture": "জন্ম তারিখ ভবিষ্যতে হতে পারে না",
+        "pobInvalid": "অনুগ্রহ করে একটি বৈধ স্থান লিখুন"
+      },
+      "placeholders": {
+        "fullName": "সম্পূর্ণ নাম",
+        "pob": "জন্মস্থান",
+        "yourName": "আপনার নাম",
+        "partnerName": "সঙ্গীর নাম"
+      }
+    }
+  },
+  "pricing": {
+    "plans": {
+      "seeker": {
+        "title": "Keep as-is (brand name)",
+        "price": "₹0",
+        "period": "/সর্বদা",
+        "buttonText": "যাত্রা শুরু করুন",
+        "features": {
+          "0": "সম্পূর্ণ জন্মকুণ্ডলী (Kundli) তৈরি",
+          "1": "দৈনিক রাশি ভবিষ্যদ্বাণী",
+          "2": "সীমিত পরামর্শ (দৈনিক ৫ মিনিট)",
+          "3": "প্রাথমিক গ্রহের অন্তর্দৃষ্টি"
+        }
+      },
+      "devotee": {
+        "title": "Devotee",
+        "price": "₹299",
+        "period": "/মাস",
+        "badge": "সর্বাধিক নির্বাচিত",
+        "buttonText": "Devotee চয়ন করুন",
+        "features": {
+          "0": "অসীমিত Navi পরামর্শ",
+          "1": "বিস্তারিত কোষ্ঠী রিপোর্ট (PDF)",
+          "2": "Dasha সময়কাল বিশ্লেষণ",
+          "3": "প্রতিকারমূলক রত্ন গাইডেন্স"
+        }
+      },
+      "disciple": {
+        "title": "Disciple",
+        "price": "₹2,999",
+        "period": "/বছর",
+        "badge": "সেরা মূল্য",
+        "buttonText": "সম্পূর্ণ প্রতিশ্রুতিবদ্ধ",
+        "features": {
+          "0": "সমস্ত Devotee সুবিধা",
+          "1": "বার্ষিক ₹৫৮৯ সাশ্রয় করুন",
+          "2": "স্থায়ী কোষ্ঠী সংরক্ষণাগার",
+          "3": "সামঞ্জস্যতা বিশ্লেষণ"
+        }
+      }
+    }
+  },
+  "blogs": {
+    "index": {
+      "badge": "জ্ঞানের গ্রন্থাগার",
+      "title": "প্রাচীন বিজ্ঞান,",
+      "subtitle": "আধুনিক অন্তর্দৃষ্টি",
+      "description": "বৈদিক জ্ঞানের বিশাল সমুদ্রের মধ্য দিয়ে যাত্রা করুন। গ্রহের গতিবিধি থেকে শুরু করে আধ্যাত্মিক প্রতিকার পর্যন্ত, আপনার মহাজাগতিক অস্তিত্বের চাবিকাঠি আবিষ্কার করুন।",
+      "liveGuide": "লাইভ গাইড",
+      "inProduction": "উৎপাদনাধীন",
+      "readStory": "গল্প পড়ুন",
+      "ctaHeading": "আপনি যা খুঁজছেন তা",
+      "ctaSubheading": "পাচ্ছেন না?",
+      "ctaDescription": "আমাদের মহাজাগতিক গ্রন্থাগার প্রতি সপ্তাহে সম্প্রসারিত হচ্ছে। আপনার চার্ট সম্পর্কে কোনও নির্দিষ্ট প্রশ্ন থাকলে, Navi এর কাছে এখনই উত্তর প্রস্তুত রয়েছে।",
+      "askNavi": "Navi-কে যেকোনো কিছু জিজ্ঞাসা করুন",
+      "subscribe": "আপডেটের জন্য সাবস্ক্রাইব করুন",
+      "footer": "© ২০২৬ ASTRANAVI · মহাজাগতিক সংরক্ষণাগার"
+    },
+    "houses": {
+      "title": "১২টি",
+      "titleSanskrit": "ভাবগুলি",
+      "encyclopediaTitle": "বিশ্বকোষ",
+      "introduction": "ভূমিকা",
+      "sidebarLabel": "১২টি ভাব",
+      "coreConcepts": "মূল ধারণা",
+      "understanding": "বোঝার",
+      "bhavas": "ভাবগুলি",
+      "description": "বৈদিক জ্যোতিষে, ১২টি ঘর (ভাব) মানব জীবনের ১২টি ক্ষেত্র প্রতিনিধিত্ব করে। গ্রহগুলি শক্তি প্রদান করে এবং রাশিগুলি পরিবেশ প্রদান করে, তবে ঘরগুলি সেই প্রকৃত অভিজ্ঞতার ক্ষেত্র যেখানে কর্ম সম্পাদিত হয়।",
+      "kendra": "কেন্দ্র (কোণীয়) ঘরগুলি",
+      "kendraDesc": "ঘর ১, ৪, ৭ এবং ১০ জীবনের স্তম্ভ গঠন করে। তারা আত্ম, বাড়ি, অংশীদারিত্ব এবং ক্যারিয়ার পরিচালনা করে। এখানে স্থাপিত গ্রহগুলির আপনার বাস্তব অস্তিত্বকে আকৃতি দিতে এবং বিশাল পদক্ষেপ শুরু করতে সর্বোচ্চ শক্তি রয়েছে।",
+      "trikona": "ত্রিকোণ (ত্রিভুজ) ঘরগুলি",
+      "trikonaDesc": "ঘর ১, ৫ এবং ৯ ধর্ম এবং বিশুদ্ধ আশীর্বাদের ঘর। তারা পূর্ববর্তী জীবনের যোগ্যতা (পূর্ব পুণ্য), বুদ্ধিমত্তা এবং ঐশ্বরিক অনুগ্রহ প্রতিনিধিত্ব করে। এখানে গ্রহগুলি প্রাকৃতিক ভাগ্য এবং আধ্যাত্মিক বিবর্তন প্রদান করে।",
+      "dusthana": "দুঃস্থান (কঠিন) ঘরগুলি",
+      "dusthanaDesc": "ঘর ৬, ৮ এবং ১২ বাধা, রূপান্তর এবং ক্ষতি শাসন করে। বস্তুগত প্রচেষ্টার জন্য চ্যালেঞ্জিং হওয়া সত্ত্বেও, তারা কর্মকে পোড়ানো, স্থিতিস্থাপকতা তৈরি করা এবং চূড়ান্ত আধ্যাত্মিক মুক্তি (মোক্ষ) অর্জনের জন্য অপরিহার্য।",
+      "upachaya": "ঊপচয় (ক্রমবর্ধমান) ঘরগুলি",
+      "upachayaDesc": "ঘর ৩, ৬, ১০ এবং ১১ জীবনের সেই ক্ষেত্রগুলি প্রতিনিধিত্ব করে যা সচেতন প্রচেষ্টার মাধ্যমে সময়ের সাথে উন্নত হয়। এখানে স্থাপিত ক্ষতিকর গ্রহগুলি (শনি, মঙ্গল, সূর্য) প্রকৃতপক্ষে চমৎকার ফলাফল দেয় কারণ তারা প্রতিযোগিতা অতিক্রম করার চালিকা শক্তি প্রদান করে।",
+      "analyzeBtn": "ভাব বিশ্লেষণ করুন",
+      "sanskrit": "সংস্কৃত",
+      "significator": "তাৎপর্য নির্দেশক",
+      "nature": "প্রকৃতি",
+      "bodyMatrix": "শরীরের ম্যাট্রিক্স",
+      "houseEssence": "ভাবের সারসত্ত্ব",
+      "dominions": "প্রভুত্ব",
+      "lifeGovernance": "জীবন পরিচালনা",
+      "bhavaMechanics": "ভাব মেকানিক্স",
+      "bhavLogic": "ভাবৎ ভবম লজিক",
+      "howAffects": "{house} কীভাবে উদ্ভূত জীবনক্ষেত্রগুলিকে প্রভাবিত করে",
+      "analyzeBtn2": "সামঞ্জস্য বিশ্লেষণ করুন"
+    },
+    "nakshatras": {
+      "title": "চন্দ্র",
+      "subtitle": "মন্দির",
+      "sidebarLabel": "২৭টি নক্ষত্র",
+      "analyzeBtn": "নক্ষত্র বিশ্লেষণ করুন",
+      "rulerLabel": "শাসক (প্রভু)",
+      "symbol": "চিহ্ন",
+      "gana": "গণ",
+      "yoni": "প্রাণী (যোনি)",
+      "karmicDeepDive": "কর্মিক গভীর অধ্যয়ন",
+      "fundamentalTrait": "মৌলিক বৈশিষ্ট্য",
+      "shakti": "নক্ষত্র শক্তি",
+      "nadi": "নাড়ী (আয়ুর্বেদিক)",
+      "purushartha": "পুরুষার্থ",
+      "padaD9Logic": "পদ (ডি৯) লজিক",
+      "subconscious": "অবচেতন নকশা",
+      "discoverJanma": "আপনার মূল জন্ম নক্ষত্র আবিষ্কার করুন",
+      "analyzeChart": "চার্ট বিশ্লেষণ করুন"
+    },
+    "planets": {
+      "title": "নবগ্রহ",
+      "subtitle": "আদিমূর্তি",
+      "encyclopediaTitle": "বিশ্বকোষ",
+      "introduction": "ভূমিকা",
+      "sidebarLabel": "নয়টি গ্রহ",
+      "coreConcepts": "মূল ধারণা",
+      "understanding": "বোঝার",
+      "navagraha": "নবগ্রহ",
+      "description": "বৈদিক জ্যোতিষে, নবগ্রহ (নয়টি গ্রহ) কর্মের মহাজাগতিক কর্মী। তারা গতিশীল শক্তি যা ঘটনাগুলিকে ট্রিগার করে, আপনার মনোবিজ্ঞান গঠন করে এবং সময় ও স্থানের মধ্য দিয়ে আত্মার বিবর্তনীয় যাত্রাকে গাইড করে।",
+      "karmicDeliverers": "কর্মিক বিতরণকারী",
+      "karmicDesc": "গ্রহগুলি শুধুমাত্র বৈশিষ্ট্যকে প্রতীক করে না; তারা সক্রিয়ভাবে আপনার অতীত কর্মের ফল বিতরণ করে। বৃহস্পতি এবং শুক্রের মতো শুভ গ্রহগুলি সহজতা এবং অনুগ্রহ নিয়ে আসে, যখন শনি এবং মঙ্গলের মতো ক্ষতিকর গ্রহগুলি প্রয়োজনীয়, প্রায়শই কঠিন পাঠ প্রয়োগ করে।",
+      "avasthas": "অবস্থা (গ্রহীয় অবস্থা)",
+      "avasthasDesc": "একটি গ্রহের শক্তি তার অবস্থার উপর নির্ভর করে। একটি উচ্চীকৃত গ্রহ তার সর্বোচ্চ, বিশুদ্ধতম সম্ভাবনা প্রকাশ করে, যখন একটি নীচস্থ গ্রহ এমন ক্ষেত্রগুলি নির্দেশ করে যেখানে আত্মাকে জন্মগত দুর্বলতা অতিক্রম করতে আরও কঠোর পরিশ্রম করতে হবে।",
+      "shadowNodes": "ছায়া নোডগুলি",
+      "shadowNodesDesc": "রাহু এবং কেতু ভৌত ভর নয়, বরং সূর্যগ্রহণ ঘটে এমন গাণিতিক বিন্দু। শরীর না থাকা সত্ত্বেও, এই নোডগুলি হঠাৎ নিয়তি, আবেশ এবং চূড়ান্ত আধ্যাত্মিক মুক্তির গভীর ট্রিগার।",
+      "functionalNature": "কার্যকরী প্রকৃতি",
+      "functionalDesc": "প্রাকৃতিক বৈশিষ্ট্যের বাইরে, একটি গ্রহ আপনার নির্দিষ্ট লগ্ন (Ascendant) এর উপর ভিত্তি করে বন্ধু বা শত্রু হিসাবে কাজ করে। মেষ লগ্নে কঠিন অভিজ্ঞতা নিয়ে আসা একই শনি, বৃষ লগ্নের জন্য সর্বোচ্চ কল্যাণকারী হিসাবে কাজ করে।",
+      "analyzeBtn": "সামঞ্জস্য বিশ্লেষণ করুন",
+      "cosmicArchetype": "মহাজাগতিক আদিমূর্তি",
+      "signatures": "স্বাক্ষর",
+      "functionalImpact": "কার্যকরী প্রভাব",
+      "planetaryGovernance": "গ্রহীয় শাসন",
+      "exaltation": "উচ্চীকরণ",
+      "highestPotential": "সর্বোচ্চ সম্ভাবনা",
+      "debilitation": "হ্রাসকরণ",
+      "lowestVitality": "নিম্নতম প্রাণশক্তি",
+      "mooltrikona": "মূলত্রিকোণ",
+      "primaryOffice": "প্রাথমিক অফিস",
+      "aligningWith": "{planet} এর সাথে সামঞ্জস্য",
+      "discoverInfluence": "এই গ্রহটি আপনার চার্টকে কীভাবে প্রভাবিত করে তা আবিষ্কার করুন"
+    },
+    "yogas": {
+      "title": "গ্রহীয়",
+      "subtitle": "যোগ",
+      "encyclopediaTitle": "বিশ্বকোষ",
+      "introduction": "ভূমিকা",
+      "sidebarLabel": "পবিত্র সংমিশ্রণ",
+      "coreConcepts": "মূল ধারণা",
+      "understanding": "বোঝা",
+      "yogasLabel": "যোগ",
+      "description": "বৈদিক জ্যোতিষে, একটি \"যোগ\" মানে সংমিশ্রণ। এটি নির্দিষ্ট গ্রহীয় সমন্বয় এবং সারিবদ্ধতা বোঝায় যা একসাথে লক হয়ে শক্তিশালী, নিয়তিপ্রাপ্ত প্রভাব তৈরি করে। এই মহাজাগতিক স্বাক্ষরগুলি একটি চার্টে সম্পদ, শক্তি এবং আধ্যাত্মিক মুক্তির উচ্চতা নির্ধারণ করে।",
+      "rajaYogas": "রাজ যোগ",
+      "rajaDesc": "সমন্বয়ের রাজা। কেন্দ্র (কর্ম) ঘরের প্রভুরা যখন ত্রিকোণ (ভাগ্য) ঘরের প্রভুদের সাথে একত্রিত হয় তখন গঠিত। তারা সক্রিয়করণ হলে অবস্থা, কর্তৃত্ব এবং বিশাল সাফল্যের নিশ্চয়তা দেয়।",
+      "dhanaYogas": "ধন যোগ",
+      "dhanaDesc": "পরম সম্পদের জন্য সমন্বয়। যখন আয়ের ঘর (২য়) এবং লাভের ঘর (১১তম) গভীরভাবে নিয়তির ঘরের সাথে সংযুক্ত হয় (৫ম, ৯ম), তখন জাতক বিশাল আর্থিক সমৃদ্ধির জন্য নিয়তিপ্রাপ্ত হয়।",
+      "activation": "সক্রিয়করণ (দশা)",
+      "activationDesc": "যোগ একটি চার্টে নিষ্ক্রিয় থাকে যতক্ষণ না তাদের গ্রহীয় প্রভুরা বিংশোত্তরী দশা দ্বারা সক্রিয় হয় (সময়কাল)। যখন একটি যোগ-সৃষ্টিকারী গ্রহের দশা শুরু হয়, তখন প্রভাবগুলি বাস্তবে দৃশ্যমানভাবে প্রকাশ পায়।",
+      "cancellation": "বাতিলকরণ (ভঙ্গ)",
+      "cancellationDesc": "সমস্ত খারাপ যোগ চিরস্থায়ী নয়। নীচভঙ্গ ঘটে যখন একটি নীচস্থ (দুর্বল) গ্রহ শক্তিশালী সারিবদ্ধতা দ্বারা সমর্থিত হয়, দুর্বলতা বাতিল করে এবং প্রায়শই বিশাল সংগ্রাম মহান সাফল্যে পরিণত করে।",
+      "analyzeBtn": "যোগ বিশ্লেষণ করুন",
+      "formationTheory": "গঠন তত্ত্ব",
+      "archetypeTraits": "আদিমূর্তির বৈশিষ্ট্য",
+      "manifestation": "প্রকাশ",
+      "activationPath": "সক্রিয়করণ পথ",
+      "activationPathDesc": "প্রধানত জড়িত গ্রহগুলির প্রধান দশা / ভুক্তি কাল চলাকালীন ট্রিগার করা হয়।",
+      "yogaAnalysisScan": "যোগ বিশ্লেষণ স্ক্যান",
+      "discoverCombinations": "আপনার কুণ্ডলীতে লুকানো সমন্বয় আবিষ্কার করুন",
+      "scanChart": "আমার চার্ট স্ক্যান করুন"
+    },
+    "remedies": {
+      "title": "পবিত্র",
+      "subtitle": "প্রতিকার",
+      "tagline": "সারিবদ্ধতার বিজ্ঞান",
+      "logic": "যুক্তি",
+      "target": "লক্ষ্য",
+      "intensity": "তীব্রতা",
+      "entity": "সত্তা",
+      "remedialTheory": "প্রতিকারমূলক তত্ত্ব",
+      "operationalRole": "কার্যকরী ভূমিকা",
+      "efficacyScale": "কার্যকারিতার স্কেল",
+      "primaryLogic": "প্রাথমিক যুক্তি",
+      "safetyLevel": "নিরাপত্তা স্তর",
+      "highNonInvasive": "উচ্চ (অ-আক্রমণাত্মক)",
+      "keyExamples": "মূল উদাহরণ",
+      "personalizedScan": "ব্যক্তিগত প্রতিকার স্ক্যান",
+      "discoverSpecific": "আপনার চার্টের জন্য প্রয়োজনীয় নির্দিষ্ট সারিবদ্ধতা আবিষ্কার করুন",
+      "consultNavi": "Navi-এর পরামর্শ নিন"
+    }
+  },
+  "profile": {
+    "page": {
+      "title": "ব্যবহারকারী প্রোফাইল",
+      "description": "আপনার জন্ম বিবরণ পরিচালনা করুন যাতে আপনার ব্যক্তিগত পাঠ সর্বদা সঠিক থাকে।",
+      "errors": {
+        "fixErrors": "সংরক্ষণের আগে অনুগ্রহ করে ত্রুটিগুলি সংশোধন করুন",
+        "noEmailSession": "সেশনে কোনো ইমেইল পাওয়া যায়নি। অনুগ্রহ করে লগআউট করুন এবং আবার লগইন করুন।",
+        "dstConflict": "আপনার জন্মের সময় একটি DST রূপান্তরের সময় পড়ে। অনুগ্রহ করে নির্বাচন করুন কোনটি আপনার প্রকৃত জন্মের সময় ছিল।",
+        "updateFailed": "আপডেট ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+      },
+      "messages": {
+        "profileUpdated": "প্রোফাইল সফলভাবে আপডেট হয়েছে!"
+      },
+      "buttons": {
+        "updating": "আপডেট হচ্ছে...",
+        "saveAndContinue": "সংরক্ষণ করুন এবং ড্যাশবোর্ডে চালিয়ে যান",
+        "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
+        "reset": "পুনরায় সেট করুন",
+        "backToHome": "বাড়িতে ফিরুন"
+      },
+      "securitySection": {
+        "title": "নিরাপত্তা সেটিংস",
+        "description": "আপনার পাসওয়ার্ড এবং সক্রিয় সেশন পরিচালনা করুন।",
+        "button": "নিরাপত্তা সেটিংস পরিচালনা করুন"
+      }
+    },
+    "fields": {
+      "email": "ইমেইল ঠিকানা",
+      "emailHelper": "আপনার ইমেইল পরিবর্তন করা যায় না",
+      "fullName": "সম্পূর্ণ নাম",
+      "fullNamePlaceholder": "আপনার সম্পূর্ণ নাম প্রবেশ করুন",
+      "fullNameHelper": "জন্ম সার্টিফিকেট অনুযায়ী আপনার সম্পূর্ণ নাম",
+      "dateOfBirth": "জন্মের তারিখ",
+      "dateOfBirthHelper": "আপনার জন্মের তারিখ",
+      "timeOfBirth": "জন্মের সময়",
+      "timeOfBirthHelper": "নির্ভুলতার জন্য সঠিক সময়",
+      "placeOfBirth": "জন্মস্থান",
+      "placeOfBirthPlaceholder": "শহর খুঁজুন, যেমন দিল্লি",
+      "placeOfBirthHelper": "আপনার সঠিক জন্মস্থান অনুসন্ধান এবং নির্বাচন করুন",
+      "phoneNumber": "ফোন নম্বর",
+      "phoneNumberPlaceholder": "+১২৩৪৫৬৭৮৯০",
+      "phoneNumberHelper": "ঐচ্ছিক ফোন নম্বর",
+      "gender": "লিঙ্গ",
+      "genderPlaceholder": "লিঙ্গ নির্বাচন করুন",
+      "genderOptions": {
+        "male": "পুরুষ",
+        "female": "মহিলা",
+        "other": "অন্যান্য",
+        "notSpecified": "নির্দিষ্ট করা হয়নি"
+      },
+      "maritalStatus": "বৈবাহিক অবস্থা",
+      "maritalStatusPlaceholder": "অবস্থা নির্বাচন করুন",
+      "maritalOptions": {
+        "single": "অবিবাহিত",
+        "married": "বিবাহিত",
+        "divorced": "বিবাহবিচ্ছেদপ্রাপ্ত",
+        "widowed": "বিধবা/বিধুর",
+        "separated": "বিচ্ছিন্ন",
+        "notSpecified": "বলতে পছন্দ করি না"
+      },
+      "occupation": "পেশা",
+      "occupationPlaceholder": "পেশা নির্বাচন করুন",
+      "occupationOptions": {
+        "student": "শিক্ষার্থী",
+        "business": "ব্যবসায়ী মালিক",
+        "employed": "কর্মচারী / বেতনভুক্ত",
+        "homemaker": "গৃহিণী",
+        "retired": "অবসর প্রাপ্ত",
+        "unemployed": "বেকার",
+        "notSpecified": "বলতে পছন্দ করি না"
+      },
+      "errors": {
+        "nameTooShort": "নাম কমপক্ষে ২ অক্ষর হতে হবে",
+        "nameTooLong": "নাম খুব দীর্ঘ",
+        "dobInFuture": "জন্মের তারিখ ভবিষ্যতে থাকতে পারে না",
+        "dobInvalid": "অনুগ্রহ করে একটি বৈধ জন্মের তারিখ প্রবেশ করুন",
+        "pobInvalid": "অনুগ্রহ করে একটি বৈধ স্থান প্রবেশ করুন",
+        "pobTooLong": "স্থানের নাম খুব দীর্ঘ",
+        "nameRequired": "নাম প্রয়োজনীয়",
+        "dobRequired": "জন্মের তারিখ প্রয়োজনীয়",
+        "tobRequired": "জন্মের সময় প্রয়োজনীয়",
+        "pobRequired": "জন্মস্থান প্রয়োজনীয়",
+        "pobSelectRequired": "অনুগ্রহ করে অনুসন্ধান ফলাফল থেকে আপনার সঠিক জন্মস্থান নির্বাচন করুন"
+      }
+    },
+    "onboarding": {
+      "steps": {
+        "name": {
+          "label": "সম্পূর্ণ নাম",
+          "hint": "জন্ম সার্টিফিকেট অনুযায়ী আপনার নাম"
+        },
+        "dob": {
+          "label": "জন্মের তারিখ",
+          "hint": "গ্রহের অবস্থান নির্ধারণ করে (নক্ষত্র)"
+        },
+        "tob": {
+          "label": "জন্মের সময়",
+          "hint": "আপনার উদয়মান (লগ্ন) এবং ঘরের সীমানা নির্ধারণ করে"
+        },
+        "pob": {
+          "label": "সঠিক জন্মস্থান",
+          "hint": "আপনার শহর খুঁজুন এবং নির্ভুল স্থানাঙ্কের জন্য ড্রপডাউন থেকে নির্বাচন করুন"
+        }
+      },
+      "mobile": {
+        "complete": "সব ঠিক আছে! আপনার মহাজাগতিক প্রোফাইল সম্পূর্ণ ✨",
+        "remaining": "{n} ধাপ{plural} অবশিষ্ট",
+        "completeHint": "ফেরত যেতে সংরক্ষণ এবং চালিয়ে যান টিপুন",
+        "remainingHint": "প্রয়োজনীয় বিষয় দেখতে ট্যাপ করুন"
+      },
+      "sidebar": {
+        "title": "আপনার মহাজাগতিক পরিচয় সম্পূর্ণ করুন",
+        "description": "আপনার জন্ম বিবরণ প্রতিটি মহাজাগতিক অন্তর্দৃষ্টির ভিত্তি — তারা ব্যক্তিগত রাশিফল, কুণ্ডলী বিশ্লেষণ এবং AI-চালিত বৈদিক পাঠ আনলক করে।",
+        "checklistLabel": "প্রোফাইল চেকলিস্ট",
+        "completeMessage": "সব ঠিক আছে! আপনার মহাজাগতিক প্রোফাইল সম্পূর্ণ। ড্যাশবোর্ডে ফিরতে সংরক্ষণ এবং চালিয়ে যান টিপুন।",
+        "progressLabel": "প্রোফাইল সম্পূর্ণতা"
+      }
+    },
+    "preferences": {
+      "language": "পছন্দের ভাষা",
+      "cosmicPreferences": "মহাজাগতিক পছন্দগুলি",
+      "horoscopeTitle": "দৈনিক রাশিফল",
+      "horoscopeDescription": "দৈনিক মহাজাগতিক অন্তর্দৃষ্টি পান",
+      "notificationsTitle": "বিজ্ঞপ্তি",
+      "notificationsDescription": "গ্রহীয় গমন সতর্কতা"
+    },
+    "security": {
+      "pageTitle": "নিরাপত্তা সেটিংস",
+      "pageDescription": "আপনার পাসওয়ার্ড, সক্রিয় সেশন এবং অ্যাকাউন্ট ডেটা পরিচালনা করুন।",
+      "backButton": "প্রোফাইলে ফিরুন",
+      "changePasswordTitle": "পাসওয়ার্ড পরিবর্তন করুন",
+      "changePasswordWarning": "আপনার পাসওয়ার্ড পরিবর্তন করলে আপনি এই ডিভাইসটি সহ সমস্ত সক্রিয় সেশন থেকে স্বয়ংক্রিয়ভাবে লগ আউট হবেন।",
+      "currentPasswordLabel": "বর্তমান পাসওয়ার্ড",
+      "currentPasswordPlaceholder": "বর্তমান পাসওয়ার্ড প্রবেশ করুন",
+      "newPasswordLabel": "নতুন পাসওয়ার্ড",
+      "newPasswordPlaceholder": "নতুন পাসওয়ার্ড প্রবেশ করুন",
+      "confirmPasswordLabel": "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+      "confirmPasswordPlaceholder": "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+      "updatePasswordButton": "পাসওয়ার্ড আপডেট করুন",
+      "sessionManagementTitle": "সেশন ব্যবস্থাপনা",
+      "sessionManagementDescription": "আপনার অ্যাকাউন্ট যেখানে স্বাক্ষরিত তা অন্য সমস্ত ডিভাইস থেকে লগ আউট করুন। এই ডিভাইস লগইন করা থাকবে।",
+      "logoutAllButton": "অন্য সমস্ত ডিভাইস থেকে লগ আউট করুন",
+      "dangerZoneTitle": "বিপন্ন অঞ্চল",
+      "dangerZoneDescription": "আপনার অ্যাকাউন্ট এবং সমস্ত সংযুক্ত ডেটা চিরতরে মুছে ফেলুন। এই ক্রিয়া পূর্ববত্তী করা যায় না।",
+      "deleteAccountButton": "অ্যাকাউন্ট মুছে ফেলুন",
+      "deleteAccountModal": {
+        "title": "অ্যাকাউন্ট মুছে ফেলুন",
+        "description": "এই ক্রিয়া স্থায়ী এবং আপনার সমস্ত জন্ম বিবরণ, উৎপাদিত রাশিফল এবং পছন্দ নিরাপদে মুছে দেবে। চালিয়ে যেতে অনুগ্রহ করে আপনার পাসওয়ার্ড দিয়ে নিশ্চিত করুন।",
+        "passwordPlaceholder": "নিশ্চিত করতে আপনার পাসওয়ার্ড প্রবেশ করুন",
+        "cancelButton": "বাতিল করুন",
+        "confirmButton": "চিরতরে মুছে ফেলুন"
+      },
+      "logoutConfirmDialog": {
+        "title": "সমস্ত ডিভাইস থেকে লগ আউট করবেন?",
+        "message": "এটি অন্যান্য সমস্ত ডিভাইস থেকে আপনার অ্যাকাউন্ট সাইন আউট করবে। আপনার বর্তমান সেশন সক্রিয় থাকবে।",
+        "confirmButton": "অন্যদের লগ আউট করুন",
+        "cancelButton": "বাতিল করুন"
+      },
+      "errors": {
+        "passwordMinLength": "নতুন পাসওয়ার্ড কমপক্ষে ১০ অক্ষর হতে হবে।",
+        "passwordMismatch": "নতুন পাসওয়ার্ড মেলে না।",
+        "passwordRequired": "মুছে ফেলার নিশ্চিত করতে অনুগ্রহ করে আপনার পাসওয়ার্ড প্রবেশ করুন।"
+      },
+      "messages": {
+        "passwordChanged": "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে। আপনি সমস্ত ডিভাইস থেকে লগ আউট হবেন।",
+        "logoutAllSuccess": "অন্য সমস্ত ডিভাইস থেকে সফলভাবে লগ আউট করা হয়েছে।",
+        "accountDeleted": "অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে। বিদায়।"
+      }
+    }
+  },
+  "support": {
+    "title": "সহায়তার জন্য যোগাযোগ করুন",
+    "description": "সাহায্য দরকার? আমাদের সহায়তা সিস্টেম আপনাকে সর্বোত্তম সহায়তা প্রদান করার জন্য সেট করা হচ্ছে। জরুরি বিষয়ের জন্য, অনুগ্রহ করে শীঘ্রই ফিরে দেখুন!"
+  },
+  "newDashboard": {
+    "landing": {
+      "title": "নতুন ড্যাশবোর্ড",
+      "subtitle": "আপনার দ্বিরজ স্ন্যাপশট",
+      "description": "আপনার সম্পূর্ণ বৈদিক স্ন্যাপশট এক নজরে — স্কোর, ট্রানজিট, পরিবার এবং আপনার AI গাইড, এক জায়গায়।",
+      "hook": "গ্রহগুলির অবস্থান এবং তাদের ক্রমাগত গতিবিধি প্রতিটি দিনের শক্তি তৈরি করে। নতুন ড্যাশবোর্ড আপনার দৈনিক বৈদিক পোর্টাল হিসাবে কাজ করে, রিয়েল-টাইম মহাজাগতিক প্যাটার্নগুলিকে আপনার ব্যক্তিগত জীবনের ক্ষেত্রগুলি, সম্পর্ক চার্ট এবং দৈনিক সময়সূচীতে ম্যাপ করে।",
+      "feature1Title": "আজকের শক্তি স্কোর",
+      "feature1Desc": "0-100 থেকে একটি রিয়েল-টাইম ব্যক্তিগতকৃত স্কোর পান যা আপনার দিনের মোট গ্রহীয় শক্তি প্রতিফলিত করে।",
+      "feature2Title": "পঞ্চাঙ্গ এবং ট্রানজিট",
+      "feature2Desc": "সক্রিয় তিথি, নক্ষত্র, যোগ, করণ এবং রাহু কাল সময়কাল ট্র্যাক করুন এবং আপনার কর্মগুলিকে অনুকূল সময়ের সাথে সংযুক্ত করুন।",
+      "feature3Title": "AI জ্যোতিষ গাইড",
+      "feature3Desc": "বৈদিক ব্যবস্থা, সম্পর্ক, সম্পদ এবং KP শাখায় প্রশিক্ষিত বিশেষায়িত AI জ্যোতিষীদের সাথে পরামর্শ করুন।",
+      "benefit1": "জ্যোতির্বৈজ্ঞানিক ট্রানজিট দ্বারা চালিত ব্যক্তিগতকৃত দৈনিক স্কোর",
+      "benefit2": "বন্ধু এবং পরিবারের সদস্যদের জন্য সামঞ্জস্য স্কোরিং",
+      "benefit3": "মহাদশা এবং অন্তর্দশা সক্রিয় গ্রহীয় সময়কাল বিশ্লেষণ",
+      "benefit4": "বিশেষায়িত মহাজাগতিক বিশেষজ্ঞ ব্যক্তিত্বদের সাথে সরাসরি পরামর্শ"
+    },
+    "todaysEnergy": {
+      "title": "আজকের শক্তি",
+      "scoreOutOf": "100-এর মধ্যে",
+      "goodTime": "ভালো সময়",
+      "alertTime": "সতর্ক থাকুন",
+      "aiChat": "Navi-কে জিজ্ঞাসা করুন",
+      "fullReading": "সম্পূর্ণ পাঠ",
+      "rising": "বৃদ্ধি পাচ্ছে",
+      "tithi": "তিথি",
+      "nakshatra": "নক্ষত্র",
+      "openingDashboard": "আপনার ড্যাশবোর্ড খুলছে..."
+    },
+    "weeklyChart": {
+      "title": "সাপ্তাহিক চার্ট",
+      "best": "সেরা",
+      "days": {
+        "mon": "সোমবার",
+        "tue": "মঙ্গলবার",
+        "wed": "বুধবার",
+        "thu": "বৃহস্পতিবার",
+        "fri": "শুক্রবার",
+        "sat": "শনিবার",
+        "sun": "রবিবার"
+      },
+      "today": "আজ"
+    },
+    "lifeAreas": {
+      "title": "জীবনের ক্ষেত্রগুলি",
+      "viewAll": "সব দেখুন",
+      "love": "প্রেম",
+      "career": "ক্যারিয়ার",
+      "finance": "অর্থ",
+      "health": "স্বাস্থ্য",
+      "general": "সাধারণ দৃষ্টিভঙ্গি",
+      "spiritual": "আধ্যাত্মিক",
+      "statusExcellent": "চমৎকার",
+      "statusGood": "ভালো",
+      "statusSteadyProgress": "স্থিতিশীল অগ্রগতি",
+      "statusManageWisely": "বুদ্ধিমানের সাথে পরিচালনা করুন",
+      "statusNeedsAttention": "ধৈর্যের প্রয়োজন",
+      "statusCosmicEnergy": "ব্যক্তিগত গতিবেগ",
+      "statusIdealForMeditation": "ধ্যানের জন্য আদর্শ",
+      "comingSoon": "শীঘ্রই আসছে",
+      "bandLegendTitle": "এই স্কোরগুলি কী অর্থ বোঝায়?",
+      "bandVerySupportive": "অত্যন্ত সমর্থনকারী",
+      "bandSupportive": "সমর্থনকারী",
+      "bandMixed": "মিশ্রিত",
+      "bandCaution": "সতর্কতা",
+      "bandFriction": "ঘর্ষণ",
+      "bandLegendNote": "স্কোর নির্দেশনার তীব্রতা দেখায় — সমর্থনকারী বনাম চ্যালেঞ্জিং অবস্থা — গ্যারান্টিযুক্ত ফলাফল নয়।",
+      "statusStayFocused": "মনোনিবেশ করুন",
+      "statusPatienceNeeded": "ধৈর্যের প্রয়োজন",
+      "statusHarmonious": "সুরেলা",
+      "statusMixedSignals": "মিশ্রিত সংকেত",
+      "statusBuilding": "নির্মাণ পর্যায়",
+      "statusSpendMindfully": "সচেতনভাবে ব্যয় করুন",
+      "statusSteady": "স্থিতিশীল",
+      "statusMindYourRoutine": "আপনার রুটিনের যত্ন নিন"
+    },
+    "panchang": {
+      "title": "আজকের পঞ্চাঙ্গ",
+      "tithi": "তিথি",
+      "vara": "বার",
+      "nakshatra": "নক্ষত্র",
+      "yoga": "যোগ",
+      "karana": "করণ",
+      "rahuKaal": "রাহু কাল"
+    },
+    "compatibility": {
+      "title": "সামঞ্জস্য এবং ম্যাচ",
+      "viewAll": "সব দেখুন",
+      "gunaMilanScore": "গুণ মিলান স্কোর",
+      "excellentMatch": "চমৎকার ম্যাচ",
+      "goodMatch": "ভালো ম্যাচ",
+      "averageMatch": "গড় ম্যাচ",
+      "challengingMatch": "চ্যালেঞ্জিং ম্যাচ",
+      "harmony": "সামঞ্জস্য",
+      "trust": "বিশ্বাস",
+      "understanding": "বোঝাপড়া",
+      "emptyTitle": "আপনার প্রথম ম্যাচ চালান",
+      "emptyBody": "কারও জন্মের বিবরণ যোগ করুন দেখতে কীভাবে আপনার চার্ট সংযুক্ত হয়। অংশীদার, বন্ধু, পরিবার — যে কেউ।",
+      "emptyCta": "ম্যাচ শুরু করুন",
+      "outOf": "/ 100",
+      "matchSuffix": "ম্যাচ"
+    },
+    "familyFriends": {
+      "title": "পরিবার এবং বন্ধু",
+      "viewAll": "সব দেখুন",
+      "callNow": "এখনই কল করুন",
+      "premium": "প্রিমিয়াম",
+      "bandExcellent": "চমৎকার",
+      "bandVeryGood": "অত্যন্ত ভালো",
+      "bandGood": "ভালো",
+      "bandGreat": "দুর্দান্ত",
+      "bandStable": "স্থিতিশীল",
+      "bandAverage": "গড়",
+      "bandChallenging": "চ্যালেঞ্জিং",
+      "addMember": "সদস্য যোগ করুন",
+      "relationshipPartner": "অংশীদার",
+      "relationshipMother": "মা",
+      "relationshipFather": "বাবা",
+      "relationshipSibling": "ভাই/বোন",
+      "relationshipFriend": "বন্ধু",
+      "relationshipSon": "ছেলে",
+      "relationshipDaughter": "মেয়ে",
+      "relationshipFamily": "পরিবার",
+      "locked": "লক করা"
+    },
+    "myChart": {
+      "title": "আমার চার্ট",
+      "viewDetails": "বিস্তারিত দেখুন",
+      "yourKundli": "আপনার কুণ্ডলী",
+      "lagna": "লগ্ন",
+      "mahadasha": "মহাদশা",
+      "antardasha": "অন্তর্দশা",
+      "exploreFullAnalysis": "সম্পূর্ণ বিশ্লেষণ দেখুন",
+      "emptyTitle": "আপনার জন্মের বিবরণ সম্পূর্ণ করুন",
+      "emptyBody": "আপনার কুণ্ডলী আনলক হয় একবার আমাদের কাছে আপনার জন্মের তারিখ, সময় এবং স্থান থাকে।",
+      "emptyCta": "প্রোফাইল আপডেট করুন",
+      "periodEndsPrefix": "শেষ"
+    },
+    "aiAstrologer": {
+      "title": "AI জ্যোতিষী",
+      "howItWorks": "এটি কীভাবে কাজ করে?",
+      "freeFirstQuestion": "প্রথম প্রশ্ন বিনামূল্যে",
+      "guides": {
+        "navi": {
+          "name": "Navi",
+          "title": "বৈদিক বিশেষজ্ঞ"
+        },
+        "relationship_guide": {
+          "name": "মীরা",
+          "title": "সম্পর্ক বিশেষজ্ঞ"
+        },
+        "career_mentor": {
+          "name": "আর্যা",
+          "title": "ক্যারিয়ার বিশেষজ্ঞ"
+        },
+        "spiritual_guide": {
+          "name": "আনন্দ",
+          "title": "সম্পদ গাইড"
+        },
+        "finance_mentor": {
+          "name": "বিদ্যা",
+          "title": "নাড়ী বিশেষজ্ঞ"
+        },
+        "astro_sage": {
+          "name": "ঋষি",
+          "title": "KP বিশেষজ্ঞ"
+        }
+      }
+    }
   }
 }

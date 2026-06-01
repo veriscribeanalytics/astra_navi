@@ -13,13 +13,16 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.detail || "Failed to reset password" }, { status: response.status });
+            return NextResponse.json(data, { status: response.status });
         }
 
         return NextResponse.json(data, { status: 200 });
 
     } catch (error) {
         console.error("Reset password error:", error);
-        return NextResponse.json({ error: "Failed to reset password. Please try again later." }, { status: 500 });
+        return NextResponse.json({ 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
+        }, { status: 500 });
     }
 }

@@ -125,28 +125,28 @@ export default function ProfileSettingsPage() {
     const onboardingSteps = useMemo(() => {
         const hasLocation = !!user?.pob && typeof user?.birthLatitude === 'number' && typeof user?.birthLongitude === 'number' && !!user?.birthTimezoneName;
         return [
-            { id: 'name' as const,   label: 'Full Name',               hint: 'Your name as per birth certificate',                     complete: !!user?.name },
-            { id: 'dob'  as const,   label: 'Date of Birth',           hint: 'Determines your planetary positions (Nakshatra)',       complete: !!user?.dob },
-            { id: 'tob'  as const,   label: 'Time of Birth',           hint: 'Pinpoints your ascendant (Lagna) and house cusps',      complete: !!user?.tob },
-            { id: 'pob'  as const,   label: 'Accurate Birth Location', hint: 'Search your city & select from the dropdown for precise coordinates', complete: hasLocation },
+            { id: 'name' as const,   label: t('profile.onboarding.steps.name.label'),               hint: t('profile.onboarding.steps.name.hint'),                     complete: !!user?.name },
+            { id: 'dob'  as const,   label: t('profile.onboarding.steps.dob.label'),           hint: t('profile.onboarding.steps.dob.hint'),       complete: !!user?.dob },
+            { id: 'tob'  as const,   label: t('profile.onboarding.steps.tob.label'),           hint: t('profile.onboarding.steps.tob.hint'),      complete: !!user?.tob },
+            { id: 'pob'  as const,   label: t('profile.onboarding.steps.pob.label'), hint: t('profile.onboarding.steps.pob.hint'), complete: hasLocation },
         ];
-    }, [user]);
+    }, [user, t]);
     const profileProgress = useMemo(() => {
         const complete = onboardingSteps.filter(s => s.complete).length;
         return { complete, total: onboardingSteps.length };
     }, [onboardingSteps]);
     const validateField = (field: keyof typeof formData, value: string) => {
         let error = '';
-        
+
         switch (field) {
             case 'name':
                 if (!value.trim()) {
                     break;
                 }
                 if (value.trim().length < 2) {
-                    error = 'Name must be at least 2 characters';
+                    error = t('profile.fields.errors.nameTooShort');
                 } else if (value.trim().length > 100) {
-                    error = 'Name is too long';
+                    error = t('profile.fields.errors.nameTooLong');
                 }
                 break;
             case 'dob':
@@ -157,9 +157,9 @@ export default function ProfileSettingsPage() {
                     hundredYearsAgo.setFullYear(today.getFullYear() - 150);
 
                     if (dob > today) {
-                        error = 'Birth date cannot be in the future';
+                        error = t('profile.fields.errors.dobInFuture');
                     } else if (dob < hundredYearsAgo) {
-                        error = 'Please enter a valid birth date';
+                        error = t('profile.fields.errors.dobInvalid');
                     }
                 }
                 break;
@@ -168,13 +168,13 @@ export default function ProfileSettingsPage() {
                     break;
                 }
                 if (value.trim().length < 2) {
-                    error = 'Please enter a valid place';
+                    error = t('profile.fields.errors.pobInvalid');
                 } else if (value.trim().length > 100) {
-                    error = 'Place name is too long';
+                    error = t('profile.fields.errors.pobTooLong');
                 }
                 break;
         }
-        
+
         return error;
     };
 
@@ -190,16 +190,16 @@ export default function ProfileSettingsPage() {
         // In onboarding mode, name/dob/tob/pob are all required,
         // and structured birth location (latitude/longitude/timezone) is also required
         if (isOnboarding) {
-            if (!formData.name.trim()) newErrors.name = 'Name is required';
-            if (!formData.dob) newErrors.dob = 'Date of birth is required';
-            if (!formData.tob) newErrors.tob = 'Time of birth is required';
-            if (!formData.pob.trim()) newErrors.pob = 'Place of birth is required';
+            if (!formData.name.trim()) newErrors.name = t('profile.fields.errors.nameRequired');
+            if (!formData.dob) newErrors.dob = t('profile.fields.errors.dobRequired');
+            if (!formData.tob) newErrors.tob = t('profile.fields.errors.tobRequired');
+            if (!formData.pob.trim()) newErrors.pob = t('profile.fields.errors.pobRequired');
             // Structured birth location validation
             if (!selectedLocation && (formData.birthLatitude === undefined || formData.birthLongitude === undefined || !formData.birthTimezoneName)) {
-                newErrors.pob = 'Please select your exact birth location from the search results';
+                newErrors.pob = t('profile.fields.errors.pobSelectRequired');
             }
         } else if (formData.pob.trim() && (formData.birthLatitude === undefined || formData.birthLongitude === undefined || !formData.birthTimezoneName)) {
-            newErrors.pob = 'Please select your exact birth location from the search results';
+            newErrors.pob = t('profile.fields.errors.pobSelectRequired');
         }
 
         setErrors(newErrors);
@@ -211,12 +211,12 @@ export default function ProfileSettingsPage() {
         e.preventDefault();
 
         if (!validateForm()) {
-            error('Please fix the errors before saving');
+            error(t('profile.page.errors.fixErrors'));
             return;
         }
 
         if (!user?.email) {
-            error('No email found in session. Please logout and login again.');
+            error(t('profile.page.errors.noEmailSession'));
             return;
         }
 
@@ -232,59 +232,59 @@ export default function ProfileSettingsPage() {
         });
         console.log('[ProfileClient.handleSubmit] selectedLocation:', selectedLocation ? { name: selectedLocation.name, lat: selectedLocation.lat, lon: selectedLocation.lon, tz: selectedLocation.timezone } : null);
 
-        showLoading("Updating your profile...", 2000);
-        saveAttemptRef.current++;
-        
-        try {
-            // Build payload including structured birth location
-            const payload = Object.fromEntries(Object.entries({
-                ...formData,
-                pob: formData.pob || formData.birthPlaceName,
-                birthPlaceName: formData.birthPlaceName || formData.pob,
-                birthLatitude: formData.birthLatitude,
-                birthLongitude: formData.birthLongitude,
-                birthTimezoneName: formData.birthTimezoneName,
-            }).filter(([, value]) => value !== undefined && value !== '')) as Partial<typeof formData>;
+            showLoading("Updating your profile...", 2000);
+            saveAttemptRef.current++;
 
-            // --- DIAGNOSTIC LOG: pre-API call ---
-            console.log('[ProfileClient.handleSubmit] Payload keys:', Object.keys(payload).filter(k => payload[k as keyof typeof payload] !== undefined && payload[k as keyof typeof payload] !== '').join(', '));
-            console.log('[ProfileClient.handleSubmit] Payload birth fields:', {
-                dob: payload.dob, tob: payload.tob, pob: payload.pob,
-                birthLatitude: payload.birthLatitude, birthLongitude: payload.birthLongitude,
-                birthTimezoneName: payload.birthTimezoneName,
-                birthTimezoneOffsetAtBirth: payload.birthTimezoneOffsetAtBirth,
-            });
+            try {
+                // Build payload including structured birth location
+                const payload = Object.fromEntries(Object.entries({
+                    ...formData,
+                    pob: formData.pob || formData.birthPlaceName,
+                    birthPlaceName: formData.birthPlaceName || formData.pob,
+                    birthLatitude: formData.birthLatitude,
+                    birthLongitude: formData.birthLongitude,
+                    birthTimezoneName: formData.birthTimezoneName,
+                }).filter(([, value]) => value !== undefined && value !== '')) as Partial<typeof formData>;
 
-            const response = await clientFetch('/api/user/profile', {
-                method: 'PUT',
-                body: JSON.stringify(payload), 
-            });
+                // --- DIAGNOSTIC LOG: pre-API call ---
+                console.log('[ProfileClient.handleSubmit] Payload keys:', Object.keys(payload).filter(k => payload[k as keyof typeof payload] !== undefined && payload[k as keyof typeof payload] !== '').join(', '));
+                console.log('[ProfileClient.handleSubmit] Payload birth fields:', {
+                    dob: payload.dob, tob: payload.tob, pob: payload.pob,
+                    birthLatitude: payload.birthLatitude, birthLongitude: payload.birthLongitude,
+                    birthTimezoneName: payload.birthTimezoneName,
+                    birthTimezoneOffsetAtBirth: payload.birthTimezoneOffsetAtBirth,
+                });
 
-            const data = await response.json();
+                const response = await clientFetch('/api/user/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(payload),
+                });
 
-            // --- DIAGNOSTIC LOG: post-API call ---
-            console.log('[ProfileClient.handleSubmit] API response - status:', response.status, 'ok:', response.ok);
-            console.log('[ProfileClient.handleSubmit] API response - profileComplete:', data.profileComplete, 'requiresReanalysis:', data.requiresReanalysis);
-            console.log('[ProfileClient.handleSubmit] API response - full keys:', Object.keys(data || {}).join(', '));
+                const data = await response.json();
 
-            if (!response.ok) {
-                // Handle DST conflict (409)
-                if (response.status === 409 && (data.dst_conflict || data.error?.includes('DST') || data.error?.includes('ambiguous'))) {
-                    setDstConflictMessage(data.message || data.error || 'Your birth time falls during a DST transition. Please select which occurrence was your actual birth time.');
-                    setDstRetryData(payload);
-                    setShowDstDialog(true);
-                    showLoading("", 0);
-                    return;
+                // --- DIAGNOSTIC LOG: post-API call ---
+                console.log('[ProfileClient.handleSubmit] API response - status:', response.status, 'ok:', response.ok);
+                console.log('[ProfileClient.handleSubmit] API response - profileComplete:', data.profileComplete, 'requiresReanalysis:', data.requiresReanalysis);
+                console.log('[ProfileClient.handleSubmit] API response - full keys:', Object.keys(data || {}).join(', '));
+
+                if (!response.ok) {
+                    // Handle DST conflict (409)
+                    if (response.status === 409 && (data.dst_conflict || data.error?.includes('DST') || data.error?.includes('ambiguous'))) {
+                        setDstConflictMessage(data.message || data.error || t('profile.page.errors.dstConflict'));
+                        setDstRetryData(payload);
+                        setShowDstDialog(true);
+                        showLoading("", 0);
+                        return;
+                    }
+                    throw new Error(data.error || t('profile.page.errors.updateFailed'));
                 }
-                throw new Error(data.error || "Update failed. Please try again.");
-            }
 
-            // Update local context
-            login(user?.email || '', formData);
-            if (formData.language !== contextLanguage) {
-                setLanguage(formData.language as LanguageCode);
-            }
-            success('Profile updated successfully!');
+                // Update local context
+                login(user?.email || '', formData);
+                if (formData.language !== contextLanguage) {
+                    setLanguage(formData.language as LanguageCode);
+                }
+                success(t('profile.page.messages.profileUpdated'));
             setHasChanges(false);
             
             // Refetch profile from backend to refresh auth state
@@ -459,13 +459,13 @@ export default function ProfileSettingsPage() {
                                 <div className="flex-1 min-w-0">
                                     <p className="text-[12px] font-bold text-primary truncate">
                                         {profileProgress.complete === profileProgress.total
-                                            ? 'All set! Your celestial profile is complete ✨'
-                                            : `${profileProgress.total - profileProgress.complete} step${profileProgress.total - profileProgress.complete !== 1 ? 's' : ''} remaining`}
+                                            ? t('profile.onboarding.mobile.complete')
+                                            : t('profile.onboarding.mobile.remaining').replace('{n}', String(profileProgress.total - profileProgress.complete))}
                                     </p>
                                     <p className="text-[10px] text-on-surface-variant/60">
                                         {profileProgress.complete === profileProgress.total
-                                            ? 'Press Save & Continue to return'
-                                            : 'Tap to see what\'s needed'}
+                                            ? t('profile.onboarding.mobile.completeHint')
+                                            : t('profile.onboarding.mobile.remainingHint')}
                                     </p>
                                 </div>
                                 <ChevronDown className={`w-4 h-4 text-secondary/60 transition-transform duration-200 ${showChecklist ? 'rotate-180' : ''}`} />
@@ -524,12 +524,10 @@ export default function ProfileSettingsPage() {
                                 </div>
                                 <div>
                                     <h2 className="text-base sm:text-lg font-headline font-bold text-primary">
-                                        Complete Your Celestial Identity
+                                        {t('profile.onboarding.sidebar.title')}
                                     </h2>
                                     <p className="text-[12px] sm:text-sm text-on-surface-variant/80 mt-1 leading-relaxed">
-                                        Your birth details are the foundation of every cosmic insight — 
-                                        they unlock personalized horoscopes, kundli analysis, and 
-                                        AI-powered Vedic readings.
+                                        {t('profile.onboarding.sidebar.description')}
                                     </p>
                                 </div>
                             </div>
@@ -537,7 +535,7 @@ export default function ProfileSettingsPage() {
                             {/* Visual checklist: all 4 steps */}
                             <div className="space-y-2">
                                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-secondary/70">
-                                    Profile Checklist
+                                    {t('profile.onboarding.sidebar.checklistLabel')}
                                 </p>
                                 <div className="space-y-1.5">
                                     {onboardingSteps.map((step, i) => (
@@ -573,7 +571,7 @@ export default function ProfileSettingsPage() {
                                 <div className="flex items-center gap-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20">
                                     <CheckCircle2 className="w-4 h-4 text-green-400" />
                                     <p className="text-[12px] font-medium text-green-300">
-                                        All set! Your celestial profile is complete. Press Save &amp; Continue to return to the dashboard.
+                                        {t('profile.onboarding.sidebar.completeMessage')}
                                     </p>
                                 </div>
                             )}
@@ -582,7 +580,7 @@ export default function ProfileSettingsPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/50">
-                                        Profile Completion
+                                        {t('profile.onboarding.sidebar.progressLabel')}
                                     </span>
                                     <span className="text-[10px] font-bold text-secondary tabular-nums">
                                         {profileProgress.complete} of {profileProgress.total}
@@ -605,9 +603,9 @@ export default function ProfileSettingsPage() {
                     <div className={`inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow ${isOnboarding ? 'w-12 h-12 sm:w-14 sm:h-14 mb-3 sm:mb-4' : 'w-14 h-14 sm:w-16 sm:h-16 mb-4 sm:mb-6'}`}>
                         <User className={`text-secondary ${isOnboarding ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'}`} />
                     </div>
-                    <h1 className={`font-headline font-bold text-primary ${isOnboarding ? 'text-2xl sm:text-3xl mb-2' : 'text-3xl sm:text-4xl mb-3'}`}>User Profile</h1>
+                    <h1 className={`font-headline font-bold text-primary ${isOnboarding ? 'text-2xl sm:text-3xl mb-2' : 'text-3xl sm:text-4xl mb-3'}`}>{t('profile.page.title')}</h1>
                     <p className={`font-body text-on-surface-variant max-w-md mx-auto ${isOnboarding ? 'text-xs sm:text-sm' : 'text-sm'}`}>
-                        Manage your birth details to ensure your personalized readings are always accurate.
+                        {t('profile.page.description')}
                     </p>
                     {/* Credit Balance — only shown when NOT in onboarding */}
                     {!isOnboarding && paywallLoaded && (
@@ -625,18 +623,18 @@ export default function ProfileSettingsPage() {
                 <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="grid grid-cols-1 gap-6">
-                            <Input 
-                                label="Email Address"
+                            <Input
+                                label={t('profile.fields.email')}
                                 type="email"
                                 icon={<Mail className="w-4 h-4" />}
                                 value={user?.email || ''}
                                 readOnly
                                 disabled
-                                helperText="Your email cannot be changed"
+                                helperText={t('profile.fields.emailHelper')}
                             />
-                            <Input 
-                                label="Full Name"
-                                placeholder="Enter your full name" 
+                            <Input
+                                label={t('profile.fields.fullName')}
+                                placeholder={t('profile.fields.fullNamePlaceholder')}
                                 type="text"
                                 icon={<User className="w-4 h-4" />}
                                 value={formData.name}
@@ -652,14 +650,14 @@ export default function ProfileSettingsPage() {
                                     setErrors({...errors, name: validateField('name', formData.name)});
                                 }}
                                 error={touched.name ? errors.name : ''}
-                                helperText="Your full name as per birth certificate"
+                                helperText={t('profile.fields.fullNameHelper')}
                                 required
                             />
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <Input 
-                                label="Date of Birth"
+                            <Input
+                                label={t('profile.fields.dateOfBirth')}
                                 type="date"
                                 icon={<Calendar className="w-4 h-4" />}
                                 value={formData.dob}
@@ -675,23 +673,23 @@ export default function ProfileSettingsPage() {
                                     setErrors({...errors, dob: validateField('dob', formData.dob)});
                                 }}
                                 error={touched.dob ? errors.dob : ''}
-                                helperText="Your birth date"
+                                helperText={t('profile.fields.dateOfBirthHelper')}
                                 required
                             />
-                            <Input 
-                                label="Time of Birth"
+                            <Input
+                                label={t('profile.fields.timeOfBirth')}
                                 type="time"
                                 icon={<Clock className="w-4 h-4" />}
                                 value={formData.tob}
                                 onChange={(e) => updateFormData({ tob: e.target.value })}
-                                helperText="Exact time for precision"
+                                helperText={t('profile.fields.timeOfBirthHelper')}
                                 required
                             />
                         </div>
-                        
-                        <LocationSearch 
-                            label="Place of Birth"
-                            placeholder="Search city, e.g. Delhi" 
+
+                        <LocationSearch
+                            label={t('profile.fields.placeOfBirth')}
+                            placeholder={t('profile.fields.placeOfBirthPlaceholder')}
                             value={formData.pob || formData.birthPlaceName}
                             required
                             confirmedLocation={selectedLocation}
@@ -725,77 +723,77 @@ export default function ProfileSettingsPage() {
                                 }
                             }}
                             error={touched.pob ? errors.pob : ''}
-                            helperText="Search and select your exact birth location"
+                            helperText={t('profile.fields.placeOfBirthHelper')}
                         />
 
-                        <Input 
-                            label="Phone Number"
-                            placeholder="+1234567890" 
+                        <Input
+                            label={t('profile.fields.phoneNumber')}
+                            placeholder={t('profile.fields.phoneNumberPlaceholder')}
                             type="tel"
-                            icon={<Phone className="w-4 h-4" />} 
+                            icon={<Phone className="w-4 h-4" />}
                             value={formData.phoneNumber}
                             onChange={(e) => {
                                 const value = e.target.value;
                                 updateFormData({ phoneNumber: value });
                             }}
-                            helperText="Optional phone number"
+                            helperText={t('profile.fields.phoneNumberHelper')}
                         />
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <div className="space-y-1">
                                 <label htmlFor="gender" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
-                                    Gender
+                                    {t('profile.fields.gender')}
                                 </label>
-                                <select 
+                                <select
                                     id="gender"
                                     className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
                                     value={formData.gender}
                                     onChange={(e) => updateFormData({ gender: e.target.value })}
                                 >
-                                    <option value="" disabled className="bg-surface text-on-surface">Select Gender</option>
-                                    <option value="male" className="bg-surface text-on-surface">Male</option>
-                                    <option value="female" className="bg-surface text-on-surface">Female</option>
-                                    <option value="other" className="bg-surface text-on-surface">Other</option>
-                                    <option value="Not Specified" className="bg-surface text-on-surface">Not Specified</option>
+                                    <option value="" disabled className="bg-surface text-on-surface">{t('profile.fields.genderPlaceholder')}</option>
+                                    <option value="male" className="bg-surface text-on-surface">{t('profile.fields.genderOptions.male')}</option>
+                                    <option value="female" className="bg-surface text-on-surface">{t('profile.fields.genderOptions.female')}</option>
+                                    <option value="other" className="bg-surface text-on-surface">{t('profile.fields.genderOptions.other')}</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">{t('profile.fields.genderOptions.notSpecified')}</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="maritalStatus" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
-                                    Marital Status
+                                    {t('profile.fields.maritalStatus')}
                                 </label>
-                                <select 
+                                <select
                                     id="maritalStatus"
                                     className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
                                     value={formData.maritalStatus}
                                     onChange={(e) => updateFormData({ maritalStatus: e.target.value })}
                                 >
-                                    <option value="" disabled className="bg-surface text-on-surface">Select Status</option>
-                                    <option value="single" className="bg-surface text-on-surface">Single</option>
-                                    <option value="married" className="bg-surface text-on-surface">Married</option>
-                                    <option value="divorced" className="bg-surface text-on-surface">Divorced</option>
-                                    <option value="widowed" className="bg-surface text-on-surface">Widowed</option>
-                                    <option value="separated" className="bg-surface text-on-surface">Separated</option>
-                                    <option value="Not Specified" className="bg-surface text-on-surface">Prefer not to say</option>
+                                    <option value="" disabled className="bg-surface text-on-surface">{t('profile.fields.maritalStatusPlaceholder')}</option>
+                                    <option value="single" className="bg-surface text-on-surface">{t('profile.fields.maritalOptions.single')}</option>
+                                    <option value="married" className="bg-surface text-on-surface">{t('profile.fields.maritalOptions.married')}</option>
+                                    <option value="divorced" className="bg-surface text-on-surface">{t('profile.fields.maritalOptions.divorced')}</option>
+                                    <option value="widowed" className="bg-surface text-on-surface">{t('profile.fields.maritalOptions.widowed')}</option>
+                                    <option value="separated" className="bg-surface text-on-surface">{t('profile.fields.maritalOptions.separated')}</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">{t('profile.fields.maritalOptions.notSpecified')}</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="occupation" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
-                                    Occupation
+                                    {t('profile.fields.occupation')}
                                 </label>
-                                <select 
+                                <select
                                     id="occupation"
                                     className="w-full h-12 bg-surface-variant/30 border border-outline-variant/30 rounded-xl px-4 text-on-surface focus:outline-none focus:border-secondary/50 transition-all appearance-none cursor-pointer"
                                     value={formData.occupation}
                                     onChange={(e) => updateFormData({ occupation: e.target.value })}
                                 >
-                                    <option value="" disabled className="bg-surface text-on-surface">Select Occupation</option>
-                                    <option value="student" className="bg-surface text-on-surface">Student</option>
-                                    <option value="business" className="bg-surface text-on-surface">Business Owner</option>
-                                    <option value="employed" className="bg-surface text-on-surface">Employed / Salaried</option>
-                                    <option value="homemaker" className="bg-surface text-on-surface">Homemaker</option>
-                                    <option value="retired" className="bg-surface text-on-surface">Retired</option>
-                                    <option value="unemployed" className="bg-surface text-on-surface">Unemployed</option>
-                                    <option value="Not Specified" className="bg-surface text-on-surface">Prefer not to say</option>
+                                    <option value="" disabled className="bg-surface text-on-surface">{t('profile.fields.occupationPlaceholder')}</option>
+                                    <option value="student" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.student')}</option>
+                                    <option value="business" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.business')}</option>
+                                    <option value="employed" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.employed')}</option>
+                                    <option value="homemaker" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.homemaker')}</option>
+                                    <option value="retired" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.retired')}</option>
+                                    <option value="unemployed" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.unemployed')}</option>
+                                    <option value="Not Specified" className="bg-surface text-on-surface">{t('profile.fields.occupationOptions.notSpecified')}</option>
                                 </select>
                             </div>
                         </div>
@@ -804,7 +802,7 @@ export default function ProfileSettingsPage() {
                         <div className="space-y-8 pt-4 border-t border-outline-variant/10">
                             <div className="space-y-4">
                                 <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 block px-1 flex items-center gap-2">
-                                    <Globe className="w-4 h-4 text-secondary" /> Preferred Language
+                                    <Globe className="w-4 h-4 text-secondary" /> {t('profile.preferences.language')}
                                 </label>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                                     {availableLanguages.map((lang) => (
@@ -829,7 +827,7 @@ export default function ProfileSettingsPage() {
 
                             <div className="space-y-4">
                                 <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 block px-1 flex items-center gap-2">
-                                    <Bell className="w-4 h-4 text-secondary" /> Cosmic Preferences
+                                    <Bell className="w-4 h-4 text-secondary" /> {t('profile.preferences.cosmicPreferences')}
                                 </label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <button
@@ -845,8 +843,8 @@ export default function ProfileSettingsPage() {
                                                 <Sparkles size={18} />
                                             </div>
                                             <div className="text-left">
-                                                <p className="text-sm font-bold text-primary">Daily Horoscope</p>
-                                                <p className="text-[10px] text-on-surface-variant/60">Receive daily cosmic insights</p>
+                                                <p className="text-sm font-bold text-primary">{t('profile.preferences.horoscopeTitle')}</p>
+                                                <p className="text-[10px] text-on-surface-variant/60">{t('profile.preferences.horoscopeDescription')}</p>
                                             </div>
                                         </div>
                                         <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.preferences.horoscope ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
@@ -867,8 +865,8 @@ export default function ProfileSettingsPage() {
                                                 <Bell size={18} />
                                             </div>
                                             <div className="text-left">
-                                                <p className="text-sm font-bold text-primary">Notifications</p>
-                                                <p className="text-[10px] text-on-surface-variant/60">Alerts for planetary transits</p>
+                                                <p className="text-sm font-bold text-primary">{t('profile.preferences.notificationsTitle')}</p>
+                                                <p className="text-[10px] text-on-surface-variant/60">{t('profile.preferences.notificationsDescription')}</p>
                                             </div>
                                         </div>
                                         <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.preferences.notifications ? 'bg-secondary' : 'bg-on-surface-variant/20'}`}>
@@ -879,10 +877,10 @@ export default function ProfileSettingsPage() {
                             </div>
                         </div>
                         <div className="pt-4 flex flex-col sm:flex-row gap-4">
-                            <Button 
-                                type="submit" 
-                                fullWidth 
-                                size="lg" 
+                            <Button
+                                type="submit"
+                                fullWidth
+                                size="lg"
                                 className={isOnboarding
                                     ? 'bg-primary text-secondary hover:bg-primary/90 hover:-translate-y-0.5 shadow-xl shadow-secondary/20 border border-secondary/20'
                                     : 'shadow-xl shadow-secondary/20'
@@ -892,31 +890,31 @@ export default function ProfileSettingsPage() {
                                 leftIcon={!isLoading ? <Save className="w-4 h-4" /> : undefined}
                                 rightIcon={!isLoading && isOnboarding ? <ArrowRight className="w-4 h-4" /> : undefined}
                             >
-                                {isLoading ? 'Updating...' : (isOnboarding ? 'Save & Continue to Dashboard' : 'Save Changes')}
+                                {isLoading ? t('profile.page.buttons.updating') : (isOnboarding ? t('profile.page.buttons.saveAndContinue') : t('profile.page.buttons.saveChanges'))}
                             </Button>
                             {hasChanges && (
-                                <Button 
+                                <Button
                                     type="button"
                                     variant="ghost"
-                                    fullWidth 
+                                    fullWidth
                                     size="lg"
                                     onClick={handleReset}
                                     disabled={isLoading}
                                     leftIcon={<RotateCcw className="w-4 h-4" />}
                                 >
-                                    Reset
+                                    {t('profile.page.buttons.reset')}
                                 </Button>
                             )}
                             {!hasChanges && (
-                                <Button 
+                                <Button
                                     type="button"
                                     variant="ghost"
-                                    fullWidth 
+                                    fullWidth
                                     size="lg"
                                     onClick={() => router.push('/')}
                                     leftIcon={<ArrowLeft className="w-4 h-4" />}
                                 >
-                                    Back to Home
+                                    {t('profile.page.buttons.backToHome')}
                                 </Button>
                             )}
                         </div>
@@ -927,18 +925,18 @@ export default function ProfileSettingsPage() {
                     <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 mt-8" hoverable={false}>
                         <div className="space-y-6">
                             <div>
-                                <h3 className="text-xl font-headline font-bold text-primary mb-2">Security Settings</h3>
-                                <p className="text-sm text-on-surface-variant">Manage your password and active sessions.</p>
+                                <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('profile.page.securitySection.title')}</h3>
+                                <p className="text-sm text-on-surface-variant">{t('profile.page.securitySection.description')}</p>
                             </div>
-                            
+
                             <div className="pt-4 border-t border-outline-variant/10 space-y-4">
-                                <Button 
-                                    type="button" 
+                                <Button
+                                    type="button"
                                     variant="ghost"
                                     fullWidth
                                     onClick={() => router.push('/profile/security')}
                                 >
-                                    Manage Security Settings
+                                    {t('profile.page.securitySection.button')}
                                 </Button>
                             </div>
                         </div>

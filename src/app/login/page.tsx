@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import {
   Orbit, Sparkles, ShieldCheck,
 } from 'lucide-react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -19,12 +18,13 @@ import {
   RegisterFlow,
 } from '@/components/auth';
 import { isProfileComplete } from '@/lib/profileCompleteness';
+import { ParsedAuthError, parseAuthError } from '@/utils/authErrorParser';
 
 const LoginContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { success, error: showError, ToastContainer } = useToast();
-  const { showLoading, login: setAuthUser } = useAuth();
+  const { showLoading, login: setAuthUser, isLoggedIn, user, logout } = useAuth();
   const { t } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
@@ -120,33 +120,45 @@ const LoginContent = () => {
 
   // --- Sign In handler ---
   const handleSignIn = async (formData: { email: string; password: string }) => {
-    const result = await signIn('credentials', {
-      redirect: false,
-      email: formData.email,
-      password: formData.password,
-    });
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
 
-    if (result?.error) {
-      if (result.error.toLowerCase().includes('locked')) {
-        const lockoutEnd = Date.now() + 15 * 60 * 1000;
-        setLockedUntil(lockoutEnd);
-        setLockedRemaining(15 * 60);
-        showError('Account locked due to too many failed attempts.');
-        return { error: 'Account locked. Try again later.' };
+      const data = await res.json();
+
+      if (!res.ok) {
+        const parsedError = parseAuthError(data);
+        if (parsedError.code === 'account_locked' || (parsedError.message && parsedError.message.toLowerCase().includes('locked'))) {
+          const seconds = parsedError.retryAfterSeconds || 15 * 60;
+          const lockoutEnd = Date.now() + seconds * 1000;
+          setLockedUntil(lockoutEnd);
+          setLockedRemaining(seconds);
+        }
+        return { parsedError };
       }
-      const msg =
-        result.error === 'CredentialsSignin'
-          ? t('login.invalidCredentials')
-          : result.error === 'Configuration'
-            ? t('login.networkError')
-            : result.error;
-      return { error: msg };
-    }
 
-    showLoading(t('login.signingYouIn'), 1500);
-    setTimeout(() => {
-      router.push(getCallbackUrl());
-    }, 1500);
+      // If credentials check succeeded, proceed with NextAuth signIn to establish the session.
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result?.error) {
+        return { parsedError: parseAuthError(result.error) };
+      }
+
+      showLoading(t('login.signingYouIn'), 1500);
+      setTimeout(() => {
+        router.push(getCallbackUrl());
+      }, 1500);
+
+    } catch (err: unknown) {
+      return { parsedError: parseAuthError(err) };
+    }
   };
 
   // --- Register handler ---
@@ -157,64 +169,93 @@ const LoginContent = () => {
     birthLatitude: number | undefined; birthLongitude: number | undefined;
     birthTimezoneName: string; language: string;
     preferences: { horoscope: boolean; notifications: boolean };
-  }) => {
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(submitData),
-    });
+  }): Promise<{ ok: boolean; data: Record<string, unknown>; parsedError?: ParsedAuthError | null }> => {
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      const errorMsg = data.error || data.detail || t('login.registrationFailed');
-      const msg = typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg);
-      throw new Error(msg);
-    }
-
-    success(t('login.accountCreated'));
-
-    // Save preferences if different from defaults
-    if (submitData.preferences) {
-      try {
-        await fetch('/api/user/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${data.accessToken}`,
-          },
-          body: JSON.stringify({ preferences: submitData.preferences }),
-        });
-      } catch {
-        // non-critical — preference save is best-effort
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, data: {}, parsedError: parseAuthError(data) };
       }
+
+      success(t('login.accountCreated'));
+
+      // Save preferences if different from defaults
+      if (submitData.preferences) {
+        try {
+          await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${data.accessToken}`,
+            },
+            body: JSON.stringify({ preferences: submitData.preferences }),
+          });
+        } catch {
+          // non-critical — preference save is best-effort
+        }
+      }
+
+      // Auto-login after registration
+      const result = await signIn('credentials', {
+        redirect: false,
+        isRegistration: 'true',
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresIn: data.expiresIn,
+      });
+
+      if (result?.error) {
+        return { ok: false, data: {}, parsedError: parseAuthError(result.error) };
+      }
+
+      const { password: _password, ...profileData } = submitData;
+      setAuthUser(data.user.email, {
+        ...profileData,
+        id: data.user.id,
+        name: data.user.name || submitData.name,
+      });
+
+      showLoading(t('login.signingYouIn'), 1500);
+      setTimeout(() => {
+        router.push(data.profileComplete || isProfileComplete(submitData) ? '/?login=success' : '/profile?onboarding=true');
+      }, 1500);
+
+      return { ok: true, data: data || {} };
+    } catch (err: unknown) {
+      return { ok: false, data: {}, parsedError: parseAuthError(err) };
     }
-
-    // Auto-login after registration
-    const result = await signIn('credentials', {
-      redirect: false,
-      isRegistration: 'true',
-      id: data.user.id,
-      email: data.user.email,
-      name: data.user.name,
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
-      expiresIn: data.expiresIn,
-    });
-
-    if (result?.error) throw new Error(result.error);
-
-    const { password: _password, ...profileData } = submitData;
-    setAuthUser(data.user.email, {
-      ...profileData,
-      id: data.user.id,
-      name: data.user.name || submitData.name,
-    });
-
-    showLoading(t('login.signingYouIn'), 1500);
-    setTimeout(() => {
-      router.push(data.profileComplete || isProfileComplete(submitData) ? '/?login=success' : '/profile?onboarding=true');
-    }, 1500);
   };
+
+  const handleActionClick = (action: string) => {
+    if (action === 'register') {
+      setIsRegister(true);
+    } else if (action === 'login') {
+      setIsRegister(false);
+    } else if (action === 'reset_password') {
+      router.push('/forgot-password');
+    }
+  };
+
+  // Respect `?action=register` on mount so deep-links from "Sign Up" CTAs
+  // (navbar, landing-page hero) drop the user straight into the register
+  // form instead of the sign-in form. Runs once: after this the user can
+  // toggle freely without the URL fighting them.
+  const initialActionRef = useRef(false);
+  useEffect(() => {
+    if (initialActionRef.current) return;
+    initialActionRef.current = true;
+    if (searchParams.get('action') === 'register') {
+      setIsRegister(true);
+    }
+  }, [searchParams]);
 
   const [quoteIndex, setQuoteIndex] = useState(0);
   const quotes = [
@@ -234,6 +275,26 @@ const LoginContent = () => {
   const lockedDisplay = lockedUntil
     ? `Locked (${Math.floor(lockedRemaining / 60)}:${(lockedRemaining % 60).toString().padStart(2, '0')})`
     : undefined;
+
+  // Map known protected destinations to a human-readable label so the bounce
+  // banner can tell the user *why* they landed on /login. Unknown / empty
+  // callbackUrls fall through to no banner.
+  const destinationLabel = (() => {
+    const cb = searchParams.get('callbackUrl');
+    if (!cb || cb === '/' || cb.startsWith('/?')) return null;
+    const path = cb.split('?')[0];
+    const map: Record<string, string> = {
+      '/chat': t('nav.chatWithNavi'),
+      '/profile': t('nav.userProfile') || 'Your Profile',
+      '/family': t('nav.myFamily'),
+      '/kundli': t('nav.myKundli'),
+      '/kundli/match': t('nav.chartMatching'),
+      '/horoscope/forecast': t('nav.forecast'),
+      '/consult': t('nav.guidedSessions'),
+      '/plans': t('nav.astraNaviPremium'),
+    };
+    return map[path] || null;
+  })();
 
   return (
     <AuthShell mouseGlow fullHeight className="px-0">
@@ -298,65 +359,109 @@ const LoginContent = () => {
 
         {/* Right Panel: Auth Form */}
         <div className="w-full lg:w-[550px] xl:w-[650px] flex flex-col min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-hidden relative">
-          {/* Mobile-only logo */}
-          <div className="lg:hidden flex justify-center mt-4 mb-2">
-            <div className="flex flex-col items-center gap-1">
-              <Image src="/icons/logo.jpeg" alt="AstraNavi" width={32} height={32} style={{ width: 'auto', height: 'auto' }} className="rounded-lg" />
-              <h2 className="text-base font-headline font-bold text-primary">AstraNavi</h2>
-            </div>
-          </div>
-
           {/* Form body */}
-          <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col justify-center">
-            {/* Header */}
-            <div className="px-4 sm:px-6 pb-6 shrink-0">
-              <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5 text-center">
-                {isRegister ? t('login.stepAccount') || 'Create Your Account' : t('login.signIn')}
-              </h1>
-              <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium text-center">
-                {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
-              </p>
-            </div>
-
-            <AuthFormCard>
-              {!isRegister ? (
-                <SignInForm
-                  onSubmit={handleSignIn}
-                  disabled={!!lockedUntil}
-                  disabledReason={lockedDisplay}
-                  onForgotPassword={() => router.push('/forgot-password')}
-                />
-              ) : (
-                <RegisterFlow
-                  onSubmit={async (data) => {
-                    await handleRegister(data);
-                    return { ok: true, data: {} };
-                  }}
-                />
+          <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col">
+            <div className="m-auto w-full">
+              {/* Already-signed-in banner — shown when a returning user lands on /login
+                  with a valid session (e.g. clicked a shared /login link). Provides a
+                  clear path to the dashboard or to sign out, instead of silently
+                  bouncing them into a feature page. */}
+              {isLoggedIn && user && (
+                <div className="mb-6 mx-2 sm:mx-4 rounded-2xl border border-secondary/30 bg-secondary/5 px-4 py-4 sm:px-5 sm:py-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary/15 border border-secondary/30 text-secondary flex items-center justify-center text-sm font-headline font-bold shrink-0">
+                      {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-secondary">
+                        {t('login.alreadySignedIn')}
+                      </p>
+                      <p className="mt-0.5 text-sm font-headline font-semibold text-primary truncate">
+                        {user.name || user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={() => router.push('/')}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-secondary text-on-primary text-[11px] sm:text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    >
+                      {t('login.goToDashboard')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { void logout('/login?signedOut=1'); }}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-transparent border border-outline-variant/30 text-on-surface-variant text-[11px] sm:text-xs font-bold uppercase tracking-widest hover:border-secondary/40 hover:text-secondary transition-colors"
+                    >
+                      {t('login.signOut')}
+                    </button>
+                  </div>
+                </div>
               )}
 
-              <div className="flex items-center gap-4 py-3">
-                <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
-                  {t('login.secureConnection')}
-                </span>
-                <div className="h-[1px] flex-1 bg-outline-variant/10" />
+              {/* Bounce-context banner — shown when the proxy/middleware
+                  redirected the user here from a protected route. Tells them
+                  exactly *why* they're seeing the login form. */}
+              {!isLoggedIn && destinationLabel && (
+                <div className="mb-5 mx-2 sm:mx-4 rounded-2xl border border-secondary/20 bg-secondary/[0.04] px-4 py-3 sm:px-5 sm:py-3.5 flex items-start gap-3">
+                  <ShieldCheck className="w-4 h-4 text-secondary mt-0.5 shrink-0" />
+                  <p className="text-[12px] sm:text-[13px] leading-relaxed text-on-surface-variant">
+                    {t('login.signInToContinue')}{' '}
+                    <span className="font-bold text-primary">{destinationLabel}</span>
+                  </p>
+                </div>
+              )}
+
+              {/* Header */}
+              <div className="px-4 sm:px-6 pb-6 shrink-0">
+                <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5 text-center">
+                  {isRegister ? t('login.stepAccount') || 'Create Your Account' : t('login.signIn')}
+                </h1>
+                <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium text-center">
+                  {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
+                </p>
               </div>
 
-              <div className="text-center pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsRegister(!isRegister)}
-                  className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
-                >
-                  {isRegister ? (
-                    <>{t('login.alreadyHaveAccount')} <span className="text-secondary ml-1">{t('login.signIn')}</span></>
-                  ) : (
-                    <>{t('login.dontHaveAccount')} <span className="text-secondary ml-1">{t('login.createAccount')}</span></>
-                  )}
-                </button>
-              </div>
-            </AuthFormCard>
+              <AuthFormCard>
+                {!isRegister ? (
+                  <SignInForm
+                    onSubmit={handleSignIn}
+                    disabled={!!lockedUntil}
+                    disabledReason={lockedDisplay}
+                    onForgotPassword={() => router.push('/forgot-password')}
+                    onActionClick={handleActionClick}
+                  />
+                ) : (
+                  <RegisterFlow
+                    onSubmit={handleRegister}
+                    onActionClick={handleActionClick}
+                  />
+                )}
+
+                <div className="flex items-center gap-4 py-3">
+                  <div className="h-[1px] flex-1 bg-outline-variant/10" />
+                  <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
+                    {t('login.secureConnection')}
+                  </span>
+                  <div className="h-[1px] flex-1 bg-outline-variant/10" />
+                </div>
+
+                <div className="text-center pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsRegister(!isRegister)}
+                    className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
+                  >
+                    {isRegister ? (
+                      <>{t('login.alreadyHaveAccount')} <span className="text-secondary ml-1">{t('login.signIn')}</span></>
+                    ) : (
+                      <>{t('login.dontHaveAccount')} <span className="text-secondary ml-1">{t('login.createAccount')}</span></>
+                    )}
+                  </button>
+                </div>
+              </AuthFormCard>
+            </div>
           </div>
         </div>
 

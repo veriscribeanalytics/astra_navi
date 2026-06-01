@@ -64,12 +64,9 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user && !hasSessionError;
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isAuthRoute = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
-      const isSessionRecoveryRoute =
-        nextUrl.searchParams.get("error") === "SessionExpired" ||
-        nextUrl.searchParams.get("sessionCleared") === "1";
-      const isPublicRoute = 
-        nextUrl.pathname === "/" || 
-        nextUrl.pathname.startsWith("/blogs") || 
+      const isPublicRoute =
+        nextUrl.pathname === "/" ||
+        nextUrl.pathname.startsWith("/blogs") ||
         nextUrl.pathname.startsWith("/rashis") ||
         nextUrl.pathname.startsWith("/about") ||
         nextUrl.pathname.startsWith("/support") ||
@@ -77,6 +74,9 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/plans") ||
         nextUrl.pathname.startsWith("/kundli") ||
         nextUrl.pathname.startsWith("/consult") ||
+        nextUrl.pathname.startsWith("/chat") ||
+        nextUrl.pathname.startsWith("/family") ||
+        nextUrl.pathname.startsWith("/horoscope") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||
         nextUrl.pathname.startsWith("/logout");
@@ -91,9 +91,12 @@ export const authConfig = {
           }
           return redirectToLoginAndClearSession(nextUrl);
         }
-        if (isLoggedIn && !isSessionRecoveryRoute) {
-          return Response.redirect(new URL("/chat", nextUrl));
-        }
+        // NOTE: we intentionally do NOT auto-redirect logged-in users away
+        // from /login. Doing so used to bounce anyone who opened a shared
+        // /login link (with a stale cookie) to /chat, where they would see
+        // a blank/dark screen if their session was in an inconsistent state.
+        // The login page itself renders an "already signed in" banner when
+        // appropriate. After sign-in, the form redirects to `callbackUrl`.
         return true;
       }
 

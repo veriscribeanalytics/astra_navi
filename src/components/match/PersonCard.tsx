@@ -3,6 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 
+import { useTranslation } from '@/hooks';
+
 interface PersonCardProps {
   name: string;
   rashi?: string;
@@ -31,9 +33,10 @@ const getRashiIcon = (sign: string) => {
 };
 
 export default function PersonCard({ name, rashi, rashiEn, nakshatra, pada, gender }: PersonCardProps) {
+  const { t } = useTranslation();
   const icon = getRashiIcon(rashiEn || rashi || '');
-  const displaySign = rashiEn || rashi || 'Unknown Sign';
-  const displayNakshatra = nakshatra || 'Unknown';
+  const displaySign = rashiEn || rashi || t('match.person.unknownSign');
+  const displayNakshatra = nakshatra || t('match.person.unknown');
   const displayPada = pada !== undefined && pada !== null ? `P-${pada}` : 'P-?';
 
   return (

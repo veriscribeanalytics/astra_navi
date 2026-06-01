@@ -161,6 +161,12 @@ export const PersonDetailSchema = z.object({
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
   place: z.string().min(2, "Place is required").max(200),
   gender: z.enum(["male", "female", "other", "Not Specified"]).optional().default("Not Specified"),
+  birthPlaceName: z.string().min(2).max(200).optional().or(emptyToUndefined),
+  birthLatitude: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
+  birthLongitude: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
+  birthTimezoneName: z.string().max(100).optional().or(emptyToUndefined),
+  birthTimezoneOffsetAtBirth: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
+  birthTimeFold: z.number().int().min(0).max(1).nullable().optional(),
 });
 
 export const MatchRequestSchema = z.object({
@@ -178,7 +184,12 @@ export const ConsultRequestSchema = z.object({
   language: z.string().max(20).default("en"),
   primary_category: z.string().max(50),
   secondary_category: z.string().max(50),
-  final_question: z.string().max(200),
+  final_question: z.string().max(500),
   response_tone: z.enum(["warm", "emotional", "realistic", "short", "detailed"]).default("warm"),
   optional_note: z.string().max(120).optional(),
+  birthLatitude: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
+  birthLongitude: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
+  birthTimezoneName: z.string().max(100).optional().or(emptyToUndefined),
+  birthTimezoneOffsetAtBirth: z.number({ error: "Please provide exact birth coordinates and timezone offset." }),
+  birthTimeFold: z.number().int().min(0).max(1).nullable().optional(),
 });

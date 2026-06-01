@@ -10,12 +10,23 @@ import ChatMessages from '@/components/chat/ChatMessages';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
 import PaywallCard from '@/components/paywall/PaywallCard';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Sun, Briefcase, Orbit, Heart, Compass, Star, Gem, ChevronRight, Shield } from 'lucide-react';
 import { useTranslation, useTransitsToday, useSwipeDrawer, useAvatarTheme } from '@/hooks';
 
 import { useAuth } from '@/context/AuthContext';
-import { calculateAge, getAgeBracket, getAvatarQuestions } from '@/utils/personalizedQuestions';
+import { getAvatarStarterCards, type StarterIconKey } from '@/utils/personalizedQuestions';
 import { getAvatarImage } from '@/utils/avatarStyle';
+
+const STARTER_ICONS: Record<StarterIconKey, React.ComponentType<{ className?: string }>> = {
+  sun: Sun,
+  briefcase: Briefcase,
+  orbit: Orbit,
+  heart: Heart,
+  compass: Compass,
+  sparkles: Sparkles,
+  star: Star,
+  gem: Gem,
+};
 
 const ChatPageClient: React.FC = () => {
   const { user, isLoading, isLoggedIn } = useAuth();
@@ -26,24 +37,16 @@ const ChatPageClient: React.FC = () => {
   const {
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
     activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
-    paywall, clearPaywall, selectedAvatarId, avatars
+    paywall, clearPaywall, selectedAvatarId, avatars, setSelectedAvatarId
     } = useChat();
-
-  useAvatarTheme(selectedAvatarId);
 
   const currentAvatar = useMemo(() => {
     return avatars.find(a => a.avatarId === selectedAvatarId);
   }, [avatars, selectedAvatarId]);
 
-  const avatarName = currentAvatar?.name ?? 'Navi';
+  useAvatarTheme(selectedAvatarId, currentAvatar);
 
   const imgSrc = getAvatarImage(selectedAvatarId);
-
-  const greetingText = useMemo(() => {
-    const id = selectedAvatarId ?? 'navi';
-    const intro = t(`chat.avatarIntros.${id}`);
-    return `Hi, I'm ${avatarName}. ${intro}`;
-  }, [selectedAvatarId, avatarName, t]);
 
   const { bindGestures } = useSwipeDrawer({
     onOpenLeft: () => setIsMobileMenuOpen(true),
@@ -67,6 +70,11 @@ const ChatPageClient: React.FC = () => {
 
     if (!user?.email) return;
 
+    const guide = searchParams.get('guide');
+    if (guide) {
+      setSelectedAvatarId(guide);
+    }
+
     const chatId = searchParams.get('id');
     if (chatId) {
       selectChat(chatId);
@@ -78,7 +86,7 @@ const ChatPageClient: React.FC = () => {
       localStorage.removeItem('astranavi_pending_message');
       createNewChat(pendingMsg);
     }
-  }, [user, isLoggedIn, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading]);
+  }, [user, isLoggedIn, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading, setSelectedAvatarId]);
 
   React.useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -91,13 +99,20 @@ const ChatPageClient: React.FC = () => {
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [createNewChat]);
 
-  const age = useMemo(() => calculateAge(user?.dob), [user?.dob]);
-  const ageBracket = useMemo(() => getAgeBracket(age), [age]);
-  const suggestedQuestions = useMemo(() => {
+  const starterCards = useMemo(() => getAvatarStarterCards(selectedAvatarId, t), [selectedAvatarId, t]);
+
+  // Map transit-driven suggestions onto the card layout when present (keeps freshness without losing the new UI).
+  const heroCards = useMemo(() => {
     const transitQuestions = transitsData?.suggestedQuestions;
-    if (transitQuestions && transitQuestions.length >= 4) return transitQuestions.slice(0, 4);
-    return getAvatarQuestions(selectedAvatarId, ageBracket);
-  }, [ageBracket, transitsData?.suggestedQuestions, selectedAvatarId]);
+    if (transitQuestions && transitQuestions.length >= 4) {
+      return starterCards.map((card, idx) => ({
+        ...card,
+        description: transitQuestions[idx] ?? card.description,
+        question: transitQuestions[idx] ?? card.question,
+      }));
+    }
+    return starterCards;
+  }, [starterCards, transitsData?.suggestedQuestions]);
 
   const handleQuestionClick = (question: string) => {
     createNewChat(question);
@@ -137,56 +152,118 @@ const ChatPageClient: React.FC = () => {
 
       <div className={`sidebar-overlay ${(isMobileMenuOpen || isRightPanelOpen) ? 'active' : ''}`} onClick={closeOverlays} />
 
-      <div className={`chat-left-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-        <ChatSidebar />
-      </div>
+      <ChatHeader />
 
-      <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`} {...bindGestures}>
-        <ChatHeader />
-        {isEmptyChat ? (
-          <div className="chat-empty-center">
-            <div className="flex flex-col items-center w-full gap-4 sm:gap-6 mb-4">
-              <div className="chat-empty-icon w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-xl overflow-hidden">
-                {imgSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imgSrc}
-                    alt={currentAvatar?.name ?? 'Navi'}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <Sparkles className="w-5 h-5" />
-                )}
+      <div className="chat-body">
+        <div className={`chat-left-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <ChatSidebar />
+        </div>
+
+        <div className={`chat-main-area relative z-10 ${isGuest ? 'pt-12 sm:pt-10' : ''}`} {...bindGestures}>
+          {isEmptyChat ? (
+          <div className="chat-empty-shell">
+            <div className="chat-empty-hero">
+              {/* Cosmic avatar */}
+              <div className="relative w-[136px] h-[136px] sm:w-[160px] sm:h-[160px] mb-5 sm:mb-6 shrink-0">
+                <div className="absolute inset-0 rounded-full bg-secondary/20 blur-2xl" aria-hidden />
+                <div className="absolute inset-0 rounded-full border border-secondary/30" aria-hidden />
+                <div className="absolute inset-1.5 rounded-full border border-secondary/15" aria-hidden />
+                <div className="absolute inset-3 rounded-full overflow-hidden border-2 border-secondary/40 bg-surface shadow-[0_0_30px_rgba(212,175,55,0.25)]">
+                  {imgSrc ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imgSrc}
+                      alt={currentAvatar?.name ?? 'Navi'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-secondary">
+                      <Sparkles className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+                {/* Floating sparkles */}
+                <Sparkles className="absolute top-0 right-2 w-3 h-3 text-secondary/80" aria-hidden />
+                <Sparkles className="absolute bottom-3 left-1 w-2.5 h-2.5 text-secondary/60" aria-hidden />
+                <Sparkles className="absolute top-1/2 -right-1 w-3 h-3 text-secondary/70" aria-hidden />
               </div>
-              <h2 className="chat-empty-greeting text-lg sm:text-xl 3xl:text-[28px] font-headline font-bold text-on-surface/80 tracking-tight text-center">
-                {greetingText}
-              </h2>
+
+              {/* Pill badge */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 mb-4">
+                <Sparkles className="w-3 h-3 text-secondary" />
+                <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-secondary">
+                  {currentAvatar?.title ?? t('chat.empty.badge')}
+                </span>
+              </div>
+
+              {/* Personal greeting (per-avatar) */}
+              {currentAvatar?.name && (
+                <p className="text-[13px] sm:text-[14px] font-semibold text-foreground/70 mb-1.5 text-center">
+                  {t('chat.empty.greeting', { name: currentAvatar.name })}
+                </p>
+              )}
+
+              {/* Heading */}
+              <h1 className="text-2xl sm:text-3xl 3xl:text-4xl font-headline font-bold text-foreground/90 tracking-tight text-center max-w-[18ch] mb-3">
+                {t('chat.empty.headingLead')}{' '}
+                <span className="text-secondary italic">{t('chat.empty.headingAccent')}</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-[13px] sm:text-[14px] text-foreground/45 max-w-[44ch] leading-relaxed text-center mb-1">
+                {currentAvatar?.description ?? t('chat.empty.subtitle')}
+              </p>
+
+              {/* Today's energy ribbon (if available) */}
               {transitsData?.todayEnergy && (
-                <p className="text-center text-[13px] text-on-surface-variant/40 max-w-[32ch] leading-relaxed italic">
+                <p className="text-[12px] text-secondary/70 max-w-[40ch] leading-relaxed text-center italic mt-1 mb-3">
                   {transitsData.todayEnergy}
                 </p>
               )}
               {isTransitsLoading && !transitsData && (
-                <p className="text-center text-[13px] text-on-surface-variant/30 italic">{t('chat.detail.todayEnergyLoading')}</p>
+                <p className="text-[12px] text-foreground/30 italic mt-1 mb-3">
+                  {t('chat.detail.todayEnergyLoading')}
+                </p>
               )}
+
+              {/* Cards grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full mt-5 sm:mt-6">
+                {heroCards.slice(0, 4).map((card, idx) => {
+                  const Icon = STARTER_ICONS[card.icon] ?? Sparkles;
+                  return (
+                    <motion.button
+                      key={`${card.title}-${idx}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: idx * 0.08 }}
+                      onClick={() => handleQuestionClick(card.question)}
+                      className="group flex items-center gap-3 px-4 py-3 sm:px-4 sm:py-3.5 rounded-2xl bg-surface/80 border border-outline-variant/20 text-left hover:border-secondary/40 hover:bg-surface transition-all"
+                      aria-label={`Ask: ${card.question}`}
+                    >
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-secondary/10 border border-secondary/15 flex items-center justify-center text-secondary shrink-0 group-hover:bg-secondary/15 group-hover:border-secondary/30 transition-colors">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] sm:text-[14px] font-bold text-secondary leading-tight">
+                          {card.title}
+                        </p>
+                        <p className="text-[11px] sm:text-[12px] text-foreground/50 leading-snug mt-0.5 line-clamp-2">
+                          {card.description}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-foreground/30 group-hover:text-secondary shrink-0 transition-colors" />
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 3xl:grid-cols-2 gap-3 w-full mb-4 sm:mb-6">
-              {suggestedQuestions.slice(0, 4).map((question, idx) => (
-                <motion.button
-                  key={idx}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.1 }}
-                  onClick={() => handleQuestionClick(question)}
-                  className="ripple-btn text-left text-[14px] 3xl:text-[16px] text-on-surface-variant/70 bg-surface/60 border border-outline-variant/20 px-4 py-3 sm:px-5 sm:py-3.5 rounded-xl hover:border-secondary/30 hover:text-secondary hover:bg-surface/90 transition-all"
-                  aria-label={`Ask: ${question}`}
-                >
-                  {question}
-                </motion.button>
-              ))}
-            </div>
-            <div className="w-full">
+
+            <div className="chat-empty-footer">
               <ChatInput />
+              <div className="flex items-center justify-center gap-1.5 mt-2 text-foreground/30 text-[11px]">
+                <Shield className="w-3 h-3" />
+                <span>{t('chat.empty.dataPrivate')}</span>
+              </div>
             </div>
           </div>
         ) : (
@@ -195,6 +272,7 @@ const ChatPageClient: React.FC = () => {
             <ChatInput />
           </div>
         )}
+        </div>
       </div>
 
       {paywall && !paywall.isSoft && (

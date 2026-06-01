@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Sparkles, Star, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { useFocusTrap } from '@/hooks';
+import { useFocusTrap, useTranslation } from '@/hooks';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -13,88 +13,6 @@ interface FeedbackModalProps {
   onSubmit: (rating: number, tags: string[], comment: string) => void;
 }
 
-const FEEDBACK_TAGS_BY_RATING: Record<number, string[]> = {
-  1: [
-    // Tone issues
-    'Tone felt dismissive or rude',
-    // Prediction-related issues
-    'Completely wrong prediction',
-    'Planetary positions were incorrect',
-    'Dasha analysis was way off',
-    // Other categories
-    'Irrelevant to my birth chart',
-    'Other',
-  ],
-  2: [
-    // Tone issues
-    'Tone felt robotic or impersonal',
-    // Prediction-related issues
-    'Misread my birth chart details',
-    'Wrong planetary transits mentioned',
-    'Timing predictions were inaccurate',
-    // Other categories
-    'Ignored my actual question',
-    'Other',
-  ],
-  3: [
-    // Tone issues
-    'Tone could be more empathetic',
-    // Prediction-related issues
-    'Partially accurate but missed key aspects',
-    'Planetary combinations not fully explained',
-    'Timing predictions felt vague',
-    // Other categories
-    'Remedies were too generic',
-    'Other',
-  ],
-  4: [
-    // Tone issues
-    'Tone was warm and supportive',
-    // Prediction-related issues
-    'Minor inaccuracy in chart details',
-    'Transit analysis could go deeper',
-    'Dasha insights were brief',
-    // Other categories
-    'Wanted more specific remedies',
-    'Other',
-  ],
-  5: [
-    // Tone issues
-    'Tone was compassionate and wise',
-    // Prediction-related issues
-    'Spot-on prediction accuracy',
-    'Excellent planetary analysis',
-    'Precise timing insights',
-    // Other categories
-    'Remedies were practical and helpful',
-    'Other',
-  ],
-};
-
-const PLACEHOLDERS: Record<number, string> = {
-  1: 'The stars were completely misaligned here - what felt wrong?',
-  2: 'Which part of the reading missed the mark?',
-  3: 'What celestial insight was missing from this reading?',
-  4: 'Almost aligned - what would make this reading perfect?',
-  5: 'What resonated most with your cosmic journey?',
-};
-
-const RATING_LABELS: Record<number, string> = {
-  1: 'Misaligned',
-  2: 'Needs Work',
-  3: 'Partial Clarity',
-  4: 'Nearly There',
-  5: 'Cosmically Aligned',
-};
-
-const TAG_SECTION_LABELS: Record<number, string> = {
-  1: 'What went wrong with this reading?',
-  2: 'Where did the reading fall short?',
-  3: 'What could improve this insight?',
-  4: 'What small thing was missing?',
-  5: 'What made this reading shine?',
-};
-
 const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
   onClose,
@@ -103,11 +21,79 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   initialRating,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(initialRating);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const modalRef = useFocusTrap<HTMLDivElement>(isOpen);
+
+  const ratingLabels: Record<number, string> = useMemo(() => ({
+    1: t('chat.feedback.ratingLabels.1'),
+    2: t('chat.feedback.ratingLabels.2'),
+    3: t('chat.feedback.ratingLabels.3'),
+    4: t('chat.feedback.ratingLabels.4'),
+    5: t('chat.feedback.ratingLabels.5'),
+  }), [t]);
+
+  const tagSectionLabels: Record<number, string> = useMemo(() => ({
+    1: t('chat.feedback.tagSectionLabels.1'),
+    2: t('chat.feedback.tagSectionLabels.2'),
+    3: t('chat.feedback.tagSectionLabels.3'),
+    4: t('chat.feedback.tagSectionLabels.4'),
+    5: t('chat.feedback.tagSectionLabels.5'),
+  }), [t]);
+
+  const placeholders: Record<number, string> = useMemo(() => ({
+    1: t('chat.feedback.placeholders.1'),
+    2: t('chat.feedback.placeholders.2'),
+    3: t('chat.feedback.placeholders.3'),
+    4: t('chat.feedback.placeholders.4'),
+    5: t('chat.feedback.placeholders.5'),
+  }), [t]);
+
+  const feedbackTagsByRating: Record<number, string[]> = useMemo(() => ({
+    1: [
+      t('chat.feedback.tags.1.0'),
+      t('chat.feedback.tags.1.1'),
+      t('chat.feedback.tags.1.2'),
+      t('chat.feedback.tags.1.3'),
+      t('chat.feedback.tags.1.4'),
+      t('chat.feedback.tags.1.5'),
+    ],
+    2: [
+      t('chat.feedback.tags.2.0'),
+      t('chat.feedback.tags.2.1'),
+      t('chat.feedback.tags.2.2'),
+      t('chat.feedback.tags.2.3'),
+      t('chat.feedback.tags.2.4'),
+      t('chat.feedback.tags.2.5'),
+    ],
+    3: [
+      t('chat.feedback.tags.3.0'),
+      t('chat.feedback.tags.3.1'),
+      t('chat.feedback.tags.3.2'),
+      t('chat.feedback.tags.3.3'),
+      t('chat.feedback.tags.3.4'),
+      t('chat.feedback.tags.3.5'),
+    ],
+    4: [
+      t('chat.feedback.tags.4.0'),
+      t('chat.feedback.tags.4.1'),
+      t('chat.feedback.tags.4.2'),
+      t('chat.feedback.tags.4.3'),
+      t('chat.feedback.tags.4.4'),
+      t('chat.feedback.tags.4.5'),
+    ],
+    5: [
+      t('chat.feedback.tags.5.0'),
+      t('chat.feedback.tags.5.1'),
+      t('chat.feedback.tags.5.2'),
+      t('chat.feedback.tags.5.3'),
+      t('chat.feedback.tags.5.4'),
+      t('chat.feedback.tags.5.5'),
+    ],
+  }), [t]);
 
   if (!isOpen) return null;
 
@@ -132,7 +118,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       <div ref={modalRef} className="relative w-full max-w-lg bg-surface border border-outline-variant/30 rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-5 flex items-center justify-between border-b border-outline-variant/10 flex-shrink-0">
-          <h3 className="text-lg font-headline font-bold text-on-surface">Share feedback</h3>
+          <h3 className="text-lg font-headline font-bold text-on-surface">{t('chat.feedback.shareFeedback')}</h3>
           <button 
             onClick={onClose}
             className="p-1 rounded-full hover:bg-on-surface/5 text-on-surface-variant transition-colors"
@@ -162,15 +148,15 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
               })}
             </div>
             <p className="text-[11px] font-bold text-secondary uppercase tracking-widest">
-              {RATING_LABELS[rating] || 'Rate'}
+              {ratingLabels[rating] || ''}
             </p>
           </div>
 
           {/* Tags */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-on-surface-variant/70 px-1">{TAG_SECTION_LABELS[rating]}</p>
+            <p className="text-xs font-semibold text-on-surface-variant/70 px-1">{tagSectionLabels[rating]}</p>
             <div className="flex flex-wrap gap-2">
-              {(FEEDBACK_TAGS_BY_RATING[rating] || []).map((tag: string) => {
+              {(feedbackTagsByRating[rating] || []).map((tag: string) => {
                 const isSelected = selectedTags.includes(tag);
                 return (
                   <button
@@ -194,7 +180,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
              <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder={PLACEHOLDERS[rating] || 'Share details (optional)'}
+              placeholder={placeholders[rating] || t('chat.feedback.commentPlaceholder')}
               className="w-full bg-on-surface/5 border border-outline-variant/20 rounded-2xl p-4 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-secondary/40 transition-colors resize-none min-h-[100px]"
             />
           </div>
@@ -203,7 +189,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           <div className="bg-on-surface/5 rounded-2xl p-4">
              <p className="flex gap-2 text-xs text-on-surface-variant/60 leading-relaxed">
               <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
-              <span>Your feedback helps Navi refine its Vedic wisdom. All responses are anonymous and used solely to improve AstraNavi&apos;s celestial guidance.</span>
+              <span>{t('chat.feedback.disclaimer')}</span>
              </p>
           </div>
         </div>
@@ -214,7 +200,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             onClick={handleSubmit}
             className="px-8 shadow-lg shadow-secondary/20 font-bold"
           >
-            Submit Feedback
+            {t('chat.feedback.submit')}
           </Button>
         </div>
       </div>

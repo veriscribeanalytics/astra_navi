@@ -42,9 +42,7 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json({ 
-                error: data.error || "Invalid credentials." 
-            }, { status: response.status });
+            return NextResponse.json(data, { status: response.status });
         }
 
         return NextResponse.json({
@@ -56,7 +54,8 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error("Login proxy error:", error);
         return NextResponse.json({ 
-            error: "An error occurred. Please try again later." 
+            code: "server_down",
+            error: "Server is down, please contact the developer." 
         }, { status: 500 });
     }
 }

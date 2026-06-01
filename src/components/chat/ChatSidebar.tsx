@@ -157,42 +157,46 @@ const ChatSidebar: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center gap-2 px-3 pt-2.5 pb-1 shrink-0">
+      <div className="flex items-center gap-2 px-3 pt-3 pb-2 shrink-0">
         <Button
           variant="secondary"
-          size="sm"
+          size="md"
           fullWidth
-          className="!border-secondary/20 !text-secondary font-semibold !py-1.5 gap-1 !text-[11px]"
+          className="!border-secondary/30 !text-secondary !bg-secondary/8 hover:!bg-secondary/15 hover:!border-secondary/50 font-bold !py-2.5 gap-1.5 !text-[13px] !rounded-xl"
           disabled={isGuest}
           onClick={() => {
             createNewChat();
             setIsMobileMenuOpen(false);
           }}
         >
-          <Plus className="w-3 h-3" /> {t('chat.sidebar.newChat')}
+          <Plus className="w-4 h-4" /> {t('chat.sidebar.newChat')}
         </Button>
-        <button 
+        <button
           onClick={() => setIsMobileMenuOpen(false)}
           className="lg:hidden chat-sidebar-close-btn text-on-surface-variant/50 hover:text-secondary rounded-lg transition-all shrink-0 flex items-center justify-center"
-          aria-label="Close sidebar"
+          aria-label={t('chat.sidebar.close')}
         >
           <X size={18} />
         </button>
       </div>
 
       <div className="px-3 pb-1.5 shrink-0">
-        <div className="flex items-center gap-1.5 bg-surface/70 border border-outline-variant/20 rounded-lg px-2.5 py-1.5">
-          <Search className="w-3.5 h-3.5 text-foreground/40 shrink-0" />
+        <div className="flex items-center gap-2 bg-surface/70 border border-outline-variant/20 rounded-lg px-3 py-2">
+          <Search className="w-4 h-4 text-foreground/40 shrink-0" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('chat.sidebar.searchPlaceholder')}
-            className="w-full bg-transparent border-none outline-none text-[13px] text-foreground placeholder:text-foreground/40"
+            className="w-full min-w-0 bg-transparent border-none outline-none text-[13px] sm:text-[14px] text-foreground placeholder:text-foreground/40"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="text-foreground/30 hover:text-foreground lg:!min-w-0 lg:!min-h-0 lg:!p-0 w-9 h-9 flex items-center justify-center rounded-md lg:w-auto lg:h-auto lg:p-0">
-              <X size={14} />
+            <button
+              onClick={() => setSearchQuery('')}
+              className="w-6 h-6 flex items-center justify-center rounded-md text-foreground/30 hover:text-foreground shrink-0"
+              aria-label="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

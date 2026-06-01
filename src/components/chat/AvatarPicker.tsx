@@ -1,25 +1,36 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, ChevronDown, Coins, Sparkles } from 'lucide-react';
 import { useChat } from '@/context/ChatContext';
-import { useClickOutside } from '@/hooks';
+import { useClickOutside, useTranslation } from '@/hooks';
 import { getAvatarIcon, getAvatarAccent, getAvatarImage } from '@/utils/avatarStyle';
 import type { ChatAvatar } from '@/types/avatar';
 
-const AvatarPicker: React.FC = () => {
+export type AvatarPickerHandle = {
+  open: () => void;
+  toggle: () => void;
+};
+
+const AvatarPicker = forwardRef<AvatarPickerHandle>(function AvatarPicker(_props, ref) {
+  const { t } = useTranslation();
   const { avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars } = useChat();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   useClickOutside(containerRef as React.RefObject<HTMLElement>, () => setOpen(false));
+
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+    toggle: () => setOpen(prev => !prev),
+  }), []);
 
   const current: ChatAvatar | undefined = useMemo(
     () => avatars.find(a => a.avatarId === selectedAvatarId),
     [avatars, selectedAvatarId]
   );
 
-  const displayName = current?.name ?? 'Navi';
+  const displayName = current?.name ?? t('chat.avatarPicker.defaultName');
   const displayTitle = current?.title;
   const currentAvatarId = current?.avatarId ?? selectedAvatarId;
   const currentAccent = getAvatarAccent(currentAvatarId);
@@ -30,7 +41,7 @@ const AvatarPicker: React.FC = () => {
         <div className={`w-7 h-7 rounded-full border flex items-center justify-center ${currentAccent}`}>
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
         </div>
-        <p className="text-[14px] font-semibold text-foreground/40">Loading…</p>
+        <p className="text-[14px] font-semibold text-foreground/40">{t('chat.avatarPicker.loading')}</p>
       </div>
     );
   }
@@ -44,14 +55,14 @@ const AvatarPicker: React.FC = () => {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={getAvatarImage(currentAvatarId) as string}
-              alt="Navi"
+              alt={t('chat.avatarPicker.defaultName')}
               className="w-full h-full object-cover"
             />
           ) : (
             React.createElement(getAvatarIcon(currentAvatarId), { className: 'w-3.5 h-3.5' })
           )}
         </div>
-        <p className="text-[14px] font-semibold text-foreground/80">Navi</p>
+        <p className="text-[14px] font-semibold text-foreground/80">{t('chat.avatarPicker.defaultName')}</p>
       </div>
     );
   }
@@ -69,7 +80,9 @@ const AvatarPicker: React.FC = () => {
         className="flex items-center gap-1.5 min-w-0 px-1 py-0.5 -mx-1 rounded-lg hover:bg-surface-variant/30 transition-colors"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Avatar: ${displayName}${displayTitle ? ', ' + displayTitle : ''}. Click to change.`}
+        aria-label={t('chat.avatarPicker.ariaAvatar')
+          .replace('{name}', displayName)
+          .replace('{title}', displayTitle ? ', ' + displayTitle : '')}
       >
         <div className={`w-7 h-7 rounded-full border overflow-hidden flex items-center justify-center ${currentAccent}`}>
           {getAvatarImage(currentAvatarId) ? (
@@ -109,15 +122,15 @@ const AvatarPicker: React.FC = () => {
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.12 }}
             role="listbox"
-            aria-label="Choose avatar"
+            aria-label={t('chat.avatarPicker.ariaChooseAvatar')}
             className="absolute left-0 top-full mt-2 w-[300px] sm:w-[340px] max-h-[min(70vh,520px)] overflow-y-auto bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl shadow-black/30 backdrop-blur-md z-50 p-1.5"
           >
             <div className="px-3 py-2 border-b border-outline-variant/15 mb-1">
               <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">
-                Choose your guide
+                {t('chat.avatarPicker.chooseGuide')}
               </p>
               <p className="text-[11px] text-foreground/30 mt-0.5">
-                Different avatars cost different credits per message.
+                {t('chat.avatarPicker.creditsNotice')}
               </p>
             </div>
             {avatars.map(avatar => {
@@ -160,11 +173,13 @@ const AvatarPicker: React.FC = () => {
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full">
                         <Coins className="w-3 h-3" />
-                        {avatar.creditCost} {avatar.creditCost === 1 ? 'credit' : 'credits'}
+                        {avatar.creditCost === 1
+                          ? t('chat.avatarPicker.creditSingle').replace('{n}', String(avatar.creditCost))
+                          : t('chat.avatarPicker.creditPlural').replace('{n}', String(avatar.creditCost))}
                       </span>
                       {avatar.isDefault && (
                         <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-wider">
-                          Default
+                          {t('chat.avatarPicker.default')}
                         </span>
                       )}
                     </div>
@@ -177,6 +192,6 @@ const AvatarPicker: React.FC = () => {
       </AnimatePresence>
     </div>
   );
-};
+});
 
 export default AvatarPicker;

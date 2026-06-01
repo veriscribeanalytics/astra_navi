@@ -14,7 +14,7 @@ export async function GET(
         const email = user?.email;
 
         const { area } = await params;
-        const validAreas = ['health', 'career', 'love', 'finance', 'overall', 'general'];
+        const validAreas = ['health', 'career', 'love', 'finance', 'overall', 'general', 'spiritual'];
         if (!validAreas.includes(area)) {
             return NextResponse.json({ error: `Invalid forecast area: ${area}` }, { status: 400 });
         }

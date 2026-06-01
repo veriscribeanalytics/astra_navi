@@ -1,0 +1,229 @@
+{
+  "locale": "ml",
+  "issues": [
+    {
+      "key": "blogs.index.badge",
+      "en": "The Library of Wisdom",
+      "current": "ജ്ഞാനത്തിന്റെ കടലിൻസ്റ്റോർ",
+      "issue": "Garbled / non-word",
+      "explanation": "'കടലിൻസ്റ്റോർ' is not a Malayalam word. It looks like a corrupted mashup of 'കടൽ' (ocean) and the English 'store'. The intended sense is 'library/treasury of wisdom'.",
+      "suggested": "ജ്ഞാനത്തിന്റെ ഗ്രന്ഥശാല"
+    },
+    {
+      "key": "blogs.houses.description",
+      "en": "...the houses are the actual fields of experience where karma is enacted.",
+      "current": "...ഭാവങ്ങൾ ആ യഥാർത്ഥ അനുഭവമെയയുണ്ട്, അവിടെ കർമ്മം പ്രകടമാണ്.",
+      "issue": "Broken non-word + ungrammatical clause",
+      "explanation": "'അനുഭവമെയയുണ്ട്' is not a real Malayalam word; the sentence fragment 'ആ യഥാർത്ഥ അനുഭവമെയയുണ്ട്' does not parse.",
+      "suggested": "...ഭാവങ്ങളാണ് കർമ്മം പ്രകടമാകുന്ന യഥാർത്ഥ അനുഭവമേഖലകൾ."
+    },
+    {
+      "key": "blogs.houses.upachayaDesc",
+      "en": "Malefic planets (Saturn, Mars, Sun) placed here actually give excellent results...",
+      "current": "ദുരാത്മ ഗ്രഹങ്ങൾ (ശനി, മങ്ങൾ, സൂര്യൻ) ഇവിടെ സ്ഥാപിത ആയിരിക്കുമ്പോൾ വളരെ മികച്ച ഫലങ്ങൾ നൽകുന്നു...",
+      "issue": "Wrong name for Mars + wrong term for 'malefic'",
+      "explanation": "'മങ്ങൾ' is not the Malayalam word for Mars (Mars is ചൊവ്വ / മംഗളൻ). 'ദുരാത്മ' literally means 'evil-souled'; the standard astrological term for malefic planet is 'പാപഗ്രഹം' or 'ക്രൂര ഗ്രഹം'.",
+      "suggested": "പാപഗ്രഹങ്ങൾ (ശനി, ചൊവ്വ, സൂര്യൻ) ഇവിടെ സ്ഥിതി ചെയ്യുമ്പോൾ വളരെ മികച്ച ഫലങ്ങൾ നൽകുന്നു..."
+    },
+    {
+      "key": "blogs.planets.karmicDesc",
+      "en": "Benefics like Jupiter and Venus bring ease and grace, while Malefics like Saturn and Mars enforce necessary, often difficult, lessons.",
+      "current": "...വ്യാഴവും ശുക്രനും പോലുള്ള ഉപകരണകൾ സുഖവും കൃപയും കൊണ്ടുവരുന്നു, ശനിയും മങ്ങളും പോലുള്ള ദുരാത്മ ഗ്രഹങ്ങൾ ആവശ്യമായ, പലപ്പോഴും കഷ്ടമായ പാഠങ്ങൾ നിർബന്ധിക്കുന്നു.",
+      "issue": "Wrong word for 'benefics' + wrong word for Mars",
+      "explanation": "'ഉപകരണകൾ' means 'instruments/tools', not benefic planets. The Vedic Malayalam term is 'ശുഭഗ്രഹങ്ങൾ'. 'മങ്ങൾ' is again wrong for Mars — should be 'ചൊവ്വ'. 'ദുരാത്മ ഗ്രഹങ്ങൾ' should be 'പാപഗ്രഹങ്ങൾ'.",
+      "suggested": "വ്യാഴവും ശുക്രനും പോലുള്ള ശുഭഗ്രഹങ്ങൾ സുഖവും കൃപയും കൊണ്ടുവരുന്നു; ശനിയും ചൊവ്വയും പോലുള്ള പാപഗ്രഹങ്ങൾ ആവശ്യമായ, പലപ്പോഴും കഠിനമായ പാഠങ്ങൾ നൽകുന്നു."
+    },
+    {
+      "key": "blogs.planets.avasthasDesc",
+      "en": "...a debilitated planet signifies areas where the soul must work harder to overcome innate weaknesses.",
+      "current": "...നീചസ്ഥിതിയിലുള്ള ഗ്രഹം അന്തർനിഹിത ബലതകൾ മറികടക്കാൻ ആത്മ അധികം പ്രയത്നം നടത്തേണ്ട ഉദ്ദേശ്യങ്ങളെ സൂചിപ്പിക്കുന്നു.",
+      "issue": "Non-word + broken phrasing",
+      "explanation": "'ബലതകൾ' is not a Malayalam word; the correct word for 'weaknesses' is 'ദുർബലതകൾ'. 'ആത്മ അധികം പ്രയത്നം' is also ungrammatical — should be 'ആത്മാവ് അധികം പ്രയത്നിക്കേണ്ട'.",
+      "suggested": "...നീചസ്ഥിതിയിലുള്ള ഗ്രഹം, അന്തർലീനമായ ദുർബലതകൾ മറികടക്കാൻ ആത്മാവ് കൂടുതൽ പ്രയത്നിക്കേണ്ട മേഖലകളെ സൂചിപ്പിക്കുന്നു."
+    },
+    {
+      "key": "blogs.planets.discoverInfluence",
+      "en": "Discover how this planet influences your chart",
+      "current": "ഈ ഗ്രഹം നിങ്ങളുടെ കുണ്ഡലിയെ എങ്ങനെ പ്രഭാവിതമാക്കുന്നത് കണ്ടെത്തുക",
+      "issue": "Broken syntax",
+      "explanation": "'എങ്ങനെ പ്രഭാവിതമാക്കുന്നത് കണ്ടെത്തുക' does not parse — the verb form is wrong. Standard Malayalam needs '...സ്വാധീനിക്കുന്നു എന്ന് കണ്ടെത്തുക'.",
+      "suggested": "ഈ ഗ്രഹം നിങ്ങളുടെ കുണ്ഡലിയെ എങ്ങനെ സ്വാധീനിക്കുന്നു എന്ന് കണ്ടെത്തുക"
+    },
+    {
+      "key": "blogs.planets.primaryOffice",
+      "en": "Primary Office",
+      "current": "പ്രാഥമിക ദ്ഷ്ടാൻതം",
+      "issue": "Non-word / corrupted spelling",
+      "explanation": "'ദ്ഷ്ടാൻതം' is not a valid Malayalam word; the consonant cluster is malformed. The intended word is likely 'ദൃഷ്ടാന്തം' (example/instance), but even that is a poor translation of 'Primary Office' — should be 'പ്രധാന അധികാരം' or 'പ്രാഥമിക ചുമതല'.",
+      "suggested": "പ്രാഥമിക ചുമതല"
+    },
+    {
+      "key": "blogs.planets.analyzeBtn",
+      "en": "Analyze Alignment",
+      "current": "അലൈനെന്റ് വിശകലനം ചെയ്യുക",
+      "issue": "Broken transliteration",
+      "explanation": "'അലൈനെന്റ്' is a misspelt phonetic transliteration of English 'alignment' (should at least be 'അലൈൻമെൻ്റ്'). Native Malayalam has 'വിന്യാസം' for alignment.",
+      "suggested": "വിന്യാസം വിശകലനം ചെയ്യുക"
+    },
+    {
+      "key": "blogs.yogas.description",
+      "en": "...the heights of wealth, power, and spiritual liberation in a chart.",
+      "current": "...സമ്പത്ത്, ശക്തി, ആത്മീയ സ്വാതന്ത്ര്യത്തിന്റെ ഗുണമേയ നിർണ്ണയിക്കുന്നു.",
+      "issue": "Non-word",
+      "explanation": "'ഗുണമേയ' is not a real Malayalam word. The English is 'heights' — appropriate Malayalam would be 'ഉയരങ്ങൾ' or 'ഉന്നതി'.",
+      "suggested": "...സമ്പത്ത്, ശക്തി, ആത്മീയ വിമോചനം എന്നിവയുടെ ഉയരങ്ങളെ നിർണ്ണയിക്കുന്നു."
+    },
+    {
+      "key": "blogs.yogas.rajaDesc",
+      "en": "They guarantee status, authority, and massive success when activated.",
+      "current": "അവ സ്ഥിതി, അധികാരം, വലിയ വിജയം ഉറപ്പ് നൽകുന്നു, സജീവമാണ്.",
+      "issue": "Broken sentence ending",
+      "explanation": "The trailing ', സജീവമാണ്' ('is active') is a dangling fragment with no subject. The English 'when activated' is supposed to modify the verb but has been hung off the end ungrammatically.",
+      "suggested": "സജീവമാകുമ്പോൾ, അവ പദവിയും അധികാരവും വലിയ വിജയവും ഉറപ്പുനൽകുന്നു."
+    },
+    {
+      "key": "blogs.yogas.dhanaDesc",
+      "en": "...the native is destined for immense financial prosperity.",
+      "current": "...നേറ്റിവ് അപരിമിത സാമ്പത്തിക സമൃദ്ധിക്കായി ഗതിനിർണ്ണയിതമാണ്.",
+      "issue": "English in transliteration + non-word verb",
+      "explanation": "'നേറ്റിവ്' is just the English 'native' in Malayalam script — should be 'ജാതകൻ' / 'വ്യക്തി'. 'ഗതിനിർണ്ണയിതമാണ്' is a broken non-word; the intended sense is 'is destined for'.",
+      "suggested": "...ജാതകൻ അപാരമായ സാമ്പത്തിക സമൃദ്ധിക്കായി വിധിക്കപ്പെട്ടവനാണ്."
+    },
+    {
+      "key": "blogs.yogas.activationDesc",
+      "en": "Yogas lie dormant in a chart until their planetary lords are activated by the Vimshottari Dasha...",
+      "current": "യോഗങ്ങൾ കുണ്ഡലിയിൽ സുപ്തമായി കിടക്കുന്നു, അവരുടെ ഗ്രഹ നിയന്ത്രകർ വിംശോത്തരി ദശ (കാലഘട്ടം) ആയ സജീവമാണ്.",
+      "issue": "Broken syntax",
+      "explanation": "The clause '...വിംശോത്തരി ദശ (കാലഘട്ടം) ആയ സജീവമാണ്' is ungrammatical. 'ആയ സജീവമാണ്' has no valid reading; the conjunction 'until ... are activated by' is mis-rendered.",
+      "suggested": "യോഗങ്ങൾ കുണ്ഡലിയിൽ സുപ്തമായി കിടക്കുന്നു; വിംശോത്തരി ദശയിലൂടെ അവയുടെ ഗ്രഹനാഥന്മാർ സജീവമാകുന്നതുവരെ."
+    },
+    {
+      "key": "blogs.yogas.cancellationDesc",
+      "en": "Neechabhanga occurs when a debilitated (weak) planet is supported by strong alignments, cancelling the weakness and often turning massive struggle into great success.",
+      "current": "എല്ലാ ഭൂതകാലത്തിന്റെ യോഗങ്ങൾ സ്ഥിരമല്ല. നിചഭംഗ സംഭവിക്കുമ്പോൾ ഒരു നീചസ്ഥിതിയിലുള്ള (ദുർബലമായ) ഗ്രഹത്തെ ശക്തിശാലിയായ സംരചനെയി പിന്തുണയ് ചെയ്യുന്നു, ബലതകെ വിസ്ഥാപിതമാക്കിയ വലിയ പോരാട്ടം മഹത്തായ വിജയമായി തിരിച്ചുകൊണ്ടുവരുന്നു.",
+      "issue": "Multiple non-words + wrong term for 'bad'",
+      "explanation": "'ഭൂതകാലത്തിന്റെ യോഗങ്ങൾ' means 'yogas of the past', not 'bad yogas'. 'നിചഭംഗ' should be 'നീചഭംഗ'. 'സംരചനെയി', 'പിന്തുണയ് ചെയ്യുന്നു', 'ബലതകെ', 'വിസ്ഥാപിതമാക്കിയ' are all malformed non-words.",
+      "suggested": "എല്ലാ ദുര്യോഗങ്ങളും സ്ഥിരമല്ല. നീചഭംഗം സംഭവിക്കുമ്പോൾ, നീചസ്ഥിതിയിലുള്ള (ദുർബലമായ) ഒരു ഗ്രഹത്തെ ശക്തമായ ഗ്രഹസംയോജനങ്ങൾ പിന്തുണയ്ക്കുന്നു — ദുർബലത റദ്ദാക്കപ്പെടുകയും വലിയ പോരാട്ടം മഹത്തായ വിജയമായി മാറുകയും ചെയ്യുന്നു."
+    },
+    {
+      "key": "blogs.yogas.discoverCombinations",
+      "en": "Discover hidden combinations in your Kundli",
+      "current": "നിങ്ങളുടെ കുണ്ഡലിയിലെ ഉരുളൻ സമ്മേളനങ്ങൾ കണ്ടെത്തുക",
+      "issue": "Wrong word for 'hidden'",
+      "explanation": "'ഉരുളൻ' means 'round/rolling', not 'hidden'. The intended Malayalam is 'മറഞ്ഞിരിക്കുന്ന' or 'നിഗൂഢ'.",
+      "suggested": "നിങ്ങളുടെ കുണ്ഡലിയിലെ മറഞ്ഞിരിക്കുന്ന ഗ്രഹസംയോജനങ്ങൾ കണ്ടെത്തുക"
+    },
+    {
+      "key": "blogs.remedies.tagline",
+      "en": "The Science of Alignment",
+      "current": "സംരചനെയുടെ ശാസ്ത്രം",
+      "issue": "Non-word",
+      "explanation": "'സംരചനെയുടെ' is a malformed inflection (the noun 'സംരചന' = composition; combined with broken case ending). Also, for 'alignment' the natural Malayalam is 'വിന്യാസം' / 'യോജിപ്പ്'.",
+      "suggested": "വിന്യാസത്തിന്റെ ശാസ്ത്രം"
+    },
+    {
+      "key": "blogs.remedies.discoverSpecific",
+      "en": "Discover specific alignments needed for your chart",
+      "current": "നിങ്ങളുടെ കുണ്ഡലിക്കായി ആവശ്യമായ നിർദ്ദിഷ്ട സംരചനെ കണ്ടെത്തുക",
+      "issue": "Non-word",
+      "explanation": "'സംരചനെ' (with the broken ്‌ + ന combination) is not a valid Malayalam noun form; the standard accusative would be 'സംരചന / സംരചനകൾ'. Better word: 'വിന്യാസങ്ങൾ'.",
+      "suggested": "നിങ്ങളുടെ കുണ്ഡലിക്കായി ആവശ്യമായ നിർദ്ദിഷ്ട വിന്യാസങ്ങൾ കണ്ടെത്തുക"
+    },
+    {
+      "key": "profile.security.pageTitle",
+      "en": "Security Settings",
+      "current": "സാ്‌ത്മത സജ്ജീകരണങ്ങൾ",
+      "issue": "Garbled non-word",
+      "explanation": "'സാ്‌ത്മത' contains a malformed character sequence (chandrakkala + ZWNJ + consonant) and is not a Malayalam word. The intended word is 'സുരക്ഷ' (security). This same broken form appears in profile.page.securitySection.title, .button and profile.security.* keys.",
+      "suggested": "സുരക്ഷാ സജ്ജീകരണങ്ങൾ"
+    },
+    {
+      "key": "profile.security.dangerZoneTitle",
+      "en": "Danger Zone",
+      "current": "ഭയാനകത സ്ഥാനം",
+      "issue": "Wrong word",
+      "explanation": "'ഭയാനകത' means 'horror/dreadfulness', not 'danger'. 'സ്ഥാനം' means 'position/post', not 'zone'. The standard rendering is 'അപകട മേഖല'.",
+      "suggested": "അപകട മേഖല"
+    },
+    {
+      "key": "profile.security.dangerZoneDescription",
+      "en": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "current": "നിങ്ങളുടെ കണക്ക് സ്ഥായിയായി നീക്കാൻ ഏത് സംബന്ധിത ഡാറ്റയും കൊണ്ട്. ഈ പ്രവർത്തനം മെയ് പരിസ്ഥിതിയിലെ പുനരാവൃത്തി നടത്തുക കഴിയില്ല.",
+      "issue": "Complete grammatical breakdown",
+      "explanation": "Both sentences are broken. 'കണക്ക്' (account) should be 'അക്കൗണ്ട്'. 'കൊണ്ട്.' is a dangling postposition with nothing to attach to. 'മെയ് പരിസ്ഥിതിയിലെ പുനരാവൃത്തി നടത്തുക കഴിയില്ല' is nonsense — looks like English 'may ... environment ... repetition' machine-translated word-for-word.",
+      "suggested": "നിങ്ങളുടെ അക്കൗണ്ടും അനുബന്ധ ഡാറ്റയും സ്ഥിരമായി ഇല്ലാതാക്കുക. ഈ പ്രവർത്തനം പിന്നീട് പഴയപടിയാക്കാൻ കഴിയില്ല."
+    },
+    {
+      "key": "profile.security.deleteAccountModal.description",
+      "en": "This action is permanent and will securely erase all your birth details, generated horoscopes, and preferences. Please confirm with your password to proceed.",
+      "current": "ഈ പ്രവർത്തനം സ്ഥായിയാണ് നിങ്ങളുടെ ജന്മ വിശദാംശങ്ങൾ, ജാതകം, പ്രാമാണികത സുരക്ഷിതമായി ഓളി നീക്കാൻ. ശരിയാക്കാൻ നിങ്ങളുടെ രഹസ്യ പദം സ്ഥിരീകരിക്കുക.",
+      "issue": "Broken syntax + non-word",
+      "explanation": "'ഓളി നീക്കാൻ' is meaningless ('ഓളി' is not a word; sounds like a garbled 'erase'). 'പ്രാമാണികത' means 'authenticity', not 'preferences' — should be 'മുൻഗണനകൾ'. 'ശരിയാക്കാൻ' ('to fix') is wrong for 'to proceed' — should be 'തുടരാൻ'. The sentence has no main verb connecting the clauses.",
+      "suggested": "ഈ പ്രവർത്തനം സ്ഥിരമാണ് — നിങ്ങളുടെ ജന്മ വിശദാംശങ്ങൾ, ജാതകം, മുൻഗണനകൾ എന്നിവയെല്ലാം സുരക്ഷിതമായി മായ്ച്ചുകളയും. തുടരാൻ ദയവായി നിങ്ങളുടെ പാസ്‌വേഡ് ഉപയോഗിച്ച് സ്ഥിരീകരിക്കുക."
+    },
+    {
+      "key": "profile.security.sessionManagementDescription",
+      "en": "Log out from all other devices where your account is currently signed in. This device will remain logged in.",
+      "current": "നിങ്ങളുടെ കണക്ക് നിലവിൽ ലോഗ് ഇൻ ചെയ്യപ്പെട്ടിരിക്കുന്ന അതലെ ഉപകരണങ്ങളിൽ നിന്ന് ലോഗ് ചെയ്യുക. ഈ ഉപകരണം ലോഗ് ഇൻ തലിക്കുത്ത് ഉണ്ടാകും.",
+      "issue": "Multiple non-words",
+      "explanation": "'അതലെ' is not a Malayalam word (intended 'മറ്റ്' = 'other'). 'ലോഗ് ചെയ്യുക' alone is incomplete — must be 'ലോഗ് ഔട്ട് ചെയ്യുക'. 'തലിക്കുത്ത് ഉണ്ടാകും' is meaningless gibberish (intended: 'will remain'). 'കണക്ക്' should be 'അക്കൗണ്ട്'.",
+      "suggested": "നിങ്ങളുടെ അക്കൗണ്ട് നിലവിൽ ലോഗിൻ ചെയ്തിരിക്കുന്ന മറ്റ് ഉപകരണങ്ങളിൽ നിന്നെല്ലാം ലോഗ് ഔട്ട് ചെയ്യുക. ഈ ഉപകരണത്തിൽ ലോഗിൻ തുടരും."
+    },
+    {
+      "key": "profile.security.logoutConfirmDialog.message",
+      "en": "This will sign out your account from all other devices. Your current session will remain active.",
+      "current": "ഇത് നിങ്ങളുടെ കണക്ക് അതലെ ഉപകരണങ്ങളിൽ നിന്ന് ലോഗ് ചെയ്യും. നിങ്ങളുടെ നിലവിലെ സെഷൻ സജീവ തലിക്കുത്ത് ഉണ്ടാകും.",
+      "issue": "Non-words and broken phrasing",
+      "explanation": "Same problems as above: 'അതലെ' (non-word, should be 'മറ്റ്'), 'തലിക്കുത്ത് ഉണ്ടാകും' (nonsense, intended 'will remain'). 'കണക്ക്' should be 'അക്കൗണ്ട്'.",
+      "suggested": "ഇത് നിങ്ങളുടെ അക്കൗണ്ടിനെ മറ്റ് ഉപകരണങ്ങളിൽ നിന്നെല്ലാം ലോഗ് ഔട്ട് ചെയ്യും. നിങ്ങളുടെ നിലവിലെ സെഷൻ സജീവമായി തുടരും."
+    },
+    {
+      "key": "profile.security.messages.passwordChanged",
+      "en": "Password changed successfully. You will be logged out of all devices.",
+      "current": "രഹസ്യ പദം വിജയകരമായി മാറ്റി. നിങ്ങൾ അതലെ ഉപകരണങ്ങളിൽ നിന്ന് ലോഗ് ചെയ്യിക്കുന്നു.",
+      "issue": "Non-word + wrong verb form",
+      "explanation": "'അതലെ' is not a Malayalam word (should be 'മറ്റ്'/'എല്ലാ'). 'ലോഗ് ചെയ്യിക്കുന്നു' is malformed/causative ('cause to log') — should be 'ലോഗ് ഔട്ട് ചെയ്യപ്പെടും' (passive future).",
+      "suggested": "പാസ്‌വേഡ് വിജയകരമായി മാറ്റി. നിങ്ങൾ എല്ലാ ഉപകരണങ്ങളിൽ നിന്നും ലോഗ് ഔട്ട് ചെയ്യപ്പെടും."
+    },
+    {
+      "key": "profile.onboarding.sidebar.description",
+      "en": "Your birth details are the foundation of every cosmic insight — they unlock personalized horoscopes, kundli analysis, and AI-powered Vedic readings.",
+      "current": "നിങ്ങളുടെ ജന്മ വിശദാംശങ്ങൾ ഓരോ ജ്യോതിർമയ ധാരണയുടെയും ആസ്തിപൻ്, എന്നാൽ അവ വ്യക്തിഗതകൃത ജാതകം, കുണ്ഡലി വിശകലനം, AI-സജ്ജീകരിത വൈദിക വായനകൾ അൺലോക്ക് ചെയ്യുന്നു.",
+      "issue": "Broken non-word",
+      "explanation": "'ആസ്തിപൻ്,' is a corrupted word (with stray chandrakkala + comma) — the intended word is 'അടിത്തറ' (foundation). Also 'വ്യക്തിഗതകൃത' and 'AI-സജ്ജീകരിത' are awkward calques.",
+      "suggested": "നിങ്ങളുടെ ജന്മ വിശദാംശങ്ങൾ ഓരോ കോസ്മിക് ഉൾക്കാഴ്ചയുടെയും അടിത്തറയാണ് — അവ വ്യക്തിഗത ജാതകം, കുണ്ഡലി വിശകലനം, AI നയിക്കുന്ന വൈദിക വായനകൾ എന്നിവ അൺലോക്ക് ചെയ്യുന്നു."
+    },
+    {
+      "key": "profile.fields.maritalOptions.separated",
+      "en": "Separated",
+      "current": "ശാസ്ത്രീയമായി ശാസ്ത്രീ",
+      "issue": "Total nonsense",
+      "explanation": "'ശാസ്ത്രീയമായി ശാസ്ത്രീ' means roughly 'scientifically scientific' — completely unrelated to 'Separated'. The auth.register.maritalSeparated key correctly uses 'വേർപിരിഞ്ഞത്'.",
+      "suggested": "വേർപിരിഞ്ഞത്"
+    },
+    {
+      "key": "profile.fields.maritalOptions.single",
+      "en": "Single",
+      "current": "ശിഷ്ടനെ",
+      "issue": "Wrong word",
+      "explanation": "'ശിഷ്ടനെ' is the accusative of 'ശിഷ്ടൻ' (a remnant/leftover person), not 'single/unmarried'. The auth.register.maritalSingle key correctly uses 'അവിവാഹിതൻ'.",
+      "suggested": "അവിവാഹിതൻ"
+    },
+    {
+      "key": "profile.preferences.cosmicPreferences",
+      "en": "Cosmic Preferences",
+      "current": "ജ്യോതിർമയ ഉപ്പുകേലികൾ",
+      "issue": "Nonsense non-word",
+      "explanation": "'ഉപ്പുകേലികൾ' is not a Malayalam word (looks like a corrupted attempt at 'മുൻഗണനകൾ' = preferences). Literally 'ഉപ്പ്' = salt, 'കേലി' = play — meaningless.",
+      "suggested": "കോസ്മിക് മുൻഗണനകൾ"
+    },
+    {
+      "key": "profile.fields.errors.dobInvalid",
+      "en": "Please enter a valid birth date",
+      "current": "ദയവായി ഒരു കൈകാര്യം ജന്മ തിയതി നിർവ്വചിക്കുക",
+      "issue": "Wrong word for 'valid' + wrong verb",
+      "explanation": "'കൈകാര്യം' means 'handling/management', not 'valid' (should be 'സാധുവായ'). 'നിർവ്വചിക്കുക' means 'to define', not 'to enter' (should be 'നൽകുക'). Same issue in pobInvalid.",
+      "suggested": "ദയവായി ഒരു സാധുവായ ജനന തീയതി നൽകുക"
+    }
+  ]
+}

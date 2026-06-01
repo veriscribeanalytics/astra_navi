@@ -235,3 +235,128 @@ test.describe('Accessibility', () => {
     await expect(passwordLabel).toBeVisible();
   });
 });
+
+test.describe('Backend Auth Error Handling & Localization', () => {
+  test('shows inline field error for wrong password', async ({ page }) => {
+    await page.route('**/api/login', async (route) => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'wrong_password',
+          message: 'Incorrect password. Please try again.',
+          field: 'password'
+        })
+      });
+    });
+
+    await page.goto('/login');
+    await page.waitForTimeout(500);
+    page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
+    const emailCount = await page.locator('input[type="email"]').count();
+    const passwordCount = await page.locator('input[type="password"]').count();
+    console.log(`TEST RUN LOG: Email count=${emailCount}, Password count=${passwordCount}`);
+    await page.locator('input[type="email"]').first().fill('test@test.com');
+    await page.locator('input[type="password"]').first().fill('wrong-pass');
+    await page.getByRole('button', { name: /Sign In/i }).click();
+
+    // Verify field-level error message is shown inline under the password input
+    const inlineError = page.locator('p.text-red-500');
+    await expect(inlineError).toBeVisible({ timeout: 5000 });
+    await expect(inlineError).toContainText(/Incorrect password|wrong/i);
+  });
+
+  test('shows banner error for server_down when API route returns 500 server down error', async ({ page }) => {
+    await page.route('**/api/login', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'server_down',
+          error: 'Server is down, please contact the developer.'
+        })
+      });
+    });
+
+    await page.goto('/login');
+    await page.waitForTimeout(500);
+    await page.locator('input[type="email"]').first().fill('test@test.com');
+    await page.locator('input[type="password"]').first().fill('password123');
+    await page.getByRole('button', { name: /Sign In/i }).click();
+
+    // Verify error banner is shown with server down message
+    const banner = page.locator('[role="alert"]').first();
+    await expect(banner).toBeVisible({ timeout: 5000 });
+    await expect(banner).toContainText(/server is down/i);
+  });
+
+  test('shows lockout banner with timer and redirect for account_locked', async ({ page }) => {
+    await page.route('**/api/login', async (route) => {
+      await route.fulfill({
+        status: 423,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'account_locked',
+          message: 'Your account has been locked due to too many failed attempts.',
+          retryAfterSeconds: 90,
+          action: 'reset_password'
+        })
+      });
+    });
+
+    await page.goto('/login');
+    await page.waitForTimeout(500);
+    await page.locator('input[type="email"]').first().fill('test@test.com');
+    await page.locator('input[type="password"]').first().fill('wrong-pass');
+    await page.getByRole('button', { name: /Sign In/i }).click();
+
+    // Verify error banner is shown with locked message and countdown
+    const banner = page.locator('[role="alert"]').first();
+    await expect(banner).toBeVisible({ timeout: 5000 });
+    await expect(banner).toContainText(/locked/i);
+    // Verify lockout countdown is visible
+    await expect(banner).toContainText(/1m\s*30s|1m|try again/i);
+
+    // Verify CTA button within the banner is visible and clickable
+    const ctaBtn = banner.getByRole('button', { name: /Reset Password|Forgot/i }).first();
+    await expect(ctaBtn).toBeVisible();
+    await ctaBtn.click();
+
+    // Verify it navigated to /forgot-password
+    await page.waitForURL('**/forgot-password', { timeout: 5000 });
+    expect(page.url()).toContain('/forgot-password');
+  });
+
+  test('shows create account CTA for email_not_registered and switches form on click', async ({ page }) => {
+    await page.route('**/api/login', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'email_not_registered',
+          message: 'This email address is not registered.',
+          action: 'register'
+        })
+      });
+    });
+
+    await page.goto('/login');
+    await page.waitForTimeout(500);
+    await page.locator('input[type="email"]').first().fill('unregistered@test.com');
+    await page.locator('input[type="password"]').first().fill('some-pass123');
+    await page.getByRole('button', { name: /Sign In/i }).click();
+
+    // Verify error banner is shown
+    const banner = page.locator('[role="alert"]').first();
+    await expect(banner).toBeVisible({ timeout: 5000 });
+    await expect(banner).toContainText(/not registered/i);
+
+    // Verify CTA button is visible and switches to registration form
+    const ctaBtn = banner.getByRole('button', { name: /Create Account|Register/i }).first();
+    await expect(ctaBtn).toBeVisible();
+    await ctaBtn.click();
+
+    // Once clicked, "Forgot Password?" should disappear because we switched to the Register form
+    await expect(page.getByText('Forgot Password?')).not.toBeVisible({ timeout: 5000 });
+  });
+});

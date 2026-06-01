@@ -37,7 +37,7 @@ export default function WorkInProgress({
 
                 <div className="flex items-center justify-center gap-3 text-sm text-secondary/70 mb-12">
                     <Sparkles className="w-4 h-4" />
-                    <span className="font-medium">Coming Soon</span>
+                    <span className="font-medium">{t('common.comingSoon')}</span>
                     <Sparkles className="w-4 h-4" />
                 </div>
 
@@ -49,14 +49,14 @@ export default function WorkInProgress({
                         className="inline-flex items-center gap-2"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Go Back
+                        {t('common.goBack')}
                     </Button>
                     <Button
                         href="/"
                         size="lg"
                         className="gold-gradient"
                     >
-                        Return Home
+                        {t('common.returnHome')}
                     </Button>
                 </div>
             </div>

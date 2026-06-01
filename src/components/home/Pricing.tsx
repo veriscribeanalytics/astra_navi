@@ -1,48 +1,65 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle, Sparkles } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-
-const plans = [
-    { 
-        title: 'Astra Seeker',
- 
-        price: '₹0', 
-        period: '/always', 
-        features: ['Complete Kundli Generation', 'Daily Rashi Predictions', 'Limited Consultations (5 min/day)', 'Basic Planetary Insights'], 
-        buttonText: 'Begin Journey',
-        variant: 'secondary' as const
-    },
-    { 
-        title: 'Devotee', 
-        price: '₹299', 
-        period: '/mo', 
-        features: ['Unlimited Navi Consultations', 'Detailed Kundli Reports (PDF)', 'Dasha Period Analysis', 'Remedial Gemstone Guidance'], 
-        isRecommended: true, 
-        variant: 'primary' as const, 
-        badge: 'Most Chosen',
-        buttonText: 'Select Devotee'
-    },
-    { 
-        title: 'Disciple', 
-        price: '₹2,999', 
-        period: '/year', 
-        features: ['All Devotee Features', 'Save ₹589 Annually', 'Permanent Chart Archive', 'Compatibility Analysis'], 
-        buttonText: 'Commit Fully', 
-        badge: 'Best Value',
-        variant: 'secondary' as const
-    }
-];
+import { useTranslation } from '@/hooks';
 
 export default function Pricing() {
+    const { t } = useTranslation();
+
+    const localizedPlans = useMemo(() => [
+        { 
+            title: t('pricing.plans.seeker.title'),
+            price: t('pricing.plans.seeker.price'), 
+            period: t('pricing.plans.seeker.period'), 
+            features: [
+                t('pricing.plans.seeker.features.0'),
+                t('pricing.plans.seeker.features.1'),
+                t('pricing.plans.seeker.features.2'),
+                t('pricing.plans.seeker.features.3')
+            ], 
+            buttonText: t('pricing.plans.seeker.buttonText'),
+            variant: 'secondary' as const
+        },
+        { 
+            title: t('pricing.plans.devotee.title'), 
+            price: t('pricing.plans.devotee.price'), 
+            period: t('pricing.plans.devotee.period'), 
+            features: [
+                t('pricing.plans.devotee.features.0'),
+                t('pricing.plans.devotee.features.1'),
+                t('pricing.plans.devotee.features.2'),
+                t('pricing.plans.devotee.features.3')
+            ], 
+            isRecommended: true, 
+            variant: 'primary' as const, 
+            badge: t('pricing.plans.devotee.badge'),
+            buttonText: t('pricing.plans.devotee.buttonText')
+        },
+        { 
+            title: t('pricing.plans.disciple.title'), 
+            price: t('pricing.plans.disciple.price'), 
+            period: t('pricing.plans.disciple.period'), 
+            features: [
+                t('pricing.plans.disciple.features.0'),
+                t('pricing.plans.disciple.features.1'),
+                t('pricing.plans.disciple.features.2'),
+                t('pricing.plans.disciple.features.3')
+            ], 
+            buttonText: t('pricing.plans.disciple.buttonText'), 
+            badge: t('pricing.plans.disciple.badge'),
+            variant: 'secondary' as const
+        }
+    ], [t]);
+
     return (
         <section className="py-12 lg:py-20 bg-transparent relative overflow-hidden">
             <div className="max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {plans.map((plan, idx) => (
+                    {localizedPlans.map((plan, idx) => (
                         <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 20 }}
