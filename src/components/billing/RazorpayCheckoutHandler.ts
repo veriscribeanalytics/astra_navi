@@ -35,6 +35,7 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
 
   constructor(
     private user: { name?: string | null; email?: string | null; phoneNumber?: string | null } | null,
+    private language: string,
     private onPaymentSuccess: (verifyResponse: any) => Promise<void> | void
   ) {}
 
@@ -50,7 +51,7 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
 
     try {
       // 2. Create the order with the backend proxy
-      const createRes = await clientFetch('/api/payments/create-order?lang=en', {
+      const createRes = await clientFetch(`/api/payments/create-order?lang=${this.language || 'en'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product_id: product.productId }),

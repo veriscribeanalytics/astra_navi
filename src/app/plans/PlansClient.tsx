@@ -19,7 +19,7 @@ import { useTranslation } from '@/hooks';
 export default function PlansClient() {
   const { isLoggedIn, user } = useAuth();
   const { tier, totalCredits, balance, isLoading: paywallLoading, refresh: refreshPaywall } = usePaywallContext();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const searchParams = useSearchParams();
 
   const razorpayHandler = useMemo(() => {
@@ -30,11 +30,12 @@ export default function PlansClient() {
         email: user?.email,
         phoneNumber: (user as any)?.phoneNumber || '',
       },
+      language || 'en',
       async () => {
         await refreshPaywall();
       }
     );
-  }, [isLoggedIn, user, refreshPaywall]);
+  }, [isLoggedIn, user, language, refreshPaywall]);
 
   // Highlight product from query params: ?product=pro_monthly or ?feature=chat_message
   const highlightProductId = searchParams?.get('product') || null;
