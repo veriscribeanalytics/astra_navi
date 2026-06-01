@@ -1928,12 +1928,30 @@
       "howItWorks": "How it Works?",
       "freeFirstQuestion": "Free First Question",
       "guides": {
-        "navi": { "name": "Navi", "title": "Vedic Expert" },
-        "relationship_guide": { "name": "Meera", "title": "Relationship" },
-        "career_mentor": { "name": "Arya", "title": "Career Expert" },
-        "spiritual_guide": { "name": "Anand", "title": "Wealth Guide" },
-        "finance_mentor": { "name": "Vidya", "title": "Nadi Expert" },
-        "astro_sage": { "name": "Rishi", "title": "KP Specialist" }
+        "navi": {
+          "name": "Navi",
+          "title": "Vedic Expert"
+        },
+        "relationship_guide": {
+          "name": "Meera",
+          "title": "Relationship"
+        },
+        "career_mentor": {
+          "name": "Arya",
+          "title": "Career Expert"
+        },
+        "spiritual_guide": {
+          "name": "Anand",
+          "title": "Wealth Guide"
+        },
+        "finance_mentor": {
+          "name": "Vidya",
+          "title": "Nadi Expert"
+        },
+        "astro_sage": {
+          "name": "Rishi",
+          "title": "KP Specialist"
+        }
       }
     },
     "guidanceHub": "Your Guidance Hub",
@@ -2000,6 +2018,76 @@
     "portalSoulmateDesc": "Match compatibility using Guna Milan & karmic insights.",
     "portalPulseDesc": "Real-time Tithi, Yoga & Vedic energies for your day.",
     "portalRashiDesc": "Explore all 12 zodiac signs with detailed traits & insights.",
-    "portalSessionsDesc": "Join live sessions & interact with experts and seekers."
+    "portalSessionsDesc": "Join live sessions & interact with experts and seekers.",
+    "unlock": "Unlock",
+    "view": "View",
+    "chartSnapshot": "My Chart Snapshot"
+  },
+  "paywall": {
+    "credits": "Credits",
+    "creditsRequired": "credits required",
+    "creditSingle": "credit",
+    "creditPlural": "credits",
+    "required": "Required",
+    "creditsRequiredLabel": "credits required",
+    "currentTier": "Current tier: {tier}",
+    "viewPlansUpgrade": "View Plans & Upgrade",
+    "viewPlans": "View Plans",
+    "products": {
+      "pro_monthly": "Pro Monthly",
+      "credit_pack_10": "10 Credits Pack"
+    },
+    "features": {
+      "chat_message": {
+        "title": "AI Chat Credits",
+        "description": "Consult our specialized Vedic AI astrologers. Each message uses credit."
+      },
+      "full_daily_horoscope": {
+        "title": "Full Daily Horoscope",
+        "description": "Get personalized area insights, transit overlays, and daily alerts based on your chart."
+      },
+      "tomorrow_horoscope": {
+        "title": "Tomorrow's Horoscope",
+        "description": "View tomorrow's cosmic forecast and plan ahead."
+      },
+      "guided_consult": {
+        "title": "Guided Sessions",
+        "description": "Personalized, deep step-by-step life consultations."
+      },
+      "match_report": {
+        "title": "Compatibility Report",
+        "description": "Unlock full 36-point Guna Milan, partner sync, and relationship harmony analysis."
+      },
+      "kundli_premium": {
+        "title": "Premium Kundli",
+        "description": "Unlock advanced planetary period details, Ashtakavarga, transits, and key themes."
+      },
+      "family_compatibility": {
+        "title": "Family Compatibility",
+        "description": "Track emotional, karmic and compatibility patterns with your family and friends."
+      }
+    },
+    "custom": {
+      "premiumdashaanalysis": {
+        "title": "Premium Dasha Analysis",
+        "description": "Dasha timing analysis requires a premium subscription."
+      },
+      "ashtakavargaanalysis": {
+        "title": "Ashtakavarga Analysis",
+        "description": "Unlock Ashtakavarga binding scores with a Pro plan."
+      },
+      "planetstrengthranking": {
+        "title": "Planet Strength Ranking",
+        "description": "Unlock detailed planet strength rankings with a Pro plan."
+      },
+      "currenttransits": {
+        "title": "Current Transits",
+        "description": "Unlock current planetary transit analysis with a Pro plan."
+      },
+      "keylifethemes": {
+        "title": "Key Life Themes",
+        "description": "Unlock key life theme insights with a Pro plan."
+      }
+    }
   }
 }

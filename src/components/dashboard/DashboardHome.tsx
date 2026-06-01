@@ -1116,7 +1116,7 @@ export default function DashboardHome() {
                   <div className="flex h-5 w-5 items-center justify-center">
                     <Orbit className="h-5 w-5 text-[#60a5fa]" />
                   </div>
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.weeklyChart.chartSnapshot') || "My Chart Snapshot"}</h3>
+                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.chartSnapshot') || "My Chart Snapshot"}</h3>
                 </div>
                 <Link href="/kundli" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
                   {t('newDashboard.myChart.viewDetails') || "View Details"} <ArrowRight className="inline h-3 w-3" />

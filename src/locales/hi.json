@@ -1823,12 +1823,30 @@
       "howItWorks": "यह कैसे काम करता है?",
       "freeFirstQuestion": "पहला प्रश्न निःशुल्क",
       "guides": {
-        "navi": { "name": "Navi", "title": "वैदिक विशेषज्ञ" },
-        "relationship_guide": { "name": "मीरा", "title": "संबंध विशेषज्ञ" },
-        "career_mentor": { "name": "आर्या", "title": "करियर विशेषज्ञ" },
-        "spiritual_guide": { "name": "आनंद", "title": "धन मार्गदर्शक" },
-        "finance_mentor": { "name": "विद्या", "title": "नाड़ी विशेषज्ञ" },
-        "astro_sage": { "name": "ऋषि", "title": "KP विशेषज्ञ" }
+        "navi": {
+          "name": "Navi",
+          "title": "वैदिक विशेषज्ञ"
+        },
+        "relationship_guide": {
+          "name": "मीरा",
+          "title": "संबंध विशेषज्ञ"
+        },
+        "career_mentor": {
+          "name": "आर्या",
+          "title": "करियर विशेषज्ञ"
+        },
+        "spiritual_guide": {
+          "name": "आनंद",
+          "title": "धन मार्गदर्शक"
+        },
+        "finance_mentor": {
+          "name": "विद्या",
+          "title": "नाड़ी विशेषज्ञ"
+        },
+        "astro_sage": {
+          "name": "ऋषि",
+          "title": "KP विशेषज्ञ"
+        }
       }
     },
     "guidanceHub": "आपका मार्गदर्शन केंद्र",
@@ -1895,6 +1913,76 @@
     "portalSoulmateDesc": "गुण मिलान और कर्म अंतर्दृष्टि का उपयोग करके अनुकूलता का मिलान करें।",
     "portalPulseDesc": "आपके दिन के लिए रीयल-टाइम तिथि, योग और वैदिक ऊर्जा।",
     "portalRashiDesc": "विस्तृत लक्षणों और अंतर्दृष्टि के साथ सभी 12 राशियों का अन्वेषण करें।",
-    "portalSessionsDesc": "लाइव सत्रों में शामिल हों और विशेषज्ञों और साधकों के साथ बातचीत करें।"
+    "portalSessionsDesc": "लाइव सत्रों में शामिल हों और विशेषज्ञों और साधकों के साथ बातचीत करें।",
+    "unlock": "अनलॉक",
+    "view": "देखें",
+    "chartSnapshot": "मेरी कुंडली स्नैपशॉट"
+  },
+  "paywall": {
+    "credits": "क्रेडिट",
+    "creditsRequired": "क्रेडिट आवश्यक",
+    "creditSingle": "क्रेडिट",
+    "creditPlural": "क्रेडिट",
+    "required": "आवश्यक",
+    "creditsRequiredLabel": "क्रेडिट आवश्यक",
+    "currentTier": "वर्तमान टियर: {tier}",
+    "viewPlansUpgrade": "योजनाएं देखें और अपग्रेड करें",
+    "viewPlans": "योजनाएं देखें",
+    "products": {
+      "pro_monthly": "प्रो मासिक",
+      "credit_pack_10": "10 क्रेडिट पैक"
+    },
+    "features": {
+      "chat_message": {
+        "title": "AI चैट क्रेडिट",
+        "description": "हमारे विशेष वैदिक AI ज्योतिषियों से परामर्श लें। प्रत्येक संदेश में क्रेडिट का उपयोग होता है।"
+      },
+      "full_daily_horoscope": {
+        "title": "पूर्ण दैनिक राशिफल",
+        "description": "अपनी कुंडली के आधार पर व्यक्तिगत क्षेत्र अंतर्दृष्टि, गोचर, और दैनिक अलर्ट प्राप्त करें।"
+      },
+      "tomorrow_horoscope": {
+        "title": "कल का राशिफल",
+        "description": "कल का ब्रह्मांडीय पूर्वानुमान देखें और आगे की योजना बनाएं।"
+      },
+      "guided_consult": {
+        "title": "मार्गदर्शित सत्र",
+        "description": "व्यक्तिगत, गहन चरण-दर-चरण जीवन परामर्श।"
+      },
+      "match_report": {
+        "title": "अनुकूलता रिपोर्ट",
+        "description": "पूर्ण 36-बिंदु गुण मिलान, साथी सिंक और संबंध सद्भाव विश्लेषण अनलॉक करें।"
+      },
+      "kundli_premium": {
+        "title": "प्रीमियम कुंडली",
+        "description": "उन्नत ग्रहीय अवधि विवरण, अष्टकवर्ग, गोचर और प्रमुख विषयों को अनलॉक करें।"
+      },
+      "family_compatibility": {
+        "title": "पारिवारिक अनुकूलता",
+        "description": "अपने परिवार और दोस्तों के साथ भावनात्मक, कर्म और अनुकूलता पैटर्न को ट्रैक करें।"
+      }
+    },
+    "custom": {
+      "premiumdashaanalysis": {
+        "title": "प्रीमियम दशा विश्लेषण",
+        "description": "दशा समय विश्लेषण के लिए प्रीमियम सदस्यता की आवश्यकता है।"
+      },
+      "ashtakavargaanalysis": {
+        "title": "अष्टकवर्ग विश्लेषण",
+        "description": "प्रो योजना के साथ अष्टकवर्ग बंधन स्कोर अनलॉक करें।"
+      },
+      "planetstrengthranking": {
+        "title": "ग्रह शक्ति रैंकिंग",
+        "description": "प्रो योजना के साथ विस्तृत ग्रह शक्ति रैंकिंग अनलॉक करें।"
+      },
+      "currenttransits": {
+        "title": "वर्तमान गोचर",
+        "description": "प्रो योजना के साथ वर्तमान ग्रहीय गोचर विश्लेषण अनलॉक करें।"
+      },
+      "keylifethemes": {
+        "title": "प्रमुख जीवन विषय",
+        "description": "प्रो योजना के साथ प्रमुख जीवन विषय अंतर्दृष्टि अनलॉक करें।"
+      }
+    }
   }
 }
