@@ -85,8 +85,8 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     return data;
   };
 
-  // E.164 Regex Validation
-  const phoneRegex = /^\+[1-9]\d{6,14}$/;
+  // E.164 Regex Validation - restricted to India (+91 followed by 10 digits)
+  const phoneRegex = /^\+91\d{10}$/;
   const isValidPhone = !!phone && phoneRegex.test(phone);
   const isValidOtp = otp.replace(/\D/g, '').length === OTP_LENGTH;
 
@@ -165,9 +165,10 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
               {t('auth.phone.phoneLabel') || 'Phone Number'}
               <span className="text-secondary ml-1">*</span>
             </label>
-            <div className="relative flex items-center">
+            <div className="relative flex items-center w-full">
               <PhoneInput
                 defaultCountry="IN"
+                countries={['IN']}
                 flags={flags}
                 placeholder={t('auth.phone.phonePlaceholder') || '+91 98765 43210'}
                 value={phone}
