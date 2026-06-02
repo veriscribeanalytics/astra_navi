@@ -62,7 +62,14 @@
     "zodiacSignsDesc": "12 வேத சந்திர ராசிகளின் பண்புகளை ஆராயுங்கள்.",
     "services": "சேவைகள்",
     "astraNaviPremium": "ஆஸ்ட்ராநவி பிரீமியம்",
-    "astraNaviPremiumDesc": "மேம்பட்ட கணிப்புகள் மற்றும் ஆழமான நுண்ணறிவுகளைத் திறக்கவும்."
+    "astraNaviPremiumDesc": "மேம்பட்ட கணிப்புகள் மற்றும் ஆழமான நுண்ணறிவுகளைத் திறக்கவும்.",
+    "login": "உள்நுழைவு",
+    "signUp": "பதிவு செய்யுங்கள்",
+    "logoutConfirmTitle": "ஆஸ்ட்ராநவி இலிருந்து வெளியேற வேண்டுமா?",
+    "logoutConfirmMessage": "உங்கள் கணக்கிலிருந்து வெளியேற்றப்படுவீர்கள், முகப்புப் பக்கத்திற்கு திருப்பி அனுப்பப்படுவீர்கள்.",
+    "signOut": "வெளியேறு",
+    "account": "கணக்கு",
+    "getStarted": "தொடங்குங்கள்"
   },
   "footer": {
     "tagline": "நவீன மனதிற்கான ஜோதிட சாஸ்திரத்தின் கணித துல்லியத்தை பாதுகாத்தல்.",
@@ -439,7 +446,8 @@
     "inscribeIdentity": "உங்கள் அடையாளத்தைப் பதிவு செய்யவும்",
     "signIn": "உள்நுழைக",
     "joinCelestialJourney": "வானியல் பயணத்தில் சேருங்கள்.",
-    "welcomeBack": "ஆஸ்ட்ராநவிக்கு மீண்டும் வரவேற்கிறோம்.",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to continue your chart",
     "fullName": "முழு பெயர்",
     "dob": "பிறந்த தேதி",
     "tob": "பிறந்த நேரம்",
@@ -450,10 +458,13 @@
     "createAccount": "கணக்கை உருவாக்கவும்",
     "accessDashboard": "டாஷ்போர்டை அணுகவும்",
     "secureConnection": "பாதுகாப்பான இணைப்பு",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
     "alreadyHaveAccount": "ஏற்கனவே கணக்கு உள்ளதா?",
     "dontHaveAccount": "கணக்கு இல்லையா?",
-    "signingYouIn": "உங்களை உள்நுழையச் செய்கிறது...",
+    "signingYouIn": "உங்களை உள்நிவுகிற்று அமைகிகிற்று அமைகிறோம்...",
+    "googleLoadError": "Google உள்நிவு தடைசெய்யப்பட்டது அல்லது ஏற்ற முடியவில்லை. உங்கள் இணைப்பை சரிபுக அல்லது ஏட்பிளாக்கர்களை முடக்கவுக",
+    "googleScriptError": "Google உள்நிவு ஸ்கிரிப்ட் ஏற்ற முடியவில்லை. உங்கள் இணைப்பை சரிபுக அல்லது ஏட்பிளாக்கர்களை முடக்கவுக",
     "registrationFailed": "பதிவு செய்ய முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
     "accountCreated": "கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது. இப்போது நீங்கள் உள்நுழையலாம்.",
     "stepAccount": "கணக்கு உருவாக்கம்",
@@ -1264,7 +1275,14 @@
       "prefHoroscope": "தினசரி ஜாதகத்தைப் பெறுங்கள்",
       "prefNotifications": "அறிவிப்புகளை அனுமதிக்கவும்",
       "continue": "தொடரவும்",
-      "submit": "கணக்கை உருவாக்கு"
+      "submit": "கணக்கை உருவாக்கு",
+      "strength": {
+        "title": "கடவுச்சொல் வலிமை",
+        "tooShort": "மிகக் குறுகியது",
+        "weak": "பலவீனமான கடவுச்சொல்",
+        "medium": "நடுத்தர கடவுச்சொல்",
+        "strong": "வலுவான கடவுச்சொல்"
+      }
     },
     "errorBanner": {
       "dismiss": "பிழையை நீக்கு"
@@ -1291,7 +1309,13 @@
       "password_too_long": "கடவுச்சொல் மிகவும் நீளமாக உள்ளது.",
       "generic": "எதிர்பாராத பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
       "retry_after": "தயవుசெய்து {minutes}நிমিடம் {seconds}விநாடிகளில் மீண்டும் முயற்சிக்கவும்.",
-      "server_down": "சர்வர் செயலிழந்துள்ளது, தயவுசெய்து டெவலப்பரைத் தொடர்பு கொள்ளவும்."
+      "server_down": "சர்வர் செயலிழந்துள்ளது, தயவுசெய்து டெவலப்பரைத் தொடர்பு கொள்ளவும்.",
+      "oauth_error": "வேறு வேறு கணக்கொண்ட அகவுடியுட் முயற்தி உள்நிவுக",
+      "oauth_account_not_linked": "உங்கள் அடையாளத்தை உறுதிப்பதற்கு, நீங்கள் முன்பு பயன்படுத்திய அதே அகவுடியுட் முயற்தி உள்நிவுக",
+      "email_signin_error": "உங்கள் மின்னஞ்சல் முகவரைச் சரிபுக",
+      "session_required": "இந்தப் பக்கத்தை அணுக பற்ற, உள்நிவுக",
+      "session_expired_error": "உங்கள் அமர்வு காலாவதி முடிந்தது. மீணும் உள்நிவுக",
+      "signin_error": "பிழை ஏற்பட்டது. மீணும் முயற்தி க"
     },
     "resetPassword": {
       "title": "புதிய கடவுச்சொல்லை உருவாக்கு",
@@ -1305,11 +1329,44 @@
       "successSubtitle": "உங்கள் கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது.",
       "proceedToLogin": "உள்நுழைவுக்குச் செல்லவும்"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "கடவுச்சொல்",
       "phone": "தொலைபேசி OTP",
       "emailOtp": "மின்னஞ்சல் OTP",
-      "orContinueWith": "அல்லது"
+      "orContinueWith": "அல்லது",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "தொலைபேசி எண்",

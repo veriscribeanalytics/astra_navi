@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { authConfig } from "@/auth.config";
 import { JWT } from "next-auth/jwt";
 
@@ -101,17 +102,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         refreshToken: { type: "hidden" },
         expiresIn: { type: "hidden" },
       },
-      async authorize(credentials) {
-        if (credentials?.isRegistration === "true") {
-           return {
-              id: credentials.id as string,
-              email: credentials.email as string | null | undefined,
-              phoneNumber: credentials.phoneNumber as string | null | undefined,
-              name: credentials.name as string,
-              accessToken: credentials.accessToken as string,
-              refreshToken: credentials.refreshToken as string,
-              accessTokenExpires: Date.now() + parseInt(credentials.expiresIn as string) * 1000,
-           };
+async authorize(credentials) {
+         if (credentials?.isRegistration === "true") {
+            const regExpiresIn = (typeof credentials.expiresIn === 'number' && credentials.expiresIn > 0)
+              ? credentials.expiresIn
+              : (typeof credentials.expiresIn === 'string' && parseInt(credentials.expiresIn) > 0)
+                ? parseInt(credentials.expiresIn)
+                : 3600;
+            return {
+               id: credentials.id as string,
+               email: credentials.email as string | null | undefined,
+               phoneNumber: credentials.phoneNumber as string | null | undefined,
+               name: credentials.name as string,
+               accessToken: credentials.accessToken as string,
+               refreshToken: credentials.refreshToken as string,
+               accessTokenExpires: Date.now() + regExpiresIn * 1000,
+            };
         }
 
         if (!credentials?.email || !credentials?.password) {
@@ -185,13 +191,70 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       },
     }),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days — session cookie lifetime
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account, trigger, session }) {
+      // Google OAuth sign-in: exchange Google id_token for backend tokens
+      if (account?.provider === 'google' && account.id_token) {
+        try {
+          const backendUrl = process.env.AI_BACKEND_URL;
+          if (!backendUrl) {
+            console.error('[Auth] AI_BACKEND_URL is not configured for Google OAuth exchange');
+            return { ...token, error: 'GoogleExchangeError' };
+          }
+
+          const res = await fetch(`${backendUrl}/api/auth/google`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': process.env.AI_BACKEND_API_KEY || '',
+            },
+            body: JSON.stringify({ idToken: account.id_token }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            console.error('[Auth] Google OAuth backend exchange failed:', data.error || res.status);
+            return { ...token, error: 'GoogleExchangeError' };
+          }
+
+          const expiresIn = (typeof data.expiresIn === 'number' && data.expiresIn > 0)
+            ? data.expiresIn
+            : 3600;
+
+          return {
+            ...token,
+            id: data.user.id,
+            email: data.user.email ?? user?.email,
+            name: data.user.name ?? user?.name,
+            phoneNumber: data.user.phoneNumber ?? null,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            accessTokenExpires: Date.now() + expiresIn * 1000,
+            // Routing hint for the landing page: Google/OAuth can't collect
+            // birth details, so a fresh OAuth user is almost always incomplete.
+            profileComplete: data.profileComplete === true,
+          };
+        } catch (error) {
+          console.error('[Auth] Google OAuth exchange error:', error);
+          return { ...token, error: 'GoogleExchangeError' };
+        }
+      }
+
       if (user) {
         return {
           ...token,
@@ -203,6 +266,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           refreshToken: user.refreshToken as string,
           accessTokenExpires: user.accessTokenExpires as number,
         };
+      }
+
+      // Client-driven session update (next-auth `update()`), called after the
+      // user completes onboarding. Refresh the onboarding hint on the JWT so
+      // the server-side gate in app/page.tsx stops redirecting them — without
+      // this the flag stays false forever and a completed user loops back to
+      // /profile on every visit.
+      if (
+        trigger === 'update' &&
+        session &&
+        typeof (session as { profileComplete?: unknown }).profileComplete === 'boolean'
+      ) {
+        token.profileComplete = (session as { profileComplete?: boolean }).profileComplete;
       }
 
       if (token.error) {
@@ -253,6 +329,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         (session.user as any).email = token.email;
         session.user.phoneNumber = token.phoneNumber;
         session.user.error = token.error;
+        // Only present for OAuth sign-ins — used as an initial onboarding hint.
+        if (typeof token.profileComplete === 'boolean') {
+          session.user.profileComplete = token.profileComplete;
+        }
       }
       return session;
     },

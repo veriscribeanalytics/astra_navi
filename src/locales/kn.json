@@ -62,7 +62,14 @@
     "zodiacSignsDesc": "12 ವೈದಿಕ ಚಂದ್ರ ರಾಶಿಗಳ ಲಕ್ಷಣಗಳನ್ನು ಅನ್ವೇಷಿಸಿ.",
     "services": "ಸೇವೆಗಳು",
     "astraNaviPremium": "AstraNavi ಪ್ರೀಮಿಯಂ",
-    "astraNaviPremiumDesc": "ಸುಧಾರಿತ ಮುನ್ನೋಟಗಳು ಮತ್ತು ಆಳವಾದ ಒಳನೋಟಗಳನ್ನು ಅನ್ಲಾಕ್ ಮಾಡಿ."
+    "astraNaviPremiumDesc": "ಸುಧಾರಿತ ಮುನ್ನೋಟಗಳು ಮತ್ತು ಆಳವಾದ ಒಳನೋಟಗಳನ್ನು ಅನ್ಲಾಕ್ ಮಾಡಿ.",
+    "login": "ಲಾಗಿನ್",
+    "signUp": "ಸೈನ್ ಅಪ್",
+    "logoutConfirmTitle": "AstraNavi ನಿಂದ ಸೈನ್ ಔಟ್ ಆಗಬೇಕೇ?",
+    "logoutConfirmMessage": "ನಿಮ್ಮ ಖಾತೆಯಿಂದ ನಿಮ್ಮನ್ನು ಸೈನ್ ಔಟ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಮುಖಪುಟಕ್ಕೆ ಮರುನಿರ್ದೇಶಿಸಲಾಗುತ್ತದೆ.",
+    "signOut": "ಸೈನ್ ಔಟ್",
+    "account": "ಖಾತೆ",
+    "getStarted": "ಪ್ರಾರಂಭಿಸಿ"
   },
   "footer": {
     "tagline": "ಆಧುನಿಕ ಮನಸ್ಸಿಗೆ ಜ್ಯೋತಿಷ್ಯ ಶಾಸ್ತ್ರದ ಗಣಿತದ ನಿಖರತೆಯನ್ನು ಸಂರಕ್ಷಿಸುವುದು.",
@@ -439,7 +446,8 @@
     "inscribeIdentity": "ನಿಮ್ಮ ಗುರುತನ್ನು ನಮೂದಿಸಿ",
     "signIn": "ಸೈನ್ ಇನ್ ಮಾಡಿ",
     "joinCelestialJourney": "ಖಗೋಳ ಪ್ರಯಾಣಕ್ಕೆ ಸೇರಿ.",
-    "welcomeBack": "AstraNavi ಗೆ ಮರಳಿ ಸ್ವಾಗತ.",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to continue your chart",
     "fullName": "ಪೂರ್ಣ ಹೆಸರು",
     "dob": "ಹುಟ್ಟಿದ ದಿನಾಂಕ",
     "tob": "ಹುಟ್ಟಿದ ಸಮಯ",
@@ -450,10 +458,13 @@
     "createAccount": "ಖಾತೆಯನ್ನು ರಚಿಸಿ",
     "accessDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪ್ರವೇಶಿಸಿ",
     "secureConnection": "ಸುರಕ್ಷಿತ ಸಂಪರ್ಕ",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
     "alreadyHaveAccount": "ಈಗಾಗಲೇ ಖಾತೆ ಹೊಂದಿದ್ದೀರಾ?",
     "dontHaveAccount": "ಖಾತೆ ಇಲ್ಲವೇ?",
-    "signingYouIn": "ನಿಮ್ಮನ್ನು ಸೈನ್ ಇನ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+    "signingYouIn": "ನಿಮ್ಮನ್ನು ಸೈನ್ ಇನ್ ಮಾಡುತ್ತಿದ್ದೆ...",
+    "googleLoadError": "Google ಸೈನ್-ಇನ್ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಅಥವಾ ಲೋಡ್ ಆಗಿಲ್ಲಿದೆ. ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ ಅಥವಾ ಅಡ್‌ಬ್ಲಾಕರ್‌ಗಳನ್ ನಿರ್ಬಂಧಿಸಿ",
+    "googleScriptError": "Google ಸೈನ್-ಇನ್ ಸ್ಕ್ರಿಪ್ಟ್ ಲೋಡ್ ಆಗಿಲ್ಲಿದೆ. ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ ಅಥವಾ ಅಡ್‌ಬ್ಲಾಕರ್‌ಗಳನ್ ನಿರ್ಬಂಧಿಸಿ",
     "registrationFailed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
     "accountCreated": "ಖಾತೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ. ನೀವು ಈಗ ಲಾಗಿನ್ ಮಾಡಬಹುದು.",
     "stepAccount": "ಖಾತೆ ರಚನೆ",
@@ -1264,7 +1275,14 @@
       "prefHoroscope": "ದೈನಂದಿನ ಜಾತಕವನ್ನು ಪಡೆಯಿರಿ",
       "prefNotifications": "ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
       "continue": "ಮುಂದುವರಿಯಿರಿ",
-      "submit": "ಖಾತೆಯನ್ನು ರಚಿಸಿ"
+      "submit": "ಖಾತೆಯನ್ನು ರಚಿಸಿ",
+      "strength": {
+        "title": "ಪಾಸ್ವರ್ಡ್ ಸಾಮರ್ಥ್ಯ",
+        "tooShort": "ಬಹಳ ಚಿಕ್ಕದಾಗಿದೆ",
+        "weak": "ದುರ್ಬಲ ಪಾಸ್ವರ್ಡ್",
+        "medium": "ಮಧ್ಯಮ ಪಾಸ್ವರ್ಡ್",
+        "strong": "ಬಲವಾದ ಪಾಸ್ವರ್ಡ್"
+      }
     },
     "errorBanner": {
       "dismiss": "ದೋಷವನ್ನು ತಳ್ಳಿಹಾಕಿ"
@@ -1291,7 +1309,13 @@
       "password_too_long": "ಪಾಸ್‌ವರ್ಡ್ ತೀರಾ ಉದ್ದವಾಗಿದೆ.",
       "generic": "ಅನಿರೀಕ್ಷಿತ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
       "retry_after": "ದಯವಿಟ್ಟು {minutes}ನಿಮಿಷ {seconds}ಸೆಕೆಂಡುಗಳ ನಂತರ ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
-      "server_down": "ಸರ್ವರ್ ಡೌನ್ ಆಗಿದೆ, ದಯವಿಟ್ಟು ಡೆವಲಪರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ."
+      "server_down": "ಸರ್ವರ್ ಡೌನ್ ಆಗಿದೆ, ದಯವಿಟ್ಟು ಡೆವಲಪರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+      "oauth_error": "ಬೇರೆ ಖಾತೆಯಿಂದಿ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+      "oauth_account_not_linked": "ನಿಮ್ಮ ಗುರುತಿನಾಳೆಗಾಗಿ ನೀವು ಮೊದಲು ಬಳಸಿದ ಅದೇ ಖಾತೆಯಿಂದಿ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+      "email_signin_error": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ಪರಿಶೀಲಿಸಿ",
+      "session_required": "ಈ ಪುಟವನ್ನು ಪ್ರವೇಶಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ",
+      "session_expired_error": "ನಿಮ್ಮ ಸೆಸ್ಸನ್ ಅವಧಿ ಮುಗಿದಿದೆ. ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+      "signin_error": "ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿ ಪ್ರಯತ್ನಿಸಿ"
     },
     "resetPassword": {
       "title": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ರಚಿಸಿ",
@@ -1305,11 +1329,44 @@
       "successSubtitle": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ಮರುಹೊಂದಿಸಲ್ಪಟ್ಟಿದೆ.",
       "proceedToLogin": "ಲಾಗಿನ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "ಪಾಸ್‌ವರ್ಡ್",
       "phone": "ಫೋನ್ OTP",
       "emailOtp": "ಇಮೇಲ್ OTP",
-      "orContinueWith": "ಅಥವಾ"
+      "orContinueWith": "ಅಥವಾ",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "ಫೋನ್ ಸಂಖ್ಯೆ",

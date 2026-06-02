@@ -622,6 +622,249 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   border: 1px solid rgba(200, 136, 10, 0.15);
 }
 
+/* ─── Auth page cosmic design classes ─────────────────────────────────────
+   Used by login, register, forgot-password, and reset-password pages.
+   Plain CSS (not @utility) — Tailwind v4 @utility does not compile nested
+   selectors like &::before or &:hover.  These are full CSS rule-sets. */
+
+.auth-card {
+  background: color-mix(in srgb, var(--surface-variant) 72%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--secondary) 28%, var(--accent) 45%);
+  border-radius: 28px;
+  box-shadow:
+    0 0 60px color-mix(in srgb, var(--secondary) 8%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+@media (min-width: 640px) {
+  .auth-card {
+    border-radius: 44px;
+  }
+}
+
+.auth-input {
+  width: 100%;
+  background: color-mix(in srgb, var(--surface-variant) 45%, var(--background));
+  border: 1px solid color-mix(in srgb, var(--secondary) 18%, var(--accent) 35%);
+  border-radius: 20px;
+  height: 56px;
+  color: var(--primary);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-input::placeholder {
+  color: color-mix(in srgb, var(--on-surface-variant) 65%, transparent);
+}
+.auth-input:focus {
+  border-color: color-mix(in srgb, var(--secondary) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--secondary) 25%, transparent);
+}
+.auth-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-input-error {
+  border-color: color-mix(in srgb, #ef4444 60%, transparent);
+}
+.auth-input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #ef4444 30%, transparent);
+}
+
+.auth-label {
+  display: block;
+  margin-left: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--primary);
+}
+
+.auth-label-star {
+  color: var(--secondary);
+  margin-left: 0.125rem;
+}
+
+.auth-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 56px;
+  border-radius: 20px;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 22px;
+  color: #1a0e2e;
+  background: linear-gradient(135deg, #ffd15a 0%, #e5a529 50%, #d4911e 100%);
+  box-shadow:
+    0 0 40px color-mix(in srgb, var(--secondary) 35%, transparent),
+    0 4px 20px color-mix(in srgb, var(--secondary) 20%, transparent);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.auth-btn-gold:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: scale(1.01);
+}
+.auth-btn-gold:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.auth-btn-gold:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--primary);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--secondary) 12%);
+  transition: background 0.2s, border-color 0.2s;
+}
+.auth-google-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--surface-variant) 40%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--secondary) 18%);
+}
+.auth-google-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--secondary) 18%, var(--accent) 30%);
+}
+
+.auth-divider-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--on-surface-variant) 65%, transparent);
+  letter-spacing: 0.05em;
+}
+
+.auth-footer-link {
+  font-size: 14px;
+  color: color-mix(in srgb, var(--on-surface-variant) 70%, transparent);
+}
+
+.auth-footer-link-gold {
+  color: var(--secondary);
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.auth-footer-link-gold:hover {
+  color: color-mix(in srgb, var(--secondary) 80%, white);
+}
+
+.auth-secure-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  font-size: 11px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--on-surface-variant) 45%, transparent);
+}
+
+.auth-select {
+  width: 100%;
+  height: 56px;
+  padding: 0 1rem;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--surface-variant) 45%, var(--background));
+  border: 1px solid color-mix(in srgb, var(--secondary) 18%, var(--accent) 35%);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  cursor: pointer;
+}
+.auth-select:focus {
+  border-color: color-mix(in srgb, var(--secondary) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--secondary) 25%, transparent);
+}
+
+.auth-toggle-bg {
+  background: color-mix(in srgb, var(--surface-variant) 50%, var(--background));
+  border: 1px solid color-mix(in srgb, var(--secondary) 10%, var(--accent) 25%);
+  border-radius: 16px;
+}
+.auth-toggle-bg:hover {
+  background: color-mix(in srgb, var(--surface-variant) 70%, var(--background));
+}
+
+/* Sm breakpoint overrides for auth elements */
+@media (min-width: 640px) {
+  .auth-input {
+    height: 62px;
+  }
+  .auth-btn-gold {
+    height: 62px;
+    font-size: 24px;
+  }
+  .auth-google-btn {
+    height: 58px;
+  }
+}
+
+/* Large-screen (≥ 2560px / QHD–4K+) sizing for auth elements.
+ * The heights / radii / font-sizes above are pixel-pinned and do NOT scale
+ * with the html root font-size bump, so on a 4K display the inputs and
+ * buttons look stubby next to the (now wider) form panel. Scale them ~1.4×. */
+@media (min-width: 2560px) {
+  .auth-card {
+    border-radius: 56px;
+  }
+  .auth-input,
+  .auth-select {
+    height: 80px;
+    border-radius: 26px;
+    font-size: 1.25rem;
+  }
+  .auth-btn-gold {
+    height: 84px;
+    border-radius: 26px;
+    font-size: 32px;
+  }
+  .auth-google-btn {
+    height: 78px;
+    border-radius: 22px;
+    font-size: 20px;
+  }
+  .auth-label {
+    font-size: 14px;
+  }
+  .auth-divider {
+    padding: 1.75rem 0;
+  }
+}
+
 /* --- CHAT PAGE STYLES --- */
 
 /* AI Message Markdown Styles */
@@ -1588,28 +1831,28 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
   display: flex; flex-direction: column; overflow: hidden; z-index: 10;
 }
 
-/* GPT-style logged-in dashboard shell */
+/* GPT-style logged-in dashboard shell — forces dark theme on navbar */
 body:has(.gpt-dashboard-shell) {
-  background: #05051c;
+  background: var(--surface);
 }
 
 body:has(.gpt-dashboard-shell) nav {
-  background: rgba(7, 8, 40, 0.96) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff;
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+  border-color: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+  color: var(--foreground);
 }
 
 body:has(.gpt-dashboard-shell) nav a,
 body:has(.gpt-dashboard-shell) nav button {
-  color: rgba(255, 255, 255, 0.9);
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
 }
 
 body:has(.gpt-dashboard-shell) nav [class*="text-primary"] {
-  color: rgba(255, 255, 255, 0.92) !important;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent) !important;
 }
 
 body:has(.gpt-dashboard-shell) nav [class*="text-on-surface-variant"] {
-  color: rgba(255, 255, 255, 0.62) !important;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent) !important;
 }
 
 body:has(.gpt-dashboard-shell) footer {

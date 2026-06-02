@@ -7,9 +7,7 @@ interface AuthFormCardProps {
 
 const AuthFormCard: React.FC<AuthFormCardProps> = ({ children, className = '' }) => {
   return (
-    <div
-      className={`bg-surface/5 dark:bg-white/[0.01] backdrop-blur-md rounded-[28px] border border-outline-variant/20 dark:border-white/5 p-5 sm:p-7 shadow-2xl ${className}`}
-    >
+    <div className={`auth-card p-5 sm:p-8 md:p-10 ${className}`}>
       {children}
     </div>
   );

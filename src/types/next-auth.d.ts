@@ -7,6 +7,8 @@ declare module 'next-auth' {
       email?: string | null;
       phoneNumber?: string | null;
       error?: string;
+      /** OAuth-only onboarding hint set at sign-in; live profile fetch is the source of truth thereafter. */
+      profileComplete?: boolean;
     } & Omit<DefaultSession['user'], 'email'>;
   }
 
@@ -29,5 +31,6 @@ declare module 'next-auth/jwt' {
     email?: string | null;
     phoneNumber?: string | null;
     error?: string;
+    profileComplete?: boolean;
   }
 }

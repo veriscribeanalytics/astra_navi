@@ -999,7 +999,7 @@ function PlanetDetail({ planet }: { planet: PlanetData }) {
                             {planet.yogas.map((yoga, i) => (
                                 <div key={i} className="bg-amber-500/[0.05] border border-amber-500/20 rounded-[14px] p-3">
                                     <h5 className="text-[12px] font-bold text-amber-400 mb-1">{yoga.name}</h5>
-                                    <p className="text-[11.5px] text-foreground/70 leading-relaxed">{yoga.effect}</p>
+                                    <p className="text-[11.5px] 3xl:text-[16px] text-foreground/70 leading-relaxed">{yoga.effect}</p>
                                 </div>
                             ))}
                         </div>
@@ -1248,7 +1248,7 @@ function DashaTimeline({ dasha }: { dasha: DashaData }) {
                             </summary>
                             <div className="space-y-2 mt-3 pl-4">
                                 {rest.map((item, i) => (
-                                    <p key={i} className="text-[12.5px] text-foreground/65 leading-relaxed">{simpleText(item)}</p>
+                                    <p key={i} className="text-[12.5px] 3xl:text-[17px] text-foreground/65 leading-relaxed">{simpleText(item)}</p>
                                 ))}
                             </div>
                         </details>

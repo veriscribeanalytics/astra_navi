@@ -62,7 +62,14 @@
     "zodiacSignsDesc": "12 ਵੈਦਿਕ ਚੰਦਰਮਾ ਰਾਸ਼ੀਆਂ ਦੇ ਗੁਣਾਂ ਦੀ ਪੜਚੋਲ ਕਰੋ।",
     "services": "ਸੇਵਾਵਾਂ",
     "astraNaviPremium": "AstraNavi ਪ੍ਰੀਮੀਅਮ",
-    "astraNaviPremiumDesc": "ਉੱਨਤ ਭਵਿੱਖਬਾਣੀਆਂ ਅਤੇ ਡੂੰਘੀ ਇਨਸਾਈਟਸ ਨੂੰ ਅਨਲੌਕ ਕਰੋ।"
+    "astraNaviPremiumDesc": "ਉੱਨਤ ਭਵਿੱਖਬਾਣੀਆਂ ਅਤੇ ਡੂੰਘੀ ਇਨਸਾਈਟਸ ਨੂੰ ਅਨਲੌਕ ਕਰੋ।",
+    "login": "ਲੌਗਇਨ",
+    "signUp": "ਸਾਈਨ ਅੱਪ",
+    "logoutConfirmTitle": "AstraNavi ਤੋਂ ਸਾਈਨ ਆਊਟ ਕਰਨਾ ਹੈ?",
+    "logoutConfirmMessage": "ਤੁਹਾਨੂੰ ਤੁਹਾਡੇ ਖਾਤੇ ਵਿੱਚੋਂ ਸਾਈਨ ਆਊਟ ਕਰ ਦਿੱਤਾ ਜਾਵੇਗਾ ਅਤੇ ਹੋਮਪੇਜ 'ਤੇ ਭੇਜ ਦਿੱਤਾ ਜਾਵੇਗਾ।",
+    "signOut": "ਸਾਈਨ ਆਊਟ",
+    "account": "ਖਾਤਾ",
+    "getStarted": "ਸ਼ੁਰੂ ਕਰੋ"
   },
   "footer": {
     "tagline": "ਆਧੁਨਿਕ ਦਿਮਾਗਾਂ ਲਈ ਜੋਤਿਸ਼ ਸ਼ਾਸਤਰ ਦੀ ਗਣਿਤਿਕ ਸ਼ੁੱਧਤਾ ਨੂੰ ਸੁਰੱਖਿਅਤ ਰੱਖਣਾ।",
@@ -439,7 +446,8 @@
     "inscribeIdentity": "ਆਪਣੀ ਪਛਾਣ ਦਰਜ ਕਰੋ",
     "signIn": "ਸਾਈਨ ਇਨ ਕਰੋ",
     "joinCelestialJourney": "ਖਗੋਲੀ ਯਾਤਰਾ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ।",
-    "welcomeBack": "AstraNavi ਵਿੱਚ ਵਾਪਸੀ 'ਤੇ ਸੁਆਗਤ ਹੈ।",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to continue your chart",
     "fullName": "ਪੂਰਾ ਨਾਮ",
     "dob": "ਜਨਮ ਮਿਤੀ",
     "tob": "ਜਨਮ ਦਾ ਸਮਾਂ",
@@ -450,10 +458,13 @@
     "createAccount": "ਖਾਤਾ ਬਣਾਓ",
     "accessDashboard": "ਡੈਸ਼ਬੋਰਡ ਤੱਕ ਪਹੁੰਚ ਕਰੋ",
     "secureConnection": "ਸੁਰੱਖਿਅਤ ਕਨੈਕਸ਼ਨ",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
     "alreadyHaveAccount": "ਕੀ ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ?",
     "dontHaveAccount": "ਖਾਤਾ ਨਹੀਂ ਹੈ?",
-    "signingYouIn": "ਤੁਹਾਨੂੰ ਸਾਈਨ ਇਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+    "signingYouIn": "ਆਪਣੇ ਸਾਈਨ ਇਨ ਕੀਤੇ ਜਾ ਰਹੇ ਹਨ...",
+    "googleLoadError": "Google ਸਾਈਨ-ਇਨ ਬਲਾਕ ਹੋਇਆ ਹੈ ਜਾਂ ਲੋਡ ਨਹੀਂ ਹੋਇਆ. ਆਪਣੀ ਕਨੈਕਸ਼ਨ ਚੈਕ ਕਰੋ ਜਾਂ ਅਡਬਲੋਕਰ ਅਕਾਰਗੇ ਕਰੋ",
+    "googleScriptError": "Google ਸਾਈਨ-ਇਨ ਸਕਰਿਪਟ ਲੋਡ ਨਹੀਂ ਹੋਇਆ. ਆਪਣੀ ਕਨੈਕਸ਼ਨ ਚੈਕ ਕਰੋ ਜਾਂ ਅਡਬਲੋਕਰ ਅਕਾਰਗੇ ਕਰੋ",
     "registrationFailed": "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਸਫਲ ਰਹੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "accountCreated": "ਖਾਤਾ ਸਫਲਤਾਪੂਰਵਕ ਬਣਾਇਆ ਗਿਆ। ਤੁਸੀਂ ਹੁਣ ਲਾਗਇਨ ਕਰ ਸਕਦੇ ਹੋ।",
     "stepAccount": "ਖਾਤਾ ਬਣਾਉਣਾ",
@@ -1264,7 +1275,14 @@
       "prefHoroscope": "ਰੋਜ਼ਾਨਾ ਰਾਸ਼ੀਫਲ ਪ੍ਰਾਪਤ ਕਰੋ",
       "prefNotifications": "ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਕਰੋ",
       "continue": "ਜਾਰੀ ਰੱਖੋ",
-      "submit": "ਖਾਤਾ ਬਣਾਓ"
+      "submit": "ਖਾਤਾ ਬਣਾਓ",
+      "strength": {
+        "title": "ਪਾਸਵਰਡ ਦੀ ਮਜ਼ਬੂਤੀ",
+        "tooShort": "ਬਹੁਤ ਛੋਟਾ",
+        "weak": "ਕਮਜ਼ੋਰ ਪਾਸਵਰਡ",
+        "medium": "ਦਰਮਿਆਨਾ ਪਾਸਵਰਡ",
+        "strong": "ਮਜ਼ਬੂਤ ਪਾਸਵਰਡ"
+      }
     },
     "errorBanner": {
       "dismiss": "ਗਲਤੀ ਖਾਰਜ ਕਰੋ"
@@ -1291,7 +1309,13 @@
       "password_too_long": "ਪਾਸਵਰਡ ਬਹੁਤ ਲੰਬਾ ਹੈ।",
       "generic": "ਇੱਕ ਅਣਕਿਆਸੀ ਗਲਤੀ ਆਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
       "retry_after": "ਕਿਰਪਾ ਕਰਕੇ {minutes} ਮਿੰਟ {seconds} ਸਕਿੰਟ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-      "server_down": "ਸਰਵਰ ਡਾਊਨ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਡਿਵੈਲਪਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"
+      "server_down": "ਸਰਵਰ ਡਾਊਨ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਡਿਵੈਲਪਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।",
+      "oauth_error": "ਹੋਰ ਖਾਤੇ ਨਾਲ ਸਾਈਨ ਇਨ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+      "oauth_account_not_linked": "ਆਪਣੀ ਪਛਾਣ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ, ਆਪਣੇ ਪਹਿਲਾਂ ਵਰਤੇ ਹੋਏ ਖਾਤੇ ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ",
+      "email_signin_error": "ਆਪਣੀ ਈਮੇਲ ਐਡਰੈਸ ਚੈਕ ਕਰੋ",
+      "session_required": "ਇਸ ਪੇਜ ਤੇ ਪਹੁੰਚਣ ਲਈ ਸਾਈਨ ਇਨ ਕਰੋ",
+      "session_expired_error": "ਆਪਣਾ ਸੈਸ਼ਨ ਖਤਮ ਹੋ ਗਿਆ ਹੈ. ਦੁਬਾਰਾ ਸਾਈਨ ਇਨ ਕਰੋ",
+      "signin_error": "ਇਰੋਰ ਹੋਇਆ. ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"
     },
     "resetPassword": {
       "title": "ਨਵਾਂ ਪਾਸਵਰਡ ਬਣਾਓ",
@@ -1305,11 +1329,44 @@
       "successSubtitle": "ਤੁਹਾਡਾ ਪਾਸਵਰਡ ਸਫਲਤਾਪੂਰਵਕ ਰੀਸੈਟ ਹੋ ਗਿਆ ਹੈ।",
       "proceedToLogin": "ਲੌਗਇਨ ਤੇ ਜਾਓ"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "ਪਾਸਵਰਡ",
       "phone": "ਫ਼ੋਨ OTP",
       "emailOtp": "ਈਮੇਲ OTP",
-      "orContinueWith": "ਜਾਂ"
+      "orContinueWith": "ਜਾਂ",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "ਫ਼ੋਨ ਨੰਬਰ",

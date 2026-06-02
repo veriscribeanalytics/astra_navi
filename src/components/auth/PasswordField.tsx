@@ -9,6 +9,8 @@ interface PasswordFieldProps extends Omit<HTMLProps<HTMLInputElement>, 'type' | 
   error?: string;
   helperText?: string;
   icon?: React.ReactNode;
+  /** Visual variant passed through to Input. */
+  variant?: 'default' | 'cosmic';
 }
 
 const PasswordField: React.FC<PasswordFieldProps> = ({
@@ -20,36 +22,43 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   autoComplete = 'current-password',
   disabled,
   className,
+  variant,
   ...inputProps
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const fieldId = id || `password-${label?.replace(/\s+/g, '-').toLowerCase()}`;
+  const isCosmic = variant === 'cosmic';
 
   return (
-    <div className="relative">
-      <Input
-        {...inputProps}
-        id={fieldId}
-        type={showPassword ? 'text' : 'password'}
-        label={label}
-        error={error}
-        helperText={helperText}
-        icon={icon}
-        autoComplete={autoComplete}
-        disabled={disabled}
-        className={`!pr-12 sm:!pr-14 ${className ?? ''}`}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        disabled={disabled}
-        className="absolute right-2 sm:right-3 top-[26px] sm:top-[28px] h-[48px] sm:h-[52px] w-10 flex items-center justify-center text-on-surface-variant/40 hover:text-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 rounded-lg"
-        aria-label={showPassword ? 'Hide password' : 'Show password'}
-        aria-pressed={showPassword}
-      >
-        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    </div>
+    <Input
+      {...inputProps}
+      id={fieldId}
+      type={showPassword ? 'text' : 'password'}
+      label={label}
+      error={error}
+      helperText={helperText}
+      icon={icon}
+      autoComplete={autoComplete}
+      disabled={disabled}
+      variant={variant}
+      className={className}
+      rightElement={
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          disabled={disabled}
+          className={`flex items-center justify-center transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 h-10 w-10 ${
+            isCosmic
+              ? 'text-[color-mix(in_srgb,var(--on-surface-variant)_55%,transparent)] hover:text-[color-mix(in_srgb,var(--on-surface-variant)_80%,transparent)]'
+              : 'text-on-surface-variant/40 hover:text-secondary'
+          }`}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          aria-pressed={showPassword}
+        >
+          {showPassword ? <EyeOff size={isCosmic ? 18 : 16} /> : <Eye size={isCosmic ? 18 : 16} />}
+        </button>
+      }
+    />
   );
 };
 

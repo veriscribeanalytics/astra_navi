@@ -43,9 +43,9 @@ export const RegisterSchema = z.object({
   occupation: occupationEnum,
   language: languageEnum,
   preferences: z.object({
-    horoscope_enabled: z.boolean().optional().default(true),
-    notifications_enabled: z.boolean().optional().default(false),
-  }).optional().default({ horoscope_enabled: true, notifications_enabled: false }),
+    horoscope: z.boolean().optional().default(true),
+    notifications: z.boolean().optional().default(false),
+  }).optional().default({ horoscope: true, notifications: false }),
 });
 
 export const LoginSchema = z.object({
@@ -62,6 +62,28 @@ export const ResetPasswordSchema = z.object({
   password: z
     .string()
     .min(10, "Password must be at least 10 cycles (characters)")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+});
+
+// --- PASSWORD RESET OTP (new flow) ---
+
+export const PasswordResetStartSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const PasswordResetVerifySchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().regex(/^\d{6}$/, "Verification code must be exactly 6 digits"),
+});
+
+export const PasswordResetCompleteSchema = z.object({
+  resetToken: z.string().min(1, "Reset token is required"),
+  password: z
+    .string()
+    .min(10, "Password must be at least 10 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")

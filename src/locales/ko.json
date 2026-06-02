@@ -62,7 +62,14 @@
     "zodiacSignsDesc": "12 베다 달 별자리의 특성을 탐구하세요.",
     "services": "서비스",
     "astraNaviPremium": "AstraNavi 프리미엄",
-    "astraNaviPremiumDesc": "고급 예측 및 심층 인사이트를 잠금 해제하세요."
+    "astraNaviPremiumDesc": "고급 예측 및 심층 인사이트를 잠금 해제하세요.",
+    "login": "로그인",
+    "signUp": "회원가입",
+    "logoutConfirmTitle": "AstraNavi에서 로그아웃하시겠습니까?",
+    "logoutConfirmMessage": "계정에서 로그아웃되며 홈페이지로 이동됩니다.",
+    "signOut": "로그아웃",
+    "account": "계정",
+    "getStarted": "시작하기"
   },
   "footer": {
     "tagline": "현대인을 위한 조티시 샤스트라의 수학적 정밀성 보존.",
@@ -439,7 +446,8 @@
     "inscribeIdentity": "신원 새기기",
     "signIn": "로그인",
     "joinCelestialJourney": "천체의 여정에 합류하세요.",
-    "welcomeBack": "AstraNavi에 다시 오신 것을 환영합니다.",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to continue your chart",
     "fullName": "성명",
     "dob": "생년월일",
     "tob": "태어난 시간",
@@ -450,7 +458,10 @@
     "createAccount": "계정 만들기",
     "accessDashboard": "대시보드 접속",
     "secureConnection": "안전한 연결",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
+    "googleLoadError": "Google 로그인이 차단되었거나 로드에 실패했습니다. 연결을 확인하거나 애드블록을 비활성화하세요",
+    "googleScriptError": "Google 로그인 스크립트 로드에 실패했습니다. 연결을 확인하거나 애드블록을 비활성화하세요",
     "alreadyHaveAccount": "이미 계정이 있으신가요?",
     "dontHaveAccount": "계정이 없으신가요?",
     "signingYouIn": "로그인 중...",
@@ -1264,7 +1275,14 @@
       "prefHoroscope": "일일 포캐스트 메일 수신",
       "prefNotifications": "알림 수신 동의",
       "continue": "다음 단계",
-      "submit": "가입하기"
+      "submit": "가입하기",
+      "strength": {
+        "title": "비밀번호 보안도",
+        "tooShort": "너무 짧음",
+        "weak": "취약한 비밀번호",
+        "medium": "적정 비밀번호",
+        "strong": "안전한 비밀번호"
+      }
     },
     "errorBanner": {
       "dismiss": "오류 닫기"
@@ -1291,7 +1309,13 @@
       "password_too_long": "비밀번호가 너무 깁니다.",
       "generic": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
       "retry_after": "{minutes}분 {seconds}초 후에 다시 시도해 주세요.",
-      "server_down": "서버가 다운되었습니다. 개발자에게 문의해 주세요."
+      "server_down": "서버가 다운되었습니다. 개발자에게 문의해 주세요.",
+      "oauth_error": "다른 계정으로 로그인해 보세요",
+      "oauth_account_not_linked": "신원 확인을 위해 처음 사용한 계정으로 로그인하세요",
+      "email_signin_error": "이메일 주소를 확인하세요",
+      "session_required": "이 페이지에 접근하려면 로그인하세요",
+      "session_expired_error": "세션이 만료되었습니다. 다시 로그인하세요",
+      "signin_error": "오류가 발생했습니다. 다시 시도해 주세요"
     },
     "resetPassword": {
       "title": "새 비밀번호 생성",
@@ -1305,11 +1329,44 @@
       "successSubtitle": "비밀번호가 성공적으로 재설정되었습니다.",
       "proceedToLogin": "로그인으로 이동"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "비밀번호",
       "phone": "휴대폰 OTP",
       "emailOtp": "이메일 OTP",
-      "orContinueWith": "또는"
+      "orContinueWith": "또는",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "휴대폰 번호",

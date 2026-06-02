@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
@@ -10,6 +11,7 @@ import AskNaviFab from "@/components/layout/AskNaviFab";
 import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
 import SkipLink from "@/components/layout/SkipLink";
 import { AuthProvider } from "@/context/AuthContext";
+import OnboardingGate from "@/components/auth/OnboardingGate";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -65,7 +67,11 @@ export default async function RootLayout({
                   <PaywallProvider>
                   <ThemeProvider>
                     <SkipLink />
-                    
+
+                    <Suspense fallback={null}>
+                      <OnboardingGate />
+                    </Suspense>
+
                     <OptimizedBackgrounds />
                     <Toaster />
 

@@ -73,8 +73,8 @@ export async function POST(req: Request) {
                 occupation: payload.occupation,
                 language: payload.language,
                 preferences: {
-                    horoscope: payload.preferences?.horoscope_enabled ?? true,
-                    notifications: payload.preferences?.notifications_enabled ?? false,
+                    horoscope: payload.preferences?.horoscope ?? true,
+                    notifications: payload.preferences?.notifications ?? false,
                 },
             }).filter(([, value]) => value !== undefined && value !== ''));
 

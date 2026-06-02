@@ -9,12 +9,12 @@ const RegisterStepIndicator: React.FC<RegisterStepIndicatorProps> = ({ currentSt
   return (
     <div className="space-y-3 mt-4">
       {/* Step dots */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 3xl:gap-2.5">
         {steps.map((_, i) => (
           <div
             key={i}
-            className={`h-1 rounded-full transition-all duration-300 ${
-              i === currentStep ? 'w-8 bg-secondary' : 'w-2 bg-outline-variant/30'
+            className={`h-1 3xl:h-1.5 rounded-full transition-all duration-300 ${
+              i === currentStep ? 'w-8 3xl:w-12 bg-[#c9a03a]' : 'w-2 3xl:w-3 bg-[rgba(190,145,135,0.2)]'
             }`}
           />
         ))}
@@ -25,7 +25,7 @@ const RegisterStepIndicator: React.FC<RegisterStepIndicatorProps> = ({ currentSt
           <span
             key={i}
             className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-300 ${
-              i === currentStep ? 'text-secondary' : 'text-on-surface-variant/40'
+              i === currentStep ? 'text-[#c9a03a]' : 'text-[#9d8cb0]/50'
             }`}
           >
             {label}

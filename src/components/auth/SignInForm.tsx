@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
+import React, { useState, useRef, useEffect } from 'react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import AuthErrorBanner from './AuthErrorBanner';
-import { ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/hooks';
 import { ParsedAuthError, parseAuthError, getLocalizedErrorMessage } from '@/utils/authErrorParser';
 
@@ -15,15 +12,10 @@ interface SignInFormData {
 }
 
 interface SignInFormProps {
-  /** Called when user clicks submit. Should call signIn('credentials', ...). */
   onSubmit: (data: SignInFormData) => Promise<{ error?: string; parsedError?: ParsedAuthError | null } | void>;
-  /** Whether the form should be disabled (e.g. account locked). */
   disabled?: boolean;
-  /** Disabled reason shown on the submit button. */
   disabledReason?: string;
-  /** Called when "Forgot Password?" is clicked. */
   onForgotPassword: () => void;
-  /** Callback for context-aware CTA redirects. */
   onActionClick?: (action: string) => void;
 }
 
@@ -41,6 +33,13 @@ const SignInForm: React.FC<SignInFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [bannerError, setBannerError] = useState<ParsedAuthError | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!bannerError && !Object.keys(fieldErrors).length) return;
+    const firstInvalid = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+    firstInvalid?.focus();
+  }, [fieldErrors, bannerError]);
 
   const validate = (): boolean => {
     const errors: { email?: string; password?: string } = {};
@@ -77,11 +76,11 @@ const SignInForm: React.FC<SignInFormProps> = ({
   };
 
   const isSubmitDisabled = disabled || isSubmitting || !email.trim() || !password.trim();
-
-  console.log('[SignInForm] Render:', { email, password, disabled, isSubmitting, isSubmitDisabled });
+  const inputCls = (hasError: boolean) =>
+    `auth-input pl-14 pr-4 ${hasError ? 'auth-input-error' : ''}`;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-5" noValidate>
       {bannerError && (
         <AuthErrorBanner
           parsedError={bannerError}
@@ -90,74 +89,107 @@ const SignInForm: React.FC<SignInFormProps> = ({
         />
       )}
 
-      <Input
-        type="email"
-        label={t('auth.signIn.emailLabel')}
-        placeholder={t('auth.signIn.emailPlaceholder')}
-        icon={<Mail size={16} className="text-secondary" />}
-        value={email}
-        onChange={(e) => {
-          console.log('[SignInForm] Email onChange:', e.target.value);
-          setEmail(e.target.value);
-          if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: undefined }));
-        }}
-        error={fieldErrors.email}
-        autoComplete="email"
-        required
-        disabled={disabled || isSubmitting}
-      />
-
-      <div className="relative">
-        <Input
-          type={showPassword ? 'text' : 'password'}
-          label={t('auth.signIn.passwordLabel')}
-          placeholder={t('auth.signIn.passwordPlaceholder')}
-          icon={<Lock size={16} className="text-secondary" />}
-          value={password}
-          onChange={(e) => {
-            console.log('[SignInForm] Password onChange:', e.target.value);
-            setPassword(e.target.value);
-            if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
-          }}
-          error={fieldErrors.password}
-          autoComplete="current-password"
-          required
-          disabled={disabled || isSubmitting}
-          className="!pr-12 sm:!pr-14"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          disabled={disabled || isSubmitting}
-          className="absolute right-2 sm:right-3 top-[26px] sm:top-[28px] h-[48px] sm:h-[52px] w-10 flex items-center justify-center text-on-surface-variant/40 hover:text-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 rounded-lg"
-          aria-label={showPassword ? t('auth.signIn.hidePassword') : t('auth.signIn.showPassword')}
-          aria-pressed={showPassword}
-        >
-          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-        </button>
+      {/* Email */}
+      <div className="space-y-2.5">
+        <label className="auth-label">
+          {t('auth.signIn.emailLabel')}
+          <span className="auth-label-star">*</span>
+        </label>
+        <div className="relative">
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-secondary" aria-hidden="true">
+            <Mail size={18} className="3xl:w-[26px] 3xl:h-[26px]" />
+          </div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: undefined }));
+            }}
+            placeholder={t('auth.signIn.emailPlaceholder')}
+            autoComplete="email"
+            required
+            disabled={disabled || isSubmitting}
+            aria-invalid={fieldErrors.email ? 'true' : 'false'}
+            aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+            className={inputCls(!!fieldErrors.email)}
+          />
+        </div>
+        {fieldErrors.email && (
+          <p id="email-error" className="text-[10px] text-red-400 ml-2" role="alert">{fieldErrors.email}</p>
+        )}
       </div>
 
-      <div className="flex justify-end">
+      {/* Password */}
+      <div className="space-y-2.5">
+        <label className="auth-label">
+          {t('auth.signIn.passwordLabel')}
+          <span className="auth-label-star">*</span>
+        </label>
+        <div className="relative">
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-secondary" aria-hidden="true">
+            <Lock size={18} className="3xl:w-[26px] 3xl:h-[26px]" />
+          </div>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+            }}
+            placeholder={t('auth.signIn.passwordPlaceholder')}
+            autoComplete="current-password"
+            required
+            disabled={disabled || isSubmitting}
+            aria-invalid={fieldErrors.password ? 'true' : 'false'}
+            aria-describedby={fieldErrors.password ? 'password-error' : undefined}
+            className={`${inputCls(!!fieldErrors.password)} pr-14`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            disabled={disabled || isSubmitting}
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-[color-mix(in_srgb,var(--on-surface-variant)_55%,transparent)] hover:text-[color-mix(in_srgb,var(--on-surface-variant)_80%,transparent)] transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+            aria-label={showPassword ? t('auth.signIn.hidePassword') : t('auth.signIn.showPassword')}
+            aria-pressed={showPassword}
+          >
+            {showPassword ? <EyeOff size={18} className="3xl:w-[26px] 3xl:h-[26px]" /> : <Eye size={18} className="3xl:w-[26px] 3xl:h-[26px]" />}
+          </button>
+        </div>
+        {fieldErrors.password && (
+          <p id="password-error" className="text-[10px] text-red-400 ml-2" role="alert">{fieldErrors.password}</p>
+        )}
+      </div>
+
+      {/* Forgot password */}
+      <div className="flex justify-end -mt-2.5">
         <button
           type="button"
           onClick={onForgotPassword}
-          className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 hover:text-secondary transition-colors"
+          className="text-[13px] font-medium text-secondary hover:opacity-80 transition-opacity focus:outline-none focus-visible:underline"
         >
           {t('auth.signIn.forgotPassword')}
         </button>
       </div>
 
-      <Button
+      {/* Submit — bright gold gradient */}
+      <button
         type="submit"
-        fullWidth
-        size="lg"
-        loading={isSubmitting}
         disabled={isSubmitDisabled}
-        className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
+        className="auth-btn-gold mt-1"
       >
-        {disabled ? disabledReason || t('auth.signIn.submit') : t('auth.signIn.submit')}
-        {!isSubmitting && !disabled && <ArrowRight size={14} />}
-      </Button>
+        {isSubmitting ? (
+          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        ) : (
+          <>
+            {disabled ? (disabledReason || t('auth.signIn.submit')) : t('auth.signIn.submit')}
+            {!disabled && <ArrowRight size={22} strokeWidth={2.5} className="3xl:w-7 3xl:h-7" />}
+          </>
+        )}
+      </button>
     </form>
   );
 };

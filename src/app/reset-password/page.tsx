@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import { Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { AuthShell, AuthHeader, AuthFormCard, AuthErrorBanner, PasswordField } from '@/components/auth';
 import { ParsedAuthError, parseAuthError, getLocalizedErrorMessage } from '@/utils/authErrorParser';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -24,17 +25,25 @@ function ResetPasswordContent() {
 
   useEffect(() => {
     if (!token) {
-      showError(t('auth.errors.reset_token_invalid') || 'Invalid or missing reset token.');
+      showError(t('auth.errors.reset_token_invalid'));
     }
   }, [token, showError, t]);
 
   const validate = (): boolean => {
     const errors: { password?: string; confirm?: string } = {};
     if (newPassword.length < 10) {
-      errors.password = t('auth.register.validation.passwordLength') || 'Password must be at least 10 characters.';
+      errors.password = t('auth.register.validation.passwordLength');
+    } else if (!/[A-Z]/.test(newPassword)) {
+      errors.password = t('auth.register.validation.passwordUpper');
+    } else if (!/[a-z]/.test(newPassword)) {
+      errors.password = t('auth.register.validation.passwordLower');
+    } else if (!/[0-9]/.test(newPassword)) {
+      errors.password = t('auth.register.validation.passwordDigit');
+    } else if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      errors.password = t('auth.register.validation.passwordSpecial');
     }
     if (newPassword !== confirmPassword) {
-      errors.confirm = t('auth.register.validation.passwordMismatch') || 'Passwords do not match.';
+      errors.confirm = t('auth.register.validation.passwordMismatch');
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -46,7 +55,7 @@ function ResetPasswordContent() {
     setFieldErrors({});
 
     if (!token) {
-      showError(t('auth.errors.reset_token_invalid') || 'Invalid reset token. Please request a new link.');
+      showError(t('auth.errors.reset_token_invalid'));
       return;
     }
 
@@ -55,10 +64,10 @@ function ResetPasswordContent() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetchWithTimeout('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({ token, password: newPassword }),
       });
 
       const data = await res.json();
@@ -73,7 +82,7 @@ function ResetPasswordContent() {
       }
 
       setIsSuccess(true);
-      success(t('auth.resetPassword.success') || 'Password has been reset successfully. You can now log in.');
+      success(t('auth.resetPassword.success'));
 
       setTimeout(() => {
         router.push('/login');
@@ -90,11 +99,11 @@ function ResetPasswordContent() {
       {ToastContainer}
       <div className="w-full max-w-md flex flex-col">
         <AuthHeader
-          title={isSuccess ? (t('auth.resetPassword.successTitle') || 'Password Reset') : (t('auth.resetPassword.title') || 'Create New Password')}
+          title={isSuccess ? t('auth.resetPassword.successTitle') : t('auth.resetPassword.title')}
           subtitle={
             isSuccess
-              ? (t('auth.resetPassword.successSubtitle') || 'Your password has been successfully reset.')
-              : (t('auth.resetPassword.subtitle') || 'Please enter your new password below.')
+              ? t('auth.resetPassword.successSubtitle')
+              : t('auth.resetPassword.subtitle')
           }
         />
 
@@ -107,8 +116,8 @@ function ResetPasswordContent() {
                 )}
 
                 <PasswordField
-                  label={t('auth.resetPassword.newPasswordLabel') || "New Password"}
-                  placeholder={t('auth.resetPassword.newPasswordPlaceholder') || "Enter new password"}
+                  label={t('auth.resetPassword.newPasswordLabel')}
+                  placeholder={t('auth.resetPassword.newPasswordPlaceholder')}
                   icon={<Lock size={16} className="text-secondary" />}
                   value={newPassword}
                   onChange={(e) => {
@@ -122,8 +131,8 @@ function ResetPasswordContent() {
                 />
 
                 <PasswordField
-                  label={t('auth.resetPassword.confirmPasswordLabel') || "Confirm Password"}
-                  placeholder={t('auth.resetPassword.confirmPasswordPlaceholder') || "Re-enter new password"}
+                  label={t('auth.resetPassword.confirmPasswordLabel')}
+                  placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
                   icon={<ShieldCheck size={16} className="text-secondary" />}
                   value={confirmPassword}
                   onChange={(e) => {
@@ -144,7 +153,7 @@ function ResetPasswordContent() {
                   disabled={!token || !newPassword.trim() || !confirmPassword.trim()}
                   className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
                 >
-                  {t('auth.resetPassword.submit') || "Reset Password"}
+                  {t('auth.resetPassword.submit')}
                   {!isLoading && <ArrowRight size={14} />}
                 </Button>
               </form>
@@ -160,7 +169,7 @@ function ResetPasswordContent() {
                   onClick={() => router.push('/login')}
                   className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2"
                 >
-                  {t('auth.resetPassword.proceedToLogin') || "Proceed to Login"}
+                  {t('auth.resetPassword.proceedToLogin')}
                 </Button>
               </div>
             )}

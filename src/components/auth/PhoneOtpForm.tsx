@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import AuthErrorBanner from './AuthErrorBanner';
 import { useTranslation } from '@/hooks';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 
 interface PhoneOtpFormProps {
   /**
@@ -24,6 +25,7 @@ interface PhoneOtpFormProps {
 type Step = 'phone' | 'otp';
 
 const OTP_LENGTH = 6;
+const RESEND_COOLDOWN_SECONDS = 30;
 
 const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = false }) => {
   const { t } = useTranslation();
@@ -43,7 +45,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
 
   /** POST /api/auth/phone/start  body: { phoneNumber: "+91..." }  ->  { sent: true, expiresIn: 300 } */
   const sendOtp = async (phoneNumber: string): Promise<number> => {
-    const res = await fetch('/api/auth/phone/start', {
+    const res = await fetchWithTimeout('/api/auth/phone/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber }),
@@ -63,7 +65,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
 
   /** POST /api/auth/phone/verify  body: { phoneNumber, code }  ->  session envelope */
   const verifyOtp = async (phoneNumber: string, code: string): Promise<unknown> => {
-    const res = await fetch('/api/auth/phone/verify', {
+    const res = await fetchWithTimeout('/api/auth/phone/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber, code }),
@@ -74,11 +76,11 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
       const errCode = data.code;
       const msg = data.message || data.error || 'Invalid code.';
       if (errCode === 'otp_expired') {
-        throw new Error(t('auth.phone.otpExpired') || 'Code expired — resend');
+        throw new Error(t('auth.phone.otpExpired'));
       } else if (errCode === 'otp_incorrect') {
-        throw new Error(t('auth.phone.otpIncorrect') || 'Incorrect code');
+        throw new Error(t('auth.phone.otpIncorrect'));
       } else if (errCode === 'otp_locked') {
-        throw new Error(t('auth.phone.otpLocked') || 'Too many incorrect attempts. Please request a new code.');
+        throw new Error(t('auth.phone.otpLocked'));
       }
       throw new Error(msg);
     }
@@ -94,14 +96,14 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     e.preventDefault();
     setError(null);
     if (!isValidPhone) {
-      setError(t('auth.phone.invalidPhone') || 'Please enter a valid phone number with country code (e.g. +91...).');
+      setError(t('auth.phone.invalidPhone'));
       return;
     }
     setIsSubmitting(true);
     try {
       const expiresIn = await sendOtp(phone.trim());
       setStep('otp');
-      setResendIn(expiresIn);
+      setResendIn(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send the code. Please try again.');
     } finally {
@@ -113,7 +115,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     e.preventDefault();
     setError(null);
     if (!isValidOtp) {
-      setError(t('auth.phone.invalidOtp') || `Enter the ${OTP_LENGTH}-digit code.`);
+      setError(t('auth.phone.invalidOtp'));
       return;
     }
     setIsSubmitting(true);
@@ -130,11 +132,14 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
   const handleResend = async () => {
     if (resendIn > 0 || isSubmitting) return;
     setError(null);
+    setIsSubmitting(true);
     try {
-      const expiresIn = await sendOtp(phone.trim());
-      setResendIn(expiresIn);
+      await sendOtp(phone.trim());
+      setResendIn(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not resend the code.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -162,7 +167,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
         <form onSubmit={handleSendOtp} className="space-y-4" noValidate>
           <div className="space-y-2 w-full text-left">
             <label className="text-[10px] sm:text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body block">
-              {t('auth.phone.phoneLabel') || 'Phone Number'}
+              {t('auth.phone.phoneLabel')}
               <span className="text-secondary ml-1">*</span>
             </label>
             <div className="relative flex items-center w-full">
@@ -170,7 +175,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
                 defaultCountry="IN"
                 countries={['IN']}
                 flags={flags}
-                placeholder={t('auth.phone.phonePlaceholder') || '+91 98765 43210'}
+                placeholder={t('auth.phone.phonePlaceholder')}
                 value={phone}
                 onChange={(val) => {
                   setPhone(val || '');
@@ -192,21 +197,21 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
             disabled={disabled || isSubmitting || !isValidPhone}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
-            {t('auth.phone.sendCode') || 'Send Code'}
+            {t('auth.phone.sendCode')}
             {!isSubmitting && <ArrowRight size={14} />}
           </Button>
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="space-y-4" noValidate>
           <p className="text-xs text-on-surface-variant/60 text-center font-body">
-            {(t('auth.phone.codeSentTo') || 'We sent a code to')} <span className="font-bold text-primary font-headline">{phone}</span>
+            {t('auth.phone.codeSentTo')} <span className="font-bold text-primary font-headline">{phone}</span>
           </p>
           <Input
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={OTP_LENGTH}
-            label={t('auth.phone.otpLabel') || 'Verification Code'}
+            label={t('auth.phone.otpLabel')}
             placeholder={'•'.repeat(OTP_LENGTH)}
             icon={<KeyRound size={16} className="text-secondary" />}
             value={otp}
@@ -226,7 +231,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
             disabled={disabled || isSubmitting || !isValidOtp}
             className="!rounded-xl font-bold text-[12px] uppercase tracking-widest gap-2 gold-gradient shadow-lg"
           >
-            {t('auth.phone.verify') || 'Verify & Sign In'}
+            {t('auth.phone.verify')}
             {!isSubmitting && <ArrowRight size={14} />}
           </Button>
 
@@ -238,7 +243,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
               className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 hover:text-secondary transition-colors"
             >
               <ArrowLeft size={12} />
-              {t('auth.phone.changeNumber') || 'Change number'}
+              {t('auth.phone.changeNumber')}
             </button>
             <button
               type="button"
@@ -247,8 +252,8 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
               className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 hover:text-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {resendIn > 0
-                ? `${t('auth.phone.resendIn') || 'Resend in'} ${resendIn}s`
-                : (t('auth.phone.resendCode') || 'Resend code')}
+                ? `${t('auth.phone.resendIn')} ${resendIn}s`
+                : t('auth.phone.resendCode')}
             </button>
           </div>
         </form>

@@ -1,28 +1,15 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useTranslation } from '@/hooks';
 
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
-
 interface GoogleSignInButtonProps {
-  /** Where to send the user after a successful Google auth. */
   callbackUrl?: string;
   disabled?: boolean;
-  /** Called with a user-facing message if Google sign-in fails. */
   onError?: (message: string) => void;
 }
 
-/**
- * Premium Google Sign-In Button.
- * Uses Google's latest Identity Services SDK for a secure, localized iframe button,
- * plus optional Google One Tap for seamless login.
- */
 const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   callbackUrl = '/',
   disabled = false,
@@ -30,180 +17,102 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [scriptError, setScriptError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const buttonContainerRef = useRef<HTMLDivElement>(null);
 
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const clientId =
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_AUTH_GOOGLE_ID;
 
-  // 1. Dynamically load Google's newer Identity Services client library
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (window.google?.accounts?.id) {
-      setScriptLoaded(true);
-      setScriptError(false);
-      return;
-    }
-
-    setScriptError(false);
-
-    // Remove any existing script elements that might have failed to load or are hung
-    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-    if (existingScript) {
-      existingScript.remove();
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-
-    // 6-second timeout fallback in case of CSP block or network failure
-    const timeoutId = setTimeout(() => {
-      if (!window.google?.accounts?.id) {
-        console.error('Google Identity Services SDK load timeout (CSP or network block).');
-        setScriptError(true);
-        onError?.(t('login.googleLoadError') || 'Google Sign-In script failed to load. Please check your connection or disable adblockers.');
-      }
-    }, 6000);
-
-    script.onload = () => {
-      clearTimeout(timeoutId);
-      setScriptLoaded(true);
-      setScriptError(false);
-    };
-
-    script.onerror = () => {
-      clearTimeout(timeoutId);
-      console.error('Failed to load Google Identity Services SDK.');
-      setScriptError(true);
-      onError?.(t('login.googleLoadError') || 'Google Sign-In script failed to load. Please check your connection or disable adblockers.');
-    };
-
-    document.body.appendChild(script);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [retryCount, onError, t]);
-
-  // 2. Initialize Google Sign-in and render the official button
-  useEffect(() => {
-    if (!scriptLoaded || !clientId || !buttonContainerRef.current) return;
-
+  const handleClick = async () => {
+    if (isLoading || disabled) return;
+    setIsLoading(true);
     try {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: async (response: any) => {
-          setIsLoading(true);
-          try {
-            // Call our Next.js API Proxy which validates via FastAPI
-            const res = await fetch('/api/auth/google', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ idToken: response.credential }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-              throw new Error(data.error || 'Google verification failed.');
-            }
-
-            // Establish the session in NextAuth using the pre-verified tokens
-            const result = await signIn('credentials', {
-              redirect: false,
-              isRegistration: 'true',
-              id: data.user.id,
-              email: data.user.email ?? undefined,
-              name: data.user.name ?? undefined,
-              accessToken: data.accessToken,
-              refreshToken: data.refreshToken,
-              expiresIn: String(data.expiresIn),
-            });
-
-            if (result?.error) {
-              throw new Error(result.error);
-            }
-
-            // Trigger safe redirection to onboarding if profile is incomplete
-            const redirectTarget = data.profileComplete ? callbackUrl : '/profile?onboarding=true';
-            window.location.href = redirectTarget;
-          } catch (err: any) {
-            console.error('Google sign-in error:', err);
-            onError?.(err instanceof Error ? err.message : 'Google sign-in failed. Please try again.');
-          } finally {
-            setIsLoading(false);
-          }
-        },
-        auto_select: false,
-      });
-
-      // Render official Google button, responsive to its wrapper's width
-      window.google.accounts.id.renderButton(buttonContainerRef.current, {
-        theme: 'outline', // 'outline' | 'filled_blue' | 'filled_black'
-        size: 'large',
-        shape: 'rectangular',
-        width: buttonContainerRef.current.offsetWidth || 340,
-        text: 'continue_with',
-        logo_alignment: 'left',
-      });
-
-      // Optional: One Tap prompt disabled by default to avoid intrusive auto-prompts
-      // window.google.accounts.id.prompt();
-    } catch (err) {
-      console.error('Error rendering Google Sign-In button:', err);
+      await signIn('google', { callbackUrl, redirect: true });
+      // signIn with redirect:true navigates away — no need to reset isLoading
+    } catch (err: any) {
+      setIsLoading(false);
+      onError?.(
+        err instanceof Error
+          ? err.message
+          : 'Google sign-in is unavailable. Please try another method.',
+      );
     }
-  }, [scriptLoaded, clientId, callbackUrl, onError]);
+  };
 
-  // Developer reminder helper if Client ID is missing
   if (!clientId) {
     return (
       <div className="w-full p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-center text-xs text-red-400">
-        Google Client ID not configured. Add <code className="bg-red-500/10 px-1 py-0.5 rounded font-mono">NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> to your .env.local
-      </div>
-    );
-  }
-
-  if (scriptError) {
-    return (
-      <div className="w-full p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-center flex flex-col items-center gap-2">
-        <div className="text-xs text-red-400 font-medium">
-          {t('login.googleLoadError') || 'Google Sign-In is blocked or failed to load. Please check your connection or disable adblockers.'}
-        </div>
-        <button
-          type="button"
-          onClick={() => setRetryCount(prev => prev + 1)}
-          className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-red-500"
-        >
-          {t('chat.retry') || 'Retry'}
-        </button>
+        Google Client ID not configured. Add{' '}
+        <code className="bg-red-500/10 px-1 py-0.5 rounded font-mono">
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID
+        </code>{' '}
+        to your .env.local
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col items-center justify-center min-h-[44px] relative">
-      {/* Mount point for the official Google Identity Services button */}
-      <div 
-        ref={buttonContainerRef} 
-        className="w-full flex justify-center"
-        style={{ display: isLoading ? 'none' : 'flex' }}
-      />
-      
-      {(isLoading || !scriptLoaded) && (
-        <div className="w-full h-[44px] flex items-center justify-center rounded-xl bg-surface border border-outline-variant/30 animate-pulse text-xs text-on-surface-variant/60 gap-2">
-          <svg className="animate-spin h-4 w-4 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={disabled || isLoading}
+      className="auth-google-btn"
+    >
+      {isLoading ? (
+        <>
+          <svg
+            className="animate-spin h-4 w-4 3xl:h-6 3xl:w-6 text-[color-mix(in_srgb,var(--on-surface-variant)_55%,transparent)]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
-          {isLoading ? (t('login.signingYouIn') || 'Signing you in...') : (t('login.loadingGoogle') || 'Loading...')}
-        </div>
+          {t('login.signingYouIn')}
+        </>
+      ) : (
+        <>
+          {/* Google "G" logo */}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            className="3xl:w-7 3xl:h-7"
+          >
+            <path
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+              fill="#4285F4"
+            />
+            <path
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              fill="#34A853"
+            />
+            <path
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              fill="#FBBC05"
+            />
+            <path
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              fill="#EA4335"
+            />
+          </svg>
+          {t('login.googleSignIn')}
+        </>
       )}
-    </div>
+    </button>
   );
 };
 
 export default GoogleSignInButton;
-

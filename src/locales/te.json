@@ -62,7 +62,14 @@
     "zodiacSignsDesc": "12 వేద చంద్ర రాశుల లక్షణాలను అన్వేషించండి.",
     "services": "సేవలు",
     "astraNaviPremium": "AstraNavi ప్రీమియం",
-    "astraNaviPremiumDesc": "అధునాతన అంచనాలు మరియు లోతైన అంతర్దృష్టులను అన్‌లాక్ చేయండి."
+    "astraNaviPremiumDesc": "అధునాతన అంచనాలు మరియు లోతైన అంతర్దృష్టులను అన్‌లాక్ చేయండి.",
+    "login": "లాగిన్",
+    "signUp": "సైన్ అప్",
+    "logoutConfirmTitle": "AstraNavi నుండి సైన్ అవుట్ చేస్తారా?",
+    "logoutConfirmMessage": "మీరు మీ ఖాతా నుండి సైన్ అవుట్ చేయబడతారు మరియు హోమ్ పేజీకి మళ్లించబడతారు.",
+    "signOut": "సైన్ అవుట్",
+    "account": "ఖాతా",
+    "getStarted": "ప్రారంభించండి"
   },
   "footer": {
     "tagline": "ఆధునిక మనస్సుకు జ్యోతిష్య శాస్త్రం యొక్క గణిత ఖచ్చితత్వాన్ని సంరక్షించడం.",
@@ -439,7 +446,8 @@
     "inscribeIdentity": "మీ గుర్తింపును నమోదు చేయండి",
     "signIn": "సైన్ ఇన్ చేయండి",
     "joinCelestialJourney": "ఖగోళ ప్రయాణంలో చేరండి.",
-    "welcomeBack": "AstraNaviకి తిరిగి స్వాగతం.",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to continue your chart",
     "fullName": "పూర్తి పేరు",
     "dob": "పుట్టిన తేదీ",
     "tob": "పుట్టిన సమయం",
@@ -450,10 +458,11 @@
     "createAccount": "ఖాతాను సృష్టించండి",
     "accessDashboard": "డాష్‌బోర్డ్‌ను యాక్సెస్ చేయండి",
     "secureConnection": "సురక్షిత కనెక్షన్",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
     "alreadyHaveAccount": "ఇప్పటికే ఖాతా ఉందా?",
     "dontHaveAccount": "ఖాతా లేదా?",
-    "signingYouIn": "మిమ్మల్ని సైన్ ఇన్ చేస్తోంది...",
+    "signingYouIn": "మిమ్ము సైన్ ఇన్ చేస్తున్న...",
     "registrationFailed": "నమోదు విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
     "accountCreated": "ఖాతా విజయవంతంగా సృష్టించబడింది. మీరు ఇప్పుడు లాగిన్ చేయవచ్చు.",
     "stepAccount": "ఖాతా సృష్టి",
@@ -477,6 +486,8 @@
     "goToDashboard": "డాష్‌బోర్డ్‌కి వెళ్లండి",
     "signOut": "సైన్ అవుట్",
     "signInToContinue": "కొనసాగించడానికి సైన్ ఇన్ చేయండి",
+    "googleLoadError": "Google సైన్-ఇన్ నిరోధించబడింది లేదా లోడ్ విఫలమైంది. మీ కనెక్షన్‌ను తనిఖించం లేదా అడ్‌బ్లాకర్‌లను నిరోధించం",
+    "googleScriptError": "Google సైన్-ఇన్ స్క్రిప్ట్ లోడ్ విఫలమైంది. మీ కనెక్షన్‌ను తనిఖించం లేదా అడ్‌బ్లాకర్‌లను నిరోధించం",
     "loadingGoogle": "లోడ్ అవుతోంది..."
   },
   "about": {
@@ -1264,7 +1275,14 @@
       "prefHoroscope": "రోజువారీ జాతకాన్ని పొందండి",
       "prefNotifications": "నోటిఫికేషన్‌లను ప్రారంభించండి",
       "continue": "కొనసాగించు",
-      "submit": "ఖాతాను సృష్టించండి"
+      "submit": "ఖాతాను సృష్టించండి",
+      "strength": {
+        "title": "పాస్‌వర్డ్ బలం",
+        "tooShort": "చాలా చిన్నది",
+        "weak": "బలహీనమైన పాస్‌వర్డ్",
+        "medium": "మధ్యస్థ పాస్‌వర్డ్",
+        "strong": "బలమైన పాస్‌వర్డ్"
+      }
     },
     "errorBanner": {
       "dismiss": "లోపాన్ని తీసివేయి"
@@ -1291,7 +1309,13 @@
       "password_too_long": "పాస్‌వర్డ్ చాలా పెద్దదిగా ఉంది.",
       "generic": "ఊహించని లోపం సంభవించింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
       "retry_after": "దయచేసి {minutes}నిమిషాల {seconds}సెకన్ల తర్వాత మళ్లీ ప్రయత్నించండి.",
-      "server_down": "సర్వర్ డౌన్ అయింది, దయచేసి డెవలపర్‌ని సంప్రదించండి."
+      "server_down": "సర్వర్ డౌన్ అయింది, దయచేసి డెవలపర్‌ని సంప్రదించండి.",
+      "oauth_error": "వేరొ ఖాతాతో సైన్ ఇన్ చేయడం ప్రయత్నించం",
+      "oauth_account_not_linked": "మీ గుర్తిని నిర్ధారించడానికి, మీరు ముందు ఉపయోగించిన అదే ఖాతాతో సైన్ ఇన్ చేయండి",
+      "email_signin_error": "మీ ఈమెల్ చిరునాళని తనిఖించం",
+      "session_required": "ఈ పేజీని యాక్స్ చేయడానికి సైన్ ఇన్ చేయండి",
+      "session_expired_error": "మీ సెస్సన్ గడువు ముగింది. మళ్ళీ సైన్ ఇన్ చేయండి",
+      "signin_error": "లోపం సంభవింది. దయచేశు ప్యత్నించం"
     },
     "resetPassword": {
       "title": "కొత్త పాస్‌వర్డ్ సృష్టించండి",
@@ -1305,11 +1329,44 @@
       "successSubtitle": "మీ పాస్‌వర్డ్ విజయవంతంగా రీసెట్ చేయబడింది.",
       "proceedToLogin": "లాగిన్‌కి వెళ్ళండి"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "పాస్‌వర్డ్",
       "phone": "ఫోన్ OTP",
       "emailOtp": "ఇమెయిల్ OTP",
-      "orContinueWith": "లేదా"
+      "orContinueWith": "లేదా",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "ఫోన్ నంబర్",

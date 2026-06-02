@@ -17,11 +17,10 @@ import {
   SignInForm,
   RegisterFlow,
   GoogleSignInButton,
-  PhoneOtpForm,
-  EmailOtpForm,
 } from '@/components/auth';
 import { isProfileComplete } from '@/lib/profileCompleteness';
 import { ParsedAuthError, parseAuthError } from '@/utils/authErrorParser';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 
 const LoginContent = () => {
   const router = useRouter();
@@ -30,7 +29,6 @@ const LoginContent = () => {
   const { showLoading, login: setAuthUser, isLoggedIn, user, logout } = useAuth();
   const { t } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
-  const [signInMethod, setSignInMethod] = useState<'email' | 'phone' | 'email-otp'>('email');
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lockedRemaining, setLockedRemaining] = useState<number>(0);
   const recoveryStartedRef = useRef(false);
@@ -86,19 +84,19 @@ const LoginContent = () => {
 
     if (authError) {
       const errorMessages: Record<string, string> = {
-        Signin: 'Try signing in with a different account.',
-        OAuthSignin: 'Try signing in with a different account.',
-        OAuthCallback: 'Try signing in with a different account.',
-        OAuthCreateAccount: 'Try signing in with a different account.',
-        EmailCreateAccount: 'Try signing in with a different account.',
-        Callback: 'Try signing in with a different account.',
-        OAuthAccountNotLinked: 'To confirm your identity, please sign in with the same account you used originally.',
-        EmailSignin: 'Check your email address.',
+        Signin: t('auth.errors.signin_error'),
+        OAuthSignin: t('auth.errors.oauth_error'),
+        OAuthCallback: t('auth.errors.oauth_error'),
+        OAuthCreateAccount: t('auth.errors.oauth_error'),
+        EmailCreateAccount: t('auth.errors.oauth_error'),
+        Callback: t('auth.errors.oauth_error'),
+        OAuthAccountNotLinked: t('auth.errors.oauth_account_not_linked'),
+        EmailSignin: t('auth.errors.email_signin_error'),
         CredentialsSignin: t('login.invalidCredentials'),
         Configuration: t('login.networkError'),
-        SessionRequired: 'Please sign in to access this page.',
-        SessionExpired: 'Your session has expired. Please sign in again.',
-        default: 'An error occurred. Please try again.',
+        SessionRequired: t('auth.errors.session_required'),
+        SessionExpired: t('auth.errors.session_expired_error'),
+        default: t('auth.errors.signin_error'),
       };
 
       const message = errorMessages[authError] || authError;
@@ -107,16 +105,22 @@ const LoginContent = () => {
     }
   }, [searchParams, showError, t, router]);
 
-  /** Extract callbackUrl, stripping nested callbackUrl params (Bug 2 fix). */
+  /** Extract callbackUrl, rejecting non-relative URLs to prevent open redirects. */
   const getCallbackUrl = (): string => {
     let cb = searchParams.get('callbackUrl') || '/?login=success';
-    if (cb.includes('callbackUrl=')) {
+    if (!cb.startsWith('/') || cb.startsWith('//')) {
+      cb = '/?login=success';
+    }
+    if (cb.includes('callbackUrl=') && typeof window !== 'undefined') {
       try {
         const url = new URL(cb, window.location.origin);
         url.searchParams.delete('callbackUrl');
         cb = url.pathname + url.search + url.hash;
+        if (!cb.startsWith('/') || cb.startsWith('//')) {
+          cb = '/?login=success';
+        }
       } catch {
-        cb = cb.split('?')[0];
+        cb = '/?login=success';
       }
     }
     return cb;
@@ -125,7 +129,7 @@ const LoginContent = () => {
   // --- Sign In handler ---
   const handleSignIn = async (formData: { email: string; password: string }) => {
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetchWithTimeout('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password }),
@@ -165,51 +169,6 @@ const LoginContent = () => {
     }
   };
 
-  // --- Phone/Email OTP verified handler ---
-  const handleOtpVerified = async (verifyResponse: unknown) => {
-    const v = verifyResponse as {
-      accessToken: string;
-      refreshToken: string;
-      expiresIn: number;
-      profileComplete: boolean;
-      user: {
-        id: string;
-        email?: string | null;
-        phoneNumber?: string | null;
-        name?: string | null;
-      };
-    };
-
-    const result = await signIn('credentials', {
-      redirect: false,
-      isRegistration: 'true',
-      id: v.user.id,
-      email: v.user.email ?? undefined,
-      name: v.user.name ?? undefined,
-      phoneNumber: v.user.phoneNumber ?? undefined,
-      accessToken: v.accessToken,
-      refreshToken: v.refreshToken,
-      expiresIn: String(v.expiresIn),
-    });
-
-    if (result?.error) {
-      throw new Error(result.error);
-    }
-
-    setAuthUser(v.user.email || '', {
-      id: v.user.id,
-      email: v.user.email || null,
-      phoneNumber: v.user.phoneNumber || null,
-      name: v.user.name || null,
-    });
-
-    showLoading(t('login.signingYouIn'), 1500);
-    const destination = v.profileComplete ? getCallbackUrl() : '/profile?onboarding=true';
-    setTimeout(() => {
-      router.push(destination);
-    }, 1500);
-  };
-
   // --- Register handler ---
   const handleRegister = async (submitData: {
     email: string; password: string; name: string; gender: string;
@@ -220,36 +179,24 @@ const LoginContent = () => {
     preferences: { horoscope: boolean; notifications: boolean };
   }): Promise<{ ok: boolean; data: Record<string, unknown>; parsedError?: ParsedAuthError | null }> => {
     try {
-      const res = await fetch('/api/register', {
+      const res = await fetchWithTimeout('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submitData),
       });
 
       const data = await res.json();
+
+      if (!data?.user?.id || !data?.accessToken) {
+        return { ok: false, data: {}, parsedError: parseAuthError({ message: t('auth.errors.generic') }) };
+      }
+
       if (!res.ok) {
         return { ok: false, data: {}, parsedError: parseAuthError(data) };
       }
 
       success(t('login.accountCreated'));
 
-      // Save preferences if different from defaults
-      if (submitData.preferences) {
-        try {
-          await fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${data.accessToken}`,
-            },
-            body: JSON.stringify({ preferences: submitData.preferences }),
-          });
-        } catch {
-          // non-critical — preference save is best-effort
-        }
-      }
-
-      // Auto-login after registration
       const result = await signIn('credentials', {
         redirect: false,
         isRegistration: 'true',
@@ -258,7 +205,7 @@ const LoginContent = () => {
         name: data.user.name,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
-        expiresIn: data.expiresIn,
+        expiresIn: (typeof data.expiresIn === 'number' && data.expiresIn > 0) ? String(data.expiresIn) : '3600',
       });
 
       if (result?.error) {
@@ -334,7 +281,7 @@ const LoginContent = () => {
     const path = cb.split('?')[0];
     const map: Record<string, string> = {
       '/chat': t('nav.chatWithNavi'),
-      '/profile': t('nav.userProfile') || 'Your Profile',
+      '/profile': t('nav.userProfile'),
       '/family': t('nav.myFamily'),
       '/kundli': t('nav.myKundli'),
       '/kundli/match': t('nav.chartMatching'),
@@ -349,20 +296,39 @@ const LoginContent = () => {
     <AuthShell mouseGlow fullHeight className="px-0">
       {ToastContainer}
 
-      <div className="w-full max-w-[1600px] mx-auto min-h-[calc(100dvh-var(--navbar-height,64px))] relative z-10 flex flex-col lg:flex-row items-stretch">
+      <div className="w-full max-w-[1600px] 3xl:max-w-[2400px] mx-auto min-h-[calc(100dvh-var(--navbar-height,64px))] relative z-10 flex flex-col lg:flex-row items-stretch">
         {/* Left Panel: Brand & Vision (Desktop) */}
         <div className="hidden lg:flex flex-1 p-12 xl:p-20 flex-col relative overflow-hidden">
-          <div className="absolute inset-0 z-0 opacity-10">
-            <Orbit className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] text-secondary animate-orbit" />
+          {/* Background glow orbs */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-secondary/5 blur-[120px] pointer-events-none" />
+          <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
+
+          {/* Orbiting decoration */}
+          <div className="absolute inset-0 z-0 opacity-[0.07]">
+            <Orbit className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] text-secondary animate-orbit" />
           </div>
 
           <div className="relative z-10 flex flex-col h-full">
-            {/* Spacer to maintain layout without the duplicate logo */}
+            {/* Spacer to maintain layout */}
             <div className="mb-auto"></div>
 
             <div className="flex-1 flex flex-col justify-center py-12">
-              <div className="space-y-4">
-                <h2 className="text-3xl xl:text-4xl font-headline font-bold text-primary leading-tight">
+              <div className="space-y-6">
+                {/* Cosmic illustration — stylized planet with ring */}
+                <div className="mb-8 flex justify-center lg:justify-start">
+                  <div className="relative w-32 h-32 xl:w-40 xl:h-40">
+                    {/* Outer glow */}
+                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-2xl animate-pulse" />
+                    {/* Planet body */}
+                    <div className="absolute inset-4 xl:inset-5 rounded-full gold-gradient opacity-90" />
+                    {/* Ring */}
+                    <div className="absolute inset-0 border-2 border-secondary/20 rounded-full rotate-[30deg] scale-x-[1.6] scale-y-[0.4]" />
+                    {/* Inner ring highlight */}
+                    <div className="absolute inset-[15%] border border-secondary/10 rounded-full rotate-[30deg] scale-x-[1.6] scale-y-[0.4]" />
+                  </div>
+                </div>
+
+                <h1 className="text-3xl xl:text-4xl font-headline font-bold text-primary leading-tight">
                   {t('login.blueprintTitle').split(' ').map((word, i) =>
                     word === 'Personal' ? (
                       <span key={i} className="text-secondary italic"> {word} </span>
@@ -370,13 +336,14 @@ const LoginContent = () => {
                       <React.Fragment key={i}>{i === 0 ? '' : ' '}{word}</React.Fragment>
                     )
                   )}
-                </h2>
+                </h1>
                 <p className="text-base text-on-surface-variant max-w-sm leading-relaxed">
                   {t('login.blueprintDesc')}
                 </p>
               </div>
             </div>
 
+            {/* Bottom: quote + stats */}
             <div className="mt-auto pt-8">
               <div className="h-16 flex flex-col justify-end">
                 <AnimatePresence mode="wait">
@@ -391,15 +358,15 @@ const LoginContent = () => {
                   </motion.p>
                 </AnimatePresence>
               </div>
-              <div className="mt-6 flex gap-6">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xl font-bold text-primary">12</span>
-                  <span className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">{t('login.statRashis')}</span>
+              <div className="mt-8 flex gap-8">
+                <div className="flex flex-col gap-1">
+                  <span className="text-2xl font-bold text-primary">12</span>
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/40 font-bold">{t('login.statRashis')}</span>
                 </div>
-                <div className="w-[1px] bg-outline-variant/30" />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xl font-bold text-primary">27</span>
-                  <span className="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold">{t('login.statNakshatras')}</span>
+                <div className="w-[1px] bg-outline-variant/20" />
+                <div className="flex flex-col gap-1">
+                  <span className="text-2xl font-bold text-primary">27</span>
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/40 font-bold">{t('login.statNakshatras')}</span>
                 </div>
               </div>
             </div>
@@ -407,10 +374,10 @@ const LoginContent = () => {
         </div>
 
         {/* Right Panel: Auth Form */}
-        <div className="w-full lg:w-[550px] xl:w-[650px] flex flex-col min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-hidden relative">
+        <div className="w-full lg:w-[520px] xl:w-[580px] 3xl:w-[800px] flex flex-col min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-hidden relative">
           {/* Form body */}
-          <div className="flex-1 p-4 sm:p-6 py-6 overflow-y-auto flex flex-col">
-            <div className="m-auto w-full">
+          <div className="flex-1 p-4 sm:p-8 py-8 3xl:p-16 overflow-y-auto flex flex-col">
+            <div className="m-auto w-full max-w-[420px] 3xl:max-w-[560px]">
               {/* Already-signed-in banner — shown when a returning user lands on /login
                   with a valid session (e.g. clicked a shared /login link). Provides a
                   clear path to the dashboard or to sign out, instead of silently
@@ -463,11 +430,11 @@ const LoginContent = () => {
               )}
 
               {/* Header */}
-              <div className="px-4 sm:px-6 pb-6 shrink-0">
-                <h1 className="text-xl sm:text-2xl font-headline font-bold text-primary mb-0.5 text-center">
-                  {isRegister ? t('login.stepAccount') || 'Create Your Account' : t('login.signIn')}
-                </h1>
-                <p className="text-[11px] sm:text-xs text-on-surface-variant/60 font-medium text-center">
+              <div className="px-2 sm:px-4 pb-7 shrink-0 text-center">
+                <h2 className="text-[26px] sm:text-[28px] 3xl:text-[40px] font-headline font-bold text-primary mb-2">
+                  {isRegister ? t('login.stepAccount') : t('login.signIn')}
+                </h2>
+                <p className="text-[13px] sm:text-sm text-on-surface-variant/50 font-medium">
                   {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
                 </p>
               </div>
@@ -475,49 +442,19 @@ const LoginContent = () => {
               <AuthFormCard>
                 {!isRegister ? (
                   <>
-                    {/* Sign-in method switcher: Password | Phone OTP | Email OTP */}
-                    <div className="flex gap-1.5 p-1 rounded-xl bg-surface-variant/20 border border-outline-variant/10 mb-4">
-                      {(['email', 'phone', 'email-otp'] as const).map((m) => (
-                        <button
-                          key={m}
-                          type="button"
-                          onClick={() => setSignInMethod(m)}
-                          className={`flex-1 py-2 rounded-lg text-[10px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
-                            signInMethod === m
-                              ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-sm'
-                              : 'text-on-surface-variant/40 hover:text-on-surface-variant/70 border border-transparent'
-                          }`}
-                        >
-                          {m === 'email'
-                            ? (t('auth.method.password') || 'Password')
-                            : m === 'phone'
-                            ? (t('auth.method.phone') || 'Phone OTP')
-                            : (t('auth.method.emailOtp') || 'Email OTP')}
-                        </button>
-                      ))}
-                    </div>
-
-                    {signInMethod === 'email' ? (
-                      <SignInForm
-                        onSubmit={handleSignIn}
-                        disabled={!!lockedUntil}
-                        disabledReason={lockedDisplay}
-                        onForgotPassword={() => router.push('/forgot-password')}
-                        onActionClick={handleActionClick}
-                      />
-                    ) : signInMethod === 'phone' ? (
-                      <PhoneOtpForm onVerified={handleOtpVerified} disabled={!!lockedUntil} />
-                    ) : (
-                      <EmailOtpForm onVerified={handleOtpVerified} disabled={!!lockedUntil} />
-                    )}
+                    <SignInForm
+                      onSubmit={handleSignIn}
+                      disabled={!!lockedUntil}
+                      disabledReason={lockedDisplay}
+                      onForgotPassword={() => router.push('/forgot-password')}
+                      onActionClick={handleActionClick}
+                    />
 
                     {/* Social sign-in */}
-                    <div className="flex items-center gap-4 py-3">
-                      <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                      <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
-                        {t('auth.method.orContinueWith') || 'or'}
+                    <div className="auth-divider">
+                      <span className="auth-divider-text">
+                        {t('auth.method.orContinueWith')}
                       </span>
-                      <div className="h-[1px] flex-1 bg-outline-variant/10" />
                     </div>
                     <GoogleSignInButton callbackUrl={getCallbackUrl()} onError={(m) => showError(m)} />
                   </>
@@ -525,31 +462,35 @@ const LoginContent = () => {
                   <RegisterFlow
                     onSubmit={handleRegister}
                     onActionClick={handleActionClick}
+                    socialAuth={<GoogleSignInButton callbackUrl={getCallbackUrl()} onError={(m) => showError(m)} />}
                   />
                 )}
 
-                <div className="flex items-center gap-4 py-3">
-                  <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                  <span className="text-[8px] uppercase tracking-widest text-on-surface-variant/20 font-bold">
-                    {t('login.secureConnection')}
-                  </span>
-                  <div className="h-[1px] flex-1 bg-outline-variant/10" />
-                </div>
-
-                <div className="text-center pt-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsRegister(!isRegister)}
-                    className="text-[9px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/30 hover:text-secondary transition-colors"
-                  >
+                {/* Account toggle — inside card */}
+                <div className="text-center pt-6">
+                  <p className="auth-footer-link">
                     {isRegister ? (
-                      <>{t('login.alreadyHaveAccount')} <span className="text-secondary ml-1">{t('login.signIn')}</span></>
+                      <>{t('login.alreadyHaveAccount')}{' '}
+                        <button type="button" onClick={() => setIsRegister(false)} className="auth-footer-link-gold">
+                          {t('login.signIn')}
+                        </button>
+                      </>
                     ) : (
-                      <>{t('login.dontHaveAccount')} <span className="text-secondary ml-1">{t('login.createAccount')}</span></>
+                      <>{t('login.dontHaveAccount')}{' '}
+                        <button type="button" onClick={() => setIsRegister(true)} className="auth-footer-link-gold">
+                          {t('login.createAccount')}
+                        </button>
+                      </>
                     )}
-                  </button>
+                  </p>
                 </div>
               </AuthFormCard>
+
+              {/* Secure connection — below card */}
+              <div className="auth-secure-text">
+                <ShieldCheck size={12} />
+                <span>{t('login.yourDataIsPrivate')}</span>
+              </div>
             </div>
           </div>
         </div>

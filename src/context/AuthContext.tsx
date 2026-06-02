@@ -46,6 +46,10 @@ interface AuthContextType {
     user: User | null;
     profileComplete: boolean;
     profileFetched: boolean;
+    /** OAuth sign-in hint: true when NextAuth flagged the freshly-authenticated
+     *  user as having an incomplete profile (e.g. Google, which can't supply
+     *  birth details). Lets the landing page route to onboarding immediately. */
+    needsOnboardingHint: boolean;
     login: (email?: string, profile?: Partial<User>) => void;
     logout: (callbackUrl?: string) => Promise<void>;
     showLoading: (message?: string, duration?: number) => void;
@@ -98,6 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             : null;
     const effectiveUser = user ?? sessionUserFallback;
+    // OAuth-only onboarding hint (Google etc.). Live profile data overrides it.
+    const needsOnboardingHint = isLoggedIn && (session?.user as any)?.profileComplete === false;
 
     useEffect(() => {
         if (session?.user) {
@@ -158,6 +164,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
                 
                 prevEmailRef.current = sessionUser.id;
+
+                // OAuth onboarding hint: NextAuth sets session.user.profileComplete
+                // for Google/OAuth sign-ins. If it's explicitly false, reflect that
+                // immediately so the landing page can route to onboarding without
+                // waiting on the (racy) profile fetch below. The live fetch remains
+                // the source of truth and will confirm/override this.
+                if (sessionUser.profileComplete === false) {
+                    setProfileComplete(false);
+                }
 
                 // Sync full profile from DB if we haven't fetched it yet this session
                 if (!profileFetched && !fetchInProgressRef.current) {
@@ -306,10 +321,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{ 
             isLoggedIn, 
             isLoading: isLoading || isSessionLoading, 
-            user: effectiveUser, 
+            user: effectiveUser,
             profileComplete,
             profileFetched,
-            login, 
+            needsOnboardingHint,
+            login,
             logout, 
             showLoading, 
             setLoadingState, 

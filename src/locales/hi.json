@@ -62,7 +62,14 @@
     "zodiacSignsDesc": "12 वैदिक चंद्र राशियों के लक्षणों का अन्वेषण करें।",
     "services": "सेवाएँ",
     "astraNaviPremium": "AstraNavi प्रीमियम",
-    "astraNaviPremiumDesc": "उन्नत भविष्यवाणियों और गहरी अंतर्दृष्टि को अनलॉक करें।"
+    "astraNaviPremiumDesc": "उन्नत भविष्यवाणियों और गहरी अंतर्दृष्टि को अनलॉक करें।",
+    "login": "लॉगिन",
+    "signUp": "साइन अप",
+    "logoutConfirmTitle": "AstraNavi से साइन आउट करें?",
+    "logoutConfirmMessage": "आपको आपके खाते से साइन आउट कर दिया जाएगा और होमपेज पर पुनर्निर्देशित कर दिया जाएगा।",
+    "signOut": "साइन आउट",
+    "account": "खाता",
+    "getStarted": "शुरू करें"
   },
   "footer": {
     "tagline": "आधुनिक मन के लिए ज्योतिष शास्त्र की गणितीय सटीकता को संरक्षित करना।",
@@ -439,7 +446,8 @@
     "inscribeIdentity": "अपनी पहचान अंकित करें",
     "signIn": "साइन इन करें",
     "joinCelestialJourney": "आकाशीय यात्रा में शामिल हों।",
-    "welcomeBack": "AstraNavi में वापसी पर स्वागत है।",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to continue your chart",
     "fullName": "पूरा नाम",
     "dob": "जन्म तिथि",
     "tob": "जन्म का समय",
@@ -450,10 +458,11 @@
     "createAccount": "खाता बनाएं",
     "accessDashboard": "डैशबोर्ड तक पहुंचें",
     "secureConnection": "सुरक्षित कनेक्शन",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
     "alreadyHaveAccount": "क्या आपके पास पहले से खाता है?",
     "dontHaveAccount": "क्या आपके पास खाता नहीं है?",
-    "signingYouIn": "आपको साइन इन किया जा रहा है...",
+    "signingYouIn": "आपको साइन इन कर रहे हैं...",
     "registrationFailed": "पंजीकरण विफल। कृपया पुनः प्रयास करें।",
     "accountCreated": "खाता सफलतापूर्वक बनाया गया। अब आप लॉगिन कर सकते हैं।",
     "stepAccount": "खाता निर्माण",
@@ -477,7 +486,9 @@
     "goToDashboard": "डैशबोर्ड पर जाएं",
     "signOut": "साइन आउट",
     "signInToContinue": "जारी रखने के लिए साइन इन करें",
-    "loadingGoogle": "लोड हो रहा है..."
+    "loadingGoogle": "लोड हो रहा है...",
+    "googleLoadError": "Google साइन-इन अवरुद्ध है या लोड होने में विफल हो गया। कृपया अपना कनेक्शन जांचें या एडब्लॉकर्स अक्षम करें",
+    "googleScriptError": "Google साइन-इन स्क्रिप्ट लोड होने में विफल हो गया। कृपया अपना कनेक्शन जांचें या एडब्लॉकर्स अक्षम करें"
   },
   "about": {
     "theTradition": "परंपरा",
@@ -1223,6 +1234,13 @@
         "digit": "संख्या",
         "special": "विशेष वर्ण"
       },
+      "strength": {
+        "title": "पासवर्ड की मजबूती",
+        "tooShort": "बहुत छोटा",
+        "weak": "कमजोर पासवर्ड",
+        "medium": "मध्यम पासवर्ड",
+        "strong": "मजबूत पासवर्ड"
+      },
       "emailLabel": "ईमेल",
       "emailPlaceholder": "you@example.com",
       "passwordLabel": "पासवर्ड",
@@ -1291,7 +1309,13 @@
       "password_too_long": "पासवर्ड बहुत लंबा है।",
       "generic": "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।",
       "retry_after": "कृपया {minutes} मिनट {seconds} सेकंड में पुनः प्रयास करें।",
-      "server_down": "सर्वर डाउन है, कृपया डेवलपर से संपर्क करें।"
+      "server_down": "सर्वर डाउन है, कृपया डेवलपर से संपर्क करें।",
+      "oauth_error": "किसी अलग खाते से साइन इन करने आज़माएं",
+      "oauth_account_not_linked": "अपनी पहचान पुष्टि करने के लिए, कृपया उसी खाते से साइन इन करें जिसका आपनने पहले इस्तेमाल किया था",
+      "email_signin_error": "अपना ईमेल पता जांचें",
+      "session_required": "इस पेज को एक्सेस करने के लिए साइन इन करें",
+      "session_expired_error": "आपका सेशन समाप्त हो गया है कृपया फिर से साइन इन करें",
+      "signin_error": "एक त्रुटि हुई। कृपया फिर से प्रयास करें"
     },
     "resetPassword": {
       "title": "नया पासवर्ड बनाएं",
@@ -1305,11 +1329,44 @@
       "successSubtitle": "आपका पासवर्ड सफलतापूर्वक रीसेट कर दिया गया है।",
       "proceedToLogin": "लॉगिन पर आगे बढ़ें"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "पासवर्ड",
       "phone": "फ़ोन ओटीपी",
       "emailOtp": "ईमेल ओटीपी",
-      "orContinueWith": "या"
+      "orContinueWith": "या",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "फ़ोन नंबर",

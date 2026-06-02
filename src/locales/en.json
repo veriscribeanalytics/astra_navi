@@ -67,7 +67,12 @@
     "zodiacSignsDesc": "Explore the traits of the 12 Vedic moon signs.",
     "services": "Services",
     "astraNaviPremium": "AstraNavi Premium",
-    "astraNaviPremiumDesc": "Unlock advanced forecasting and deep insights."
+    "astraNaviPremiumDesc": "Unlock advanced forecasting and deep insights.",
+    "logoutConfirmTitle": "Sign out of AstraNavi?",
+    "logoutConfirmMessage": "You will be signed out of your account and redirected to the homepage.",
+    "signOut": "Sign Out",
+    "account": "Account",
+    "getStarted": "GET STARTED"
   },
   "footer": {
     "tagline": "Preserving the mathematical precision of Jyotish Shastra for the modern individual.",
@@ -457,6 +462,7 @@
     "createAccount": "Create Account",
     "accessDashboard": "Access Dashboard",
     "secureConnection": "Secure Connection",
+    "yourDataIsPrivate": "Your data is private and secure.",
     "googleSignIn": "Google",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
@@ -1283,7 +1289,7 @@
       "passwordPlaceholder": "Enter your password",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
-      "forgotPassword": "Forgot Password?",
+      "forgotPassword": "Forgot password?",
       "submit": "Sign In"
     },
     "register": {
@@ -1314,6 +1320,13 @@
         "lower": "Lowercase letter",
         "digit": "Number",
         "special": "Special character"
+      },
+      "strength": {
+        "title": "Password Strength",
+        "tooShort": "Too Short",
+        "weak": "Weak Password",
+        "medium": "Medium Password",
+        "strong": "Strong Password"
       },
       "emailLabel": "Email",
       "emailPlaceholder": "you@example.com",
@@ -1383,7 +1396,13 @@
       "password_too_long": "Password is too long.",
       "generic": "An unexpected error occurred. Please try again.",
       "retry_after": "Please try again in {minutes}m {seconds}s.",
-      "server_down": "Server is down, please contact the developer."
+      "server_down": "Server is down, please contact the developer.",
+      "oauth_error": "Try signing in with a different account.",
+      "oauth_account_not_linked": "To confirm your identity, please sign in with the same account you used originally.",
+      "email_signin_error": "Check your email address.",
+      "session_required": "Please sign in to access this page.",
+      "session_expired_error": "Your session has expired. Please sign in again.",
+      "signin_error": "An error occurred. Please try again."
     },
     "resetPassword": {
       "title": "Create New Password",
@@ -1397,11 +1416,44 @@
       "successSubtitle": "Your password has been successfully reset.",
       "proceedToLogin": "Proceed to Login"
     },
+    "passwordReset": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a verification code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCode": "Send Code",
+      "otpTitle": "Check Your Email",
+      "otpSubtitle": "Enter the 6-digit code sent to your email.",
+      "otpLabel": "Verification Code",
+      "otpInvalid": "Please enter a valid 6-digit code.",
+      "otpExpiresIn": "Code expires in",
+      "otpExpired": "Code has expired. Please request a new one.",
+      "otpIncorrect": "Incorrect code. Please try again.",
+      "otpLocked": "Too many incorrect attempts. Please request a new code.",
+      "otpGeneric": "Verification failed. Please try again.",
+      "verifyCode": "Verify Code",
+      "changeEmail": "Change email",
+      "resendIn": "Resend in",
+      "resendCode": "Resend code",
+      "sendFailed": "Failed to send email. Please try again.",
+      "unavailable": "Service is currently unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "newPasswordTitle": "Create New Password",
+      "newPasswordSubtitle": "Your password must be at least 10 characters long.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "tokenInvalid": "Your session has expired. Please start over.",
+      "successMessage": "Your password has been reset successfully. You can now sign in with your new password.",
+      "backToLogin": "Back to Login"
+    },
     "method": {
       "password": "Password",
       "phone": "Phone OTP",
       "emailOtp": "Email OTP",
-      "orContinueWith": "or"
+      "orContinueWith": "OR",
+      "switcherLabel": "Sign-in method"
     },
     "phone": {
       "phoneLabel": "Phone Number",

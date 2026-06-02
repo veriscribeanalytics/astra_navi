@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -31,6 +32,10 @@ const nullToUndef = <T,>(val: T | null | undefined): T | undefined =>
 
 export default function ProfileSettingsPage() {
     const { user, login, showLoading, isLoading, refreshProfile } = useAuth();
+    // next-auth session updater — used to refresh the JWT `profileComplete`
+    // hint once onboarding is done, so the server-side gate (app/page.tsx)
+    // stops redirecting the user back here.
+    const { update: updateAuthSession } = useSession();
     const { tier, totalCredits, isLoaded: paywallLoaded } = usePaywallContext();
     const { language: contextLanguage, setLanguage, availableLanguages, t } = useTranslation();
     const router = useRouter();
@@ -290,6 +295,19 @@ export default function ProfileSettingsPage() {
             // Refetch profile from backend to refresh auth state
             await refreshProfile();
 
+            // Refresh the NextAuth `profileComplete` hint on the JWT so the
+            // server-side onboarding gate (app/page.tsx) recognises this user
+            // as complete and stops redirecting them back here. Onboarding
+            // submits are validated to include all required birth fields, so
+            // reaching here in onboarding mode means the profile is complete.
+            if (data.profileComplete === true || isOnboarding) {
+                try {
+                    await updateAuthSession({ profileComplete: true });
+                } catch (updateErr) {
+                    console.warn('[ProfileClient.handleSubmit] session profileComplete update failed:', updateErr);
+                }
+            }
+
             // --- DIAGNOSTIC LOG: post-refresh ---
             console.log('[ProfileClient.handleSubmit] refreshProfile() completed');
             // The AuthContext will have updated profileComplete internally.
@@ -367,6 +385,15 @@ export default function ProfileSettingsPage() {
 
             // Refetch profile to refresh auth state
             await refreshProfile();
+
+            // Keep the JWT onboarding hint in sync (see handleSubmit note).
+            if (data.profileComplete === true || isOnboarding) {
+                try {
+                    await updateAuthSession({ profileComplete: true });
+                } catch (updateErr) {
+                    console.warn('[ProfileClient.handleDstResolution] session profileComplete update failed:', updateErr);
+                }
+            }
 
             // Trigger sign calculation if needed
             const hasBirthDetails = dstRetryData.dob && dstRetryData.tob && dstRetryData.pob;

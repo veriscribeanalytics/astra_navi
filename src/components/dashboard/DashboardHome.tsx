@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Activity,
   AlertTriangle,
@@ -41,7 +41,6 @@ import { useGreeting } from "@/hooks/useGreeting";
 import { LOCALE_BY_LANGUAGE } from "@/locales";
 import { clientFetch } from "@/lib/apiClient";
 import { getRashiData } from "@/lib/astrology";
-import { isProfileComplete } from "@/lib/profileCompleteness";
 import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
 import type { ForecastDay } from "@/components/dashboard/MiniChart";
 import Particles from "@/components/ui/Particles";
@@ -122,9 +121,9 @@ function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"]) {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 75) return "#34d399";
-  if (score >= 60) return "#f6b400";
-  return "#fb7185";
+  if (score >= 75) return "var(--flare-gold)";
+  if (score >= 60) return "var(--secondary)";
+  return "var(--outline-variant)";
 }
 
 function RingScore({ score, size = 132, color }: { score: number; size?: number; color: string }) {
@@ -134,8 +133,8 @@ function RingScore({ score, size = 132, color }: { score: number; size?: number;
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 110 110">
-        <circle cx="55" cy="55" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+      <svg role="img" aria-label={`Overall score: ${score} out of 100`} className="h-full w-full -rotate-90" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r={radius} fill="none" stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="8" />
         <circle
           cx="55"
           cy="55"
@@ -150,16 +149,16 @@ function RingScore({ score, size = 132, color }: { score: number; size?: number;
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[42px] font-black leading-none tabular-nums" style={{ color }}>
+        <span className="text-[42px] 3xl:text-[54px] font-black leading-none tabular-nums" style={{ color }}>
           {score}
         </span>
-        <span className="mt-1 text-sm font-semibold text-white/70">/100</span>
+        <span className="mt-1 text-sm font-semibold text-foreground/70">/100</span>
       </div>
     </div>
   );
 }
 
-function WeeklyOutlookChart({ days, colorHex }: { days: ForecastDay[]; colorHex: string }) {
+function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]; colorHex: string; areaLabel: string }) {
   const W = 600;
   const H = 230;
   const PAD = { top: 26, right: 20, bottom: 44, left: 38 };
@@ -180,7 +179,12 @@ function WeeklyOutlookChart({ days, colorHex }: { days: ForecastDay[]; colorHex:
   const dt = (s: string) => new Date(s + "T00:00:00");
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-[230px] w-full">
+    <svg
+      role="img"
+      aria-label={`Weekly ${areaLabel} forecast chart`}
+      viewBox={`0 0 ${W} ${H}`}
+      className="h-[230px] w-full"
+    >
       <defs>
         <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={colorHex} stopOpacity="0.4" />
@@ -194,8 +198,8 @@ function WeeklyOutlookChart({ days, colorHex }: { days: ForecastDay[]; colorHex:
         const y = yOf(v);
         return (
           <g key={v}>
-            <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-            <text x={PAD.left - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="rgba(255,255,255,0.4)">{v}</text>
+            <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="1" />
+            <text x={PAD.left - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="var(--on-surface-variant)" opacity="0.4">{v}</text>
           </g>
         );
       })}
@@ -225,14 +229,14 @@ function WeeklyOutlookChart({ days, colorHex }: { days: ForecastDay[]; colorHex:
         return (
           <g key={i}>
             {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
-            <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "#0a0829"} stroke={colorHex} strokeWidth="2" />
-            <text x={p.x} y={p.y - 11} textAnchor="middle" fontSize="11" fontWeight={isToday ? 700 : 600} fill={isToday ? colorHex : "rgba(255,255,255,0.7)"}>
+            <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "var(--surface)"} stroke={colorHex} strokeWidth="2" />
+            <text x={p.x} y={p.y - 11} textAnchor="middle" fontSize="11" fontWeight={isToday ? 700 : 600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.7}>
               {d.score}
             </text>
-            <text x={p.x} y={H - 24} textAnchor="middle" fontSize="9.5" fontWeight={700} letterSpacing="0.5" fill={isToday ? colorHex : "rgba(255,255,255,0.45)"}>
+            <text x={p.x} y={H - 24} textAnchor="middle" fontSize="9.5" fontWeight={700} letterSpacing="0.5" fill={isToday ? colorHex : "var(--on-surface-variant)"} opacity={isToday ? undefined : 0.45}>
               {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
             </text>
-            <text x={p.x} y={H - 11} textAnchor="middle" fontSize="11" fontWeight={600} fill={isToday ? colorHex : "rgba(255,255,255,0.6)"}>
+            <text x={p.x} y={H - 11} textAnchor="middle" fontSize="11" fontWeight={600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.6}>
               {date.getDate()}
             </text>
           </g>
@@ -247,11 +251,13 @@ function AreaRing({
   color,
   children,
   size = 80,
+  label,
 }: {
   score: number;
   color: string;
   children: React.ReactNode;
   size?: number;
+  label?: string;
 }) {
   const radius = 33;
   const circumference = 2 * Math.PI * radius;
@@ -259,8 +265,13 @@ function AreaRing({
 
   return (
     <div className="relative mx-auto" style={{ width: size, height: size }}>
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 76 76">
-        <circle cx="38" cy="38" r={radius} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="5" />
+      <svg
+        role="img"
+        aria-label={label ? `${label} score: ${score} out of 100` : `Score: ${score} out of 100`}
+        className="h-full w-full -rotate-90"
+        viewBox="0 0 76 76"
+      >
+        <circle cx="38" cy="38" r={radius} fill="none" stroke="var(--outline-variant)" strokeOpacity="0.09" strokeWidth="5" />
         <circle
           cx="38"
           cy="38"
@@ -281,7 +292,7 @@ function AreaRing({
 
 function DarkPanel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-[22px] border border-[#b98224]/30 bg-[#090826]/82 shadow-[0_18px_60px_rgba(0,0,0,0.24)] ${className}`}>
+    <section className={`dark-glass rounded-[22px] shadow-[var(--card-shadow)] ${className}`}>
       {children}
     </section>
   );
@@ -289,10 +300,9 @@ function DarkPanel({ children, className = "" }: { children: React.ReactNode; cl
 
 export default function DashboardHome() {
   const router = useRouter();
-  const pathname = usePathname();
   const { t, language } = useTranslation();
   const greeting = t(useGreeting());
-  const { user, refreshProfile, isLoading: userLoading, profileComplete, profileFetched } = useAuth();
+  const { user, refreshProfile, isLoading: userLoading } = useAuth();
   const { tier, totalCredits, isLoaded: paywallLoaded, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
   const [activePaywallData, setActivePaywallData] = useState<PaywallData | null>(null);
   const { data: horoscope, isLoading: horoscopeLoading, profileLocationRequired } = useDailyHoroscope();
@@ -303,30 +313,14 @@ export default function DashboardHome() {
   const [forecastLoading, setForecastLoading] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState<ChatPrompt | null>(null);
   const hasAnalyzedRef = useRef<string | null>(null);
-  const redirectedRef = useRef(false);
-
-  const profileCompleteFromFields = isProfileComplete({
-    name: user?.name,
-    dob: user?.dob,
-    tob: user?.tob,
-    pob: user?.pob,
-    birthLatitude: user?.birthLatitude,
-    birthLongitude: user?.birthLongitude,
-    birthTimezoneName: user?.birthTimezoneName,
-  });
 
   useEffect(() => {
     if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
 
-    if (profileFetched && !profileComplete && !profileCompleteFromFields && !redirectedRef.current && pathname !== "/profile") {
-      const timer = setTimeout(() => {
-        if (!profileComplete && !profileCompleteFromFields && !redirectedRef.current) {
-          redirectedRef.current = true;
-          router.push(`/profile?onboarding=true&return=${encodeURIComponent(pathname || "/")}`);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
+    // NOTE: incomplete-profile → onboarding redirect now lives in the global
+    // <OnboardingGate /> (mounted in the root layout) so it fires on every
+    // landing route, not just the dashboard. This effect only handles the
+    // astrology auto-analysis below.
 
     const hasBirthDetails =
       user.dob &&
@@ -364,11 +358,6 @@ export default function DashboardHome() {
     user?.astrologyData,
     userLoading,
     refreshProfile,
-    profileComplete,
-    profileCompleteFromFields,
-    profileFetched,
-    router,
-    pathname,
   ]);
 
   useEffect(() => {
@@ -401,10 +390,10 @@ export default function DashboardHome() {
   const overallScore = horoscope?.score?.overall ?? horoscope?.overall_score ?? 73;
   const scoreColor = getScoreColor(overallScore);
   const scoreBand = overallScore >= 75
-    ? (t('newDashboard.todaysEnergy.bandFavorable') || "Favorable")
+    ? t('newDashboard.todaysEnergy.bandFavorable')
     : overallScore >= 60
-      ? (t('newDashboard.todaysEnergy.bandBalanced') || "Balanced")
-      : (t('newDashboard.todaysEnergy.bandCaution') || "Caution");
+      ? t('newDashboard.todaysEnergy.bandBalanced')
+      : t('newDashboard.todaysEnergy.bandCaution');
   const moonSign = getRashiData(user?.moonSign || horoscope?.user?.sign || horoscope?.sign || "Leo");
   const sunSign = getRashiData(user?.sunSign || "Libra");
   const ascendantSign = getRashiData(user?.lagnaSign || "Leo");
@@ -441,7 +430,7 @@ export default function DashboardHome() {
     "Your current planetary period is on your side - act on the bigger plan now.";
   const headline =
     rawHeadline === "Your current planetary period is on your side - act on the bigger plan now."
-      ? (t('newDashboard.todaysEnergy.defaultHeadline') || rawHeadline)
+      ? t('newDashboard.todaysEnergy.defaultHeadline')
       : rawHeadline;
 
   const rawSubtitle =
@@ -451,23 +440,23 @@ export default function DashboardHome() {
     "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose.";
   const subtitle =
     rawSubtitle === "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose."
-      ? (t('newDashboard.todaysEnergy.defaultSubtitle') || rawSubtitle)
+      ? t('newDashboard.todaysEnergy.defaultSubtitle')
       : rawSubtitle;
 
   if (profileLocationRequired && !horoscope) {
     return (
-      <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[#06061f] px-4 py-10 text-white">
+      <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-background px-4 py-10 text-foreground">
         <DarkPanel className="mx-auto max-w-xl p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#f2b233]/30 bg-[#f2b233]/10">
-            <ShieldAlert className="h-7 w-7 text-[#f2b233]" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10">
+            <ShieldAlert className="h-7 w-7 text-secondary" />
           </div>
           <h1 className="font-headline text-2xl font-bold">Exact birth location required</h1>
-          <p className="mt-3 text-sm leading-6 text-white/60">
+          <p className="mt-3 text-sm leading-6 text-foreground/60">
             Please confirm your exact birth location and timezone in your profile for personalized horoscope calculations.
           </p>
           <button
             onClick={() => router.push("/profile?onboarding=true&return=/")}
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f2b233] px-5 py-3 text-sm font-black uppercase tracking-wider text-[#08071f]"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-sm font-black uppercase tracking-wider text-on-primary"
           >
             Confirm birth location <ArrowRight className="h-4 w-4" />
           </button>
@@ -477,12 +466,12 @@ export default function DashboardHome() {
   }
 
   return (
-    <div className="gpt-dashboard-shell relative min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-x-hidden bg-[#05051c] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(154,67,67,0.38),transparent_28%),radial-gradient(circle_at_88%_12%,rgba(61,49,123,0.38),transparent_34%),linear-gradient(180deg,#070828_0%,#060521_48%,#080622_100%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-80">
+    <div className="gpt-dashboard-shell safe-bottom-buffer relative min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-x-hidden bg-background text-foreground">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,color-mix(in_srgb,var(--secondary)_38%,transparent),transparent_28%),radial-gradient(circle_at_88%_12%,color-mix(in_srgb,var(--accent)_38%,transparent),transparent_34%),linear-gradient(180deg,var(--surface)_0%,var(--background)_48%,var(--surface)_100%)]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-80">
         <Particles
           particleCount={260}
-          particleColors={["#ffd27a", "#ffffff", "#a78bd2"]}
+          particleColors={["var(--flare-gold)", "var(--foreground)", "var(--flare-lavender)"]}
           particleBaseSize={70}
           particleSpread={11}
           speed={0.08}
@@ -491,56 +480,57 @@ export default function DashboardHome() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[94%]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
         <header className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div>
-            <div className="flex flex-wrap items-center gap-3 text-[12px] font-bold uppercase tracking-[0.24em] text-white/58">
-              <span className="h-px w-12 bg-[#d99b23]/50" />
+            <div className="flex flex-wrap items-center gap-3 label-sm tracking-[0.24em] text-foreground/58">
+              <span aria-hidden="true" className="h-px w-12 bg-secondary/50" />
               <span>{currentDate}</span>
               {paywallLoaded && (
-                <Link href="/plans" className="inline-flex items-center gap-2 rounded-full border border-[#d99b23]/20 bg-[#d99b23]/10 px-3 py-1.5 tracking-normal text-[#e6ad2f]">
+                <Link href="/plans" className="inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1.5 tracking-normal text-secondary">
                   <Wallet className="h-3.5 w-3.5" />
                   <span className="text-sm font-black">{totalCredits ?? 0}</span>
-                  <span className="text-[10px] uppercase text-white/40">{t('plans.naviCredits') || "Navi Credits"}</span>
-                  <span className="rounded-full bg-[#d99b23]/10 px-2 py-0.5 text-[10px] uppercase text-[#e6ad2f]">{getTierLabel(tier || "free")}</span>
+                  <span className="text-[10px] uppercase text-foreground/40">{t('plans.naviCredits')}</span>
+                  <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] uppercase text-secondary">{getTierLabel(tier || "free")}</span>
                 </Link>
               )}
             </div>
-            <h1 className="mt-4 font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px]">
+            <h1 className="mt-4 font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px] 3xl:text-[56px]">
               {greeting},{" "}
-              <span className="bg-gradient-to-r from-[#ffcf66] via-[#f5a500] to-[#dd8d00] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[var(--flare-gold)] via-secondary to-[var(--secondary)] bg-clip-text text-transparent">
                 {userLoading ? "..." : userName}
               </span>
             </h1>
             {topLifeArea && (
-              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-white">
-                <Star className="h-4 w-4 fill-[#ffc83d] text-[#ffc83d]" />
-                {t('newDashboard.todaysEnergy.scoreImpressive', { label: topLifeArea.label }) || `Your ${topLifeArea.label} Score is Impressive!`} <span className="font-black text-[#34d399]">{topLifeArea.score}%</span>
+              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Star className="h-4 w-4 fill-secondary text-secondary" />
+                {t('newDashboard.todaysEnergy.scoreImpressive', { label: topLifeArea.label })} <span className="font-black text-emerald-400">{topLifeArea.score}%</span>
               </p>
             )}
           </div>
 
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {[
-              { label: t('dashboard.moonSign') || "Moon Sign", data: moonSign, fallback: "Leo" },
-              { label: t('dashboard.sunSign') || "Sun Sign", data: sunSign, fallback: "Libra" },
-              { label: t('dashboard.ascendant') || "Ascendant", data: ascendantSign, fallback: "Leo" },
+              { label: t('dashboard.moonSign'), data: moonSign, fallback: "Leo" },
+              { label: t('dashboard.sunSign'), data: sunSign, fallback: "Libra" },
+              { label: t('dashboard.ascendant'), data: ascendantSign, fallback: "Leo" },
             ].map((item) => (
               <Link
                 key={item.label}
                 href={item.data?.id ? `/rashis?sign=${item.data.id}` : "/rashis"}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.035] px-2 py-3 text-center transition hover:border-[#d99b23]/40 hover:bg-[#d99b23]/8 sm:min-w-[185px] sm:flex-row sm:gap-4 sm:px-4 sm:text-left"
+                aria-label={`${item.label}: ${item.data?.name || item.fallback}`}
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-outline-variant/12 bg-surface-variant/[0.035] px-2 py-3 text-center transition hover:border-secondary/40 hover:bg-secondary/8 sm:min-w-[185px] sm:flex-row sm:gap-4 sm:px-4 sm:text-left"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#d99b23]/25 bg-[#05051c] sm:h-[58px] sm:w-[58px]">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-secondary/25 bg-background sm:h-[58px] sm:w-[58px]">
                   {item.data?.icon ? (
                     <Image src={item.data.icon} alt={item.data.name} width={34} height={34} className="h-7 w-7 object-contain sm:h-9 sm:w-9" />
                   ) : (
-                    <Sparkles className="h-5 w-5 text-[#d99b23] sm:h-6 sm:w-6" />
+                    <Sparkles className="h-5 w-5 text-secondary sm:h-6 sm:w-6" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/55 sm:text-[11px] sm:tracking-[0.22em]">{item.label}</p>
-                  <p className="mt-0.5 truncate font-headline text-sm font-bold text-white sm:mt-1 sm:text-lg">{item.data?.name || item.fallback}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-foreground/55 sm:text-[11px] sm:tracking-[0.22em]">{item.label}</p>
+                  <p className="mt-0.5 truncate font-headline text-sm font-bold text-foreground sm:mt-1 sm:text-lg">{item.data?.name || item.fallback}</p>
                 </div>
               </Link>
             ))}
@@ -552,7 +542,7 @@ export default function DashboardHome() {
             <DarkPanel className="p-5 sm:p-7">
               <div className="grid gap-6 lg:grid-cols-[170px_minmax(0,1fr)_190px] lg:items-center">
                 <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-                  <p className="text-[13px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{t('newDashboard.todaysEnergy.title') || "Today's Energy"}</p>
+                  <p className="label-secondary font-black tracking-[0.2em]">{t('newDashboard.todaysEnergy.title')}</p>
                   <div className="mt-5">
                     <RingScore score={overallScore} color={scoreColor} />
                   </div>
@@ -566,8 +556,8 @@ export default function DashboardHome() {
                 </div>
 
                 <div>
-                  <h2 className="font-headline text-2xl font-bold leading-snug sm:text-[28px]">{headline}</h2>
-                  <p className="mt-3 max-w-2xl text-base leading-7 text-white/62">{subtitle}</p>
+                  <h2 className="font-headline text-2xl font-bold leading-snug sm:text-[28px] 3xl:text-[38px]">{headline}</h2>
+                  <p className="mt-3 max-w-2xl text-base leading-7 text-foreground/62">{subtitle}</p>
                 </div>
 
                 <div className="hidden justify-center lg:flex">
@@ -578,40 +568,38 @@ export default function DashboardHome() {
               <div className="mt-6 flex flex-wrap gap-3">
                 {[
                   { label: moonSign?.name || "Leo", icon: <Orbit className="h-4 w-4" /> },
-                  { label: `${ascendantSign?.name || "Leo"} ${t('newDashboard.todaysEnergy.rising') || "Rising"}`, icon: <Moon className="h-4 w-4" /> },
-                  { label: transits?.panchanga?.tithi || "Purnima", prefix: t('newDashboard.panchang.tithi') || "Tithi" },
-                  { label: transits?.panchanga?.nakshatra || "Anuradha", prefix: t('newDashboard.panchang.nakshatra') || "Nakshatra" },
+                  { label: `${ascendantSign?.name || "Leo"} ${t('newDashboard.todaysEnergy.rising')}`, icon: <Moon className="h-4 w-4" /> },
+                  { label: transits?.panchanga?.tithi || "Purnima", prefix: t('newDashboard.panchang.tithi') },
+                  { label: transits?.panchanga?.nakshatra || "Anuradha", prefix: t('newDashboard.panchang.nakshatra') },
                 ].map((chip) => (
-                  <div key={`${chip.prefix || chip.label}-${chip.label}`} className="inline-flex items-center gap-2 rounded-full bg-[#21164d]/70 px-4 py-2 text-sm font-bold text-white">
+                  <div key={`${chip.prefix || chip.label}-${chip.label}`} className="inline-flex items-center gap-2 rounded-full bg-surface-variant/70 px-4 py-2 text-sm font-bold text-foreground">
                     {"icon" in chip && chip.icon}
-                    {"prefix" in chip && <span className="text-[11px] uppercase tracking-[0.18em] text-white/45">{chip.prefix}</span>}
+                    {"prefix" in chip && <span className="text-[11px] uppercase tracking-[0.18em] text-foreground/45">{chip.prefix}</span>}
                     <span>{chip.label}</span>
                   </div>
                 ))}
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                <div className="rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-5">
                   <div className="flex items-start gap-4">
-                    <Sun className="h-8 w-8 shrink-0 text-[#34d399]" />
+                    <Sun className="h-8 w-8 shrink-0 text-emerald-400" />
                     <div>
-                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#34d399]">{t('newDashboard.todaysEnergy.goodTime') || "Good Time"}</p>
+                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-emerald-400">{t('newDashboard.todaysEnergy.goodTime')}</p>
                       <p className="mt-2 text-lg font-bold">19:00 - 20:00</p>
-                      <p className="mt-1 text-sm leading-6 text-white/58">{t('newDashboard.todaysEnergy.goodTimeDesc') || "Auspicious window for important work and decisions."}</p>
+                      <p className="mt-1 text-sm leading-6 text-foreground/58">{t('newDashboard.todaysEnergy.goodTimeDesc')}</p>
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                <div className="rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-5">
                   <div className="flex items-start gap-4">
-                    <AlertTriangle className="h-8 w-8 shrink-0 fill-[#ffb400]/15 text-[#ffb400]" />
+                    <AlertTriangle className="h-8 w-8 shrink-0 fill-amber-400/15 text-amber-400" />
                     <div>
-                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-[#ffb400]">
-                        {t('newDashboard.panchang.rahuKaal') && t('newDashboard.todaysEnergy.alertTime')
-                          ? `${t('newDashboard.panchang.rahuKaal')} / ${t('newDashboard.todaysEnergy.alertTime')}`
-                          : "Rahu Kaal / Caution Window"}
+                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-amber-400">
+                        {`${t('newDashboard.panchang.rahuKaal')} / ${t('newDashboard.todaysEnergy.alertTime')}`}
                       </p>
                       <p className="mt-2 text-lg font-bold">{formatRahuKaal(transits)}</p>
-                      <p className="mt-1 text-sm leading-6 text-white/58">{t('newDashboard.todaysEnergy.cautionTimeDesc') || "Avoid starting new work or making major commitments."}</p>
+                      <p className="mt-1 text-sm leading-6 text-foreground/58">{t('newDashboard.todaysEnergy.cautionTimeDesc')}</p>
                     </div>
                   </div>
                 </div>
@@ -619,22 +607,22 @@ export default function DashboardHome() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <button
-                  onClick={() => askInChat(t('newDashboard.todaysEnergy.aiChat') || "Ask Navi", t('newDashboard.todaysEnergy.explainMsg', { score: overallScore }) || `Explain today's energy for me. My overall score is ${overallScore}.`)}
-                  className="rounded-full border border-[#f2ad1d]/60 px-5 py-3 text-sm font-black uppercase tracking-wider text-[#ffc43d] transition hover:bg-[#f2ad1d]/10"
+                  onClick={() => askInChat(t('newDashboard.todaysEnergy.aiChat'), t('newDashboard.todaysEnergy.explainMsg', { score: overallScore }))}
+                  className="rounded-full border border-secondary/60 px-5 py-3 text-sm font-black uppercase tracking-wider text-secondary transition hover:bg-secondary/10"
                 >
-                  {t('newDashboard.todaysEnergy.aiChat') || "Ask Navi"}
+                  {t('newDashboard.todaysEnergy.aiChat')}
                 </button>
                 <Link
                   href="/horoscope/forecast"
-                  className="rounded-full bg-gradient-to-r from-[#f9a900] via-[#ffbd16] to-[#de8b00] px-5 py-3 text-center text-sm font-black uppercase tracking-wider text-[#08071f] transition hover:brightness-110"
+                  className="rounded-full bg-gradient-to-r from-[var(--secondary)] via-[var(--flare-gold)] to-[var(--secondary)] px-5 py-3 text-center text-sm font-black uppercase tracking-wider text-on-primary transition hover:brightness-110"
                 >
-                  {t('newDashboard.todaysEnergy.fullReading') || "Full Reading"}
+                  {t('newDashboard.todaysEnergy.fullReading')}
                 </Link>
               </div>
             </DarkPanel>
 
             <section className="space-y-3">
-              <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-white/70">{t('newDashboard.lifeAreas.title') || "Life Areas"}</h2>
+              <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-foreground/70">{t('newDashboard.lifeAreas.title')}</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                 {lifeAreas.map(({ area, label, score, insight, theme }) => {
                   const Icon = theme.icon;
@@ -644,9 +632,9 @@ export default function DashboardHome() {
                     <Link
                       key={area}
                       href={`/horoscope/forecast?area=${area}`}
-                      className="group rounded-2xl border border-white/10 bg-[#0a0829]/78 p-4 text-center transition hover:-translate-y-0.5 hover:border-[#d99b23]/35 hover:bg-[#100b35]"
+                      className="group rounded-2xl border border-outline-variant/10 bg-surface/78 p-4 text-center transition hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-variant"
                     >
-                      <AreaRing score={score} color={color}>
+                      <AreaRing score={score} color={color} label={label}>
                         <span
                           className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
                           style={{ color }}
@@ -658,7 +646,7 @@ export default function DashboardHome() {
                         </span>
                       </AreaRing>
                       <p className="mt-3 font-headline text-lg font-bold">{label}</p>
-                      <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-white/58">{insight}</p>
+                      <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-foreground/58">{insight}</p>
                     </Link>
                   );
                 })}
@@ -667,20 +655,20 @@ export default function DashboardHome() {
 
             <DarkPanel className="grid gap-4 p-5 md:grid-cols-[160px_1fr_1fr_1fr_1fr]">
               <div className="flex items-center gap-3">
-                <Sparkles className="h-8 w-8 text-[#ffc43d]" />
+                <Sparkles className="h-8 w-8 text-secondary" />
                 <div>
-                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">{t('newDashboard.celestial') || "Celestial"}</p>
-                  <p className="text-[13px] font-black uppercase tracking-[0.16em]">{t('newDashboard.insights') || "Insights"}</p>
+                  <p className="label-sm font-black tracking-[0.16em]">{t('newDashboard.celestial')}</p>
+                  <p className="label-sm font-black tracking-[0.16em]">{t('newDashboard.insights')}</p>
                 </div>
               </div>
               {(transits?.notableTransits?.length ? transits.notableTransits : [
-                t('newDashboard.notableTransits.jupiter') || "Jupiter's transit enhances your gains and stabilizes growth.",
-                t('newDashboard.notableTransits.saturn') || "Saturn's transit tests your discipline and builds resilience.",
-                t('newDashboard.notableTransits.rahu') || "Rahu's transit destabilizes old patterns - stay grounded.",
-                t('newDashboard.notableTransits.ketu') || "Ketu supports letting go and releasing attachments.",
+                t('newDashboard.notableTransits.jupiter'),
+                t('newDashboard.notableTransits.saturn'),
+                t('newDashboard.notableTransits.rahu'),
+                t('newDashboard.notableTransits.ketu'),
               ]).slice(0, 4).map((item, idx) => (
-                <p key={idx} className="border-white/10 text-sm leading-6 text-white/65 md:border-l md:pl-5">
-                  <span className="mr-2 text-[#ffc43d]">•</span>
+                <p key={idx} className="border-outline-variant/10 text-sm leading-6 text-foreground/65 md:border-l md:pl-5">
+                  <span aria-hidden="true" className="mr-2 text-secondary">•</span>
                   {item}
                 </p>
               ))}
@@ -691,8 +679,8 @@ export default function DashboardHome() {
             <div className="space-y-5">
               <DarkPanel className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 className="text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.weeklyChart.title') || "Weekly Chart"}</h2>
-                  <p className="text-[12px] font-black uppercase tracking-wider text-[#ffc43d]">{t('newDashboard.weeklyChart.best') || "Best Day"}: {bestDay}</p>
+                  <h2 className="text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.weeklyChart.title')}</h2>
+                  <p className="label-secondary font-black">{t('newDashboard.weeklyChart.best')}: {bestDay}</p>
                 </div>
                 <div className="mb-5 overflow-x-auto">
                   <div className="flex min-w-max gap-2">
@@ -704,11 +692,13 @@ export default function DashboardHome() {
                       return (
                         <button
                           key={area}
+                          aria-pressed={selected}
+                          aria-label={resolveAreaLabel(t, area)}
                           onClick={() => setActiveArea(area)}
                           className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
                             selected
-                              ? "border-[#d99b23]/45 bg-[#d99b23]/12 text-[#ffc43d]"
-                              : "border-white/10 bg-white/[0.025] text-white/70 hover:border-white/20"
+                              ? "border-secondary/45 bg-secondary/12 text-secondary"
+                              : "border-outline-variant/10 bg-surface-variant/[0.025] text-foreground/70 hover:border-outline-variant/20"
                           }`}
                         >
                           <Icon className={isLucide ? "h-4 w-4 fill-current" : "h-4 w-4 object-cover"} />
@@ -722,9 +712,9 @@ export default function DashboardHome() {
                   {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
                     <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
                   ) : forecastLoading || !forecast ? (
-                    <div className="h-[230px] animate-pulse rounded-2xl bg-white/[0.04]" />
+                    <div className="h-[230px] animate-pulse rounded-2xl bg-surface-variant/[0.04]" />
                   ) : (
-                    <WeeklyOutlookChart days={forecast.days} colorHex={AREA_THEMES[activeArea].hex} />
+                    <WeeklyOutlookChart days={forecast.days} colorHex={AREA_THEMES[activeArea].hex} areaLabel={resolveAreaLabel(t, activeArea)} />
                   )}
                 </div>
               </DarkPanel>
@@ -732,20 +722,20 @@ export default function DashboardHome() {
               <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] min-[2560px]:grid-cols-[minmax(0,1fr)_480px]">
                 <div className="space-y-5">
                   <DarkPanel className="p-5">
-                    <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.panchang.title') || "Panchang Today"}</h2>
+                    <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.panchang.title')}</h2>
                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                       {[
-                        { label: t('newDashboard.panchang.tithi') || "Tithi", value: transits?.panchanga?.tithi || "Purnima", icon: <Moon className="h-4 w-4 text-[#ffc43d]" /> },
-                        { label: t('newDashboard.panchang.vara') || "Vara", value: transits?.panchanga?.vara || "Shanivaar", icon: <Calendar className="h-4 w-4 text-[#f59e0b]" /> },
-                        { label: t('newDashboard.panchang.nakshatra') || "Nakshatra", value: transits?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-4 w-4 text-[#34d399]" /> },
-                        { label: t('newDashboard.panchang.yoga') || "Yoga", value: transits?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-4 w-4 text-[#a78bfa]" /> },
-                        { label: t('newDashboard.panchang.karana') || "Karana", value: transits?.panchanga?.karana || "Vishti", icon: <Gem className="h-4 w-4 text-[#fb7185]" /> },
-                        { label: t('newDashboard.panchang.rahuKaal') || "Rahu Kaal", value: formatRahuKaal(transits), icon: <AlertTriangle className="h-4 w-4 text-[#ffc43d]" /> },
+                        { label: t('newDashboard.panchang.tithi'), value: transits?.panchanga?.tithi || "Purnima", icon: <Moon className="h-4 w-4 text-secondary" /> },
+                        { label: t('newDashboard.panchang.vara'), value: transits?.panchanga?.vara || "Shanivaar", icon: <Calendar className="h-4 w-4 text-amber-500" /> },
+                        { label: t('newDashboard.panchang.nakshatra'), value: transits?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-4 w-4 text-emerald-400" /> },
+                        { label: t('newDashboard.panchang.yoga'), value: transits?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-4 w-4 text-violet-400" /> },
+                        { label: t('newDashboard.panchang.karana'), value: transits?.panchanga?.karana || "Vishti", icon: <Gem className="h-4 w-4 text-rose-400" /> },
+                        { label: t('newDashboard.panchang.rahuKaal'), value: formatRahuKaal(transits), icon: <AlertTriangle className="h-4 w-4 text-secondary" /> },
                       ].map((chip) => (
-                        <div key={chip.label} className="flex min-h-[82px] flex-col items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] p-2 text-center">
+                        <div key={chip.label} className="flex min-h-[82px] flex-col items-center justify-between rounded-xl border border-outline-variant/10 bg-surface-variant/[0.025] p-2 text-center">
                           {chip.icon}
-                          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-white/45">{chip.label}</p>
-                          <p className="w-full truncate font-headline text-[12px] font-bold">{chip.value}</p>
+                          <p className="label-sm text-[9px] tracking-[0.14em] text-foreground/45">{chip.label}</p>
+                          <p className="w-full truncate 3xl:whitespace-normal font-headline text-[12px] font-bold">{chip.value}</p>
                         </div>
                       ))}
                     </div>
@@ -753,16 +743,16 @@ export default function DashboardHome() {
 
                   <DarkPanel className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#8b5cf6]/20">
-                        <Heart className="h-7 w-7 fill-[#a78bfa]/20 text-[#a78bfa]" />
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-500/20">
+                        <Heart className="h-7 w-7 fill-violet-400/20 text-violet-400" />
                       </div>
                       <div>
-                        <h3 className="text-[14px] font-black uppercase tracking-[0.16em]">{t('newDashboard.compatibility.title') || "Compatibility & Match"}</h3>
-                        <p className="mt-1 max-w-lg text-sm leading-6 text-white/58">{t('newDashboard.compatibility.desc') || "Discover your cosmic compatibility with anyone. Find harmony in relationships."}</p>
+                        <h3 className="text-[14px] font-black uppercase tracking-[0.16em]">{t('newDashboard.compatibility.title')}</h3>
+                        <p className="mt-1 max-w-lg text-sm leading-6 text-foreground/58">{t('newDashboard.compatibility.desc')}</p>
                       </div>
                     </div>
-                    <Link href="/kundli/match" className="rounded-xl bg-[#ffc022] px-5 py-3 text-center text-sm font-black uppercase text-[#08071f]">
-                      {t('newDashboard.compatibility.emptyCta') || "Start a Match"}
+                    <Link href="/kundli/match" className="rounded-xl bg-secondary px-5 py-3 text-center text-sm font-black uppercase text-on-primary">
+                      {t('newDashboard.compatibility.emptyCta')}
                     </Link>
                   </DarkPanel>
 
@@ -770,39 +760,39 @@ export default function DashboardHome() {
                   <DarkPanel className="p-6">
                     <div className="mb-5 flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
-                        <Sun className="h-5 w-5 text-[#ffc43d]" />
-                        <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.cosmicInsight.title') || "Daily Cosmic Insight"}</h3>
+                        <Sun className="h-5 w-5 text-secondary" />
+                        <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.cosmicInsight.title')}</h3>
                       </div>
-                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[#ffc43d]">
-                        {t('horoscope.today') || "Today"} • {horoscope?.meta?.date_display || horoscope?.date_display || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      <span className="shrink-0 label-secondary text-[10px]">
+                        {t('horoscope.today')} • {horoscope?.meta?.date_display || horoscope?.date_display || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </span>
                     </div>
                     <div className="relative mb-6 px-2 py-3">
-                      <span className="absolute -left-2 -top-3 select-none font-serif text-[56px] leading-none text-[#ffc43d]">&ldquo;</span>
-                      <p className="relative px-6 text-[13px] leading-relaxed text-white/75">
+                      <span aria-hidden="true" className="absolute -left-2 -top-3 select-none font-serif text-[56px] leading-none text-secondary">&ldquo;</span>
+                      <p className="relative px-6 text-[13px] leading-relaxed text-foreground/75">
                         {(typeof horoscope?.tip === 'object' ? horoscope.tip?.text : horoscope?.tip) || "A day to align your actions with your higher purpose. Trust the timing of the universe and take one step forward with clarity."}
                       </p>
-                      <span className="absolute -bottom-6 -right-2 select-none font-serif text-[56px] leading-none text-[#ffc43d]">&rdquo;</span>
+                      <span aria-hidden="true" className="absolute -bottom-6 -right-2 select-none font-serif text-[56px] leading-none text-secondary">&rdquo;</span>
                     </div>
                     <div className="mt-8 grid grid-cols-2 gap-3">
-                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-3 text-center sm:text-left min-w-0 w-full">
+                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-3 text-center sm:text-left min-w-0 w-full">
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
                           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-700 shadow-[0_0_16px_rgba(168,85,247,0.6)]" />
                         </div>
                         <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
-                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.cosmicInsight.luckyColor') || "Lucky Color"}</p>
-                          <p className="font-headline text-[12px] sm:text-sm font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
+                          <p className="label-sm text-[9px] tracking-wider text-foreground/35">{t('newDashboard.cosmicInsight.luckyColor')}</p>
+                          <p className="font-headline text-[12px] sm:text-sm font-bold text-foreground mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
                             {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-3 text-center sm:text-left min-w-0 w-full">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#d99b23]/40 bg-[#d99b23]/20 text-lg font-black text-[#ffc43d]">
+                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-3 text-center sm:text-left min-w-0 w-full">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-secondary/40 bg-secondary/20 text-lg font-black text-secondary">
                           {(horoscope?.lucky?.number || horoscope?.lucky_number) ?? "7"}
                         </div>
                         <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
-                          <p className="text-[9px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.cosmicInsight.luckyNumber') || "Lucky Number"}</p>
-                          <p className="font-headline text-[12px] sm:text-sm font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
+                          <p className="label-sm text-[9px] tracking-wider text-foreground/35">{t('newDashboard.cosmicInsight.luckyNumber')}</p>
+                          <p className="font-headline text-[12px] sm:text-sm font-bold text-foreground mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
                             {typeof (horoscope?.lucky?.number || horoscope?.lucky_number) === 'number'
                               ? (horoscope?.lucky?.number || horoscope?.lucky_number)
                               : ((horoscope?.lucky?.number || horoscope?.lucky_number) ?? "Seven")}
@@ -815,22 +805,22 @@ export default function DashboardHome() {
 
                 <DarkPanel className="hidden sm:block p-5">
                   <div className="mb-4 flex items-start gap-3">
-                    <Sparkles className="mt-1 h-7 w-7 text-[#ffc43d]" />
+                    <Sparkles className="mt-1 h-7 w-7 text-secondary" />
                     <div>
-                      <h2 className="font-headline text-2xl font-bold">{t('dashboard.consultNaviAi') || "Consult Navi AI"}</h2>
-                      <p className="text-sm text-white/55">{t('dashboard.vedicWisdomPowered') || "Vedic wisdom powered by advanced AI."}</p>
+                      <h2 className="font-headline text-2xl font-bold">{t('dashboard.consultNaviAi')}</h2>
+                      <p className="text-sm text-foreground/55">{t('dashboard.vedicWisdomPowered')}</p>
                     </div>
                   </div>
 
-                  <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{t('dashboard.askAbout') || "Ask About"}</p>
+                  <p className="mb-3 label-secondary font-black tracking-[0.2em]">{t('dashboard.askAbout')}</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: t("topicPills.careerFinance") || "Career & Finance", icon: <Briefcase className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.loveMarriage") || "Love & Marriage", icon: <Heart className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.healthWellness") || "Health & Wellness", icon: <Activity className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.travelRelocation") || "Travel & Relocation", icon: <Home className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.muhuratTiming") || "Muhurat & Timing", icon: <Calendar className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.currentTransits") || "Current Transits", icon: <Orbit className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.careerFinance"), icon: <Briefcase className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.loveMarriage"), icon: <Heart className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.healthWellness"), icon: <Activity className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.travelRelocation"), icon: <Home className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.muhuratTiming"), icon: <Calendar className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+                      { label: t("topicPills.currentTransits"), icon: <Orbit className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
                     ].map((item) => {
                       const isBlocked = isFeatureBlocked(item.requiresFeature);
                       const paywallData = getFeaturePaywall(item.requiresFeature);
@@ -845,26 +835,26 @@ export default function DashboardHome() {
                             }
                             askInChat(item.label, `I want guidance about ${item.label.toLowerCase()} based on today's horoscope.`);
                           }}
-                          className={`flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold text-white/78 transition relative overflow-hidden ${
+                          className={`flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold text-foreground/78 transition relative overflow-hidden ${
                             isBlocked
-                              ? "border border-white/5 bg-white/[0.015] text-white/40 cursor-pointer hover:bg-white/5"
-                              : "bg-white/[0.045] hover:bg-[#d99b23]/12 hover:text-[#ffc43d]"
+                              ? "border border-outline-variant/5 bg-surface-variant/[0.015] text-foreground/40 cursor-pointer hover:bg-white/5"
+                              : "bg-surface-variant/[0.045] hover:bg-secondary/12 hover:text-secondary"
                           }`}
                         >
-                          <span className={isBlocked ? "text-white/30" : "text-[#ffc43d]"}>{item.icon}</span>
-                          <span className="flex-1 truncate">{item.label}</span>
-                          {isBlocked && <Lock className="h-3.5 w-3.5 text-white/35 shrink-0" />}
+                          <span className={isBlocked ? "text-foreground/30" : "text-secondary"}>{item.icon}</span>
+                          <span className="flex-1 truncate 3xl:whitespace-normal">{item.label}</span>
+                          {isBlocked && <Lock className="h-3.5 w-3.5 text-foreground/35 shrink-0" />}
                         </button>
                       );
                     })}
                   </div>
 
-                  <p className="mb-3 mt-6 text-[12px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{t('newDashboard.deepDive.title') || "Deep Dive"}</p>
+                  <p className="mb-3 mt-6 label-secondary font-black tracking-[0.2em]">{t('newDashboard.deepDive.title')}</p>
                   <div className="space-y-3">
                     {[
-                      t('newDashboard.deepDive.deepDiveQ1') || "Analyze my weekly forecast in detail",
-                      t('newDashboard.deepDive.deepDiveQ2', { area: activeAreaLabel }) || `Why is my ${activeAreaLabel} score at its current level?`,
-                      t('newDashboard.deepDive.deepDiveQ3') || "Give me a quick action to improve my score",
+                      t('newDashboard.deepDive.deepDiveQ1'),
+                      t('newDashboard.deepDive.deepDiveQ2', { area: activeAreaLabel }),
+                      t('newDashboard.deepDive.deepDiveQ3'),
                     ].map((question) => {
                       const isBlocked = isFeatureBlocked('chat_message');
                       const paywallData = getFeaturePaywall('chat_message');
@@ -877,19 +867,19 @@ export default function DashboardHome() {
                               setActivePaywallData(paywallData);
                               return;
                             }
-                            askInChat(t('newDashboard.deepDive.title') || "Deep Dive", question);
+                            askInChat(t('newDashboard.deepDive.title'), question);
                           }}
                           className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${
                             isBlocked
-                              ? "border-white/5 bg-white/[0.01] text-white/40 cursor-pointer"
-                              : "border-white/10 bg-white/[0.025] text-white/78 hover:border-[#d99b23]/35 hover:text-[#ffc43d]"
+                              ? "border-outline-variant/5 bg-white/[0.01] text-foreground/40 cursor-pointer"
+                              : "border-outline-variant/10 bg-surface-variant/[0.025] text-foreground/78 hover:border-secondary/35 hover:text-secondary"
                           }`}
                         >
-                          <span className="truncate flex-1">{question}</span>
+                          <span className="truncate flex-1 3xl:whitespace-normal">{question}</span>
                           {isBlocked ? (
-                            <Lock className="h-3.5 w-3.5 text-white/30 shrink-0" />
+                            <Lock className="h-3.5 w-3.5 text-foreground/30 shrink-0" />
                           ) : (
-                            <ArrowRight className="h-4 w-4 text-[#ffc43d] shrink-0" />
+                            <ArrowRight className="h-4 w-4 text-secondary shrink-0" />
                           )}
                         </button>
                       );
@@ -903,12 +893,12 @@ export default function DashboardHome() {
                         return;
                       }
                       setSelectedAvatarId("navi");
-                      askInChat(t('chatWithNavi') || "Chat with Navi", t('newDashboard.todaysEnergy.discussMsg') || "I want to discuss my dashboard and today's horoscope.");
+                      askInChat(t('chatWithNavi'), t('newDashboard.todaysEnergy.discussMsg'));
                     }}
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d99b23]/60 px-4 py-3 text-sm font-black uppercase tracking-wider text-[#ffc43d] transition hover:bg-[#d99b23]/10"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-secondary/60 px-4 py-3 text-sm font-black uppercase tracking-wider text-secondary transition hover:bg-secondary/10"
                   >
                     {isFeatureBlocked('chat_message') ? <Lock className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-                    {t('chatWithNavi') || "Chat with Navi"}
+                    {t('chatWithNavi')}
                   </button>
                 </DarkPanel>
               </div>
@@ -918,18 +908,18 @@ export default function DashboardHome() {
       </div>
 
       {/* EXPLORE YOUR COSMIC NETWORK SECTION */}
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] min-[2560px]:max-w-[94%]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
         {/* Section Header */}
         <div className="mb-10 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#ffc43d]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ffc43d]">{t('newDashboard.guidanceHub') || "Your Guidance Hub"}</span>
+            <Sparkles className="h-4 w-4 text-secondary" />
+            <span className="label-secondary text-[10px] font-black tracking-[0.3em]">{t('newDashboard.guidanceHub')}</span>
           </div>
-          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-white sm:text-[42px]">
-            {t('newDashboard.exploreCosmicNetwork') || "Explore Your Cosmic Network"}
+          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-foreground sm:text-[42px] 3xl:text-[56px]">
+            {t('newDashboard.exploreCosmicNetwork')}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-white/55">
-            {t('newDashboard.cosmicNetworkDesc') || "Connect with expert guides, explore your chart, understand your bonds, and access powerful astrological tools."}
+          <p className="mt-3 text-sm leading-relaxed text-foreground/55">
+            {t('newDashboard.cosmicNetworkDesc')}
           </p>
         </div>
 
@@ -941,22 +931,22 @@ export default function DashboardHome() {
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-5 w-5 items-center justify-center">
-                    <div className="h-2 w-2 rotate-45 border border-[#ffc43d] bg-[#ffc43d]/20" />
+                    <div aria-hidden="true" className="h-2 w-2 rotate-45 border border-secondary bg-secondary/20" />
                   </div>
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.meetYourAiAstrologers') || "Meet Your AI Astrologers"}</h3>
+                  <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.meetYourAiAstrologers')}</h3>
                 </div>
-                <Link href="/chat" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-                  {t('newDashboard.lifeAreas.viewAll') || "View All"} <ArrowRight className="inline h-3 w-3" />
+                <Link href="/chat" aria-label={t('newDashboard.meetYourAiAstrologers')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
+                  {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
                 </Link>
               </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {[
-                  { name: "Navi", role: t('newDashboard.guides.navi.role') || "General Vedic Guide", desc: t('newDashboard.guides.navi.desc') || "Balanced Vedic guidance for love, work, timing & life.", credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
-                  { name: "Arya", role: t('newDashboard.guides.arya.role') || "Career Mentor", desc: t('newDashboard.guides.arya.desc') || "Guidance for jobs, skills, promotion & work decisions.", credits: 2, avatarId: "career_mentor", img: "/images/avatars/ARYA_AVATAR.jpeg" },
-                  { name: "Meera", role: t('newDashboard.guides.meera.role') || "Relationship Guide", desc: t('newDashboard.guides.meera.desc') || "Insights for love, marriage, compatibility & emotions.", credits: 2, avatarId: "relationship_guide", img: "/images/avatars/MEERA_AVATAR.jpeg" },
-                  { name: "Anand", role: t('newDashboard.guides.anand.role') || "Health Advisor", desc: t('newDashboard.guides.anand.desc') || "Understand vitality, well-being & health patterns.", credits: 2, avatarId: "spiritual_guide", img: "/images/avatars/ANAND_AVATAR.jpeg" },
-                  { name: "Vidya", role: t('newDashboard.guides.vidya.role') || "Financial Astrologer", desc: t('newDashboard.guides.vidya.desc') || "Wealth, investments & financial stability insights.", credits: 2, avatarId: "finance_mentor", img: "/images/avatars/VIDYA_AVATAR.jpeg" },
-                  { name: "Rishi", role: t('newDashboard.guides.rishi.role') || "Deep Chart Sage", desc: t('newDashboard.guides.rishi.desc') || "Advanced chart synthesis for deep spiritual insights.", credits: 3, avatarId: "astro_sage", img: "/images/avatars/RISHI_AVATAR.jpeg" },
+                  { name: "Navi", role: t('newDashboard.guides.navi.role'), desc: t('newDashboard.guides.navi.desc'), credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
+                  { name: "Arya", role: t('newDashboard.guides.arya.role'), desc: t('newDashboard.guides.arya.desc'), credits: 2, avatarId: "career_mentor", img: "/images/avatars/ARYA_AVATAR.jpeg" },
+                  { name: "Meera", role: t('newDashboard.guides.meera.role'), desc: t('newDashboard.guides.meera.desc'), credits: 2, avatarId: "relationship_guide", img: "/images/avatars/MEERA_AVATAR.jpeg" },
+                  { name: "Anand", role: t('newDashboard.guides.anand.role'), desc: t('newDashboard.guides.anand.desc'), credits: 2, avatarId: "spiritual_guide", img: "/images/avatars/ANAND_AVATAR.jpeg" },
+                  { name: "Vidya", role: t('newDashboard.guides.vidya.role'), desc: t('newDashboard.guides.vidya.desc'), credits: 2, avatarId: "finance_mentor", img: "/images/avatars/VIDYA_AVATAR.jpeg" },
+                  { name: "Rishi", role: t('newDashboard.guides.rishi.role'), desc: t('newDashboard.guides.rishi.desc'), credits: 3, avatarId: "astro_sage", img: "/images/avatars/RISHI_AVATAR.jpeg" },
                 ].map((guide) => {
                   const isLocked = isFeatureBlocked('chat_message');
                   const paywallData = getFeaturePaywall('chat_message');
@@ -964,10 +954,10 @@ export default function DashboardHome() {
                   return (
                     <div key={guide.name} className={`group flex flex-col items-center text-center ${isLocked ? 'opacity-60' : ''}`}>
                       <div className="relative mb-4">
-                        <div className={`h-[92px] w-[92px] overflow-hidden rounded-full border-[3px] bg-[#0a0829] transition-all ${
+                        <div className={`h-[92px] w-[92px] overflow-hidden rounded-full border-[3px] bg-surface transition-all ${
                           isLocked
-                            ? 'border-white/20'
-                            : 'border-[#d99b23]/50 group-hover:border-[#d99b23]/80 group-hover:shadow-[0_0_28px_rgba(217,155,35,0.4)]'
+                            ? 'border-outline-variant/20'
+                            : 'border-secondary/50 group-hover:border-secondary/80 group-hover:gold-glow'
                         }`}>
                           <Image
                             src={guide.img}
@@ -978,18 +968,18 @@ export default function DashboardHome() {
                           />
                           {isLocked && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
-                              <Lock className="h-6 w-6 text-white/80" />
+                              <Lock className="h-6 w-6 text-foreground/80" />
                             </div>
                           )}
                         </div>
-                        <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-[#d99b23]/40 bg-[#0a0a1f] px-2.5 py-1 text-[9px] font-bold text-[#ffc43d] shadow-lg">
+                        <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-secondary/40 bg-surface px-2.5 py-1 text-[9px] font-bold text-secondary shadow-lg">
                           <Coins className="h-2.5 w-2.5" />
-                          {guide.credits} {guide.credits > 1 ? (t('dashboard.creditPlural') || 'credits') : (t('dashboard.creditSingular') || 'credit')}
+                          {guide.credits} {guide.credits > 1 ? t('dashboard.creditPlural') : t('dashboard.creditSingular')}
                         </div>
                       </div>
-                      <h4 className="mb-1 mt-1 font-headline text-base font-bold text-white">{guide.name}</h4>
-                      <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-white/40">{guide.role}</p>
-                      <p className="mb-3 line-clamp-2 min-h-[32px] text-[10.5px] leading-relaxed text-white/45">{guide.desc}</p>
+                      <h4 className="mb-1 mt-1 font-headline text-base font-bold text-foreground">{guide.name}</h4>
+                      <p className="mb-2 label-sm text-[9px] tracking-[0.15em] text-foreground/40">{guide.role}</p>
+                      <p className="mb-3 line-clamp-2 min-h-[32px] 3xl:min-h-[40px] text-[10.5px] 3xl:text-[14px] leading-relaxed text-foreground/45">{guide.desc}</p>
                       <button
                         onClick={() => {
                           if (isLocked && paywallData) {
@@ -997,23 +987,23 @@ export default function DashboardHome() {
                             return;
                           }
                           setSelectedAvatarId(guide.avatarId);
-                          askInChat(t('chatWithNavi') || `Chat with ${guide.name}`, `I want to consult with ${guide.name} about my chart.`);
+                          askInChat(t('chatWithNavi'), `I want to consult with ${guide.name} about my chart.`);
                         }}
                         className={`flex items-center gap-1.5 rounded-xl border-2 px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
                           isLocked
-                            ? 'border-white/20 bg-transparent text-white/50 cursor-pointer hover:bg-white/5'
-                            : 'border-[#d99b23]/50 bg-transparent text-[#ffc43d] hover:border-[#d99b23]/70 hover:bg-[#d99b23]/10'
+                            ? 'border-outline-variant/20 bg-transparent text-foreground/50 cursor-pointer hover:bg-white/5'
+                            : 'border-secondary/50 bg-transparent text-secondary hover:border-secondary/70 hover:bg-secondary/10'
                         }`}
                       >
                         {isLocked ? (
                           <>
                             <Lock className="h-3 w-3" />
-                            {t('newDashboard.guides.locked') || "Locked"}
+                            {t('newDashboard.guides.locked')}
                           </>
                         ) : (
                           <>
                             <MessageSquare className="h-3 w-3" />
-                            {t('dashboard.startChat') || "Start Chat"}
+                            {t('dashboard.startChat')}
                           </>
                         )}
                       </button>
@@ -1027,31 +1017,31 @@ export default function DashboardHome() {
             <DarkPanel className="p-6">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Heart className="h-5 w-5 text-[#fb7185]" />
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.familyFriends.title') || "Family & Friends"}</h3>
+                  <Heart className="h-5 w-5 text-rose-400" />
+                  <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.familyFriends.title')}</h3>
                 </div>
-                <Link href="/family" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-                  {t('newDashboard.lifeAreas.viewAll') || "View All"} <ArrowRight className="inline h-3 w-3" />
+                <Link href="/family" aria-label={t('newDashboard.familyFriends.title')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
+                  {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {/* Example family members */}
-                <div className="flex flex-col gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-4">
+                <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#d99b23]/20 text-xl font-bold text-[#ffc43d]">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-xl font-bold text-secondary">
                       C
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="truncate font-headline text-sm font-bold text-white">Chandrakant</h4>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.familyFriends.relationshipSibling') || "Sibling"}</p>
+                      <h4 className="truncate font-headline text-sm font-bold text-foreground">Chandrakant</h4>
+                      <p className="label-sm text-[10px] tracking-wider text-foreground/35">{t('newDashboard.familyFriends.relationshipSibling')}</p>
                     </div>
                   </div>
-                  <span className="inline-block self-start rounded-md bg-[#ffb400]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#ffb400]">
-                    {t('dashboard.familyStatusNeedsAttention') || "Needs Attention"}
+                  <span className="inline-block self-start rounded-md bg-amber-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-400">
+                    {t('dashboard.familyStatusNeedsAttention')}
                   </span>
                   <div className="grid grid-cols-2 gap-2">
-                    <Link href="/family" className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]">
-                      {t('dashboard.familyViewBond') || "View Bond"}
+                    <Link href="/family" className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
+                      {t('dashboard.familyViewBond')}
                     </Link>
                     <button
                       onClick={() => {
@@ -1061,30 +1051,30 @@ export default function DashboardHome() {
                         }
                         router.push('/kundli/match');
                       }}
-                      className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]"
+                      className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
                     >
                       {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-                      {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
+                      {t('dashboard.familyRunCompatibility')}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-4">
+                <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#34d399]/20 text-xl font-bold text-[#34d399]">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-xl font-bold text-emerald-400">
                       A
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="truncate font-headline text-sm font-bold text-white">Ankit Prasad</h4>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{t('newDashboard.familyFriends.relationshipFriend') || "Friend"}</p>
+                      <h4 className="truncate font-headline text-sm font-bold text-foreground">Ankit Prasad</h4>
+                      <p className="label-sm text-[10px] tracking-wider text-foreground/35">{t('newDashboard.familyFriends.relationshipFriend')}</p>
                     </div>
                   </div>
-                  <span className="inline-block self-start rounded-md bg-[#34d399]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#34d399]">
-                    {t('newDashboard.linked') || "✓ Linked"}
+                  <span className="inline-block self-start rounded-md bg-emerald-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                    {t('newDashboard.linked')}
                   </span>
                   <div className="grid grid-cols-2 gap-2">
-                    <Link href="/family" className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]">
-                      {t('dashboard.familyViewBond') || "View Bond"}
+                    <Link href="/family" className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
+                      {t('dashboard.familyViewBond')}
                     </Link>
                     <button
                       onClick={() => {
@@ -1094,25 +1084,25 @@ export default function DashboardHome() {
                         }
                         router.push('/kundli/match');
                       }}
-                      className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all hover:border-[#d99b23]/30 hover:text-[#ffc43d]"
+                      className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
                     >
                       {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-                      {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
+                      {t('dashboard.familyRunCompatibility')}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#d99b23]/30 bg-[#d99b23]/5 p-4 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[#d99b23]/40 text-[#ffc43d]">
+                <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-secondary/30 bg-secondary/5 p-4 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/40 text-secondary">
                     <Users className="h-7 w-7" />
                   </div>
                   <div>
-                    <p className="mb-1 text-sm font-bold text-white">{t('newDashboard.familyFriends.addMember') || "Add Member"}</p>
-                    <p className="text-[10px] leading-relaxed text-white/40">{t('dashboard.familyAddSubtitle') || "Add family or friends to compare charts"}</p>
+                    <p className="mb-1 text-sm font-bold text-foreground">{t('newDashboard.familyFriends.addMember')}</p>
+                    <p className="text-[10px] leading-relaxed text-foreground/40">{t('dashboard.familyAddSubtitle')}</p>
                   </div>
-                  <button className="flex items-center gap-1.5 rounded-xl border-2 border-[#d99b23]/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-[#ffc43d] transition-all hover:border-[#d99b23]/70 hover:bg-[#d99b23]/10">
+                  <button className="flex items-center gap-1.5 rounded-xl border-2 border-secondary/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/10">
                     <Users className="h-3 w-3" />
-                    {t('newDashboard.familyFriends.addMember') || "Add Member"}
+                    {t('newDashboard.familyFriends.addMember')}
                   </button>
                 </div>
               </div>
@@ -1127,19 +1117,19 @@ export default function DashboardHome() {
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-5 w-5 items-center justify-center">
-                    <Orbit className="h-5 w-5 text-[#60a5fa]" />
+                    <Orbit className="h-5 w-5 text-blue-400" />
                   </div>
-                  <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('newDashboard.chartSnapshot') || "My Chart Snapshot"}</h3>
+                  <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.chartSnapshot')}</h3>
                 </div>
-                <Link href="/kundli" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-                  {t('newDashboard.myChart.viewDetails') || "View Details"} <ArrowRight className="inline h-3 w-3" />
+                <Link href="/kundli" aria-label={t('newDashboard.myChart.viewDetails')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
+                  {t('newDashboard.myChart.viewDetails')} <ArrowRight className="inline h-3 w-3" />
                 </Link>
               </div>
               <div className="space-y-3">
                 {[
-                  { label: t('newDashboard.myChart.yourKundli') || "Kundli", sublabel: `${ascendantSign?.name || "Leo"} ${t('dashboard.ascendant') || "Ascendant"}`, icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
-                  { label: t('newDashboard.myChart.mahadasha') || "Mahadasha", sublabel: "Rahu", subtext: "May 2026 — May 2044", icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "#fbbf24", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-                  { label: t('newDashboard.myChart.antardasha') || "Antardasha", sublabel: "Rahu", subtext: "May 2026 — Jan 2028", icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "#a78bfa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                  { label: t('newDashboard.myChart.yourKundli'), sublabel: `${ascendantSign?.name || "Leo"} ${t('dashboard.ascendant')}`, icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
+                  { label: t('newDashboard.myChart.mahadasha'), sublabel: "Rahu", subtext: "May 2026 — May 2044", icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "var(--flare-gold)", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                  { label: t('newDashboard.myChart.antardasha'), sublabel: "Rahu", subtext: "May 2026 — Jan 2028", icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "var(--flare-lavender)", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
                 ].map((item, idx) => {
                   const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
                   const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
@@ -1147,6 +1137,9 @@ export default function DashboardHome() {
                   return (
                     <div
                       key={idx}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={isBlocked ? `${t('newDashboard.unlock')} ${item.label}` : `${t('newDashboard.view')} ${item.label}`}
                       onClick={() => {
                         if (isBlocked && paywallData) {
                           setActivePaywallData(paywallData);
@@ -1154,7 +1147,17 @@ export default function DashboardHome() {
                         }
                         router.push(item.href);
                       }}
-                      className="flex items-center justify-between rounded-2xl border border-white/8 bg-[#0a0a1f] p-4 transition-all hover:border-[#d99b23]/30 hover:bg-[#0f0d2a] cursor-pointer"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          if (isBlocked && paywallData) {
+                            setActivePaywallData(paywallData);
+                            return;
+                          }
+                          router.push(item.href);
+                        }
+                      }}
+                      className="flex items-center justify-between rounded-2xl border border-outline-variant/8 bg-surface p-4 transition-all hover:border-secondary/30 hover:bg-surface-variant cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -1164,14 +1167,14 @@ export default function DashboardHome() {
                           {item.icon}
                         </div>
                         <div className={isBlocked ? "blur-[2.5px] select-none opacity-50 transition-all duration-300" : ""}>
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{item.label}</p>
-                          <p className="font-headline text-sm font-bold text-white">{item.sublabel}</p>
-                          {item.subtext && <p className="text-[10px] text-white/35">{item.subtext}</p>}
+                          <p className="label-sm text-[10px] tracking-wider text-foreground/35">{item.label}</p>
+                          <p className="font-headline text-sm font-bold text-foreground">{item.sublabel}</p>
+                          {item.subtext && <p className="text-[10px] text-foreground/35">{item.subtext}</p>}
                         </div>
                       </div>
-                      <button className="flex items-center gap-1 rounded-xl border border-[#d99b23]/40 bg-[#d99b23]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#ffc43d] shrink-0">
+                      <button className="flex items-center gap-1 rounded-xl border border-secondary/40 bg-secondary/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-secondary shrink-0">
                         {isBlocked ? <Lock className="h-3 w-3 mr-0.5" /> : null}
-                        {isBlocked ? (t('newDashboard.unlock') || 'Unlock') : (t('newDashboard.view') || 'View')} <ArrowRight className="h-3 w-3" />
+                        {isBlocked ? t('newDashboard.unlock') : t('newDashboard.view')} <ArrowRight className="h-3 w-3" />
                       </button>
                     </div>
                   );
@@ -1179,10 +1182,10 @@ export default function DashboardHome() {
               </div>
               <Link
                 href="/kundli"
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-[#d99b23]/50 bg-[#d99b23]/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-[#ffc43d] transition-all hover:border-[#d99b23]/70 hover:bg-[#d99b23]/15"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-secondary/50 bg-secondary/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/15"
               >
                 <Sparkles className="h-4 w-4" />
-                {t('newDashboard.myChart.exploreFullAnalysis') || "Explore Full Analysis"}
+                {t('newDashboard.myChart.exploreFullAnalysis')}
               </Link>
             </DarkPanel>
 
@@ -1195,22 +1198,22 @@ export default function DashboardHome() {
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-5 w-5 items-center justify-center">
-                <div className="h-2 w-2 rotate-45 border border-[#ffc43d] bg-[#ffc43d]/20" />
+                <div aria-hidden="true" className="h-2 w-2 rotate-45 border border-secondary bg-secondary/20" />
               </div>
-              <h3 className="text-[13px] font-black uppercase tracking-[0.24em] text-white">{t('dashboard.cosmicPortals') || "Cosmic Portals"}</h3>
+              <h3 className="label-sm font-black tracking-[0.24em]">{t('dashboard.cosmicPortals')}</h3>
             </div>
-            <Link href="/chat" className="text-[11px] font-bold uppercase tracking-wider text-[#ffc43d] hover:text-[#e6ad2f]">
-              {t('newDashboard.exploreAllPortals') || "Explore All Portals"} <ArrowRight className="inline h-3 w-3" />
+            <Link href="/chat" aria-label={t('newDashboard.exploreAllPortals')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
+              {t('newDashboard.exploreAllPortals')} <ArrowRight className="inline h-3 w-3" />
             </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {[
-              { icon: <MessageSquare className="h-5 w-5" />, title: t('dashboard.consultNaviAi') || "Chat with Navi", desc: t('newDashboard.portalChatDesc') || "Ask anything about your Kundli, Dashas, transits, or life guidance.", action: t('dashboard.consultAi') || "Consult AI", href: "/chat", color: "#ffc43d", requiresFeature: 'chat_message' as PaywallFeatureKey },
-              { icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli') || "Janam Kundli", desc: t('dashboard.janamKundliDesc') || "Detailed birth chart & planetary analysis based on Vedic wisdom.", action: t('dashboard.openChart') || "Open Chart", href: "/kundli", color: "#60a5fa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-              { icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync') || "Soulmate Sync", desc: t('newDashboard.portalSoulmateDesc') || "Match compatibility using Guna Milan & karmic insights.", action: t('dashboard.analyzeMatch') || "Analyze Match", href: "/kundli/match", color: "#fb7185", requiresFeature: 'match_report' as PaywallFeatureKey },
-              { icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse') || "Daily Pulse", desc: t('newDashboard.portalPulseDesc') || "Real-time Tithi, Yoga & Vedic energies for your day.", action: t('newDashboard.viewToday') || "View Today", href: "/horoscope/forecast", color: "#34d399", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
-              { icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary') || "Rashi Library", desc: t('newDashboard.portalRashiDesc') || "Explore all 12 zodiac signs with detailed traits & insights.", action: t('dashboard.openLibrary') || "Open Library", href: "/rashis", color: "#a78bfa" },
-              { icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions') || "Sessions", desc: t('newDashboard.portalSessionsDesc') || "Join live sessions & interact with experts and seekers.", action: t('dashboard.joinSession') || "Join Session", href: "/consult", color: "#f59e0b", requiresFeature: 'guided_consult' as PaywallFeatureKey },
+              { icon: <MessageSquare className="h-5 w-5" />, title: t('dashboard.consultNaviAi'), desc: t('newDashboard.portalChatDesc'), action: t('dashboard.consultAi'), href: "/chat", color: "var(--secondary)", requiresFeature: 'chat_message' as PaywallFeatureKey },
+              { icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli'), desc: t('dashboard.janamKundliDesc'), action: t('dashboard.openChart'), href: "/kundli", color: "#60a5fa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+              { icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync'), desc: t('newDashboard.portalSoulmateDesc'), action: t('dashboard.analyzeMatch'), href: "/kundli/match", color: "#fb7185", requiresFeature: 'match_report' as PaywallFeatureKey },
+              { icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse'), desc: t('newDashboard.portalPulseDesc'), action: t('newDashboard.viewToday'), href: "/horoscope/forecast", color: "#34d399", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
+              { icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary'), desc: t('newDashboard.portalRashiDesc'), action: t('dashboard.openLibrary'), href: "/rashis", color: "var(--flare-lavender)" },
+              { icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions'), desc: t('newDashboard.portalSessionsDesc'), action: t('dashboard.joinSession'), href: "/consult", color: "var(--flare-gold)", requiresFeature: 'guided_consult' as PaywallFeatureKey },
             ].map((portal, idx) => {
               const isLocked = portal.requiresFeature ? isFeatureBlocked(portal.requiresFeature) : false;
               const paywallData = portal.requiresFeature ? getFeaturePaywall(portal.requiresFeature) : null;
@@ -1220,6 +1223,9 @@ export default function DashboardHome() {
               return (
                 <div
                   key={idx}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={portal.title}
                   onClick={(e) => {
                     if (isLocked && paywallData) {
                       e.preventDefault();
@@ -1228,13 +1234,23 @@ export default function DashboardHome() {
                       router.push(portal.href);
                     }
                   }}
-                  className={`group relative flex flex-col gap-3 rounded-2xl border border-white/8 bg-[#0a0a1f] p-5 transition-all cursor-pointer ${
-                    isLocked ? 'opacity-60 hover:border-white/10' : 'hover:-translate-y-0.5 hover:border-[#d99b23]/30 hover:bg-[#0f0d2a]'
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (isLocked && paywallData) {
+                        setActivePaywallData(paywallData);
+                      } else {
+                        router.push(portal.href);
+                      }
+                    }
+                  }}
+                  className={`group relative flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-5 transition-all cursor-pointer ${
+                    isLocked ? 'opacity-60 hover:border-outline-variant/10' : 'hover:-translate-y-0.5 hover:border-secondary/30 hover:bg-surface-variant'
                   }`}
                 >
                   {/* Pro Badge */}
                   {showProBadge && (
-                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-[#ffc43d] to-[#f59e0b] px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-[#0a0a1f]">
+                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-secondary to-amber-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-on-primary">
                       <Zap className="h-2.5 w-2.5" />
                       Pro
                     </div>
@@ -1242,7 +1258,7 @@ export default function DashboardHome() {
 
                   {/* Credit Badge */}
                   {showCreditBadge && paywallData?.creditsRequired && (
-                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-[#d99b23]/40 bg-[#d99b23]/15 px-2 py-0.5 text-[8px] font-bold text-[#ffc43d]">
+                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-secondary/40 bg-secondary/15 px-2 py-0.5 text-[8px] font-bold text-secondary">
                       <Coins className="h-2.5 w-2.5" />
                       {paywallData.creditsRequired}
                     </div>
@@ -1255,15 +1271,15 @@ export default function DashboardHome() {
                     {portal.icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="mb-1.5 font-headline text-base font-bold text-white">{portal.title}</h4>
-                    <p className="line-clamp-3 text-[11px] leading-relaxed text-white/45">{portal.desc}</p>
+                    <h4 className="mb-1.5 font-headline text-base font-bold text-foreground">{portal.title}</h4>
+                    <p className="line-clamp-3 text-[11px] leading-relaxed text-foreground/45">{portal.desc}</p>
                   </div>
                   <button
                     className={`mt-auto flex items-center justify-center gap-2 rounded-xl border-2 px-3 py-2 text-[10px] font-black uppercase tracking-wider transition-all`}
                     style={{ borderColor: `${portal.color}50`, backgroundColor: 'transparent', color: portal.color }}
                   >
                     {isLocked && <Lock className="h-3 w-3 mr-1 shrink-0" />}
-                    {isLocked ? (t('newDashboard.unlock') || 'Unlock') : portal.action} <ArrowRight className="h-3 w-3" />
+                    {isLocked ? t('newDashboard.unlock') : portal.action} <ArrowRight className="h-3 w-3" />
                   </button>
                 </div>
               );
@@ -1272,17 +1288,17 @@ export default function DashboardHome() {
         </DarkPanel>
 
         {/* Privacy Footer */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-center text-[11px] text-white/30">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-center text-[11px] text-foreground/30">
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4" />
-            <span>{t('newDashboard.privacy.protected') || "Your data is private and protected."}</span>
+            <span>{t('newDashboard.privacy.protected')}</span>
           </div>
           <span>•</span>
-          <span>{t('newDashboard.privacy.secure') || "Secure"}</span>
+          <span>{t('newDashboard.privacy.secure')}</span>
           <span>•</span>
-          <span>{t('newDashboard.privacy.encrypted') || "Encrypted"}</span>
+          <span>{t('newDashboard.privacy.encrypted')}</span>
           <span>•</span>
-          <span>{t('newDashboard.privacy.trusted') || "Trusted by thousands"}</span>
+          <span>{t('newDashboard.privacy.trusted')}</span>
         </div>
       </div>
 
@@ -1294,8 +1310,12 @@ export default function DashboardHome() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setPendingPrompt(null)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setPendingPrompt(null);
+            }}
             role="dialog"
             aria-modal="true"
+            aria-labelledby="chat-confirm-title"
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
             <motion.div
@@ -1303,30 +1323,31 @@ export default function DashboardHome() {
               animate={{ y: 0, scale: 1 }}
               exit={{ y: 12, scale: 0.98 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md rounded-[28px] border border-[#d99b23]/30 bg-[#090826] p-6 shadow-2xl"
+              className="relative w-full max-w-md rounded-[28px] border border-secondary/30 bg-surface p-6 shadow-2xl"
             >
               <button
+                autoFocus
                 onClick={() => setPendingPrompt(null)}
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-white/70 hover:bg-white/12"
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-foreground/70 hover:bg-white/12"
                 aria-label="Close chat confirmation"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d99b23]/30 bg-[#d99b23]/10 text-[#ffc43d]">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
                 <MessageSquare className="h-6 w-6" />
               </div>
-              <h2 className="font-headline text-2xl font-bold">{t('newDashboard.todaysEnergy.askNaviInChat') || "Ask Navi in chat?"}</h2>
-              <p className="mt-2 text-sm leading-6 text-white/60">{t('newDashboard.todaysEnergy.askNaviConfirmDesc') || "Navi will open chat with this question so you can continue from there."}</p>
-              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ffc43d]">{pendingPrompt.title}</p>
-                <p className="mt-2 text-sm leading-6 text-white/82">{pendingPrompt.message}</p>
+              <h2 id="chat-confirm-title" className="font-headline text-2xl font-bold">{t('newDashboard.todaysEnergy.askNaviInChat')}</h2>
+              <p className="mt-2 text-sm leading-6 text-foreground/60">{t('newDashboard.todaysEnergy.askNaviConfirmDesc')}</p>
+              <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-4">
+                <p className="label-secondary text-[11px] font-black tracking-[0.2em]">{pendingPrompt.title}</p>
+                <p className="mt-2 text-sm leading-6 text-foreground/82">{pendingPrompt.message}</p>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <button onClick={() => setPendingPrompt(null)} className="rounded-2xl border border-white/12 px-4 py-3 text-sm font-bold text-white/75 hover:bg-white/8">
-                  {t('newDashboard.todaysEnergy.stayHere') || "Stay here"}
+                <button onClick={() => setPendingPrompt(null)} className="rounded-2xl border border-outline-variant/12 px-4 py-3 text-sm font-bold text-foreground/75 hover:bg-white/8">
+                  {t('newDashboard.todaysEnergy.stayHere')}
                 </button>
-                <button onClick={confirmChat} className="rounded-2xl bg-[#ffc022] px-4 py-3 text-sm font-black text-[#08071f]">
-                  {t('newDashboard.todaysEnergy.openChat') || "Open chat"}
+                <button onClick={confirmChat} className="rounded-2xl bg-secondary px-4 py-3 text-sm font-black text-on-primary">
+                  {t('newDashboard.todaysEnergy.openChat')}
                 </button>
               </div>
             </motion.div>

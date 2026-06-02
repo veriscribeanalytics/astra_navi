@@ -400,10 +400,10 @@ const Navbar: React.FC = () => {
                 isOpen={showLogoutDialog}
                 onClose={() => setShowLogoutDialog(false)}
                 onConfirm={confirmLogout}
-                title="Sign out of AstraNavi?"
-                message="You will be signed out of your account and redirected to the homepage."
-                confirmText="Sign Out"
-                cancelText="Cancel"
+                title={t('nav.logoutConfirmTitle')}
+                message={t('nav.logoutConfirmMessage')}
+                confirmText={t('nav.signOut')}
+                cancelText={t('common.cancel')}
                 variant="warning"
                 isLoading={isLoggingOut}
             />
@@ -465,7 +465,7 @@ const Navbar: React.FC = () => {
                                                     aria-label={`${item.label}: ${item.desc}`}
                                                     className={`group flex items-start gap-4 p-3 rounded-2xl transition-all duration-200 ${isActive(item.href) ? 'bg-secondary/10' : 'hover:bg-secondary/5'}`}
                                                 >
-                                                    <div className={`mt-0.5 w-10 h-10 shrink-0 rounded-xl flex items-center justify-center border transition-all duration-300 ${isActive(item.href) ? 'bg-secondary text-white border-secondary' : 'bg-secondary/5 text-secondary border-secondary/10 group-hover:bg-secondary/10 group-hover:border-secondary/30'}`}>
+                                                    <div className={`mt-0.5 w-10 h-10 shrink-0 rounded-xl flex items-center justify-center border transition-all duration-300 ${isActive(item.href) ? 'bg-secondary text-on-primary border-secondary' : 'bg-secondary/5 text-secondary border-secondary/10 group-hover:bg-secondary/10 group-hover:border-secondary/30'}`}>
                                                         {item.icon}
                                                     </div>
                                                     <div className="flex flex-col">
@@ -517,14 +517,14 @@ const Navbar: React.FC = () => {
                                 className="profile-ring-glow cursor-pointer" 
                                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                             >
-                                <div className="profile-comet-dot"></div>
+                                <div className="profile-comet-dot" aria-hidden="true"></div>
                                 <div className="profile-avatar-content !text-sm">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </button>
                             {isUserDropdownOpen && (
-                                <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div role="menu" aria-label={t('nav.account')} className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
-                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
-                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || "User"}</p>
+                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">{t('nav.account')}</p>
+                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || t('common.user')}</p>
                                     </div>
                                     {/* Credit Balance */}
                                     {isLoggedIn && isLoaded && (
@@ -542,10 +542,10 @@ const Navbar: React.FC = () => {
                                             <Sparkles className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.astraNaviPremium')}
                                         </Link>
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
-                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> User Profile
+                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> {t('common.userProfile')}
                                         </Link>
                                         <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 text-sm text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-medium">
-                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> Sign Out
+                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.signOut')}
                                         </button>
                                     </div>
                                 </div>
@@ -591,14 +591,14 @@ const Navbar: React.FC = () => {
                     ) : (
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
                             <button className="profile-ring-glow !w-8 !h-8 cursor-pointer border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 p-0" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label="User menu" aria-expanded={isUserDropdownOpen}>
-                                <div className="profile-comet-dot"></div>
+                                <div className="profile-comet-dot" aria-hidden="true"></div>
                                 <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
                             </button>
                             {isUserDropdownOpen && (
-                                <div className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div role="menu" aria-label={t('nav.account')} className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3.5 mb-2 border-b border-primary/5">
-                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">Account</p>
-                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || "User"}</p>
+                                        <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">{t('nav.account')}</p>
+                                        <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || t('common.user')}</p>
                                     </div>
                                     {/* Credit Balance */}
                                     {isLoggedIn && isLoaded && (
@@ -616,10 +616,10 @@ const Navbar: React.FC = () => {
                                             <Sparkles className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.astraNaviPremium')}
                                         </Link>
                                         <Link href="/profile" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
-                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> User Profile
+                                            <User className="w-4 h-4 mr-3.5 opacity-60" /> {t('common.userProfile')}
                                         </Link>
                                         <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 text-sm text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-medium">
-                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> Sign Out
+                                            <LogOut className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.signOut')}
                                         </button>
                                     </div>
                                 </div>
@@ -641,7 +641,7 @@ const Navbar: React.FC = () => {
                                 {section.items.map((item, idx) => {
                                     return (
                                         <Link key={idx} href={item.href} onClick={() => setIsMenuOpen(false)} className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all active:scale-[0.98] ${isActive(item.href) ? 'bg-secondary/10' : 'hover:bg-primary/5'}`}>
-                                            <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition-colors ${isActive(item.href) ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary'}`}>
+                                            <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition-colors ${isActive(item.href) ? 'bg-secondary text-on-primary' : 'bg-secondary/10 text-secondary'}`}>
                                                 {cloneElement(item.icon as React.ReactElement<Record<string, unknown>>, { size: 18 })}
                                             </div>
                                             <div className="flex flex-col min-w-0">
@@ -663,13 +663,13 @@ const Navbar: React.FC = () => {
 
                     {/* Preferences Row (Language Picker) on Mobile */}
                     <div className="pt-5 border-t border-outline-variant/30 flex items-center justify-between">
-                        <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">{t('profile.basicInfo.language') || 'Language'}</span>
+                        <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">{t('profile.basicInfo.language')}</span>
                         <LanguagePicker />
                     </div>
 
                     {!isLoggedIn && (
                         <div className="pt-2">
-                            <Button href="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="rounded-2xl shadow-lg shadow-secondary/20 font-bold tracking-wider">GET STARTED</Button>
+                            <Button href="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="rounded-2xl shadow-lg shadow-secondary/20 font-bold tracking-wider">{t('nav.getStarted')}</Button>
                         </div>
                     )}
                 </div>

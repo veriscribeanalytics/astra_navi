@@ -6,6 +6,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import AuthErrorBanner from './AuthErrorBanner';
 import { useTranslation } from '@/hooks';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 
 interface EmailOtpFormProps {
   /**
@@ -20,6 +21,10 @@ interface EmailOtpFormProps {
 type Step = 'email' | 'otp';
 
 const OTP_LENGTH = 6;
+// Short cooldown before "Resend" re-enables — kept independent of the code's
+// expiry (~5 min) so a user whose email never arrives isn't locked out of
+// requesting a new one.
+const RESEND_COOLDOWN_SECONDS = 30;
 
 const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = false }) => {
   const { t } = useTranslation();
@@ -39,7 +44,7 @@ const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = fals
 
   /** POST /api/auth/email-otp/start  body: { email: "x@y.com" }  ->  { sent: true, expiresIn: 300 } */
   const sendOtp = async (emailAddress: string): Promise<number> => {
-    const res = await fetch('/api/auth/email-otp/start', {
+    const res = await fetchWithTimeout('/api/auth/email-otp/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: emailAddress }),
@@ -59,7 +64,7 @@ const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = fals
 
   /** POST /api/auth/email-otp/verify  body: { email, code }  ->  session envelope */
   const verifyOtp = async (emailAddress: string, code: string): Promise<unknown> => {
-    const res = await fetch('/api/auth/email-otp/verify', {
+    const res = await fetchWithTimeout('/api/auth/email-otp/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: emailAddress, code }),
@@ -94,9 +99,9 @@ const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = fals
     }
     setIsSubmitting(true);
     try {
-      const expiresIn = await sendOtp(email.trim());
+      await sendOtp(email.trim());
       setStep('otp');
-      setResendIn(expiresIn);
+      setResendIn(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send the code. Please try again.');
     } finally {
@@ -108,7 +113,7 @@ const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = fals
     e.preventDefault();
     setError(null);
     if (!isValidOtp) {
-      setError(t('auth.phone.invalidOtp') || `Enter the ${OTP_LENGTH}-digit code.`);
+      setError(t('auth.email.invalidOtp') || `Enter the ${OTP_LENGTH}-digit code.`);
       return;
     }
     setIsSubmitting(true);
@@ -125,11 +130,14 @@ const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = fals
   const handleResend = async () => {
     if (resendIn > 0 || isSubmitting) return;
     setError(null);
+    setIsSubmitting(true);
     try {
-      const expiresIn = await sendOtp(email.trim());
-      setResendIn(expiresIn);
+      await sendOtp(email.trim());
+      setResendIn(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not resend the code.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,6 +183,7 @@ const EmailOtpForm: React.FC<EmailOtpFormProps> = ({ onVerified, disabled = fals
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
+            autoFocus
             maxLength={OTP_LENGTH}
             label={t('auth.email.otpLabel') || 'Verification Code'}
             placeholder={'•'.repeat(OTP_LENGTH)}
