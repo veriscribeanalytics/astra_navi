@@ -46,6 +46,8 @@ const Footer = () => {
                         <li><Link className="hover:text-secondary transition-colors" href="/about">{t('footer.aboutUs')}</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/privacy">{t('footer.privacyPolicy') || 'Privacy Policy'}</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/terms">{t('footer.terms') || 'Terms & Conditions'}</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/privacy/subprocessors">{t('footer.subprocessors') || 'Subprocessors'}</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/privacy/grievance">{t('footer.grievance') || 'Grievance Redressal'}</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/astrologers">{t('footer.ourAstrologers')}</Link></li>
                         <li className="flex items-center text-on-surface-variant/40">
                             <span>{t('footer.careers')}</span>

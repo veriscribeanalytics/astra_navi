@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { RazorpayCheckoutHandler } from '@/components/billing/RazorpayCheckoutHandler';
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Clock, Shield, Star } from 'lucide-react';
+import { Sparkles, ArrowRight, Clock, Shield, Star, FlaskConical } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import CreditBalanceCard from '@/components/billing/CreditBalanceCard';
 import ProductCatalog from '@/components/billing/ProductCatalog';
@@ -40,6 +40,9 @@ export default function PlansClient() {
   // Highlight product from query params: ?product=pro_monthly or ?feature=chat_message
   const highlightProductId = searchParams?.get('product') || null;
   const highlightFeature = searchParams?.get('feature') || null;
+
+  // Test mode: ?test=1 reveals hidden/inactive products (e.g. ₹1 test plan test_pro_1_inr)
+  const isTestMode = searchParams?.get('test') === '1';
 
   // State
   const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null);
@@ -92,6 +95,16 @@ export default function PlansClient() {
             <ArrowRight className="w-3 h-3 text-secondary/40" />
           </div>
         )}
+
+        {/* Test mode indicator */}
+        {isTestMode && (
+          <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-500/[0.08] border border-amber-500/20 mt-2">
+            <FlaskConical className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest">
+              Test Mode — ₹1 test plans visible
+            </span>
+          </div>
+        )}
       </motion.div>
 
       {/* ─── Credit Balance (for logged-in users) ─── */}
@@ -130,9 +143,10 @@ export default function PlansClient() {
         className="max-w-4xl 2xl:max-w-6xl 3xl:max-w-[1600px] mx-auto px-4 mb-8 sm:mb-12 w-full"
       >
         <ProductCatalog
-          highlightProductId={highlightProductId ?? undefined}
+          highlightProductId={highlightProductId ?? (isTestMode ? 'test_pro_1_inr' : undefined)}
           currentTier={effectiveBalance?.tier ?? undefined}
           onSelectProduct={handleSelectProduct}
+          showInactive={isTestMode}
         />
       </motion.div>
 

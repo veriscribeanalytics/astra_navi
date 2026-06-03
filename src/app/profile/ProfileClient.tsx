@@ -903,7 +903,21 @@ export default function ProfileSettingsPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="pt-4 flex flex-col sm:flex-row gap-4">
+                        {/* DPDP Consent Reaffirmation */}
+                        <div className="pt-4 border-t border-outline-variant/12">
+                          <p className="text-[10px] sm:text-xs text-primary/50 leading-relaxed mb-3">
+                            By saving, you reaffirm your consent for Astra Navi to process your personal data — including birth details — for Vedic astrological computations, AI-powered readings, and personalized insights as described in our{' '}
+                            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                              Privacy Policy
+                            </a>
+                            {' '}(DPDP Act, 2023). You may withdraw consent at any time via{' '}
+                            <a href="/profile/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                              Privacy Settings
+                            </a>.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4">
                             <Button
                                 type="submit"
                                 fullWidth

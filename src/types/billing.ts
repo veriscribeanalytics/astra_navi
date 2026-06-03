@@ -317,7 +317,14 @@ export function getActionCategoryLabel(category: ActionCategory, t: (key: string
  *
  * Returns a valid CatalogResponse with empty arrays for missing sections.
  */
-export function normalizeCatalogResponse(raw: unknown): CatalogResponse {
+export interface NormalizeCatalogOptions {
+  /** When true, include products where isActive === false (e.g. hidden/test products). */
+  showInactive?: boolean;
+}
+
+export function normalizeCatalogResponse(raw: unknown, options?: NormalizeCatalogOptions): CatalogResponse {
+  const { showInactive = false } = options || {};
+
   if (!raw || typeof raw !== 'object') {
     return { subscriptions: [], creditPacks: [], reports: [] };
   }
@@ -382,8 +389,8 @@ export function normalizeCatalogResponse(raw: unknown): CatalogResponse {
       if (!item || typeof item !== 'object') continue;
       const pt = item.productType || item.product_type || item.type || '';
       const normalized = normalizeCatalogProduct(item);
-      // Filter out inactive products
-      if (normalized.isActive === false) continue;
+      // Filter out inactive products (unless showInactive test mode)
+      if (!showInactive && normalized.isActive === false) continue;
       if (pt === 'subscription' || normalized.productType === 'subscription') {
         subs.push(normalized as CatalogSubscription);
       } else if (pt === 'one_time_pack' || normalized.productType === 'one_time_pack') {
@@ -394,10 +401,10 @@ export function normalizeCatalogResponse(raw: unknown): CatalogResponse {
     }
   }
 
-  // Filter out inactive products from explicit-key collections too
-  const activeSubs = subs.filter(s => s.isActive !== false);
-  const activePacks = packs.filter(p => p.isActive !== false);
-  const activeReports = reports.filter(r => r.isActive !== false);
+  // Filter out inactive products from explicit-key collections too (unless showInactive test mode)
+  const activeSubs = showInactive ? subs : subs.filter(s => s.isActive !== false);
+  const activePacks = showInactive ? packs : packs.filter(p => p.isActive !== false);
+  const activeReports = showInactive ? reports : reports.filter(r => r.isActive !== false);
 
   return { subscriptions: activeSubs, creditPacks: activePacks, reports: activeReports };
 }

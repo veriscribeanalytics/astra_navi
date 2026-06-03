@@ -19,6 +19,8 @@ import { PaywallProvider } from "@/context/PaywallContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/hooks/useToast";
 import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
+import { CookieConsentProvider } from "@/context/CookieConsentContext";
+import CookieConsentBanner from "@/components/privacy/CookieConsentBanner";
 
 export const metadata: Metadata = {
   title: "AstraNavi | Vedic AI Astrology",
@@ -66,21 +68,24 @@ export default async function RootLayout({
                 <ChatProvider>
                   <PaywallProvider>
                   <ThemeProvider>
-                    <SkipLink />
+                    <CookieConsentProvider>
+                      <SkipLink />
 
-                    <Suspense fallback={null}>
-                      <OnboardingGate />
-                    </Suspense>
+                      <Suspense fallback={null}>
+                        <OnboardingGate />
+                      </Suspense>
 
-                    <OptimizedBackgrounds />
-                    <Toaster />
+                      <OptimizedBackgrounds />
+                      <Toaster />
 
-                    <Navbar />
-                    <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent pt-[var(--navbar-height,64px)]">
-                      {children}
-                    </main>
-                    <ConditionalFooter />
-                    <AskNaviFab />
+                      <Navbar />
+                      <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent pt-[var(--navbar-height,64px)]">
+                        {children}
+                      </main>
+                      <ConditionalFooter />
+                      <AskNaviFab />
+                      <CookieConsentBanner />
+                    </CookieConsentProvider>
                   </ThemeProvider>
                   </PaywallProvider>
                 </ChatProvider>

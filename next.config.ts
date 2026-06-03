@@ -2,13 +2,26 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
 
+const devConnectSrc = isDev
+  ? ` ws: http://localhost:* http://127.0.0.1:* http://192.168.1.4:* ws://192.168.1.4:*${
+      process.env.DEV_ORIGIN
+        ? (() => {
+            const clean = process.env.DEV_ORIGIN.replace(/^(https?:\/\/)?/, "");
+            const hostOnly = clean.split("/")[0];
+            const ipOnly = hostOnly.split(":")[0];
+            return ` http://${hostOnly} ws://${hostOnly} http://${ipOnly}:* ws://${ipOnly}:*`;
+          })()
+        : ""
+    }`
+  : "";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://accounts.google.com/gsi/client${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://api.veriscribeanalytics.com https://lh3.googleusercontent.com https://checkout.razorpay.com",
-  `connect-src 'self' https://api.veriscribeanalytics.com https://api.razorpay.com https://accounts.google.com${isDev ? " ws: http://localhost:* http://127.0.0.1:*" : ""}`,
+  `connect-src 'self' https://api.veriscribeanalytics.com https://api.razorpay.com https://accounts.google.com${devConnectSrc}`,
   "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://accounts.google.com",
 ].join("; ");
 
@@ -20,7 +33,33 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   turbopack: { root: process.cwd() },
 
-  allowedDevOrigins: process.env.DEV_ORIGIN ? [process.env.DEV_ORIGIN] : [],
+  allowedDevOrigins: (() => {
+    const rawOrigins = [
+      "192.168.1.4",
+      "192.168.1.4:3000",
+      "192.168.1.4:3001",
+      "192.168.1.4:3002",
+      "192.168.1.4:3003",
+    ];
+    if (process.env.DEV_ORIGIN) {
+      const clean = process.env.DEV_ORIGIN.replace(/^(https?:\/\/)?/, "");
+      const hostOnly = clean.split("/")[0];
+      const ipOnly = hostOnly.split(":")[0];
+      if (!rawOrigins.includes(clean)) rawOrigins.push(clean);
+      if (!rawOrigins.includes(hostOnly)) rawOrigins.push(hostOnly);
+      if (!rawOrigins.includes(ipOnly)) rawOrigins.push(ipOnly);
+      if (!rawOrigins.includes(process.env.DEV_ORIGIN)) rawOrigins.push(process.env.DEV_ORIGIN);
+    }
+    const allOrigins: string[] = [];
+    for (const o of rawOrigins) {
+      allOrigins.push(o);
+      if (!o.startsWith("http")) {
+        allOrigins.push(`http://${o}`);
+        allOrigins.push(`https://${o}`);
+      }
+    }
+    return allOrigins;
+  })(),
 
   // Image optimization - allow external sources if needed in future
   images: {

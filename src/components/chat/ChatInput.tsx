@@ -479,7 +479,12 @@ const ChatInput: React.FC = () => {
               <span>{cycleLabel}</span>
             </button>
 
-            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden md:inline ml-1">{t('chat.input.naviUsesChart')}</span>
+            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden md:inline ml-1">
+              {t('chat.input.naviUsesChart')}{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
+                (DPDP-compliant AI processing)
+              </a>
+            </span>
             
             {showCharCount && (
               <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'} ml-2`}>

@@ -88,6 +88,11 @@ export default function MockCheckoutModal({
       const result = await checkoutHandler.initiateCheckout(product);
       if (result.success) {
         setCheckoutSuccess(true);
+        // Auto-close after a brief success display
+        setTimeout(() => {
+          onClose();
+          setCheckoutSuccess(false);
+        }, 2000);
       } else {
         setCheckoutError(result.error || 'Checkout failed');
       }

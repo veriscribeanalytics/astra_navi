@@ -58,7 +58,11 @@ const hasSpecial = (p: string) => /[^A-Za-z0-9]/.test(p);
 const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false, onActionClick, socialAuth }) => {
   const { t, language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
   const [step, setStep] = useState(0);
-  const [consentGiven, setConsentGiven] = useState(false);
+  // DPDP Act 2023 — unbundled consent: separate checkboxes for each purpose
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
   const [data, setData] = useState<RegisterData>({
     email: '', password: '', confirmPassword: '', name: '', gender: '',
     phoneNumber: '', maritalStatus: '', occupation: '',
@@ -520,27 +524,75 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
                 </div>
               </div>
 
-              {/* Required Consent Checkbox */}
-              <div className="pt-4 border-t border-[color-mix(in_srgb,var(--secondary)_10%,var(--accent)_25%)]">
+              {/* DPDP Act 2023 — Unbundled Consent Checkboxes */}
+              <div className="pt-4 border-t border-[color-mix(in_srgb,var(--secondary)_10%,var(--accent)_25%)] space-y-3.5">
+                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] text-secondary/70">
+                  Required Acknowledgements
+                </p>
+
+                {/* 1. Age Gate */}
                 <label className="flex items-start gap-3 cursor-pointer select-none">
                   <input
-                    id="consent-checkbox"
+                    id="consent-age"
                     type="checkbox"
-                    checked={consentGiven}
-                    onChange={(e) => setConsentGiven(e.target.checked)}
-                    className="mt-1 w-4.5 h-4.5 rounded border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] bg-[color-mix(in_srgb,var(--surface-variant)_55%,#0e0a20)] text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
+                    checked={ageConfirmed}
+                    onChange={(e) => setAgeConfirmed(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] bg-[color-mix(in_srgb,var(--surface-variant)_55%,#0e0a20)] text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
                     required
                   />
                   <span className="text-xs text-[color-mix(in_srgb,var(--on-surface-variant)_75%,transparent)] leading-relaxed font-medium font-body">
-                    {t('login.consentPart1') || 'I confirm I am 18 or older and agree to the'}{' '}
+                    {t('login.consentAge') || 'I confirm that I am 18 years of age or older.'}
+                  </span>
+                </label>
+
+                {/* 2. Privacy Policy */}
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    id="consent-privacy"
+                    type="checkbox"
+                    checked={privacyAccepted}
+                    onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] bg-[color-mix(in_srgb,var(--surface-variant)_55%,#0e0a20)] text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
+                    required
+                  />
+                  <span className="text-xs text-[color-mix(in_srgb,var(--on-surface-variant)_75%,transparent)] leading-relaxed font-medium font-body">
+                    {t('login.consentPrivacy') || 'I have read and understood the'}{' '}
                     <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
                       {t('footer.privacyPolicy') || 'Privacy Policy'}
-                    </Link>{' '}
-                    {t('login.consentPart2') || 'and'}{' '}
+                    </Link>.
+                  </span>
+                </label>
+
+                {/* 3. Terms & Conditions */}
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    id="consent-terms"
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] bg-[color-mix(in_srgb,var(--surface-variant)_55%,#0e0a20)] text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
+                    required
+                  />
+                  <span className="text-xs text-[color-mix(in_srgb,var(--on-surface-variant)_75%,transparent)] leading-relaxed font-medium font-body">
+                    {t('login.consentTerms') || 'I agree to the'}{' '}
                     <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
                       {t('footer.terms') || 'Terms & Conditions'}
-                    </Link>
-                    .
+                    </Link>.
+                  </span>
+                </label>
+
+                {/* 4. Data Processing Consent (DPDP-specific) */}
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    id="consent-processing"
+                    type="checkbox"
+                    checked={dataProcessingConsent}
+                    onChange={(e) => setDataProcessingConsent(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] bg-[color-mix(in_srgb,var(--surface-variant)_55%,#0e0a20)] text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
+                    required
+                  />
+                  <span className="text-xs text-[color-mix(in_srgb,var(--on-surface-variant)_75%,transparent)] leading-relaxed font-medium font-body">
+                    {t('login.consentProcessing') || 'I consent to the processing of my personal data, including birth details, for generating Vedic astrological charts, AI-powered readings, and personalized horoscope insights as described in the Privacy Policy. I understand I can withdraw this consent at any time.'}
                   </span>
                 </label>
               </div>
@@ -574,7 +626,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
         ) : (
           <button
             type="button"
-            disabled={disabled || isSubmitting || !consentGiven}
+            disabled={disabled || isSubmitting || !ageConfirmed || !privacyAccepted || !termsAccepted || !dataProcessingConsent}
             onClick={handleSubmit}
             className="auth-btn-gold flex-1 h-[48px] sm:h-[52px] 3xl:h-[84px] !rounded-[18px] 3xl:!rounded-[26px] !text-[16px] sm:!text-[18px] 3xl:!text-[28px]"
           >

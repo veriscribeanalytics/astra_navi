@@ -57,7 +57,20 @@ function KundliContent() {
         );
     }
 
-    return <KundliClient />;
+    return (
+      <>
+        <KundliClient />
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 pb-8">
+          <p className="text-[10px] text-primary/25 leading-relaxed text-center">
+            Your birth chart is processed using AES-256 encrypted computation. Chart data is shared with AI/LLM providers for analysis only, in accordance with our{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
+              Privacy Policy
+            </a>
+            {' '}under India&apos;s DPDP Act, 2023.
+          </p>
+        </div>
+      </>
+    );
 }
 
 export default function KundliPage() {

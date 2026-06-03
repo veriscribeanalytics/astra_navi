@@ -5,6 +5,7 @@ import { Sparkles, Star, Shield } from 'lucide-react';
 import ProductCard from '@/components/billing/ProductCard';
 import { CatalogResponse, CatalogProduct, normalizeCatalogResponse } from '@/types/billing';
 import { useTranslation } from '@/hooks';
+import { clientFetch } from '@/lib/apiClient';
 
 interface ProductCatalogProps {
   /** The product ID to highlight (from URL query param). */
@@ -19,6 +20,8 @@ interface ProductCatalogProps {
   isLoading?: boolean;
   /** Optional product_type filter: 'subscription' or 'one_time_pack' or 'one_time_report'. */
   productTypeFilter?: string;
+  /** When true, include inactive/hidden products (e.g. test plans). */
+  showInactive?: boolean;
 }
 
 export default function ProductCatalog({
@@ -28,6 +31,7 @@ export default function ProductCatalog({
   catalog,
   isLoading = false,
   productTypeFilter,
+  showInactive = false,
 }: ProductCatalogProps) {
   const { t, language } = useTranslation();
   const [fetchedCatalog, setFetchedCatalog] = useState<CatalogResponse | null>(null);
@@ -41,18 +45,20 @@ export default function ProductCatalog({
     }
 
     setFetchLoading(true);
-    const langParam = language ? `&lang=${language}` : '';
-    const typeParam = productTypeFilter ? `&product_type=${productTypeFilter}` : '';
-    const query = langParam || typeParam ? `?${langParam.replace('&', '')}${typeParam}` : '';
+    const params = new URLSearchParams();
+    if (language) params.set('lang', language);
+    if (productTypeFilter) params.set('product_type', productTypeFilter);
+    if (showInactive) params.set('include_inactive', 'true');
+    const query = params.toString() ? `?${params.toString()}` : '';
 
-    fetch(`/api/entitlements/catalog${query}`)
+    clientFetch(`/api/entitlements/catalog${query}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
-        if (data) setFetchedCatalog(normalizeCatalogResponse(data));
+        if (data) setFetchedCatalog(normalizeCatalogResponse(data, { showInactive }));
       })
       .catch(err => console.warn('[ProductCatalog] Failed to fetch catalog:', err))
       .finally(() => setFetchLoading(false));
-  }, [catalog, language, productTypeFilter]);
+  }, [catalog, language, productTypeFilter, showInactive]);
 
   const activeCatalog = fetchedCatalog || catalog;
   const loading = isLoading || fetchLoading;

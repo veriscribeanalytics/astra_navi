@@ -916,8 +916,11 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                             className="mt-1 accent-secondary"
                         />
                         <span className="text-xs text-on-surface-variant/80 leading-relaxed">
-                            I confirm I have permission to store this person&apos;s birth details on AstraNavi, and I will not
-                            share their chart without their consent.
+                            I confirm that I have obtained explicit permission from this person to store and process their birth details on Astra Navi for Vedic astrological chart generation, compatibility analysis, and AI-powered readings. Their data will be protected under India&apos;s{' '}
+                            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
+                                DPDP Act, 2023
+                            </a>
+                            {' '}and will not be shared without their consent.
                             {errors.consent && (
                                 <span className="block mt-1 text-red-500 font-bold">{errors.consent}</span>
                             )}

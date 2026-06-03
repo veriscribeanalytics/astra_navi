@@ -258,6 +258,15 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
           </div>
         </form>
       )}
+
+      {/* DPDP Privacy Notice */}
+      <p className="text-[9px] text-primary/25 leading-relaxed text-center pt-1">
+        Your phone number is used solely for authentication.
+        Protected under India&apos;s{' '}
+        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
+          DPDP Act, 2023
+        </a>.
+      </p>
     </div>
   );
 };

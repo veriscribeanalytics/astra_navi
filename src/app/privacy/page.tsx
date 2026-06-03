@@ -89,6 +89,27 @@ export default function PrivacyPage() {
           </ul>
         </div>
 
+        {/* 4a. Cookie & Local Storage Disclosure */}
+        <div className="space-y-4">
+          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">4a. Cookies & Local Storage</h2>
+          <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
+            Astra Navi uses cookies and browser local storage for essential platform functionality. We do not use third-party tracking cookies or advertising networks. Here is exactly what is stored on your device:
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
+            <li><strong>Session Cookie (auth.js.session-token):</strong> Maintains your secure login session. Expires after 30 days of inactivity. Essential.</li>
+            <li><strong>Theme Cookie:</strong> Remembers your light/dark mode preference. Purely functional.</li>
+            <li><strong>Language Cookie (NEXT_LOCALE):</strong> Remembers your preferred language. Purely functional.</li>
+            <li><strong>Consent Cookie (astra_navi_cookie_consent):</strong> Records your cookie and privacy preferences. Essential for DPDP compliance.</li>
+            <li><strong>Local Storage:</strong> Stores UI state such as chat avatar selection, pending messages, and toast notifications. No personal data is persisted here beyond your session.</li>
+          </ul>
+          <p className="text-sm text-primary/60 leading-relaxed">
+            You can manage non-essential cookie preferences at any time via the cookie consent banner or the{' '}
+            <Link href="/profile/privacy" className="text-secondary hover:underline font-bold">Privacy Settings</Link> page.
+          </p>
+        </div>
+
+        <hr className="border-outline-variant/20" />
+
         {/* 5. Right to Erasure & Other Rights */}
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">5. Your Legal Rights (Data Principal Rights)</h2>
@@ -112,9 +133,39 @@ export default function PrivacyPage() {
 
         {/* 7. Data Retention */}
         <div className="space-y-4">
-          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">7. Data Retention Period</h2>
+          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">7. Data Retention Schedule</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            We retain your personal data only as long as necessary to fulfill the services you signed up for. Once you delete your account or withdraw consent, your personal data is completely erased or irreversibly anonymized from our database within <strong>30 days</strong>, subject to statutory backups or legal compliance.
+            We retain personal data only as long as necessary for the specific purpose it was collected. Below is our retention schedule per data category:
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
+            <li><strong>Account & Profile Data:</strong> Retained for the lifetime of your account. Upon deletion, erased or irreversibly anonymized within <strong>30 days</strong>.</li>
+            <li><strong>Birth Chart & Astrological Data:</strong> Retained while your account is active. Deleted alongside your account within 30 days of deletion request.</li>
+            <li><strong>Chat & Consultation History:</strong> Retained while your account is active. Deleted within 30 days of account deletion.</li>
+            <li><strong>Payment & Transaction Records:</strong> Retained for <strong>7 years</strong> as required by Indian tax and financial regulations (Income Tax Act, 1961; Companies Act, 2013), even after account deletion.</li>
+            <li><strong>Consent Records (Audit Log):</strong> Retained for <strong>5 years</strong> after consent withdrawal or account deletion for legal compliance under the DPDP Act, 2023.</li>
+            <li><strong>Authentication Logs & OTP Records:</strong> Retained for <strong>90 days</strong> for security and fraud prevention.</li>
+          </ul>
+          <p className="text-sm text-primary/60 leading-relaxed">
+            In accordance with the DPDP Rules 2025, Rule 8, we provide <strong>48 hours prior notice</strong> before erasing data due to account inactivity. Data in encrypted backups may take up to an additional 60 days to be fully purged.
+          </p>
+        </div>
+
+        <hr className="border-outline-variant/20" />
+
+        {/* 7a. Data Breach Response */}
+        <div className="space-y-4">
+          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">7a. Data Breach Response Commitment</h2>
+          <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
+            In the event of a personal data breach, Astra Navi is committed to the following response timeline, in compliance with the DPDP Rules, 2025 (Rule 7) and CERT-In guidelines:
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
+            <li><strong>Immediate Intimation:</strong> The Data Protection Board of India (DPBI) will be notified immediately upon becoming aware of a breach.</li>
+            <li><strong>Detailed Report (within 72 hours):</strong> A comprehensive incident report — including the nature of the breach, categories of affected data, number of affected Data Principals, containment measures taken, and remedial actions — will be submitted to the DPBI within 72 hours.</li>
+            <li><strong>Affected User Notification (without delay):</strong> Affected Data Principals will be notified directly via email without undue delay, with clear guidance on protective measures they should take.</li>
+            <li><strong>CERT-In Reporting (within 6 hours):</strong> For incidents qualifying under CERT-In guidelines, a separate notification will be filed within the mandated 6-hour window.</li>
+          </ul>
+          <p className="text-sm text-primary/60 leading-relaxed">
+            We maintain a documented incident response plan, conduct regular security drills, and employ AES-256 encryption for data at rest and TLS 1.3 for data in transit. Security safeguards are reviewed quarterly.
           </p>
         </div>
 
@@ -125,9 +176,30 @@ export default function PrivacyPage() {
             If you have any questions, concerns, or grievances regarding this Privacy Policy or your personal data processing, you may reach out to our designated Grievance Officer:
           </p>
           <div className="bg-background/40 p-4 border border-outline-variant/20 rounded-xl space-y-1.5 text-xs sm:text-sm text-primary/80">
-            <p><strong>Grievance Officer:</strong> Munna Bhai MBBS</p>
+            <p><strong>Grievance Officer:</strong> Data Protection Officer</p>
             <p><strong>Address/Jurisdiction:</strong> Gurugram, Haryana, India</p>
             <p><strong>Email:</strong> <a href="mailto:contact@veriscribeanalytics.com" className="text-secondary hover:underline font-bold">contact@veriscribeanalytics.com</a></p>
+          </div>
+        </div>
+
+        <hr className="border-outline-variant/20" />
+
+        {/* 9. Related Resources */}
+        <div className="space-y-4">
+          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">9. Related Resources</h2>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/privacy/subprocessors" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[18px] text-[11px] font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-secondary hover:border-secondary/30 transition-all bg-transparent">
+              Subprocessors List
+            </Link>
+            <Link href="/privacy/grievance" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[18px] text-[11px] font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-secondary hover:border-secondary/30 transition-all bg-transparent">
+              Submit a Grievance
+            </Link>
+            <Link href="/profile/privacy" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[18px] text-[11px] font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-secondary hover:border-secondary/30 transition-all bg-transparent">
+              Privacy Settings
+            </Link>
+            <Link href="/terms" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[18px] text-[11px] font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-secondary hover:border-secondary/30 transition-all bg-transparent">
+              Terms & Conditions
+            </Link>
           </div>
         </div>
 
