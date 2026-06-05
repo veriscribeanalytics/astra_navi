@@ -165,7 +165,23 @@ function RingScore({ score, size = 132, color }: { score: number; size?: number;
 }
 
 function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]; colorHex: string; areaLabel: string }) {
-  const W = 600;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(600);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        if (width > 0) {
+          setW(width);
+        }
+      }
+    });
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
+
   const H = 230;
   const PAD = { top: 26, right: 20, bottom: 44, left: 38 };
   const plotW = W - PAD.left - PAD.right;
@@ -185,70 +201,72 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
   const dt = (s: string) => new Date(s + "T00:00:00");
 
   return (
-    <svg
-      role="img"
-      aria-label={`Weekly ${areaLabel} forecast chart`}
-      viewBox={`0 0 ${W} ${H}`}
-      className="h-[230px] w-full"
-    >
-      <defs>
-        <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={colorHex} stopOpacity="0.4" />
-          <stop offset="60%" stopColor={colorHex} stopOpacity="0.12" />
-          <stop offset="100%" stopColor={colorHex} stopOpacity="0" />
-        </linearGradient>
-      </defs>
+    <div ref={containerRef} className="w-full">
+      <svg
+        role="img"
+        aria-label={`Weekly ${areaLabel} forecast chart`}
+        viewBox={`0 0 ${W} ${H}`}
+        className="h-[230px] w-full"
+      >
+        <defs>
+          <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={colorHex} stopOpacity="0.4" />
+            <stop offset="60%" stopColor={colorHex} stopOpacity="0.12" />
+            <stop offset="100%" stopColor={colorHex} stopOpacity="0" />
+          </linearGradient>
+        </defs>
 
-      {/* Y-axis gridlines + labels */}
-      {[0, 25, 50, 75, 100].map((v) => {
-        const y = yOf(v);
-        return (
-          <g key={v}>
-            <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="1" />
-            <text x={PAD.left - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="var(--on-surface-variant)" opacity="0.4">{v}</text>
-          </g>
-        );
-      })}
+        {/* Y-axis gridlines + labels */}
+        {[0, 25, 50, 75, 100].map((v) => {
+          const y = yOf(v);
+          return (
+            <g key={v}>
+              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="1" />
+              <text x={PAD.left - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="var(--on-surface-variant)" opacity="0.4">{v}</text>
+            </g>
+          );
+        })}
 
-      {/* Today marker */}
-      {todayX !== null && (
-        <line x1={todayX} y1={PAD.top} x2={todayX} y2={PAD.top + plotH} stroke={colorHex} strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
-      )}
+        {/* Today marker */}
+        {todayX !== null && (
+          <line x1={todayX} y1={PAD.top} x2={todayX} y2={PAD.top + plotH} stroke={colorHex} strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
+        )}
 
-      {/* Area + line */}
-      <path d={areaPath} fill={`url(#wk-${gid})`} />
-      <path
-        d={linePath}
-        fill="none"
-        stroke={colorHex}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{ filter: `drop-shadow(0 4px 10px ${colorHex}55)` }}
-      />
+        {/* Area + line */}
+        <path d={areaPath} fill={`url(#wk-${gid})`} />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={colorHex}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: `drop-shadow(0 4px 10px ${colorHex}55)` }}
+        />
 
-      {/* Points + score labels + x-axis labels */}
-      {points.map((p, i) => {
-        const d = days[i];
-        const isToday = i === todayIdx;
-        const date = dt(d.date);
-        return (
-          <g key={i}>
-            {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
-            <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "var(--surface)"} stroke={colorHex} strokeWidth="2" />
-            <text x={p.x} y={p.y - 11} textAnchor="middle" fontSize="11" fontWeight={isToday ? 700 : 600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.7}>
-              {d.score}
-            </text>
-            <text x={p.x} y={H - 24} textAnchor="middle" fontSize="9.5" fontWeight={700} letterSpacing="0.5" fill={isToday ? colorHex : "var(--on-surface-variant)"} opacity={isToday ? undefined : 0.45}>
-              {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
-            </text>
-            <text x={p.x} y={H - 11} textAnchor="middle" fontSize="11" fontWeight={600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.6}>
-              {date.getDate()}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+        {/* Points + score labels + x-axis labels */}
+        {points.map((p, i) => {
+          const d = days[i];
+          const isToday = i === todayIdx;
+          const date = dt(d.date);
+          return (
+            <g key={i}>
+              {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
+              <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "var(--surface)"} stroke={colorHex} strokeWidth="2" />
+              <text x={p.x} y={p.y - 11} textAnchor="middle" fontSize="11" fontWeight={isToday ? 700 : 600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.7}>
+                {d.score}
+              </text>
+              <text x={p.x} y={H - 24} textAnchor="middle" fontSize="9.5" fontWeight={700} letterSpacing="0.5" fill={isToday ? colorHex : "var(--on-surface-variant)"} opacity={isToday ? undefined : 0.45}>
+                {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
+              </text>
+              <text x={p.x} y={H - 11} textAnchor="middle" fontSize="11" fontWeight={600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.6}>
+                {date.getDate()}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
