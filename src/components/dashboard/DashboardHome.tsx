@@ -54,7 +54,7 @@ import {
   useFamilyCompatibility,
 } from "@/hooks/useFamily";
 import { parseKundliStats } from "@/lib/kundliStats";
-import { computeFamilyMemberStatus } from "@/lib/familyStatus";
+import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
 import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from "@/types/family";
 
 interface ForecastData {
@@ -376,6 +376,10 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
     band: (compat?.band as FamilyCompatibilityBand | undefined) ?? null,
   });
 
+  const hasScore = typeof compat?.score === "number";
+  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(compat!.score))) : null;
+  const scorePalette = bandPalette(compat?.band ?? "");
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
       <div className="flex items-center gap-3">
@@ -386,6 +390,14 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
           <h4 className="truncate font-headline text-sm font-bold text-foreground">{member.name || "—"}</h4>
           <p className="label-sm text-[10px] tracking-wider text-foreground/35">{formatRelationship(member.relationshipType)}</p>
         </div>
+        {scorePct !== null && (
+          <div className="shrink-0 text-right">
+            <span className={`font-headline text-lg font-bold tabular-nums leading-none ${scorePalette.text}`}>
+              {scorePct}
+              <span className="ml-0.5 text-[10px] font-body text-foreground/40">%</span>
+            </span>
+          </div>
+        )}
       </div>
       {status && (
         <span className={`inline-block self-start rounded-md border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${status.classes}`}>
@@ -1249,7 +1261,7 @@ export default function DashboardHome() {
                           onRunCompatibility={() => {
                             const pw = getFeaturePaywall('family_compatibility');
                             if (blocked && pw) { setActivePaywallData(pw); return; }
-                            router.push('/kundli/match');
+                            router.push(`/family?member=${m.id}&run=1`);
                           }}
                         />
                       );
@@ -1265,7 +1277,7 @@ export default function DashboardHome() {
                           onRunCompatibility={() => {
                             const pw = getFeaturePaywall('family_compatibility');
                             if (blocked && pw) { setActivePaywallData(pw); return; }
-                            router.push('/kundli/match');
+                            router.push('/family');
                           }}
                         />
                       );

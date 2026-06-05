@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
-    Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
-    ChevronDown, ChevronUp, HandHeart, Sparkles, Compass, FileText,
-    Sun, Moon, Flower, Activity, Mail, Send, Link2, Settings, RefreshCw, Search,
+    Crown, TrendingUp, Sparkles, FileText,
+    Mail, Send, Link2, Settings, RefreshCw, Search,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -16,6 +14,7 @@ import Input from '@/components/ui/Input';
 import LocationSearch, { LocationResult } from '@/components/ui/LocationSearch';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useTranslation, useToast, usePaywallContext } from '@/hooks';
+import { useAuth } from '@/context/AuthContext';
 import {
     useFamilyMembers,
     useFamilyChart,
@@ -45,8 +44,11 @@ import {
 } from '@/types/family';
 import { parseInviteErrorByStatus } from '@/lib/familyInviteErrors';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
-import { bandPalette } from '@/lib/familyStatus';
 import FamilyChartView from '@/components/family/FamilyChartView';
+import CompatibilityReport, {
+    getFamilyIcon,
+    type ReportSubject,
+} from '@/app/family/CompatibilityReport';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'mother', label: 'Mother' },
@@ -104,29 +106,6 @@ function formatReportDate(value: string | null | undefined): string {
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function formatDob(value: string | null | undefined): string {
-    if (!value) return '—';
-    // Backend yields YYYY-MM-DD. Parse as local date (avoid timezone shifts from `new Date('YYYY-MM-DD')` which is treated as UTC).
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-    if (!match) return value;
-    const [, y, m, day] = match;
-    const dt = new Date(Number(y), Number(m) - 1, Number(day));
-    if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function formatTob(value: string | null | undefined): string {
-    if (!value) return '—';
-    const match = /^(\d{1,2}):(\d{2})/.exec(value);
-    if (!match) return value;
-    const h24 = Number(match[1]);
-    const min = match[2];
-    if (Number.isNaN(h24)) return value;
-    const period = h24 >= 12 ? 'PM' : 'AM';
-    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-    return `${String(h12).padStart(2, '0')}:${min} ${period}`;
-}
-
 /** Derive which side is blocking a connection's compatibility purely from the
  *  client-side connection record. Used for instant feedback before the backend
  *  responds; backend response is authoritative when available. */
@@ -161,7 +140,10 @@ export default function FamilyClient() {
     // to the list and the URL still carries the param.
     const searchParams = useSearchParams();
     const memberIdParam = searchParams?.get('member');
+    const autoRunParam = searchParams?.get('run') === '1';
     const autoOpenedRef = useRef(false);
+    // Captured at open time so navigating back and re-opening doesn't re-trigger a run.
+    const [autoRunMember, setAutoRunMember] = useState(false);
 
     useEffect(() => {
         if (autoOpenedRef.current) return;
@@ -169,10 +151,11 @@ export default function FamilyClient() {
         const found = members.find(m => String(m.id) === memberIdParam);
         if (found) {
             setDetailMember(found);
+            setAutoRunMember(autoRunParam);
             setView('detail');
             autoOpenedRef.current = true;
         }
-    }, [memberIdParam, members]);
+    }, [memberIdParam, members, autoRunParam]);
 
     const isFreeTier = !tier || tier === 'free';
     const manualCount = members?.length ?? 0;
@@ -196,6 +179,7 @@ export default function FamilyClient() {
 
     const openDetail = (m: FamilyMember) => {
         setDetailMember(m);
+        setAutoRunMember(false);
         setView('detail');
     };
 
@@ -359,12 +343,13 @@ export default function FamilyClient() {
                 )}
 
                 {view === 'detail' && detailMember && (
-                    <FamilyMemberDetail member={detailMember} onEdit={() => openEdit(detailMember)} />
+                    <FamilyMemberDetail member={detailMember} onEdit={() => openEdit(detailMember)} onBack={backToList} autoRun={autoRunMember} />
                 )}
 
                 {view === 'connectionDetail' && detailConnection && (
                     <FamilyConnectionDetail
                         connection={detailConnection}
+                        onBack={backToList}
                         onUpdated={(updated) => {
                             setDetailConnection(updated);
                             refetchConnections();
@@ -953,9 +938,10 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
 /* DETAIL — chart + compatibility                                         */
 /* ====================================================================== */
 
-function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: () => void }) {
+function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: FamilyMember; onEdit: () => void; onBack: () => void; autoRun?: boolean }) {
     const { t } = useTranslation();
     const { totalCredits } = usePaywallContext();
+    const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
     const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member.id);
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member.id);
@@ -985,8 +971,6 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
     const scrollTo = (el: HTMLElement | null) => {
         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    const scrollToCompat = () => scrollTo(compatRef.current);
-    const scrollToChart = () => scrollTo(chartRef.current);
     const scrollToReports = () => scrollTo(reportsRef.current);
 
     const alreadyPaidForLang = useMemo(
@@ -1074,221 +1058,85 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
         }
     };
 
+    // Auto-start a run when arriving via the dashboard "Run Compatibility" button
+    // (/family?member=<id>&run=1). Fires once; "View Bond" / manual Open won't set
+    // autoRun, so this stays inert there. Skips if a result for this language is
+    // already on screen.
+    const autoRunFiredRef = useRef(false);
+    useEffect(() => {
+        if (!autoRun || autoRunFiredRef.current) return;
+        if (compatLoading) return;
+        autoRunFiredRef.current = true;
+        if (!alreadyPaidForLang) startCompatibility();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoRun]);
+
+    const youSubject: ReportSubject = {
+        name: user?.name || (t('family.youLabel') || 'You'),
+        initial: (user?.name || 'Y').charAt(0).toUpperCase(),
+        gender: user?.gender,
+        dob: user?.dob,
+        tob: user?.tob,
+        pob: user?.pob || user?.birthPlaceName,
+        verified: false,
+        hasBirthDetails: !!(user?.dob && user?.tob && (user?.pob || user?.birthPlaceName)),
+    };
+
+    const themSubject: ReportSubject = {
+        name: member.name,
+        initial: member.name.charAt(0).toUpperCase() || '?',
+        gender: member.gender,
+        dob: member.dob,
+        tob: member.tob,
+        pob: member.pob,
+        avatar: member.avatar ? { iconKey: member.avatar.iconKey, accentColor: member.avatar.accentColor } : null,
+        verified: false,
+        hasBirthDetails: true,
+        relationshipLabel: member.relationshipType,
+    };
+
     return (
         <div className="space-y-6">
-            {/* Compact profile card */}
-            <Card variant="default" padding="lg">
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    {member.avatar ? (
-                        <div
-                            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border"
-                            style={{
-                                color: member.avatar.accentColor || 'var(--secondary)',
-                                borderColor: `${member.avatar.accentColor || 'var(--secondary)'}33`,
-                                backgroundColor: `${member.avatar.accentColor || 'var(--secondary)'}11`
-                            }}
-                        >
-                            {React.createElement(getFamilyIcon(member.avatar.iconKey), { className: 'w-6 h-6' })}
-                        </div>
-                    ) : (
-                        <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-lg font-bold shrink-0">
-                            {member.name.charAt(0).toUpperCase()}
-                        </div>
-                    )}
-
-                    <div className="min-w-0">
-                        <h2 className="text-xl font-headline font-bold text-primary">{member.name}</h2>
-                        <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
-                            {member.relationshipType} · {member.gender}
-                        </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-on-surface-variant/85 md:ml-2 md:pl-4 md:border-l md:border-outline-variant/20">
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-secondary/70" />
-                            <div className="flex flex-col leading-tight">
-                                <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">DOB</span>
-                                <span className="font-bold text-primary">{formatDob(member.dob)}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 text-secondary/70" />
-                            <div className="flex flex-col leading-tight">
-                                <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">Time</span>
-                                <span className="font-bold text-primary">{formatTob(member.tob)}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 min-w-0">
-                            <MapPin className="w-3.5 h-3.5 text-secondary/70 shrink-0" />
-                            <div className="flex flex-col leading-tight min-w-0">
-                                <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 font-bold">Place</span>
-                                <span className="font-bold text-primary truncate max-w-[180px]">{member.pob}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 md:ml-auto md:w-64 md:shrink-0">
-                        <div className="grid grid-cols-2 gap-2">
-                            <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<Pencil className="w-3.5 h-3.5" />} fullWidth>
-                                Edit
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={scrollToChart} leftIcon={<BookOpen className="w-3.5 h-3.5" />} fullWidth>
-                                View Chart
-                            </Button>
-                        </div>
-                        <Button variant="primary" size="sm" onClick={scrollToCompat} leftIcon={<Heart className="w-3.5 h-3.5" />} fullWidth>
-                            {compat ? 'View Compatibility' : 'Compare Compatibility'}
-                        </Button>
-                    </div>
-                </div>
-                {member.notes && (
-                    <p className="mt-4 pt-4 border-t border-outline-variant/15 text-[12px] text-on-surface-variant/80 italic">
-                        &ldquo;{member.notes}&rdquo;
-                    </p>
-                )}
-            </Card>
-
-            {/* ─────────────── Compatibility hero ─────────────── */}
+            {/* ─────────────── Compatibility report / pre-read CTA ─────────────── */}
             <div ref={compatRef} className="scroll-mt-24">
             {compat ? (
-                <Card variant="default" padding="lg">
-                    <div className="flex flex-col lg:flex-row gap-6">
-                        <div className="flex justify-center lg:justify-start lg:shrink-0">
-                            <ScoreRing score={compat.score} band={compat.band} size={200} />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                            <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/75 font-bold">
-                                {t('family.compatibilityWith') || 'Compatibility with'}
-                            </p>
-                            <h2 className="text-2xl sm:text-3xl font-headline font-bold text-secondary leading-tight">
-                                {member.name}
-                            </h2>
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                <span className={`text-lg font-headline font-bold ${bandPalette(compat.band).text}`}>
-                                    {compat.band}
-                                </span>
-                                {compat.confidence && (
-                                    <>
-                                        <span className="text-on-surface-variant/65">|</span>
-                                        <span
-                                            className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${confidencePalette(compat.confidence.level).bg} ${confidencePalette(compat.confidence.level).text} ${confidencePalette(compat.confidence.level).border}`}
-                                        >
-                                            <Shield className="w-3 h-3" />
-                                            {compat.confidence.label}
-                                        </span>
-                                    </>
-                                )}
-                            </div>
-                            <p className="mt-3 text-sm text-on-surface-variant/85 leading-relaxed whitespace-pre-line">
-                                {compat.verdict}
-                            </p>
-                            {compat.confidence?.note && (
-                                <p className="mt-2 text-[11px] text-on-surface-variant/70 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
-                                    {compat.confidence.note}
+                <CompatibilityReport
+                    you={youSubject}
+                    them={themSubject}
+                    data={compat}
+                    totalCredits={totalCredits}
+                    onRerun={startCompatibility}
+                    onViewFullReport={scrollToReports}
+                    askNaviHref="/chat"
+                    onBack={onBack}
+                    onEdit={onEdit}
+                    lang={lang}
+                    onLangChange={setLang}
+                    langOptions={LANGS}
+                    cached={!!compat.cached}
+                    freeRerun={alreadyPaidForLang && !compat.cached}
+                    rerunLoading={compatLoading}
+                    slotBelowActions={
+                        preflightData?.staleDataWarning && preflightData?.refresh?.available ? (
+                            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-between gap-3 flex-wrap">
+                                <p className="text-[12px] text-amber-300">
+                                    {t('family.compatibilityStaleHint') ||
+                                        'Birth details changed since this reading. Refresh for an updated analysis.'}
                                 </p>
-                            )}
-                        </div>
-
-                        <div className="flex flex-col gap-3 lg:w-56 shrink-0">
-                            <div className="flex items-center gap-1.5 flex-wrap lg:justify-end">
-                                {compat.cached && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                                        Cached
-                                    </span>
-                                )}
-                                {alreadyPaidForLang && !compat.cached && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                                        Free re-run
-                                    </span>
-                                )}
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/85 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
-                                    <Coins className="w-3 h-3" /> {creditCost} credits
-                                </span>
-                            </div>
-                            {preflightData?.staleDataWarning && preflightData?.refresh?.available && (
-                                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3">
-                                    <p className="text-[11px] text-amber-300 leading-snug mb-2">
-                                        {t('family.compatibilityStaleHint') ||
-                                            'Birth details changed since this reading. Refresh for an updated analysis.'}
-                                    </p>
-                                    <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={runCompatibility}
-                                        loading={compatLoading}
-                                        leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
-                                        fullWidth
-                                    >
-                                        {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
-                                            .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
-                                    </Button>
-                                </div>
-                            )}
-                            <Button
-                                variant="primary"
-                                onClick={scrollToReports}
-                                leftIcon={<FileText className="w-4 h-4" />}
-                            >
-                                View Full Report
-                            </Button>
-                            <Link href="/chat" className="block">
                                 <Button
-                                    variant="secondary"
-                                    leftIcon={<MessageCircle className="w-4 h-4" />}
-                                    fullWidth
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={runCompatibility}
+                                    loading={compatLoading}
+                                    leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
                                 >
-                                    Ask Navi
+                                    {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
+                                        .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
                                 </Button>
-                            </Link>
-                        </div>
-                    </div>
-
-                    {compat.relationship_actions && (
-                        <div className="mt-6 pt-6 border-t border-outline-variant/15 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            {[
-                                { label: 'Today', text: compat.relationship_actions.today, icon: <Sun className="w-3.5 h-3.5" />, accent: 'text-emerald-400' },
-                                { label: 'This Week', text: compat.relationship_actions.this_week, icon: <Calendar className="w-3.5 h-3.5" />, accent: 'text-sky-400' },
-                                { label: 'Long Term', text: compat.relationship_actions.long_term, icon: <Compass className="w-3.5 h-3.5" />, accent: 'text-secondary' },
-                            ].filter((it) => it.text?.trim()).map((it) => (
-                                <div key={it.label} className="rounded-2xl border border-outline-variant/30 p-4 bg-surface">
-                                    <div className={`flex items-center gap-1.5 mb-1.5 ${it.accent}`}>
-                                        {it.icon}
-                                        <p className="text-[10px] font-bold uppercase tracking-widest">{it.label}</p>
-                                    </div>
-                                    <p className="text-[12px] text-on-surface-variant/85 leading-relaxed">{it.text}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
-                        <p className="text-[11px] text-on-surface-variant/70">
-                            {(t('family.compatibilityLangNote') || 'Reading in {lang}. Other languages charge {n} credits.')
-                                .replace('{lang}', lang.toUpperCase()).replace('{n}', String(creditCost))}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {LANGS.map((l) => (
-                                <button
-                                    key={l.value}
-                                    onClick={() => setLang(l.value)}
-                                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors border ${
-                                        lang === l.value
-                                            ? 'bg-secondary text-white border-secondary'
-                                            : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                                    }`}
-                                >
-                                    {l.label}
-                                </button>
-                            ))}
-                            {!alreadyPaidForLang && (
-                                <Button variant="ghost" size="sm" onClick={startCompatibility}>
-                                    Re-run · {creditCost}
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </Card>
+                            </div>
+                        ) : null
+                    }
+                />
             ) : (
                 <Card variant="default" padding="lg">
                     <div className="flex items-center gap-2 mb-3">
@@ -1339,86 +1187,6 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                 </Card>
             )}
             </div>
-
-            {/* ─────────────── Strengths (left) + Tensions/Guidance (right) ─────────────── */}
-            {compat && (
-                (compat.strengths && compat.strengths.length > 0) ||
-                (compat.tension_points && compat.tension_points.length > 0) ||
-                compat.advice
-            ) && (
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    {/* Left column: Top Strengths */}
-                    {compat.strengths && compat.strengths.length > 0 && (
-                        <div className="md:col-span-3">
-                            <Card variant="default" padding="lg">
-                                <HighlightList
-                                    title="Top Strengths"
-                                    items={compat.strengths}
-                                    icon={<TrendingUp className="w-3.5 h-3.5" />}
-                                    variant="strength"
-                                />
-                            </Card>
-                        </div>
-                    )}
-
-                    {/* Right column: Tensions stacked above Guidance */}
-                    <div className="md:col-span-2 space-y-4">
-                        {compat.tension_points && compat.tension_points.length > 0 && (
-                            <Card variant="default" padding="lg">
-                                <HighlightList
-                                    title="Tension Points"
-                                    items={compat.tension_points}
-                                    icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                                    variant="tension"
-                                />
-                            </Card>
-                        )}
-                        {compat.advice && (
-                            <Card variant="default" padding="lg">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <HandHeart className="w-4 h-4 text-secondary" />
-                                    <h3 className="text-sm font-headline font-bold text-primary">
-                                        {t('family.guidance') || 'Guidance'}
-                                    </h3>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <AdviceCard
-                                        icon={<MessageCircle className="w-3 h-3" />}
-                                        label="Communication"
-                                        text={compat.advice.communication_style}
-                                        accent="text-sky-400"
-                                    />
-                                    <AdviceCard
-                                        icon={<HandHeart className="w-3 h-3" />}
-                                        label="Best Support"
-                                        text={compat.advice.best_support_method}
-                                        accent="text-emerald-400"
-                                    />
-                                    <AdviceCard
-                                        icon={<Shield className="w-3 h-3" />}
-                                        label="Boundaries"
-                                        text={compat.advice.boundaries_or_cautions}
-                                        accent="text-amber-400"
-                                    />
-                                    <AdviceCard
-                                        icon={<ArrowRight className="w-3 h-3" />}
-                                        label="Next Step"
-                                        text={compat.advice.next_step}
-                                        accent="text-secondary"
-                                    />
-                                </div>
-                            </Card>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Factor Breakdown (collapsible) */}
-            {compat?.factors && compat.factors.length > 0 && (
-                <Card variant="default" padding="lg">
-                    <FactorsBreakdown factors={compat.factors} />
-                </Card>
-            )}
 
             {/* ─────────────── Chart ─────────────── */}
             <div ref={chartRef} className="scroll-mt-24">
@@ -1500,352 +1268,6 @@ function FamilyMemberDetail({ member, onEdit }: { member: FamilyMember; onEdit: 
                 variant="warning"
                 isLoading={compatLoading}
             />
-        </div>
-    );
-}
-
-/* ---------- Compatibility helpers ---------- */
-
-function statusPalette(status: string): { text: string; bg: string; border: string; bar: string } {
-    switch (status) {
-        case 'strength':
-            return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', bar: 'bg-emerald-400' };
-        case 'tension':
-            return { text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30', bar: 'bg-orange-400' };
-        case 'balanced':
-        default:
-            return { text: 'text-indigo-300', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', bar: 'bg-indigo-400' };
-    }
-}
-
-function confidencePalette(level: string): { text: string; bg: string; border: string } {
-    switch (level) {
-        case 'high':
-            return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
-        case 'low':
-            return { text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
-        case 'medium':
-        default:
-            return { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30' };
-    }
-}
-
-function ScoreRing({ score, band, size = 88 }: { score: number; band: string; size?: number }) {
-    const clamped = Math.max(0, Math.min(100, score));
-    const stroke = 6;
-    const r = (size - stroke) / 2;
-    const circ = 2 * Math.PI * r;
-    const offset = circ * (1 - clamped / 100);
-    const palette = bandPalette(band);
-    return (
-        <div className="relative shrink-0" style={{ width: size, height: size }}>
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={r}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={stroke}
-                    className="text-outline-variant/30"
-                />
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={r}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={stroke}
-                    strokeLinecap="round"
-                    strokeDasharray={circ}
-                    strokeDashoffset={offset}
-                    className={`${palette.ring} transition-[stroke-dashoffset] duration-700 ease-out`}
-                />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-                <span className="text-xl sm:text-2xl font-headline font-bold text-primary">{score}</span>
-                <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/65 mt-0.5">
-                    /100
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function HighlightList({
-    title,
-    items,
-    icon,
-    variant,
-}: {
-    title: string;
-    items: { factor: string; score: number; text: string }[];
-    icon: React.ReactNode;
-    variant: 'strength' | 'tension';
-}) {
-    const palette = statusPalette(variant);
-    return (
-        <div>
-            <div className={`flex items-center gap-1.5 mb-2 ${palette.text}`}>
-                {icon}
-                <p className="text-[11px] font-bold uppercase tracking-widest">{title}</p>
-            </div>
-            <div className="space-y-2">
-                {items.map((it, i) => (
-                    <div
-                        key={i}
-                        className={`rounded-2xl p-3 border ${palette.bg} ${palette.border}`}
-                    >
-                        <div className="flex items-baseline justify-between gap-2 mb-1">
-                            <p className={`text-[12px] font-bold ${palette.text}`}>{it.factor}</p>
-                            <span className="text-[10px] font-bold text-on-surface-variant/70 shrink-0">
-                                {Math.round(it.score)}
-                            </span>
-                        </div>
-                        <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{it.text}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-function AdviceCard({
-    icon,
-    label,
-    text,
-    accent,
-}: {
-    icon: React.ReactNode;
-    label: string;
-    text: string;
-    accent: string;
-}) {
-    if (!text?.trim()) return null;
-    return (
-        <div className="rounded-2xl border border-outline-variant/30 p-3 bg-surface">
-            <div className={`flex items-center gap-1.5 mb-1.5 ${accent}`}>
-                {icon}
-                <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
-            </div>
-            <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{text}</p>
-        </div>
-    );
-}
-
-function FactorsBreakdown({ factors }: { factors: NonNullable<ReturnType<typeof useFamilyCompatibility>['data']>['factors'] }) {
-    const [expanded, setExpanded] = useState(false);
-    if (!factors?.length) return null;
-    return (
-        <div className="rounded-2xl border border-outline-variant/30 overflow-hidden">
-            <button
-                onClick={() => setExpanded((v) => !v)}
-                className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-secondary/5 transition-colors"
-            >
-                <div className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-secondary" />
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-                        Factor Breakdown
-                    </p>
-                    <span className="text-[10px] text-on-surface-variant/65 font-bold">
-                        {factors.length}
-                    </span>
-                </div>
-                {expanded ? (
-                    <ChevronUp className="w-4 h-4 text-on-surface-variant/65" />
-                ) : (
-                    <ChevronDown className="w-4 h-4 text-on-surface-variant/65" />
-                )}
-            </button>
-            {expanded && (
-                <div className="border-t border-outline-variant/20 p-3 space-y-3">
-                    {factors.map((f, i) => {
-                        const palette = statusPalette(f.status);
-                        const pct = Math.max(0, Math.min(100, f.score_percent ?? 0));
-                        return (
-                            <div key={f.name ?? f.key ?? i} className="space-y-1.5">
-                                <div className="flex items-baseline justify-between gap-2">
-                                    <p className="text-[12px] font-bold text-primary">
-                                        {f.label || f.name || f.key || `Factor ${i + 1}`}
-                                    </p>
-                                    <div className="flex items-center gap-1.5 shrink-0">
-                                        <span
-                                            className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${palette.bg} ${palette.text} ${palette.border}`}
-                                        >
-                                            {f.status}
-                                        </span>
-                                        <span className="text-[11px] font-bold text-on-surface-variant/75 tabular-nums">
-                                            {Math.round(pct)}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="h-1.5 rounded-full bg-outline-variant/20 overflow-hidden">
-                                    <div
-                                        className={`h-full rounded-full ${palette.bar} transition-[width] duration-700 ease-out`}
-                                        style={{ width: `${pct}%` }}
-                                    />
-                                </div>
-                                {(f.summary || f.detail) && (
-                                    <p className="text-[11px] text-on-surface-variant/70 leading-relaxed">
-                                        {f.summary || f.detail}
-                                    </p>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function RelationshipActions({ actions }: { actions: NonNullable<NonNullable<ReturnType<typeof useFamilyCompatibility>['data']>['relationship_actions']> }) {
-    const items: { label: string; text: string; icon: React.ReactNode; accent: string }[] = [
-        { label: 'Today', text: actions.today, icon: <Clock className="w-3 h-3" />, accent: 'text-emerald-400' },
-        { label: 'This Week', text: actions.this_week, icon: <Calendar className="w-3 h-3" />, accent: 'text-sky-400' },
-        { label: 'Long Term', text: actions.long_term, icon: <Compass className="w-3 h-3" />, accent: 'text-secondary' },
-    ].filter((it) => it.text?.trim());
-
-    if (items.length === 0) return null;
-
-    return (
-        <div>
-            <div className="flex items-center gap-1.5 mb-2 text-secondary">
-                <ArrowRight className="w-3.5 h-3.5" />
-                <p className="text-[11px] font-bold uppercase tracking-widest">What To Do</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {items.map((it) => (
-                    <div
-                        key={it.label}
-                        className="rounded-2xl border border-outline-variant/30 p-3 bg-surface"
-                    >
-                        <div className={`flex items-center gap-1.5 mb-1.5 ${it.accent}`}>
-                            {it.icon}
-                            <p className="text-[10px] font-bold uppercase tracking-widest">{it.label}</p>
-                        </div>
-                        <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{it.text}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-function CompatibilityResult({
-    result,
-    onRerun,
-    alreadyPaid,
-}: {
-    result: NonNullable<ReturnType<typeof useFamilyCompatibility>['data']>;
-    onRerun: () => void;
-    alreadyPaid: boolean;
-}) {
-    const palette = bandPalette(result.band);
-    const confPalette = result.confidence ? confidencePalette(result.confidence.level) : null;
-
-    return (
-        <div className="space-y-5">
-            {/* Top summary */}
-            <div className="flex items-center gap-4 flex-wrap">
-                <ScoreRing score={result.score} band={result.band} />
-                <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/75 font-bold">
-                        Band
-                    </p>
-                    <p className={`text-xl font-headline font-bold ${palette.text}`}>{result.band}</p>
-                    {result.confidence && confPalette && (
-                        <span
-                            className={`inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${confPalette.bg} ${confPalette.text} ${confPalette.border}`}
-                        >
-                            <Shield className="w-3 h-3" />
-                            {result.confidence.label}
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            {/* Verdict */}
-            <p className="text-sm text-on-surface-variant/80 leading-relaxed whitespace-pre-line">
-                {result.verdict}
-            </p>
-
-            {/* Confidence note */}
-            {result.confidence?.note && (
-                <p className="text-[11px] text-on-surface-variant/70 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
-                    {result.confidence.note}
-                </p>
-            )}
-
-            {/* What to do — Today / This Week / Long Term */}
-            {result.relationship_actions && (
-                <RelationshipActions actions={result.relationship_actions} />
-            )}
-
-            {/* Strengths */}
-            {result.strengths && result.strengths.length > 0 && (
-                <HighlightList
-                    title="Top Strengths"
-                    items={result.strengths}
-                    icon={<TrendingUp className="w-3.5 h-3.5" />}
-                    variant="strength"
-                />
-            )}
-
-            {/* Tension points */}
-            {result.tension_points && result.tension_points.length > 0 && (
-                <HighlightList
-                    title="Tension Points"
-                    items={result.tension_points}
-                    icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                    variant="tension"
-                />
-            )}
-
-            {/* Advice */}
-            {result.advice && (
-                <div>
-                    <div className="flex items-center gap-1.5 mb-2 text-secondary">
-                        <HandHeart className="w-3.5 h-3.5" />
-                        <p className="text-[11px] font-bold uppercase tracking-widest">Guidance</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <AdviceCard
-                            icon={<MessageCircle className="w-3 h-3" />}
-                            label="Communication"
-                            text={result.advice.communication_style}
-                            accent="text-sky-400"
-                        />
-                        <AdviceCard
-                            icon={<HandHeart className="w-3 h-3" />}
-                            label="Best Support"
-                            text={result.advice.best_support_method}
-                            accent="text-emerald-400"
-                        />
-                        <AdviceCard
-                            icon={<Shield className="w-3 h-3" />}
-                            label="Boundaries"
-                            text={result.advice.boundaries_or_cautions}
-                            accent="text-amber-400"
-                        />
-                        <AdviceCard
-                            icon={<ArrowRight className="w-3 h-3" />}
-                            label="Next Step"
-                            text={result.advice.next_step}
-                            accent="text-secondary"
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Factor breakdown */}
-            <FactorsBreakdown factors={result.factors} />
-
-            {!alreadyPaid && (
-                <Button variant="ghost" size="sm" onClick={onRerun}>
-                    Re-run analysis
-                </Button>
-            )}
         </div>
     );
 }
@@ -1973,12 +1395,15 @@ function FamilyConnectionDetail({
     connection,
     onUpdated,
     onDisconnected,
+    onBack,
 }: {
     connection: FamilyConnection;
     onUpdated: (c: FamilyConnection) => void;
     onDisconnected: () => void;
+    onBack: () => void;
 }) {
     const { t } = useTranslation();
+    const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
     const { totalCredits } = usePaywallContext();
     const { data: avatars } = useFamilyAvatars();
@@ -2111,6 +1536,29 @@ function FamilyConnectionDetail({
 
     const notesDirty = (notes ?? '') !== (connection.myNotes ?? '');
 
+    const youSubject: ReportSubject = {
+        name: user?.name || (t('family.youLabel') || 'You'),
+        initial: (user?.name || 'Y').charAt(0).toUpperCase(),
+        gender: user?.gender,
+        dob: user?.dob,
+        tob: user?.tob,
+        pob: user?.pob || user?.birthPlaceName,
+        verified: false,
+        hasBirthDetails: !!(user?.dob && user?.tob && (user?.pob || user?.birthPlaceName)),
+    };
+
+    // Linked connections never expose the other person's birth details to the
+    // client (synastry is computed server-side), so the THEM panel degrades to a
+    // name + relationship label. The score itself is still valid.
+    const themSubject: ReportSubject = {
+        name: connection.otherName,
+        initial: connection.otherName.charAt(0).toUpperCase() || '?',
+        avatar: connection.avatar ? { iconKey: connection.avatar.iconKey, accentColor: connection.avatar.accentColor } : null,
+        verified: true,
+        hasBirthDetails: false,
+        relationshipLabel: (t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs),
+    };
+
     return (
         <div className="space-y-6">
             {/* Header card */}
@@ -2221,161 +1669,161 @@ function FamilyConnectionDetail({
             </Card>
 
             {/* Compatibility */}
-            <Card variant="default" padding="lg">
-                <div className="flex items-center gap-2 mb-3">
-                    <Heart className="w-4 h-4 text-secondary" />
-                    <h3 className="text-sm font-headline font-bold text-primary">
-                        {t('family.compatibility') || 'Compatibility'}
-                    </h3>
-                    <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
-                        {compat?.cached && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                                Cached
-                            </span>
-                        )}
-                        {alreadyPaidForLang && !compat?.cached && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                                Free re-run
-                            </span>
-                        )}
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
+            {compat ? (
+                <CompatibilityReport
+                    you={youSubject}
+                    them={themSubject}
+                    data={compat}
+                    totalCredits={totalCredits}
+                    onRerun={startCompatibility}
+                    onViewFullReport={() => { window.location.href = '/chat'; }}
+                    askNaviHref="/chat"
+                    onBack={onBack}
+                    lang={lang}
+                    onLangChange={setLang}
+                    langOptions={LANGS}
+                    cached={!!compat.cached}
+                    freeRerun={!!alreadyPaidForLang && !compat.cached}
+                    rerunLoading={compatLoading}
+                    slotBelowActions={
+                        preflightData?.staleDataWarning && preflightData?.refresh?.available ? (
+                            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-between gap-3 flex-wrap">
+                                <p className="text-[12px] text-amber-300">
+                                    {t('family.compatibilityStaleHint') ||
+                                        'Birth details changed since this reading. Refresh for an updated analysis.'}
+                                </p>
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={runCompatibility}
+                                    loading={compatLoading}
+                                    leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                                >
+                                    {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
+                                        .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
+                                </Button>
+                            </div>
+                        ) : null
+                    }
+                />
+            ) : (
+                <Card variant="default" padding="lg">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Heart className="w-4 h-4 text-secondary" />
+                        <h3 className="text-sm font-headline font-bold text-primary">
+                            {t('family.compatibility') || 'Compatibility'}
+                        </h3>
+                        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
                             <Coins className="w-3 h-3" /> {creditCost} credits
                         </span>
                     </div>
-                </div>
 
-                <p className="text-xs text-on-surface-variant/75 mb-4">
-                    {t('family.compatibilityDesc') ||
-                        'First read charges credits. Repeating the same language is free.'}
-                </p>
+                    <p className="text-xs text-on-surface-variant/75 mb-4">
+                        {t('family.compatibilityDesc') ||
+                            'First read charges credits. Repeating the same language is free.'}
+                    </p>
 
-                {/* Language picker */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {LANGS.map((l) => (
-                        <button
-                            key={l.value}
-                            onClick={() => setLang(l.value)}
-                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
-                                lang === l.value
-                                    ? 'bg-secondary text-white border-secondary'
-                                    : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                            }`}
-                        >
-                            {l.label}
-                        </button>
-                    ))}
-                </div>
+                    {/* Language picker */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {LANGS.map((l) => (
+                            <button
+                                key={l.value}
+                                onClick={() => setLang(l.value)}
+                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
+                                    lang === l.value
+                                        ? 'bg-secondary text-white border-secondary'
+                                        : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
+                                }`}
+                            >
+                                {l.label}
+                            </button>
+                        ))}
+                    </div>
 
-                {/* SHARING_REQUIRED inline gate — branches on which side is blocking */}
-                {sharingBlocked && !compat && (
-                    <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
-                        <div className="flex items-start gap-2">
-                            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[12px] font-bold text-amber-300">
-                                    {sharingBlocked.blockedBy === 'you'
-                                        ? (t('family.sharingBlockedYou') || 'Enable sharing to unlock compatibility.')
-                                        : sharingBlocked.blockedBy === 'them'
-                                            ? (t('family.sharingBlockedThem') || 'Waiting for {name} to enable sharing.')
-                                                .replace('{name}', connection.otherName)
-                                            : (t('family.sharingBlockedBoth') || 'Both of you need to enable sharing before compatibility can be computed.')}
-                                </p>
-                                {sharingBlocked.blockedBy === 'you' && (
-                                    <div className="mt-3">
-                                        <p className="text-[11px] text-on-surface-variant/75 mb-2">
-                                            {(t('family.sharingBlockedYouHint') ||
-                                                'Turn on sharing with {name} below to compute synastry.')
-                                                .replace('{name}', connection.otherName)}
-                                        </p>
-                                        <Button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={toggleShare}
-                                            loading={togglingShare}
-                                            leftIcon={<Heart className="w-3.5 h-3.5" />}
-                                        >
-                                            {t('family.sharingEnable') || 'Enable sharing'}
-                                        </Button>
-                                    </div>
-                                )}
-                                {sharingBlocked.blockedBy === 'them' && (
-                                    <div className="mt-3 text-[11px] text-on-surface-variant/80 leading-relaxed">
-                                        {(t('family.sharingBlockedThemHint') ||
-                                            'Ask them to enable sharing in their family settings. You can reach them at {email}.')
-                                            .replace('{email}', sharingBlocked.nudgeEmail ?? connection.otherEmail)}
-                                    </div>
-                                )}
-                                {sharingBlocked.blockedBy === 'both' && (
-                                    <div className="mt-3">
-                                        <p className="text-[11px] text-on-surface-variant/75 mb-2">
-                                            {t('family.sharingBlockedBothHint') ||
-                                                'Start by turning on your side, then ask them to enable sharing too.'}
-                                        </p>
-                                        <Button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={toggleShare}
-                                            loading={togglingShare}
-                                            leftIcon={<Heart className="w-3.5 h-3.5" />}
-                                        >
-                                            {t('family.sharingEnableMine') || 'Enable my side'}
-                                        </Button>
-                                    </div>
-                                )}
+                    {/* SHARING_REQUIRED inline gate — branches on which side is blocking */}
+                    {sharingBlocked && (
+                        <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+                            <div className="flex items-start gap-2">
+                                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[12px] font-bold text-amber-300">
+                                        {sharingBlocked.blockedBy === 'you'
+                                            ? (t('family.sharingBlockedYou') || 'Enable sharing to unlock compatibility.')
+                                            : sharingBlocked.blockedBy === 'them'
+                                                ? (t('family.sharingBlockedThem') || 'Waiting for {name} to enable sharing.')
+                                                    .replace('{name}', connection.otherName)
+                                                : (t('family.sharingBlockedBoth') || 'Both of you need to enable sharing before compatibility can be computed.')}
+                                    </p>
+                                    {sharingBlocked.blockedBy === 'you' && (
+                                        <div className="mt-3">
+                                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
+                                                {(t('family.sharingBlockedYouHint') ||
+                                                    'Turn on sharing with {name} below to compute synastry.')
+                                                    .replace('{name}', connection.otherName)}
+                                            </p>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={toggleShare}
+                                                loading={togglingShare}
+                                                leftIcon={<Heart className="w-3.5 h-3.5" />}
+                                            >
+                                                {t('family.sharingEnable') || 'Enable sharing'}
+                                            </Button>
+                                        </div>
+                                    )}
+                                    {sharingBlocked.blockedBy === 'them' && (
+                                        <div className="mt-3 text-[11px] text-on-surface-variant/80 leading-relaxed">
+                                            {(t('family.sharingBlockedThemHint') ||
+                                                'Ask them to enable sharing in their family settings. You can reach them at {email}.')
+                                                .replace('{email}', sharingBlocked.nudgeEmail ?? connection.otherEmail)}
+                                        </div>
+                                    )}
+                                    {sharingBlocked.blockedBy === 'both' && (
+                                        <div className="mt-3">
+                                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
+                                                {t('family.sharingBlockedBothHint') ||
+                                                    'Start by turning on your side, then ask them to enable sharing too.'}
+                                            </p>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={toggleShare}
+                                                loading={togglingShare}
+                                                leftIcon={<Heart className="w-3.5 h-3.5" />}
+                                            >
+                                                {t('family.sharingEnableMine') || 'Enable my side'}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Stale-data refresh CTA — shown when preflight reports the cached
-                    result is stale and refresh is available. */}
-                {compat && preflightData?.staleDataWarning && preflightData?.refresh?.available && (
-                    <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                            <p className="text-[12px] text-amber-300">
-                                {t('family.compatibilityStaleHint') ||
-                                    'Birth details changed since this reading. Refresh for an updated analysis.'}
-                            </p>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={runCompatibility}
-                                loading={compatLoading}
-                                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
-                            >
-                                {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
-                                    .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
-                            </Button>
+                    {!compatLoading && (
+                        <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
+                            Check Compatibility · {creditCost} credits
+                        </Button>
+                    )}
+
+                    {compatLoading && (
+                        <div className="text-secondary/60 text-sm flex items-center gap-2">
+                            <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {!compat && !compatLoading && (
-                    <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
-                        Check Compatibility · {creditCost} credits
-                    </Button>
-                )}
-
-                {compatLoading && (
-                    <div className="text-secondary/60 text-sm flex items-center gap-2">
-                        <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
-                    </div>
-                )}
-
-                {compat && (
-                    <CompatibilityResult result={compat} onRerun={startCompatibility} alreadyPaid={!!alreadyPaidForLang} />
-                )}
-
-                {totalCredits != null && totalCredits < creditCost && !compat && (
-                    <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
-                        <a href="/plans" className="font-bold underline">
-                            Top up
-                        </a>
-                    </div>
-                )}
-            </Card>
+                    {totalCredits != null && totalCredits < creditCost && (
+                        <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
+                            <a href="/plans" className="font-bold underline">
+                                Top up
+                            </a>
+                        </div>
+                    )}
+                </Card>
+            )}
 
             {/* Avatar picker */}
             {avatars && avatars.length > 0 && (
@@ -2496,25 +1944,5 @@ function FamilyConnectionDetail({
             />
         </div>
     );
-}
-
-const FAMILY_ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
-    heart: Heart,
-    star: Star,
-    smile: Sparkles,
-    sparkles: Sparkles,
-    user: Users,
-    users: Users,
-    sun: Sun,
-    moon: Moon,
-    compass: Compass,
-    flower: Flower,
-    coins: Coins,
-    activity: Activity,
-};
-
-export function getFamilyIcon(iconKey?: string | null): React.FC<{ className?: string }> {
-    if (!iconKey) return Users;
-    return FAMILY_ICON_MAP[iconKey.toLowerCase()] || Users;
 }
 
