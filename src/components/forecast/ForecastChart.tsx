@@ -9,7 +9,17 @@ export interface ChartPoint {
   isCurrent?: boolean;
 }
 
-export default function ForecastChart({ points, colorHex, activeLabel }: { points: ChartPoint[]; colorHex: string; activeLabel?: string }) {
+export default function ForecastChart({
+  points,
+  colorHex,
+  activeLabel,
+  onSelect,
+}: {
+  points: ChartPoint[];
+  colorHex: string;
+  activeLabel?: string;
+  onSelect?: (label: string) => void;
+}) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   if (!points.length) return null;
@@ -103,6 +113,7 @@ export default function ForecastChart({ points, colorHex, activeLabel }: { point
                 style={{ cursor: 'pointer' }}
                 onMouseEnter={() => setHoveredIdx(i)}
                 onMouseLeave={() => setHoveredIdx(prev => (prev === i ? null : prev))}
+                onClick={() => onSelect?.(p.label)}
               />
             </g>
           );

@@ -408,7 +408,12 @@ export default function ForecastPage() {
               <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/20">
                 <div className="p-4 sm:p-8">
                   <div className="h-44 sm:h-56 lg:h-64 w-full">
-                    <ForecastChart points={chartPoints} colorHex={theme.hex} activeLabel={activeLabel || undefined} />
+                    <ForecastChart
+                      points={chartPoints}
+                      colorHex={theme.hex}
+                      activeLabel={activeLabel || undefined}
+                      onSelect={range === 'yearly' ? setSelectedMonth : setSelectedDay}
+                    />
                   </div>
                 </div>
                 {summary && (
