@@ -17,11 +17,17 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const lang = searchParams.get('lang') || '';
     const productType = searchParams.get('product_type') || '';
+    const includeInactive = searchParams.get('include_inactive');
 
     // Build backend URL with passthrough query params
     const backendParams = new URLSearchParams();
     if (lang) backendParams.set('lang', lang);
     if (productType) backendParams.set('product_type', productType);
+    // Only honored when test plans are enabled via env; the client never sets
+    // this in production (see PlansClient isTestMode gate).
+    if (includeInactive === 'true' && process.env.NEXT_PUBLIC_ENABLE_TEST_PLANS === '1') {
+      backendParams.set('include_inactive', 'true');
+    }
 
     const backendUrl = `/api/entitlements/catalog${backendParams.toString() ? `?${backendParams.toString()}` : ''}`;
 

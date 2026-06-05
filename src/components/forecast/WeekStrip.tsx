@@ -20,7 +20,12 @@ export default function WeekStrip({ days, colorHex, selectedDate, onSelect }: We
       {days.map(day => {
         const isSelected = selectedDate === day.date;
         const isToday = day.date === today;
-        const weekdayKey = (day.weekday || '').slice(0, 3).toLowerCase();
+        let weekdayKey = (day.weekday || '').slice(0, 3).toLowerCase();
+        if (!weekdayKey && day.date) {
+          const dateObj = new Date(day.date + 'T00:00:00');
+          const weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          weekdayKey = weekDays[dateObj.getDay()];
+        }
         const weekdayShort = t(`forecast.weekdays.${weekdayKey}`).toUpperCase();
         const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
 

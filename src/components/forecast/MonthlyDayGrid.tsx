@@ -56,6 +56,12 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
           const isLow = day.score <= 45;
           const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
           const scoreColor = isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b8';
+          let weekdayName = day.weekday;
+          if (!weekdayName && day.date) {
+            const dateObj = new Date(day.date + 'T00:00:00');
+            const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            weekdayName = weekDays[dateObj.getDay()];
+          }
 
           return (
             <motion.button
@@ -63,7 +69,7 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
               whileTap={{ scale: 0.94 }}
               onClick={() => onSelect(day.date)}
               aria-label={t('forecast.ariaDay')
-                .replace('{weekday}', day.weekday || '')
+                .replace('{weekday}', weekdayName || '')
                 .replace('{date}', day.date)
                 .replace('{score}', String(day.score))}
               className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 hover:bg-surface/50 hover:border-white/15'}`}

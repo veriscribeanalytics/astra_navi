@@ -57,8 +57,8 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <AsyncStylesheet href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       </head>
-      <body 
-        className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-full flex flex-col relative h-full"
+      <body
+        className="bg-background selection:bg-secondary selection:text-white overflow-x-hidden celestial-silk min-h-screen flex flex-col relative"
         suppressHydrationWarning
       >
         <ErrorBoundary>

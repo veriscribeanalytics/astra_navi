@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base styles
-  const baseStyles = 'inline-flex items-center justify-center gap-1.5 sm:gap-2 font-bold font-body transition-all duration-300 rounded-[24px] active:scale-95 cursor-pointer relative overflow-hidden min-h-[44px]';
+  const baseStyles = 'inline-flex items-center justify-center gap-1.5 sm:gap-2 font-bold font-body transition-all duration-300 rounded-[24px] active:scale-95 cursor-pointer relative overflow-hidden min-h-[44px] whitespace-nowrap';
   
   // Variant styles
   const variants = {

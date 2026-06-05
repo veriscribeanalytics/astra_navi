@@ -117,16 +117,25 @@ export default function ProductCatalog({
   );
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12 sm:space-y-16">
       {/* ─── Subscription Plans ─── */}
       {subscriptions.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-secondary" />
-            <h3 className="text-sm font-bold text-secondary uppercase tracking-widest">{t('plans.subscriptions')}</h3>
-            <div className="h-[1px] flex-1 bg-secondary/10" />
+        <section>
+          <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0">
+              <Shield className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-secondary" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.15em] sm:tracking-[0.2em]">
+                {t('plans.subscriptions')}
+              </h3>
+              <p className="text-[10px] sm:text-xs text-primary/35 mt-0.5 hidden sm:block">
+                Recurring plans with monthly credits, full feature access, and priority support
+              </p>
+            </div>
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-secondary/15 to-transparent ml-1 sm:ml-2" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {subscriptions.map((product) => (
               <ProductCard
                 key={product.productId}
@@ -137,18 +146,27 @@ export default function ProductCatalog({
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* ─── Credit Packs ─── */}
       {creditPacks.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="w-5 h-5 text-secondary" />
-            <h3 className="text-sm font-bold text-secondary uppercase tracking-widest">{t('plans.creditPacks')}</h3>
-            <div className="h-[1px] flex-1 bg-secondary/10" />
+        <section>
+          <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0">
+              <Star className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-secondary" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.15em] sm:tracking-[0.2em]">
+                {t('plans.creditPacks')}
+              </h3>
+              <p className="text-[10px] sm:text-xs text-primary/35 mt-0.5 hidden sm:block">
+                One-time credit bundles — buy what you need, use anytime
+              </p>
+            </div>
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-secondary/15 to-transparent ml-1 sm:ml-2" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {creditPacks.map((product) => (
               <ProductCard
                 key={product.productId}
@@ -158,18 +176,27 @@ export default function ProductCatalog({
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* ─── One-Time Reports ─── */}
       {reports.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-secondary" />
-            <h3 className="text-sm font-bold text-secondary uppercase tracking-widest">{t('plans.oneTimeReports')}</h3>
-            <div className="h-[1px] flex-1 bg-secondary/10" />
+        <section>
+          <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-secondary" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black text-secondary uppercase tracking-[0.15em] sm:tracking-[0.2em]">
+                {t('plans.oneTimeReports')}
+              </h3>
+              <p className="text-[10px] sm:text-xs text-primary/35 mt-0.5 hidden sm:block">
+                Detailed Vedic reports generated from your exact birth chart
+              </p>
+            </div>
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-secondary/15 to-transparent ml-1 sm:ml-2" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {reports.map((product) => (
               <ProductCard
                 key={product.productId}
@@ -179,13 +206,14 @@ export default function ProductCatalog({
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* ─── Fallback if no products ─── */}
+      {/* ─── Fallback ─── */}
       {subscriptions.length === 0 && creditPacks.length === 0 && reports.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-sm text-foreground/40">{t('plans.noProductsAvailable')}</p>
+        <div className="text-center py-12 sm:py-16">
+          <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-secondary/20 mx-auto mb-4" />
+          <p className="text-sm text-primary/30">{t('plans.noProductsAvailable')}</p>
         </div>
       )}
     </div>

@@ -13,7 +13,7 @@ import ForecastInsight from './ForecastInsight';
 import ForecastSnapshot from './ForecastSnapshot';
 import MonthlyDayGrid from './MonthlyDayGrid';
 import WeekStrip from './WeekStrip';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, AlertTriangle, RotateCw } from 'lucide-react';
 import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse } from '@/types/forecast';
 import { todayISO, currentMonthISO } from '@/utils/forecastError';
 
@@ -60,6 +60,7 @@ export default function ForecastPage() {
   const [area, setArea] = useState<ForecastArea>(initialArea);
   const [range, setRange] = useState<TimeRange>(initialRange);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [yearlyData, setYearlyData] = useState<YearlyResponse | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyResponse | null>(null);
   const [monthlyData, setMonthlyData] = useState<MonthlyResponse | null>(null);
@@ -69,6 +70,9 @@ export default function ForecastPage() {
 
   // Cache by `${area}|${range}|${lang}`. Distinct keys for 7d (weekly), monthly, and yearly.
   const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
+  // Tracks the in-flight request so a slow earlier response (e.g. after the
+  // user switches area/range) can't overwrite a newer selection's data.
+  const abortRef = useRef<AbortController | null>(null);
   const cacheKeyFor = useCallback((a: ForecastArea, r: TimeRange, lang: string): string => {
     return `${a}|${r}|${lang}`;
   }, []);
@@ -102,24 +106,35 @@ export default function ForecastPage() {
         const current = cached.data.months?.find(m => m.is_current);
         setSelectedMonth(current?.month || cached.data.months?.[0]?.month || null);
       }
+      setError(false);
       setLoading(false);
       return;
     }
 
+    // Abort any request still in flight for a previous area/range/language.
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
+    setError(false);
     try {
       if (range === '7d') {
-        const res = await clientFetch(`/api/forecast/${area}?days_back=3&days_forward=3&lang=${language}`);
+        const res = await clientFetch(`/api/forecast/${area}?days_back=3&days_forward=3&lang=${language}`, { signal: controller.signal });
+        if (controller.signal.aborted) return;
         if (res.ok) {
           const data: WeeklyResponse = await res.json();
           setWeeklyData(data);
           const today = data.days?.find(d => d.is_today || d.date === todayISO());
           setSelectedDay(today?.date || data.days?.[0]?.date || null);
           cacheRef.current.set(key, { kind: 'weekly', data, timestamp: Date.now() });
+        } else {
+          setError(true);
         }
       } else if (range === 'monthly') {
         const month = currentMonthISO();
-        const res = await clientFetch(`/api/forecast/${area}/monthly?month=${month}&lang=${language}`);
+        const res = await clientFetch(`/api/forecast/${area}/monthly?month=${month}&lang=${language}`, { signal: controller.signal });
+        if (controller.signal.aborted) return;
         if (res.ok) {
           const data: MonthlyResponse = await res.json();
           setMonthlyData(data);
@@ -128,27 +143,42 @@ export default function ForecastPage() {
           const todayInMonth = data.days?.find(d => d.date === today);
           setSelectedDay(todayInMonth?.date || data.days?.[0]?.date || null);
           cacheRef.current.set(key, { kind: 'monthly', data, timestamp: Date.now() });
+        } else {
+          setError(true);
         }
       } else {
-        const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`);
+        const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`, { signal: controller.signal });
+        if (controller.signal.aborted) return;
         if (res.ok) {
           const data: YearlyResponse = await res.json();
           setYearlyData(data);
           const current = data.months?.find(m => m.is_current);
           setSelectedMonth(current?.month || data.months?.[0]?.month || null);
           cacheRef.current.set(key, { kind: 'yearly', data, timestamp: Date.now() });
+        } else {
+          setError(true);
         }
       }
     } catch (err) {
+      // Ignore aborts — a newer request has superseded this one.
+      if (controller.signal.aborted || (err instanceof DOMException && err.name === 'AbortError')) {
+        return;
+      }
       console.error('[ForecastPage] fetch error:', err);
+      setError(true);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [area, range, language, cacheKeyFor, selectedDay]);
 
   useEffect(() => {
     if (isLoggedIn) fetchData();
   }, [isLoggedIn, fetchData]);
+
+  // Abort any in-flight forecast request when the page unmounts.
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const theme = AREA_THEMES[area];
 
@@ -207,6 +237,12 @@ export default function ForecastPage() {
   }, [range, weeklyData, monthlyData, yearlyData, selectedDay, selectedMonth]);
 
   const summary = range === '7d' ? weeklyData?.summary : range === 'monthly' ? monthlyData?.summary : yearlyData?.summary;
+
+  // Does the currently-selected range actually have data to render?
+  const hasData =
+    range === '7d' ? !!weeklyData?.days?.length
+    : range === 'monthly' ? !!monthlyData?.days?.length
+    : !!yearlyData?.months?.length;
 
   if (authLoading || !isLoggedIn) {
     return (
@@ -330,6 +366,40 @@ export default function ForecastPage() {
               </Card>
             </div>
           </div>
+        ) : error ? (
+          <Card padding="lg" className="border-white/5 bg-surface/20 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
+            <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
+              <AlertTriangle className="w-7 h-7 text-red-400" />
+            </div>
+            <div className="space-y-1.5 max-w-sm">
+              <h2 className="text-base sm:text-lg font-headline font-bold text-foreground">{t('forecast.errorTitle')}</h2>
+              <p className="text-xs sm:text-sm text-foreground/50">{t('forecast.errorBody')}</p>
+            </div>
+            <button
+              onClick={() => fetchData()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all cursor-pointer"
+            >
+              <RotateCw className="w-4 h-4" />
+              {t('forecast.retry')}
+            </button>
+          </Card>
+        ) : !hasData ? (
+          <Card padding="lg" className="border-white/5 bg-surface/20 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
+            <div className="w-14 h-14 rounded-full bg-surface-variant/15 flex items-center justify-center">
+              <TrendingUp className="w-7 h-7 text-foreground/30" />
+            </div>
+            <div className="space-y-1.5 max-w-sm">
+              <h2 className="text-base sm:text-lg font-headline font-bold text-foreground">{t('forecast.emptyTitle')}</h2>
+              <p className="text-xs sm:text-sm text-foreground/50">{t('forecast.emptyBody')}</p>
+            </div>
+            <button
+              onClick={() => fetchData()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all cursor-pointer"
+            >
+              <RotateCw className="w-4 h-4" />
+              {t('forecast.retry')}
+            </button>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Observatory & Selection & Insight */}

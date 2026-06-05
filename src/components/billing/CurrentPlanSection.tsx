@@ -2,39 +2,38 @@
 
 import React, { useEffect, useState } from 'react';
 import Card from '@/components/ui/Card';
-import { Package, Calendar, Shield, Crown, Zap } from 'lucide-react';
+import { Package, Calendar, Shield, Crown, Zap, Star, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
+import { usePaywallContext } from '@/context/PaywallContext';
 import { clientFetch } from '@/lib/apiClient';
 
-// ─── Types for subscription and packs responses ──────────────
+// ─── Types ────────────────────────────────────────────────────
 
-/** User's active subscription details (from /api/entitlements/subscription). */
 interface SubscriptionDetails {
   id: string;
-  planTier: string;           // "pro" or "premium"
-  productId: string;          // e.g. "sub_pro_monthly"
-  status: string;             // "active" | "cancelled" | "expired"
-  provider: string;           // "razorpay" | "manual" | "admin" | "google_play" | "app_store" | "system"
+  planTier: string;
+  productId: string;
+  status: string;
+  provider: string;
   creditsMonthly: number;
   creditsUsed: number;
   creditsRemaining: number;
-  cycleStart: string;         // ISO datetime
-  cycleEnd: string;           // ISO datetime
-  startedAt: string;          // ISO datetime
+  cycleStart: string;
+  cycleEnd: string;
+  startedAt: string;
 }
 
-/** User's active credit pack (from /api/entitlements/packs). */
 interface PackDetails {
   id: string;
   productId: string;
   productName: string;
   creditsTotal: number;
   creditsRemaining: number;
-  status: string;             // "active" | "exhausted" | "expired"
+  status: string;
   amountPaid: number | null;
-  purchasedAt: string;        // ISO datetime
-  expiresAt: string | null;   // ISO datetime
+  purchasedAt: string;
+  expiresAt: string | null;
 }
 
 // ─── Normalize helpers ────────────────────────────────────────
@@ -43,7 +42,6 @@ function normalizeSubscription(raw: Record<string, unknown>): SubscriptionDetail
   if (!raw || typeof raw !== 'object') return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s = raw as any;
-  // The backend returns a nested "subscription" key
   const sub = s.subscription && typeof s.subscription === 'object' ? s.subscription : s;
   if (!sub.id) return null;
   return {
@@ -84,17 +82,14 @@ function normalizePacks(raw: Record<string, unknown>): PackDetails[] {
 
 export default function CurrentPlanSection() {
   const { isLoggedIn } = useAuth();
+  const { refreshVersion } = usePaywallContext();
   const { t, language } = useTranslation();
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const [packs, setPacks] = useState<PackDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      setLoading(false);
-      return;
-    }
-
+    if (!isLoggedIn) { setLoading(false); return; }
     setLoading(true);
     Promise.all([
       clientFetch('/api/entitlements/subscription')
@@ -110,17 +105,19 @@ export default function CurrentPlanSection() {
       setPacks(pk);
       setLoading(false);
     });
-  }, [isLoggedIn]);
+    // refreshVersion bumps after a successful purchase (PaywallContext.refresh),
+    // re-running this fetch so the plan/packs reflect the new purchase immediately.
+  }, [isLoggedIn, refreshVersion]);
 
   const dateLocale = language === 'hi' ? 'hi-IN' : 'en-IN';
 
   if (!isLoggedIn) return null;
   if (loading) {
     return (
-      <Card padding="md" variant="bordered" className="!rounded-[24px]">
+      <Card padding="md" variant="bordered" className="!rounded-[28px] border-secondary/20">
         <div className="space-y-3">
           {[0, 1].map(i => (
-            <div key={i} className="h-10 rounded-xl bg-surface animate-pulse" />
+            <div key={i} className="h-12 rounded-2xl bg-primary/[0.03] animate-pulse" />
           ))}
         </div>
       </Card>
@@ -129,86 +126,110 @@ export default function CurrentPlanSection() {
 
   const hasSubscription = subscription && subscription.status === 'active';
   const activePacks = packs.filter(p => p.status === 'active');
-
   if (!hasSubscription && activePacks.length === 0) return null;
 
+  const isPremium = (subscription?.planTier || '').toLowerCase() === 'premium';
+  const tierAccent = isPremium ? 'purple' : 'secondary';
+  const tierIcon = isPremium ? Crown : Shield;
+
   return (
-    <Card padding="md" variant="bordered" className="!rounded-[24px] border-secondary/20">
-      <div className="space-y-4">
+    <Card padding="md" variant="bordered" className="!rounded-[28px] border-secondary/20 overflow-hidden relative">
+      {/* Subtle inner glow */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          background: isPremium
+            ? 'radial-gradient(ellipse 50% 100% at 10% 50%, rgba(168,130,255,0.9) 0%, transparent 70%)'
+            : 'radial-gradient(ellipse 50% 100% at 10% 50%, rgba(200,136,10,0.8) 0%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative space-y-4">
         {/* Section header */}
-        <div className="flex items-center gap-2 mb-3">
-          <Shield className="w-4 h-4 text-secondary" />
-          <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">
+        <div className="flex items-center gap-2">
+          <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${
+            isPremium ? 'bg-purple-500/10 border border-purple-400/20' : 'bg-secondary/10 border border-secondary/20'
+          }`}>
+            <Star className={`w-3.5 h-3.5 ${isPremium ? 'text-purple-400' : 'text-secondary'}`} />
+          </div>
+          <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isPremium ? 'text-purple-400' : 'text-secondary'}`}>
             {t('plans.currentPlan')}
           </span>
+          <div className="h-[1px] flex-1 bg-gradient-to-r from-secondary/15 to-transparent" />
         </div>
 
         {/* Active subscription */}
         {hasSubscription ? (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary/[0.04] border border-secondary/10">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-secondary/10 text-secondary">
-              <Crown className="w-4 h-4" />
+          <div className={`flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-500 ${
+            isPremium
+              ? 'bg-purple-500/[0.03] border-purple-400/15'
+              : 'bg-secondary/[0.03] border-secondary/10'
+          }`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              isPremium
+                ? 'bg-purple-500/10 border-purple-400/25 text-purple-400'
+                : 'bg-secondary/10 border-secondary/20 text-secondary'
+            }`}>
+              <Crown className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-bold text-foreground/80">
-                {t('plans.currentSubscription')}: {subscription.productId}
+              <p className="text-sm font-bold text-primary/80">
+                {t('plans.currentSubscription')}: <span className={isPremium ? 'text-purple-300' : 'text-secondary'}>{subscription.productId}</span>
               </p>
-              <div className="flex items-center gap-2 text-[10px] text-foreground/40">
+              <div className="flex items-center gap-3 text-[10px] text-primary/35 mt-1 flex-wrap">
                 <span className="flex items-center gap-1">
-                  <Zap className="w-3 h-3 text-secondary/50" />
+                  <Zap className={`w-3 h-3 ${isPremium ? 'text-purple-400/50' : 'text-secondary/50'}`} />
                   {subscription.creditsRemaining}/{subscription.creditsMonthly} {t('plans.naviCredits')}
                 </span>
                 {subscription.cycleEnd && (
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-secondary/40" />
+                    <Calendar className="w-3 h-3 text-primary/25" />
                     {t('plans.nextRenewal')}: {new Date(subscription.cycleEnd).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}
                   </span>
                 )}
               </div>
             </div>
-            <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
+            <span className={`text-[8px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full border ${
+              isPremium
+                ? 'bg-purple-500/10 text-purple-300 border-purple-400/20'
+                : 'bg-secondary/10 text-secondary border-secondary/20'
+            }`}>
               {subscription.planTier}
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] text-foreground/30">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] text-primary/25">
             <span>{t('plans.noSubscription')}</span>
           </div>
         )}
 
         {/* Active packs */}
-        {activePacks.length > 0 ? (
+        {activePacks.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-[10px] text-foreground/40">
-              <Package className="w-3 h-3 text-secondary/30" />
+            <div className="flex items-center gap-1.5 text-[10px] text-primary/30">
+              <Package className="w-3 h-3 text-secondary/25" />
               <span>{t('plans.currentCreditPacks')}</span>
             </div>
             {activePacks.map(pack => (
-              <div key={pack.id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-variant/20 border border-outline-variant/10">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-foreground/5 text-foreground/40">
-                  <Package className="w-3.5 h-3.5" />
+              <div key={pack.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/[0.02] border border-outline-variant/10 hover:border-outline-variant/20 transition-all duration-300">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/[0.04] border border-outline-variant/10">
+                  <Package className="w-3.5 h-3.5 text-primary/30" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold text-foreground/70">{pack.productName}</p>
-                  <div className="flex items-center gap-2 text-[9px] text-foreground/30">
-                    <span>{pack.creditsRemaining}/{pack.creditsTotal} {t('plans.naviCredits')}</span>
+                  <p className="text-xs font-bold text-primary/60">{pack.productName}</p>
+                  <div className="flex items-center gap-2 text-[9px] text-primary/25">
+                    <span>{pack.creditsRemaining}/{pack.creditsTotal} {t('plans.naviCredits')} {t('plans.packRemaining')}</span>
                     {pack.expiresAt && (
                       <span className="flex items-center gap-1">
-                        <Calendar className="w-2.5 h-2.5" />
-                        {t('plans.packExpires')}: {new Date(pack.expiresAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}
+                        · {t('plans.packExpires')}: {new Date(pack.expiresAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}
                       </span>
                     )}
                   </div>
                 </div>
-                <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-foreground/5 text-foreground/25">
+                <span className="text-[7px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-md bg-primary/[0.04] text-primary/20">
                   {pack.status}
                 </span>
               </div>
             ))}
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] text-foreground/30">
-            <span>{t('plans.noCreditPacks')}</span>
           </div>
         )}
       </div>

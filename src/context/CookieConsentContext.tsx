@@ -183,25 +183,37 @@ export const CookieConsentProvider: React.FC<{ children: React.ReactNode }> = ({
       // Persist to localStorage
       savePreferencesToStorage(preferences, consentedAt, PRIVACY_POLICY_VERSION);
 
-      // Apply/remove functional cookies based on consent
+      // Enforce the functional-cookie choice. Declining functional must actually
+      // remove the functional cookies/storage (theme + locale), otherwise the
+      // toggle is cosmetic (DPDP S.6 — consent must be specific and actionable).
       if (typeof window !== 'undefined') {
         const functionalEnabled = preferences.find(
           (p) => p.category === 'functional'
         )?.enabled;
 
         if (!functionalEnabled) {
-          // User declined functional cookies — clear non-essential localStorage items
-          // (Keep theme & locale as they have their own consent via the banner)
-          // We keep the consent record itself and the consent session
+          try {
+            // Expire the functional cookies set by themeManager / LanguageContext.
+            document.cookie = 'theme=; path=/; max-age=0; SameSite=Lax';
+            document.cookie = 'NEXT_LOCALE=; path=/; max-age=0; SameSite=Lax';
+            localStorage.removeItem('theme');
+          } catch {
+            // Best-effort cleanup — ignore storage/cookie failures.
+          }
         }
       }
+
+      // Whether any optional (non-essential) category was actually granted.
+      // Logging a flat granted:true even for "Accept Essential Only" would
+      // misstate the audit trail, so derive it from the real choices.
+      const anyOptionalGranted = preferences.some((p) => !p.required && p.enabled);
 
       // Log consent to backend for audit trail
       logConsentToBackend({
         userId: undefined, // May be set by AuthContext later
         sessionId: sessionIdRef.current,
         consentType,
-        granted: true,
+        granted: anyOptionalGranted,
         preferences,
         policyVersion: PRIVACY_POLICY_VERSION,
         timestamp: consentedAt,
@@ -267,9 +279,29 @@ export const CookieConsentProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const resetConsent = useCallback(() => {
+    // Record the withdrawal server-side so the DPDP audit trail reflects it
+    // (best-effort; local reset proceeds regardless). The backend resolves the
+    // user from the session cookie; anonymous callers simply no-op server-side.
     if (typeof window !== 'undefined') {
+      fetch('/api/user/consent', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sessionIdRef.current,
+          consentType: 'cookies',
+          policyVersion: PRIVACY_POLICY_VERSION,
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {
+        // Withdrawal still applies locally even if the audit call fails.
+      });
+
+      // Clear functional cookies/storage on withdrawal too.
       try {
         localStorage.removeItem(COOKIE_CONSENT_KEY);
+        document.cookie = 'theme=; path=/; max-age=0; SameSite=Lax';
+        document.cookie = 'NEXT_LOCALE=; path=/; max-age=0; SameSite=Lax';
+        localStorage.removeItem('theme');
       } catch {
         // ignore
       }

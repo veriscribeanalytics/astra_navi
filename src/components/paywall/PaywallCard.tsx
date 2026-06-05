@@ -39,12 +39,23 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
   
   // Clean up title to generate a potential custom section lookup key
   const sanitizedTitleKey = paywall.title ? paywall.title.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
-  const customTitle = sanitizedTitleKey ? t(`paywall.custom.${sanitizedTitleKey}.title`) : '';
-  const customDesc = sanitizedTitleKey ? t(`paywall.custom.${sanitizedTitleKey}.description`) : '';
+  
+  const customTitleKey = `paywall.custom.${sanitizedTitleKey}.title`;
+  const customTitleVal = sanitizedTitleKey ? t(customTitleKey) : '';
+  const customTitle = (customTitleVal && customTitleVal !== customTitleKey) ? customTitleVal : '';
+
+  const customDescKey = `paywall.custom.${sanitizedTitleKey}.description`;
+  const customDescVal = sanitizedTitleKey ? t(customDescKey) : '';
+  const customDesc = (customDescVal && customDescVal !== customDescKey) ? customDescVal : '';
 
   // Feature key standard translations
-  const featureTitle = t(`paywall.features.${paywall.featureKey}.title`);
-  const featureDesc = t(`paywall.features.${paywall.featureKey}.description`);
+  const featureTitleKey = `paywall.features.${paywall.featureKey}.title`;
+  const featureTitleVal = t(featureTitleKey);
+  const featureTitle = (featureTitleVal && featureTitleVal !== featureTitleKey) ? featureTitleVal : '';
+
+  const featureDescKey = `paywall.features.${paywall.featureKey}.description`;
+  const featureDescVal = t(featureDescKey);
+  const featureDesc = (featureDescVal && featureDescVal !== featureDescKey) ? featureDescVal : '';
 
   // Resolution order: custom localized -> feature localized -> backend language-specific -> default backend English
   const title = customTitle || featureTitle || ((isHindi && paywall.titleHi) ? paywall.titleHi : paywall.title);
@@ -63,8 +74,9 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
 
   // Helper: get product name based on language/dictionary
   const getProductName = (product: SuggestedProduct) => {
-    const localizedName = t(`paywall.products.${product.productId}`);
-    if (localizedName) return localizedName;
+    const key = `paywall.products.${product.productId}`;
+    const localizedName = t(key);
+    if (localizedName && localizedName !== key) return localizedName;
     return (isHindi && product.nameHi) ? product.nameHi : product.nameEn;
   };
 
@@ -181,8 +193,9 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             size="md"
             fullWidth
             className="mt-2 rounded-[16px]"
+            rightIcon={<ArrowRight className="w-4 h-4" />}
           >
-            {t('paywall.viewPlansUpgrade') || "View Plans & Upgrade"} <ArrowRight className="w-4 h-4 ml-1" />
+            {t('paywall.viewPlansUpgrade') || "View Plans & Upgrade"}
           </Button>
 
           {/* Payment notice */}
@@ -202,10 +215,10 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative rounded-[24px] overflow-hidden min-h-[280px]"
+        className="relative rounded-[24px] overflow-hidden min-h-[290px]"
       >
         {/* Blurred backdrop overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/90 to-surface/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 p-6 text-center min-h-[280px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/90 to-surface/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 p-4 sm:p-5 text-center min-h-[290px]">
           {/* Close button */}
           {onClose && (
             <button
@@ -267,8 +280,8 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             </Link>
           )}
 
-          <Button href={ctaHref} variant="primary" size="sm" className="rounded-xl">
-            {t('paywall.viewPlans') || "View Plans"} <ArrowRight className="w-3 h-3 ml-1" />
+          <Button href={ctaHref} variant="primary" size="sm" className="rounded-xl" rightIcon={<ArrowRight className="w-3 h-3" />}>
+            {t('paywall.viewPlans') || "View Plans"}
           </Button>
         </div>
       </motion.div>
@@ -403,8 +416,9 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                 size="lg"
                 fullWidth
                 className="rounded-[16px] mt-2"
+                rightIcon={<ArrowRight className="w-4 h-4" />}
               >
-                {t('paywall.viewPlansUpgrade') || "View Plans & Upgrade"} <ArrowRight className="w-4 h-4 ml-2" />
+                {t('paywall.viewPlansUpgrade') || "View Plans & Upgrade"}
               </Button>
 
               {/* Payment notice */}

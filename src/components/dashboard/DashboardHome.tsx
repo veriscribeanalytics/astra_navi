@@ -46,10 +46,16 @@ import type { ForecastDay } from "@/components/dashboard/MiniChart";
 import Particles from "@/components/ui/Particles";
 import { catmullRomToBezier, catmullRomArea } from "@/utils/chartCurve";
 import type { HoroscopeData } from "@/types/horoscope";
-import { useFamilyMembers } from "@/hooks/useFamily";
+import {
+  useFamilyMembers,
+  useFamilyConnections,
+  useFamilyCompatibilityPreflight,
+  useFamilyReports,
+  useFamilyCompatibility,
+} from "@/hooks/useFamily";
 import { parseKundliStats } from "@/lib/kundliStats";
-import { getAvatarImage } from "@/utils/avatarStyle";
 import { computeFamilyMemberStatus } from "@/lib/familyStatus";
+import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from "@/types/family";
 
 interface ForecastData {
   area: ForecastArea;
@@ -298,6 +304,97 @@ function DarkPanel({ children, className = "" }: { children: React.ReactNode; cl
   );
 }
 
+const formatRelationship = (rel?: string | null): string =>
+  rel ? rel.charAt(0).toUpperCase() + rel.slice(1) : "";
+
+const initialOf = (name?: string | null): string => {
+  const trimmed = (name ?? "").trim();
+  return trimmed ? trimmed[0].toUpperCase() : "?";
+};
+
+interface FamilyCardActionProps {
+  t: (key: string) => string;
+  onRunCompatibility: () => void;
+  isCompatibilityBlocked: boolean;
+}
+
+/** Dashboard family-member card backed by real member data + compatibility status. */
+function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibilityBlocked }: { member: FamilyMember } & FamilyCardActionProps) {
+  const { data: preflight } = useFamilyCompatibilityPreflight(member.id);
+  const { data: reports } = useFamilyReports(member.id);
+  const { data: compat } = useFamilyCompatibility(member.id);
+
+  const status = computeFamilyMemberStatus({
+    member,
+    preflight,
+    reports,
+    band: (compat?.band as FamilyCompatibilityBand | undefined) ?? null,
+  });
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-xl font-bold text-secondary">
+          {initialOf(member.name)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h4 className="truncate font-headline text-sm font-bold text-foreground">{member.name || "—"}</h4>
+          <p className="label-sm text-[10px] tracking-wider text-foreground/35">{formatRelationship(member.relationshipType)}</p>
+        </div>
+      </div>
+      {status && (
+        <span className={`inline-block self-start rounded-md border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${status.classes}`}>
+          {t(status.labelKey)}
+        </span>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        <Link href={`/family?member=${member.id}`} className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
+          {t('dashboard.familyViewBond')}
+        </Link>
+        <button
+          onClick={onRunCompatibility}
+          className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
+        >
+          {isCompatibilityBlocked ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
+          {t('dashboard.familyRunCompatibility')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Dashboard card for a linked connection (another user who shares with you). */
+function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatibilityBlocked }: { connection: FamilyConnection } & FamilyCardActionProps) {
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-xl font-bold text-emerald-400">
+          {initialOf(connection.otherName)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h4 className="truncate font-headline text-sm font-bold text-foreground">{connection.otherName || "—"}</h4>
+          <p className="label-sm text-[10px] tracking-wider text-foreground/35">{formatRelationship(connection.iSeeThemAs)}</p>
+        </div>
+      </div>
+      <span className="inline-block self-start rounded-md bg-emerald-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+        {t('newDashboard.linked')}
+      </span>
+      <div className="grid grid-cols-2 gap-2">
+        <Link href="/family" className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
+          {t('dashboard.familyViewBond')}
+        </Link>
+        <button
+          onClick={onRunCompatibility}
+          className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
+        >
+          {isCompatibilityBlocked ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
+          {t('dashboard.familyRunCompatibility')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardHome() {
   const router = useRouter();
   const { t, language } = useTranslation();
@@ -389,6 +486,11 @@ export default function DashboardHome() {
   const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
   const overallScore = horoscope?.score?.overall ?? horoscope?.overall_score ?? 73;
   const scoreColor = getScoreColor(overallScore);
+  // Only the *initial* fetch (no data yet) should show skeletons. Once the
+  // request settles we render real scores, or the graceful fallback numbers if
+  // the backend returned nothing — never the fabricated 73/70 *during* loading
+  // (that placeholder-then-real swap is the "wrong data then correct" flash).
+  const scoreLoading = horoscopeLoading && !horoscope;
   const scoreBand = overallScore >= 75
     ? t('newDashboard.todaysEnergy.bandFavorable')
     : overallScore >= 60
@@ -397,6 +499,34 @@ export default function DashboardHome() {
   const moonSign = getRashiData(user?.moonSign || horoscope?.user?.sign || horoscope?.sign || "Leo");
   const sunSign = getRashiData(user?.sunSign || "Libra");
   const ascendantSign = getRashiData(user?.lagnaSign || "Leo");
+
+  // Real family + chart data (replaces the previously-hardcoded placeholders).
+  const { data: familyMembers, isLoading: familyLoading } = useFamilyMembers();
+  const { data: familyConnections, isLoading: connectionsLoading } = useFamilyConnections();
+  const kundliStats = useMemo(() => parseKundliStats(user?.astrologyData), [user?.astrologyData]);
+
+  // Format a dasha period like "May 2026 — May 2044" from ISO/loose date strings.
+  const formatDashaRange = useCallback(
+    (start?: string, end?: string): string | undefined => {
+      const fmt = (d?: string) => {
+        if (!d) return null;
+        const parsed = new Date(d.length <= 10 ? `${d}T00:00:00` : d);
+        if (Number.isNaN(parsed.getTime())) return null;
+        return parsed.toLocaleDateString(LOCALE_BY_LANGUAGE[language] || "en-IN", { month: "short", year: "numeric" });
+      };
+      const s = fmt(start);
+      const e = fmt(end);
+      if (s && e) return `${s} — ${e}`;
+      return s || e || undefined;
+    },
+    [language]
+  );
+
+  const mahadashaSub = kundliStats?.mahaPlanet;
+  const mahadashaRange = formatDashaRange(kundliStats?.mahaStart, kundliStats?.mahaEnd);
+  const antardashaSub = kundliStats?.antaPlanet;
+  const antardashaRange = formatDashaRange(kundliStats?.antaStart, kundliStats?.antaEnd);
+
   const activeAreaLabel = resolveAreaLabel(t, activeArea);
   const bestDay = useMemo(() => {
     const day = forecast?.days?.reduce<ForecastDay | null>((best, item) => (!best || item.score > best.score ? item : best), null);
@@ -445,7 +575,7 @@ export default function DashboardHome() {
 
   if (profileLocationRequired && !horoscope) {
     return (
-      <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-background px-4 py-10 text-foreground">
+      <div className="min-h-[calc(100dvh-var(--navbar-height,64px)-100px)] bg-background px-4 py-10 text-foreground">
         <DarkPanel className="mx-auto max-w-xl p-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10">
             <ShieldAlert className="h-7 w-7 text-secondary" />
@@ -466,7 +596,7 @@ export default function DashboardHome() {
   }
 
   return (
-    <div className="gpt-dashboard-shell safe-bottom-buffer relative min-h-[calc(100dvh-var(--navbar-height,64px))] overflow-x-hidden bg-background text-foreground">
+    <div className="gpt-dashboard-shell safe-bottom-buffer relative min-h-[calc(100dvh-var(--navbar-height,64px)-100px)] overflow-x-hidden bg-background text-foreground">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,color-mix(in_srgb,var(--secondary)_38%,transparent),transparent_28%),radial-gradient(circle_at_88%_12%,color-mix(in_srgb,var(--accent)_38%,transparent),transparent_34%),linear-gradient(180deg,var(--surface)_0%,var(--background)_48%,var(--surface)_100%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-80">
         <Particles
@@ -501,7 +631,9 @@ export default function DashboardHome() {
                 {userLoading ? "..." : userName}
               </span>
             </h1>
-            {topLifeArea && (
+            {scoreLoading ? (
+              <div className="mt-2 h-5 w-64 animate-pulse rounded bg-surface-variant/[0.06]" />
+            ) : topLifeArea && (
               <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
                 <Star className="h-4 w-4 fill-secondary text-secondary" />
                 {t('newDashboard.todaysEnergy.scoreImpressive', { label: topLifeArea.label })} <span className="font-black text-emerald-400">{topLifeArea.score}%</span>
@@ -543,16 +675,25 @@ export default function DashboardHome() {
               <div className="grid gap-6 lg:grid-cols-[170px_minmax(0,1fr)_190px] lg:items-center">
                 <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
                   <p className="label-secondary font-black tracking-[0.2em]">{t('newDashboard.todaysEnergy.title')}</p>
-                  <div className="mt-5">
-                    <RingScore score={overallScore} color={scoreColor} />
-                  </div>
-                  <span
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
-                    style={{ color: scoreColor, backgroundColor: `${scoreColor}1f` }}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: scoreColor }} />
-                    {scoreBand}
-                  </span>
+                  {scoreLoading ? (
+                    <>
+                      <div className="mt-5 h-[132px] w-[132px] shrink-0 animate-pulse rounded-full bg-surface-variant/[0.06]" />
+                      <div className="mt-4 h-7 w-28 animate-pulse rounded-full bg-surface-variant/[0.06]" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="mt-5">
+                        <RingScore score={overallScore} color={scoreColor} />
+                      </div>
+                      <span
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
+                        style={{ color: scoreColor, backgroundColor: `${scoreColor}1f` }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: scoreColor }} />
+                        {scoreBand}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 <div>
@@ -624,7 +765,15 @@ export default function DashboardHome() {
             <section className="space-y-3">
               <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-foreground/70">{t('newDashboard.lifeAreas.title')}</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-                {lifeAreas.map(({ area, label, score, insight, theme }) => {
+                {scoreLoading
+                  ? AREA_LIST.map((area) => (
+                      <div key={area} className="rounded-2xl border border-outline-variant/10 bg-surface/78 p-4 text-center">
+                        <div className="mx-auto h-20 w-20 animate-pulse rounded-full bg-surface-variant/[0.06]" />
+                        <div className="mx-auto mt-3 h-5 w-16 animate-pulse rounded bg-surface-variant/[0.06]" />
+                        <div className="mx-auto mt-2 h-3 w-full animate-pulse rounded bg-surface-variant/[0.06]" />
+                      </div>
+                    ))
+                  : lifeAreas.map(({ area, label, score, insight, theme }) => {
                   const Icon = theme.icon;
                   const color = getScoreColor(score);
                   const isLucide = area === "general" || area === "spiritual";
@@ -708,7 +857,11 @@ export default function DashboardHome() {
                     })}
                   </div>
                 </div>
-                <div className="relative min-h-[230px] rounded-2xl overflow-hidden">
+                <div className={`relative rounded-2xl overflow-hidden ${
+                  isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope')
+                    ? 'min-h-[320px]'
+                    : 'min-h-[230px]'
+                }`}>
                   {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
                     <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
                   ) : forecastLoading || !forecast ? (
@@ -1025,74 +1178,60 @@ export default function DashboardHome() {
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Example family members */}
-                <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-xl font-bold text-secondary">
-                      C
+                {familyLoading && !familyMembers && connectionsLoading && !familyConnections ? (
+                  [0, 1].map((i) => (
+                    <div key={i} className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 shrink-0 rounded-full bg-surface-variant/20 animate-pulse" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 w-24 rounded bg-surface-variant/20 animate-pulse" />
+                          <div className="h-2 w-16 rounded bg-surface-variant/20 animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="h-5 w-24 rounded bg-surface-variant/20 animate-pulse" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="truncate font-headline text-sm font-bold text-foreground">Chandrakant</h4>
-                      <p className="label-sm text-[10px] tracking-wider text-foreground/35">{t('newDashboard.familyFriends.relationshipSibling')}</p>
-                    </div>
-                  </div>
-                  <span className="inline-block self-start rounded-md bg-amber-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-400">
-                    {t('dashboard.familyStatusNeedsAttention')}
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link href="/family" className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
-                      {t('dashboard.familyViewBond')}
-                    </Link>
-                    <button
-                      onClick={() => {
-                        if (isFeatureBlocked('family_compatibility') && getFeaturePaywall('family_compatibility')) {
-                          setActivePaywallData(getFeaturePaywall('family_compatibility')!);
-                          return;
-                        }
-                        router.push('/kundli/match');
-                      }}
-                      className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
-                    >
-                      {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-                      {t('dashboard.familyRunCompatibility')}
-                    </button>
-                  </div>
-                </div>
+                  ))
+                ) : (
+                  <>
+                    {familyMembers?.map((m) => {
+                      const blocked = isFeatureBlocked('family_compatibility');
+                      return (
+                        <DashboardFamilyMemberCard
+                          key={`m-${m.id}`}
+                          member={m}
+                          t={t}
+                          isCompatibilityBlocked={blocked}
+                          onRunCompatibility={() => {
+                            const pw = getFeaturePaywall('family_compatibility');
+                            if (blocked && pw) { setActivePaywallData(pw); return; }
+                            router.push('/kundli/match');
+                          }}
+                        />
+                      );
+                    })}
+                    {familyConnections?.map((c) => {
+                      const blocked = isFeatureBlocked('family_compatibility');
+                      return (
+                        <DashboardConnectionCard
+                          key={`c-${c.connectionId}`}
+                          connection={c}
+                          t={t}
+                          isCompatibilityBlocked={blocked}
+                          onRunCompatibility={() => {
+                            const pw = getFeaturePaywall('family_compatibility');
+                            if (blocked && pw) { setActivePaywallData(pw); return; }
+                            router.push('/kundli/match');
+                          }}
+                        />
+                      );
+                    })}
+                  </>
+                )}
 
-                <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-xl font-bold text-emerald-400">
-                      A
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="truncate font-headline text-sm font-bold text-foreground">Ankit Prasad</h4>
-                      <p className="label-sm text-[10px] tracking-wider text-foreground/35">{t('newDashboard.familyFriends.relationshipFriend')}</p>
-                    </div>
-                  </div>
-                  <span className="inline-block self-start rounded-md bg-emerald-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-400">
-                    {t('newDashboard.linked')}
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link href="/family" className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
-                      {t('dashboard.familyViewBond')}
-                    </Link>
-                    <button
-                      onClick={() => {
-                        if (isFeatureBlocked('family_compatibility') && getFeaturePaywall('family_compatibility')) {
-                          setActivePaywallData(getFeaturePaywall('family_compatibility')!);
-                          return;
-                        }
-                        router.push('/kundli/match');
-                      }}
-                      className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
-                    >
-                      {isFeatureBlocked('family_compatibility') ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-                      {t('dashboard.familyRunCompatibility')}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-secondary/30 bg-secondary/5 p-4 text-center">
+                <Link
+                  href="/family"
+                  className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-secondary/30 bg-secondary/5 p-4 text-center transition-all hover:border-secondary/50"
+                >
                   <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/40 text-secondary">
                     <Users className="h-7 w-7" />
                   </div>
@@ -1100,11 +1239,11 @@ export default function DashboardHome() {
                     <p className="mb-1 text-sm font-bold text-foreground">{t('newDashboard.familyFriends.addMember')}</p>
                     <p className="text-[10px] leading-relaxed text-foreground/40">{t('dashboard.familyAddSubtitle')}</p>
                   </div>
-                  <button className="flex items-center gap-1.5 rounded-xl border-2 border-secondary/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/10">
+                  <span className="flex items-center gap-1.5 rounded-xl border-2 border-secondary/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/10">
                     <Users className="h-3 w-3" />
                     {t('newDashboard.familyFriends.addMember')}
-                  </button>
-                </div>
+                  </span>
+                </Link>
               </div>
             </DarkPanel>
 
@@ -1128,8 +1267,12 @@ export default function DashboardHome() {
               <div className="space-y-3">
                 {[
                   { label: t('newDashboard.myChart.yourKundli'), sublabel: `${ascendantSign?.name || "Leo"} ${t('dashboard.ascendant')}`, icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
-                  { label: t('newDashboard.myChart.mahadasha'), sublabel: "Rahu", subtext: "May 2026 — May 2044", icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "var(--flare-gold)", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-                  { label: t('newDashboard.myChart.antardasha'), sublabel: "Rahu", subtext: "May 2026 — Jan 2028", icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "var(--flare-lavender)", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+                  ...(mahadashaSub
+                    ? [{ label: t('newDashboard.myChart.mahadasha'), sublabel: mahadashaSub, subtext: mahadashaRange, icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "var(--flare-gold)", requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                    : []),
+                  ...(antardashaSub
+                    ? [{ label: t('newDashboard.myChart.antardasha'), sublabel: antardashaSub, subtext: antardashaRange, icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "var(--flare-lavender)", requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                    : []),
                 ].map((item, idx) => {
                   const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
                   const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;

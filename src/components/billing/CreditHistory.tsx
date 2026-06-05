@@ -7,6 +7,7 @@ import { Sparkles, Clock, MessageSquare, Globe, Heart, Brain, FileText, ArrowUpR
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
+import { usePaywallContext } from '@/context/PaywallContext';
 import { clientFetch } from '@/lib/apiClient';
 
 /** Map feature key to icon. */
@@ -49,6 +50,7 @@ export default function CreditHistory({
   className = '',
 }: CreditHistoryProps) {
   const { isLoggedIn } = useAuth();
+  const { refreshVersion } = usePaywallContext();
   const { t, language } = useTranslation();
   const [fetchedHistory, setFetchedHistory] = useState<CreditHistoryResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -71,7 +73,9 @@ export default function CreditHistory({
       })
       .catch(err => console.warn('[CreditHistory] Fetch failed:', err))
       .finally(() => setLoading(false));
-  }, [isLoggedIn, history, limit]);
+    // refreshVersion bumps after a purchase so the new transaction appears
+    // without a full page reload.
+  }, [isLoggedIn, history, limit, refreshVersion]);
 
   // Client-side filter by actionCategory
   const activeHistory = fetchedHistory || history;

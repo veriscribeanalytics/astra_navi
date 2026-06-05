@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { RazorpayCheckoutHandler } from '@/components/billing/RazorpayCheckoutHandler';
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Clock, Shield, Star, FlaskConical } from 'lucide-react';
+import { Sparkles, ArrowRight, Clock, Shield, Star, FlaskConical, Compass } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import CreditBalanceCard from '@/components/billing/CreditBalanceCard';
 import ProductCatalog from '@/components/billing/ProductCatalog';
@@ -31,34 +31,27 @@ export default function PlansClient() {
         phoneNumber: (user as any)?.phoneNumber || '',
       },
       language || 'en',
-      async () => {
-        await refreshPaywall();
-      }
+      async () => { await refreshPaywall(); }
     );
   }, [isLoggedIn, user, language, refreshPaywall]);
 
-  // Highlight product from query params: ?product=pro_monthly or ?feature=chat_message
   const highlightProductId = searchParams?.get('product') || null;
   const highlightFeature = searchParams?.get('feature') || null;
+  // Test mode (₹1 test plans) must be explicitly enabled via env — a URL param
+  // alone must never expose test SKUs in production.
+  const isTestMode = searchParams?.get('test') === '1'
+    && process.env.NEXT_PUBLIC_ENABLE_TEST_PLANS === '1';
 
-  // Test mode: ?test=1 reveals hidden/inactive products (e.g. ₹1 test plan test_pro_1_inr)
-  const isTestMode = searchParams?.get('test') === '1';
-
-  // State
   const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Use PaywallContext's balance directly (it fetches from /api/entitlements/balance),
-  // with a fallback constructed from tier + totalCredits
   const effectiveBalance: BalanceResponse | null = balance || (isLoggedIn ? {
     credits: totalCredits ?? 0,
     tier: tier || user?.tier || 'free',
   } : null);
 
-  // Balance loading state from PaywallContext
   const balanceLoading = isLoggedIn && paywallLoading && !balance;
 
-  // When user selects a product → open mock checkout
   const handleSelectProduct = useCallback((product: CatalogProduct) => {
     setSelectedProduct(product);
     setShowCheckout(true);
@@ -66,54 +59,81 @@ export default function PlansClient() {
 
   return (
     <div className="min-h-screen pt-4 sm:pt-8 pb-10 sm:pb-16 flex flex-col relative z-10">
-      {/* Header */}
+      {/* ═══════════════════════════════════════════════════════════
+          HERO HEADER — cosmic, dramatic, premium
+          ═══════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center px-4 max-w-3xl mx-auto mb-6 sm:mb-10 space-y-3 sm:space-y-4"
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center px-4 max-w-4xl mx-auto mb-8 sm:mb-12 relative"
       >
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="h-[1px] w-8 bg-secondary/30 hidden sm:block" />
-          <Sparkles className="w-5 h-5 text-secondary" />
-          <div className="h-[1px] w-8 bg-secondary/30 hidden sm:block" />
+        {/* Decorative cosmic ring — smaller on mobile */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] pointer-events-none opacity-[0.04] sm:opacity-[0.06]"
+          style={{
+            background: 'radial-gradient(circle, rgba(200,136,10,0.4) 0%, transparent 60%)',
+            filter: 'blur(60px)',
+          }}
+        />
+
+        {/* Eyebrow */}
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="h-[1px] w-8 sm:w-10 lg:w-16 bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-xl sm:rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shadow-[0_0_20px_rgba(200,136,10,0.1)]">
+            <Compass className="w-4 h-4 sm:w-4.5 sm:h-4.5 lg:w-5 lg:h-5 text-secondary" />
+          </div>
+          <div className="h-[1px] w-8 sm:w-10 lg:w-16 bg-gradient-to-r from-transparent via-secondary/40 to-transparent" />
         </div>
-        <h1 className="text-3xl sm:text-5xl font-headline font-bold text-primary">
+
+        {/* Headline — scales smoothly across breakpoints */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl 3xl:text-7xl font-headline font-black text-primary leading-[1.05] tracking-tight mb-3 sm:mb-4 px-2">
           {t('plans.title')}
         </h1>
-        <p className="text-sm sm:text-lg text-primary/70 max-w-2xl mx-auto">
+
+        {/* Subtitle */}
+        <p className="text-xs sm:text-base lg:text-lg text-primary/50 max-w-xl sm:max-w-2xl mx-auto leading-relaxed mb-5 sm:mb-6 px-2">
           {t('plans.subtitle')}
         </p>
 
-        {/* Highlighted feature message */}
+        {/* Highlighted feature banner */}
         {highlightFeature && (
-          <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-secondary/[0.06] border border-secondary/10 mt-2">
-            <Shield className="w-3.5 h-3.5 text-secondary" />
-            <span className="text-[11px] font-bold text-secondary">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-secondary/[0.05] border border-secondary/15 shadow-[0_0_30px_rgba(200,136,10,0.04)]"
+          >
+            <Shield className="w-4 h-4 text-secondary" />
+            <span className="text-xs font-bold text-secondary">
               {t('plans.upgradeForFeature')} {highlightFeature}
             </span>
-            <ArrowRight className="w-3 h-3 text-secondary/40" />
-          </div>
+            <ArrowRight className="w-3.5 h-3.5 text-secondary/40" />
+          </motion.div>
         )}
 
         {/* Test mode indicator */}
         {isTestMode && (
-          <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-500/[0.08] border border-amber-500/20 mt-2">
-            <FlaskConical className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest">
-              Test Mode — ₹1 test plans visible
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500/[0.06] border border-amber-500/15 mt-3"
+          >
+            <FlaskConical className="w-4 h-4 text-amber-500" />
+            <span className="text-xs font-bold text-amber-500 uppercase tracking-[0.15em]">
+              {t('plans.testModeBanner')}
             </span>
-          </div>
+          </motion.div>
         )}
       </motion.div>
 
-      {/* ─── Credit Balance (for logged-in users) ─── */}
+      {/* ═══════════════════════════════════════════════════════════
+          BALANCE + CURRENT PLAN (logged-in users)
+          ═══════════════════════════════════════════════════════════ */}
       {isLoggedIn && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="max-w-4xl 2xl:max-w-6xl mx-auto px-4 mb-6 sm:mb-8 w-full"
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-4xl 2xl:max-w-6xl mx-auto px-4 mb-5 sm:mb-6 w-full"
         >
           <CreditBalanceCard
             balance={effectiveBalance}
@@ -123,24 +143,25 @@ export default function PlansClient() {
         </motion.div>
       )}
 
-      {/* ─── Current Plan & Packs (for logged-in users) ─── */}
       {isLoggedIn && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="max-w-4xl 2xl:max-w-6xl mx-auto px-4 mb-6 sm:mb-8 w-full"
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-4xl 2xl:max-w-6xl mx-auto px-4 mb-8 sm:mb-10 w-full"
         >
           <CurrentPlanSection />
         </motion.div>
       )}
 
-      {/* ─── Product Catalog ─── */}
+      {/* ═══════════════════════════════════════════════════════════
+          PRODUCT CATALOG
+          ═══════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="max-w-4xl 2xl:max-w-6xl 3xl:max-w-[1600px] mx-auto px-4 mb-8 sm:mb-12 w-full"
+        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-4xl 2xl:max-w-6xl 3xl:max-w-[1600px] mx-auto px-4 mb-10 sm:mb-14 w-full"
       >
         <ProductCatalog
           highlightProductId={highlightProductId ?? (isTestMode ? 'test_pro_1_inr' : undefined)}
@@ -150,43 +171,73 @@ export default function PlansClient() {
         />
       </motion.div>
 
-      {/* ─── Credit Usage History (for logged-in users) ─── */}
+      {/* ═══════════════════════════════════════════════════════════
+          CREDIT HISTORY
+          ═══════════════════════════════════════════════════════════ */}
       {isLoggedIn && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="max-w-4xl 2xl:max-w-6xl mx-auto px-4 mb-8 sm:mb-12 w-full"
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-4xl 2xl:max-w-6xl mx-auto px-4 mb-10 sm:mb-14 w-full"
         >
           <CreditHistory limit={10} />
         </motion.div>
       )}
 
-      {/* ─── Beta / Coming Soon Notice ─── */}
+      {/* ═══════════════════════════════════════════════════════════
+          BETA / EARLY ADOPTER NOTICE
+          ═══════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="max-w-4xl 2xl:max-w-6xl 3xl:max-w-[1600px] mx-auto px-4 w-full"
       >
-        <Card padding="lg" variant="bordered" className="text-center border-secondary/20 !p-5 sm:!p-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-secondary" />
-            <h3 className="text-xl sm:text-2xl font-headline font-bold text-primary">{t('plans.betaNoticeTitle')}</h3>
-          </div>
-          <p className="text-xs sm:text-base text-primary/70 leading-relaxed">
-            {t('plans.betaNoticeDesc')}
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/[0.06] border border-secondary/10">
-              <Star className="w-3 h-3 text-secondary" />
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">{t('plans.earlyAdopter')}</span>
+        <Card padding="lg" variant="bordered" className="text-center border-secondary/20 !p-5 sm:!p-8 lg:!p-10 overflow-hidden relative">
+          {/* Inner glow */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            style={{
+              background: 'radial-gradient(ellipse 60% 80% at 50% 30%, rgba(200,136,10,0.8) 0%, transparent 70%)',
+            }}
+          />
+
+          <div className="relative">
+            <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shadow-[0_0_25px_rgba(200,136,10,0.1)]">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-secondary" />
+              </div>
+            </div>
+
+            <h3 className="text-lg sm:text-2xl lg:text-3xl font-headline font-bold text-primary mb-2 sm:mb-3">
+              {t('plans.betaNoticeTitle')}
+            </h3>
+
+            <p className="text-xs sm:text-sm lg:text-base text-primary/55 leading-relaxed max-w-2xl mx-auto mb-4 sm:mb-5">
+              {t('plans.betaNoticeDesc')}
+            </p>
+
+            <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-secondary/[0.05] border border-secondary/15">
+                <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-secondary" />
+                <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.1em]">
+                  {t('plans.earlyAdopter')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-primary/[0.03] border border-outline-variant/15">
+                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/35" />
+                <span className="text-[10px] sm:text-xs font-bold text-primary/45 uppercase tracking-[0.1em]">
+                  DPDP Act 2023 Compliant
+                </span>
+              </div>
             </div>
           </div>
         </Card>
       </motion.div>
 
-      {/* ─── Mock Checkout Modal ─── */}
+      {/* ═══════════════════════════════════════════════════════════
+          CHECKOUT MODAL
+          ═══════════════════════════════════════════════════════════ */}
       <MockCheckoutModal
         isOpen={showCheckout}
         onClose={() => setShowCheckout(false)}

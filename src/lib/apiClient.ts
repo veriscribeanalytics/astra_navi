@@ -13,6 +13,28 @@ let signOutPromise: Promise<void> | null = null;
 
 const SESSION_RECOVERY_URL = "/login?error=SessionExpired&sessionCleared=1";
 
+// Upper bound on how long we'll wait for a Retry-After before giving up and
+// returning the 429 to the caller. Anything longer is surfaced as a recoverable
+// error rather than blocking the request.
+const MAX_429_BACKOFF_MS = 4000;
+
+/**
+ * Parse a Retry-After header (delta-seconds or HTTP-date) into milliseconds.
+ * Returns null when absent or unparseable.
+ */
+function parseRetryAfter(headerValue: string | null): number | null {
+  if (!headerValue) return null;
+  const seconds = Number(headerValue);
+  if (Number.isFinite(seconds)) {
+    return Math.max(0, seconds * 1000);
+  }
+  const dateMs = Date.parse(headerValue);
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+  return null;
+}
+
 async function getRefreshedSession() {
   if (sessionRefreshPromise) {
     return sessionRefreshPromise;
@@ -131,9 +153,21 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
   // and showing a PaywallCard.
   // We let it pass through as a normal response so callers can detect it.
 
+  // 429 = Too Many Requests. This is a TRANSIENT, recoverable condition, NOT an
+  // auth failure — a rate limit is not cleared by logging in. Attempt a single
+  // bounded backoff retry (honoring Retry-After when small), then return the
+  // response so the calling hook can surface a recoverable error/retry UI.
   if (response.status === 429 && !init?._retry) {
-      console.error("[clientFetch] Rate limited (429). Redirecting to login to clear invalid state.");
-      await performSignOut("/login?error=RateLimited", "Rate limit exceeded. Please log in again.");
+    const retryAfterMs = parseRetryAfter(response.headers.get("retry-after"));
+    if (retryAfterMs !== null && retryAfterMs <= MAX_429_BACKOFF_MS) {
+      console.warn(`[clientFetch] Rate limited (429). Retrying once after ${retryAfterMs}ms.`);
+      await new Promise(resolve => setTimeout(resolve, retryAfterMs));
+      const retryInit: RequestInit & { _retry: boolean } = { ...init, body, _retry: true };
+      const retryRequest = isRequest ? (input as Request).clone() : input;
+      response = await fetch(retryRequest, retryInit);
+    } else {
+      console.warn("[clientFetch] Rate limited (429). Returning to caller for recoverable handling.");
+    }
   }
 
   return response;

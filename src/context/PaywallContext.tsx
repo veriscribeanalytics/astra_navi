@@ -30,6 +30,10 @@ interface PaywallContextType {
   getFeaturePaywall: (feature: PaywallFeatureKey) => PaywallData | null;
   /** Force a refresh of the batch check. */
   refresh: () => Promise<void>;
+  /** Monotonic counter bumped on every refresh(). Sibling billing sections
+   *  (CurrentPlanSection, CreditHistory) include this in their effect deps so
+   *  they refetch together after a purchase, instead of going stale until reload. */
+  refreshVersion: number;
   /** Current paywall from any source (402 response, individual check, etc.). */
   activePaywall: PaywallData | null;
   /** Clear the active paywall state. */
@@ -48,6 +52,7 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const hasFetchedRef = useRef(false);
 
   // Batch check on dashboard load when user is authenticated
@@ -148,6 +153,9 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const refresh = useCallback(async () => {
     hasFetchedRef.current = false;
     await doBatchCheck();
+    // Signal sibling billing sections to refetch their own data (subscription,
+    // packs, history) so the whole Plans page reflects the purchase together.
+    setRefreshVersion(v => v + 1);
   }, [doBatchCheck]);
 
   const clearActivePaywall = useCallback(() => {
@@ -166,6 +174,7 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isFeatureBlocked,
       getFeaturePaywall,
       refresh,
+      refreshVersion,
       activePaywall,
       clearActivePaywall,
     }}>

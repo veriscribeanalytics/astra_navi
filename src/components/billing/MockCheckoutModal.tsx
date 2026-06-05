@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkles, Shield, ArrowRight, Clock, Tag } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { CatalogProduct, isSubscription, formatProductPrice, getPricePeriod, getTierLabel } from '@/types/billing';
-import { useTranslation } from '@/hooks';
+import { useTranslation, useFocusTrap } from '@/hooks';
 
 // ─── Checkout Handler Interface ────────────────────────────────
 //
@@ -62,6 +62,32 @@ export default function MockCheckoutModal({
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
   const [checkoutSuccess, setCheckoutSuccess] = React.useState(false);
 
+  const dialogRef = useFocusTrap<HTMLDivElement>(isOpen);
+
+  // Reset transient checkout state and lock body scroll while open. Without the
+  // reset, a previous product's error/success banner would persist when the
+  // modal is reopened for a different product (the modal stays mounted).
+  React.useEffect(() => {
+    if (isOpen) {
+      setCheckoutError(null);
+      setCheckoutSuccess(false);
+      setCheckoutLoading(false);
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prevOverflow; };
+    }
+  }, [isOpen]);
+
+  // Escape-to-close (disabled mid-payment so a charge isn't abandoned ambiguously).
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !checkoutLoading) onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen, checkoutLoading, onClose]);
+
   if (!product) return null;
 
   const name = (isHindi && product.nameHi) ? product.nameHi : product.nameEn;
@@ -94,10 +120,10 @@ export default function MockCheckoutModal({
           setCheckoutSuccess(false);
         }, 2000);
       } else {
-        setCheckoutError(result.error || 'Checkout failed');
+        setCheckoutError(result.error || t('plans.checkoutFailed'));
       }
     } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : 'Checkout failed');
+      setCheckoutError(err instanceof Error ? err.message : t('plans.checkoutFailed'));
     } finally {
       setCheckoutLoading(false);
     }
@@ -125,11 +151,16 @@ export default function MockCheckoutModal({
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             onClick={e => e.stopPropagation()}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="checkout-modal-title"
             className="relative w-full max-w-md bg-surface rounded-[24px] sm:rounded-[32px] border border-secondary/20 shadow-2xl overflow-hidden"
           >
             {/* Close */}
             <button
               onClick={onClose}
+              aria-label={t('plans.closeCheckout')}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-variant/30 flex items-center justify-center hover:bg-surface-variant/50 transition-colors z-50 group"
             >
               <X className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-foreground/70 group-hover:text-foreground transition-colors" />
@@ -151,7 +182,7 @@ export default function MockCheckoutModal({
               </div>
 
               {/* Title */}
-              <h3 className="text-xl font-headline font-bold text-foreground leading-tight">
+              <h3 id="checkout-modal-title" className="text-xl font-headline font-bold text-foreground leading-tight">
                 {name}
               </h3>
 
@@ -210,12 +241,12 @@ export default function MockCheckoutModal({
 
               {/* Checkout status messages */}
               {checkoutSuccess && (
-                <div className="w-full px-5 py-3 rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-center">
-                  <span className="text-[11px] font-bold text-emerald-500">Checkout successful!</span>
+                <div className="w-full px-5 py-3 rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-center" role="status">
+                  <span className="text-[11px] font-bold text-emerald-500">{t('plans.checkoutSuccessful')}</span>
                 </div>
               )}
               {checkoutError && (
-                <div className="w-full px-5 py-3 rounded-xl bg-red-500/[0.08] border border-red-500/20 text-center">
+                <div className="w-full px-5 py-3 rounded-xl bg-red-500/[0.08] border border-red-500/20 text-center" role="alert">
                   <span className="text-[11px] font-bold text-red-500">{checkoutError}</span>
                 </div>
               )}
@@ -245,12 +276,12 @@ export default function MockCheckoutModal({
                 onClick={hasRealCheckout ? handleCheckout : undefined}
               >
                 {checkoutSuccess ? (
-                  '✓ Done'
+                  t('plans.checkoutDone')
                 ) : checkoutLoading ? (
-                  'Processing...'
+                  t('plans.checkoutProcessing')
                 ) : hasRealCheckout ? (
                   <>
-                    {t('plans.buyCredits')} via {checkoutHandler.providerName} <ArrowRight className="w-4 h-4 ml-2" />
+                    {t('plans.buyCredits')} {t('plans.checkoutVia')} {checkoutHandler.providerName} <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 ) : (
                   <>

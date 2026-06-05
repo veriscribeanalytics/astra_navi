@@ -58,7 +58,9 @@ export const DEFAULT_CONSENT_PREFERENCES: ConsentPreference[] = [
     description:
       'Remember your preferences such as theme (light/dark), language, and display settings for a smoother experience.',
     required: false,
-    enabled: true,
+    // DPDP S.6 requires affirmative opt-in for non-essential categories — must
+    // default to off (no pre-ticked boxes). "Accept All" turns it on explicitly.
+    enabled: false,
   },
   {
     category: 'analytics',
