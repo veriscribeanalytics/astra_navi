@@ -33,6 +33,8 @@ export interface User {
     tier?: string | null;
     image?: string | null;
     language?: string | null;
+    username?: string | null;
+    discoverable?: boolean | null;
     preferences?: {
         horoscope?: boolean;
         notifications?: boolean;

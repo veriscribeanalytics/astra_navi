@@ -2,6 +2,8 @@ export interface ProfileLike {
   id?: string;
   email?: string | null;
   name?: string | null;
+  username?: string | null;
+  discoverable?: boolean | null;
   dob?: string | null;
   tob?: string | null;
   pob?: string | null;

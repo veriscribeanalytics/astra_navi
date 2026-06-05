@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { clientFetch } from '@/lib/apiClient';
+import { useDebouncedValue } from '@/hooks/useDebounce';
 import type {
     FamilyMember,
     FamilyMemberCreatePayload,
@@ -21,6 +22,9 @@ import type {
     FamilyMergeMatchScore,
     FamilySharingBlockedBy,
     FamilySharingNudgeAction,
+    FamilyDiscoverResult,
+    FamilyDiscoverRelationshipStatus,
+    FamilyBlock,
 } from '@/types/family';
 
 /* ------------------------------------------------------------------ */
@@ -926,5 +930,171 @@ export async function updateConnection(
 
 export async function deleteConnection(connectionId: number | string): Promise<MutationResult> {
     return postJson(`/api/family/connections/${encodeURIComponent(String(connectionId))}`, undefined, 'DELETE');
+}
+
+/* ------------------------------------------------------------------ */
+/* Discovery (search) + handle + blocking                              */
+/* ------------------------------------------------------------------ */
+
+const DISCOVER_MIN_CHARS = 2;
+const DISCOVER_DEBOUNCE_MS = 300;
+
+function normalizeDiscoverResult(raw: unknown): FamilyDiscoverResult | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+    const username = (r.username ?? r.user_name) as string | undefined;
+    if (!username) return null;
+    const statusRaw = (r.relationshipStatus ?? r.relationship_status ?? 'none') as string;
+    const relationshipStatus: FamilyDiscoverRelationshipStatus =
+        statusRaw === 'pending' || statusRaw === 'connected' ? statusRaw : 'none';
+    return {
+        username,
+        name: (r.name ?? '') as string,
+        moonSign: (r.moonSign ?? r.moon_sign ?? null) as string | null,
+        relationshipStatus,
+    };
+}
+
+function extractDiscoverResults(body: unknown): FamilyDiscoverResult[] {
+    let raw: unknown[] = [];
+    if (Array.isArray(body)) raw = body;
+    else if (body && typeof body === 'object') {
+        const b = body as Record<string, unknown>;
+        if (Array.isArray(b.results)) raw = b.results;
+        else if (Array.isArray(b.data)) raw = b.data;
+    }
+    return raw.map(normalizeDiscoverResult).filter((r): r is FamilyDiscoverResult => r !== null);
+}
+
+/** Debounced people search. Queries shorter than 2 chars short-circuit to an
+ *  empty result set without hitting the network (backend also enforces this). */
+export function useFamilyDiscover() {
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<FamilyDiscoverResult[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const debounced = useDebouncedValue(query, DISCOVER_DEBOUNCE_MS);
+    // Guards against out-of-order responses overwriting a newer query's results.
+    const latestQueryRef = useRef('');
+
+    useEffect(() => {
+        const term = debounced.trim();
+        latestQueryRef.current = term;
+
+        if (term.length < DISCOVER_MIN_CHARS) {
+            setResults([]);
+            setIsLoading(false);
+            setError(null);
+            return;
+        }
+
+        let cancelled = false;
+        setIsLoading(true);
+        setError(null);
+
+        (async () => {
+            try {
+                const res = await clientFetch(`/api/family/discover?q=${encodeURIComponent(term)}`);
+                const body = await res.json().catch(() => ({}));
+                if (cancelled || latestQueryRef.current !== term) return;
+                if (!res.ok) {
+                    throw new Error(body.error || body.detail || 'Search failed');
+                }
+                setResults(extractDiscoverResults(body));
+            } catch (err) {
+                if (cancelled || latestQueryRef.current !== term) return;
+                setError(err instanceof Error ? err.message : 'Search failed');
+                setResults([]);
+            } finally {
+                if (!cancelled && latestQueryRef.current === term) setIsLoading(false);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [debounced]);
+
+    /** Patch a single row's relationshipStatus in place (e.g. after inviting),
+     *  so the CTA flips to "Requested" without a re-search. */
+    const setResultStatus = useCallback((username: string, status: FamilyDiscoverRelationshipStatus) => {
+        setResults(prev => prev.map(r => (r.username === username ? { ...r, relationshipStatus: status } : r)));
+    }, []);
+
+    /** Drop a row from results entirely (e.g. after blocking). */
+    const removeResult = useCallback((username: string) => {
+        setResults(prev => prev.filter(r => r.username !== username));
+    }, []);
+
+    return { query, setQuery, results, isLoading, error, setResultStatus, removeResult };
+}
+
+/** Set, change, or clear (pass null) the caller's discovery handle.
+ *  On 409 the backend returns { error: { code: 'USERNAME_TAKEN' } }; the raw
+ *  body is returned so callers can distinguish taken vs. validation (422). */
+export async function setUsername(username: string | null): Promise<MutationResult<{ username: string | null }>> {
+    return postJson<{ username: string | null }>('/api/user/username', { username }, 'PATCH');
+}
+
+function normalizeBlock(raw: unknown): FamilyBlock | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Record<string, unknown>;
+    const id = (r.id ?? r.block_id) as number | undefined;
+    if (typeof id !== 'number') return null;
+    return {
+        id,
+        username: (r.username ?? r.user_name ?? '') as string,
+        name: (r.name ?? '') as string,
+        createdAt: (r.createdAt ?? r.created_at ?? '') as string,
+    };
+}
+
+function extractBlocks(body: unknown): FamilyBlock[] {
+    let raw: unknown[] = [];
+    if (Array.isArray(body)) raw = body;
+    else if (body && typeof body === 'object') {
+        const b = body as Record<string, unknown>;
+        if (Array.isArray(b.blocks)) raw = b.blocks;
+        else if (Array.isArray(b.data)) raw = b.data;
+    }
+    return raw.map(normalizeBlock).filter((x): x is FamilyBlock => x !== null);
+}
+
+export function useFamilyBlocks() {
+    const [data, setData] = useState<FamilyBlock[] | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchBlocks = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const res = await clientFetch('/api/family/blocks');
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(body.error || body.detail || 'Failed to load blocked users');
+            }
+            setData(extractBlocks(body));
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Failed to load blocked users';
+            setError(msg);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchBlocks();
+    }, [fetchBlocks]);
+
+    return { data, isLoading, error, refetch: fetchBlocks };
+}
+
+/** Block a user by exactly one of username or email. Idempotent on the backend. */
+export async function blockUser(target: { username?: string; email?: string }): Promise<MutationResult> {
+    return postJson('/api/family/blocks', target, 'POST');
+}
+
+/** Unblock by block id (not username — survives handle changes). */
+export async function unblockUser(blockId: number | string): Promise<MutationResult> {
+    return postJson(`/api/family/blocks/${encodeURIComponent(String(blockId))}`, undefined, 'DELETE');
 }
 

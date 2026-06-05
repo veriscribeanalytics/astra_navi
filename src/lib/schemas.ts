@@ -106,6 +106,7 @@ export const ProfileUpdateSchema = z.object({
   maritalStatus: maritalStatusEnum,
   occupation: occupationEnum,
   language: languageOptionalEnum,
+  discoverable: z.boolean().optional(),
   preferences: z.object({
     horoscope: z.boolean().optional(),
     notifications: z.boolean().optional(),

@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import LocationSearch, { LocationResult } from '@/components/ui/LocationSearch';
 import DstConflictDialog from '@/components/ui/DstConflictDialog';
+import ProfileDiscoverySettings from './ProfileDiscoverySettings';
 import { useAuth } from '@/context/AuthContext';
 import { usePaywallContext } from '@/context/PaywallContext';
 import { useToast, useTranslation } from '@/hooks';
@@ -983,6 +984,8 @@ export default function ProfileSettingsPage() {
                         </div>
                     </Card>
                 )}
+
+                {!isOnboarding && <ProfileDiscoverySettings />}
                 </div>
             </div>
 

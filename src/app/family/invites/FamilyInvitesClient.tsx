@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, ChevronDown, Trash2, Link2,
+    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, ChevronDown, Trash2, Link2, Search,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -221,13 +221,22 @@ const FamilyInvitesClient: React.FC = () => {
                         <ChevronLeft className="w-3 h-3" />
                         {t('nav.myFamily')}
                     </Link>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-11 h-11 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
-                            <Mail className="w-5 h-5" />
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
+                                <Mail className="w-5 h-5" />
+                            </div>
+                            <h1 className="text-2xl sm:text-3xl font-headline font-bold text-primary">
+                                {t('family.invitesPageTitle')}
+                            </h1>
                         </div>
-                        <h1 className="text-2xl sm:text-3xl font-headline font-bold text-primary">
-                            {t('family.invitesPageTitle')}
-                        </h1>
+                        <Link
+                            href="/family/discover"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 text-secondary text-[12px] font-bold transition-colors shrink-0"
+                        >
+                            <Search className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">{t('family.discoverNavLink')}</span>
+                        </Link>
                     </div>
                     <p className="text-sm text-on-surface-variant/60 max-w-2xl">
                         {t('family.invitesPageSubtitle')}

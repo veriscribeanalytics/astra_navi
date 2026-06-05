@@ -8,7 +8,7 @@ import {
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
     Crown, TrendingUp, AlertTriangle, MessageCircle, Shield, ArrowRight,
     ChevronDown, ChevronUp, HandHeart, Sparkles, Compass, FileText,
-    Sun, Moon, Flower, Activity, Mail, Send, Link2, Settings, RefreshCw,
+    Sun, Moon, Flower, Activity, Mail, Send, Link2, Settings, RefreshCw, Search,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -277,6 +277,14 @@ export default function FamilyClient() {
                                         disabled={atFreeCap}
                                     >
                                         {t('family.inviteByEmail') || 'Invite by Email'}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        href="/family/discover"
+                                        leftIcon={<Search className="w-4 h-4" />}
+                                    >
+                                        {t('family.discoverNavLink') || 'Find people'}
                                     </Button>
                                 </>
                             )}

@@ -42,6 +42,10 @@ function extractCode(body: unknown): FamilyInviteErrorCode | null {
         'INVITE_NOT_PENDING',
         'MERGE_CANDIDATE_MISMATCH',
         'SHARING_REQUIRED',
+        'USERNAME_TAKEN',
+        'INVITE_BLOCKED',
+        'CANNOT_BLOCK_SELF',
+        'BLOCK_TARGET_NOT_FOUND',
     ];
     return known.includes(raw as FamilyInviteErrorCode) ? (raw as FamilyInviteErrorCode) : null;
 }
@@ -55,6 +59,10 @@ function mapCodeToCopy(code: FamilyInviteErrorCode | null, t: Translator): strin
         case 'INVITE_NOT_PENDING': return t('family.inviteErrorNotPending');
         case 'MERGE_CANDIDATE_MISMATCH': return t('family.inviteErrorMergeStale');
         case 'SHARING_REQUIRED': return t('family.sharingRequired');
+        case 'INVITE_BLOCKED': return t('family.inviteErrorBlocked');
+        case 'USERNAME_TAKEN': return t('family.usernameTaken');
+        case 'CANNOT_BLOCK_SELF': return t('family.blockErrorSelf');
+        case 'BLOCK_TARGET_NOT_FOUND': return t('family.blockErrorNotFound');
         // FAMILY_FREE_TIER_CAP intentionally returns null — caller should route
         // to the existing 402 paywall surface instead of a toast.
         default: return null;

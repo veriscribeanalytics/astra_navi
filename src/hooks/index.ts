@@ -55,6 +55,11 @@ export {
     revokeInvite,
     updateConnection,
     deleteConnection,
+    useFamilyDiscover,
+    setUsername,
+    useFamilyBlocks,
+    blockUser,
+    unblockUser,
 } from './useFamily';
 export type { CompatibilityFetchResult, MutationResult, FamilyReport } from './useFamily';
 export { useAvatarTheme } from './useAvatarTheme';

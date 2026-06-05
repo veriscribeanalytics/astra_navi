@@ -243,6 +243,30 @@ export interface FamilyReservationPendingError {
 }
 
 /* ------------------------------------------------------------------ */
+/* Discovery + blocking                                                */
+/* ------------------------------------------------------------------ */
+
+/** Drives the per-row CTA in search results. */
+export type FamilyDiscoverRelationshipStatus = 'none' | 'pending' | 'connected';
+
+/** A single /api/family/discover result. No email or avatar is returned —
+ *  render initials or the moonSign/rashi instead. */
+export interface FamilyDiscoverResult {
+  username: string;
+  name: string;
+  moonSign: string | null;
+  relationshipStatus: FamilyDiscoverRelationshipStatus;
+}
+
+/** A blocked user entry from GET /api/family/blocks. */
+export interface FamilyBlock {
+  id: number;
+  username: string;
+  name: string;
+  createdAt: string;
+}
+
+/* ------------------------------------------------------------------ */
 /* Invites + linked connections                                        */
 /* ------------------------------------------------------------------ */
 
@@ -295,8 +319,10 @@ export interface FamilyInviteAcceptResponse {
   mergeCandidate?: FamilyMergeCandidate;
 }
 
+/** Send by exactly one of `username` or `email`. */
 export interface FamilyInviteSendPayload {
-  email: string;
+  username?: string;
+  email?: string;
   relationshipType: FamilyRelationshipType;
   message?: string;
 }
@@ -313,7 +339,7 @@ export interface FamilyConnectionUpdatePayload {
   relationshipOverride?: FamilyRelationshipType;
 }
 
-/** Error codes returned on invite/connection endpoints. */
+/** Error codes returned on invite/connection/discovery/block endpoints. */
 export const FAMILY_INVITE_ERROR_CODES = [
   'INVITEE_NO_ACCOUNT',
   'FAMILY_FREE_TIER_CAP',
@@ -323,6 +349,10 @@ export const FAMILY_INVITE_ERROR_CODES = [
   'INVITE_NOT_PENDING',
   'MERGE_CANDIDATE_MISMATCH',
   'SHARING_REQUIRED',
+  'USERNAME_TAKEN',
+  'INVITE_BLOCKED',
+  'CANNOT_BLOCK_SELF',
+  'BLOCK_TARGET_NOT_FOUND',
 ] as const;
 export type FamilyInviteErrorCode = typeof FAMILY_INVITE_ERROR_CODES[number];
 
