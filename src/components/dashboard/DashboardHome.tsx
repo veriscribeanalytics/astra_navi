@@ -202,9 +202,36 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
 
   return (
     <div ref={containerRef} className="w-full">
+      {/* Visually hidden text alternative for screen readers (WCAG 1.1.1) */}
+      <div
+        style={{
+          position: "absolute",
+          width: "1px",
+          height: "1px",
+          padding: 0,
+          margin: "-1px",
+          overflow: "hidden",
+          clip: "rect(0, 0, 0, 0)",
+          whiteSpace: "nowrap",
+          border: 0,
+        }}
+      >
+        <h3>Weekly {areaLabel} Forecast Data</h3>
+        <ul>
+          {days.map((d) => {
+            const date = dt(d.date);
+            const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+            return (
+              <li key={d.date}>
+                {weekday}, {date.getDate()}: {d.score} out of 100{d.is_today ? " (Today)" : ""}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
       <svg
-        role="img"
-        aria-label={`Weekly ${areaLabel} forecast chart`}
+        aria-hidden="true"
         viewBox={`0 0 ${W} ${H}`}
         className="h-[230px] w-full"
       >
