@@ -61,7 +61,9 @@ const ProfileDiscoverySettings: React.FC = () => {
         if (res.status === 409) {
             setUsernameError(t('family.usernameTaken'));
         } else if (res.status === 422) {
-            setUsernameError(t('profile.discovery.usernameRulesError'));
+            // Client already gated on the format regex, so a server 422 here is
+            // almost always a reserved/disallowed handle rather than bad format.
+            setUsernameError(t('profile.discovery.usernameReservedError'));
         } else if (res.status === 429) {
             toastError(t('profile.discovery.usernameRateLimited'));
         } else {

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-    Search, ChevronLeft, ChevronDown, Loader2, UserPlus, Check, Send, Ban,
+    Search, ChevronLeft, ChevronDown, ChevronRight, Loader2, UserPlus, Check, Send, Ban, AtSign,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -17,6 +17,7 @@ import {
     useTranslation,
     useToast,
 } from '@/hooks';
+import { useAuth } from '@/context/AuthContext';
 import type { FamilyDiscoverResult, FamilyRelationshipType } from '@/types/family';
 import { parseInviteErrorByStatus } from '@/lib/familyInviteErrors';
 
@@ -44,6 +45,9 @@ function initials(name: string, username: string): string {
 const FamilyDiscoverClient: React.FC = () => {
     const { t } = useTranslation();
     const { success: toastSuccess, error: toastError } = useToast();
+
+    const { user } = useAuth();
+    const hasHandle = !!user?.username;
 
     const { query, setQuery, results, isLoading, error, setResultStatus, removeResult } = useFamilyDiscover();
     const outgoing = useOutgoingInvites();
@@ -144,6 +148,20 @@ const FamilyDiscoverClient: React.FC = () => {
                     </p>
                 </header>
 
+                {/* Opt-in prompt: the current user is only findable once they set a handle. */}
+                {!hasHandle && (
+                    <Link
+                        href="/profile"
+                        className="flex items-center gap-3 rounded-2xl bg-secondary/5 border border-secondary/20 px-4 py-3 hover:bg-secondary/10 transition-colors"
+                    >
+                        <AtSign className="w-4 h-4 text-secondary shrink-0" />
+                        <span className="text-[13px] text-on-surface-variant/80 flex-1">
+                            {t('family.discoverSetHandlePrompt')}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-secondary shrink-0" />
+                    </Link>
+                )}
+
                 {/* Search */}
                 <Card variant="bordered" padding="md" hoverable={false}>
                     <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block mb-2">
@@ -169,9 +187,14 @@ const FamilyDiscoverClient: React.FC = () => {
                         ) : error ? (
                             <p className="px-1 text-[13px] text-red-400">{error}</p>
                         ) : showNoResults ? (
-                            <p className="px-1 text-[13px] text-on-surface-variant/50">
-                                {t('family.discoverNoResults', { query: trimmedQuery })}
-                            </p>
+                            <div className="px-3 py-4 rounded-2xl bg-surface/50 border border-dashed border-outline-variant/30 space-y-1.5">
+                                <p className="text-[13px] text-on-surface-variant/60">
+                                    {t('family.discoverNoResults', { query: trimmedQuery })}
+                                </p>
+                                <p className="text-[12px] text-on-surface-variant/45">
+                                    {t('family.discoverNoResultsHint')}
+                                </p>
+                            </div>
                         ) : (
                             results.map((r) => (
                                 <ResultRow

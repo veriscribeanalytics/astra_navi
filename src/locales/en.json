@@ -1278,6 +1278,8 @@
     "discoverHint": "Type at least 2 characters to search.",
     "discoverSearching": "Searching…",
     "discoverNoResults": "No one found matching \"{query}\".",
+    "discoverNoResultsHint": "They may not have set a username yet — invite them by email below instead.",
+    "discoverSetHandlePrompt": "Set your own handle so people can find and invite you.",
     "discoverInvite": "Invite",
     "discoverRequested": "Requested",
     "discoverConnected": "Connected",
