@@ -8,6 +8,7 @@ import Button from "../ui/Button";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "../ui/LanguagePicker";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import NotificationBell from "./NotificationBell";
 import { useAuth } from "@/context/AuthContext";
 import { useToast, useTranslation } from "@/hooks";
 import {
@@ -510,11 +511,13 @@ const Navbar: React.FC = () => {
                             </Button>
                         </div>
                     ) : (
+                        <div className="flex items-center gap-3 lg:gap-4">
+                        <NotificationBell />
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
-                            <button 
+                            <button
                                 aria-haspopup="true"
                                 aria-expanded={isUserDropdownOpen}
-                                className="profile-ring-glow cursor-pointer" 
+                                className="profile-ring-glow cursor-pointer"
                                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                             >
                                 <div className="profile-comet-dot" aria-hidden="true"></div>
@@ -550,6 +553,7 @@ const Navbar: React.FC = () => {
                                     </div>
                                 </div>
                             )}
+                        </div>
                         </div>
                     )}
                 </div>
@@ -589,6 +593,8 @@ const Navbar: React.FC = () => {
                             {t('nav.login')}
                         </Link>
                     ) : (
+                        <>
+                        <NotificationBell />
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
                             <button className="profile-ring-glow !w-8 !h-8 cursor-pointer border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 p-0" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label="User menu" aria-expanded={isUserDropdownOpen}>
                                 <div className="profile-comet-dot" aria-hidden="true"></div>
@@ -625,6 +631,7 @@ const Navbar: React.FC = () => {
                                 </div>
                             )}
                         </div>
+                        </>
                     )}
                 </div>
             </div>

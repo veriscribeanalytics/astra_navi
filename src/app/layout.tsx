@@ -11,6 +11,7 @@ import AskNaviFab from "@/components/layout/AskNaviFab";
 import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
 import SkipLink from "@/components/layout/SkipLink";
 import { AuthProvider } from "@/context/AuthContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import OnboardingGate from "@/components/auth/OnboardingGate";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -65,6 +66,7 @@ export default async function RootLayout({
           <SessionProvider session={session} refetchInterval={5 * 60}>
             <LanguageProvider initialLanguage={languageCookie}>
               <AuthProvider>
+                <NotificationProvider>
                 <ChatProvider>
                   <PaywallProvider>
                   <ThemeProvider>
@@ -89,6 +91,7 @@ export default async function RootLayout({
                   </ThemeProvider>
                   </PaywallProvider>
                 </ChatProvider>
+                </NotificationProvider>
               </AuthProvider>
             </LanguageProvider>
           </SessionProvider>

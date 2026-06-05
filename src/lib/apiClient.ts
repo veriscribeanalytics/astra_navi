@@ -177,3 +177,6 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
 export function resetAuthGrace() {
   authEstablishedAt = null;
 }
+
+export { normalizeApiError, isPaywallError, isHardPaywall, isSoftPaywall, isAuthError, isCapacityError, isReservationPending, isFamilyError, isRateLimitError, isValidationError, shouldForceLogout, shouldTryRefresh, getAuthAction, extractPaywallData, getLocalizedApiError, ApiErrorCategory, AUTH_ACTIONS, API_ERROR_CODES } from './apiError';
+export type { NormalizedApiError, AuthAction, ApiErrorCode, ValidationDetail } from './apiError';
