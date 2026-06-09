@@ -253,7 +253,7 @@ function ActionBar({
     );
 }
 
-function SubjectPanel({ subject, roleLabel, align }: { subject: ReportSubject; roleLabel: string; align: 'left' | 'right' }) {
+export function SubjectPanel({ subject, roleLabel, align }: { subject: ReportSubject; roleLabel: string; align: 'left' | 'right' }) {
     const { t } = useTranslation();
     const accent = subject.avatar?.accentColor || 'var(--secondary)';
     const symbol = genderSymbol(subject.gender);
@@ -318,7 +318,7 @@ function SubjectPanel({ subject, roleLabel, align }: { subject: ReportSubject; r
     );
 }
 
-function HeroScore({ score, band }: { score: number; band: string }) {
+export function HeroScore({ score, band }: { score: number; band: string }) {
     const { t } = useTranslation();
     const palette = bandPalette(band);
     const valid = Number.isFinite(score);

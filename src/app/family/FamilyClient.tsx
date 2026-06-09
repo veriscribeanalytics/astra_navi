@@ -19,6 +19,8 @@ import {
     useFamilyMembers,
     useFamilyChart,
     useFamilyCompatibility,
+    useFamilyCompatibilitySummary,
+    useFamilyConnectionCompatibilitySummary,
     createFamilyMember,
     updateFamilyMember,
     deleteFamilyMember,
@@ -40,15 +42,19 @@ import {
     type CompatibilityLang,
     type FamilyCompatibilityPreflight,
     COMPATIBILITY_CREDIT_COST,
-    FAMILY_FREE_TIER_LIMIT,
+    familyRosterLimit,
 } from '@/types/family';
-import { parseInviteErrorByStatus } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import FamilyChartView from '@/components/family/FamilyChartView';
 import CompatibilityReport, {
     getFamilyIcon,
     type ReportSubject,
 } from '@/app/family/CompatibilityReport';
+import CompatibilitySummaryCard from '@/app/family/CompatibilitySummaryCard';
+import FamilyCapDialog from '@/components/family/FamilyCapDialog';
+import PaywallCard from '@/components/paywall/PaywallCard';
+import type { PaywallData } from '@/types/paywall';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'mother', label: 'Mother' },
@@ -123,7 +129,7 @@ function deriveLocalBlockedBy(c: FamilyConnection): 'you' | 'them' | 'both' | nu
 export default function FamilyClient() {
     const { t } = useTranslation();
     const { tier } = usePaywallContext();
-    const { success, error: toastError, info } = useToast();
+    const { success, error: toastError } = useToast();
     const { data: members, isLoading, error, refetch } = useFamilyMembers();
     const { data: connections, refetch: refetchConnections } = useFamilyConnections();
 
@@ -157,11 +163,17 @@ export default function FamilyClient() {
         }
     }, [memberIdParam, members, autoRunParam]);
 
-    const isFreeTier = !tier || tier === 'free';
     const manualCount = members?.length ?? 0;
     const linkedCount = connections?.length ?? 0;
     const totalCount = manualCount + linkedCount;
-    const atFreeCap = isFreeTier && totalCount >= FAMILY_FREE_TIER_LIMIT;
+    // null limit = unlimited (premium). Free: 1, Pro: 6.
+    const rosterLimit = familyRosterLimit(tier);
+    const atFreeCap = rosterLimit != null && totalCount >= rosterLimit;
+    const showCounter = rosterLimit != null;
+
+    // FAMILY_FREE_TIER_CAP upgrade dialog (shared across create path here; the
+    // invites/discover pages own their own instances).
+    const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
 
     const openAdd = () => {
         setEditing(null);
@@ -275,12 +287,12 @@ export default function FamilyClient() {
                         </div>
                     </div>
 
-                    {/* Free-tier counter */}
-                    {isFreeTier && view === 'list' && (
+                    {/* Roster counter (hidden for unlimited/premium) */}
+                    {showCounter && view === 'list' && (
                         <div className="mt-4 flex items-center gap-2 text-[11px] text-on-surface-variant/70">
                             <Crown className="w-3.5 h-3.5 text-secondary/70" />
                             <span>
-                                {totalCount} / {FAMILY_FREE_TIER_LIMIT} {t('family.freeTierUsed') || 'members used on Free tier'}
+                                {totalCount} / {rosterLimit} {t('family.freeTierUsed') || 'members used on your plan'}
                             </span>
                             {atFreeCap && (
                                 <a href="/plans" className="text-secondary font-bold hover:underline">
@@ -325,8 +337,8 @@ export default function FamilyClient() {
                                 setView('list');
                             }
                         }}
-                        onFreeTierCap={() => {
-                            info(t('family.freeTierCapMessage') || `Free plan supports up to ${FAMILY_FREE_TIER_LIMIT} members. Upgrade to add more.`);
+                        onFreeTierCap={(detail) => {
+                            setCapDialog(detail ?? {});
                             setView('list');
                         }}
                     />
@@ -377,6 +389,14 @@ export default function FamilyClient() {
                 cancelText={t('common.back') || 'Cancel'}
                 variant="danger"
                 isLoading={isDeleting}
+            />
+
+            <FamilyCapDialog
+                open={!!capDialog}
+                onClose={() => setCapDialog(null)}
+                message={capDialog?.message}
+                currentTier={capDialog?.currentTier ?? tier}
+                limit={capDialog?.limit ?? rosterLimit}
             />
         </div>
     );
@@ -587,7 +607,7 @@ interface FormProps {
     editing: FamilyMember | null;
     onSaved: (m: FamilyMember, isNew: boolean) => void;
     onCancel: () => void;
-    onFreeTierCap: () => void;
+    onFreeTierCap: (detail: FamilyCapDetail | null) => void;
 }
 
 interface FormState {
@@ -716,8 +736,9 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
             };
             const res = await createFamilyMember(payload);
             if (!res.ok || !res.data) {
-                if (res.status === 402 && res.raw?.code === 'FAMILY_FREE_TIER_CAP') {
-                    onFreeTierCap();
+                const cap = familyCapDetail(res.raw);
+                if (cap) {
+                    onFreeTierCap(cap);
                     return;
                 }
                 toastError(res.error || 'Failed to add member.');
@@ -940,17 +961,20 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
 
 function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: FamilyMember; onEdit: () => void; onBack: () => void; autoRun?: boolean }) {
     const { t } = useTranslation();
-    const { totalCredits } = usePaywallContext();
+    const { totalCredits, getFeaturePaywall } = usePaywallContext();
     const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
     const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member.id);
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member.id);
 
     const [lang, setLang] = useState<CompatibilityLang>('en');
+    const { data: summary, isLoading: summaryLoading } = useFamilyCompatibilitySummary(member.id, lang);
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
     const { data: reports } = useFamilyReports(member.id);
     const { fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
     const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
+    /** When preflight reports insufficient credits, render this paywall modally. */
+    const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
     const compatRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
     const reportsRef = useRef<HTMLDivElement | null>(null);
@@ -1044,18 +1068,30 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
             return;
         }
         const preflight = await fetchPreflight();
-        if (preflight) {
-            if (preflight.cachedResultAvailable) {
-                // Free/cached available! Skip warning and run directly!
-                await runCompatibility();
-            } else {
-                setPreflightData(preflight);
-                setConfirmingPurchase(true);
-            }
-        } else {
+        if (!preflight) {
+            // Preflight unavailable — fall back to the confirm dialog; the backend
+            // still enforces credits and returns 402 if short.
             setPreflightData(null);
             setConfirmingPurchase(true);
+            return;
         }
+        setPreflightData(preflight);
+        if (preflight.cachedResultAvailable) {
+            // Cached result exists — open the paid endpoint without a new charge.
+            await runCompatibility();
+            return;
+        }
+        // sufficient === false → show the paywall instead of the confirm dialog.
+        if (preflight.sufficient === false) {
+            const paywall = preflight.paywall ?? getFeaturePaywall('family_compatibility');
+            if (paywall) {
+                setActivePaywall(paywall);
+                return;
+            }
+            // No paywall payload to show — fall through to the confirm dialog,
+            // where the insufficient-credit hint and a 402 on confirm still apply.
+        }
+        setConfirmingPurchase(true);
     };
 
     // Auto-start a run when arriving via the dashboard "Run Compatibility" button
@@ -1137,6 +1173,18 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                         ) : null
                     }
                 />
+            ) : summary ? (
+                <CompatibilitySummaryCard
+                    you={youSubject}
+                    them={themSubject}
+                    summary={summary}
+                    creditCost={creditCost}
+                    onViewDetailed={startCompatibility}
+                    detailedLoading={compatLoading}
+                    lang={lang}
+                    onLangChange={setLang}
+                    langOptions={LANGS}
+                />
             ) : (
                 <Card variant="default" padding="lg">
                     <div className="flex items-center gap-2 mb-3">
@@ -1148,41 +1196,42 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                             <Coins className="w-3 h-3" /> {creditCost} credits
                         </span>
                     </div>
-                    <p className="text-xs text-on-surface-variant/75 mb-4">
-                        {t('family.compatibilityDesc') ||
-                            'First read charges credits. Repeating the same language is free.'}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {LANGS.map((l) => (
-                            <button
-                                key={l.value}
-                                onClick={() => setLang(l.value)}
-                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
-                                    lang === l.value
-                                        ? 'bg-secondary text-white border-secondary'
-                                        : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                                }`}
-                            >
-                                {l.label}
-                            </button>
-                        ))}
-                    </div>
-                    {!compatLoading && (
-                        <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
-                            Check Compatibility · {creditCost} credits
-                        </Button>
-                    )}
-                    {compatLoading && (
+                    {summaryLoading || compatLoading ? (
                         <div className="text-secondary/60 text-sm flex items-center gap-2">
                             <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
                         </div>
-                    )}
-                    {totalCredits != null && totalCredits < creditCost && (
-                        <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
-                            <a href="/plans" className="font-bold underline">Top up</a>
-                        </div>
+                    ) : (
+                        <>
+                            <p className="text-xs text-on-surface-variant/75 mb-4">
+                                {t('family.compatibilityDesc') ||
+                                    'First read charges credits. Repeating the same language is free.'}
+                            </p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {LANGS.map((l) => (
+                                    <button
+                                        key={l.value}
+                                        onClick={() => setLang(l.value)}
+                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
+                                            lang === l.value
+                                                ? 'bg-secondary text-white border-secondary'
+                                                : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
+                                        }`}
+                                    >
+                                        {l.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
+                                Check Compatibility · {creditCost} credits
+                            </Button>
+                            {totalCredits != null && totalCredits < creditCost && (
+                                <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
+                                    <AlertCircle className="w-3.5 h-3.5" />
+                                    You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
+                                    <a href="/plans" className="font-bold underline">Top up</a>
+                                </div>
+                            )}
+                        </>
                     )}
                 </Card>
             )}
@@ -1268,6 +1317,14 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                 variant="warning"
                 isLoading={compatLoading}
             />
+
+            {activePaywall && (
+                <PaywallCard
+                    paywall={activePaywall}
+                    variant="modal"
+                    onClose={() => setActivePaywall(null)}
+                />
+            )}
         </div>
     );
 }
@@ -1405,11 +1462,12 @@ function FamilyConnectionDetail({
     const { t } = useTranslation();
     const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
-    const { totalCredits } = usePaywallContext();
+    const { totalCredits, getFeaturePaywall } = usePaywallContext();
     const { data: avatars } = useFamilyAvatars();
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
     const { fetchPreflight: fetchConnectionPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
     const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
+    const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
 
     const [notes, setNotes] = useState(connection.myNotes ?? '');
     const [savingNotes, setSavingNotes] = useState(false);
@@ -1418,6 +1476,13 @@ function FamilyConnectionDetail({
     const [confirmDisconnect, setConfirmDisconnect] = useState(false);
     const [isDisconnecting, setIsDisconnecting] = useState(false);
     const [lang, setLang] = useState<CompatibilityLang>('en');
+    const {
+        data: summary,
+        isLoading: summaryLoading,
+        sharingRequired: summarySharingRequired,
+        blockedBy: summaryBlockedBy,
+        nudgeAction: summaryNudge,
+    } = useFamilyConnectionCompatibilitySummary(connection.connectionId, lang);
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
     /** Replaces the previous sharingRequired boolean — captures who's blocking
      *  and (optionally) the email to nudge when blocked by them. */
@@ -1442,6 +1507,17 @@ function FamilyConnectionDetail({
         });
         return () => { cancelled = true; };
     }, [compat, fetchConnectionPreflight]);
+
+    // The free summary auto-loads and returns SHARING_REQUIRED when sharing isn't
+    // mutual — surface the inline gate proactively (no paid attempt needed).
+    useEffect(() => {
+        if (summarySharingRequired) {
+            setSharingBlocked({
+                blockedBy: summaryBlockedBy ?? deriveLocalBlockedBy(connection) ?? 'both',
+                nudgeEmail: summaryNudge?.target_email ?? connection.otherEmail,
+            });
+        }
+    }, [summarySharingRequired, summaryBlockedBy, summaryNudge, connection]);
 
     const persist = async (payload: Parameters<typeof updateConnection>[1]) => {
         const res = await updateConnection(connection.connectionId, payload);
@@ -1523,13 +1599,31 @@ function FamilyConnectionDetail({
         toastError(res.error || 'Compatibility request failed.');
     };
 
-    const startCompatibility = () => {
+    const startCompatibility = async () => {
         if (alreadyPaidForLang) return;
         // Pre-check sharing locally; backend will enforce too but this gives instant feedback.
         const local = deriveLocalBlockedBy(connection);
         if (local) {
             setSharingBlocked({ blockedBy: local, nudgeEmail: connection.otherEmail });
             return;
+        }
+        const preflight = await fetchConnectionPreflight();
+        if (!preflight) {
+            setPreflightData(null);
+            setConfirmingPurchase(true);
+            return;
+        }
+        setPreflightData(preflight);
+        if (preflight.cachedResultAvailable) {
+            await runCompatibility();
+            return;
+        }
+        if (preflight.sufficient === false) {
+            const paywall = preflight.paywall ?? getFeaturePaywall('family_compatibility');
+            if (paywall) {
+                setActivePaywall(paywall);
+                return;
+            }
         }
         setConfirmingPurchase(true);
     };
@@ -1558,6 +1652,68 @@ function FamilyConnectionDetail({
         hasBirthDetails: false,
         relationshipLabel: (t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs),
     };
+
+    /* SHARING_REQUIRED inline gate — branches on which side is blocking. Shared
+     * between the summary card (slotBelow) and the no-summary fallback. */
+    const sharingGate = sharingBlocked ? (
+        <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+            <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-bold text-amber-300">
+                        {sharingBlocked.blockedBy === 'you'
+                            ? (t('family.sharingBlockedYou') || 'Enable sharing to unlock compatibility.')
+                            : sharingBlocked.blockedBy === 'them'
+                                ? (t('family.sharingBlockedThem') || 'Waiting for {name} to enable sharing.')
+                                    .replace('{name}', connection.otherName)
+                                : (t('family.sharingBlockedBoth') || 'Both of you need to enable sharing before compatibility can be computed.')}
+                    </p>
+                    {sharingBlocked.blockedBy === 'you' && (
+                        <div className="mt-3">
+                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
+                                {(t('family.sharingBlockedYouHint') ||
+                                    'Turn on sharing with {name} below to compute synastry.')
+                                    .replace('{name}', connection.otherName)}
+                            </p>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={toggleShare}
+                                loading={togglingShare}
+                                leftIcon={<Heart className="w-3.5 h-3.5" />}
+                            >
+                                {t('family.sharingEnable') || 'Enable sharing'}
+                            </Button>
+                        </div>
+                    )}
+                    {sharingBlocked.blockedBy === 'them' && (
+                        <div className="mt-3 text-[11px] text-on-surface-variant/80 leading-relaxed">
+                            {(t('family.sharingBlockedThemHint') ||
+                                'Ask them to enable sharing in their family settings. You can reach them at {email}.')
+                                .replace('{email}', sharingBlocked.nudgeEmail ?? connection.otherEmail)}
+                        </div>
+                    )}
+                    {sharingBlocked.blockedBy === 'both' && (
+                        <div className="mt-3">
+                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
+                                {t('family.sharingBlockedBothHint') ||
+                                    'Start by turning on your side, then ask them to enable sharing too.'}
+                            </p>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={toggleShare}
+                                loading={togglingShare}
+                                leftIcon={<Heart className="w-3.5 h-3.5" />}
+                            >
+                                {t('family.sharingEnableMine') || 'Enable my side'}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    ) : null;
 
     return (
         <div className="space-y-6">
@@ -1706,6 +1862,19 @@ function FamilyConnectionDetail({
                         ) : null
                     }
                 />
+            ) : summary ? (
+                <CompatibilitySummaryCard
+                    you={youSubject}
+                    them={themSubject}
+                    summary={summary}
+                    creditCost={creditCost}
+                    onViewDetailed={startCompatibility}
+                    detailedLoading={compatLoading}
+                    lang={lang}
+                    onLangChange={setLang}
+                    langOptions={LANGS}
+                    slotBelow={sharingGate}
+                />
             ) : (
                 <Card variant="default" padding="lg">
                     <div className="flex items-center gap-2 mb-3">
@@ -1718,109 +1887,58 @@ function FamilyConnectionDetail({
                         </span>
                     </div>
 
-                    <p className="text-xs text-on-surface-variant/75 mb-4">
-                        {t('family.compatibilityDesc') ||
-                            'First read charges credits. Repeating the same language is free.'}
-                    </p>
-
-                    {/* Language picker */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {LANGS.map((l) => (
-                            <button
-                                key={l.value}
-                                onClick={() => setLang(l.value)}
-                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
-                                    lang === l.value
-                                        ? 'bg-secondary text-white border-secondary'
-                                        : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                                }`}
-                            >
-                                {l.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* SHARING_REQUIRED inline gate — branches on which side is blocking */}
-                    {sharingBlocked && (
-                        <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
-                            <div className="flex items-start gap-2">
-                                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[12px] font-bold text-amber-300">
-                                        {sharingBlocked.blockedBy === 'you'
-                                            ? (t('family.sharingBlockedYou') || 'Enable sharing to unlock compatibility.')
-                                            : sharingBlocked.blockedBy === 'them'
-                                                ? (t('family.sharingBlockedThem') || 'Waiting for {name} to enable sharing.')
-                                                    .replace('{name}', connection.otherName)
-                                                : (t('family.sharingBlockedBoth') || 'Both of you need to enable sharing before compatibility can be computed.')}
-                                    </p>
-                                    {sharingBlocked.blockedBy === 'you' && (
-                                        <div className="mt-3">
-                                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
-                                                {(t('family.sharingBlockedYouHint') ||
-                                                    'Turn on sharing with {name} below to compute synastry.')
-                                                    .replace('{name}', connection.otherName)}
-                                            </p>
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={toggleShare}
-                                                loading={togglingShare}
-                                                leftIcon={<Heart className="w-3.5 h-3.5" />}
-                                            >
-                                                {t('family.sharingEnable') || 'Enable sharing'}
-                                            </Button>
-                                        </div>
-                                    )}
-                                    {sharingBlocked.blockedBy === 'them' && (
-                                        <div className="mt-3 text-[11px] text-on-surface-variant/80 leading-relaxed">
-                                            {(t('family.sharingBlockedThemHint') ||
-                                                'Ask them to enable sharing in their family settings. You can reach them at {email}.')
-                                                .replace('{email}', sharingBlocked.nudgeEmail ?? connection.otherEmail)}
-                                        </div>
-                                    )}
-                                    {sharingBlocked.blockedBy === 'both' && (
-                                        <div className="mt-3">
-                                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
-                                                {t('family.sharingBlockedBothHint') ||
-                                                    'Start by turning on your side, then ask them to enable sharing too.'}
-                                            </p>
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={toggleShare}
-                                                loading={togglingShare}
-                                                leftIcon={<Heart className="w-3.5 h-3.5" />}
-                                            >
-                                                {t('family.sharingEnableMine') || 'Enable my side'}
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {!compatLoading && (
-                        <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
-                            Check Compatibility · {creditCost} credits
-                        </Button>
-                    )}
-
-                    {compatLoading && (
+                    {summaryLoading && !sharingBlocked ? (
                         <div className="text-secondary/60 text-sm flex items-center gap-2">
                             <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
                         </div>
-                    )}
+                    ) : (
+                        <>
+                            <p className="text-xs text-on-surface-variant/75 mb-4">
+                                {t('family.compatibilityDesc') ||
+                                    'First read charges credits. Repeating the same language is free.'}
+                            </p>
 
-                    {totalCredits != null && totalCredits < creditCost && (
-                        <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
-                            <a href="/plans" className="font-bold underline">
-                                Top up
-                            </a>
-                        </div>
+                            {/* Language picker */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {LANGS.map((l) => (
+                                    <button
+                                        key={l.value}
+                                        onClick={() => setLang(l.value)}
+                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
+                                            lang === l.value
+                                                ? 'bg-secondary text-white border-secondary'
+                                                : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
+                                        }`}
+                                    >
+                                        {l.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {sharingGate}
+
+                            {!compatLoading && (
+                                <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
+                                    Check Compatibility · {creditCost} credits
+                                </Button>
+                            )}
+
+                            {compatLoading && (
+                                <div className="text-secondary/60 text-sm flex items-center gap-2">
+                                    <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
+                                </div>
+                            )}
+
+                            {totalCredits != null && totalCredits < creditCost && (
+                                <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
+                                    <AlertCircle className="w-3.5 h-3.5" />
+                                    You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
+                                    <a href="/plans" className="font-bold underline">
+                                        Top up
+                                    </a>
+                                </div>
+                            )}
+                        </>
                     )}
                 </Card>
             )}
@@ -1942,6 +2060,14 @@ function FamilyConnectionDetail({
                 variant="warning"
                 isLoading={compatLoading}
             />
+
+            {activePaywall && (
+                <PaywallCard
+                    paywall={activePaywall}
+                    variant="modal"
+                    onClose={() => setActivePaywall(null)}
+                />
+            )}
         </div>
     );
 }

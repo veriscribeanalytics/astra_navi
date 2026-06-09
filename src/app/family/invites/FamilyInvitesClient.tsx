@@ -29,7 +29,8 @@ import type {
     FamilyMergeCandidate,
     FamilyRelationshipType,
 } from '@/types/family';
-import { parseInviteErrorByStatus } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'mother', label: 'Mother' },
@@ -57,6 +58,9 @@ const FamilyInvitesClient: React.FC = () => {
     const outgoing = useOutgoingInvites();
     const connections = useFamilyConnections();
 
+    /* FAMILY_FREE_TIER_CAP upgrade dialog (send + accept paths). */
+    const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
+
     /* ----- Send invite form state ----- */
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteRelationship, setInviteRelationship] = useState<FamilyRelationshipType>('friend');
@@ -81,7 +85,9 @@ const FamilyInvitesClient: React.FC = () => {
             setInviteMessage('');
             outgoing.refetch();
         } else {
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            const cap = familyCapDetail(res.raw);
+            if (cap) setCapDialog(cap);
+            else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
     };
 
@@ -107,7 +113,9 @@ const FamilyInvitesClient: React.FC = () => {
 
         if (!res.ok || !res.data) {
             setAcceptingInviteId(null);
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            const cap = familyCapDetail(res.raw);
+            if (cap) setCapDialog(cap);
+            else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
             incoming.refetch();
             return;
         }
@@ -423,6 +431,14 @@ const FamilyInvitesClient: React.FC = () => {
                     isLoading={isDisconnecting}
                 />
             )}
+
+            <FamilyCapDialog
+                open={!!capDialog}
+                onClose={() => setCapDialog(null)}
+                message={capDialog?.message}
+                currentTier={capDialog?.currentTier}
+                limit={capDialog?.limit}
+            />
         </div>
     );
 };

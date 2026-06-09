@@ -3,6 +3,8 @@
  * See docs in: feat/family-feature (commit 8c88964).
  */
 
+import type { PaywallData } from '@/types/paywall';
+
 export type FamilyRelationshipType =
   | 'mother'
   | 'father'
@@ -35,7 +37,24 @@ export const COMPATIBILITY_CREDIT_COST: Record<FamilyRelationshipType, number> =
   other: 2,
 };
 
-export const FAMILY_FREE_TIER_LIMIT = 3;
+/** Total roster usage = manual members + active linked connections.
+ *  Free: 1, Pro: 6, Premium: unlimited (`null`). Backend is the source of
+ *  truth and enforces the same caps via FAMILY_FREE_TIER_CAP. */
+export function familyRosterLimit(tier: string | null | undefined): number | null {
+  switch ((tier || 'free').toLowerCase()) {
+    case 'premium':
+      return null; // unlimited
+    case 'pro':
+      return 6;
+    case 'free':
+    default:
+      return 1;
+  }
+}
+
+/** @deprecated Use {@link familyRosterLimit}. Retained as the free-tier value so
+ *  any stray imports keep compiling; equals familyRosterLimit('free'). */
+export const FAMILY_FREE_TIER_LIMIT = 1;
 
 export interface FamilyAvatar {
   key: string;
@@ -49,6 +68,14 @@ export interface FamilyCompatibilityPreflight {
   staleDataWarning: boolean;
   creditCost: number;
   relationshipType: FamilyRelationshipType;
+  /** Authoritative credit balance for this user (backend: available_credits). */
+  availableCredits?: number;
+  /** True when the user can afford `creditCost`. Gate the paid report on this
+   *  (or `cachedResultAvailable`) rather than comparing balances client-side. */
+  sufficient?: boolean;
+  /** Present when `sufficient` is false — render this via PaywallCard instead of
+   *  the confirm dialog. Null/absent when the user can pay or a cache exists. */
+  paywall?: PaywallData | null;
   /** Optional refresh CTA block. When `staleDataWarning && refresh.available`,
    *  surface a "Refresh for {creditCost} credits" button next to the cached
    *  result; tapping it just re-issues the existing compatibility GET. */
@@ -219,6 +246,28 @@ export interface FamilyCompatibilityResponse {
   member_id: number;
   credit_cost: number;
   cached: boolean;
+}
+
+/** Free compatibility summary — loaded by default, never consumes credits.
+ *  Returned by the `…/compatibility/summary` endpoints. The detailed report
+ *  ({@link FamilyCompatibilityResponse}) adds factors, advice,
+ *  relationship_actions, and confidence on top of this. */
+export interface FamilyCompatibilitySummary {
+  score: number;
+  band: FamilyCompatibilityBand | string;
+  verdict: string;
+  strengths: FamilyCompatibilityHighlight[];
+  tension_points: FamilyCompatibilityHighlight[];
+  relationship_type: FamilyRelationshipType;
+  meta: {
+    lang: CompatibilityLang | string;
+    /** Always 0 for the summary. */
+    credit_cost: 0;
+    cached: boolean;
+    summary: true;
+    member_id?: number;
+    connection_id?: number;
+  };
 }
 
 /** 402 paywall body when free-tier cap is hit. */

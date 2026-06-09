@@ -28,10 +28,58 @@ export function inviteErrorCode(body: unknown): FamilyInviteErrorCode | null {
     return extractCode(body);
 }
 
+export interface FamilyCapDetail {
+    message?: string;
+    currentTier?: string;
+    limit?: number;
+}
+
+/** Detect a FAMILY_FREE_TIER_CAP body (code at top level or nested under
+ *  `detail`) and pull out the spec's message / currentTier / limit so the caller
+ *  can show the upgrade dialog. Returns null when it's not a cap error. */
+export function familyCapDetail(body: unknown): FamilyCapDetail | null {
+    if (!body || typeof body !== 'object') return null;
+    const b = body as Record<string, unknown>;
+    const detail = b.detail && typeof b.detail === 'object' ? b.detail as Record<string, unknown> : null;
+
+    const code = (
+        typeof b.code === 'string' ? b.code
+        : typeof b.error === 'string' ? b.error
+        : detail && typeof detail.code === 'string' ? detail.code
+        : null
+    );
+    if (code !== 'FAMILY_FREE_TIER_CAP') return null;
+
+    // Prefer the nested detail object (spec shape), fall back to top level.
+    const src = detail ?? b;
+    const message = typeof src.message === 'string' ? src.message
+        : typeof b.message === 'string' ? b.message
+        : undefined;
+    const currentTier = typeof src.currentTier === 'string' ? src.currentTier
+        : typeof src.current_tier === 'string' ? src.current_tier as string
+        : undefined;
+    const rawLimit = src.limit ?? b.limit;
+    const limit = typeof rawLimit === 'number' ? rawLimit
+        : typeof rawLimit === 'string' && rawLimit.trim() !== '' && !Number.isNaN(Number(rawLimit)) ? Number(rawLimit)
+        : undefined;
+
+    return {
+        ...(message !== undefined ? { message } : {}),
+        ...(currentTier !== undefined ? { currentTier } : {}),
+        ...(limit !== undefined ? { limit } : {}),
+    };
+}
+
 function extractCode(body: unknown): FamilyInviteErrorCode | null {
     if (!body || typeof body !== 'object') return null;
     const b = body as Record<string, unknown>;
-    const raw = (typeof b.code === 'string' ? b.code : typeof b.error === 'string' ? b.error : null);
+    const detail = b.detail && typeof b.detail === 'object' ? b.detail as Record<string, unknown> : null;
+    const raw = (
+        typeof b.code === 'string' ? b.code
+        : typeof b.error === 'string' ? b.error
+        : detail && typeof detail.code === 'string' ? detail.code
+        : null
+    );
     if (!raw) return null;
     const known: FamilyInviteErrorCode[] = [
         'INVITEE_NO_ACCOUNT',

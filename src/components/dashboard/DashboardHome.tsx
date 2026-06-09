@@ -52,6 +52,10 @@ import {
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
+  useFamilyCompatibilitySummary,
+  useFamilyConnectionCompatibility,
+  useFamilyConnectionCompatibilitySummary,
+  useFamilyConnectionCompatibilityPreflight,
 } from "@/hooks/useFamily";
 import { parseKundliStats } from "@/lib/kundliStats";
 import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
@@ -365,20 +369,36 @@ interface FamilyCardActionProps {
 
 /** Dashboard family-member card backed by real member data + compatibility status. */
 function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibilityBlocked }: { member: FamilyMember } & FamilyCardActionProps) {
-  const { data: preflight } = useFamilyCompatibilityPreflight(member.id);
+  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
   const { data: reports } = useFamilyReports(member.id);
-  const { data: compat } = useFamilyCompatibility(member.id);
+  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member.id);
+  const { data: summary } = useFamilyCompatibilitySummary(member.id, 'en');
+
+  useEffect(() => {
+    if (member.id) {
+      fetchPreflight();
+    }
+  }, [member.id, fetchPreflight]);
+
+  useEffect(() => {
+    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning && member.id) {
+      fetchCompatibility('en');
+    }
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, member.id]);
+
+  const activeBand = (compat?.band ?? summary?.band) as FamilyCompatibilityBand | undefined;
+  const activeScore = compat?.score ?? summary?.score;
 
   const status = computeFamilyMemberStatus({
     member,
     preflight,
     reports,
-    band: (compat?.band as FamilyCompatibilityBand | undefined) ?? null,
+    band: activeBand ?? null,
   });
 
-  const hasScore = typeof compat?.score === "number";
-  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(compat!.score))) : null;
-  const scorePalette = bandPalette(compat?.band ?? "");
+  const hasScore = typeof activeScore === "number";
+  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
+  const scorePalette = bandPalette(activeBand ?? "");
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
@@ -422,6 +442,29 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
 /** Dashboard card for a linked connection (another user who shares with you). */
 function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatibilityBlocked }: { connection: FamilyConnection } & FamilyCardActionProps) {
+  const { data: preflight, fetchPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
+  const { data: compat, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
+  const { data: summary } = useFamilyConnectionCompatibilitySummary(connection.connectionId, 'en');
+
+  useEffect(() => {
+    if (connection.connectionId) {
+      fetchPreflight();
+    }
+  }, [connection.connectionId, fetchPreflight]);
+
+  useEffect(() => {
+    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning && connection.connectionId) {
+      fetchCompatibility('en');
+    }
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, connection.connectionId]);
+
+  const activeBand = (compat?.band ?? summary?.band) as FamilyCompatibilityBand | undefined;
+  const activeScore = compat?.score ?? summary?.score;
+
+  const hasScore = typeof activeScore === "number";
+  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
+  const scorePalette = bandPalette(activeBand ?? "");
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
       <div className="flex items-center gap-3">
@@ -432,6 +475,14 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
           <h4 className="truncate font-headline text-sm font-bold text-foreground">{connection.otherName || "—"}</h4>
           <p className="label-sm text-[10px] tracking-wider text-foreground/35">{formatRelationship(connection.iSeeThemAs)}</p>
         </div>
+        {scorePct !== null && (
+          <div className="shrink-0 text-right">
+            <span className={`font-headline text-lg font-bold tabular-nums leading-none ${scorePalette.text}`}>
+              {scorePct}
+              <span className="ml-0.5 text-[10px] font-body text-foreground/40">%</span>
+            </span>
+          </div>
+        )}
       </div>
       <span className="inline-block self-start rounded-md bg-emerald-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-400">
         {t('newDashboard.linked')}

@@ -9,6 +9,7 @@ import type {
     FamilyMemberUpdatePayload,
     FamilyChartResponse,
     FamilyCompatibilityResponse,
+    FamilyCompatibilitySummary,
     CompatibilityLang,
     FamilyAvatar,
     FamilyCompatibilityPreflight,
@@ -203,6 +204,45 @@ function sleep(ms: number) {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
+interface ParsedSharingRequired {
+    message: string;
+    blockedBy?: FamilySharingBlockedBy;
+    sharingWithThem: boolean;
+    theyShareWithMe: boolean;
+    nudgeAction?: FamilySharingNudgeAction;
+}
+
+/** Detect and parse a SHARING_REQUIRED body from any connection compatibility
+ *  endpoint (paid or summary). Returns null when the body isn't that error.
+ *  Accepts the code at the top level or nested under `detail`. */
+function parseSharingRequired(body: Record<string, unknown>): ParsedSharingRequired | null {
+    const detail = body?.detail && typeof body.detail === 'object'
+        ? body.detail as Record<string, unknown>
+        : null;
+    const code = (body?.code ?? detail?.code) as string | undefined;
+    if (code !== 'SHARING_REQUIRED') return null;
+
+    const message = (body.error || body.message || detail?.error || 'Sharing required') as string;
+    const rawNudge = (body.nudgeAction ?? body.nudge_action) as Record<string, unknown> | undefined;
+    const nudgeAction = rawNudge && typeof rawNudge === 'object' && typeof rawNudge.target_email === 'string'
+        ? {
+            type: (rawNudge.type ?? 'remind') as string,
+            target_email: rawNudge.target_email as string,
+        }
+        : undefined;
+    const blockedByRaw = (body.blockedBy ?? body.blocked_by) as string | undefined;
+    const blockedBy = (blockedByRaw === 'you' || blockedByRaw === 'them' || blockedByRaw === 'both')
+        ? (blockedByRaw as FamilySharingBlockedBy)
+        : undefined;
+    return {
+        message,
+        blockedBy,
+        sharingWithThem: !!(body.sharing_with_them ?? body.sharingWithThem),
+        theyShareWithMe: !!(body.they_share_with_me ?? body.theyShareWithMe ?? body.sharing_with_user),
+        ...(nudgeAction ? { nudgeAction } : {}),
+    };
+}
+
 export function useFamilyCompatibility(memberId: number | string | null) {
     const [data, setData] = useState<FamilyCompatibilityResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -341,32 +381,20 @@ export function useFamilyConnectionCompatibility(connectionId: number | string |
                     }
 
                     // SHARING_REQUIRED — not an error to toast; surface inline.
-                    const code = (body?.code ?? body?.detail?.code) as string | undefined;
-                    if (code === 'SHARING_REQUIRED') {
-                        const msg = body.error || body.message || body.detail?.error || 'Sharing required';
-                        const rawNudge = (body.nudgeAction ?? body.nudge_action) as Record<string, unknown> | undefined;
-                        const nudgeAction = rawNudge && typeof rawNudge === 'object' && typeof rawNudge.target_email === 'string'
-                            ? {
-                                type: (rawNudge.type ?? 'remind') as string,
-                                target_email: rawNudge.target_email,
-                            }
-                            : undefined;
-                        const blockedByRaw = (body.blockedBy ?? body.blocked_by) as string | undefined;
-                        const blockedBy = (blockedByRaw === 'you' || blockedByRaw === 'them' || blockedByRaw === 'both')
-                            ? (blockedByRaw as FamilySharingBlockedBy)
-                            : undefined;
-                        setError(msg);
+                    const sharing = parseSharingRequired(body);
+                    if (sharing) {
+                        setError(sharing.message);
                         return {
                             ok: false,
                             status: res.status,
                             data: null,
-                            error: msg,
+                            error: sharing.message,
                             raw: body,
                             sharingRequired: true,
-                            blockedBy,
-                            sharingWithThem: !!(body.sharing_with_them ?? body.sharingWithThem),
-                            theyShareWithMe: !!(body.they_share_with_me ?? body.theyShareWithMe ?? body.sharing_with_user),
-                            ...(nudgeAction ? { nudgeAction } : {}),
+                            blockedBy: sharing.blockedBy,
+                            sharingWithThem: sharing.sharingWithThem,
+                            theyShareWithMe: sharing.theyShareWithMe,
+                            ...(sharing.nudgeAction ? { nudgeAction: sharing.nudgeAction } : {}),
                         };
                     }
 
@@ -398,6 +426,147 @@ export function useFamilyConnectionCompatibility(connectionId: number | string |
     );
 
     return { data, isLoading, error, fetchCompatibility, reset: () => setData(null) };
+}
+
+/* ------------------------------------------------------------------ */
+/* Free compatibility summary (auto-loaded, never charges)             */
+/* ------------------------------------------------------------------ */
+
+export interface CompatibilitySummaryState {
+    data: FamilyCompatibilitySummary | null;
+    isLoading: boolean;
+    error: string | null;
+    /** 400 missing_birth_details → the user's own profile is incomplete. */
+    missingBirthFields?: string[];
+    refetch: () => void;
+}
+
+export interface ConnectionCompatibilitySummaryState extends CompatibilitySummaryState {
+    /** True when sharing isn't mutual — surface the inline sharing gate. */
+    sharingRequired?: boolean;
+    blockedBy?: FamilySharingBlockedBy;
+    nudgeAction?: FamilySharingNudgeAction;
+}
+
+/** Auto-fetches the free summary on mount and whenever `lang` changes. Caches by
+ *  `${memberId}:${lang}` so re-selecting a language is instant. Summary never
+ *  consumes credits, so unlike the paid hook this fires automatically. */
+export function useFamilyCompatibilitySummary(memberId: number | string | null, lang: CompatibilityLang = 'en') {
+    const [data, setData] = useState<FamilyCompatibilitySummary | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [missingBirthFields, setMissingBirthFields] = useState<string[] | undefined>(undefined);
+    const cacheRef = useRef<Map<string, FamilyCompatibilitySummary>>(new Map());
+
+    const fetchSummary = useCallback(async () => {
+        if (memberId === null || memberId === undefined || memberId === '') {
+            setData(null);
+            return;
+        }
+        const key = `${memberId}:${lang}`;
+        const cached = cacheRef.current.get(key);
+        if (cached) {
+            setData(cached);
+            setMissingBirthFields(undefined);
+            setError(null);
+            return;
+        }
+        setIsLoading(true);
+        setError(null);
+        setMissingBirthFields(undefined);
+        try {
+            const url = `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility/summary?lang=${encodeURIComponent(lang)}`;
+            const res = await clientFetch(url);
+            const body = await res.json().catch(() => ({}));
+            if (res.ok) {
+                const result = body as FamilyCompatibilitySummary;
+                cacheRef.current.set(key, result);
+                setData(result);
+                return;
+            }
+            if (res.status === 400 && body?.error === 'missing_birth_details') {
+                const missing = Array.isArray(body.missing) ? body.missing as string[] : [];
+                setMissingBirthFields(missing);
+                setError('Complete your own birth details to see compatibility.');
+                return;
+            }
+            setError(body.error || body.detail || `Failed (${res.status})`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load compatibility summary');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [memberId, lang]);
+
+    useEffect(() => {
+        fetchSummary();
+    }, [fetchSummary]);
+
+    return { data, isLoading, error, missingBirthFields, refetch: fetchSummary } as CompatibilitySummaryState;
+}
+
+/** Connection variant of {@link useFamilyCompatibilitySummary}. Also surfaces
+ *  SHARING_REQUIRED inline (summary needs mutual sharing too). */
+export function useFamilyConnectionCompatibilitySummary(connectionId: number | string | null, lang: CompatibilityLang = 'en') {
+    const [data, setData] = useState<FamilyCompatibilitySummary | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [sharing, setSharing] = useState<ParsedSharingRequired | null>(null);
+    const cacheRef = useRef<Map<string, FamilyCompatibilitySummary>>(new Map());
+
+    const fetchSummary = useCallback(async () => {
+        if (connectionId === null || connectionId === undefined || connectionId === '') {
+            setData(null);
+            return;
+        }
+        const key = `${connectionId}:${lang}`;
+        const cached = cacheRef.current.get(key);
+        if (cached) {
+            setData(cached);
+            setSharing(null);
+            setError(null);
+            return;
+        }
+        setIsLoading(true);
+        setError(null);
+        setSharing(null);
+        try {
+            const url = `/api/family/connections/${encodeURIComponent(String(connectionId))}/compatibility/summary?lang=${encodeURIComponent(lang)}`;
+            const res = await clientFetch(url);
+            const body = await res.json().catch(() => ({}));
+            if (res.ok) {
+                const result = body as FamilyCompatibilitySummary;
+                cacheRef.current.set(key, result);
+                setData(result);
+                return;
+            }
+            const sharingReq = parseSharingRequired(body);
+            if (sharingReq) {
+                setSharing(sharingReq);
+                setError(sharingReq.message);
+                return;
+            }
+            setError(body.error || body.detail || `Failed (${res.status})`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load compatibility summary');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [connectionId, lang]);
+
+    useEffect(() => {
+        fetchSummary();
+    }, [fetchSummary]);
+
+    return {
+        data,
+        isLoading,
+        error,
+        refetch: fetchSummary,
+        sharingRequired: !!sharing,
+        blockedBy: sharing?.blockedBy,
+        nudgeAction: sharing?.nudgeAction,
+    } as ConnectionCompatibilitySummaryState;
 }
 
 /* ------------------------------------------------------------------ */
@@ -619,11 +788,19 @@ function normalizePreflight(body: Record<string, unknown>): FamilyCompatibilityP
             wouldUseFresh: !!(rawRefresh.would_use_fresh ?? rawRefresh.wouldUseFresh ?? false),
         }
         : undefined;
+    const rawAvailable = body.available_credits ?? body.availableCredits;
+    const rawSufficient = body.sufficient;
+    // Paywall block is already in the camelCase PaywallData shape from the
+    // shared paywall system; pass it through untouched.
+    const rawPaywall = (body.paywall ?? null) as FamilyCompatibilityPreflight['paywall'];
     return {
         cachedResultAvailable: !!(body.cached_result_available ?? body.cachedResultAvailable),
         staleDataWarning: !!(body.stale_data_warning ?? body.staleDataWarning),
         creditCost: Number(body.credit_cost ?? body.creditCost ?? 0),
         relationshipType: (body.relationship_type ?? body.relationshipType) as FamilyCompatibilityPreflight['relationshipType'],
+        ...(rawAvailable !== undefined ? { availableCredits: Number(rawAvailable) } : {}),
+        ...(rawSufficient !== undefined ? { sufficient: !!rawSufficient } : {}),
+        ...(rawPaywall ? { paywall: rawPaywall } : {}),
         ...(refresh ? { refresh } : {}),
     };
 }

@@ -19,7 +19,8 @@ import {
 } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import type { FamilyDiscoverResult, FamilyRelationshipType } from '@/types/family';
-import { parseInviteErrorByStatus } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; labelKey: string }[] = [
     { value: 'mother', labelKey: 'mother' },
@@ -52,6 +53,9 @@ const FamilyDiscoverClient: React.FC = () => {
     const { query, setQuery, results, isLoading, error, setResultStatus, removeResult } = useFamilyDiscover();
     const outgoing = useOutgoingInvites();
 
+    /* FAMILY_FREE_TIER_CAP upgrade dialog. */
+    const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
+
     /* ----- Invite (relationship picker per row) ----- */
     const [pickerFor, setPickerFor] = useState<string | null>(null);
     const [pickerRelationship, setPickerRelationship] = useState<FamilyRelationshipType>('friend');
@@ -75,7 +79,9 @@ const FamilyDiscoverClient: React.FC = () => {
             setResultStatus(result.username, 'pending');
             outgoing.refetch();
         } else {
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            const cap = familyCapDetail(res.raw);
+            if (cap) setCapDialog(cap);
+            else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
     };
 
@@ -116,7 +122,9 @@ const FamilyDiscoverClient: React.FC = () => {
             setInviteEmail('');
             outgoing.refetch();
         } else {
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            const cap = familyCapDetail(res.raw);
+            if (cap) setCapDialog(cap);
+            else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
     };
 
@@ -281,6 +289,14 @@ const FamilyDiscoverClient: React.FC = () => {
                     isLoading={isBlocking}
                 />
             )}
+
+            <FamilyCapDialog
+                open={!!capDialog}
+                onClose={() => setCapDialog(null)}
+                message={capDialog?.message}
+                currentTier={capDialog?.currentTier}
+                limit={capDialog?.limit}
+            />
         </div>
     );
 };
