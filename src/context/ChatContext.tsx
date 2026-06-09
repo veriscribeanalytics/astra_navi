@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { generateUUID } from '@/lib/uuid';
+import { truncateCodePoints } from '@/lib/text';
 import { clientFetch } from '@/lib/apiClient';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/hooks';
@@ -375,17 +376,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       if (targetId.startsWith('temp-')) {
+        // Truncate by code point, not UTF-16 unit, so an emoji landing on the
+        // 30-char boundary (e.g. 💰) isn't cut into a lone surrogate the
+        // backend rejects with a 422.
+        const safeTitle = truncateCodePoints(text, 30);
         const createRes = await clientFetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: text.slice(0, 30), language }),
+          body: JSON.stringify({ title: safeTitle, language }),
         });
-        const createData = await createRes.json();
-        if (createData.chat?.id) {
-          targetId = createData.chat.id;
-          setActiveChatId(targetId);
-          setActiveChat(prev => prev ? { ...prev, id: targetId as string } : null);
+        const createData = await createRes.json().catch(() => ({} as Record<string, unknown>));
+
+        // Chat creation must succeed before we send the message. If it fails
+        // (e.g. 422), stop here — never POST a message against the temporary
+        // id, which the backend doesn't know about. Surface the failure on the
+        // placeholder so the user can retry instead of silently hanging.
+        if (!createRes.ok || !createData.chat?.id) {
+          setActiveChat(prev => prev ? {
+            ...prev,
+            messages: prev.messages.map(m => m.id === aiMsgId ? {
+              ...m, text: '', error: true, errorMessage: t('chat.errorSending'),
+            } : m),
+          } : null);
+          toastError(t('chat.errorSending'));
+          return;
         }
+
+        // Replace the temporary id with the backend UUID before sending.
+        targetId = createData.chat.id;
+        setActiveChatId(targetId);
+        setActiveChat(prev => prev ? { ...prev, id: targetId as string } : null);
       }
 
       abortControllerRef.current?.abort();
@@ -640,7 +660,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const tempChat: Chat = {
       id: tempId,
       userEmail: user.email || '',
-      title: initialMessage?.slice(0,30) || t('chat.newConversation'),
+      title: truncateCodePoints(initialMessage ?? '', 30) || t('chat.newConversation'),
       messages: [{
         id: generateUUID(),
         type: 'ai',
