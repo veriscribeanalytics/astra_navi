@@ -105,6 +105,15 @@ export interface ChatMessage {
   pendingActions?: PendingChatAction[];
   /** Backend signals the tool-use loop got stuck — UI shows fallback copy. */
   toolLoopExceeded?: boolean;
+  /** Templated narrated opener (SSE `opener` event, complex questions only).
+   *  Rendered as its own first bubble; NOT part of the token-streamed answer. */
+  opener?: string;
+  /** True when the full agentic loop ran (metadata.agentic). */
+  agentic?: boolean;
+  planSteps?: string[];
+  reflections?: { round: number; grounded?: boolean; complete?: boolean; missing?: string[]; confidence?: number }[];
+  agentRounds?: number;
+  toolTrajectory?: { name: string; args?: Record<string, unknown>; ok?: boolean; error?: string | null; ms?: number }[];
   /** Local-only: per-pendingAction state once the user has tapped approve. */
   resolvedActions?: Record<number, ResolvedChatAction>;
   createdAt: string;
@@ -137,6 +146,10 @@ export interface ThinkingData {
   /** Tool names from the new `tool_use` SSE event. Non-empty means the AI is
    *  consulting family data — UI swaps to a family-flavoured thinking copy. */
   tools?: string[];
+  /** Localized, human status lines parallel to `tools` (may be shorter).
+   *  When present, the thinking indicator shows these verbatim instead of the
+   *  generic rotating copy. Replaced (not accumulated) on each tool_use event. */
+  narration?: string[];
 }
 
 interface ChatContextType {
@@ -515,11 +528,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   model: data.model ?? undefined,
                   answerStyle: data.answerStyle ?? undefined,
                 }));
+              } else if (currentEventName === 'opener') {
+                // Pre-localized templated line for complex questions. Shown as
+                // its own first bubble right away to mask the data-gather.
+                if (typeof data.text === 'string' && data.text) {
+                  setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, opener: data.text } : m) } : null);
+                }
+              } else if (currentEventName === 'plan') {
+                if (Array.isArray(data.steps)) {
+                  const steps = (data.steps as unknown[]).filter((s): s is string => typeof s === 'string');
+                  setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, planSteps: steps } : m) } : null);
+                }
               } else if (currentEventName === 'tool_use') {
                 // The AI is consulting family/relationship data. We just track
                 // the tool names; the indicator decides what copy to show.
                 const tools = Array.isArray(data.tools) ? (data.tools as string[]) : [];
-                setThinkingData(prev => ({ ...(prev ?? {}), tools }));
+                const narration = Array.isArray(data.narration)
+                  ? (data.narration as unknown[]).filter((s): s is string => typeof s === 'string')
+                  : undefined;
+                setThinkingData(prev => ({ ...(prev ?? {}), tools, narration }));
               } else if (currentEventName === 'metadata') {
                 if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
                   persistedAiMsgId = data.aiMessageId;
@@ -551,6 +578,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     avatarCreditCost: data.avatarCreditCost ?? m.avatarCreditCost,
                     pendingActions: Array.isArray(data.pendingActions) ? data.pendingActions : m.pendingActions,
                     toolLoopExceeded: typeof data.toolLoopExceeded === 'boolean' ? data.toolLoopExceeded : m.toolLoopExceeded,
+                    agentic: typeof data.agentic === 'boolean' ? data.agentic : m.agentic,
+                    planSteps: Array.isArray(data.planSteps) ? data.planSteps : m.planSteps,
+                    reflections: Array.isArray(data.reflections) ? data.reflections : m.reflections,
+                    agentRounds: typeof data.agentRounds === 'number' ? data.agentRounds : m.agentRounds,
+                    toolTrajectory: Array.isArray(data.toolTrajectory) ? data.toolTrajectory : m.toolTrajectory,
                     errorCode: errorCode ?? m.errorCode,
                     error: errorCode ? true : m.error,
                     errorMessage: errorCode ? (() => {
@@ -590,7 +622,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const localAiMsg = prev.messages.find(m => m.id === persistedAiMsgId || m.id === aiMsgId);
               if (!localAiMsg) return backendChat;
               const backendAiMsg = backendChat.messages.find(m => m.id === persistedAiMsgId) ?? backendChat.messages.find(m => m.type === 'ai' && m.text === localAiMsg.text);
-              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.mode || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined)) {
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.mode || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory)) {
                 const merged = backendChat.messages.map(m => {
                   if (m.id === backendAiMsg.id) {
                     return {
@@ -615,6 +647,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       avatarTitle: localAiMsg.avatarTitle ?? m.avatarTitle,
                       avatarCreditCost: localAiMsg.avatarCreditCost ?? m.avatarCreditCost,
                       errorCode: localAiMsg.errorCode ?? m.errorCode,
+                      opener: localAiMsg.opener ?? m.opener,
+                      agentic: localAiMsg.agentic ?? m.agentic,
+                      planSteps: localAiMsg.planSteps ?? m.planSteps,
+                      reflections: localAiMsg.reflections ?? m.reflections,
+                      agentRounds: localAiMsg.agentRounds ?? m.agentRounds,
+                      toolTrajectory: localAiMsg.toolTrajectory ?? m.toolTrajectory,
                     };
                   }
                   return m;
@@ -711,7 +749,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatarIdForRegen = target?.avatarId ?? selectedAvatarId ?? undefined;
       return {
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null } : m),
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null, opener: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined } : m),
       };
     });
 

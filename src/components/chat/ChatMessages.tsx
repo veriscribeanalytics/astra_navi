@@ -84,6 +84,81 @@ const haptic = (light?: boolean) => {
   }
 };
 
+/** Split an assistant answer into stacked bubbles: blank lines and bold
+ *  numbered lead-ins (`**1) Title**`) start a new bubble; a trailing
+ *  closing-question line becomes its own bubble. Fenced code blocks are
+ *  never split. Stable under append-only streaming text. */
+function splitIntoBubbles(text: string): string[] {
+  if (!text.trim()) return [];
+  const blocks: string[] = [];
+  let cur: string[] = [];
+  let inFence = false;
+  const flush = () => {
+    const joined = cur.join('\n').trim();
+    if (joined) blocks.push(joined);
+    cur = [];
+  };
+  for (const line of text.split('\n')) {
+    if (/^\s*```/.test(line)) inFence = !inFence;
+    if (!inFence) {
+      if (!line.trim()) { flush(); continue; }
+      if (/^\s*\*\*\s*\d+[).:]/.test(line)) flush();
+    }
+    cur.push(line);
+  }
+  flush();
+  if (blocks.length === 0) return [text.trim()];
+  // Detach a trailing closing question that wasn't blank-line separated.
+  const last = blocks[blocks.length - 1];
+  const lastLines = last.split('\n');
+  if (lastLines.length > 1 && lastLines[lastLines.length - 1].trim().endsWith('?')) {
+    blocks[blocks.length - 1] = lastLines.slice(0, -1).join('\n').trim();
+    blocks.push(lastLines[lastLines.length - 1].trim());
+  }
+  return blocks;
+}
+
+const OR_WORDS = ['or', 'या', 'किंवा', 'অথবা', 'নাকি', 'અથવા', 'કે', 'ಅಥವಾ', '또는', '아니면', 'അതോ', 'അല്ലെങ്കിൽ', 'ਜਾਂ', 'அல்லது', 'లేదా'];
+const OR_SPLIT = new RegExp(`\\s+(?:${OR_WORDS.join('|')})\\s+`, 'i');
+const OR_LEADING = new RegExp(`^(?:${OR_WORDS.join('|')})\\s+`, 'i');
+
+/** Parse the trailing multiple-choice question ("…career, money,
+ *  relationships, or health?") into tappable chip options. Returns [] when
+ *  the block doesn't look like a clean 3–5 option closing question. */
+function parseClosingOptions(block: string): string[] {
+  const plain = block.replace(/\*\*/g, '').replace(/<[^>]*>/g, '').trim();
+  if (!plain.endsWith('?') || !plain.includes(',')) return [];
+  const qStart = Math.max(
+    plain.lastIndexOf('.', plain.length - 2),
+    plain.lastIndexOf('!', plain.length - 2),
+    plain.lastIndexOf('?', plain.length - 2),
+    plain.lastIndexOf(':'),
+    plain.lastIndexOf('—'),
+    plain.lastIndexOf('\n'),
+  );
+  const q = plain.slice(qStart + 1, -1).trim();
+  const segments = q.split(',').map(s => s.trim()).filter(Boolean);
+  if (segments.length < 2) return [];
+  const rawTail = segments.pop() as string;
+  // A genuine choice list always has an "or" before the last option;
+  // ordinary comma-laden sentences don't.
+  if (!OR_LEADING.test(rawTail) && !OR_SPLIT.test(rawTail)) return [];
+  const tail = rawTail.replace(OR_LEADING, '');
+  const tailParts = tail.split(OR_SPLIT).map(s => s.trim()).filter(Boolean);
+  const middle = segments.slice(1);
+  const known = [...middle, ...tailParts];
+  if (known.length < 2) return [];
+  // The first comma segment carries the lead-in ("Want me to dig into
+  // career") — keep only as many trailing words as the longest known option.
+  const maxWords = Math.min(4, Math.max(...known.map(o => o.split(/\s+/).length)));
+  const firstWords = segments[0].split(/\s+/);
+  const first = firstWords.slice(-maxWords).join(' ');
+  const options = [first, ...known].map(o => o.replace(/[.?!]+$/, '').trim()).filter(Boolean);
+  if (options.length < 3 || options.length > 5) return [];
+  if (options.some(o => o.length > 30 || o.length < 2)) return [];
+  return options;
+}
+
 const DEFAULT_THINKING_STATUSES = [
   'chat.thinkingReadingChart',
   'chat.thinkingConsultingStars',
@@ -104,7 +179,10 @@ const ThinkingIndicator: React.FC = () => {
   const { t } = useTranslation();
   const { selectedAvatarId, avatars, thinkingData } = useChat();
 
-  const statuses = getThinkingStatuses(thinkingData?.tools);
+  // Backend-provided narration lines (already localized) win over the
+  // generic rotating copy.
+  const narration = thinkingData?.narration?.length ? thinkingData.narration : null;
+  const statuses = narration ?? getThinkingStatuses(thinkingData?.tools);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -121,9 +199,14 @@ const ThinkingIndicator: React.FC = () => {
   const currentAvatar = avatars.find(a => a.avatarId === selectedAvatarId);
   const accent = selectedAvatarId && selectedAvatarId !== 'navi' ? getAvatarAccent(selectedAvatarId) : '';
   const avatarName = currentAvatar?.name ?? 'Navi';
-  const statusText = t(statuses[statusIdx]);
-  const lowerStatusText = statusText.charAt(0).toLowerCase() + statusText.slice(1);
-  const thinkingText = `${avatarName} is ${lowerStatusText}`;
+  let thinkingText: string;
+  if (narration) {
+    thinkingText = narration[Math.min(statusIdx, narration.length - 1)];
+  } else {
+    const statusText = t(statuses[statusIdx]);
+    const lowerStatusText = statusText.charAt(0).toLowerCase() + statusText.slice(1);
+    thinkingText = `${avatarName} is ${lowerStatusText}`;
+  }
 
   return (
     <div className="flex gap-3 items-start mt-4 mb-2">
@@ -427,7 +510,7 @@ const ChatMessages: React.FC = () => {
           toastInfo(t('chat.speaking'));
         };
 
-        if (isAi && !msg.text && isSending) return null;
+        if (isAi && !msg.text && !msg.opener && isSending) return null;
 
         const isStreamingAi = isAi && isSending && isLastAiMsg && mainText.length > 0 && !msg.error;
 
@@ -500,26 +583,57 @@ const ChatMessages: React.FC = () => {
                     </details>
                   )}
 
-                  <div className="ai-bubble-container">
-                  <div
-                    className="ai-message-content text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.8] max-w-[65ch]"
-                    dangerouslySetInnerHTML={{ __html: getSanitizedHtml(msg.id, mainText) }}
-                    onClick={(e) => {
-                      const btn = (e.target as Element).closest('[data-action="copy-code"]');
-                      if (!btn) return;
-                      const wrapper = btn.closest('.code-block-wrapper');
-                      const codeEl = wrapper?.querySelector('code');
-                      if (codeEl) {
-                        navigator.clipboard.writeText(codeEl.textContent || '');
-                        toastSuccess(t('chat.copiedToClipboard'));
-                      }
-                    }}
-                  />
-                  </div>
-
-                  {isStreamingAi && (
-                    <span className="typing-cursor inline-block w-[2px] h-[1em] bg-secondary/70 ml-0.5 rounded-sm align-text-bottom" />
+                  {msg.opener && (
+                    <div className="ai-bubble-container">
+                      <div className="ai-message-content text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.8] max-w-[65ch]">
+                        {msg.opener}
+                      </div>
+                    </div>
                   )}
+
+                  {msg.planSteps && msg.planSteps.length > 0 && (
+                    <details className="mt-2 mb-1 group/plan">
+                      <summary className="text-[13px] font-bold text-secondary/50 cursor-pointer list-none flex items-center gap-1.5 hover:text-secondary transition-colors">
+                        <ChevronRight className="w-3 h-3 group-open/plan:rotate-90 transition-transform" />
+                        {t('chat.planApproach')}
+                      </summary>
+                      <ol className="mt-2 pl-3 border-l border-secondary/15 text-[13px] text-on-surface-variant/50 leading-relaxed list-decimal list-inside">
+                        {msg.planSteps.map((step, sIdx) => (
+                          <li key={sIdx}>{step}</li>
+                        ))}
+                      </ol>
+                    </details>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    {splitIntoBubbles(mainText).map((block, bIdx, blocks) => (
+                      <motion.div
+                        key={bIdx}
+                        className="ai-bubble-container"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                      >
+                        <div
+                          className="ai-message-content text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.8] max-w-[65ch]"
+                          dangerouslySetInnerHTML={{ __html: getSanitizedHtml(msg.id + ':' + bIdx, block) }}
+                          onClick={(e) => {
+                            const btn = (e.target as Element).closest('[data-action="copy-code"]');
+                            if (!btn) return;
+                            const wrapper = btn.closest('.code-block-wrapper');
+                            const codeEl = wrapper?.querySelector('code');
+                            if (codeEl) {
+                              navigator.clipboard.writeText(codeEl.textContent || '');
+                              toastSuccess(t('chat.copiedToClipboard'));
+                            }
+                          }}
+                        />
+                        {isStreamingAi && bIdx === blocks.length - 1 && (
+                          <span className="typing-cursor inline-block w-[2px] h-[1em] bg-secondary/70 ml-0.5 rounded-sm align-text-bottom" />
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
 
 {msg.error && (
                     <div className={`flex items-center gap-2 mt-3 p-3 rounded-xl border ${msg.errorCode === 'llm_unavailable' ? 'bg-amber-500/8 border-amber-500/15' : msg.errorCode === 'capacity' ? 'bg-orange-500/8 border-orange-500/15' : 'bg-red-500/8 border-red-500/15'}`}>
@@ -669,6 +783,37 @@ const ChatMessages: React.FC = () => {
                       ))}
                     </Card>
                   )}
+
+                  {msg.agentic && !isStreamingAi && (msg.reflections?.length || msg.toolTrajectory?.length) ? (
+                    <details className="mt-2 group/work">
+                      <summary className="text-[12px] font-medium text-on-surface-variant/30 cursor-pointer list-none flex items-center gap-1.5 hover:text-on-surface-variant/60 transition-colors">
+                        <ChevronRight className="w-3 h-3 group-open/work:rotate-90 transition-transform" />
+                        {t('chat.showWork')}
+                        {typeof msg.agentRounds === 'number' && (
+                          <span className="opacity-60">· {msg.agentRounds} {msg.agentRounds === 1 ? 'round' : 'rounds'}</span>
+                        )}
+                      </summary>
+                      <div className="mt-2 pl-3 border-l border-outline-variant/20 text-[12px] text-on-surface-variant/40 leading-relaxed flex flex-col gap-1">
+                        {msg.toolTrajectory?.map((tr, tIdx) => (
+                          <div key={tIdx} className="flex items-center gap-1.5 min-w-0">
+                            {tr.ok === false ? <AlertCircle className="w-3 h-3 shrink-0 text-red-400/60" /> : <Check className="w-3 h-3 shrink-0 text-secondary/50" />}
+                            <span className="font-mono truncate">{tr.name}</span>
+                            {typeof tr.ms === 'number' && <span className="opacity-60 shrink-0">{tr.ms}ms</span>}
+                            {tr.error && <span className="text-red-300/60 truncate">{tr.error}</span>}
+                          </div>
+                        ))}
+                        {msg.reflections?.map((r) => (
+                          <div key={r.round}>
+                            <span className="font-semibold">R{r.round}</span>
+                            {typeof r.grounded === 'boolean' && <span> · grounded: {String(r.grounded)}</span>}
+                            {typeof r.complete === 'boolean' && <span> · complete: {String(r.complete)}</span>}
+                            {typeof r.confidence === 'number' && <span> · conf: {r.confidence}</span>}
+                            {r.missing && r.missing.length > 0 && <span> · missing: {r.missing.join(', ')}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null}
                 </div>
               </div>
 
@@ -731,7 +876,11 @@ const ChatMessages: React.FC = () => {
 
               {isAi && isLastAiMsg && !isSending && (
                 <div className="flex flex-nowrap overflow-x-auto gap-1.5 mt-2 ml-10 msg-suggestion-pills">
-                  {(msg.suggestedQuestions?.slice(0, 3) || getSmartSuggestions(msg)).map((option, qIdx) => (
+                  {(() => {
+                    const blocks = splitIntoBubbles(mainText);
+                    const closing = blocks.length > 0 ? parseClosingOptions(blocks[blocks.length - 1]) : [];
+                    return closing.length > 0 ? closing : (msg.suggestedQuestions?.slice(0, 3) || getSmartSuggestions(msg));
+                  })().map((option, qIdx) => (
                     <motion.button
                       key={option}
                       initial={{ opacity: 0, y: 6 }}
