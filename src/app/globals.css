@@ -2,12 +2,35 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant 3xl (@media (min-width: 2560px));
 
+/* Hide Navbar during cosmic intro and fade it in when complete */
+html.intro-playing nav {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+html.intro-playing main {
+  padding-top: 0 !important;
+}
+
+/* Fade in the navbar over 0.9s when the intro finishes to match the landing page crossfade */
+html:not(.intro-playing) nav {
+  transition: opacity 0.9s ease, transform 0.9s ease, background-color 0.3s ease, border-color 0.3s ease !important;
+}
+
 html {
-  scroll-behavior: smooth;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
-  overflow: hidden;
   font-size: clamp(14px, 0.85vw + 0.5rem, 16px);
+}
+
+html.intro-playing {
+  height: 100%;
+  overflow: hidden;
+}
+
+html.intro-playing body {
+  height: 100%;
+  overflow: hidden;
 }
 
 @media (min-width: 2560px) {
@@ -22,48 +45,47 @@ html {
   }
 }
 
-/* Prevent double scrollbars: body is the SOLE scroll container */
+/* Allow standard viewport scrolling */
 body {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
-  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
 
 /* Global Custom Scrollbar - Premium 4px */
-body, .custom-scrollbar {
+html, body, .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(200, 136, 10, 0.2) transparent;
 }
 
-body::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
+html::-webkit-scrollbar, body::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
-body::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-body::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(200, 136, 10, 0.2);
   border-radius: 20px;
   transition: background 0.3s ease;
 }
 
-body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(200, 136, 10, 0.4);
 }
 
 /* Dark Mode Overrides */
-.dark body, .dark .custom-scrollbar {
+.dark html, .dark body, .dark .custom-scrollbar {
   scrollbar-color: rgba(200, 136, 10, 0.15) transparent;
 }
 
-.dark body::-webkit-scrollbar-thumb, .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+.dark html::-webkit-scrollbar-thumb, .dark body::-webkit-scrollbar-thumb, .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(200, 136, 10, 0.15);
 }
 
@@ -1822,8 +1844,9 @@ html:has(.chat-layout) body {
 }
 
 /* DASHBOARD SHELL */
-html:has(.dashboard-shell), html:has(.dashboard-shell) body { height: 100vh; overflow: hidden; }
-body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+html:has(.dashboard-shell) { height: 100vh; overflow: hidden; }
+html:has(.dashboard-shell) body { min-height: 100vh; }
+body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height: 100%; }
 
 .dashboard-shell {
   position: fixed; top: var(--navbar-height, 85px);
@@ -1853,10 +1876,6 @@ body:has(.gpt-dashboard-shell) nav [class*="text-primary"] {
 
 body:has(.gpt-dashboard-shell) nav [class*="text-on-surface-variant"] {
   color: color-mix(in srgb, var(--foreground) 62%, transparent) !important;
-}
-
-body:has(.gpt-dashboard-shell) footer {
-  display: none;
 }
 
 /* CELESTIAL ANIMATIONS */
@@ -2029,3 +2048,5 @@ html.avatar-theme-pulse body::after {
   .text-\[18px\] { font-size: 25px; }
   .text-\[19px\] { font-size: 27px; }
 }
+
+

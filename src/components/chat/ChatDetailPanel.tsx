@@ -224,7 +224,7 @@ const ChatDetailPanel: React.FC = () => {
             </div>
 
             <div className="flex min-h-0 flex-1 items-center justify-center p-3 sm:p-6">
-              <div className="flex aspect-square w-full max-w-[min(84vw,680px,76dvh)] items-center justify-center rounded-2xl border border-secondary/15 bg-surface/20 p-2">
+              <div className="flex aspect-square w-full max-w-[min(84vw,680px,76dvh)] items-center justify-center rounded-2xl border border-secondary/15 bg-surface/80 p-2">
                 <KundliSvg className="h-full w-full text-secondary opacity-95 brightness-125 contrast-125" />
               </div>
             </div>

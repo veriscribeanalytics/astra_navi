@@ -389,7 +389,7 @@ export default function MatchClient() {
   }
 
   return (
-    <div className="max-w-6xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] mx-auto px-4 pt-12">
+    <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 pt-12">
       {ToastContainer}
 
       {/* Paywall Modal — shown when match is hard-blocked (402) */}

@@ -139,9 +139,9 @@ export default function ProductCard({
       {/* Card body */}
       <div
         className={`relative h-full flex flex-col rounded-[24px] sm:rounded-[28px] overflow-hidden border transition-all duration-500
-          bg-surface/80 backdrop-blur-xl
+          bg-surface/80 backdrop-blur-xl hover:scale-[1.015] hover:-translate-y-1
           ${isHighlighted
-            ? 'border-transparent shadow-2xl shadow-secondary/10'
+            ? 'border-transparent shadow-2xl shadow-secondary/15'
             : isCurrentPlan
               ? 'border-secondary/25 shadow-lg shadow-secondary/5'
               : 'border-outline-variant/15 hover:border-outline-variant/30 shadow-sm hover:shadow-lg'
@@ -272,7 +272,7 @@ export default function ProductCard({
           <button
             onClick={() => onSelect(product)}
             disabled={isCurrentPlan}
-            className={`w-full py-3 sm:py-3.5 lg:py-4 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs lg:text-sm uppercase tracking-[0.12em] sm:tracking-[0.15em] transition-all duration-500 cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2
+            className={`w-full py-3 sm:py-3.5 lg:py-4 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs lg:text-sm uppercase tracking-[0.12em] sm:tracking-[0.15em] transition-all duration-500 cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 relative overflow-hidden group/btn
               ${isCurrentPlan
                 ? 'bg-primary/[0.04] text-primary/25 border border-outline-variant/15 cursor-default'
                 : isHighlighted
@@ -281,6 +281,14 @@ export default function ProductCard({
               }
             `}
           >
+            {isHighlighted && !isCurrentPlan && (
+              <div 
+                className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-[25deg] -translate-x-[150%] pointer-events-none"
+                style={{
+                  animation: 'shimmer-sweep 2.2s infinite ease-in-out',
+                }}
+              />
+            )}
             {isCurrentPlan ? (
               t('plans.currentPlanButton')
             ) : (

@@ -305,7 +305,7 @@ const ConsultClient: React.FC = () => {
   const currentStepIndex = stepsOrder.indexOf(step);
 
   return (
-    <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] mx-auto relative px-4 sm:px-6 h-screen overflow-hidden flex flex-col pb-8">
+    <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto relative px-4 sm:px-6 lg:px-8 h-screen overflow-hidden flex flex-col pb-8">
 
       {/* Paywall Modal — shown when consult is hard-blocked (402) */}
       {paywall && (

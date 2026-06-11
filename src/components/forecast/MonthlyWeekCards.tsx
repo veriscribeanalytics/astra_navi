@@ -5,10 +5,13 @@ import { motion } from 'motion/react';
 import type { MonthlyWeek } from '@/types/forecast';
 import { useTranslation } from '@/hooks';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
+import { ForecastArea } from '@/data/areaThemes';
+import { getAreaPhaseHex } from '@/data/lifeAreaColors';
 
 interface MonthlyWeekCardsProps {
   weeks: MonthlyWeek[];
   colorHex: string;
+  area: ForecastArea;
   selectedWeekStart: string | null;
   onSelect: (startDate: string) => void;
 }
@@ -25,34 +28,35 @@ function formatRange(start: string, end: string, language: string): string {
   return `${sm} ${s.getDate()} – ${em} ${e.getDate()}`;
 }
 
-export default function MonthlyWeekCards({ weeks, colorHex, selectedWeekStart, onSelect }: MonthlyWeekCardsProps) {
+export default function MonthlyWeekCards({ weeks, colorHex, area, selectedWeekStart, onSelect }: MonthlyWeekCardsProps) {
   const { t, language } = useTranslation();
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3 lg:gap-4">
       {weeks.map(week => {
         const isSelected = selectedWeekStart === week.start_date;
-        const isHigh = week.score >= 75;
-        const isLow = week.score <= 45;
+        const phaseColor = getAreaPhaseHex(area, week.score);
 
         return (
           <motion.button
             key={week.start_date}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(week.start_date)}
-            className={`relative flex flex-col items-start gap-2 p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer text-left ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 border-white/5'}`}
+            className={`relative flex flex-col items-start gap-2 p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer text-left ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/80 border-white/5'}`}
             style={{
-              borderColor: isSelected ? colorHex + '50' : undefined,
-              boxShadow: isSelected ? `0 0 32px ${colorHex}25` : undefined,
+              borderColor: isSelected ? colorHex + '50' : phaseColor + '25',
+              boxShadow: isSelected ? `0 0 32px ${colorHex}25` : `0 0 12px ${phaseColor}10`,
             }}
           >
             <span
               className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider"
-              style={{ color: isSelected ? colorHex : 'rgb(var(--color-foreground) / 0.3)' }}
+              style={{ color: isSelected ? colorHex : phaseColor }}
             >
               {t('forecast.weekLabel').replace('{n}', String(week.week_index))}
             </span>
-            <span className={`text-2xl sm:text-3xl font-headline font-bold ${isSelected ? 'text-foreground' : 'text-foreground/50'}`}>
+            <span className={`text-2xl sm:text-3xl font-headline font-bold ${isSelected ? 'text-foreground' : ''}`}
+              style={{ color: isSelected ? undefined : phaseColor }}
+            >
               {week.score}
             </span>
             <div className="w-full h-1 sm:h-1.5 rounded-full overflow-hidden bg-white/5 relative">
@@ -60,7 +64,7 @@ export default function MonthlyWeekCards({ weeks, colorHex, selectedWeekStart, o
                 initial={{ width: 0 }}
                 animate={{ width: `${week.score}%` }}
                 className="absolute inset-0 rounded-full"
-                style={{ backgroundColor: isSelected ? colorHex : isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840' }}
+                style={{ backgroundColor: isSelected ? colorHex : phaseColor }}
               />
             </div>
             <span className="text-[10px] sm:text-[11px] text-foreground/40 font-bold">

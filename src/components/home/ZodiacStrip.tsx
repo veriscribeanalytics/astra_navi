@@ -54,7 +54,7 @@ export default function ZodiacStrip() {
     [rashiItems]);
 
     return (
-        <section className="bg-surface relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full z-20 border-b border-outline-variant/20">
+        <section className="bg-surface relative overflow-hidden h-[60px] sm:h-[72px] flex items-center w-full border-b border-outline-variant/20">
             <div className="absolute inset-0 bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 animate-pulse opacity-50" />
             <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent,rgba(200,136,10,0.1),transparent)] bg-[length:200%_100%] animate-[shimmer_5s_infinite_linear]" />
             <LogoLoop

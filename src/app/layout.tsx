@@ -22,6 +22,7 @@ import { Toaster } from "@/hooks/useToast";
 import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
 import { CookieConsentProvider } from "@/context/CookieConsentContext";
 import CookieConsentBanner from "@/components/privacy/CookieConsentBanner";
+import MobileScrollDamper from "@/components/ui/MobileScrollDamper";
 
 export const metadata: Metadata = {
   title: "AstraNavi | Vedic AI Astrology",
@@ -47,15 +48,30 @@ export default async function RootLayout({
   return (
     <html
       lang={languageCookie}
-      className={`${ALL_FONT_VARIABLES} h-full antialiased ${theme}`}
+      className={`${ALL_FONT_VARIABLES} antialiased ${theme}`}
       suppressHydrationWarning
-      data-scroll-behavior="smooth"
+      
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var seen = sessionStorage.getItem('astranavi_intro_seen_v3');
+                var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                var isLanding = window.location.pathname === '/';
+                var hasSession = document.cookie.indexOf('auth.js.session-token') !== -1 || document.cookie.indexOf('__Secure-auth.js.session-token') !== -1;
+                if (isLanding && !hasSession && seen !== '1' && !reduced) {
+                  document.documentElement.classList.add('intro-playing');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
         <AsyncStylesheet href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       </head>
       <body
@@ -87,6 +103,7 @@ export default async function RootLayout({
                       <ConditionalFooter />
                       <AskNaviFab />
                       <CookieConsentBanner />
+                      <MobileScrollDamper />
                     </CookieConsentProvider>
                   </ThemeProvider>
                   </PaywallProvider>

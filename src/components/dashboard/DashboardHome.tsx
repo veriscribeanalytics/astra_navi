@@ -9,13 +9,12 @@ import {
   AlertTriangle,
   ArrowRight,
   Bell,
-  Briefcase,
   Calendar,
+  ChevronRight,
   Coins,
   Gem,
   Globe,
   Heart,
-  Home,
   Lock,
   MessageSquare,
   Moon,
@@ -42,10 +41,13 @@ import { LOCALE_BY_LANGUAGE } from "@/locales";
 import { clientFetch } from "@/lib/apiClient";
 import { getRashiData } from "@/lib/astrology";
 import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
+import { getAreaColor, getAreaPhaseHex, getAreaPhaseGlow } from "@/data/lifeAreaColors";
 import type { ForecastDay } from "@/components/dashboard/MiniChart";
-import Particles from "@/components/ui/Particles";
+// import Particles from "@/components/ui/Particles";
 import { catmullRomToBezier, catmullRomArea } from "@/utils/chartCurve";
+import { todayISO } from "@/utils/forecastError";
 import type { HoroscopeData } from "@/types/horoscope";
+import DailyHoroscopeCardSkeleton from "@/components/dashboard/DailyHoroscopeCardSkeleton";
 import {
   useFamilyMembers,
   useFamilyConnections,
@@ -124,16 +126,10 @@ function getAreaInsight(horoscope: HoroscopeData | null, area: ForecastArea) {
   return legacy?.areas?.[legacyKey]?.text || areaDescriptions[area];
 }
 
-function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"]) {
-  const rk = transits?.panchanga?.rahukaal;
+function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"], horoscope?: HoroscopeData | null) {
+  const rk = transits?.panchanga?.rahukaal || horoscope?.meta?.panchanga?.rahukaal;
   if (!rk) return "08:34 - 10:25";
   return `${rk.start} - ${rk.end}`;
-}
-
-function getScoreColor(score: number) {
-  if (score >= 75) return "var(--flare-gold)";
-  if (score >= 60) return "var(--secondary)";
-  return "var(--outline-variant)";
 }
 
 function RingScore({ score, size = 132, color }: { score: number; size?: number; color: string }) {
@@ -186,8 +182,8 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
     return () => obs.disconnect();
   }, []);
 
-  const H = 230;
-  const PAD = { top: 26, right: 20, bottom: 44, left: 38 };
+  const H = 180;
+  const PAD = { top: 10, right: 20, bottom: 30, left: 20 };
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
 
@@ -235,9 +231,10 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
       </div>
 
       <svg
-        aria-hidden="true"
+        role="img"
+        aria-label={`Weekly ${areaLabel} forecast chart`}
         viewBox={`0 0 ${W} ${H}`}
-        className="h-[230px] w-full"
+        className="h-[180px] w-full overflow-visible"
       >
         <defs>
           <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
@@ -253,7 +250,7 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
           return (
             <g key={v}>
               <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="1" />
-              <text x={PAD.left - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="var(--on-surface-variant)" opacity="0.4">{v}</text>
+              <text x={PAD.left - 15} y={y + 3.5} textAnchor="end" fontSize="12" fontWeight="700" fill="var(--foreground)" opacity="0.85">{v}</text>
             </g>
           );
         })}
@@ -284,13 +281,13 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
             <g key={i}>
               {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
               <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "var(--surface)"} stroke={colorHex} strokeWidth="2" />
-              <text x={p.x} y={p.y - 11} textAnchor="middle" fontSize="11" fontWeight={isToday ? 700 : 600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.7}>
+              <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.95}>
                 {d.score}
               </text>
-              <text x={p.x} y={H - 24} textAnchor="middle" fontSize="9.5" fontWeight={700} letterSpacing="0.5" fill={isToday ? colorHex : "var(--on-surface-variant)"} opacity={isToday ? undefined : 0.45}>
+              <text x={p.x} y={H - 16} textAnchor="middle" fontSize="12" fontWeight="800" letterSpacing="0.5" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.85}>
                 {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
               </text>
-              <text x={p.x} y={H - 11} textAnchor="middle" fontSize="11" fontWeight={600} fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? undefined : 0.6}>
+              <text x={p.x} y={H - 3} textAnchor="middle" fontSize="13" fontWeight="700" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.95}>
                 {date.getDate()}
               </text>
             </g>
@@ -359,6 +356,18 @@ const formatRelationship = (rel?: string | null): string =>
 const initialOf = (name?: string | null): string => {
   const trimmed = (name ?? "").trim();
   return trimmed ? trimmed[0].toUpperCase() : "?";
+};
+
+const getPlanetImage = (name?: string | null): string => {
+  const n = (name || "").toLowerCase().trim();
+  if (n.includes("sun")) return "/icons/planets/sun.png";
+  if (n.includes("moon")) return "/icons/planets/moon.png";
+  if (n.includes("mars")) return "/icons/planets/mars.png";
+  if (n.includes("mercury")) return "/icons/planets/mercury.png";
+  if (n.includes("jupiter")) return "/icons/planets/jupiter.png";
+  if (n.includes("venus")) return "/icons/planets/venus.png";
+  if (n.includes("saturn")) return "/icons/planets/saturn.png";
+  return "/icons/planets/jupiter.png";
 };
 
 interface FamilyCardActionProps {
@@ -512,12 +521,125 @@ export default function DashboardHome() {
   const [activePaywallData, setActivePaywallData] = useState<PaywallData | null>(null);
   const { data: horoscope, isLoading: horoscopeLoading, profileLocationRequired } = useDailyHoroscope();
   const { data: transits, isLoading: transitsLoading } = useTransitsToday();
-  const { setSelectedAvatarId } = useChat();
+  const { setSelectedAvatarId, avatars } = useChat();
   const [activeArea, setActiveArea] = useState<ForecastArea>("general");
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [forecastLoading, setForecastLoading] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState<ChatPrompt | null>(null);
+  const [isPanchangModalOpen, setIsPanchangModalOpen] = useState(false);
+  const [isRahuKaalModalOpen, setIsRahuKaalModalOpen] = useState(false);
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [isAdviceModalOpen, setIsAdviceModalOpen] = useState(false);
   const hasAnalyzedRef = useRef<string | null>(null);
+
+  const [leftContentHeight, setLeftContentHeight] = useState<number | undefined>(undefined);
+  const [rightContentHeight, setRightContentHeight] = useState<number | undefined>(undefined);
+
+  const leftObserverRef = useRef<ResizeObserver | null>(null);
+  const rightObserverRef = useRef<ResizeObserver | null>(null);
+
+  const leftContentRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (leftObserverRef.current) {
+      leftObserverRef.current.disconnect();
+      leftObserverRef.current = null;
+    }
+    if (node) {
+      const observer = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setLeftContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
+        }
+      });
+      observer.observe(node);
+      leftObserverRef.current = observer;
+    }
+  }, []);
+
+  const rightContentRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (rightObserverRef.current) {
+      rightObserverRef.current.disconnect();
+      rightObserverRef.current = null;
+    }
+    if (node) {
+      const observer = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setRightContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
+        }
+      });
+      observer.observe(node);
+      rightObserverRef.current = observer;
+    }
+  }, []);
+
+  const leftTotalHeight = leftContentHeight !== undefined ? leftContentHeight + 44 : undefined;
+  const rightTotalHeight = rightContentHeight !== undefined ? rightContentHeight + 36 : undefined;
+
+  const commonHeight = (leftTotalHeight !== undefined && rightTotalHeight !== undefined)
+    ? Math.min(leftTotalHeight, rightTotalHeight)
+    : undefined;
+
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    setIsLargeScreen(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  const cardHeightStyle = (isLargeScreen && commonHeight !== undefined)
+    ? { height: `${commonHeight}px` }
+    : undefined;
+
+  const [familyContentHeight, setFamilyContentHeight] = useState<number | undefined>(undefined);
+  const [snapshotContentHeight, setSnapshotContentHeight] = useState<number | undefined>(undefined);
+
+  const familyObserverRef = useRef<ResizeObserver | null>(null);
+  const snapshotObserverRef = useRef<ResizeObserver | null>(null);
+
+  const familyContentRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (familyObserverRef.current) {
+      familyObserverRef.current.disconnect();
+      familyObserverRef.current = null;
+    }
+    if (node) {
+      const observer = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setFamilyContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
+        }
+      });
+      observer.observe(node);
+      familyObserverRef.current = observer;
+    }
+  }, []);
+
+  const snapshotContentRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (snapshotObserverRef.current) {
+      snapshotObserverRef.current.disconnect();
+      snapshotObserverRef.current = null;
+    }
+    if (node) {
+      const observer = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          setSnapshotContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
+        }
+      });
+      observer.observe(node);
+      snapshotObserverRef.current = observer;
+    }
+  }, []);
+
+  const familyTotalHeight = familyContentHeight !== undefined ? familyContentHeight + 48 : undefined;
+  const snapshotTotalHeight = snapshotContentHeight !== undefined ? snapshotContentHeight + 48 : undefined;
+
+  const commonLowerHeight = (familyTotalHeight !== undefined && snapshotTotalHeight !== undefined)
+    ? Math.min(familyTotalHeight, snapshotTotalHeight)
+    : undefined;
+
+  const lowerCardHeightStyle = (isLargeScreen && commonLowerHeight !== undefined)
+    ? { height: `${commonLowerHeight}px` }
+    : undefined;
 
   useEffect(() => {
     if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
@@ -567,11 +689,30 @@ export default function DashboardHome() {
 
   useEffect(() => {
     setForecastLoading(true);
-    clientFetch(`/api/forecast/${activeArea}?days_back=3&days_forward=3&lang=${language}`)
+    const date = todayISO();
+    clientFetch(`/api/forecast/${activeArea}/weekly?date=${date}&lang=${language}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.days)) {
-          setForecast(data);
+          const mappedForecast: ForecastData = {
+            area: data.area as ForecastArea,
+            days: data.days.map((d: any) => ({
+              date: d.date,
+              is_today: d.is_today ?? (d.date === date),
+              score: d.score,
+              text: d.text || "",
+              dominant_planet: d.dominant_planet || "",
+              personalized_alerts: d.alerts || [],
+              transits: d.transits,
+            })),
+            summary: data.summary || {
+              best_day: "",
+              worst_day: "",
+              average_score: 0,
+              trend: "neutral",
+            },
+          };
+          setForecast(mappedForecast);
         } else {
           setForecast(null);
         }
@@ -593,12 +734,15 @@ export default function DashboardHome() {
 
   const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
   const overallScore = horoscope?.score?.overall ?? horoscope?.overall_score ?? 73;
-  const scoreColor = getScoreColor(overallScore);
+  const overallColor = getAreaColor("general", overallScore);
+  const overallPhaseHex = overallColor.main;
+  const overallPhaseGlow = overallColor.glow;
   // Only the *initial* fetch (no data yet) should show skeletons. Once the
   // request settles we render real scores, or the graceful fallback numbers if
   // the backend returned nothing — never the fabricated 73/70 *during* loading
   // (that placeholder-then-real swap is the "wrong data then correct" flash).
   const scoreLoading = horoscopeLoading && !horoscope;
+  const rashiLoading = userLoading || (!user?.moonSign && !user?.sunSign && !user?.lagnaSign);
   const scoreBand = overallScore >= 75
     ? t('newDashboard.todaysEnergy.bandFavorable')
     : overallScore >= 60
@@ -636,12 +780,148 @@ export default function DashboardHome() {
   const antardashaRange = formatDashaRange(kundliStats?.antaStart, kundliStats?.antaEnd);
 
   const activeAreaLabel = resolveAreaLabel(t, activeArea);
+  const activeAreaHex = AREA_THEMES[activeArea].hex;
+  const activeAvatar = useMemo(() => {
+    const AREA_TO_AVATAR_ID: Record<string, string> = {
+      general: "navi",
+      career: "career_mentor",
+      love: "relationship_guide",
+      health: "spiritual_guide",
+      finance: "finance_mentor",
+      spiritual: "astro_sage",
+    };
+
+    const targetId = AREA_TO_AVATAR_ID[activeArea] || "navi";
+    const apiAvatar = avatars?.find((a) => a.avatarId === targetId);
+
+    // Resolves /static/avatars/ paths to the local public /images/avatars/*.jpeg files
+    const getSafeImageUrl = (url?: string, name?: string) => {
+      const defaultName = name || "navi";
+      if (!url) {
+        return `/images/avatars/${defaultName.toUpperCase()}_AVATAR.jpeg`;
+      }
+      if (url.startsWith('/static/avatars/')) {
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+        const basename = filename.substring(0, filename.lastIndexOf('.'));
+        return `/images/avatars/${basename}.jpeg`;
+      }
+      return url;
+    };
+
+    if (apiAvatar) {
+      return {
+        avatarId: apiAvatar.avatarId,
+        name: apiAvatar.name,
+        title: apiAvatar.title || "AI Astrologer",
+        imageUrl: getSafeImageUrl(apiAvatar.imageUrl, apiAvatar.name),
+        desc: apiAvatar.description || `Get personalized guidance for your ${activeAreaLabel.toLowerCase()} journey`,
+      };
+    }
+
+    switch (activeArea) {
+      case "career":
+        return {
+          avatarId: "career_mentor",
+          name: "Arya",
+          title: "Career Mentor",
+          imageUrl: "/images/avatars/ARYA_AVATAR.jpeg",
+          desc: "Get personalized guidance for your career path",
+        };
+      case "love":
+        return {
+          avatarId: "relationship_guide",
+          name: "Meera",
+          title: "Relationship Guide",
+          imageUrl: "/images/avatars/MEERA_AVATAR.jpeg",
+          desc: "Get personalized guidance for your relationships",
+        };
+      case "finance":
+        return {
+          avatarId: "finance_mentor",
+          name: "Vidya",
+          title: "Finance Mentor",
+          imageUrl: "/images/avatars/VIDYA_AVATAR.jpeg",
+          desc: "Get personalized guidance for your wealth and assets",
+        };
+      case "health":
+        return {
+          avatarId: "spiritual_guide",
+          name: "Anand",
+          title: "Health Guide",
+          imageUrl: "/images/avatars/ANAND_AVATAR.jpeg",
+          desc: "Get personalized guidance for your health and vitality",
+        };
+      case "spiritual":
+        return {
+          avatarId: "astro_sage",
+          name: "Rishi",
+          title: "Deep Chart Sage",
+          imageUrl: "/images/avatars/RISHI_AVATAR.jpeg",
+          desc: "Get personalized guidance for your spiritual growth",
+        };
+      case "general":
+      default:
+        return {
+          avatarId: "navi",
+          name: "Navi",
+          title: "General Vedic Guide",
+          imageUrl: "/images/avatars/NAVI_AVATAR.jpeg",
+          desc: "Get personalized guidance for your overall journey",
+        };
+    }
+  }, [activeArea, avatars, activeAreaLabel]);
   const bestDay = useMemo(() => {
     const day = forecast?.days?.reduce<ForecastDay | null>((best, item) => (!best || item.score > best.score ? item : best), null);
     if (!day) return "Thu 74";
     const label = new Date(day.date + "T00:00:00").toLocaleDateString(LOCALE_BY_LANGUAGE[language] || "en-IN", { weekday: "short" });
     return `${label} ${day.score}`;
   }, [forecast, language]);
+
+  const activeTrigger = useMemo(() => {
+    if (!horoscope?.time_triggers || horoscope.time_triggers.length === 0) return null;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const parseTimeToMinutes = (timeStr: string) => {
+      const [h, m] = timeStr.split(":").map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
+    const currentTriggers = horoscope.time_triggers.filter((trigger) => {
+      const startMin = parseTimeToMinutes(trigger.start);
+      const endMin = parseTimeToMinutes(trigger.end);
+      return currentMinutes >= startMin && currentMinutes <= endMin;
+    });
+
+    if (currentTriggers.length > 0) {
+      return currentTriggers[0];
+    }
+
+    const upcomingTriggers = horoscope.time_triggers
+      .filter((trigger) => {
+        const startMin = parseTimeToMinutes(trigger.start);
+        return currentMinutes < startMin;
+      })
+      .sort((a, b) => parseTimeToMinutes(a.start) - parseTimeToMinutes(b.start));
+
+    if (upcomingTriggers.length > 0) {
+      return upcomingTriggers[0];
+    }
+
+    return null;
+  }, [horoscope?.time_triggers]);
+
+  const isRahuKaalEnded = useMemo(() => {
+    const rk = transits?.panchanga?.rahukaal || horoscope?.meta?.panchanga?.rahukaal;
+    if (!rk || !rk.end) return false;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const [h, m] = rk.end.split(":").map(Number);
+    const endMinutes = (h || 0) * 60 + (m || 0);
+
+    return currentMinutes > endMinutes;
+  }, [transits, horoscope]);
 
   const askInChat = useCallback((title: string, message: string) => {
     setPendingPrompt({ title, message });
@@ -654,13 +934,43 @@ export default function DashboardHome() {
     router.push("/chat");
   }, [pendingPrompt, router]);
 
-  const lifeAreas = AREA_LIST.map((area) => ({
-    area,
-    label: resolveAreaLabel(t, area),
-    score: getAreaScore(horoscope, area),
-    insight: getAreaInsight(horoscope, area),
-    theme: AREA_THEMES[area],
-  }));
+  const lifeAreas = useMemo(() => {
+    const mapped = AREA_LIST.map((area) => ({
+      area,
+      label: resolveAreaLabel(t, area),
+      score: getAreaScore(horoscope, area),
+      insight: getAreaInsight(horoscope, area),
+      theme: AREA_THEMES[area],
+    }));
+
+    const generalItem = mapped.find((item) => item.area === "general");
+    const otherItems = mapped
+      .filter((item) => item.area !== "general")
+      .sort((a, b) => b.score - a.score);
+
+    return generalItem ? [generalItem, ...otherItems] : otherItems;
+  }, [horoscope, t]);
+
+  const activeAreaInsight = useMemo(() => {
+    const rawInsight = getAreaInsight(horoscope, activeArea);
+    if (!rawInsight) return "";
+    const dotIndex = rawInsight.indexOf(".");
+    if (dotIndex === -1) return rawInsight;
+    return rawInsight.substring(0, dotIndex + 1);
+  }, [horoscope, activeArea]);
+
+  const activeAreaNotes = useMemo(() => {
+    if (activeArea === "general") {
+      return horoscope?.current_state?.derived_from || [];
+    }
+    const notes = horoscope?.areas_text?.[activeArea as keyof typeof horoscope.areas_text]?.personal_notes;
+    return Array.isArray(notes) ? notes : [];
+  }, [horoscope, activeArea]);
+
+  const activeAreaTone = useMemo(() => {
+    if (activeArea === "general") return "neutral";
+    return horoscope?.areas_text?.[activeArea as keyof typeof horoscope.areas_text]?.tone || "neutral";
+  }, [horoscope, activeArea]);
 
   const topLifeArea = [...lifeAreas].sort((a, b) => b.score - a.score)[0];
   const rawHeadline =
@@ -670,16 +980,6 @@ export default function DashboardHome() {
     rawHeadline === "Your current planetary period is on your side - act on the bigger plan now."
       ? t('newDashboard.todaysEnergy.defaultHeadline')
       : rawHeadline;
-
-  const rawSubtitle =
-    (typeof horoscope?.tip === "string"
-      ? horoscope.tip
-      : horoscope?.tip?.text) ||
-    "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose.";
-  const subtitle =
-    rawSubtitle === "This is a powerful window to build momentum, make thoughtful moves, and align with your greater purpose."
-      ? t('newDashboard.todaysEnergy.defaultSubtitle')
-      : rawSubtitle;
 
   if (profileLocationRequired && !horoscope) {
     return (
@@ -704,472 +1004,659 @@ export default function DashboardHome() {
   }
 
   return (
-    <div className="gpt-dashboard-shell safe-bottom-buffer relative min-h-[calc(100dvh-var(--navbar-height,64px)-100px)] overflow-x-hidden bg-background text-foreground">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,color-mix(in_srgb,var(--secondary)_38%,transparent),transparent_28%),radial-gradient(circle_at_88%_12%,color-mix(in_srgb,var(--accent)_38%,transparent),transparent_34%),linear-gradient(180deg,var(--surface)_0%,var(--background)_48%,var(--surface)_100%)]" />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-80">
-        <Particles
-          particleCount={260}
-          particleColors={["var(--flare-gold)", "var(--foreground)", "var(--flare-lavender)"]}
-          particleBaseSize={70}
-          particleSpread={11}
-          speed={0.08}
-          alphaParticles
-          disableRotation={false}
-        />
-      </div>
+    <div className="gpt-dashboard-shell safe-bottom-buffer relative min-h-[calc(100dvh-var(--navbar-height,64px)-100px)] overflow-x-hidden bg-transparent text-foreground">
+      {/* Custom local background particles and gradients removed to follow the global layout background */}
 
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-6 sm:px-8 lg:px-10 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
-        <header className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
-          <div>
-            <div className="flex flex-wrap items-center gap-3 label-sm tracking-[0.24em] text-foreground/58">
-              <span aria-hidden="true" className="h-px w-12 bg-secondary/50" />
-              <span>{currentDate}</span>
-              {paywallLoaded && (
-                <Link href="/plans" className="inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1.5 tracking-normal text-secondary">
-                  <Wallet className="h-3.5 w-3.5" />
-                  <span className="text-sm font-black">{totalCredits ?? 0}</span>
-                  <span className="text-[10px] uppercase text-foreground/40">{t('plans.naviCredits')}</span>
-                  <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] uppercase text-secondary">{getTierLabel(tier || "free")}</span>
-                </Link>
-              )}
+      <div className="relative z-10 mx-auto max-w-[1760px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
+        <header className="mb-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_580px] xl:items-center">
+          {/* Column 1: Left Column with 2 Rows */}
+          <div className="flex flex-col gap-2 w-full">
+            {/* Row 1: Date/Panchang & Career Score */}
+            <div className="flex flex-wrap items-center justify-start gap-x-8 gap-y-2 w-full pb-1">
+              <div className="flex flex-wrap items-center gap-3 label-sm tracking-[0.24em] text-foreground/58">
+                <span aria-hidden="true" className="h-px w-12 bg-secondary/50" />
+                <span>{currentDate}</span>
+                <span>•</span>
+                <button
+                  onClick={() => setIsPanchangModalOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-full border border-secondary/35 bg-secondary/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-secondary hover:bg-secondary/20 hover:border-secondary/50 transition cursor-pointer active:scale-95 shrink-0"
+                >
+                  <Calendar className="h-3 w-3 text-secondary shrink-0" />
+                  <span>{t('newDashboard.panchang.title')}</span>
+                  <ChevronRight className="h-3 w-3 text-secondary shrink-0" />
+                </button>
+              </div>
+              <div>
+                {scoreLoading ? (
+                  <div className="h-5 w-64 animate-pulse rounded bg-surface-variant/[0.06]" />
+                ) : topLifeArea && (
+                  <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Star className="h-4 w-4 fill-secondary text-secondary" />
+                    {topLifeArea.score >= 80
+                      ? <>{topLifeArea.label} {t('newDashboard.todaysEnergy.topAreaStrongest')} <span className="font-black text-emerald-400">{topLifeArea.score}%</span></>
+                      : <>{t('newDashboard.todaysEnergy.topAreaFocus')}: <span className="font-black" style={{ color: AREA_THEMES[topLifeArea.area].hex }}>{topLifeArea.label}</span> · <span className="font-black text-emerald-400">{topLifeArea.score}%</span></>
+                    }
+                  </p>
+                )}
+              </div>
             </div>
-            <h1 className="mt-4 font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px] 3xl:text-[56px]">
-              {greeting},{" "}
-              <span className="bg-gradient-to-r from-[var(--flare-gold)] via-secondary to-[var(--secondary)] bg-clip-text text-transparent">
-                {userLoading ? "..." : userName}
-              </span>
-            </h1>
-            {scoreLoading ? (
-              <div className="mt-2 h-5 w-64 animate-pulse rounded bg-surface-variant/[0.06]" />
-            ) : topLifeArea && (
-              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Star className="h-4 w-4 fill-secondary text-secondary" />
-                {t('newDashboard.todaysEnergy.scoreImpressive', { label: topLifeArea.label })} <span className="font-black text-emerald-400">{topLifeArea.score}%</span>
-              </p>
-            )}
+
+            {/* Row 2: Greeting */}
+            <div className="w-full">
+              <h1 className="font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px] 3xl:text-[56px]">
+                {greeting},{" "}
+                <span className="bg-gradient-to-r from-[var(--flare-gold)] via-secondary to-[var(--secondary)] bg-clip-text text-transparent">
+                  {userLoading ? "..." : userName}
+                </span>
+              </h1>
+            </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {[
-              { label: t('dashboard.moonSign'), data: moonSign, fallback: "Leo" },
-              { label: t('dashboard.sunSign'), data: sunSign, fallback: "Libra" },
-              { label: t('dashboard.ascendant'), data: ascendantSign, fallback: "Leo" },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.data?.id ? `/rashis?sign=${item.data.id}` : "/rashis"}
-                aria-label={`${item.label}: ${item.data?.name || item.fallback}`}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-outline-variant/12 bg-surface-variant/[0.035] px-2 py-3 text-center transition hover:border-secondary/40 hover:bg-secondary/8 sm:min-w-[185px] sm:flex-row sm:gap-4 sm:px-4 sm:text-left"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-secondary/25 bg-background sm:h-[58px] sm:w-[58px]">
-                  {item.data?.icon ? (
-                    <Image src={item.data.icon} alt={item.data.name} width={34} height={34} className="h-7 w-7 object-contain sm:h-9 sm:w-9" />
-                  ) : (
-                    <Sparkles className="h-5 w-5 text-secondary sm:h-6 sm:w-6" />
-                  )}
+          {/* Column 2: Right Column with Rashis Grid */}
+          <div className="grid grid-cols-3 gap-3 w-full sm:min-w-[360px] xl:max-w-[580px]">
+            {rashiLoading ? (
+              [1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-1 rounded-xl border border-outline-variant/12 bg-surface-variant/[0.035] px-1.5 py-1 text-center sm:min-w-[110px] sm:flex-row sm:gap-2.5 sm:px-2.5 sm:text-left animate-pulse"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-variant/20 sm:h-[38px] sm:w-[38px]" />
+                  <div className="min-w-0 space-y-1 flex-1">
+                    <div className="h-1 w-8 rounded bg-surface-variant/20" />
+                    <div className="h-2.5 w-12 rounded bg-surface-variant/20" />
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-foreground/55 sm:text-[11px] sm:tracking-[0.22em]">{item.label}</p>
-                  <p className="mt-0.5 truncate font-headline text-sm font-bold text-foreground sm:mt-1 sm:text-lg">{item.data?.name || item.fallback}</p>
-                </div>
-              </Link>
-            ))}
+              ))
+            ) : (
+              [
+                { label: t('dashboard.moonSign'), data: moonSign, fallback: "Leo" },
+                { label: t('dashboard.sunSign'), data: sunSign, fallback: "Libra" },
+                { label: t('dashboard.ascendant'), data: ascendantSign, fallback: "Leo" },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.data?.id ? `/rashis?sign=${item.data.id}` : "/rashis"}
+                  aria-label={`${item.label}: ${item.data?.name || item.fallback}`}
+                  className="group flex flex-col items-center gap-1 rounded-xl border border-outline-variant/12 bg-surface-variant/[0.035] px-1.5 py-1 text-center transition hover:border-secondary/40 hover:bg-secondary/8 sm:min-w-[110px] sm:flex-row sm:gap-2.5 sm:px-2.5 sm:text-left"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary/25 bg-background sm:h-[38px] sm:w-[38px]">
+                    {item.data?.icon ? (
+                      <Image src={item.data.icon} alt={item.data.name} width={24} height={24} className="h-5.5 w-5.5 object-contain sm:h-6.5 sm:w-6.5" />
+                    ) : (
+                      <Sparkles className="h-3 w-3 text-secondary sm:h-4 sm:w-4" />
+                    )}
+                  </div>
+                  <div className="min-w-0 leading-tight">
+                    <p className="text-[7px] font-black uppercase tracking-[0.12em] text-foreground/50 sm:text-[8.5px]">{item.label}</p>
+                    <p className="mt-0.5 truncate font-headline text-xs font-bold text-foreground sm:text-[14.5px]">{item.data?.name || item.fallback}</p>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </header>
 
-        <div className="grid gap-5 2xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <div className="space-y-5">
-            <DarkPanel className="p-5 sm:p-7">
-              <div className="grid gap-6 lg:grid-cols-[170px_minmax(0,1fr)_190px] lg:items-center">
-                <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-                  <p className="label-secondary font-black tracking-[0.2em]">{t('newDashboard.todaysEnergy.title')}</p>
-                  {scoreLoading ? (
-                    <>
-                      <div className="mt-5 h-[132px] w-[132px] shrink-0 animate-pulse rounded-full bg-surface-variant/[0.06]" />
-                      <div className="mt-4 h-7 w-28 animate-pulse rounded-full bg-surface-variant/[0.06]" />
-                    </>
-                  ) : (
-                    <>
-                      <div className="mt-5">
-                        <RingScore score={overallScore} color={scoreColor} />
-                      </div>
-                      <span
-                        className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
-                        style={{ color: scoreColor, backgroundColor: `${scoreColor}1f` }}
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: scoreColor }} />
-                        {scoreBand}
-                      </span>
-                    </>
+        {scoreLoading ? (
+          <DailyHoroscopeCardSkeleton />
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-start relative z-10">
+            {/* Left Card: Your Day Today */}
+            <DarkPanel 
+              className="py-4.5 px-4 sm:py-5.5 sm:px-5 flex flex-col gap-4 overflow-y-auto pr-1"
+              style={cardHeightStyle}
+            >
+              <div ref={leftContentRef} className="flex flex-col gap-4 w-full">
+              {/* Combined Header */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-1">
+                <div>
+                  <h2 className="text-xl font-headline font-bold text-foreground">
+                    Your Day Today
+                  </h2>
+                </div>
+                
+                {/* Lucky items & Mood - smaller than header */}
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-foreground/70 justify-center md:justify-end">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-variant/70 px-2.5 py-1">
+                    <span className="h-2 w-2 rounded-full bg-gradient-to-br from-purple-400 to-purple-700" />
+                    {t('newDashboard.cosmicInsight.luckyColor')}: {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-variant/70 px-2.5 py-1">
+                    <Star className="h-3 w-3 text-secondary" />
+                    {t('newDashboard.cosmicInsight.luckyNumber')}: {(horoscope?.lucky?.number ?? horoscope?.lucky_number) ?? "7"}
+                  </span>
+                  {horoscope?.mood && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-variant/70 px-2.5 py-1">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                      Cosmic Mood: {typeof horoscope.mood === 'object' ? horoscope.mood.value : horoscope.mood}
+                    </span>
                   )}
                 </div>
-
-                <div>
-                  <h2 className="font-headline text-2xl font-bold leading-snug sm:text-[28px] 3xl:text-[38px]">{headline}</h2>
-                  <p className="mt-3 max-w-2xl text-base leading-7 text-foreground/62">{subtitle}</p>
-                </div>
-
-                <div className="hidden justify-center lg:flex">
-                  <Image src="/images/lotus.svg" alt="" width={180} height={130} className="drop-shadow-[0_0_30px_rgba(168,85,247,0.45)]" />
-                </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                {[
-                  { label: moonSign?.name || "Leo", icon: <Orbit className="h-4 w-4" /> },
-                  { label: `${ascendantSign?.name || "Leo"} ${t('newDashboard.todaysEnergy.rising')}`, icon: <Moon className="h-4 w-4" /> },
-                  { label: transits?.panchanga?.tithi || "Purnima", prefix: t('newDashboard.panchang.tithi') },
-                  { label: transits?.panchanga?.nakshatra || "Anuradha", prefix: t('newDashboard.panchang.nakshatra') },
-                ].map((chip) => (
-                  <div key={`${chip.prefix || chip.label}-${chip.label}`} className="inline-flex items-center gap-2 rounded-full bg-surface-variant/70 px-4 py-2 text-sm font-bold text-foreground">
-                    {"icon" in chip && chip.icon}
-                    {"prefix" in chip && <span className="text-[11px] uppercase tracking-[0.18em] text-foreground/45">{chip.prefix}</span>}
-                    <span>{chip.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-5">
-                  <div className="flex items-start gap-4">
-                    <Sun className="h-8 w-8 shrink-0 text-emerald-400" />
-                    <div>
-                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-emerald-400">{t('newDashboard.todaysEnergy.goodTime')}</p>
-                      <p className="mt-2 text-lg font-bold">19:00 - 20:00</p>
-                      <p className="mt-1 text-sm leading-6 text-foreground/58">{t('newDashboard.todaysEnergy.goodTimeDesc')}</p>
+              {/* Left Side Content */}
+              <div className="flex-grow flex flex-col gap-3">
+                {/* 3-column Grid for Ratings, Advice, Lotus */}
+                <div className="grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)_190px] lg:items-stretch">
+                  {/* Ratings Card */}
+                  <div className="flex flex-col items-center text-center lg:items-start lg:text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full justify-center">
+                    <p className="label-secondary font-black tracking-[0.2em]">{t('newDashboard.todaysEnergy.title')}</p>
+                    <div className="mt-3">
+                      <RingScore score={overallScore} color={overallPhaseHex} />
                     </div>
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-5">
-                  <div className="flex items-start gap-4">
-                    <AlertTriangle className="h-8 w-8 shrink-0 fill-amber-400/15 text-amber-400" />
-                    <div>
-                      <p className="text-[12px] font-black uppercase tracking-[0.2em] text-amber-400">
-                        {`${t('newDashboard.panchang.rahuKaal')} / ${t('newDashboard.todaysEnergy.alertTime')}`}
-                      </p>
-                      <p className="mt-2 text-lg font-bold">{formatRahuKaal(transits)}</p>
-                      <p className="mt-1 text-sm leading-6 text-foreground/58">{t('newDashboard.todaysEnergy.cautionTimeDesc')}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <button
-                  onClick={() => askInChat(t('newDashboard.todaysEnergy.aiChat'), t('newDashboard.todaysEnergy.explainMsg', { score: overallScore }))}
-                  className="rounded-full border border-secondary/60 px-5 py-3 text-sm font-black uppercase tracking-wider text-secondary transition hover:bg-secondary/10"
-                >
-                  {t('newDashboard.todaysEnergy.aiChat')}
-                </button>
-                <Link
-                  href="/horoscope/forecast"
-                  className="rounded-full bg-gradient-to-r from-[var(--secondary)] via-[var(--flare-gold)] to-[var(--secondary)] px-5 py-3 text-center text-sm font-black uppercase tracking-wider text-on-primary transition hover:brightness-110"
-                >
-                  {t('newDashboard.todaysEnergy.fullReading')}
-                </Link>
-              </div>
-            </DarkPanel>
-
-            <section className="space-y-3">
-              <h2 className="text-[14px] font-bold uppercase tracking-[0.22em] text-foreground/70">{t('newDashboard.lifeAreas.title')}</h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-                {scoreLoading
-                  ? AREA_LIST.map((area) => (
-                      <div key={area} className="rounded-2xl border border-outline-variant/10 bg-surface/78 p-4 text-center">
-                        <div className="mx-auto h-20 w-20 animate-pulse rounded-full bg-surface-variant/[0.06]" />
-                        <div className="mx-auto mt-3 h-5 w-16 animate-pulse rounded bg-surface-variant/[0.06]" />
-                        <div className="mx-auto mt-2 h-3 w-full animate-pulse rounded bg-surface-variant/[0.06]" />
-                      </div>
-                    ))
-                  : lifeAreas.map(({ area, label, score, insight, theme }) => {
-                  const Icon = theme.icon;
-                  const color = getScoreColor(score);
-                  const isLucide = area === "general" || area === "spiritual";
-                  return (
-                    <Link
-                      key={area}
-                      href={`/horoscope/forecast?area=${area}`}
-                      className="group rounded-2xl border border-outline-variant/10 bg-surface/78 p-4 text-center transition hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-variant"
+                    <span
+                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
+                      style={{ color: overallPhaseHex, backgroundColor: `${overallPhaseGlow}1f` }}
                     >
-                      <AreaRing score={score} color={color} label={label}>
-                        <span
-                          className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
-                          style={{ color }}
-                        >
-                          <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
-                        </span>
-                        <span className="text-base font-black leading-none tabular-nums" style={{ color }}>
-                          {score}
-                        </span>
-                      </AreaRing>
-                      <p className="mt-3 font-headline text-lg font-bold">{label}</p>
-                      <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-foreground/58">{insight}</p>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: overallPhaseHex }} />
+                      {scoreBand}
+                    </span>
+                  </div>
 
-            <DarkPanel className="grid gap-4 p-5 md:grid-cols-[160px_1fr_1fr_1fr_1fr]">
-              <div className="flex items-center gap-3">
-                <Sparkles className="h-8 w-8 text-secondary" />
-                <div>
-                  <p className="label-sm font-black tracking-[0.16em]">{t('newDashboard.celestial')}</p>
-                  <p className="label-sm font-black tracking-[0.16em]">{t('newDashboard.insights')}</p>
-                </div>
-              </div>
-              {(transits?.notableTransits?.length ? transits.notableTransits : [
-                t('newDashboard.notableTransits.jupiter'),
-                t('newDashboard.notableTransits.saturn'),
-                t('newDashboard.notableTransits.rahu'),
-                t('newDashboard.notableTransits.ketu'),
-              ]).slice(0, 4).map((item, idx) => (
-                <p key={idx} className="border-outline-variant/10 text-sm leading-6 text-foreground/65 md:border-l md:pl-5">
-                  <span aria-hidden="true" className="mr-2 text-secondary">•</span>
-                  {item}
-                </p>
-              ))}
-            </DarkPanel>
-          </div>
+                  {/* Advice Card */}
+                  <div className="space-y-3 bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full flex flex-col justify-center text-left">
+                    <h2 className="font-headline text-lg font-bold leading-snug sm:text-xl">{headline}</h2>
+                    {horoscope?.current_state?.advice_now && (
+                      <button
+                        onClick={() => setIsAdviceModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors cursor-pointer text-left w-fit"
+                      >
+                        Today's Advice for You <ArrowRight className="inline h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-1">
-            <div className="space-y-5">
-              <DarkPanel className="p-5">
-                <div className="mb-4 flex items-center justify-between gap-4">
-                  <h2 className="text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.weeklyChart.title')}</h2>
-                  <p className="label-secondary font-black">{t('newDashboard.weeklyChart.best')}: {bestDay}</p>
-                </div>
-                <div className="mb-5 overflow-x-auto">
-                  <div className="flex min-w-max gap-2">
-                    {AREA_LIST.map((area) => {
-                      const theme = AREA_THEMES[area];
-                      const Icon = theme.icon;
-                      const isLucide = area === "general" || area === "spiritual";
-                      const selected = activeArea === area;
-                      return (
-                        <button
-                          key={area}
-                          aria-pressed={selected}
-                          aria-label={resolveAreaLabel(t, area)}
-                          onClick={() => setActiveArea(area)}
-                          className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                            selected
-                              ? "border-secondary/45 bg-secondary/12 text-secondary"
-                              : "border-outline-variant/10 bg-surface-variant/[0.025] text-foreground/70 hover:border-outline-variant/20"
-                          }`}
-                        >
-                          <Icon className={isLucide ? "h-4 w-4 fill-current" : "h-4 w-4 object-cover"} />
-                          {resolveAreaLabel(t, area)}
-                        </button>
-                      );
-                    })}
+                  {/* Lotus Card */}
+                  <div className="hidden justify-center lg:flex items-center bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full">
+                    <Image src="/images/lotus.svg" alt="" width={130} height={90} className="drop-shadow-[0_0_30px_rgba(168,85,247,0.45)]" />
                   </div>
                 </div>
-                <div className={`relative rounded-2xl overflow-hidden ${
-                  isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope')
-                    ? 'min-h-[320px]'
-                    : 'min-h-[230px]'
-                }`}>
-                  {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
-                    <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
-                  ) : forecastLoading || !forecast ? (
-                    <div className="h-[230px] animate-pulse rounded-2xl bg-surface-variant/[0.04]" />
-                  ) : (
-                    <WeeklyOutlookChart days={forecast.days} colorHex={AREA_THEMES[activeArea].hex} areaLabel={resolveAreaLabel(t, activeArea)} />
-                  )}
-                </div>
-              </DarkPanel>
 
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] min-[2560px]:grid-cols-[minmax(0,1fr)_480px]">
-                <div className="space-y-5">
-                  <DarkPanel className="p-5">
-                    <h2 className="mb-4 text-[14px] font-black uppercase tracking-[0.22em]">{t('newDashboard.panchang.title')}</h2>
-                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                      {[
-                        { label: t('newDashboard.panchang.tithi'), value: transits?.panchanga?.tithi || "Purnima", icon: <Moon className="h-4 w-4 text-secondary" /> },
-                        { label: t('newDashboard.panchang.vara'), value: transits?.panchanga?.vara || "Shanivaar", icon: <Calendar className="h-4 w-4 text-amber-500" /> },
-                        { label: t('newDashboard.panchang.nakshatra'), value: transits?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-4 w-4 text-emerald-400" /> },
-                        { label: t('newDashboard.panchang.yoga'), value: transits?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-4 w-4 text-violet-400" /> },
-                        { label: t('newDashboard.panchang.karana'), value: transits?.panchanga?.karana || "Vishti", icon: <Gem className="h-4 w-4 text-rose-400" /> },
-                        { label: t('newDashboard.panchang.rahuKaal'), value: formatRahuKaal(transits), icon: <AlertTriangle className="h-4 w-4 text-secondary" /> },
-                      ].map((chip) => (
-                        <div key={chip.label} className="flex min-h-[82px] flex-col items-center justify-between rounded-xl border border-outline-variant/10 bg-surface-variant/[0.025] p-2 text-center">
-                          {chip.icon}
-                          <p className="label-sm text-[9px] tracking-[0.14em] text-foreground/45">{chip.label}</p>
-                          <p className="w-full truncate 3xl:whitespace-normal font-headline text-[12px] font-bold">{chip.value}</p>
+                {/* Good Time & Rahu Kaal Cards */}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left">
+                    <div className="flex items-start gap-4 w-full">
+                      <Sun className="h-8 w-8 shrink-0 text-emerald-400" />
+                      <div className="flex-grow min-w-0">
+                        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-emerald-400 mb-2">{t('newDashboard.todaysEnergy.goodTime')}</p>
+                        {activeTrigger ? (
+                          <div className="space-y-3">
+                            <div>
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="font-bold text-sm text-foreground">{activeTrigger.label}</span>
+                                <span className="text-[11px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full shrink-0">{activeTrigger.start} - {activeTrigger.end}</span>
+                              </div>
+                              <p className="mt-1 text-xs text-foreground/58 leading-normal">{activeTrigger.advice}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="mt-2 text-lg font-bold">19:00 - 20:00</p>
+                            <p className="mt-1 text-sm leading-6 text-foreground/58">{t('newDashboard.todaysEnergy.goodTimeDesc')}</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left">
+                    <div className="flex items-start gap-4 w-full">
+                      <AlertTriangle className="h-8 w-8 shrink-0 fill-amber-400/15 text-amber-400" />
+                      <div className="flex-grow min-w-0">
+                        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-amber-400 mb-2">
+                          {`${t('newDashboard.panchang.rahuKaal')} / ${t('newDashboard.todaysEnergy.alertTime')}`}
+                        </p>
+                        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                          <span className="font-bold text-sm text-foreground">{t('newDashboard.panchang.rahuKaal')}</span>
+                          <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 ${
+                            isRahuKaalEnded
+                              ? "text-foreground/40 bg-surface-variant/20"
+                              : "text-red-500 bg-red-500/10"
+                          }`}>
+                            {formatRahuKaal(transits, horoscope)}
+                          </span>
                         </div>
-                      ))}
+                        {horoscope?.alerts?.secondary && horoscope.alerts.secondary.length > 0 ? (
+                          <div className="mt-3">
+                            <button
+                              onClick={() => setIsRahuKaalModalOpen(true)}
+                              className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>View Details</span>
+                              <ChevronRight className="h-3.5 w-3.5 text-secondary shrink-0" />
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-xs text-foreground/58 leading-normal">{t('newDashboard.todaysEnergy.cautionTimeDesc')}</p>
+                        )}
+                      </div>
                     </div>
-                  </DarkPanel>
+                  </div>
+                </div>
 
-                  <DarkPanel className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-500/20">
-                        <Heart className="h-7 w-7 fill-violet-400/20 text-violet-400" />
+                {/* AI Astrologers Section */}
+                <div className="space-y-3 mt-auto pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1.3fr] items-stretch gap-3 w-full">
+                    {/* Left Card: Choose from AI Astrologers */}
+                    <button
+                      onClick={() => {
+                        if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
+                          setActivePaywallData(getFeaturePaywall('chat_message')!);
+                          return;
+                        }
+                        localStorage.removeItem("astranavi_pending_message");
+                        router.push("/chat");
+                      }}
+                      className="w-full flex items-center gap-3 rounded-2xl border border-purple-500/30 bg-purple-950/10 py-3 px-4 text-left hover:bg-purple-950/20 transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
+                        <Sparkles className="h-5 w-5" />
                       </div>
-                      <div>
-                        <h3 className="text-[14px] font-black uppercase tracking-[0.16em]">{t('newDashboard.compatibility.title')}</h3>
-                        <p className="mt-1 max-w-lg text-sm leading-6 text-foreground/58">{t('newDashboard.compatibility.desc')}</p>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-black uppercase tracking-[0.15em] text-purple-400">
+                          CHOOSE FROM AI ASTROLOGERS
+                        </h4>
+                        <p className="text-[11px] text-foreground/50 mt-0.5 whitespace-nowrap">
+                          Browse and select your personal guide
+                        </p>
                       </div>
-                    </div>
-                    <Link href="/kundli/match" className="rounded-xl bg-secondary px-5 py-3 text-center text-sm font-black uppercase text-on-primary">
-                      {t('newDashboard.compatibility.emptyCta')}
-                    </Link>
-                  </DarkPanel>
+                    </button>
 
-                  {/* DAILY COSMIC INSIGHT */}
-                  <DarkPanel className="p-6">
-                    <div className="mb-5 flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <Sun className="h-5 w-5 text-secondary" />
-                        <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.cosmicInsight.title')}</h3>
-                      </div>
-                      <span className="shrink-0 label-secondary text-[10px]">
-                        {t('horoscope.today')} • {horoscope?.meta?.date_display || horoscope?.date_display || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {/* OR Separator Column */}
+                    <div className="flex items-center justify-center py-1 md:py-0">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#18122B] border border-white/20 text-[9px] font-black text-foreground/60 shadow-lg">
+                        OR
                       </span>
                     </div>
-                    <div className="relative mb-6 px-2 py-3">
-                      <span aria-hidden="true" className="absolute -left-2 -top-3 select-none font-serif text-[56px] leading-none text-secondary">&ldquo;</span>
-                      <p className="relative px-6 text-[13px] leading-relaxed text-foreground/75">
-                        {(typeof horoscope?.tip === 'object' ? horoscope.tip?.text : horoscope?.tip) || "A day to align your actions with your higher purpose. Trust the timing of the universe and take one step forward with clarity."}
-                      </p>
-                      <span aria-hidden="true" className="absolute -bottom-6 -right-2 select-none font-serif text-[56px] leading-none text-secondary">&rdquo;</span>
-                    </div>
-                    <div className="mt-8 grid grid-cols-2 gap-3">
-                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-3 text-center sm:text-left min-w-0 w-full">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
-                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-700 shadow-[0_0_16px_rgba(168,85,247,0.6)]" />
+
+                    {/* Right Card: Ask Navi / Arya / Meera / Anand / Vidya / Rishi */}
+                    <button
+                      onClick={() => {
+                        if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
+                          setActivePaywallData(getFeaturePaywall('chat_message')!);
+                          return;
+                        }
+                        setSelectedAvatarId(activeAvatar.avatarId);
+                        localStorage.setItem(
+                          "astranavi_pending_message",
+                          `I want to consult with ${activeAvatar.name} about my ${activeAreaLabel.toLowerCase()} area.`
+                        );
+                        router.push("/chat");
+                      }}
+                      className="w-full flex items-center justify-between gap-3 rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left hover:bg-white/[0.02] transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white/10">
+                          <Image
+                             src={activeAvatar.imageUrl}
+                             alt={activeAvatar.name}
+                             fill
+                             className="object-cover"
+                           />
                         </div>
-                        <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
-                          <p className="label-sm text-[9px] tracking-wider text-foreground/35">{t('newDashboard.cosmicInsight.luckyColor')}</p>
-                          <p className="font-headline text-[12px] sm:text-sm font-bold text-foreground mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
-                            {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-xs text-foreground">
+                              Ask {activeAvatar.name} about {activeAreaLabel}
+                            </span>
+                            <span className="text-[9px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full shrink-0 uppercase tracking-wide">
+                              RECOMMENDED
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-foreground/50 mt-0.5 truncate max-w-[200px] md:max-w-[190px] xl:max-w-[230px] 2xl:max-w-[280px]">
+                            {activeAvatar.desc}
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-3 text-center sm:text-left min-w-0 w-full">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-secondary/40 bg-secondary/20 text-lg font-black text-secondary">
-                          {(horoscope?.lucky?.number || horoscope?.lucky_number) ?? "7"}
-                        </div>
-                        <div className="min-w-0 flex flex-col items-center sm:items-start w-full">
-                          <p className="label-sm text-[9px] tracking-wider text-foreground/35">{t('newDashboard.cosmicInsight.luckyNumber')}</p>
-                          <p className="font-headline text-[12px] sm:text-sm font-bold text-foreground mt-0.5 sm:mt-1 truncate max-w-full text-center sm:text-left">
-                            {typeof (horoscope?.lucky?.number || horoscope?.lucky_number) === 'number'
-                              ? (horoscope?.lucky?.number || horoscope?.lucky_number)
-                              : ((horoscope?.lucky?.number || horoscope?.lucky_number) ?? "Seven")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </DarkPanel>
+                      <ArrowRight className="h-4 w-4 text-foreground/45 shrink-0 ml-auto" />
+                    </button>
+                  </div>
                 </div>
-
-                <DarkPanel className="hidden sm:block p-5">
-                  <div className="mb-4 flex items-start gap-3">
-                    <Sparkles className="mt-1 h-7 w-7 text-secondary" />
-                    <div>
-                      <h2 className="font-headline text-2xl font-bold">{t('dashboard.consultNaviAi')}</h2>
-                      <p className="text-sm text-foreground/55">{t('dashboard.vedicWisdomPowered')}</p>
-                    </div>
-                  </div>
-
-                  <p className="mb-3 label-secondary font-black tracking-[0.2em]">{t('dashboard.askAbout')}</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: t("topicPills.careerFinance"), icon: <Briefcase className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.loveMarriage"), icon: <Heart className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.healthWellness"), icon: <Activity className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.travelRelocation"), icon: <Home className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.muhuratTiming"), icon: <Calendar className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                      { label: t("topicPills.currentTransits"), icon: <Orbit className="h-4 w-4" />, requiresFeature: 'guided_consult' as PaywallFeatureKey },
-                    ].map((item) => {
-                      const isBlocked = isFeatureBlocked(item.requiresFeature);
-                      const paywallData = getFeaturePaywall(item.requiresFeature);
-
-                      return (
-                        <button
-                          key={item.label}
-                          onClick={() => {
-                            if (isBlocked && paywallData) {
-                              setActivePaywallData(paywallData);
-                              return;
-                            }
-                            askInChat(item.label, `I want guidance about ${item.label.toLowerCase()} based on today's horoscope.`);
-                          }}
-                          className={`flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold text-foreground/78 transition relative overflow-hidden ${
-                            isBlocked
-                              ? "border border-outline-variant/5 bg-surface-variant/[0.015] text-foreground/40 cursor-pointer hover:bg-white/5"
-                              : "bg-surface-variant/[0.045] hover:bg-secondary/12 hover:text-secondary"
-                          }`}
-                        >
-                          <span className={isBlocked ? "text-foreground/30" : "text-secondary"}>{item.icon}</span>
-                          <span className="flex-1 truncate 3xl:whitespace-normal">{item.label}</span>
-                          {isBlocked && <Lock className="h-3.5 w-3.5 text-foreground/35 shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <p className="mb-3 mt-6 label-secondary font-black tracking-[0.2em]">{t('newDashboard.deepDive.title')}</p>
-                  <div className="space-y-3">
-                    {[
-                      t('newDashboard.deepDive.deepDiveQ1'),
-                      t('newDashboard.deepDive.deepDiveQ2', { area: activeAreaLabel }),
-                      t('newDashboard.deepDive.deepDiveQ3'),
-                    ].map((question) => {
-                      const isBlocked = isFeatureBlocked('chat_message');
-                      const paywallData = getFeaturePaywall('chat_message');
-
-                      return (
-                        <button
-                          key={question}
-                          onClick={() => {
-                            if (isBlocked && paywallData) {
-                              setActivePaywallData(paywallData);
-                              return;
-                            }
-                            askInChat(t('newDashboard.deepDive.title'), question);
-                          }}
-                          className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${
-                            isBlocked
-                              ? "border-outline-variant/5 bg-white/[0.01] text-foreground/40 cursor-pointer"
-                              : "border-outline-variant/10 bg-surface-variant/[0.025] text-foreground/78 hover:border-secondary/35 hover:text-secondary"
-                          }`}
-                        >
-                          <span className="truncate flex-1 3xl:whitespace-normal">{question}</span>
-                          {isBlocked ? (
-                            <Lock className="h-3.5 w-3.5 text-foreground/30 shrink-0" />
-                          ) : (
-                            <ArrowRight className="h-4 w-4 text-secondary shrink-0" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
-                        setActivePaywallData(getFeaturePaywall('chat_message')!);
-                        return;
-                      }
-                      setSelectedAvatarId("navi");
-                      askInChat(t('chatWithNavi'), t('newDashboard.todaysEnergy.discussMsg'));
-                    }}
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-secondary/60 px-4 py-3 text-sm font-black uppercase tracking-wider text-secondary transition hover:bg-secondary/10"
-                  >
-                    {isFeatureBlocked('chat_message') ? <Lock className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-                    {t('chatWithNavi')}
-                  </button>
-                </DarkPanel>
               </div>
             </div>
+          </DarkPanel>
+
+            {/* Right Card: Your Life Areas */}
+            <DarkPanel 
+              className="py-3.5 px-4 sm:py-4.5 sm:px-5 flex flex-col gap-4 overflow-y-auto pr-1"
+              style={cardHeightStyle}
+            >
+              <div ref={rightContentRef} className="flex flex-col gap-4 w-full">
+                <div className="flex flex-col gap-4">
+                {/* Sub-header for Current Week */}
+                <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
+                  <div>
+                    <h3 className="text-[14px] font-black uppercase tracking-[0.22em] text-foreground">
+                      {t('newDashboard.currentWeek.title') || "Your Life Areas"}
+                    </h3>
+                    <p className="mt-1 text-xs text-foreground/50">
+                      {t('newDashboard.currentWeek.description') || "Select a life area for today and current week predictions"}
+                    </p>
+                  </div>
+                  {bestDay && (
+                    <p className="label-secondary font-black text-xs shrink-0">
+                      {t('newDashboard.weeklyChart.best')}: {bestDay}
+                    </p>
+                  )}
+                </div>
+
+                {/* Life Areas grid acting as the activeArea selector */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-6">
+                  {lifeAreas.map(({ area, label, score, insight, theme }) => {
+                    const Icon = theme.icon;
+                    const phaseColor = getAreaColor(area, score);
+                    const phaseHex = phaseColor.main;
+                    const isLucide = area === "general" || area === "spiritual";
+                    const isSelected = activeArea === area;
+                    return (
+                      <button
+                        key={area}
+                        onClick={() => setActiveArea(area)}
+                        className={`group flex flex-col items-center rounded-2xl border py-2.5 px-3 text-center transition hover:-translate-y-0.5 cursor-pointer ${
+                          isSelected
+                            ? "border-white bg-white/[0.04] shadow-md shadow-white/5 ring-1 ring-white/30"
+                            : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant"
+                        }`}
+                      >
+                        <AreaRing score={score} color={phaseHex} label={label}>
+                          <span
+                            className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
+                            style={{ color: phaseHex }}
+                          >
+                            <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
+                          </span>
+                          <span className="text-base font-black leading-none tabular-nums" style={{ color: phaseHex }}>
+                            {score}
+                          </span>
+                        </AreaRing>
+                        <p className="mt-2 font-headline text-sm font-bold">{label}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Grid layout: Insight on Left, Chart on Right (40% / 60% ratio) */}
+                <div className="grid gap-4 lg:grid-cols-[2fr_3fr] lg:items-start pt-0 mt-3">
+                  {/* Left Column: Selected Area Insight */}
+                  <div className="space-y-3 text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl">
+                    {activeAreaInsight ? (
+                      <>
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-[0.15em] mb-2" style={{ color: activeAreaHex }}>
+                            {activeAreaLabel} {t('newDashboard.insight') || "Insight"}
+                          </h4>
+                          <p className="text-sm leading-relaxed text-foreground/75">
+                            {activeAreaInsight}
+                          </p>
+                        </div>
+
+                        <div className="mt-auto pt-2 flex flex-row gap-3 w-full">
+                          <Link
+                            href={`/horoscope/forecast?area=${activeArea}`}
+                            className="flex-1 flex items-center justify-center text-center rounded-xl px-3 py-2.5 text-[11px] font-black uppercase tracking-wider transition-all"
+                            style={{
+                              color: activeAreaHex,
+                              borderWidth: "1px",
+                              borderStyle: "solid",
+                              borderColor: `${activeAreaHex}4d`,
+                              backgroundColor: `${activeAreaHex}0d`,
+                            }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${activeAreaHex}1a`; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${activeAreaHex}0d`; }}
+                          >
+                            {t('newDashboard.todaysEnergy.openForecast', { area: activeAreaLabel }) || `Open ${activeAreaLabel} Forecast`}
+                          </Link>
+
+                          {(activeAreaNotes.length > 0 || activeAreaTone) && (
+                            <button
+                              onClick={() => setIsNotesModalOpen(true)}
+                              className="flex-1 flex items-center justify-center text-center rounded-xl px-3 py-2.5 text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                              style={{
+                                color: activeAreaHex,
+                                borderWidth: "1px",
+                                borderStyle: "solid",
+                                borderColor: `${activeAreaHex}4d`,
+                                backgroundColor: `${activeAreaHex}0d`,
+                              }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = `${activeAreaHex}1a`; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = `${activeAreaHex}0d`; }}
+                            >
+                              {t('newDashboard.todaysEnergy.personalNotesBtn') || "Personalized Notes"}
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-foreground/50 italic">
+                        Select an area below to view insights.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Right Column: Weekly Chart */}
+                  <div className="w-full">
+                    <h4 className="text-xs font-black uppercase tracking-[0.15em] text-secondary mb-2 text-left">
+                      {t('newDashboard.currentWeekChartTitle') || "Current Week"}
+                    </h4>
+                    <div className="relative rounded-2xl overflow-hidden w-full bg-surface-variant/[0.035] px-4 py-4 min-h-[230px] flex flex-col justify-center">
+                      {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
+                        <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                      ) : forecastLoading || !forecast ? (
+                        <div className="h-[180px] animate-pulse rounded-2xl bg-surface-variant/[0.04]" />
+                      ) : (
+                        <WeeklyOutlookChart days={forecast.days} colorHex={AREA_THEMES[activeArea].hex} areaLabel={resolveAreaLabel(t, activeArea)} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DarkPanel>
           </div>
+        )}
+      </div>
+
+      {/* FAMILY + CHART SNAPSHOT — 2 Column Row */}
+      <div className="relative z-10 mx-auto max-w-[1760px] px-4 sm:px-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-[3fr_2fr] lg:items-stretch">
+
+          {/* LEFT — Family Compatibility */}
+          <DarkPanel 
+            className="p-6 flex flex-col gap-4 overflow-y-auto pr-1"
+            style={lowerCardHeightStyle}
+          >
+            <div ref={familyContentRef} className="flex flex-col gap-4 w-full">
+              <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-400/10 border border-rose-400/20">
+                  <Heart className="h-4 w-4 text-rose-400" />
+                </div>
+                <div>
+                  <h2 className="font-headline text-sm font-bold text-foreground">
+                    {t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}
+                  </h2>
+                  <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-[0.14em] font-bold">
+                    {t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/family"
+                aria-label={t('newDashboard.familyFriends.title')}
+                className="shrink-0 text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary"
+              >
+                {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
+              </Link>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {familyLoading && !familyMembers && connectionsLoading && !familyConnections ? (
+                [0, 1, 2].map((i) => (
+                  <div key={i} className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 shrink-0 rounded-full bg-surface-variant/20 animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 w-24 rounded bg-surface-variant/20 animate-pulse" />
+                        <div className="h-2 w-16 rounded bg-surface-variant/20 animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="h-5 w-24 rounded bg-surface-variant/20 animate-pulse" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  {familyMembers?.map((m) => {
+                    const blocked = isFeatureBlocked('family_compatibility');
+                    return (
+                      <DashboardFamilyMemberCard
+                        key={`m-${m.id}`}
+                        member={m}
+                        t={t}
+                        isCompatibilityBlocked={blocked}
+                        onRunCompatibility={() => {
+                          const pw = getFeaturePaywall('family_compatibility');
+                          if (blocked && pw) { setActivePaywallData(pw); return; }
+                          router.push('/kundli/match');
+                        }}
+                      />
+                    );
+                  })}
+                  {familyConnections?.map((c) => {
+                    const blocked = isFeatureBlocked('family_compatibility');
+                    return (
+                      <DashboardConnectionCard
+                        key={`c-${c.connectionId}`}
+                        connection={c}
+                        t={t}
+                        isCompatibilityBlocked={blocked}
+                        onRunCompatibility={() => {
+                          const pw = getFeaturePaywall('family_compatibility');
+                          if (blocked && pw) { setActivePaywallData(pw); return; }
+                          router.push('/kundli/match');
+                        }}
+                      />
+                    );
+                  })}
+                </>
+              )}
+
+              <Link
+                href="/family"
+                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-secondary/30 bg-secondary/5 p-4 text-center transition-all hover:border-secondary/50"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/40 text-secondary">
+                  <Users className="h-7 w-7" />
+                </div>
+                <div>
+                  <p className="mb-1 text-sm font-bold text-foreground">{t('newDashboard.familyFriends.addMember')}</p>
+                  <p className="text-[10px] leading-relaxed text-foreground/40">{t('dashboard.familyAddSubtitle')}</p>
+                </div>
+                <span className="flex items-center gap-1.5 rounded-xl border-2 border-secondary/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/10">
+                  <Users className="h-3 w-3" />
+                  {t('newDashboard.familyFriends.addMember')}
+                </span>
+              </Link>
+            </div>
+            </div>
+          </DarkPanel>
+
+          {/* RIGHT — Chart Snapshot (40%) */}
+          <DarkPanel 
+            className="p-6 flex flex-col justify-between overflow-y-auto pr-1"
+            style={lowerCardHeightStyle}
+          >
+            <div ref={snapshotContentRef} className="flex flex-col gap-4 w-full h-full justify-between">
+              <div>
+                <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-5 w-5 items-center justify-center">
+                      <Orbit className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.chartSnapshot')}</h3>
+                  </div>
+                  <Link href="/kundli" aria-label={t('newDashboard.myChart.viewDetails')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
+                    {t('newDashboard.myChart.viewDetails')} <ArrowRight className="inline h-3 w-3" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    ...(mahadashaSub
+                      ? [{ label: t('newDashboard.myChart.mahadasha'), sublabel: mahadashaSub, subtext: mahadashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                      : horoscope?.planetary?.active_dasha
+                        ? [{ label: t('newDashboard.myChart.mahadasha'), sublabel: horoscope.planetary.active_dasha, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                        : [{ label: t('newDashboard.myChart.mahadasha'), sublabel: "..." }]),
+                    ...(antardashaSub
+                      ? [{ label: t('newDashboard.myChart.antardasha'), sublabel: antardashaSub, subtext: antardashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                      : [{ label: t('newDashboard.myChart.antardasha'), sublabel: "..." }]),
+                    (horoscope?.planetary?.dominant_planet
+                      ? { label: "Dominant Planet", sublabel: horoscope.planetary.dominant_planet }
+                      : { label: "Dominant Planet", sublabel: "..." }),
+                  ].map((item, idx) => {
+                    const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
+                    const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
+                    const planetImg = getPlanetImage(item.sublabel);
+
+                    return (
+                      <div
+                        key={idx}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={isBlocked ? `${t('newDashboard.unlock')} ${item.label}` : `${t('newDashboard.view')} ${item.label}`}
+                        onClick={() => {
+                          if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
+                          router.push('/kundli');
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
+                            router.push('/kundli');
+                          }
+                        }}
+                        className="relative flex flex-col items-center justify-center rounded-2xl border border-outline-variant/8 bg-surface p-3 transition-all hover:border-secondary/30 hover:bg-surface-variant cursor-pointer text-center min-h-[140px]"
+                      >
+                        {isBlocked && (
+                          <div className="absolute top-2 right-2 text-secondary bg-surface/80 rounded-full p-1 border border-outline-variant/10 shadow-sm z-10">
+                            <Lock className="h-3 w-3" />
+                          </div>
+                        )}
+                        <div className="relative mb-2 shrink-0">
+                          <img
+                            src={planetImg}
+                            alt={item.sublabel || "Planet"}
+                            className="h-12 w-12 object-contain"
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-center min-w-0 w-full">
+                          <p className="text-[10px] font-bold tracking-wider text-foreground/45 uppercase truncate">{item.label}</p>
+                          <p className={`font-headline text-sm sm:text-base font-bold text-foreground truncate mt-0.5 ${isBlocked ? "blur-[2px] select-none opacity-50" : ""}`}>
+                            {item.sublabel}
+                          </p>
+                          {item.subtext && (
+                            <p className={`text-[9px] sm:text-[10px] text-foreground/45 truncate mt-0.5 ${isBlocked ? "blur-[2.5px] select-none opacity-50" : ""}`}>
+                              {item.subtext}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/kundli"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-secondary/50 bg-secondary/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/15"
+            >
+              <Sparkles className="h-4 w-4" />
+              {t('newDashboard.myChart.exploreFullAnalysis')}
+            </Link>
+          </DarkPanel>
+
         </div>
       </div>
 
       {/* EXPLORE YOUR COSMIC NETWORK SECTION */}
-      <div className="relative z-10 mx-auto max-w-[1760px] px-5 py-12 sm:px-8 lg:px-10 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-4 py-12 sm:px-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
         {/* Section Header */}
         <div className="mb-10 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
@@ -1184,10 +1671,8 @@ export default function DashboardHome() {
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-          {/* LEFT COLUMN */}
-          <div className="space-y-8">
-            {/* MEET YOUR AI ASTROLOGERS */}
+        <div>
+          {/* MEET YOUR AI ASTROLOGERS */}
             <DarkPanel className="p-6">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1274,174 +1759,6 @@ export default function DashboardHome() {
               </div>
             </DarkPanel>
 
-            {/* MY FAMILY & BONDS */}
-            <DarkPanel className="p-6">
-              <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Heart className="h-5 w-5 text-rose-400" />
-                  <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.familyFriends.title')}</h3>
-                </div>
-                <Link href="/family" aria-label={t('newDashboard.familyFriends.title')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
-                  {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
-                </Link>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {familyLoading && !familyMembers && connectionsLoading && !familyConnections ? (
-                  [0, 1].map((i) => (
-                    <div key={i} className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 shrink-0 rounded-full bg-surface-variant/20 animate-pulse" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 w-24 rounded bg-surface-variant/20 animate-pulse" />
-                          <div className="h-2 w-16 rounded bg-surface-variant/20 animate-pulse" />
-                        </div>
-                      </div>
-                      <div className="h-5 w-24 rounded bg-surface-variant/20 animate-pulse" />
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    {familyMembers?.map((m) => {
-                      const blocked = isFeatureBlocked('family_compatibility');
-                      return (
-                        <DashboardFamilyMemberCard
-                          key={`m-${m.id}`}
-                          member={m}
-                          t={t}
-                          isCompatibilityBlocked={blocked}
-                          onRunCompatibility={() => {
-                            const pw = getFeaturePaywall('family_compatibility');
-                            if (blocked && pw) { setActivePaywallData(pw); return; }
-                            router.push(`/family?member=${m.id}&run=1`);
-                          }}
-                        />
-                      );
-                    })}
-                    {familyConnections?.map((c) => {
-                      const blocked = isFeatureBlocked('family_compatibility');
-                      return (
-                        <DashboardConnectionCard
-                          key={`c-${c.connectionId}`}
-                          connection={c}
-                          t={t}
-                          isCompatibilityBlocked={blocked}
-                          onRunCompatibility={() => {
-                            const pw = getFeaturePaywall('family_compatibility');
-                            if (blocked && pw) { setActivePaywallData(pw); return; }
-                            router.push('/family');
-                          }}
-                        />
-                      );
-                    })}
-                  </>
-                )}
-
-                <Link
-                  href="/family"
-                  className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-secondary/30 bg-secondary/5 p-4 text-center transition-all hover:border-secondary/50"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/40 text-secondary">
-                    <Users className="h-7 w-7" />
-                  </div>
-                  <div>
-                    <p className="mb-1 text-sm font-bold text-foreground">{t('newDashboard.familyFriends.addMember')}</p>
-                    <p className="text-[10px] leading-relaxed text-foreground/40">{t('dashboard.familyAddSubtitle')}</p>
-                  </div>
-                  <span className="flex items-center gap-1.5 rounded-xl border-2 border-secondary/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/10">
-                    <Users className="h-3 w-3" />
-                    {t('newDashboard.familyFriends.addMember')}
-                  </span>
-                </Link>
-              </div>
-            </DarkPanel>
-
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div className="space-y-8">
-            {/* MY CHART SNAPSHOT */}
-            <DarkPanel className="p-6">
-              <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-5 w-5 items-center justify-center">
-                    <Orbit className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.chartSnapshot')}</h3>
-                </div>
-                <Link href="/kundli" aria-label={t('newDashboard.myChart.viewDetails')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
-                  {t('newDashboard.myChart.viewDetails')} <ArrowRight className="inline h-3 w-3" />
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: t('newDashboard.myChart.yourKundli'), sublabel: `${ascendantSign?.name || "Leo"} ${t('dashboard.ascendant')}`, icon: <Orbit className="h-4 w-4" />, href: "/kundli", color: "#60a5fa" },
-                  ...(mahadashaSub
-                    ? [{ label: t('newDashboard.myChart.mahadasha'), sublabel: mahadashaSub, subtext: mahadashaRange, icon: <Activity className="h-4 w-4" />, href: "/kundli", color: "var(--flare-gold)", requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
-                    : []),
-                  ...(antardashaSub
-                    ? [{ label: t('newDashboard.myChart.antardasha'), sublabel: antardashaSub, subtext: antardashaRange, icon: <Sparkles className="h-4 w-4" />, href: "/kundli", color: "var(--flare-lavender)", requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
-                    : []),
-                ].map((item, idx) => {
-                  const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
-                  const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
-
-                  return (
-                    <div
-                      key={idx}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={isBlocked ? `${t('newDashboard.unlock')} ${item.label}` : `${t('newDashboard.view')} ${item.label}`}
-                      onClick={() => {
-                        if (isBlocked && paywallData) {
-                          setActivePaywallData(paywallData);
-                          return;
-                        }
-                        router.push(item.href);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          if (isBlocked && paywallData) {
-                            setActivePaywallData(paywallData);
-                            return;
-                          }
-                          router.push(item.href);
-                        }
-                      }}
-                      className="flex items-center justify-between rounded-2xl border border-outline-variant/8 bg-surface p-4 transition-all hover:border-secondary/30 hover:bg-surface-variant cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0"
-                          style={{ backgroundColor: `${item.color}1f`, color: item.color }}
-                        >
-                          {item.icon}
-                        </div>
-                        <div className={isBlocked ? "blur-[2.5px] select-none opacity-50 transition-all duration-300" : ""}>
-                          <p className="label-sm text-[10px] tracking-wider text-foreground/35">{item.label}</p>
-                          <p className="font-headline text-sm font-bold text-foreground">{item.sublabel}</p>
-                          {item.subtext && <p className="text-[10px] text-foreground/35">{item.subtext}</p>}
-                        </div>
-                      </div>
-                      <button className="flex items-center gap-1 rounded-xl border border-secondary/40 bg-secondary/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-secondary shrink-0">
-                        {isBlocked ? <Lock className="h-3 w-3 mr-0.5" /> : null}
-                        {isBlocked ? t('newDashboard.unlock') : t('newDashboard.view')} <ArrowRight className="h-3 w-3" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-              <Link
-                href="/kundli"
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-secondary/50 bg-secondary/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/15"
-              >
-                <Sparkles className="h-4 w-4" />
-                {t('newDashboard.myChart.exploreFullAnalysis')}
-              </Link>
-            </DarkPanel>
-
-
-          </div>
         </div>
 
         {/* COSMIC PORTALS — Full Width */}
@@ -1613,6 +1930,362 @@ export default function DashboardHome() {
             variant="modal"
             onClose={() => setActivePaywallData(null)}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isPanchangModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsPanchangModalOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsPanchangModalOpen(false);
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+            <motion.div
+              initial={{ y: 20, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 15, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg rounded-[28px] border border-outline-variant/15 bg-surface p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setIsPanchangModalOpen(false)}
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-foreground/70 transition hover:bg-white/12 hover:text-foreground"
+                aria-label="Close panchang modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
+                <Calendar className="h-6 w-6" />
+              </div>
+
+              <h2 className="font-headline text-2xl font-bold mb-1">
+                {t('newDashboard.panchang.title')}
+              </h2>
+              <p className="text-sm text-foreground/60 mb-6">
+                Daily astronomical configurations for today
+              </p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { label: t('newDashboard.panchang.tithi'), value: transits?.panchanga?.tithi || horoscope?.meta?.panchanga?.tithi || "Purnima", icon: <Moon className="h-5 w-5 text-secondary" />, desc: "Lunar day based on moon's elongation" },
+                  { label: t('newDashboard.panchang.vara'), value: transits?.panchanga?.vara || horoscope?.meta?.panchanga?.vaara || "Shanivaar", icon: <Calendar className="h-5 w-5 text-amber-500" />, desc: "Day of the week named after ruler planet" },
+                  { label: t('newDashboard.panchang.nakshatra'), value: transits?.panchanga?.nakshatra || horoscope?.meta?.panchanga?.nakshatra || "Anuradha", icon: <Star className="h-5 w-5 text-emerald-400" />, desc: "Lunar mansion / stellar constellation" },
+                  { label: t('newDashboard.panchang.yoga'), value: transits?.panchanga?.yoga || horoscope?.meta?.panchanga?.yoga || "Shiva", icon: <Sparkles className="h-5 w-5 text-violet-400" />, desc: "Auspicious alignment of Sun and Moon" },
+                  { label: t('newDashboard.panchang.karana'), value: transits?.panchanga?.karana || horoscope?.meta?.panchanga?.karana || "Vishti", icon: <Gem className="h-5 w-5 text-rose-400" />, desc: "Half of a tithi / active biological influence" },
+                ].map((item) => (
+                  <div key={item.label} className="flex gap-3 items-start rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.02] p-4 transition hover:bg-surface-variant/[0.04]">
+                    <div className="mt-0.5 shrink-0">
+                      {item.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground/45">{item.label}</p>
+                      <p className="mt-1 text-base font-bold text-foreground truncate">{item.value}</p>
+                      <p className="mt-0.5 text-[11px] text-foreground/50 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsPanchangModalOpen(false)}
+                  className="w-full sm:w-auto rounded-xl bg-secondary px-6 py-3 text-sm font-black uppercase text-on-primary transition hover:bg-secondary-hover hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isRahuKaalModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsRahuKaalModalOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsRahuKaalModalOpen(false);
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+            <motion.div
+              initial={{ y: 20, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 15, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg rounded-[28px] border border-outline-variant/15 bg-surface p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setIsRahuKaalModalOpen(false)}
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-foreground/70 transition hover:bg-white/12 hover:text-foreground"
+                aria-label="Close details modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
+                <AlertTriangle className="h-6 w-6 text-amber-500" />
+              </div>
+
+              <h2 className="font-headline text-2xl font-bold mb-1">
+                {t('newDashboard.panchang.rahuKaal')} & Alerts
+              </h2>
+              <p className="text-sm text-foreground/60 mb-6">
+                Caution periods and active astrological factors for today
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-[0.16em] text-secondary mb-2">
+                    {t('newDashboard.panchang.rahuKaal')} Timing
+                  </h3>
+                  <div className="rounded-xl border border-outline-variant/10 bg-surface-variant/[0.02] p-4 flex justify-between items-center">
+                    <span className="font-bold text-sm text-foreground">{t('newDashboard.panchang.rahuKaal')}</span>
+                    <span className={`text-xs font-black px-2.5 py-1 rounded-full shrink-0 ${
+                      isRahuKaalEnded
+                        ? "text-foreground/40 bg-surface-variant/20"
+                        : "text-red-500 bg-red-500/10"
+                    }`}>
+                      {formatRahuKaal(transits, horoscope)}
+                    </span>
+                  </div>
+                </div>
+
+                {horoscope?.alerts?.secondary && horoscope.alerts.secondary.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.16em] text-secondary mb-2">
+                      Astrological Caution Points
+                    </h3>
+                    <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
+                      {horoscope.alerts.secondary.map((alert, idx) => (
+                        <div key={idx} className="flex gap-3 items-start rounded-xl border border-outline-variant/10 bg-surface-variant/[0.02] p-3 transition hover:bg-surface-variant/[0.04]">
+                          <span className="text-amber-500 mt-1 shrink-0">•</span>
+                          <div className="min-w-0">
+                            {alert.simple && <p className="text-xs font-bold text-foreground leading-relaxed">{alert.simple}</p>}
+                            {alert.technical && <p className="mt-0.5 text-[10px] text-foreground/40 italic">{alert.technical}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsRahuKaalModalOpen(false)}
+                  className="w-full sm:w-auto rounded-xl bg-secondary px-6 py-3 text-sm font-black uppercase text-on-primary transition hover:bg-secondary-hover hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isNotesModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsNotesModalOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsNotesModalOpen(false);
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+            <motion.div
+              initial={{ y: 20, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 15, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg rounded-[28px] border border-white/30 bg-surface p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setIsNotesModalOpen(false)}
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-foreground/70 transition hover:bg-white/12 hover:text-foreground"
+                aria-label="Close notes modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div
+                className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                style={{
+                  color: activeAreaHex,
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  borderColor: `${activeAreaHex}4d`,
+                  backgroundColor: `${activeAreaHex}1a`,
+                }}
+              >
+                <Sparkles className="h-6 w-6" />
+              </div>
+
+              <h2 className="font-headline text-2xl font-bold mb-1">
+                Personalized Notes
+              </h2>
+              <p className="text-xs text-foreground/50 mb-4 uppercase tracking-wider">
+                {activeAreaLabel} Outlook
+              </p>
+
+              <div className="space-y-4 text-left">
+                {activeArea === "general" ? (
+                  <div className="space-y-4">
+                    {/* Personal Focus Points */}
+                    {activeAreaNotes.length > 0 && (
+                      <div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.16em] mb-2" style={{ color: activeAreaHex }}>
+                          Personal Focus Points
+                        </h3>
+                        <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-2 text-sm text-foreground/80 leading-relaxed">
+                          {activeAreaNotes.map((note, idx) => (
+                            <p key={idx}>{note}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Celestial Insights */}
+                    <div>
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.16em] mb-2" style={{ color: activeAreaHex }}>
+                        Celestial Insights
+                      </h3>
+                      <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-3 text-sm text-foreground/80 leading-relaxed max-h-[220px] overflow-y-auto pr-1">
+                        {(transits?.notableTransits?.length
+                          ? transits.notableTransits
+                          : horoscope?.astro_explanations?.items?.map(item => item.simple) || [
+                              t('newDashboard.notableTransits.jupiter'),
+                              t('newDashboard.notableTransits.saturn'),
+                              t('newDashboard.notableTransits.rahu'),
+                              t('newDashboard.notableTransits.ketu'),
+                            ]
+                        ).slice(0, 4).map((item, idx) => (
+                          <div key={idx} className="flex gap-2 items-start">
+                            <span aria-hidden="true" className="mt-0.5" style={{ color: activeAreaHex }}>•</span>
+                            <p className="flex-1">{item}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Standard Personal Notes for other categories */
+                  activeAreaNotes.length > 0 ? (
+                    <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-2 text-sm text-foreground/80 leading-relaxed max-h-[200px] overflow-y-auto pr-1">
+                      {activeAreaNotes.map((note, idx) => (
+                        <p key={idx}>{note}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-foreground/50 italic">No personal notes available.</p>
+                  )
+                )}
+
+                {activeAreaTone && (
+                  <div className="flex items-center gap-2 pt-3">
+                    <span className="font-bold text-sm text-foreground/50">Cosmic Tone:</span>
+                    <span className={`text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full shrink-0 ${
+                      activeAreaTone === "positive"
+                        ? "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20"
+                        : activeAreaTone === "negative" || activeAreaTone === "caution"
+                        ? "text-red-400 bg-red-400/10 border border-red-400/20"
+                        : "text-foreground/45 bg-surface-variant/30 border border-white/5"
+                    }`}>
+                      {activeAreaTone}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsNotesModalOpen(false)}
+                  className="w-full sm:w-auto rounded-xl bg-secondary px-6 py-3 text-sm font-black uppercase text-on-primary transition hover:bg-secondary-hover hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isAdviceModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsAdviceModalOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsAdviceModalOpen(false);
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+            <motion.div
+              initial={{ y: 20, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 15, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg rounded-[28px] border border-white/30 bg-surface p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setIsAdviceModalOpen(false)}
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-foreground/70 transition hover:bg-white/12 hover:text-foreground"
+                aria-label="Close advice modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
+                <Sparkles className="h-6 w-6" />
+              </div>
+
+              <h2 className="font-headline text-2xl font-bold mb-1">
+                Today's Advice
+              </h2>
+              <p className="text-xs text-foreground/50 mb-6 uppercase tracking-wider">
+                Cosmic Guidance for You
+              </p>
+
+              <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 text-sm text-foreground/80 leading-relaxed text-left">
+                {horoscope?.current_state?.advice_now}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsAdviceModalOpen(false)}
+                  className="w-full sm:w-auto rounded-xl bg-secondary px-6 py-3 text-sm font-black uppercase text-on-primary transition hover:bg-secondary-hover hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

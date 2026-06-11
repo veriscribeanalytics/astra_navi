@@ -7,6 +7,7 @@ export interface ChartPoint {
   label: string;
   score: number;
   isCurrent?: boolean;
+  displayLabel?: string;
 }
 
 export default function ForecastChart({
@@ -34,7 +35,7 @@ export default function ForecastChart({
 
   return (
     <div className="relative w-full h-full">
-      <svg viewBox="-12 -14 264 108" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="-12 -14 264 114" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id={`fc-area-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={colorHex} stopOpacity="0.15" />
@@ -101,6 +102,19 @@ export default function ForecastChart({
                   fontWeight={highlight ? 'bold' : 'medium'}
                 >
                   {p.score}
+                </text>
+              )}
+              {p.displayLabel && (
+                <text
+                  x={c.x}
+                  y="95"
+                  textAnchor="middle"
+                  fill={isActive || isHovered ? colorHex : 'var(--color-foreground)'}
+                  fillOpacity={isActive || isHovered ? 0.9 : 0.3}
+                  fontSize="7.2"
+                  fontWeight={isActive || isHovered ? 'bold' : 'medium'}
+                >
+                  {p.displayLabel}
                 </text>
               )}
               {/* Invisible hit-area so dense charts respond to hover/touch

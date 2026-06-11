@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { getAreaPhaseHex } from "@/data/lifeAreaColors";
+import type { ForecastArea } from "@/data/areaThemes";
 
 interface ScoreRingProps {
     score: number;
@@ -14,9 +16,10 @@ interface ScoreRingProps {
     };
     label?: string;
     animated?: boolean;
+    area?: ForecastArea;
 }
 
-export default function ScoreRing({ score, maxScore = 100, size = 88, tier, label = "Score", animated = true }: ScoreRingProps) {
+export default function ScoreRing({ score, maxScore = 100, size = 88, tier, label = "Score", animated = true, area }: ScoreRingProps) {
     const [animatedScore, setAnimatedScore] = useState(animated ? 0 : score);
     const normalizedSize = 100; // Standardize internal coordinate space
     const radius = 42; 
@@ -50,14 +53,14 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
 
     const progress = circumference - (animatedScore / maxScore) * circumference;
 
-    const getCelestialColor = () => {
-        if (percentage >= 80) return '#D4A017'; // Solar Gold
-        if (percentage >= 60) return '#E8832A'; // Radiant Amber
-        if (percentage >= 40) return '#E84A2A'; // Warm Earth
-        return '#C83A2A'; // Deep Mars
+const getCelestialColor = () => {
+        if (percentage >= 80) return '#D4A017';
+        if (percentage >= 60) return '#E8832A';
+        if (percentage >= 40) return '#E84A2A';
+        return '#C83A2A';
     };
 
-    const color = tier?.color || getCelestialColor();
+    const color = tier?.color || (area ? getAreaPhaseHex(area, score) : getCelestialColor());
     const isLarge = size >= 90;
 
     return (
@@ -91,7 +94,7 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
                         </span>
                         <div className="flex flex-col items-center mt-1">
                             <span className="text-[8px] sm:text-[9px] text-foreground/45 font-bold uppercase tracking-[0.15em]">
-                                {label || (maxScore === 100 ? 'General Outlook' : `/ ${maxScore}`)}
+                                {label || (maxScore === 100 ? 'General' : `/ ${maxScore}`)}
                             </span>
                         </div>
                     </div>

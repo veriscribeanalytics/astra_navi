@@ -46,7 +46,7 @@ export default function ForecastOverview({
       key={overview.title}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-[28px] bg-surface/40 border border-white/5 shadow-lg flex flex-col gap-4 overflow-hidden"
+      className="relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-[28px] bg-surface/80 border border-white/5 shadow-lg flex flex-col gap-4 overflow-hidden"
     >
       <div
         className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 blur-[80px] pointer-events-none"
@@ -70,7 +70,7 @@ export default function ForecastOverview({
             onClick={handlePrev}
             disabled={!navigation.can_go_previous}
             aria-label={t('forecast.previous')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/5 bg-surface/60 flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4 text-foreground/70" />
           </button>
@@ -78,7 +78,7 @@ export default function ForecastOverview({
             onClick={handleNext}
             disabled={!navigation.can_go_next}
             aria-label={t('forecast.next')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/5 bg-surface/60 flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
             <ChevronRight className="w-4 h-4 text-foreground/70" />
           </button>

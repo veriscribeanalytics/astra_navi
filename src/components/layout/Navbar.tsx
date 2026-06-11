@@ -88,12 +88,6 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                         desc: t('nav.encyclopediaDesc')
                     },
                     { 
-                        label: t('nav.the12Rashis'), 
-                        href: "/rashis", 
-                        icon: <Sparkles className="w-4 h-4" />,
-                        desc: t('nav.the12RashisDesc')
-                    },
-                    { 
                         label: t('nav.theNavagraha'), 
                         href: "/blogs/planets", 
                         icon: <Compass className="w-4 h-4" />,
@@ -158,12 +152,6 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                     icon: <User className="w-4 h-4" />,
                     desc: t('nav.ourMissionDesc')
                 },
-                { 
-                    label: t('nav.naviAiModels'), 
-                    href: "/chat", 
-                    icon: <Brain className="w-4 h-4" />,
-                    desc: t('nav.naviAiModelsDesc')
-                },            
             ]
         },
         {
@@ -171,22 +159,10 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
             label: t('nav.astrology'),
             items: [
                 { 
-                    label: t('nav.birthChart'), 
-                    href: "/kundli", 
-                    icon: <BookOpen className="w-4 h-4" />,
-                    desc: t('nav.birthChartDesc')
-                },
-                { 
-                    label: t('nav.chartMatching'), 
-                    href: "/kundli/match", 
-                    icon: <Heart className="w-4 h-4" />,
-                    desc: t('nav.chartMatchingDesc')
-                },
-                { 
-                    label: t('nav.zodiacSigns'), 
-                    href: "/rashis", 
-                    icon: <Sparkles className="w-4 h-4" />,
-                    desc: t('nav.zodiacSignsDesc')
+                    label: t('nav.forecast') || "Transit Forecast", 
+                    href: "/horoscope/forecast", 
+                    icon: <TrendingUp className="w-4 h-4" />,
+                    desc: t('nav.forecastDesc') || "Plan your week with planetary transit forecasting."
                 },
             ]
         },
@@ -199,12 +175,6 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                     href: "/blogs", 
                     icon: <BookOpen className="w-4 h-4" />,
                     desc: t('nav.encyclopediaDesc')
-                },
-                { 
-                    label: t('nav.the12Rashis'), 
-                    href: "/rashis", 
-                    icon: <Sparkles className="w-4 h-4" />,
-                    desc: t('nav.the12RashisDesc')
                 },
                 { 
                     label: t('nav.theNavagraha'), 
@@ -237,16 +207,10 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
             label: t('nav.services'),
             items: [
                 {
-                    label: t('nav.chatWithNavi'),
-                    href: "/chat",
-                    icon: <MessageSquare className="w-4 h-4" />,
-                    desc: t('nav.chatWithNaviDesc')
-                },
-                {
-                    label: t('nav.guidedSessions'),
-                    href: "/consult", 
+                    label: t('nav.ourServices') || "Our Services",
+                    href: "/services",
                     icon: <Compass className="w-4 h-4" />,
-                    desc: t('nav.guidedSessionsDesc')
+                    desc: t('nav.ourServicesDesc') || "Explore all of AstraNavi's AI and Vedic services"
                 },
                 { 
                     label: t('nav.astraNaviPremium'), 
@@ -309,7 +273,15 @@ const Navbar: React.FC = () => {
             setIsUserDropdownOpen(false);
             setHoveredSection(null);
         }
-    }, [pathname]);
+
+        // Ensure that the intro-playing class is removed if the user is logged in
+        // or has navigated away from the landing page.
+        if (typeof window !== 'undefined') {
+            if (pathname !== '/' || isLoggedIn) {
+                document.documentElement.classList.remove('intro-playing');
+            }
+        }
+    }, [pathname, isLoggedIn]);
 
     const isChatPage = pathname?.startsWith('/chat');
     // Only hide the navbar on /chat when the user is actually signed in
@@ -410,7 +382,7 @@ const Navbar: React.FC = () => {
             />
             <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${hideNavbar ? 'hidden' : ''}`}>
             {/* ===== DESKTOP NAVBAR (lg+) ===== */}
-            <div className="hidden lg:flex items-center justify-between px-4 sm:px-8 lg:px-12 py-2 w-full mx-auto max-w-[1600px] 2xl:max-w-[2000px] 3xl:max-w-[2400px]">
+            <div className="hidden lg:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 w-full mx-auto max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start shrink-0">
                     <Link href="/" aria-label="Astra Navi Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
@@ -487,8 +459,21 @@ const Navbar: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Right: Actions */}
                 <div className="flex items-center justify-end space-x-4 lg:space-x-5">
+                    {isLoggedIn && !isLoaded && (
+                        <div className="w-24 h-[34px] rounded-full bg-secondary/20 border border-secondary/15 animate-pulse shrink-0" />
+                    )}
+                    {isLoggedIn && isLoaded && (
+                        <Link 
+                            href="/plans"
+                            className="flex items-center gap-1.5 rounded-full border border-secondary/80 bg-secondary/80 px-3 py-1.5 text-white hover:bg-secondary hover:border-secondary transition-all active:scale-95 cursor-pointer shadow-sm"
+                        >
+                            <Wallet className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-xs font-black tabular-nums">{totalCredits ?? 0}</span>
+                            <span className="text-[9px] uppercase tracking-wider hidden xl:inline">{t('plans.naviCredits')}</span>
+                            <span className="rounded-full bg-black/20 px-2 py-0.5 text-[9px] uppercase font-bold text-white">{getTierLabel(tier || 'free')}</span>
+                        </Link>
+                    )}
                     <LanguagePicker />
                     <ThemeToggle />
                     {isLoading ? (
@@ -517,11 +502,12 @@ const Navbar: React.FC = () => {
                             <button
                                 aria-haspopup="true"
                                 aria-expanded={isUserDropdownOpen}
-                                className="profile-ring-glow cursor-pointer"
+                                className="profile-ring-glow relative w-9 h-9 rounded-full flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-secondary/50 cursor-pointer"
                                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                aria-label="User menu"
                             >
-                                <div className="profile-comet-dot" aria-hidden="true"></div>
-                                <div className="profile-avatar-content !text-sm">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
+                                <div className="profile-comet-dot absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-surface shadow-sm shadow-emerald-500/20" aria-hidden="true"></div>
+                                <div className="profile-avatar-content text-secondary font-black text-sm uppercase">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
                             </button>
                             {isUserDropdownOpen && (
                                 <div role="menu" aria-label={t('nav.account')} className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
@@ -529,17 +515,7 @@ const Navbar: React.FC = () => {
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">{t('nav.account')}</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || t('common.user')}</p>
                                     </div>
-                                    {/* Credit Balance */}
-                                    {isLoggedIn && isLoaded && (
-                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-1.5 min-w-0">
-                                                <Wallet className="w-3.5 h-3.5 text-secondary shrink-0" />
-                                                <span className="text-[10px] font-bold text-secondary tabular-nums whitespace-nowrap shrink-0">{totalCredits ?? 0}</span>
-                                                <span className="text-[9px] text-foreground/30 uppercase tracking-wider whitespace-nowrap truncate">{t('plans.naviCredits')}</span>
-                                            </div>
-                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15 whitespace-nowrap shrink-0">{getTierLabel(tier || 'free')}</span>
-                                        </div>
-                                    )}
+
                                     <div className="space-y-0.5">
                                         <Link href="/plans" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
                                             <Sparkles className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.astraNaviPremium')}
@@ -596,9 +572,14 @@ const Navbar: React.FC = () => {
                         <>
                         <NotificationBell />
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
-                            <button className="profile-ring-glow !w-8 !h-8 cursor-pointer border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-secondary/50 p-0" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label="User menu" aria-expanded={isUserDropdownOpen}>
-                                <div className="profile-comet-dot" aria-hidden="true"></div>
-                                <div className="profile-avatar-content !text-[10px] font-bold">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
+                            <button 
+                                className="profile-ring-glow relative w-8 h-8 rounded-full flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-secondary/50 cursor-pointer p-0" 
+                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} 
+                                aria-label="User menu" 
+                                aria-expanded={isUserDropdownOpen}
+                            >
+                                <div className="profile-comet-dot absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-surface shadow-sm shadow-emerald-500/20" aria-hidden="true"></div>
+                                <div className="profile-avatar-content text-secondary font-black text-[10px] uppercase">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
                             </button>
                             {isUserDropdownOpen && (
                                 <div role="menu" aria-label={t('nav.account')} className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
@@ -606,17 +587,7 @@ const Navbar: React.FC = () => {
                                         <p className="text-[10px] text-primary/40 uppercase tracking-[0.2em] font-bold">{t('nav.account')}</p>
                                         <p className="text-sm font-bold text-primary truncate mt-0.5">{user?.name || user?.email?.split('@')[0] || t('common.user')}</p>
                                     </div>
-                                    {/* Credit Balance */}
-                                    {isLoggedIn && isLoaded && (
-                                        <div className="px-4 py-2.5 mb-2 border-b border-primary/5 flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-1.5 min-w-0">
-                                                <Wallet className="w-3.5 h-3.5 text-secondary shrink-0" />
-                                                <span className="text-[10px] font-bold text-secondary tabular-nums whitespace-nowrap shrink-0">{totalCredits ?? 0}</span>
-                                                <span className="text-[9px] text-foreground/30 uppercase tracking-wider whitespace-nowrap truncate">{t('plans.naviCredits')}</span>
-                                            </div>
-                                            <span className="text-[8px] font-bold text-secondary/60 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15 whitespace-nowrap shrink-0">{getTierLabel(tier || 'free')}</span>
-                                        </div>
-                                    )}
+
                                     <div className="space-y-0.5">
                                         <Link href="/plans" onClick={() => setIsUserDropdownOpen(false)} className="w-full flex items-center px-4 py-3 text-sm text-primary/75 hover:text-secondary hover:bg-secondary/10 rounded-xl transition-all font-medium">
                                             <Sparkles className="w-4 h-4 mr-3.5 opacity-60" /> {t('nav.astraNaviPremium')}

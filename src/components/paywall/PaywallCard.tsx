@@ -215,38 +215,40 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative rounded-[24px] overflow-hidden min-h-[290px]"
+        className="relative rounded-[24px] overflow-hidden min-h-[230px]"
       >
         {/* Blurred backdrop overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/90 to-surface/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 p-4 sm:p-5 text-center min-h-[290px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/90 to-surface/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 p-4 sm:p-5 text-center min-h-[230px]">
           {/* Close button */}
           {onClose && (
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/50 border border-outline-variant/20 flex items-center justify-center text-foreground/40 hover:text-foreground hover:border-secondary/30 transition-all z-20"
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 border border-outline-variant/20 flex items-center justify-center text-foreground/40 hover:text-foreground hover:border-secondary/30 transition-all z-20"
             >
               <X className="w-4 h-4" />
             </button>
           )}
 
-          <div className="w-12 h-12 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-            {paywallIcon ? (
-              <span className="text-xl">{paywallIcon}</span>
-            ) : paywall.isSoft ? (
-              <Sparkles className="w-6 h-6 text-secondary" />
-            ) : (
-              <Lock className="w-6 h-6 text-secondary" />
+          {/* Symbol + Pro Badge in one row */}
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
+              {paywallIcon ? (
+                <span className="text-lg">{paywallIcon}</span>
+              ) : paywall.isSoft ? (
+                <Sparkles className="w-5 h-5 text-secondary" />
+              ) : (
+                <Lock className="w-5 h-5 text-secondary" />
+              )}
+            </div>
+            {paywall.badge && (
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
+                {paywall.badge}
+              </span>
             )}
           </div>
 
-          {paywall.badge && (
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
-              {paywall.badge}
-            </span>
-          )}
-
           <h3 className="text-base font-headline font-bold text-foreground leading-tight">{title}</h3>
-          <p className="text-xs text-foreground/60 leading-relaxed">{description}</p>
+          <p className="text-xs text-foreground/60 leading-relaxed max-w-sm">{description}</p>
 
           {(paywall.credits !== undefined || paywall.creditsRequired !== undefined) && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-variant/20 border border-outline-variant/10">
@@ -259,30 +261,42 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             </div>
           )}
 
-          {/* Suggested products (first product only for overlay — space limited) */}
-          {products.length > 0 && (
-            <Link
-              href={`/plans?feature=${encodeURIComponent(paywall.featureKey)}&product=${encodeURIComponent(products[0].productId)}`}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/[0.06] border border-secondary/10 hover:bg-secondary/[0.1] hover:border-secondary/20 transition-all group"
-            >
-              {products[0].icon ? (
-                <span className="text-sm">{products[0].icon}</span>
-              ) : (
-                <Star className="w-3.5 h-3.5 text-secondary" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-secondary">{getProductName(products[0])}</p>
-                {getProductPrice(products[0]) && (
-                  <p className="text-[9px] text-foreground/40 font-bold">{getProductPrice(products[0])}</p>
-                )}
-              </div>
-              <ArrowRight className="w-3 h-3 text-secondary/40 group-hover:text-secondary transition-colors" />
-            </Link>
-          )}
+          {/* Both buttons in one row */}
+          <div className="flex flex-row items-stretch justify-center gap-3 w-full max-w-[360px] mt-1">
+            {products.length > 0 && (
+              <Link
+                href={`/plans?feature=${encodeURIComponent(paywall.featureKey)}&product=${encodeURIComponent(products[0].productId)}`}
+                className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 rounded-[24px] bg-secondary/[0.06] border border-secondary/10 hover:bg-secondary/[0.1] hover:border-secondary/20 transition-all group text-left min-h-[44px]"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  {products[0].icon ? (
+                    <span className="text-sm shrink-0">{products[0].icon}</span>
+                  ) : (
+                    <Star className="w-3.5 h-3.5 text-secondary shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-secondary truncate">
+                      {getProductName(products[0])}
+                    </p>
+                    {getProductPrice(products[0]) && (
+                      <p className="text-[9px] text-foreground/40 font-bold">{getProductPrice(products[0])}</p>
+                    )}
+                  </div>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-secondary/40 group-hover:text-secondary group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+            )}
 
-          <Button href={ctaHref} variant="primary" size="sm" className="rounded-xl" rightIcon={<ArrowRight className="w-3 h-3" />}>
-            {t('paywall.viewPlans') || "View Plans"}
-          </Button>
+            <Button
+              href={ctaHref}
+              variant="primary"
+              size="sm"
+              className={`flex items-center justify-center font-bold text-[11px] tracking-wider uppercase px-4 ${products.length > 0 ? 'flex-1' : 'w-auto'}`}
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+            >
+              {t('paywall.viewPlans') || "View Plans"}
+            </Button>
+          </div>
         </div>
       </motion.div>
     );

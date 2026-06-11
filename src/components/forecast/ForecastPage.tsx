@@ -5,15 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
+import { usePaywallContext } from '@/context/PaywallContext';
+import PaywallCard from '@/components/paywall/PaywallCard';
+import { PaywallData } from '@/types/paywall';
 import { AREA_THEMES, AREA_LIST, ForecastArea } from '@/data/areaThemes';
+import { getAreaPhaseHex, getAreaPhaseGlow } from '@/data/lifeAreaColors';
 import Card from '@/components/ui/Card';
 import ForecastChart, { ChartPoint } from './ForecastChart';
 import MonthGrid, { MonthData } from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
-import ForecastSnapshot from './ForecastSnapshot';
 import MonthlyDayGrid from './MonthlyDayGrid';
-import WeekStrip from './WeekStrip';
-import { TrendingUp, AlertTriangle, RotateCw } from 'lucide-react';
+import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { resolveTone } from '@/utils/forecastTones';
 import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse } from '@/types/forecast';
 import { todayISO, currentMonthISO } from '@/utils/forecastError';
 
@@ -50,15 +54,16 @@ export default function ForecastPage() {
 
   const initialArea: ForecastArea = useMemo(() => {
     const a = searchParams.get('area');
-    return (AREA_LIST as string[]).includes(a || '') ? (a as ForecastArea) : 'career';
+    return (AREA_LIST as string[]).includes(a || '') ? (a as ForecastArea) : 'general';
   }, [searchParams]);
   const initialRange: TimeRange = useMemo(() => {
     const r = searchParams.get('range');
-    return r === '7d' || r === 'yearly' ? r : 'monthly';
+    return r === 'monthly' || r === 'yearly' ? r : '7d';
   }, [searchParams]);
 
   const [area, setArea] = useState<ForecastArea>(initialArea);
   const [range, setRange] = useState<TimeRange>(initialRange);
+  const [detailModalData, setDetailModalData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [yearlyData, setYearlyData] = useState<YearlyResponse | null>(null);
@@ -68,13 +73,70 @@ export default function ForecastPage() {
   // Shared by 7d (weekly days) and monthly (every day in the month).
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
-  // Cache by `${area}|${range}|${lang}`. Distinct keys for 7d (weekly), monthly, and yearly.
+  // Pagination cursor state: date (for weekly) or month (for monthly)
+  const [cursor, setCursor] = useState<string | null>(null);
+
+  const openDayDetailModal = useCallback((dayDate: string) => {
+    if (range === '7d' && activeWeekly?.days) {
+      const day = activeWeekly.days.find(d => d.date === dayDate);
+      if (day) {
+        setDetailModalData({
+          date: day.date,
+          score: day.score,
+          text: day.text,
+          dominant_planet: day.dominant_planet,
+          alerts: (day.alerts || day.personalized_alerts) as any,
+          transits: day.transits as any,
+          mood: (day as any).mood,
+          lucky_color: (day as any).lucky_color,
+          lucky_number: (day as any).lucky_number,
+          dominant_planet_meaning: (day as any).dominant_planet_meaning,
+          weekday: day.weekday,
+        });
+      }
+    } else if (range === 'monthly' && activeMonthly?.days) {
+      const day = activeMonthly.days.find(d => d.date === dayDate);
+      if (day) {
+        setDetailModalData({
+          date: day.date,
+          score: day.score,
+          text: day.text || '',
+          dominant_planet: undefined,
+          alerts: day.alerts as any,
+          transits: day.transits as any,
+        });
+      }
+    }
+  }, [range, activeWeekly, activeMonthly]);
+
+  const openMonthDetailModal = useCallback((monthName: string) => {
+    if (range === 'yearly' && activeYearly?.months) {
+      const month = activeYearly.months.find(m => m.month === monthName);
+      if (month) {
+        setDetailModalData({
+          month: month.month,
+          score: month.score,
+          text: month.text || '',
+          dominant_planet: undefined,
+          alerts: month.alerts as any,
+          transits: month.transits as any,
+        });
+      }
+    }
+  }, [range, activeYearly]);
+
+  // Reset pagination cursor when changing range or area
+  useEffect(() => {
+    setCursor(null);
+  }, [area, range]);
+
+  // Cache by `${area}|${range}|${lang}|${cursor}`. Distinct keys for 7d (weekly), monthly, and yearly.
   const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
   // Tracks the in-flight request so a slow earlier response (e.g. after the
   // user switches area/range) can't overwrite a newer selection's data.
   const abortRef = useRef<AbortController | null>(null);
-  const cacheKeyFor = useCallback((a: ForecastArea, r: TimeRange, lang: string): string => {
-    return `${a}|${r}|${lang}`;
+  const cacheKeyFor = useCallback((a: ForecastArea, r: TimeRange, lang: string, cur: string | null): string => {
+    return `${a}|${r}|${lang}|${cur || 'default'}`;
   }, []);
 
   useEffect(() => {
@@ -84,7 +146,7 @@ export default function ForecastPage() {
   }, [authLoading, isLoggedIn, router]);
 
   const fetchData = useCallback(async () => {
-    const key = cacheKeyFor(area, range, language);
+    const key = cacheKeyFor(area, range, language, cursor);
     const cached = cacheRef.current.get(key);
     if (cached && Date.now() - cached.timestamp < FORECAST_CACHE_TTL) {
       if (cached.kind === 'weekly') {
@@ -120,7 +182,8 @@ export default function ForecastPage() {
     setError(false);
     try {
       if (range === '7d') {
-        const res = await clientFetch(`/api/forecast/${area}?days_back=3&days_forward=3&lang=${language}`, { signal: controller.signal });
+        const dateStr = cursor || todayISO();
+        const res = await clientFetch(`/api/forecast/${area}/weekly?date=${dateStr}&lang=${language}`, { signal: controller.signal });
         if (controller.signal.aborted) return;
         if (res.ok) {
           const data: WeeklyResponse = await res.json();
@@ -132,7 +195,7 @@ export default function ForecastPage() {
           setError(true);
         }
       } else if (range === 'monthly') {
-        const month = currentMonthISO();
+        const month = cursor || currentMonthISO();
         const res = await clientFetch(`/api/forecast/${area}/monthly?month=${month}&lang=${language}`, { signal: controller.signal });
         if (controller.signal.aborted) return;
         if (res.ok) {
@@ -169,7 +232,7 @@ export default function ForecastPage() {
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
-  }, [area, range, language, cacheKeyFor, selectedDay]);
+  }, [area, range, language, cacheKeyFor, selectedDay, cursor]);
 
   useEffect(() => {
     if (isLoggedIn) fetchData();
@@ -182,42 +245,229 @@ export default function ForecastPage() {
 
   const theme = AREA_THEMES[area];
 
+  const { tier, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
+  const userTier = (tier || 'free').toLowerCase();
+  const isFree = userTier === 'free';
+
+  // Does the currently-selected range actually have data?
+  const hasRealData = useMemo(() => {
+    if (range === '7d') return !!weeklyData?.days?.length;
+    if (range === 'monthly') return !!monthlyData?.days?.length;
+    return !!yearlyData?.months?.length;
+  }, [range, weeklyData, monthlyData, yearlyData]);
+
+  // Is this view blocked/paywalled?
+  const isBlocked = useMemo(() => {
+    if (isFree) {
+      if (range === 'yearly') {
+        return true; // Yearly is strictly Pro/Premium
+      }
+      // For 7d and monthly: blocked if fetch failed (error) OR no data is returned OR explicitly blocked by backend
+      if (error || !hasRealData || isFeatureBlocked('full_daily_horoscope')) {
+        return true;
+      }
+    }
+    return false;
+  }, [isFree, range, error, hasRealData, isFeatureBlocked]);
+
+  const mockWeeklyData = useMemo((): WeeklyResponse => ({
+    area: area,
+    period: 'weekly',
+    period_label: 'June 10 - June 16, 2026',
+    overview: {
+      title: 'Weekly Transit Outlook',
+      text: 'Planetary alignments indicate an active week with significant shifts in your energy cycles. Focus on stability and alignment.',
+      tone: 'steady',
+      key_theme: 'focus'
+    },
+    navigation: { previous: null, next: null, can_go_previous: false, can_go_next: false, limit: { from: '', to: '' } },
+    days: [
+      { date: '2026-06-10', weekday: 'Wed', score: 80, text: 'Strong lunar support enhances clarity and decision making.', dominant_planet: 'Moon' },
+      { date: '2026-06-11', weekday: 'Thu', score: 75, text: 'Jupiter transit brings positive guidance in communication.', dominant_planet: 'Jupiter' },
+      { date: '2026-06-12', weekday: 'Fri', score: 85, text: 'Vibrant energy. Excellent time for creative undertakings.', dominant_planet: 'Venus' },
+      { date: '2026-06-13', weekday: 'Sat', score: 60, text: 'Saturn energy suggests caution in financial decisions.', dominant_planet: 'Saturn' },
+      { date: '2026-06-14', weekday: 'Sun', score: 70, text: 'Sun alignment brings clarity to personal goals.', dominant_planet: 'Sun' },
+      { date: '2026-06-15', weekday: 'Mon', score: 90, text: 'Peak alignment. Favorable for new initiatives.', dominant_planet: 'Mercury' },
+      { date: '2026-06-16', weekday: 'Tue', score: 65, text: 'Mars energy suggests avoiding conflicts today.', dominant_planet: 'Mars' }
+    ],
+    summary: { best_day: 'Monday', worst_day: 'Saturday', average_score: 75, trend: 'improving' }
+  }), [area]);
+
+  const mockMonthlyData = useMemo((): MonthlyResponse => ({
+    area: area,
+    period: 'monthly',
+    period_label: 'June 2026',
+    overview: {
+      title: 'Monthly Cycle Summary',
+      text: 'A constructive month ahead with favorable planetary transits supporting your personal and professional growth.',
+      tone: 'positive',
+      key_theme: 'growth'
+    },
+    navigation: { previous: null, next: null, can_go_previous: false, can_go_next: false, limit: { from: '', to: '' } },
+    weeks: [],
+    days: Array.from({ length: 30 }, (_, i) => ({
+      date: `2026-06-${String(i + 1).padStart(2, '0')}`,
+      weekday: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][(i + 3) % 7], // 2026-06-01 is Monday
+      score: 60 + Math.floor(Math.sin(i) * 25),
+      text: 'Favorable cosmic trends support development.'
+    })),
+    summary: { best_day: 'June 15', worst_day: 'June 4', average_score: 72, trend: 'steady' }
+  }), [area]);
+
+  const mockYearlyData = useMemo((): YearlyResponse => ({
+    area: area,
+    period: 'yearly',
+    period_label: '2026 Yearly Forecast',
+    overview: {
+      title: 'Annual Alignment Overview',
+      text: 'Your solar return and major Dasha transits highlight career progression and spiritual expansion as key pillars for this year.',
+      tone: 'buoyant',
+      key_theme: 'expansion'
+    },
+    navigation: { previous: null, next: null, can_go_previous: false, can_go_next: false, limit: { from: '', to: '' } },
+    months: [
+      { month: '2026-01', label: 'January', score: 70, is_current: false, text: 'New foundations.' },
+      { month: '2026-02', label: 'February', score: 75, is_current: false, text: 'Growth cycle.' },
+      { month: '2026-03', label: 'March', score: 85, is_current: false, text: 'Peak alignment.' },
+      { month: '2026-04', label: 'April', score: 60, is_current: false, text: 'Reflective period.' },
+      { month: '2026-05', label: 'May', score: 65, is_current: false, text: 'Action phase.' },
+      { month: '2026-06', label: 'June', score: 80, is_current: true, text: 'Constructive shifts.' },
+      { month: '2026-07', label: 'July', score: 70, is_current: false, text: 'Stabilization.' },
+      { month: '2026-08', label: 'August', score: 55, is_current: false, text: 'Caution advised.' },
+      { month: '2026-09', label: 'September', score: 90, is_current: false, text: 'Exceptional progress.' },
+      { month: '2026-10', label: 'October', score: 75, is_current: false, text: 'Creative expansion.' },
+      { month: '2026-11', label: 'November', score: 80, is_current: false, text: 'Harvest cycle.' },
+      { month: '2026-12', label: 'December', score: 65, is_current: false, text: 'Review and wrap.' }
+    ],
+    summary: { best_month: 'September', worst_month: 'August', average_score: 72, trend: 'improving' }
+  }), [area]);
+
+  const activeWeekly = useMemo(() => {
+    if (isBlocked && !weeklyData) return mockWeeklyData;
+    return weeklyData;
+  }, [isBlocked, weeklyData, mockWeeklyData]);
+
+  const activeMonthly = useMemo(() => {
+    if (isBlocked && !monthlyData) return mockMonthlyData;
+    return monthlyData;
+  }, [isBlocked, monthlyData, mockMonthlyData]);
+
+  const activeYearly = useMemo(() => {
+    if (isBlocked && !yearlyData) return mockYearlyData;
+    return yearlyData;
+  }, [isBlocked, yearlyData, mockYearlyData]);
+
+  // Set default selected day/month when blocked and using mock data
+  useEffect(() => {
+    if (isBlocked) {
+      if (range === '7d') {
+        setSelectedDay('2026-06-10');
+      } else if (range === 'monthly') {
+        setSelectedDay('2026-06-10');
+      } else if (range === 'yearly') {
+        setSelectedMonth('2026-06');
+      }
+    }
+  }, [isBlocked, range]);
+
+  const fallbackPaywall: PaywallData = useMemo(() => {
+    const isYearly = range === 'yearly';
+    return {
+      featureKey: 'full_daily_horoscope',
+      isSoft: true,
+      title: isYearly ? "Yearly Forecast is Premium" : "Unlock Personal Forecasts",
+      description: isYearly
+        ? "Access 12-month Vedic forecast tracking planetary periods (Dasha) and transits for your chart. Only for Pro users."
+        : "Get personalized daily, weekly, and monthly Vedic forecasts mapped to your planetary periods and houses.",
+      badge: isYearly ? "Pro" : "Premium",
+      icon: "🔒",
+      suggestedProducts: [
+        {
+          productId: "sub_pro_monthly",
+          productType: "subscription",
+          nameEn: "Pro Monthly",
+          credits: 0,
+          tier: "pro",
+          priceInr: 199,
+          currency: "INR"
+        }
+      ]
+    };
+  }, [range]);
+
+  const activePaywall = getFeaturePaywall('full_daily_horoscope') || fallbackPaywall;
+
   const chartPoints: ChartPoint[] = useMemo(() => {
-    if (range === '7d' && weeklyData?.days) {
-      return weeklyData.days.map(d => ({
-        label: d.date,
-        score: d.score,
-        isCurrent: d.is_today || d.date === todayISO(),
-      }));
+    if (range === '7d' && activeWeekly?.days) {
+      return activeWeekly.days.map(d => {
+        let weekdayKey = (d.weekday || '').slice(0, 3).toLowerCase();
+        if (!weekdayKey && d.date) {
+          const dateObj = new Date(d.date + 'T00:00:00');
+          const weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          weekdayKey = weekDays[dateObj.getDay()];
+        }
+        const weekdayShort = t(`forecast.weekdays.${weekdayKey}`).toUpperCase();
+        return {
+          label: d.date,
+          score: d.score,
+          isCurrent: d.is_today || d.date === todayISO(),
+          displayLabel: weekdayShort,
+        };
+      });
     }
-    if (range === 'monthly' && monthlyData?.days) {
+    if (range === 'monthly' && activeMonthly?.days) {
       const today = todayISO();
-      return monthlyData.days.map(d => ({
-        label: d.date,
-        score: d.score,
-        isCurrent: d.date === today,
-      }));
+      return activeMonthly.days.map(d => {
+        const dateObj = new Date(d.date + 'T00:00:00');
+        const dayOfMonth = dateObj.getDate();
+        const showLabel = dayOfMonth === 1 || dayOfMonth % 5 === 0;
+        return {
+          label: d.date,
+          score: d.score,
+          isCurrent: d.date === today,
+          displayLabel: showLabel ? dayOfMonth.toString() : '',
+        };
+      });
     }
-    if (range === 'yearly' && yearlyData?.months) {
-      return yearlyData.months.map(m => ({
-        label: m.month,
-        score: m.score,
-        isCurrent: m.is_current,
-      }));
+    if (range === 'yearly' && activeYearly?.months) {
+      return activeYearly.months.map(m => {
+        const dateObj = new Date(m.month + '-01T00:00:00');
+        const monthIdx = dateObj.getMonth();
+        const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        const labelStr = t(`forecast.monthsShort.${monthKeys[monthIdx]}`).toUpperCase();
+        return {
+          label: m.month,
+          score: m.score,
+          isCurrent: m.is_current,
+          displayLabel: labelStr,
+        };
+      });
     }
     return [];
-  }, [range, weeklyData, monthlyData, yearlyData]);
+  }, [range, activeWeekly, activeMonthly, activeYearly, t]);
 
   const activeLabel = range === 'yearly' ? selectedMonth : selectedDay;
 
   const insightData = useMemo(() => {
-    if (range === '7d' && weeklyData?.days && selectedDay) {
-      const day = weeklyData.days.find(d => d.date === selectedDay);
+    if (range === '7d' && activeWeekly?.days && selectedDay) {
+      const day = activeWeekly.days.find(d => d.date === selectedDay);
       if (!day) return null;
-      return { date: day.date, score: day.score, text: day.text, dominant_planet: day.dominant_planet, alerts: (day.alerts || day.personalized_alerts) as (string | { simple: string; technical?: string })[], transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined };
+      return {
+        date: day.date,
+        score: day.score,
+        text: day.text,
+        dominant_planet: day.dominant_planet,
+        alerts: (day.alerts || day.personalized_alerts) as (string | { simple: string; technical?: string })[],
+        transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined,
+        mood: (day as any).mood,
+        lucky_color: (day as any).lucky_color,
+        lucky_number: (day as any).lucky_number,
+        dominant_planet_meaning: (day as any).dominant_planet_meaning,
+        weekday: day.weekday,
+      };
     }
-    if (range === 'monthly' && monthlyData?.days && selectedDay) {
-      const day = monthlyData.days.find(d => d.date === selectedDay);
+    if (range === 'monthly' && activeMonthly?.days && selectedDay) {
+      const day = activeMonthly.days.find(d => d.date === selectedDay);
       if (!day) return null;
       return {
         date: day.date,
@@ -228,21 +478,47 @@ export default function ForecastPage() {
         transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined,
       };
     }
-    if (range === 'yearly' && yearlyData?.months && selectedMonth) {
-      const month = yearlyData.months.find(m => m.month === selectedMonth);
+    if (range === 'yearly' && activeYearly?.months && selectedMonth) {
+      const month = activeYearly.months.find(m => m.month === selectedMonth);
       if (!month) return null;
       return { month: month.month, score: month.score, text: month.text || '', dominant_planet: undefined, alerts: month.alerts as (string | { simple: string; technical?: string })[] | undefined, transits: month.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined };
     }
     return null;
-  }, [range, weeklyData, monthlyData, yearlyData, selectedDay, selectedMonth]);
+  }, [range, activeWeekly, activeMonthly, activeYearly, selectedDay, selectedMonth]);
 
-  const summary = range === '7d' ? weeklyData?.summary : range === 'monthly' ? monthlyData?.summary : yearlyData?.summary;
+  const summary = range === '7d' ? activeWeekly?.summary : range === 'monthly' ? activeMonthly?.summary : activeYearly?.summary;
+
+  const activeOverview = useMemo(() => {
+    if (range === '7d') return activeWeekly?.overview;
+    if (range === 'monthly') return activeMonthly?.overview;
+    return activeYearly?.overview;
+  }, [range, activeWeekly, activeMonthly, activeYearly]);
+
+  const activeNavigation = useMemo(() => {
+    if (range === '7d') return activeWeekly?.navigation;
+    if (range === 'monthly') return activeMonthly?.navigation;
+    return activeYearly?.navigation;
+  }, [range, activeWeekly, activeMonthly, activeYearly]);
+
+  const activePeriodLabel = useMemo(() => {
+    if (range === '7d') return activeWeekly?.period_label;
+    if (range === 'monthly') return activeMonthly?.period_label;
+    return activeYearly?.period_label;
+  }, [range, activeWeekly, activeMonthly, activeYearly]);
+
+  const handlePrevious = useCallback((prevCursor: string) => {
+    setCursor(prevCursor);
+  }, []);
+
+  const handleNext = useCallback((nextCursor: string) => {
+    setCursor(nextCursor);
+  }, []);
 
   // Does the currently-selected range actually have data to render?
   const hasData =
-    range === '7d' ? !!weeklyData?.days?.length
-    : range === 'monthly' ? !!monthlyData?.days?.length
-    : !!yearlyData?.months?.length;
+    range === '7d' ? !!activeWeekly?.days?.length
+    : range === 'monthly' ? !!activeMonthly?.days?.length
+    : !!activeYearly?.months?.length;
 
   if (authLoading || !isLoggedIn) {
     return (
@@ -254,18 +530,34 @@ export default function ForecastPage() {
 
   return (
     <div className="w-full min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)]">
-      <div className="max-w-[1360px] 3xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 3xl:py-16">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10 3xl:py-16">
         {/* Header */}
-        <div className="mb-6 sm:mb-10 lg:mb-12">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-secondary animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.3em]">{t('forecast.title')}</span>
+        <div className="mb-2 flex flex-col items-center text-center">
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20">
+              <TrendingUp className="w-3.5 h-3.5 text-secondary animate-pulse" />
+              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('forecast.title')}</span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-headline font-black tracking-tight text-foreground">{t('forecast.heading')}</h1>
           </div>
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl 3xl:text-6xl font-headline font-black tracking-tight text-foreground">{t('forecast.heading')}</h1>
+        </div>
+
+        {/* Time range toggle */}
+        <div className="flex gap-1 p-1 rounded-xl bg-surface border border-white/5 w-fit mx-auto mb-2">
+          {([
+            ['7d', 'This Week'],
+            ['monthly', 'This Month'],
+            ['yearly', 'This Year']
+          ] as [TimeRange, string][]).map(([key, label]) => (
+            <button key={key} onClick={() => setRange(key)}
+              className={`px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/30 hover:text-foreground/60'}`}>
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Area pills */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-4 sm:mb-6 pb-1">
+        <div className="flex gap-2 overflow-x-auto justify-start md:justify-center scrollbar-hide mb-2 pb-1">
           {AREA_LIST.map(a => {
             const th = AREA_THEMES[a];
             const Icon = th.icon;
@@ -280,94 +572,37 @@ export default function ForecastPage() {
           })}
         </div>
 
-        {/* Time range toggle */}
-        <div className="flex gap-1 p-1 rounded-xl bg-surface border border-white/5 w-fit mb-6 sm:mb-8">
-          {([['7d', t('forecast.weekly')], ['monthly', t('forecast.monthly')], ['yearly', t('forecast.yearly')]] as [TimeRange, string][]).map(([key, label]) => (
-            <button key={key} onClick={() => setRange(key)}
-              className={`px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/30 hover:text-foreground/60'}`}>
-              {label}
-            </button>
-          ))}
-        </div>
-
         {loading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-pulse" aria-busy="true" aria-label={t('forecast.loading')}>
-            {/* Left column skeleton */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
-              {/* Chart card skeleton */}
-              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/20">
-                <div className="p-4 sm:p-8">
-                  <div className="h-44 sm:h-56 lg:h-64 w-full rounded-xl bg-surface-variant/15" />
-                </div>
-                <div className="px-4 sm:px-8 pb-4 sm:pb-6 flex flex-wrap gap-3 sm:gap-6 border-t border-white/5 pt-4">
-                  {[0, 1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-surface-variant/30" />
-                      <div className="h-3 w-20 rounded bg-surface-variant/20" />
+          <div className="flex flex-col gap-6 animate-pulse" aria-busy="true" aria-label={t('forecast.loading')}>
+            {/* Overview & Chart Card Skeleton */}
+            <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/80">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 sm:p-8">
+                <div className="lg:col-span-5 flex flex-col gap-6">
+                  <div className="h-6 w-32 rounded bg-surface-variant/25" />
+                  <div className="flex gap-4">
+                    <div className="w-20 h-20 rounded-full bg-surface-variant/20 animate-pulse" />
+                    <div className="space-y-2 flex-grow">
+                      <div className="h-5 w-2/3 rounded bg-surface-variant/25" />
+                      <div className="h-4 w-full rounded bg-surface-variant/15" />
                     </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Grid selector skeleton — mirrors weekly day strip, monthly day grid, or yearly month grid */}
-              {range === '7d' && (
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
-                  {[0, 1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="flex flex-col items-center p-1.5 sm:p-3 rounded-xl border border-white/5 bg-surface/30 gap-1.5">
-                      <div className="h-2.5 w-8 rounded bg-surface-variant/20" />
-                      <div className="h-6 w-6 rounded bg-surface-variant/25" />
-                      <div className="h-2 w-5 rounded bg-surface-variant/15" />
-                    </div>
-                  ))}
-                </div>
-              )}
-              {range === 'monthly' && (
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-                  {Array.from({ length: 35 }).map((_, i) => (
-                    <div key={i} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl border border-white/5 bg-surface/30" />
-                  ))}
-                </div>
-              )}
-              {range === 'yearly' && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <div key={i} className="h-20 sm:h-24 rounded-xl border border-white/5 bg-surface/30" />
-                  ))}
-                </div>
-              )}
-
-              {/* Insight skeleton */}
-              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 bg-surface/20">
-                <div className="p-4 sm:p-6 space-y-3">
-                  <div className="h-4 w-32 rounded bg-surface-variant/25" />
-                  <div className="space-y-2">
-                    <div className="h-3 w-full rounded bg-surface-variant/15" />
-                    <div className="h-3 w-11/12 rounded bg-surface-variant/15" />
-                    <div className="h-3 w-3/4 rounded bg-surface-variant/15" />
                   </div>
                 </div>
-              </Card>
-            </div>
+                <div className="lg:col-span-7 h-44 sm:h-56 lg:h-64 w-full rounded-xl bg-surface-variant/15" />
+              </div>
+            </Card>
 
-            {/* Right column skeleton (Snapshot) */}
-            <div className="lg:col-span-4 lg:sticky lg:top-24">
-              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 bg-surface/20">
-                <div className="p-4 sm:p-6 space-y-4">
-                  <div className="h-3 w-20 rounded bg-surface-variant/25" />
-                  <div className="h-8 w-2/3 rounded bg-surface-variant/25" />
-                  <div className="h-px w-full bg-white/5" />
-                  {[0, 1, 2].map(i => (
-                    <div key={i} className="space-y-1.5">
-                      <div className="h-2.5 w-16 rounded bg-surface-variant/20" />
-                      <div className="h-3 w-full rounded bg-surface-variant/15" />
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
+            {/* Days Breakdown Skeleton */}
+            <Card padding="lg" className="border-white/5 bg-surface/80 !rounded-[32px]">
+              <div className="h-5 w-48 rounded bg-surface-variant/25 mb-6" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="h-32 rounded-xl bg-surface-variant/10 border border-white/5" />
+                ))}
+              </div>
+            </Card>
           </div>
-        ) : error ? (
-          <Card padding="lg" className="border-white/5 bg-surface/20 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
+        ) : (error && !isBlocked) ? (
+          <Card padding="lg" className="border-white/5 bg-surface/80 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
             <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
               <AlertTriangle className="w-7 h-7 text-red-400" />
             </div>
@@ -383,8 +618,8 @@ export default function ForecastPage() {
               {t('forecast.retry')}
             </button>
           </Card>
-        ) : !hasData ? (
-          <Card padding="lg" className="border-white/5 bg-surface/20 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
+        ) : (!hasData && !isBlocked) ? (
+          <Card padding="lg" className="border-white/5 bg-surface/80 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
             <div className="w-14 h-14 rounded-full bg-surface-variant/15 flex items-center justify-center">
               <TrendingUp className="w-7 h-7 text-foreground/30" />
             </div>
@@ -401,61 +636,263 @@ export default function ForecastPage() {
             </button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Column: Observatory & Selection & Insight */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
-              {/* Chart */}
-              <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/20">
-                <div className="p-4 sm:p-8">
-                  <div className="h-44 sm:h-56 lg:h-64 w-full">
-                    <ForecastChart
-                      points={chartPoints}
-                      colorHex={theme.hex}
-                      activeLabel={activeLabel || undefined}
-                      onSelect={range === 'yearly' ? setSelectedMonth : setSelectedDay}
-                    />
+          <div className="relative">
+            <div className={`flex flex-col gap-6 transition-all duration-300 ${isBlocked ? 'filter blur-md select-none pointer-events-none' : ''}`}>
+              
+              {/* Card 1: Overview & Chart */}
+              {activeOverview && activeNavigation && (
+                <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/80 relative">
+                  {range === 'monthly' ? (
+                    /* Monthly layout: col1 = calendar, col2 = 2 rows (ratings top, chart bottom) */
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 p-6 sm:p-8 items-start">
+
+                      {/* Left Column: Monthly Outlook Calendar */}
+                      <div className="lg:col-span-6 flex flex-col gap-4 pr-0 lg:pr-6 lg:border-r border-white/5">
+                        <div className="flex items-center justify-between gap-3">
+                          <span
+                            className="px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
+                            style={{ color: theme.hex, backgroundColor: theme.hex + '12' }}
+                          >
+                            {activePeriodLabel}
+                          </span>
+                          {/* Arrow Navigation */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => activeNavigation.can_go_previous && activeNavigation.previous && handlePrevious(activeNavigation.previous)}
+                              disabled={!activeNavigation.can_go_previous}
+                              aria-label={t('forecast.previous')}
+                              className="w-8 h-8 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                              <ChevronLeft className="w-4 h-4 text-foreground/70" />
+                            </button>
+                            <button
+                              onClick={() => activeNavigation.can_go_next && activeNavigation.next && handleNext(activeNavigation.next)}
+                              disabled={!activeNavigation.can_go_next}
+                              aria-label={t('forecast.next')}
+                              className="w-8 h-8 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                              <ChevronRight className="w-4 h-4 text-foreground/70" />
+                            </button>
+                          </div>
+                        </div>
+                        <h3 className="text-sm font-bold text-foreground/50 uppercase tracking-widest">Monthly Outlook</h3>
+                        {activeMonthly?.days && (
+                          <MonthlyDayGrid
+                            days={activeMonthly.days}
+                            colorHex={theme.hex}
+                            area={area}
+                            selectedDate={selectedDay}
+                            onSelect={openDayDetailModal}
+                          />
+                        )}
+                      </div>
+
+                      {/* Right Column: Row 1 = ratings, Row 2 = chart */}
+                      <div className="lg:col-span-6 flex flex-col justify-between pl-0 lg:pl-6 mt-6 lg:mt-0">
+
+                        {/* Row 1: Rating circle + title/description + badges/stats */}
+                        <div className="flex flex-col gap-5 pb-6 border-b border-white/5">
+                          {/* Tone & Theme Badges + Summary Statistics */}
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {activeOverview.tone && (
+                                <span
+                                  className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                                  style={{ color: resolveTone(activeOverview.tone, theme.hex).color, backgroundColor: resolveTone(activeOverview.tone, theme.hex).color + '12' }}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, theme.hex).color }} />
+                                  {t(resolveTone(activeOverview.tone, theme.hex).labelKey) || activeOverview.tone}
+                                </span>
+                              )}
+                              {activeOverview.key_theme && (
+                                <span className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/70">
+                                  <Sparkles className="w-3.5 h-3.5 text-secondary/70" />
+                                  <span className="capitalize">{activeOverview.key_theme}</span>
+                                </span>
+                              )}
+                            </div>
+                            {summary && (
+                              <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[10px] font-bold">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: getAreaPhaseHex(area, 80) }} />
+                                  <span className="text-foreground/40">{t('forecast.best')}:</span>
+                                  <span className="text-foreground/70">{range === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: getAreaPhaseHex(area, 20) }} />
+                                  <span className="text-foreground/40">{t('forecast.worst')}:</span>
+                                  <span className="text-foreground/70">{range === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-foreground/40">{t('forecast.avg')}:</span>
+                                  <span style={{ color: getAreaPhaseHex(area, summary.average_score) }}>{summary.average_score}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-foreground/40">{t('forecast.trend')}:</span>
+                                  <span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          {/* Avg score circle + title + description */}
+                          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                            <div className="shrink-0">
+                              <div className="relative w-36 h-36 flex items-center justify-center">
+                                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
+                                  <circle cx="48" cy="48" r="40" className="stroke-white/[0.04] fill-none" strokeWidth="6" />
+                                  <circle
+                                    cx="48" cy="48" r="40"
+                                    className="fill-none transition-all duration-1000"
+                                    strokeWidth="6" strokeLinecap="round"
+                                    style={{
+                                      stroke: getAreaPhaseHex(area, summary?.average_score ?? 0),
+                                      strokeDasharray: '251.3',
+                                      strokeDashoffset: (251.3 - (251.3 * (summary?.average_score ?? 0)) / 100).toString(),
+                                      filter: `drop-shadow(0 0 8px ${getAreaPhaseGlow(area, summary?.average_score ?? 0)}50)`
+                                    }}
+                                  />
+                                </svg>
+                                <div className="absolute flex flex-col items-center justify-center">
+                                  <span className="text-4xl font-headline font-black" style={{ color: getAreaPhaseHex(area, summary?.average_score ?? 0) }}>{summary?.average_score ?? 0}</span>
+                                  <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">/ 100</span>
+                                </div>
+                              </div>
+                              <div className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest text-center mt-2">Avg Score</div>
+                            </div>
+                            <div className="flex-grow space-y-3 text-center sm:text-left">
+                              <h2 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight tracking-tight">
+                                {activeOverview.title}
+                              </h2>
+                              <p className="text-sm sm:text-base text-foreground/75 leading-relaxed">
+                                {activeOverview.text}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Row 2: Chart */}
+                        <div className="h-44 sm:h-52 w-full pt-5">
+                          <ForecastChart
+                            points={chartPoints}
+                            colorHex={theme.hex}
+                            activeLabel={activeLabel || undefined}
+                            onSelect={(d) => { setSelectedDay(d); openDayDetailModal(d); }}
+                          />
+                        </div>
+
+                      </div>
+                    </div>
+                  ) : null}
+                </Card>
+              )}
+
+              {/* Card 2: 7 Days Breakdown (or monthly/yearly grids) */}
+              {range === '7d' && activeWeekly?.days && (
+                <Card className="border-white/5 bg-surface/80 shadow-xl !rounded-[32px] p-6 sm:p-8">
+                  <h3 className="text-lg font-headline font-bold text-foreground mb-6">7-Day Breakdown</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    {activeWeekly.days.map(day => {
+                      const today = todayISO();
+                      const isToday = day.date === today;
+                      let weekdayKey = (day.weekday || '').slice(0, 3).toLowerCase();
+                      if (!weekdayKey && day.date) {
+                        const dateObj = new Date(day.date + 'T00:00:00');
+                        const weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                        weekdayKey = weekDays[dateObj.getDay()];
+                      }
+                      const weekdayShort = t(`forecast.weekdays.${weekdayKey}`).toUpperCase();
+                      const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
+                      const displayDateStr = new Date(day.date).toLocaleDateString(language || 'en', { day: 'numeric', month: 'short' });
+
+                      return (
+                        <div
+                          key={day.date}
+                          className={`flex flex-col justify-between items-center p-5 rounded-2xl border transition-all text-center gap-4 ${isToday ? 'bg-secondary/5 border-secondary/20 shadow-md' : 'bg-surface-variant/5 border-white/5 hover:border-white/10'}`}
+                          style={{
+                            boxShadow: isToday ? `0 0 20px ${theme.hex}10` : undefined,
+                          }}
+                        >
+                          <div className="space-y-1">
+                            <span className={`text-[10px] font-black uppercase tracking-wider ${isToday ? 'text-secondary' : 'text-foreground/45'}`}>
+                              {isToday ? 'TODAY' : weekdayShort}
+                            </span>
+                            <h4 className="text-xl font-headline font-black text-foreground leading-none">{dayOfMonth}</h4>
+                            <p className="text-[10px] text-foreground/40 font-medium">{displayDateStr}</p>
+                          </div>
+
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-2xl font-headline font-black" style={{ color: getAreaPhaseHex(area, day.score) }}>{day.score}</span>
+                            <span className="text-[8px] font-bold text-foreground/40 uppercase tracking-widest">Score</span>
+                          </div>
+
+                          <button
+                            onClick={() => openDayDetailModal(day.date)}
+                            className="w-full py-2 bg-secondary/10 hover:bg-secondary/20 border border-secondary/15 hover:border-secondary/40 text-secondary rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
+                </Card>
+              )}
+
+              {/* Monthly calendar is now embedded inside Card 1 for range === 'monthly' */}
+
+              {range === 'yearly' && activeYearly?.months && (
+                <Card className="border-white/5 bg-surface/80 shadow-xl !rounded-[32px] p-6 sm:p-8">
+                  <h3 className="text-lg font-headline font-bold text-foreground mb-6">Yearly Outlook</h3>
+                  <MonthGrid
+                    months={activeYearly.months}
+                    colorHex={theme.hex}
+                    area={area}
+                    selectedMonth={selectedMonth}
+                    onSelect={openMonthDetailModal}
+                  />
+                </Card>
+              )}
+
+            </div>
+
+            {/* Paywall Overlay */}
+            {isBlocked && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center p-4 sm:p-8 bg-black/10 rounded-[32px] sm:rounded-[40px] pointer-events-auto">
+                <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
+                  <PaywallCard paywall={activePaywall} variant="inline" />
                 </div>
-                {summary && (
-                  <div className="px-4 sm:px-8 pb-4 sm:pb-6 flex flex-wrap gap-3 sm:gap-6 text-[10px] sm:text-[11px] font-bold border-t border-white/5 pt-4">
-                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.best')}:</span><span className="text-foreground/70">{range === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span></div>
-                    <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /><span className="text-foreground/40">{t('forecast.worst')}:</span><span className="text-foreground/70">{range === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day}</span></div>
-                    <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.avg')}:</span><span style={{ color: theme.hex }}>{summary.average_score}</span></div>
-                    <div className="flex items-center gap-1.5"><span className="text-foreground/40">{t('forecast.trend')}:</span><span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span></div>
-                  </div>
-                )}
-              </Card>
-
-              {/* Grid selector */}
-              {range === '7d' && weeklyData?.days && (
-                <WeekStrip days={weeklyData.days} colorHex={theme.hex} selectedDate={selectedDay} onSelect={setSelectedDay} />
-              )}
-
-              {range === 'monthly' && monthlyData?.days && (
-                <MonthlyDayGrid days={monthlyData.days} colorHex={theme.hex} selectedDate={selectedDay} onSelect={setSelectedDay} />
-              )}
-
-              {range === 'yearly' && yearlyData?.months && (
-                <MonthGrid months={yearlyData.months} colorHex={theme.hex} selectedMonth={selectedMonth} onSelect={setSelectedMonth} />
-              )}
-
-              {/* Insight */}
-              <ForecastInsight data={insightData} colorHex={theme.hex} />
-            </div>
-
-            {/* Right Column: Sticky Cosmic Snapshot Panel */}
-            <div className="lg:col-span-4 lg:sticky lg:top-24">
-              <ForecastSnapshot 
-                insight={insightData} 
-                summary={summary ?? null} 
-                range={range} 
-                theme={theme} 
-                t={t} 
-              />
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Detail Popup Modal */}
+      <AnimatePresence>
+        {detailModalData && (
+          <div
+            onClick={() => setDetailModalData(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md cursor-pointer"
+          >
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`relative w-full ${range === '7d' ? 'lg:max-w-[66.666vw]' : 'max-w-2xl'} bg-surface border border-white/10 rounded-[32px] shadow-2xl text-left overflow-y-auto max-h-[90vh] cursor-default p-6 sm:p-8`}
+            >
+              <button
+                onClick={() => setDetailModalData(null)}
+                className="absolute top-6 right-6 z-10 p-2 rounded-full bg-white/5 hover:bg-white/10 text-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <ForecastInsight data={detailModalData} colorHex={theme.hex} isWide={range === '7d'} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
