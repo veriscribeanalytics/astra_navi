@@ -238,8 +238,8 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
       >
         <defs>
           <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colorHex} stopOpacity="0.4" />
-            <stop offset="60%" stopColor={colorHex} stopOpacity="0.12" />
+            <stop offset="0%" stopColor={colorHex} stopOpacity="0.18" />
+            <stop offset="60%" stopColor={colorHex} stopOpacity="0.06" />
             <stop offset="100%" stopColor={colorHex} stopOpacity="0" />
           </linearGradient>
         </defs>
@@ -269,7 +269,7 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: `drop-shadow(0 4px 10px ${colorHex}55)` }}
+          style={{ filter: `drop-shadow(0 4px 10px ${colorHex}25)` }}
         />
 
         {/* Points + score labels + x-axis labels */}
@@ -522,9 +522,18 @@ export default function DashboardHome() {
   const { data: horoscope, isLoading: horoscopeLoading, profileLocationRequired } = useDailyHoroscope();
   const { data: transits, isLoading: transitsLoading } = useTransitsToday();
   const { setSelectedAvatarId, avatars } = useChat();
-  const [activeArea, setActiveArea] = useState<ForecastArea>("general");
-  const [forecast, setForecast] = useState<ForecastData | null>(null);
-  const [forecastLoading, setForecastLoading] = useState(false);
+  const [activeArea, setActiveArea] = useState<ForecastArea>("career");
+  const [allWeeklyForecasts, setAllWeeklyForecasts] = useState<Record<ForecastArea, ForecastData | null>>({
+    general: null,
+    love: null,
+    career: null,
+    finance: null,
+    health: null,
+    spiritual: null,
+  });
+  const [allForecastsLoading, setAllForecastsLoading] = useState(false);
+  const forecast = allWeeklyForecasts[activeArea];
+  const forecastLoading = allForecastsLoading;
   const [pendingPrompt, setPendingPrompt] = useState<ChatPrompt | null>(null);
   const [isPanchangModalOpen, setIsPanchangModalOpen] = useState(false);
   const [isRahuKaalModalOpen, setIsRahuKaalModalOpen] = useState(false);
@@ -688,38 +697,56 @@ export default function DashboardHome() {
   ]);
 
   useEffect(() => {
-    setForecastLoading(true);
+    if (isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope')) {
+      return;
+    }
     const date = todayISO();
-    clientFetch(`/api/forecast/${activeArea}/weekly?date=${date}&lang=${language}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data.days)) {
-          const mappedForecast: ForecastData = {
-            area: data.area as ForecastArea,
-            days: data.days.map((d: any) => ({
-              date: d.date,
-              is_today: d.is_today ?? (d.date === date),
-              score: d.score,
-              text: d.text || "",
-              dominant_planet: d.dominant_planet || "",
-              personalized_alerts: d.alerts || [],
-              transits: d.transits,
-            })),
-            summary: data.summary || {
-              best_day: "",
-              worst_day: "",
-              average_score: 0,
-              trend: "neutral",
-            },
-          };
-          setForecast(mappedForecast);
-        } else {
-          setForecast(null);
+    setAllForecastsLoading(true);
+
+    Promise.all(
+      AREA_LIST.map(async (area) => {
+        try {
+          const res = await clientFetch(`/api/forecast/${area}/weekly?date=${date}&lang=${language}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.days)) {
+              return {
+                area,
+                data: {
+                  area: data.area as ForecastArea,
+                  days: data.days.map((d: any) => ({
+                    date: d.date,
+                    is_today: d.is_today ?? (d.date === date),
+                    score: d.score,
+                    text: d.text || "",
+                    dominant_planet: d.dominant_planet || "",
+                    personalized_alerts: d.alerts || [],
+                    transits: d.transits,
+                  })),
+                  summary: data.summary || {
+                    best_day: "",
+                    worst_day: "",
+                    average_score: 70,
+                    trend: "stable",
+                  },
+                },
+              };
+            }
+          }
+        } catch (err) {
+          console.warn(`[GptDashboard] Failed to fetch forecast for ${area}:`, err);
         }
+        return { area, data: null };
       })
-      .catch((err) => console.warn("[GptDashboard] Weekly forecast failed:", err))
-      .finally(() => setForecastLoading(false));
-  }, [activeArea, language]);
+    ).then((results) => {
+      const newForecasts = {} as Record<ForecastArea, ForecastData | null>;
+      results.forEach(({ area, data }) => {
+        newForecasts[area] = data;
+      });
+      setAllWeeklyForecasts(newForecasts);
+      setAllForecastsLoading(false);
+    });
+  }, [language, isFeatureBlocked, getFeaturePaywall]);
 
   const currentDate = useMemo(
     () =>
@@ -733,7 +760,12 @@ export default function DashboardHome() {
   );
 
   const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
-  const overallScore = horoscope?.score?.overall ?? horoscope?.overall_score ?? 73;
+  const overallScore = useMemo(() => {
+    if (!horoscope) return 73;
+    const scores = AREA_LIST.map((area) => getAreaScore(horoscope, area));
+    const sum = scores.reduce((acc, val) => acc + val, 0);
+    return Math.round(sum / AREA_LIST.length);
+  }, [horoscope]);
   const overallColor = getAreaColor("general", overallScore);
   const overallPhaseHex = overallColor.main;
   const overallPhaseGlow = overallColor.glow;
@@ -780,7 +812,6 @@ export default function DashboardHome() {
   const antardashaRange = formatDashaRange(kundliStats?.antaStart, kundliStats?.antaEnd);
 
   const activeAreaLabel = resolveAreaLabel(t, activeArea);
-  const activeAreaHex = AREA_THEMES[activeArea].hex;
   const activeAvatar = useMemo(() => {
     const AREA_TO_AVATAR_ID: Record<string, string> = {
       general: "navi",
@@ -950,6 +981,107 @@ export default function DashboardHome() {
 
     return generalItem ? [generalItem, ...otherItems] : otherItems;
   }, [horoscope, t]);
+
+  const stabilitySortedAreas = useMemo(() => {
+    const list = AREA_LIST.map((area) => {
+      const forecastData = allWeeklyForecasts[area];
+      if (!forecastData || !forecastData.days || forecastData.days.length === 0) {
+        return { area, diff: 70 };
+      }
+      
+      const scores = forecastData.days.map((d) => d.score);
+      const sum = scores.reduce((a, b) => a + b, 0);
+      const weeklyAvg = sum / scores.length;
+      
+      const absDeviations = scores.map((s) => Math.abs(s - weeklyAvg));
+      const sumDeviations = absDeviations.reduce((a, b) => a + b, 0);
+      const meanAbsDeviation = sumDeviations / scores.length;
+      
+      return { area, diff: meanAbsDeviation };
+    });
+
+    // Sort by absolute weekly deviation ascending (lower deviation is more stable)
+    return list.sort((a, b) => a.diff - b.diff).map((item) => item.area);
+  }, [allWeeklyForecasts]);
+
+  const dashboardLifeAreas = useMemo(() => {
+    if (lifeAreas.length === 0) return [];
+
+    const sortedScores = [...lifeAreas].sort((a, b) => b.score - a.score);
+    const bestItem = sortedScores[0];
+    const worstItem = sortedScores[sortedScores.length - 1];
+
+    const stableAreaName = stabilitySortedAreas.find(
+      (area) => area !== bestItem?.area && area !== worstItem?.area
+    ) || "general";
+
+    const stableItem = lifeAreas.find((item) => item.area === stableAreaName);
+
+    const result = [];
+
+    // 1. Best Card (Left)
+    if (bestItem) {
+      result.push({
+        ...bestItem,
+        badge: "Best Today",
+        arrow: "up",
+        badgeColor: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+      });
+    }
+
+    // 2. Stable Card (Middle)
+    if (stableItem) {
+      result.push({
+        ...stableItem,
+        badge: "Stable This Week",
+        arrow: "side",
+        badgeColor: "text-sky-400 bg-sky-400/10 border-sky-400/20",
+      });
+    }
+
+    // 3. Worst Card (Right)
+    if (worstItem && worstItem.area !== bestItem?.area) {
+      result.push({
+        ...worstItem,
+        badge: "Needs Attention",
+        arrow: "down",
+        badgeColor: "text-rose-400 bg-rose-400/10 border-rose-400/20",
+      });
+    }
+
+    return result;
+  }, [lifeAreas, stabilitySortedAreas]);
+
+  // Set default activeArea to the Stable area on load
+  const hasSetDefaultActiveRef = useRef(false);
+  useEffect(() => {
+    if (hasSetDefaultActiveRef.current) return;
+    const hasForecastsLoaded = Object.values(allWeeklyForecasts).some((f) => f !== null);
+    if (!allForecastsLoading && hasForecastsLoaded && stabilitySortedAreas.length > 0 && lifeAreas.length > 0) {
+      const sortedScores = [...lifeAreas].sort((a, b) => b.score - a.score);
+      const bestItem = sortedScores[0];
+      const worstItem = sortedScores[sortedScores.length - 1];
+      const stableAreaName = stabilitySortedAreas.find(
+        (area) => area !== bestItem?.area && area !== worstItem?.area
+      );
+      if (stableAreaName) {
+        setActiveArea(stableAreaName);
+        hasSetDefaultActiveRef.current = true;
+      }
+    } else if (lifeAreas.length > 0 && activeArea === "career") {
+      // If horoscope is loaded but forecasts aren't, default to best area to avoid showing general or career if not best
+      const sortedScores = [...lifeAreas].sort((a, b) => b.score - a.score);
+      const bestItem = sortedScores[0];
+      if (bestItem) {
+        setActiveArea(bestItem.area);
+      }
+    }
+  }, [allForecastsLoading, allWeeklyForecasts, stabilitySortedAreas, lifeAreas, activeArea]);
+
+  const activeAreaHex = useMemo(() => {
+    const score = getAreaScore(horoscope, activeArea);
+    return getAreaColor(activeArea, score).main;
+  }, [activeArea, horoscope]);
 
   const activeAreaInsight = useMemo(() => {
     const rawInsight = getAreaInsight(horoscope, activeArea);
@@ -1167,7 +1299,7 @@ export default function DashboardHome() {
 
                   {/* Lotus Card */}
                   <div className="hidden justify-center lg:flex items-center bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full">
-                    <Image src="/images/lotus.svg" alt="" width={130} height={90} className="drop-shadow-[0_0_30px_rgba(168,85,247,0.45)]" />
+                    <Image src="/images/lotus.svg" alt="" width={130} height={90} className="drop-shadow-[0_0_30px_rgba(168,85,247,0.18)]" />
                   </div>
                 </div>
 
@@ -1328,47 +1460,62 @@ export default function DashboardHome() {
                     <h3 className="text-[14px] font-black uppercase tracking-[0.22em] text-foreground">
                       {t('newDashboard.currentWeek.title') || "Your Life Areas"}
                     </h3>
-                    <p className="mt-1 text-xs text-foreground/50">
-                      {t('newDashboard.currentWeek.description') || "Select a life area for today and current week predictions"}
+                    <p className="mt-1 text-xs text-foreground/50 font-medium text-secondary/80">
+                      Today’s strongest and weakest signals
                     </p>
                   </div>
-                  {bestDay && (
-                    <p className="label-secondary font-black text-xs shrink-0">
-                      {t('newDashboard.weeklyChart.best')}: {bestDay}
-                    </p>
-                  )}
+                  <Link
+                    href="/lifeareas"
+                    className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-secondary border border-secondary/30 bg-secondary/10 hover:bg-secondary/20 hover:border-secondary/50 px-3 py-1.5 rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md shadow-secondary/5"
+                  >
+                    <span>View All</span>
+                    <ArrowRight className="h-3 w-3 text-secondary animate-pulse" />
+                  </Link>
                 </div>
 
                 {/* Life Areas grid acting as the activeArea selector */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-6">
-                  {lifeAreas.map(({ area, label, score, insight, theme }) => {
+                <div className="grid grid-cols-3 gap-3">
+                  {dashboardLifeAreas.map(({ area, label, score, theme, badge, badgeColor, arrow }) => {
                     const Icon = theme.icon;
                     const phaseColor = getAreaColor(area, score);
-                    const phaseHex = phaseColor.main;
+                    const cardColorHex = phaseColor.main;
+
                     const isLucide = area === "general" || area === "spiritual";
                     const isSelected = activeArea === area;
                     return (
                       <button
                         key={area}
                         onClick={() => setActiveArea(area)}
-                        className={`group flex flex-col items-center rounded-2xl border py-2.5 px-3 text-center transition hover:-translate-y-0.5 cursor-pointer ${
+                        className={`group flex flex-col items-center rounded-2xl border py-2.5 px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
                           isSelected
-                            ? "border-white bg-white/[0.04] shadow-md shadow-white/5 ring-1 ring-white/30"
-                            : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant"
+                            ? "bg-white/[0.04] opacity-100"
+                            : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant opacity-40 hover:opacity-80"
                         }`}
+                        style={{
+                          borderColor: isSelected ? `${cardColorHex}60` : undefined,
+                          boxShadow: isSelected ? `0 0 20px ${cardColorHex}30` : undefined,
+                        }}
                       >
-                        <AreaRing score={score} color={phaseHex} label={label}>
+                        <AreaRing score={score} color={cardColorHex} label={label}>
                           <span
                             className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
-                            style={{ color: phaseHex }}
+                            style={{ color: cardColorHex }}
                           >
                             <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
                           </span>
-                          <span className="text-base font-black leading-none tabular-nums" style={{ color: phaseHex }}>
+                          <span className="text-base font-black leading-none tabular-nums" style={{ color: cardColorHex }}>
                             {score}
                           </span>
                         </AreaRing>
-                        <p className="mt-2 font-headline text-sm font-bold">{label}</p>
+                        <p className="mt-2 font-headline text-xs font-bold leading-tight">{label}</p>
+                        {badge && (
+                          <span className={`mt-1.5 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.06em] px-1.5 py-0.5 rounded border ${badgeColor}`}>
+                            {arrow === "up" && <span className="text-[9px] leading-none">▲</span>}
+                            {arrow === "side" && <span className="text-[9px] leading-none">◆</span>}
+                            {arrow === "down" && <span className="text-[9px] leading-none">▼</span>}
+                            <span>{badge}</span>
+                          </span>
+                        )}
                       </button>
                     );
                   })}

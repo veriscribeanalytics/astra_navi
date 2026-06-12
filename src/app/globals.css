@@ -161,10 +161,19 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .custo
 .particle-container,
 .rashi-orbit-container,
 [class*="orbit"],
-[class*="particle"] {
+[class*="particle"],
+.stars,
+.cosmic-particles {
   transform: translateZ(0);
   backface-visibility: hidden;
   transition: opacity 400ms ease;
+}
+
+.dark .particle-container,
+.dark [class*="particle"],
+.dark .stars,
+.dark .cosmic-particles {
+  opacity: 0.20;
 }
 
 /* Optimized will-change usage */
@@ -553,8 +562,8 @@ body.skip-disabled .skip-to-content:focus-visible {
   --on-surface: #ece8f2;
   --on-surface-variant: #c4b0e0;
   --outline-variant: #3a2860;
-  --glow-color: rgba(200, 136, 10, 0.25);
-  --flare-gold: #e6b05e;
+  --glow-color: rgba(200, 136, 10, 0.10);
+  --flare-gold: #b98218;
   --flare-lavender: #c4b5fd;
   --flare-ivory: #ece8f2;
   --pattern-opacity: 0;
@@ -636,12 +645,12 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 }
 
 @utility cosmic-glow {
-  box-shadow: 0 0 20px var(--glow-color), 0 0 40px color-mix(in srgb, var(--glow-color) 30%, transparent);
+  box-shadow: 0 0 12px var(--glow-color), 0 0 24px color-mix(in srgb, var(--glow-color) 25%, transparent);
 }
 
 @utility dark-glass {
   background: var(--surface);
-  border: 1px solid rgba(200, 136, 10, 0.15);
+  border: 1px solid rgba(200, 136, 10, 0.08);
 }
 
 /* ─── Auth page cosmic design classes ─────────────────────────────────────
@@ -1930,7 +1939,7 @@ body:has(.gpt-dashboard-shell) nav [class*="text-on-surface-variant"] {
 }
 
 @utility gold-glow {
-  box-shadow: 0 0 15px rgba(200, 136, 10, 0.3), 0 0 30px rgba(200, 136, 10, 0.1);
+  box-shadow: 0 0 10px rgba(200, 136, 10, 0.14), 0 0 20px rgba(200, 136, 10, 0.06);
 }
 
 @keyframes shimmer {

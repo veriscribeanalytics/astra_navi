@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import CosmicIntro from '@/components/home/cosmic-intro/CosmicIntro';
 import { useRouter } from 'next/navigation';
 
@@ -15,12 +15,32 @@ export default function IntroTestPage() {
     const [revealed, setRevealed] = useState(false);
     const [done, setDone] = useState(false);
 
-    const handleReveal = useCallback(() => setRevealed(true), []);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            document.documentElement.classList.add('intro-playing');
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                document.documentElement.classList.remove('intro-playing');
+            }
+        };
+    }, []);
+
+    const handleReveal = useCallback(() => {
+        setRevealed(true);
+        if (typeof window !== 'undefined') {
+            document.documentElement.classList.remove('intro-playing');
+        }
+    }, []);
+    
     const handleComplete = useCallback(() => setDone(true), []);
 
     const handleReplay = () => {
         setRevealed(false);
         setDone(false);
+        if (typeof window !== 'undefined') {
+            document.documentElement.classList.add('intro-playing');
+        }
         setKey((k) => k + 1);
     };
 

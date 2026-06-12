@@ -275,9 +275,9 @@ const Navbar: React.FC = () => {
         }
 
         // Ensure that the intro-playing class is removed if the user is logged in
-        // or has navigated away from the landing page.
+        // or has navigated away from the intro page.
         if (typeof window !== 'undefined') {
-            if (pathname !== '/' || isLoggedIn) {
+            if (pathname !== '/intro' || isLoggedIn) {
                 document.documentElement.classList.remove('intro-playing');
             }
         }
