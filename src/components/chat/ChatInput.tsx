@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { useTranslation, useIsMobile, useResponsive } from '@/hooks';
-import { 
-    Mic, MicOff, 
-    ArrowUp, Zap, Sparkles, Gem,
+import {
+    Mic, MicOff,
+    ArrowUp,
     Paperclip, X, Image, FileText, Eye, EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -74,19 +74,11 @@ interface SpeechRecognition extends EventTarget {
   stop: () => void;
 }
 
-const modeCycleOrder: Array<'quick' | 'normal' | 'deep'> = ['quick', 'normal', 'deep'];
-
-const modeOptionMap: Record<string, { label: string; Icon: React.FC<{ className?: string }> }> = {
-  quick: { label: 'Instant', Icon: Zap },
-  normal: { label: 'Standard', Icon: Sparkles },
-  deep: { label: 'Deep Analysis', Icon: Gem },
-};
-
 const ChatInput: React.FC = () => {
-  const { 
-    inputText, setInputText, sendMessage, 
+  const {
+    inputText, setInputText, sendMessage,
     isSending, activeChatId, createNewChat,
-    mode, setMode, attachments, addAttachment, removeAttachment,
+    attachments, addAttachment, removeAttachment,
     selectedAvatarId
   } = useChat();
   const { t, language } = useTranslation();
@@ -110,12 +102,6 @@ const ChatInput: React.FC = () => {
   const charCount = inputText.length;
   const isOverLimit = charCount > MAX_CHARS;
   const showCharCount = charCount > MAX_CHARS * 0.8;
-
-  const cycleMode = useCallback(() => {
-    const currentIdx = modeCycleOrder.indexOf(mode);
-    const nextIdx = (currentIdx + 1) % modeCycleOrder.length;
-    setMode(modeCycleOrder[nextIdx]);
-  }, [mode, setMode]);
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -184,12 +170,6 @@ const ChatInput: React.FC = () => {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
-
-  const modeOptions = [
-    { value: "quick" as const, label: "Instant", Icon: Zap },
-    { value: "normal" as const, label: "Standard", Icon: Sparkles },
-    { value: "deep" as const, label: "Deep Analysis", Icon: Gem },
-  ];
 
   const currentPlaceholders = AVATAR_PLACEHOLDERS[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS.navi;
   const shortPlaceholder = AVATAR_PLACEHOLDERS_SHORT[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS_SHORT.navi;
@@ -310,10 +290,6 @@ const ChatInput: React.FC = () => {
     }
   }, [inputText]);
 
-  const currentModeOpt = modeOptionMap[mode];
-  const CycleIcon = currentModeOpt?.Icon || Sparkles;
-  const cycleLabel = currentModeOpt?.label || 'Normal';
-
   return (
     <div ref={containerRef} className="w-full px-2 sm:px-5 3xl:px-6 pb-[calc(0.5rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
       onDragOver={handleDragOver}
@@ -407,7 +383,7 @@ const ChatInput: React.FC = () => {
           </button>
         </div>
 
-        {/* Bottom Toolbar: Attach, Voice, Mode, Char Count */}
+        {/* Bottom Toolbar: Attach, Voice, Char Count */}
         <div className="flex flex-row items-center justify-between px-2.5 sm:px-3.5 py-1.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 gap-2">
           {/* Left tools: Paperclip, Voice */}
           <div className="flex items-center gap-1 sm:gap-2">
@@ -448,37 +424,8 @@ const ChatInput: React.FC = () => {
             </button>
           </div>
 
-          {/* Right/Center: Mode Selector and character count */}
+          {/* Right/Center: character count */}
           <div className="flex items-center gap-2 min-w-0">
-            {/* Desktop Mode Selector */}
-            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2.5">
-              {modeOptions.map(({ value: m, label, Icon }) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-[12px] 3xl:text-[14px] font-bold uppercase tracking-wider transition-all ${
-                    mode === m
-                      ? 'bg-secondary/20 text-secondary border border-secondary/30 shadow-sm shadow-secondary/10'
-                      : 'text-foreground/40 hover:text-foreground/60 hover:bg-surface-variant/30 border border-transparent'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Mobile Mode Selector */}
-            <button
-              onClick={cycleMode}
-              className="sm:hidden inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg bg-secondary/15 text-secondary border border-secondary/25 shrink-0 text-[11px] font-bold uppercase tracking-wide"
-              title={`Mode: ${cycleLabel} — tap to cycle`}
-              aria-label={`Mode: ${cycleLabel}`}
-            >
-              <CycleIcon className="w-3.5 h-3.5" />
-              <span>{cycleLabel}</span>
-            </button>
-
             <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden md:inline ml-1">
               {t('chat.input.naviUsesChart')}{' '}
               <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
