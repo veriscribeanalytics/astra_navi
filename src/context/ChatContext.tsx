@@ -16,15 +16,6 @@ const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
 const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
 
-const FALLBACK_DEFAULT_MODES: Record<string, "quick" | "normal" | "deep"> = {
-  navi: 'quick',
-  relationship_guide: 'normal',
-  career_mentor: 'normal',
-  finance_mentor: 'normal',
-  spiritual_guide: 'normal',
-  astro_sage: 'deep',
-};
-
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
   try {
@@ -78,7 +69,6 @@ export interface ChatMessage {
   topic?: "career" | "love" | "study" | "finance" | "health" | "timing" | "remedy" | "general";
   intent?: "greeting" | "yes_no" | "timing" | "comparison" | "advice" | "topic_overview" | "deep_analysis" | "emotional_support" | "remedy_request" | "explanation" | "general";
   answerStyle?: string;
-  mode?: "quick" | "normal" | "deep";
   creditsRemaining?: number | null;
   finishReason?: string | null;
   retryUsed?: boolean;
@@ -140,7 +130,6 @@ export interface ChatSummary {
 export interface ThinkingData {
   topic?: ChatMessage['topic'];
   intent?: ChatMessage['intent'];
-  mode?: ChatMessage['mode'];
   model?: string;
   answerStyle?: string;
   /** Tool names from the new `tool_use` SSE event. Non-empty means the AI is
@@ -179,8 +168,6 @@ interface ChatContextType {
   attachments: FileAttachment[];
   addAttachment: (file: File) => void;
   removeAttachment: (id: string) => void;
-  mode: "quick" | "normal" | "deep";
-  setMode: React.Dispatch<React.SetStateAction<"quick" | "normal" | "deep">>;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   isRightPanelOpen: boolean;
@@ -219,14 +206,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasMoreChats, setHasMoreChats] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallData | null>(null);
-  const [mode, setModeState] = useState<"quick" | "normal" | "deep">("normal");
-  const [userHasManuallyChangedMode, setUserHasManuallyChangedMode] = useState(false);
-
-  const setMode = useCallback((action: React.SetStateAction<"quick" | "normal" | "deep">) => {
-    setModeState(action);
-    setUserHasManuallyChangedMode(true);
-  }, []);
-
   const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
   const [avatars, setAvatars] = useState<ChatAvatar[]>([]);
   const [isLoadingAvatars, setIsLoadingAvatars] = useState(false);
@@ -241,12 +220,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('astranavi_selected_avatar', avatarId);
       } catch {}
     }
-    if (!userHasManuallyChangedMode) {
-      const avatar = avatars.find(a => a.avatarId === avatarId);
-      const resolvedMode = avatar?.defaultMode || FALLBACK_DEFAULT_MODES[avatarId] || 'normal';
-      setModeState(resolvedMode);
-    }
-  }, [avatars, userHasManuallyChangedMode]);
+  }, []);
 
   // Guest State
   const [isGuest, setIsGuest] = useState(false);
@@ -431,7 +405,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({
           text,
           language,
-          mode,
           ...(pageContextSource ? { context: { source: pageContextSource } } : {}),
           ...(selectedAvatarId && selectedAvatarId !== DEFAULT_AVATAR_ID ? { avatarId: selectedAvatarId } : {}),
         }),
@@ -524,7 +497,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   ...(prev ?? {}),
                   topic: data.topic ?? undefined,
                   intent: data.intent ?? undefined,
-                  mode: data.mode ?? undefined,
                   model: data.model ?? undefined,
                   answerStyle: data.answerStyle ?? undefined,
                 }));
@@ -561,7 +533,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     topic: data.topic ?? m.topic,
                     intent: data.intent ?? m.intent,
                     answerStyle: data.answerStyle ?? m.answerStyle,
-                    mode: data.mode ?? m.mode,
                     creditsRemaining: data.creditsRemaining ?? m.creditsRemaining,
                     finishReason: data.finishReason ?? m.finishReason,
                     retryUsed: data.retryUsed ?? m.retryUsed,
@@ -622,7 +593,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const localAiMsg = prev.messages.find(m => m.id === persistedAiMsgId || m.id === aiMsgId);
               if (!localAiMsg) return backendChat;
               const backendAiMsg = backendChat.messages.find(m => m.id === persistedAiMsgId) ?? backendChat.messages.find(m => m.type === 'ai' && m.text === localAiMsg.text);
-              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.mode || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory)) {
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory)) {
                 const merged = backendChat.messages.map(m => {
                   if (m.id === backendAiMsg.id) {
                     return {
@@ -631,7 +602,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       topic: localAiMsg.topic ?? m.topic,
                       intent: localAiMsg.intent ?? m.intent,
                       answerStyle: localAiMsg.answerStyle ?? m.answerStyle,
-                      mode: localAiMsg.mode ?? m.mode,
                       creditsRemaining: localAiMsg.creditsRemaining ?? m.creditsRemaining,
                       finishReason: localAiMsg.finishReason ?? m.finishReason,
                       retryUsed: localAiMsg.retryUsed ?? m.retryUsed,
@@ -683,7 +653,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsSending(false);
       setThinkingData(null);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, mode, attachments, selectedAvatarId, setSelectedAvatarId]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, attachments, selectedAvatarId, setSelectedAvatarId]);
 
   const createNewChat = useCallback(async (initialMessage?: string, pageContextSource?: ChatPageContextSource) => {
     if (isGuest) return 'guest-session';
@@ -714,10 +684,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setActiveChat(tempChat);
     setActiveChatId(tempId);
-    setUserHasManuallyChangedMode(false);
     if (initialMessage) sendMessage(initialMessage, tempId, pageContextSource);
     return tempId;
-  }, [user, sendMessage, isGuest, t, setUserHasManuallyChangedMode, selectedAvatarId, avatars]);
+  }, [user, sendMessage, isGuest, t, selectedAvatarId, avatars]);
 
   const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
@@ -759,7 +728,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           language,
-          mode,
           ...(avatarIdForRegen ? { avatarId: avatarIdForRegen } : {}),
         }),
       });
@@ -775,7 +743,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           topic: metadata.topic ?? m.topic,
           intent: metadata.intent ?? m.intent,
           answerStyle: metadata.answerStyle ?? m.answerStyle,
-          mode: metadata.mode ?? m.mode,
           creditsRemaining: metadata.creditsRemaining ?? m.creditsRemaining,
           finishReason: metadata.finishReason ?? m.finishReason,
           retryUsed: metadata.retryUsed ?? m.retryUsed,
@@ -793,7 +760,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, isGuest, isSending, language, mode, loadChats, toastError, t, selectedAvatarId]);
+  }, [activeChatId, isGuest, isSending, language, loadChats, toastError, t, selectedAvatarId]);
 
   const retryMessage = useCallback(async (messageId: string) => {
     if (isGuest || isSending) return;
@@ -847,8 +814,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveChat(null);
     setActiveChatId(null);
     setPaywall(null);
-    setUserHasManuallyChangedMode(false);
-  }, [setUserHasManuallyChangedMode]);
+  }, []);
 
   const clearPaywall = useCallback(() => {
     setPaywall(null);
@@ -899,19 +865,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem(AVATAR_STORAGE_KEY);
         }
         setSelectedAvatarIdState(activeId);
-        
-        if (!userHasManuallyChangedMode) {
-          const avatar = mappedList.find(a => a.avatarId === activeId);
-          const resolvedMode = avatar?.defaultMode || FALLBACK_DEFAULT_MODES[activeId] || 'normal';
-          setModeState(resolvedMode);
-        }
       }
     } catch (err) {
       console.warn('Failed to load avatar catalog:', err);
     } finally {
       setIsLoadingAvatars(false);
     }
-  }, [isGuest, language, t, userHasManuallyChangedMode]);
+  }, [isGuest, language, t]);
 
   const editMessage = useCallback(async (messageId: string, newText: string) => {
     if (isGuest || !activeChatId || isSending) return;
@@ -1047,7 +1007,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
       loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, regenerateMessage, retryMessage, deleteChat, resetChat,
       editMessage, deleteMessage, togglePin,
-      inputText, setInputText, attachments, addAttachment, removeAttachment, mode, setMode, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
+      inputText, setInputText, attachments, addAttachment, removeAttachment, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall,
       thinkingData,
       avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars,
