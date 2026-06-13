@@ -45,7 +45,7 @@ export default function IntroTestPage() {
     };
 
     return (
-        <div className="fixed inset-0 overflow-hidden" style={{ background: '#050716' }}>
+        <div className="fixed inset-0 overflow-hidden" style={{ background: 'var(--background)' }}>
 
             {/* ── Behind layer — the "landing" the intro reveals into ─────── */}
             <div
@@ -53,13 +53,13 @@ export default function IntroTestPage() {
                 style={{
                     opacity: revealed ? 1 : 0,
                     transition: 'opacity 0.8s ease',
-                    background: 'radial-gradient(ellipse at 50% 60%, rgba(120,60,220,0.15) 0%, #050716 65%)',
+                    background: 'radial-gradient(ellipse at 50% 60%, rgba(120,60,220,0.15) 0%, var(--background) 65%)',
                 }}
             >
                 {/* Decorative top label */}
                 <p
                     className="text-xs font-bold uppercase tracking-[0.3em]"
-                    style={{ color: 'rgba(244,210,122,0.55)' }}
+                    style={{ color: 'color-mix(in srgb, var(--secondary) 55%, transparent)' }}
                 >
                     Vedic AI Astrology
                 </p>
@@ -69,7 +69,7 @@ export default function IntroTestPage() {
                     className="font-headline font-black leading-tight"
                     style={{
                         fontSize: 'clamp(2.8rem, 8vw, 6rem)',
-                        background: 'linear-gradient(135deg, #f4d27a 0%, #e8b4f8 45%, #9b7fe8 100%)',
+                        background: 'linear-gradient(135deg, var(--brand-gold-hover) 0%, var(--flare-lavender) 45%, var(--flare-lavender) 100%)',
                         WebkitBackgroundClip: 'text',
                         backgroundClip: 'text',
                         color: 'transparent',
@@ -81,7 +81,7 @@ export default function IntroTestPage() {
                 {/* Subtext */}
                 <p
                     className="max-w-md text-base font-medium leading-relaxed"
-                    style={{ color: 'rgba(220,210,255,0.6)' }}
+                    style={{ color: 'var(--text-body)' }}
                 >
                     Ancient Vedic wisdom decoded by modern AI — personalised to your birth chart, not your sun sign.
                 </p>
@@ -91,9 +91,9 @@ export default function IntroTestPage() {
                     onClick={() => router.push('/')}
                     className="mt-2 rounded-full px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all hover:scale-105"
                     style={{
-                        background: 'linear-gradient(135deg, #c8880a, #f4d27a)',
-                        color: '#050716',
-                        boxShadow: '0 0 32px rgba(200,136,10,0.35)',
+                        background: 'linear-gradient(135deg, var(--brand-gold), var(--brand-gold-hover))',
+                    color: 'var(--on-primary)',
+                    boxShadow: '0 0 32px color-mix(in srgb, var(--secondary) 35%, transparent)',
                     }}
                 >
                     Explore AstraNavi →
@@ -114,9 +114,9 @@ export default function IntroTestPage() {
                         onClick={handleReplay}
                         className="rounded-full border px-5 py-2 text-xs font-bold uppercase tracking-widest transition-all hover:opacity-100"
                         style={{
-                            color: '#f4d27a',
-                            borderColor: 'rgba(200,136,10,0.5)',
-                            background: 'rgba(5,7,22,0.7)',
+                            color: 'var(--brand-gold-hover)',
+                            borderColor: 'color-mix(in srgb, var(--secondary) 50%, transparent)',
+                            background: 'color-mix(in srgb, var(--background) 70%, transparent)',
                             backdropFilter: 'blur(8px)',
                             opacity: 0.9,
                         }}
@@ -127,9 +127,9 @@ export default function IntroTestPage() {
                         onClick={() => router.push('/')}
                         className="rounded-full border px-5 py-2 text-xs font-bold uppercase tracking-widest transition-all hover:opacity-100"
                         style={{
-                            color: '#c4a8ff',
-                            borderColor: 'rgba(196,168,255,0.3)',
-                            background: 'rgba(5,7,22,0.7)',
+                            color: 'var(--flare-lavender)',
+                            borderColor: 'color-mix(in srgb, var(--flare-lavender) 30%, transparent)',
+                            background: 'color-mix(in srgb, var(--background) 70%, transparent)',
                             backdropFilter: 'blur(8px)',
                             opacity: 0.8,
                         }}

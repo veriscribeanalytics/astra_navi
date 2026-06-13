@@ -5,6 +5,7 @@ import { Wallet, Sparkles, Clock, Package, Calendar, Crown, Zap } from 'lucide-r
 import Card from '@/components/ui/Card';
 import { BalanceResponse, getTierLabel } from '@/types/billing';
 import { useTranslation } from '@/hooks';
+import { usePaywallContext } from '@/context/PaywallContext';
 
 interface CreditBalanceCardProps {
   balance: BalanceResponse | null;
@@ -83,34 +84,39 @@ export default function CreditBalanceCard({
   }
 
   // ── Full ──
+  const { catalog } = usePaywallContext();
   const hasBreakdown = balance.subscriptionCredits != null || balance.packCredits != null;
   const dateLocale = language === 'hi' ? 'hi-IN' : 'en-IN';
   const tierLabel = getTierLabel(balance.tier);
-  const isPremium = (balance.tier || '').toLowerCase() === 'premium';
+  const planTier = (balance.tier || '').toLowerCase();
+  const isPremium = planTier === 'premium';
+  const isPro = planTier === 'pro';
+  const isFree = planTier === 'free' || !balance.tier;
   const hasExpiry = balance.nextRenewalAt || balance.tierExpiresAt || balance.creditsExpireAt || balance.nearestPackExpiry;
 
+  const activeSub = catalog?.subscriptions.find(s => s.tier?.toLowerCase() === planTier);
+  const planColor = activeSub?.color || (isPremium ? '#D97706' : isPro ? '#7C3AED' : '#6B7280');
+  const CardIcon = isPremium ? Crown : isPro ? Crown : Wallet;
+
   return (
-    <Card padding="md" variant="bordered" className={`!rounded-[24px] sm:!rounded-[28px] border-secondary/20 overflow-hidden relative ${className}`}>
+    <Card
+      padding="md"
+      variant="bordered"
+      className={`!rounded-[24px] sm:!rounded-[28px] border-secondary/20 overflow-hidden relative ${className}`}
+      style={{ '--plan-color': planColor } as React.CSSProperties}
+    >
       {/* Subtle radial glow */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
-          background: `radial-gradient(ellipse 60% 120% at 15% 50%, rgba(200,136,10,1) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 100% at 85% 50%, ${isPremium ? 'rgba(168,130,255,0.8)' : 'rgba(200,136,10,0.6)'} 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse 60% 120% at 15% 50%, var(--plan-color) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 100% at 85% 50%, var(--plan-color) 0%, transparent 70%)`,
         }}
       />
 
       <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
         {/* ── Icon ── */}
-        <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-500
-          ${isPremium
-            ? 'bg-purple-500/10 border-purple-400/25 shadow-[0_0_30px_rgba(168,130,255,0.1)]'
-            : 'bg-secondary/10 border-secondary/20 shadow-[0_0_30px_rgba(200,136,10,0.1)]'
-          }`}>
-          {isPremium ? (
-            <Crown className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-400" />
-          ) : (
-            <Wallet className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-secondary" />
-          )}
+        <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-500 bg-[var(--plan-color)]/10 border-[var(--plan-color)]/25 shadow-[0_0_30px_var(--plan-color)] text-[var(--plan-color)]">
+          <CardIcon className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
         </div>
 
         {/* ── Credit count + breakdown ── */}
@@ -119,11 +125,7 @@ export default function CreditBalanceCard({
             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-secondary">
               {t('plans.creditBalance')}
             </span>
-            <span className={`text-[7px] sm:text-[8px] font-bold uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full border ${
-              isPremium
-                ? 'bg-purple-500/10 text-purple-300 border-purple-400/20'
-                : 'bg-secondary/10 text-secondary border-secondary/15'
-            }`}>
+            <span className="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full border bg-[var(--plan-color)]/10 text-[var(--plan-color)] border-[var(--plan-color)]/20">
               {tierLabel}
             </span>
           </div>
@@ -138,8 +140,8 @@ export default function CreditBalanceCard({
             <div className="flex items-center gap-3 sm:gap-4 mt-1.5 sm:mt-2.5 text-[10px] sm:text-[11px] text-primary/35 flex-wrap">
               {balance.subscriptionCredits != null && (
                 <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                  <Zap className={`w-3 h-3 shrink-0 ${isPremium ? 'text-purple-400/60' : 'text-secondary/60'}`} />
-                  <span className={`font-bold ${isPremium ? 'text-purple-300/70' : 'text-secondary/70'}`}>{balance.subscriptionCredits}</span>
+                  <Zap className="w-3.5 h-3.5 shrink-0 text-secondary/60" />
+                  <span className="font-bold text-secondary/70">{balance.subscriptionCredits}</span>
                   {t('plans.subscriptionCredits')}
                 </span>
               )}

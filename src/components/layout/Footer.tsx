@@ -16,7 +16,7 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="relative isolate w-full overflow-hidden min-h-[560px]">
+        <footer className="safe-area-footer relative isolate w-full overflow-hidden min-h-[560px]">
             <img
                 src="/images/footer.png"
                 alt=""
@@ -87,7 +87,7 @@ const Footer = () => {
             <div className="mt-8 sm:mt-12 pt-6 border-t border-secondary/5 text-center">
                 <p
                     className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-body font-bold"
-                    style={{ color: 'rgba(212, 160, 23, 0.5)' }}
+                    style={{ color: 'color-mix(in srgb, var(--secondary) 50%, transparent)' }}
                 >
                     © {currentYear} Astra Navi. {t('footer.copyright')}
                 </p>

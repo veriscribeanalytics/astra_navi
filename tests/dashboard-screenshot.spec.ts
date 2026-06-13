@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { mockSession, mockAllApis } from './auth-helpers';
 
 const FULL_PROFILE = {
@@ -122,6 +122,35 @@ test('dashboard mobile', async ({ page, context }) => {
   await page.waitForTimeout(2500);
   await page.screenshot({ path: 'scratch/shots/mobile.png', fullPage: true });
 });
+
+for (const width of [1000, 1102, 1413]) {
+  test(`dashboard responsive layout at ${width}px`, async ({ page, context }) => {
+    await setup(page, context);
+    await page.setViewportSize({ width, height: 932 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(2500);
+
+    const layout = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: window.innerWidth,
+      clippedElements: Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '.gpt-dashboard-shell section, .gpt-dashboard-shell button, .gpt-dashboard-shell a'
+        )
+      )
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.right > window.innerWidth + 1 || rect.left < -1;
+        })
+        .map((element) => element.textContent?.trim().slice(0, 80) || element.tagName)
+        .slice(0, 10),
+    }));
+
+    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth);
+    expect(layout.clippedElements).toEqual([]);
+    await page.screenshot({ path: `scratch/shots/responsive-${width}.png`, fullPage: true });
+  });
+}
 
 test('dashboard 4k', async ({ page, context }) => {
   await setup(page, context);

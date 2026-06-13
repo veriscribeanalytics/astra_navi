@@ -57,9 +57,60 @@ const defaultReports: CatalogOneTimeReport[] = [
   { productId: 'monthly_report', productType: 'one_time_report', nameEn: 'Monthly Navi Report', priceInr: 149, credits: 20, isActive: true, descriptionEn: 'AI-generated monthly forecast narrative with transit analysis' },
 ];
 
+function getProductColorTheme(color: string | null | undefined) {
+  const hex = (color || '').toUpperCase();
+  if (hex === '#10B981') {
+    return {
+      text: 'text-emerald-400',
+      borderHover: 'hover:border-emerald-500/30',
+      buttonHover: 'hover:bg-emerald-500/15 hover:border-emerald-500 hover:text-emerald-400',
+    };
+  }
+  if (hex === '#3B82F6') {
+    return {
+      text: 'text-blue-400',
+      borderHover: 'hover:border-blue-500/30',
+      buttonHover: 'hover:bg-blue-500/15 hover:border-blue-500 hover:text-blue-400',
+    };
+  }
+  if (hex === '#EC4899') {
+    return {
+      text: 'text-pink-400',
+      borderHover: 'hover:border-pink-500/30',
+      buttonHover: 'hover:bg-pink-500/15 hover:border-pink-500 hover:text-pink-400',
+    };
+  }
+  if (hex === '#F59E0B' || hex === '#D97706') {
+    return {
+      text: 'text-amber-400',
+      borderHover: 'hover:border-amber-500/30',
+      buttonHover: 'hover:bg-amber-500/15 hover:border-amber-500 hover:text-amber-400',
+    };
+  }
+  if (hex === '#EF4444') {
+    return {
+      text: 'text-rose-400',
+      borderHover: 'hover:border-rose-500/30',
+      buttonHover: 'hover:bg-rose-500/15 hover:border-rose-500 hover:text-rose-400',
+    };
+  }
+  if (hex === '#8B5CF6' || hex === '#7C3AED') {
+    return {
+      text: 'text-purple-400',
+      borderHover: 'hover:border-purple-500/30',
+      buttonHover: 'hover:bg-purple-500/15 hover:border-purple-500 hover:text-purple-400',
+    };
+  }
+  return {
+    text: 'text-secondary',
+    borderHover: 'hover:border-secondary/30',
+    buttonHover: 'hover:bg-secondary/15 hover:border-secondary hover:text-secondary',
+  };
+}
+
 export default function PlansClient() {
   const { isLoggedIn, user } = useAuth();
-  const { tier, totalCredits, balance, isLoading: paywallLoading, refresh: refreshPaywall, refreshVersion } = usePaywallContext();
+  const { tier, totalCredits, balance, isLoading: paywallLoading, refresh: refreshPaywall, refreshVersion, getTierColor } = usePaywallContext();
   const { t, language } = useTranslation();
   const searchParams = useSearchParams();
 
@@ -168,6 +219,7 @@ export default function PlansClient() {
   const balanceLoading = isLoggedIn && paywallLoading && !balance;
 
   const currentPlanTier = (effectiveBalance?.tier || 'free').toLowerCase();
+  const currentPlanColor = getTierColor(currentPlanTier);
 
   // Dynamic products parsing
   const creditPacks = useMemo(() => {
@@ -357,7 +409,7 @@ export default function PlansClient() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center max-w-4xl mx-auto mb-6 sm:mb-8 relative flex flex-col items-center justify-center min-h-[140px] sm:min-h-[180px] max-h-[220px] w-full"
+        className="text-center max-w-4xl mx-auto mb-6 sm:mb-8 relative flex flex-col items-center justify-center min-h-[140px] sm:min-h-[180px] w-full"
       >
         {/* Subtle cosmic blur backdrop */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] sm:w-[350px] h-[150px] pointer-events-none opacity-[0.04]"
@@ -406,11 +458,14 @@ export default function PlansClient() {
           {balanceLoading ? (
             <div className="h-24 w-full bg-surface/30 border border-outline-variant/10 rounded-2xl animate-pulse" />
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:items-center lg:justify-between gap-4 p-5 sm:p-6 bg-surface border border-outline-variant/20 rounded-2xl relative overflow-hidden shadow-md">
+            <div
+              className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:items-center lg:justify-between gap-4 p-5 sm:p-6 bg-surface border border-[var(--current-plan-color)]/20 rounded-2xl relative overflow-hidden shadow-md"
+              style={{ '--current-plan-color': currentPlanColor } as React.CSSProperties}
+            >
               {/* Radial glow */}
               <div className="absolute inset-0 pointer-events-none opacity-[0.02]"
                 style={{
-                  background: 'radial-gradient(circle at 10% 50%, rgba(200,136,10,0.5) 0%, transparent 60%)',
+                  background: 'radial-gradient(circle at 10% 50%, var(--current-plan-color) 0%, transparent 60%)',
                 }}
               />
 
@@ -444,7 +499,7 @@ export default function PlansClient() {
 
               <div className="flex flex-col">
                 <span className="text-[10px] text-primary/65 uppercase tracking-wider font-bold">Current Plan</span>
-                <span className="text-sm sm:text-base font-black text-secondary mt-1">{planNameStr}</span>
+                <span className="text-sm sm:text-base font-black text-[var(--current-plan-color)] mt-1">{planNameStr}</span>
               </div>
 
               <a href="/profile" className="col-span-2 md:col-span-1 lg:col-span-auto flex items-center justify-center px-4 py-2.5 bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 hover:border-secondary text-secondary rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap">
@@ -502,33 +557,31 @@ export default function PlansClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 w-full items-stretch">
               {subscriptionPlans.map((plan) => {
                 const isCurrent = plan.tier === currentPlanTier;
-                const isPremiumTheme = plan.tier === 'premium';
-                const isProTheme = plan.tier === 'pro';
+                const planColor = plan.catalogProduct?.color || getTierColor(plan.tier);
 
-                // Assign themes
-                let cardClass = 'border-outline-variant/20 bg-surface text-primary shadow-sm';
-                let btnClass = 'border border-outline-variant/30 text-primary hover:bg-secondary/[0.02] hover:border-secondary';
-                
-                if (isCurrent) {
-                  btnClass = 'bg-primary/[0.04] text-primary/40 border border-outline-variant/15 cursor-default';
+                let cardClass = 'border-[var(--plan-color)]/30 bg-surface text-primary relative';
+                let btnClass = 'border border-[var(--plan-color)]/40 text-[var(--plan-color)] hover:bg-[var(--plan-color)]/10 hover:border-[var(--plan-color)]';
+
+                if (plan.tier === 'premium') {
+                  cardClass += ' shadow-lg';
+                  if (!isCurrent) {
+                    btnClass = 'bg-[var(--plan-color)] text-white font-black hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]';
+                  }
+                } else if (plan.tier === 'pro') {
+                  cardClass += ' shadow-md';
+                } else {
+                  cardClass += ' shadow-sm';
                 }
 
-                if (isProTheme) {
-                  cardClass = 'border-purple-500/30 bg-surface text-primary shadow-md relative';
-                  if (!isCurrent) {
-                    btnClass = 'border border-purple-500/40 text-purple-400 hover:bg-purple-500/10 hover:border-purple-300';
-                  }
-                } else if (isPremiumTheme) {
-                  cardClass = 'border-amber-500/40 bg-surface text-primary shadow-lg relative';
-                  if (!isCurrent) {
-                    btnClass = 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-300 text-black font-black hover:scale-[1.02] active:scale-[0.98]';
-                  }
+                if (isCurrent) {
+                  btnClass = 'bg-primary/[0.04] text-primary/40 border border-outline-variant/15 cursor-default';
                 }
 
                 return (
                   <motion.div
                     key={plan.productId}
                     className={`p-6 rounded-[24px] border flex flex-col justify-between hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 ${cardClass}`}
+                    style={{ '--plan-color': planColor } as React.CSSProperties}
                   >
                     {/* Badge Recommendation */}
                     {plan.isRecommended && (
@@ -540,11 +593,11 @@ export default function PlansClient() {
                     {/* Header */}
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-primary/5 text-primary/60">
+                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-[var(--plan-color)]/10 text-[var(--plan-color)] border border-[var(--plan-color)]/20">
                           {plan.tier}
                         </span>
                         {isCurrent && (
-                          <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-secondary/10 text-secondary border border-secondary/20">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-[var(--plan-color)]/10 text-[var(--plan-color)] border border-[var(--plan-color)]/20">
                             Current Plan
                           </span>
                         )}
@@ -567,7 +620,7 @@ export default function PlansClient() {
                       <div className="space-y-2.5 my-5">
                         {plan.bullets.map((bullet, index) => (
                           <div key={index} className="flex items-start gap-2 text-xs text-primary">
-                            <CheckCircle className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                            <CheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-secondary" />
                             <span>{bullet}</span>
                           </div>
                         ))}
@@ -578,7 +631,7 @@ export default function PlansClient() {
                     <div className="mt-auto">
                       <button
                         onClick={() => openDetails(plan)}
-                        className="text-[11px] text-primary/65 hover:text-secondary font-bold underline mb-4 block mx-auto transition-colors"
+                        className="text-[11px] text-primary/65 hover:text-[var(--plan-color)] font-bold underline mb-4 block mx-auto transition-colors"
                       >
                         View Plan Details
                       </button>
@@ -606,29 +659,32 @@ export default function PlansClient() {
                 <p className="text-xs text-primary/65">One-time credit bundles — use anytime</p>
               </div>
 
-              <div className="flex md:grid md:grid-cols-5 gap-4 overflow-x-auto pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory">
-                {creditPacks.map((pack) => (
-                  <div
-                    key={pack.productId}
-                    className="min-w-[210px] md:min-w-0 snap-center p-4 bg-surface border border-outline-variant/20 hover:border-secondary/30 rounded-2xl flex flex-col justify-between transition-all duration-300 hover:scale-[1.015] shadow-sm"
-                  >
-                    <div>
-                      <span className="text-[9px] text-secondary font-black uppercase tracking-widest">Navi Pack</span>
-                      <h4 className="text-base font-black text-primary mt-0.5">{pack.credits} Credits</h4>
-                      <p className="text-[10px] text-primary/65 mt-1 font-medium">No expiry, use anytime</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                {creditPacks.map((pack) => {
+                  const theme = getProductColorTheme(pack.color);
+                  return (
+                    <div
+                      key={pack.productId}
+                      className={`min-w-[210px] md:min-w-0 snap-start p-4 bg-surface border border-outline-variant/20 ${theme.borderHover} rounded-2xl flex flex-col justify-between transition-all duration-300 hover:scale-[1.015] shadow-sm`}
+                    >
+                      <div>
+                        <span className={`text-[9px] ${theme.text} font-black uppercase tracking-widest`}>Navi Pack</span>
+                        <h4 className="text-base font-black text-primary mt-0.5">{pack.credits} Credits</h4>
+                        <p className="text-[10px] text-primary/65 mt-1 font-medium">No expiry, use anytime</p>
+                      </div>
+
+                      <div className="mt-4">
+                        <div className={`text-lg font-headline font-black ${theme.text} mb-2.5`}>₹{pack.priceInr}</div>
+                        <button
+                          onClick={() => handleSelectProduct(pack)}
+                          className={`w-full py-2 bg-transparent ${theme.buttonHover} border border-outline-variant/30 text-primary font-bold rounded-xl text-xs uppercase tracking-wider transition-all`}
+                        >
+                          Buy Now
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="mt-4">
-                      <div className="text-lg font-headline font-black text-secondary mb-2.5">₹{pack.priceInr}</div>
-                      <button
-                        onClick={() => handleSelectProduct(pack)}
-                        className="w-full py-2 bg-transparent hover:bg-secondary/15 border border-outline-variant/30 hover:border-secondary text-primary font-bold hover:text-secondary rounded-xl text-xs uppercase tracking-wider transition-all"
-                      >
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
@@ -658,28 +714,31 @@ export default function PlansClient() {
                     exit={{ opacity: 0, height: 0 }}
                     className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 overflow-hidden"
                   >
-                    {reports.map((report) => (
-                      <div
-                        key={report.productId}
-                        className="p-5 bg-surface border border-outline-variant/20 rounded-2xl flex flex-col justify-between hover:border-secondary/30 transition-all duration-300 shadow-sm"
-                      >
-                        <div>
-                          <h4 className="text-sm sm:text-base font-bold text-primary">{report.nameEn}</h4>
-                          <p className="text-xs text-primary/80 mt-2 leading-relaxed">
-                            {report.descriptionEn || 'Custom birth chart calculation and Vedic analysis.'}
-                          </p>
+                    {reports.map((report) => {
+                      const theme = getProductColorTheme(report.color);
+                      return (
+                        <div
+                          key={report.productId}
+                          className={`p-5 bg-surface border border-outline-variant/20 rounded-2xl flex flex-col justify-between ${theme.borderHover} transition-all duration-300 shadow-sm`}
+                        >
+                          <div>
+                            <h4 className="text-sm sm:text-base font-bold text-primary">{report.nameEn}</h4>
+                            <p className="text-xs text-primary/80 mt-2 leading-relaxed">
+                              {report.descriptionEn || 'Custom birth chart calculation and Vedic analysis.'}
+                            </p>
+                          </div>
+                          <div className="mt-5">
+                            <div className={`text-base font-headline font-black ${theme.text} mb-3`}>₹{report.priceInr}</div>
+                            <button
+                              onClick={() => handleSelectProduct(report)}
+                              className={`w-full py-2.5 bg-transparent ${theme.buttonHover} border border-outline-variant/30 text-primary font-bold rounded-xl text-xs uppercase tracking-wider transition-all`}
+                            >
+                              Get Report
+                            </button>
+                          </div>
                         </div>
-                        <div className="mt-5">
-                          <div className="text-base font-headline font-black text-secondary mb-3">₹{report.priceInr}</div>
-                          <button
-                            onClick={() => handleSelectProduct(report)}
-                            className="w-full py-2.5 bg-transparent hover:bg-secondary/15 border border-outline-variant/30 hover:border-secondary text-primary font-bold hover:text-secondary rounded-xl text-xs uppercase tracking-wider transition-all"
-                          >
-                            Get Report
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -844,7 +903,7 @@ export default function PlansClient() {
               {/* List */}
               <div className="space-y-4 mb-6">
                 <h4 className="text-[10px] font-black uppercase tracking-wider text-primary/40">Includes features:</h4>
-                <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
+                <div className="space-y-2.5">
                   {detailsProduct.detailedFeatures.map((feat: string, idx: number) => (
                     <div key={idx} className="flex items-start gap-2.5 text-xs text-primary/80">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />

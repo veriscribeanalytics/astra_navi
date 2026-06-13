@@ -6,7 +6,7 @@ import type { MonthlyDay } from '@/types/forecast';
 import { todayISO } from '@/utils/forecastError';
 import { useTranslation } from '@/hooks';
 import { ForecastArea } from '@/data/areaThemes';
-import { getAreaPhaseHex } from '@/data/lifeAreaColors';
+import { AREA_COLORS, STATUS_COLORS } from '@/data/lifeAreaColors';
 
 interface MonthlyDayGridProps {
   days: MonthlyDay[];
@@ -55,7 +55,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
         {days.map(day => {
           const isSelected = selectedDate === day.date;
           const isToday = day.date === today;
-          const phaseColor = getAreaPhaseHex(area, day.score);
+          const phaseColor = AREA_COLORS[area].main;
           const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
           let weekdayName = day.weekday;
           if (!weekdayName && day.date) {
@@ -122,15 +122,15 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
       {/* Legend */}
       <div className="flex items-center gap-4 mt-1 px-1">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getAreaPhaseHex(area, 80) }} />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS.EXCELLENT.main }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.legendHigh')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getAreaPhaseHex(area, 50) }} />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS.MIXED.main }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.legendAverage')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getAreaPhaseHex(area, 20) }} />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS.BAD.main }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.legendChallenging')}</span>
         </div>
         <div className="flex items-center gap-1.5 ml-auto">

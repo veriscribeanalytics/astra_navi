@@ -235,8 +235,8 @@ export default function CosmicIntro({ onReveal, onComplete }: CosmicIntroProps) 
                         style={{
                             opacity: 0,
                             fontSize: 'clamp(2rem, 6vw, 4rem)',
-                            color: '#D6A325',
-                            textShadow: '0 0 28px rgba(214,163,37,0.45)',
+                            color: 'var(--secondary)',
+                            textShadow: '0 0 28px color-mix(in srgb, var(--secondary) 45%, transparent)',
                         }}
                     >
                         AstraNavi
@@ -249,14 +249,14 @@ export default function CosmicIntro({ onReveal, onComplete }: CosmicIntroProps) 
                     className="pointer-events-none absolute left-1/2 top-[58%] w-full -translate-x-1/2 px-6 text-center font-headline font-bold"
                     style={{ opacity: 0 }}
                 >
-                    <p style={{ fontSize: 'clamp(1.6rem, 5vw, 3.4rem)', color: '#F8F1DF', lineHeight: 1.15 }}>
+                    <p style={{ fontSize: 'clamp(1.6rem, 5vw, 3.4rem)', color: 'var(--flare-ivory)', lineHeight: 1.15 }}>
                         Your Cosmic Journey,
                     </p>
                     <p
                         style={{
                             fontSize: 'clamp(1.6rem, 5vw, 3.4rem)',
                             lineHeight: 1.2,
-                            backgroundImage: 'linear-gradient(90deg, #D6A325 0%, #7C3AED 55%, #5B21B6 100%)',
+                            backgroundImage: 'linear-gradient(90deg, var(--secondary) 0%, var(--flare-lavender) 55%, var(--flare-violet) 100%)',
                             WebkitBackgroundClip: 'text',
                             backgroundClip: 'text',
                             color: 'transparent',
@@ -272,7 +272,7 @@ export default function CosmicIntro({ onReveal, onComplete }: CosmicIntroProps) 
                 className="pointer-events-none absolute inset-0"
                 style={{
                     background:
-                        'radial-gradient(circle at 50% 50%, rgba(5,7,22,0) 35%, rgba(5,7,22,0.55) 78%, rgba(3,4,14,0.92) 100%), radial-gradient(circle at 50% 64%, rgba(59,19,107,0.10), transparent 55%)',
+                        'radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--background) 0%, transparent) 35%, color-mix(in srgb, var(--background) 55%, transparent) 78%, color-mix(in srgb, var(--background) 92%, transparent) 100%), radial-gradient(circle at 50% 64%, color-mix(in srgb, var(--flare-lavender) 10%, transparent), transparent 55%)',
                 }}
             />
 
@@ -284,9 +284,9 @@ export default function CosmicIntro({ onReveal, onComplete }: CosmicIntroProps) 
                 style={{
                     opacity: skipVisible ? 0.7 : 0,
                     pointerEvents: skipVisible ? 'auto' : 'none',
-                    color: '#D6A325',
-                    borderColor: 'rgba(214,163,37,0.35)',
-                    background: 'rgba(5,7,22,0.45)',
+                    color: 'var(--secondary)',
+                    borderColor: 'color-mix(in srgb, var(--secondary) 35%, transparent)',
+                    background: 'color-mix(in srgb, var(--background) 45%, transparent)',
                     backdropFilter: 'blur(6px)',
                 }}
             >
@@ -326,7 +326,7 @@ function PlanetSprite({
                         height: '100%',
                         borderRadius: '50%',
                         background: asset.gradient,
-                        boxShadow: '0 0 12px rgba(214,163,37,0.3), 0 0 24px rgba(124,58,237,0.15)',
+                        boxShadow: '0 0 12px color-mix(in srgb, var(--secondary) 30%, transparent), 0 0 24px color-mix(in srgb, var(--flare-lavender) 15%, transparent)',
                     }}
                 />
             ) : (
@@ -362,8 +362,8 @@ function RashiSprite({
                     style={{
                         fontSize: SIZE * 0.8,
                         lineHeight: 1,
-                        color: '#D6A325',
-                        textShadow: '0 0 10px rgba(214,163,37,0.5), 0 0 20px rgba(124,58,237,0.2)',
+                        color: 'var(--secondary)',
+                        textShadow: '0 0 10px color-mix(in srgb, var(--secondary) 50%, transparent), 0 0 20px color-mix(in srgb, var(--flare-lavender) 20%, transparent)',
                     }}
                 >
                     {asset.glyph}
@@ -390,13 +390,13 @@ function SunSymbol() {
         <svg width="84" height="84" viewBox="0 0 100 100" fill="none" aria-hidden="true">
             <defs>
                 <radialGradient id="cosmic-sun-core" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#F8F1DF" />
-                    <stop offset="55%" stopColor="#D6A325" />
-                    <stop offset="100%" stopColor="#91710A" />
+                    <stop offset="0%" stopColor="var(--flare-ivory)" />
+                    <stop offset="55%" stopColor="var(--secondary)" />
+                    <stop offset="100%" stopColor="var(--brand-gold-dark)" />
                 </radialGradient>
             </defs>
             <circle cx="50" cy="50" r="20" fill="url(#cosmic-sun-core)" />
-            <circle cx="50" cy="50" r="27" stroke="#D6A325" strokeWidth="2" opacity="0.8" />
+            <circle cx="50" cy="50" r="27" stroke="var(--secondary)" strokeWidth="2" opacity="0.8" />
             {Array.from({ length: 12 }).map((_, i) => {
                 const a = (i / 12) * Math.PI * 2;
                 const r1 = 33;
@@ -408,7 +408,7 @@ function SunSymbol() {
                         y1={50 + Math.sin(a) * r1}
                         x2={50 + Math.cos(a) * r2}
                         y2={50 + Math.sin(a) * r2}
-                        stroke="#D6A325"
+                        stroke="var(--secondary)"
                         strokeWidth="2"
                         strokeLinecap="round"
                         opacity="0.7"

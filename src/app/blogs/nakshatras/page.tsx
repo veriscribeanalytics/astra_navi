@@ -307,7 +307,7 @@ export default function NakshatrasPage() {
                                 transition={{ duration: 0.4 }}
                                 className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
-                                <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
+                                <Card padding="none" className="w-full h-auto !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
                                     <div className="absolute top-8 right-8 z-20">
                                         <button
                                             onClick={() => router.push('/kundli')}

@@ -229,7 +229,7 @@ const Navbar: React.FC = () => {
     const { isLoggedIn, isLoading, logout, user } = useAuth();
     const { ToastContainer } = useToast();
     const { t } = useTranslation();
-    const { tier, totalCredits, isLoaded } = usePaywallContext();
+    const { tier, totalCredits, isLoaded, tierColor } = usePaywallContext();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -380,9 +380,9 @@ const Navbar: React.FC = () => {
                 variant="warning"
                 isLoading={isLoggingOut}
             />
-            <nav ref={navRef} className={`fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${hideNavbar ? 'hidden' : ''}`}>
-            {/* ===== DESKTOP NAVBAR (lg+) ===== */}
-            <div className="hidden lg:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 w-full mx-auto max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
+            <nav ref={navRef} className={`safe-area-navbar fixed top-0 w-full z-[210] bg-surface border-b border-outline-variant/30 transition-all duration-500 ${hideNavbar ? 'hidden' : ''}`}>
+            {/* ===== DESKTOP NAVBAR (xl+) ===== */}
+            <div className="hidden xl:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 w-full mx-auto max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start shrink-0">
                     <Link href="/" aria-label="Astra Navi Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
@@ -466,7 +466,8 @@ const Navbar: React.FC = () => {
                     {isLoggedIn && isLoaded && (
                         <Link 
                             href="/plans"
-                            className="flex items-center gap-1.5 rounded-full border border-secondary/80 bg-secondary/80 px-3 py-1.5 text-white hover:bg-secondary hover:border-secondary transition-all active:scale-95 cursor-pointer shadow-sm"
+                            className="flex items-center gap-1.5 rounded-full border border-[var(--tier-color)]/80 bg-[var(--tier-color)]/80 px-3 py-1.5 text-white hover:bg-[var(--tier-color)] hover:border-[var(--tier-color)] transition-all active:scale-95 cursor-pointer shadow-sm"
+                            style={{ '--tier-color': tierColor } as React.CSSProperties}
                         >
                             <Wallet className="w-3.5 h-3.5 shrink-0" />
                             <span className="text-xs font-black tabular-nums">{totalCredits ?? 0}</span>
@@ -535,8 +536,8 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
 
-            {/* ===== MOBILE NAVBAR (<lg) ===== */}
-            <div className="flex lg:hidden items-center px-4 py-2 w-full relative h-[56px]">
+            {/* ===== MOBILE/TABLET NAVBAR (<xl) ===== */}
+            <div className="flex xl:hidden items-center px-4 py-2 w-full relative h-[56px]">
                 {/* Left Section (33%) */}
                 <div className="flex-[1] flex justify-start">
                     <button 
@@ -608,9 +609,9 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* ===== SITE MENU OVERLAY (Mobile) ===== */}
-            <div className={`lg:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
+            <div className={`xl:hidden fixed inset-0 top-[var(--navbar-height,56px)] bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
             
-            <div className={`lg:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 max-h-[calc(100vh-var(--navbar-height,56px))] bg-surface border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
+            <div className={`xl:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 max-h-[calc(100vh-var(--navbar-height,56px))] bg-surface border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
                 <div className="p-5 space-y-7 pb-12">
                     {navSections.map((section) => (
                         <div key={section.id} className="space-y-3">

@@ -53,7 +53,12 @@ export interface HoroscopeData {
     primary: { technical: string; simple: string; type: string; importance: string };
     secondary: Array<{ technical: string; simple: string; type: string; importance: string }>;
   };
-  time_triggers?: Array<{ start: string; end: string; type: string; label: string; advice: string }>;
+  time_triggers?: Array<{ start: string; end: string; type: string; label: string; advice: string; reason?: string }>;
+  current_state?: {
+    energy: string;
+    derived_from: string[];
+    advice_now: string;
+  };
   astro_explanations?: {
     enabled: boolean;
     items: Array<{ technical: string; simple: string; importance: string }>;

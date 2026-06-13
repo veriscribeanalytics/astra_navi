@@ -281,7 +281,7 @@ export default function HousesPage() {
                                 transition={{ duration: 0.4 }}
                                 className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
-                                <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
+                                <Card padding="md" className="w-full h-auto !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
                                     <div className="p-8 lg:p-10 flex-grow flex flex-col">
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
                                             <BookOpen className="w-3 h-3" /> {t('blogs.houses.coreConcepts')}
@@ -362,7 +362,7 @@ export default function HousesPage() {
                             transition={{ duration: 0.25 }}
                             className="h-full flex flex-col items-start p-2 lg:pt-0"
                         >
-                            <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
+                            <Card padding="none" className="w-full h-auto !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
                                     <div className="absolute top-8 right-8 z-20">
                                         <button
                                             onClick={() => router.push('/kundli')}

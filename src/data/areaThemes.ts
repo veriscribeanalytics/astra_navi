@@ -48,12 +48,12 @@ const GeneralIcon = (props: LucideProps) => React.createElement(Star, props);
 const SpiritualIcon = (props: LucideProps) => React.createElement(Sparkles, props);
 
 export const AREA_THEMES: Record<ForecastArea, Omit<AreaTheme, "key">> = {
-  career: { color: "text-blue-500", bg: "bg-blue-500/10", hex: "#3B82F6", icon: CareerIcon },
-  health: { color: "text-teal-500", bg: "bg-teal-500/10", hex: "#14B8A6", icon: HealthIcon },
-  love: { color: "text-pink-600", bg: "bg-pink-600/10", hex: "#DB2777", icon: LoveIcon },
-  finance: { color: "text-green-600", bg: "bg-green-600/10", hex: "#16A34A", icon: FinanceIcon },
-  general: { color: "text-amber-500", bg: "bg-amber-500/10", hex: "#F59E0B", icon: GeneralIcon },
-  spiritual: { color: "text-purple-500", bg: "bg-purple-500/10", hex: "#A855F7", icon: SpiritualIcon },
+  career: { color: "text-blue-400", bg: "bg-blue-400/10", hex: "#60A5FA", icon: CareerIcon },
+  health: { color: "text-teal-400", bg: "bg-teal-400/10", hex: "#2DD4BF", icon: HealthIcon },
+  love: { color: "text-pink-400", bg: "bg-pink-400/10", hex: "#F472B6", icon: LoveIcon },
+  finance: { color: "text-emerald-400", bg: "bg-emerald-400/10", hex: "#34D399", icon: FinanceIcon },
+  general: { color: "text-slate-300", bg: "bg-slate-300/10", hex: "#CBD5E1", icon: GeneralIcon },
+  spiritual: { color: "text-violet-400", bg: "bg-violet-400/10", hex: "#A78BFA", icon: SpiritualIcon },
 };
 
 export const AREA_LIST: ForecastArea[] = ["general", "love", "career", "finance", "health", "spiritual"];

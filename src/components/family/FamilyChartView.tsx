@@ -105,7 +105,7 @@ export default function FamilyChartView({ chart }: FamilyChartViewProps) {
                         </span>
                     )}
                 </div>
-                <div className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-4 lg:grid-cols-9">
                     {planetNames.map((name) => {
                         const p = chart.planets[name];
                         const dignity = getDignityStyle(p.dignity);
@@ -115,7 +115,7 @@ export default function FamilyChartView({ chart }: FamilyChartViewProps) {
                             <button
                                 key={name}
                                 onClick={() => setSelectedPlanet(isSelected ? null : name)}
-                                className={`flex flex-col items-center gap-1 shrink-0 px-2 py-1 rounded-2xl transition-all ${
+                                className={`flex min-w-0 flex-col items-center gap-1 px-2 py-1 rounded-2xl transition-all ${
                                     isSelected
                                         ? 'bg-secondary/10 ring-1 ring-secondary/40'
                                         : 'hover:bg-secondary/5'

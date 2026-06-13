@@ -72,11 +72,11 @@ export default function LandingImage({
   // Beautiful wireframe fallback for missing images
   return (
     <div
-      className={`relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#0d0922] to-[#060410] border-2 border-dashed border-secondary/25 rounded-[32px] overflow-hidden group shadow-2xl p-6 ${className} ${aspectRatio}`}
+      className={`relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-background to-background border-2 border-dashed border-secondary/25 rounded-[32px] overflow-hidden group shadow-2xl p-6 ${className} ${aspectRatio}`}
     >
       {/* Abstract background grids to look like a premium app blueprint */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(200,136,10,0.12),transparent)]" />
-      <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#c8880a_1px,transparent_1px),linear-gradient(to_bottom,#c8880a_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 80% at 50% -20%, color-mix(in srgb, var(--secondary) 12%, transparent), transparent)' }} />
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(to right, var(--secondary) 1px, transparent 1px), linear-gradient(to bottom, var(--secondary) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
       
       {/* Placeholder Details */}
       <div className="relative z-10 flex flex-col items-center text-center space-y-4 max-w-[85%]">

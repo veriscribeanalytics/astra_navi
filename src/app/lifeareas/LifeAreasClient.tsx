@@ -1,32 +1,26 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 import { usePaywallContext } from '@/context/PaywallContext';
 import PaywallCard from '@/components/paywall/PaywallCard';
-import type { PaywallFeatureKey, PaywallData } from '@/types/paywall';
+import type { PaywallData } from '@/types/paywall';
 import { useDailyHoroscope, useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
 import { AREA_LIST, AREA_THEMES, ForecastArea } from '@/data/areaThemes';
-import { getAreaColor } from '@/data/lifeAreaColors';
+import { AREA_COLORS, TEXT_COLORS, BRAND_GOLD } from '@/data/lifeAreaColors';
 import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
 import { todayISO } from '@/utils/forecastError';
 import type { HoroscopeData } from '@/types/horoscope';
 import type { ForecastDay } from '@/components/dashboard/MiniChart';
 import { useChat } from '@/context/ChatContext';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
   ArrowRight,
   Sparkles,
-  Calendar,
-  MessageSquare,
-  TrendingUp,
-  RotateCw,
-  ChevronRight,
   Sparkle
 } from 'lucide-react';
 
@@ -147,7 +141,7 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
   useEffect(() => {
     if (!containerRef.current) return;
     const obs = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         const width = entry.contentRect.width;
         if (width > 0) {
           setW(width);
@@ -308,10 +302,14 @@ export default function LifeAreasClient() {
     clientFetch(`/api/forecast/${activeArea}/weekly?date=${date}&lang=${language}`)
       .then(async (res) => {
         if (res.ok) {
-          const data = await res.json();
+          const data = await res.json() as {
+            area: ForecastArea;
+            days?: ForecastDay[];
+            summary?: ForecastData["summary"];
+          };
           const mappedForecast: ForecastData = {
-            area: data.area as ForecastArea,
-            days: (data.days || []).map((d: any) => ({
+            area: data.area,
+            days: (data.days || []).map((d) => ({
               ...d,
               is_today: d.date === date,
             })),
@@ -342,7 +340,7 @@ export default function LifeAreasClient() {
   }, [horoscope, t]);
 
   const activeAreaLabel = useMemo(() => resolveAreaLabel(t, activeArea), [t, activeArea]);
-  const activeAreaHex = useMemo(() => AREA_THEMES[activeArea].hex, [activeArea]);
+  const activeAreaHex = useMemo(() => AREA_COLORS[activeArea].main, [activeArea]);
 
   const activeAreaInsight = useMemo(() => {
     const rawInsight = getAreaInsight(horoscope, activeArea);
@@ -352,7 +350,7 @@ export default function LifeAreasClient() {
 
   const activeAreaNotes = useMemo(() => {
     if (activeArea === "general") {
-      return (horoscope as any)?.current_state?.derived_from || [];
+      return horoscope?.current_state?.derived_from || [];
     }
     const notes = horoscope?.areas_text?.[activeArea as keyof typeof horoscope.areas_text]?.personal_notes;
     return Array.isArray(notes) ? notes : [];
@@ -371,7 +369,7 @@ export default function LifeAreasClient() {
         weekday: "short",
       });
     } catch {
-      return day.day;
+      return "";
     }
   }, [forecast, language]);
 
@@ -491,10 +489,10 @@ export default function LifeAreasClient() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h1 className="font-headline text-[26px] sm:text-[34px] font-bold leading-tight tracking-tight flex items-center gap-2">
-                <Sparkle className="w-6 h-6 text-secondary fill-secondary" />
-                <span>Your Life Areas</span>
+                <Sparkle className="w-6 h-6 fill-current" style={{ color: BRAND_GOLD.main }} />
+                <span style={{ color: TEXT_COLORS.heading }}>Your Life Areas</span>
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-foreground/60">
+              <p className="mt-1 text-xs sm:text-sm" style={{ color: TEXT_COLORS.muted }}>
                 Detailed Vedic insights, transit impacts, and weekly cycles across all key areas.
               </p>
             </div>
@@ -510,14 +508,16 @@ export default function LifeAreasClient() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 w-full">
           {lifeAreas.map(({ area, label, score, theme }) => {
             const Icon = theme.icon;
-            const phaseColor = getAreaColor(area, score);
-            const phaseHex = phaseColor.main;
+            const phaseHex = AREA_COLORS[area].main;
             const isLucide = area === "general" || area === "spiritual";
             const isSelected = activeArea === area;
             
             return (
               <button
                 key={area}
+                type="button"
+                data-testid={`life-area-teaser-${area}`}
+                aria-label={`${label}: ${score} out of 100`}
                 onClick={() => {
                   setActiveArea(area);
                   // Update URL query parameter without triggering full reload
@@ -543,7 +543,7 @@ export default function LifeAreasClient() {
                     <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
                   </span>
                   <span className="text-base font-black leading-none tabular-nums" style={{ color: phaseHex }}>
-                    {score}
+                    <span data-testid={`life-area-score-${area}`}>{score}</span>
                   </span>
                 </AreaRing>
                 <p className="mt-2.5 font-headline text-xs sm:text-sm font-bold leading-tight text-foreground/90">{label}</p>
@@ -573,8 +573,10 @@ export default function LifeAreasClient() {
             
             {/* Left Column: Details, Personalized Notes & Ask Navi */}
             <div className="flex flex-col justify-between gap-5 bg-surface-variant/[0.025] py-4.5 px-4.5 rounded-2xl border border-white/5">
-              <div className="space-y-4 text-left">
-                {activeAreaInsight ? (
+              <div className="relative space-y-4 text-left min-h-[120px]">
+                {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
+                  <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                ) : activeAreaInsight ? (
                   <div>
                     <h4 className="text-xs font-black uppercase tracking-[0.15em] mb-2" style={{ color: activeAreaHex }}>
                       Astrological Analysis
@@ -590,14 +592,14 @@ export default function LifeAreasClient() {
                 )}
 
                 {/* Why Score is High/Low & Personalized Notes rendered Inline */}
-                {activeAreaNotes.length > 0 && (
+                {!isFeatureBlocked('full_daily_horoscope') && activeAreaNotes.length > 0 && (
                   <div className="mt-4 p-4 rounded-xl border border-secondary/15 bg-secondary/5 space-y-2.5">
-                    <h5 className="text-xs font-black uppercase tracking-wider text-secondary flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 fill-secondary" />
+                    <h5 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5" style={{ color: TEXT_COLORS.muted }}>
+                      <Sparkles className="w-3.5 h-3.5" style={{ color: BRAND_GOLD.main }} />
                       Personalized Transit Notes
                     </h5>
                     <ul className="text-xs text-foreground/75 space-y-2 list-disc pl-4 leading-relaxed">
-                      {activeAreaNotes.map((note, i) => (
+                      {activeAreaNotes.map((note: string, i: number) => (
                         <li key={i}>{note}</li>
                       ))}
                     </ul>
@@ -655,7 +657,7 @@ export default function LifeAreasClient() {
             <div className="flex flex-col justify-between gap-5 bg-surface-variant/[0.025] py-4.5 px-4.5 rounded-2xl border border-white/5">
               
               <div>
-                <h4 className="text-xs font-black uppercase tracking-[0.15em] text-secondary mb-2 text-left">
+                <h4 className="text-xs font-black uppercase tracking-[0.15em] mb-2 text-left" style={{ color: TEXT_COLORS.muted }}>
                   7-Day Outlook Trend
                 </h4>
                 <div className="relative rounded-2xl overflow-hidden w-full bg-surface-variant/[0.035] px-4 py-4 min-h-[200px] flex flex-col justify-center border border-white/5">
@@ -669,7 +671,7 @@ export default function LifeAreasClient() {
                 </div>
               </div>
 
-              {forecast && forecast.summary && (
+              {!isFeatureBlocked('full_daily_horoscope') && forecast && forecast.summary && (
                 <div className="grid grid-cols-3 gap-2.5 text-center mt-2.5">
                   <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
                     <p className="text-[10px] uppercase font-black tracking-wider text-foreground/40">Average Score</p>

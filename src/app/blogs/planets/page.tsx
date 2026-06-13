@@ -11,27 +11,14 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks';
+import { PLANET_COLORS, PLANET_TO_ICON } from '@/lib/astrology';
 
-
-const PLANET_COLORS: Record<string, string> = {
-    'Sun': '#F59E0B', 'Moon': '#C7D2FE', 'Mars': '#EF4444',
-    'Mercury': '#34D399', 'Jupiter': '#FBBF24', 'Venus': '#F472B6',
-    'Saturn': '#818CF8', 'Rahu': '#9CA3AF', 'Ketu': '#A78BFA',
-};
-const PLANET_TO_ICON: Record<string, string> = {
-    'Sun': '/icons/planets/sun.png', 'Moon': '/icons/planets/moon.png',
-    'Mars': '/icons/planets/mars.png', 'Saturn': '/icons/planets/saturn.png',
-    'Mercury': '/icons/planets/mercury.png', 'Jupiter': '/icons/planets/jupiter.png',
-    'Venus': '/icons/planets/venus.png',
-};
-
-// ─── FIX 1: Glow is now tightly constrained — same size as icon, low blur radius ───
 const PlanetIcon = ({ planet, size = "w-12 h-12", withGlow = true }: { planet: string; size?: string; withGlow?: boolean }) => (
     <div className={`${size} relative flex items-center justify-center shrink-0`}>
         {withGlow && (
             <div 
                 className="absolute inset-0 blur-[14px] opacity-40 rounded-full animate-pulse-slow" 
-                style={{ backgroundColor: PLANET_COLORS[planet] || '#c8880a' }} 
+                style={{ backgroundColor: PLANET_COLORS[planet] || 'var(--secondary)' }}
             />
         )}
         {PLANET_TO_ICON[planet] ? (
@@ -321,7 +308,7 @@ export default function PlanetsPage() {
                                 transition={{ duration: 0.25 }}
                                 className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
-                                <Card padding="md" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
+                                <Card padding="md" className="w-full h-auto !rounded-[40px] border-outline-variant/20 bg-surface flex flex-col relative overflow-hidden" hoverable={false}>
                                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-outline-variant/20 text-foreground/60 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 w-fit">
                                         <BookOpen className="w-3 h-3" /> {t('blogs.planets.coreConcepts')}
                                     </div>
@@ -400,7 +387,7 @@ export default function PlanetsPage() {
                                 transition={{ duration: 0.4 }}
                                 className="h-full flex flex-col items-start p-2 lg:pt-0"
                             >
-                                <Card padding="none" className="w-full h-auto max-h-[90vh] !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
+                                <Card padding="none" className="w-full h-auto !rounded-[40px] border-outline-variant/20 flex flex-col relative overflow-hidden bg-surface">
                                     <div className="absolute top-8 right-8 z-20">
                                         <button
                                             onClick={() => router.push('/kundli')}

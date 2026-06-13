@@ -6,7 +6,7 @@ import type { MonthlyWeek } from '@/types/forecast';
 import { useTranslation } from '@/hooks';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { ForecastArea } from '@/data/areaThemes';
-import { getAreaPhaseHex } from '@/data/lifeAreaColors';
+import { AREA_COLORS } from '@/data/lifeAreaColors';
 
 interface MonthlyWeekCardsProps {
   weeks: MonthlyWeek[];
@@ -35,7 +35,7 @@ export default function MonthlyWeekCards({ weeks, colorHex, area, selectedWeekSt
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3 lg:gap-4">
       {weeks.map(week => {
         const isSelected = selectedWeekStart === week.start_date;
-        const phaseColor = getAreaPhaseHex(area, week.score);
+        const phaseColor = AREA_COLORS[area].main;
 
         return (
           <motion.button

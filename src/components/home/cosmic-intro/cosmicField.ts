@@ -65,8 +65,8 @@ interface FieldOpts {
 }
 
 
-const GOLD = '214, 163, 37';
-const GOLD_HI = '244, 194, 83';
+const GOLD = '201, 151, 46';
+const GOLD_HI = '224, 184, 90';
 const PURPLE_DEEP = '59, 19, 107';
 const PURPLE_MID = '91, 33, 182';
 const PURPLE_LIGHT = '124, 58, 237';

@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Bell,
   Calendar,
+  Check,
   ChevronRight,
   Coins,
   Gem,
@@ -19,6 +20,7 @@ import {
   MessageSquare,
   Moon,
   Orbit,
+  Plus,
   ShieldAlert,
   Sparkles,
   Star,
@@ -41,7 +43,8 @@ import { LOCALE_BY_LANGUAGE } from "@/locales";
 import { clientFetch } from "@/lib/apiClient";
 import { getRashiData } from "@/lib/astrology";
 import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
-import { getAreaColor, getAreaPhaseHex, getAreaPhaseGlow } from "@/data/lifeAreaColors";
+import { AREA_COLORS, STATUS_COLORS, SIGNAL_BADGES, BRAND_GOLD, TEXT_COLORS, getScorePhase } from "@/data/lifeAreaColors";
+import { PORTAL_COLORS } from "@/data/portalColors";
 import type { ForecastDay } from "@/components/dashboard/MiniChart";
 // import Particles from "@/components/ui/Particles";
 import { catmullRomToBezier, catmullRomArea } from "@/utils/chartCurve";
@@ -62,6 +65,7 @@ import {
 import { parseKundliStats } from "@/lib/kundliStats";
 import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
 import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from "@/types/family";
+import FamilyCapDialog from "@/components/family/FamilyCapDialog";
 
 interface ForecastData {
   area: ForecastArea;
@@ -104,6 +108,7 @@ function resolveAreaLabel(t: (key: string) => string, area: ForecastArea) {
 }
 
 function getAreaScore(horoscope: HoroscopeData | null, area: ForecastArea) {
+  if (!horoscope) return 0;
   const scoreArea = horoscope?.score?.areas?.[area as keyof NonNullable<HoroscopeData["score"]>["areas"]];
   if (scoreArea && typeof scoreArea === "object" && "value" in scoreArea) return scoreArea.value;
   if (horoscope?.today_scores?.[area] != null) return horoscope.today_scores[area];
@@ -112,10 +117,11 @@ function getAreaScore(horoscope: HoroscopeData | null, area: ForecastArea) {
     areas?: Record<string, { score?: number; text?: string }>;
   } | null;
   const legacyKey = area === "love" ? "relationships" : area === "finance" ? "finances" : area;
-  return legacy?.areas?.[legacyKey]?.score ?? (area === "spiritual" ? 76 : 70);
+  return legacy?.areas?.[legacyKey]?.score ?? 0;
 }
 
 function getAreaInsight(horoscope: HoroscopeData | null, area: ForecastArea) {
+  if (!horoscope) return "";
   const areasText = horoscope?.areas_text as Partial<Record<ForecastArea, { insight: string; tone: string }>> | undefined;
   const insight = areasText?.[area]?.insight;
   if (insight) return insight;
@@ -123,7 +129,7 @@ function getAreaInsight(horoscope: HoroscopeData | null, area: ForecastArea) {
     areas?: Record<string, { score?: number; text?: string }>;
   } | null;
   const legacyKey = area === "love" ? "relationships" : area === "finance" ? "finances" : area;
-  return legacy?.areas?.[legacyKey]?.text || areaDescriptions[area];
+  return legacy?.areas?.[legacyKey]?.text || "";
 }
 
 function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"], horoscope?: HoroscopeData | null) {
@@ -342,9 +348,11 @@ function AreaRing({
   );
 }
 
-function DarkPanel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function DarkPanel({ children, className = "", style, borderVariant }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; borderVariant?: 'muted' | 'glow-premium' | 'gradient-cosmic' | 'top-gold' | 'dashed-locked' }) {
+  const variantClass = borderVariant ? `border-${borderVariant}` : '';
+  const shadowClass = borderVariant ? '' : 'shadow-[var(--card-shadow)]';
   return (
-    <section className={`dark-glass rounded-[22px] shadow-[var(--card-shadow)] ${className}`}>
+    <section className={`dark-glass rounded-[22px] ${shadowClass} ${variantClass} ${className}`} style={style}>
       {children}
     </section>
   );
@@ -374,6 +382,71 @@ interface FamilyCardActionProps {
   t: (key: string) => string;
   onRunCompatibility: () => void;
   isCompatibilityBlocked: boolean;
+}
+
+function DashboardAddMemberCard({
+  onClick,
+  isLocked,
+  lockType
+}: {
+  onClick?: () => void;
+  isLocked?: boolean;
+  lockType?: 'pro' | 'premium'
+}) {
+  const { t } = useTranslation();
+  const { getTierColor } = usePaywallContext();
+  const lockColor = getTierColor(lockType);
+
+  let title = t('newDashboard.familyFriends.addMember') || "Add Member";
+  let subtitle = t('dashboard.familyAddSubtitle') || "Add family or friends to compare charts and emotional patterns.";
+  let buttonText = t('newDashboard.familyFriends.addMember') || "ADD MEMBER";
+  let bgClass = "bg-secondary/[0.01] border-secondary/35 hover:border-secondary/60 hover:bg-secondary/[0.04]";
+  let textClass = "text-secondary";
+  let buttonBorderClass = "border-secondary/50 group-hover:border-secondary group-hover:bg-secondary/10";
+
+  if (isLocked) {
+    if (lockType === 'pro') {
+      title = "Get Pro to Unlock";
+      subtitle = "Unlock up to 3 slots and get deeper insights.";
+      buttonText = "GET PRO";
+      bgClass = "bg-[var(--lock-color)]/[0.03] border-[var(--lock-color)]/25 hover:border-[var(--lock-color)]/55 hover:bg-[var(--lock-color)]/[0.06]";
+      textClass = "text-[var(--lock-color)]";
+      buttonBorderClass = "border-[var(--lock-color)]/40 group-hover:border-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/10";
+    } else {
+      title = "Get Premium to Unlock";
+      subtitle = "Unlock all 6 slots and unlimited cosmic compatibility.";
+      buttonText = "GET PREMIUM";
+      bgClass = "bg-[var(--lock-color)]/[0.03] border-[var(--lock-color)]/25 hover:border-[var(--lock-color)]/55 hover:bg-[var(--lock-color)]/[0.06]";
+      textClass = "text-[var(--lock-color)]";
+      buttonBorderClass = "border-[var(--lock-color)]/40 group-hover:border-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/10";
+    }
+  }
+
+  return (
+    <div
+      onClick={onClick}
+      className={`group flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed p-5 text-center cursor-pointer transition-all min-h-[170px] ${bgClass}`}
+      style={{ '--lock-color': lockColor } as React.CSSProperties}
+    >
+      <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed transition-transform group-hover:scale-105 ${
+        isLocked ? 'border-[var(--lock-color)]/40 text-[var(--lock-color)]' : 'border-secondary/40 text-secondary/70'
+      }`}>
+        {isLocked ? <Lock className="h-5 w-5" /> : <Users className="h-6 w-6" />}
+      </div>
+      <div className="space-y-1">
+        <p className="text-sm font-bold text-foreground flex items-center justify-center gap-1.5 group-hover:text-secondary transition-colors">
+          {title}
+        </p>
+        <p className="text-[10px] leading-relaxed text-foreground/45 max-w-[24ch] mx-auto">
+          {subtitle}
+        </p>
+      </div>
+      <span className={`flex items-center gap-1.5 rounded-full border bg-transparent px-4 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${textClass} ${buttonBorderClass}`}>
+        {isLocked ? <Lock className="h-2.5 w-2.5" /> : <Users className="h-2.5 w-2.5" />}
+        {buttonText}
+      </span>
+    </div>
+  );
 }
 
 /** Dashboard family-member card backed by real member data + compatibility status. */
@@ -410,40 +483,58 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
   const scorePalette = bandPalette(activeBand ?? "");
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-xl font-bold text-secondary">
+    <div className="flex gap-4 p-4 sm:p-5 rounded-2xl border border-outline-variant/8 bg-surface">
+      {/* Left Column: Avatar + Status Badge */}
+      <div className="flex flex-col items-center shrink-0">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 border border-secondary/20 text-xl font-headline font-bold text-secondary">
           {initialOf(member.name)}
         </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="truncate font-headline text-sm font-bold text-foreground">{member.name || "—"}</h4>
-          <p className="label-sm text-[10px] tracking-wider text-foreground/35">{formatRelationship(member.relationshipType)}</p>
-        </div>
-        {scorePct !== null && (
-          <div className="shrink-0 text-right">
-            <span className={`font-headline text-lg font-bold tabular-nums leading-none ${scorePalette.text}`}>
-              {scorePct}
-              <span className="ml-0.5 text-[10px] font-body text-foreground/40">%</span>
-            </span>
-          </div>
-        )}
-      </div>
-      {status && (
-        <span className={`inline-block self-start rounded-md border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${status.classes}`}>
-          {t(status.labelKey)}
+        <span className={`mt-2.5 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider border ${
+          status?.kind === 'incomplete'
+            ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
+            : 'bg-secondary/10 border-secondary/20 text-secondary'
+        }`}>
+          {status ? t(status.labelKey) : 'MANUAL'}
         </span>
-      )}
-      <div className="grid grid-cols-2 gap-2">
-        <Link href={`/family?member=${member.id}`} className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
-          {t('dashboard.familyViewBond')}
-        </Link>
-        <button
-          onClick={onRunCompatibility}
-          className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
-        >
-          {isCompatibilityBlocked ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-          {t('dashboard.familyRunCompatibility')}
-        </button>
+      </div>
+
+      {/* Right Column: Name, Relationship, Score, and Buttons */}
+      <div className="flex-1 flex flex-col justify-between min-w-0 min-h-[92px]">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h4 className="truncate font-headline text-sm font-bold text-foreground">
+              {member.name || "—"}
+            </h4>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/45 mt-0.5">
+              {formatRelationship(member.relationshipType)}
+            </p>
+          </div>
+          {scorePct !== null && (
+            <div className="shrink-0 text-right leading-none">
+              <span className={`font-headline text-2xl font-bold tabular-nums ${scorePalette.text}`}>
+                {scorePct}
+                <span className="text-[10px] font-body text-foreground/45 ml-0.5">%</span>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Buttons */}
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <Link
+            href={`/family?member=${member.id}`}
+            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5"
+          >
+            {t('dashboard.familyViewBond') || "View Bond"}
+          </Link>
+          <button
+            onClick={onRunCompatibility}
+            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5 flex items-center justify-center gap-1"
+          >
+            {isCompatibilityBlocked && <Lock className="h-2.5 w-2.5 shrink-0" />}
+            {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -475,38 +566,54 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
   const scorePalette = bandPalette(activeBand ?? "");
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-xl font-bold text-emerald-400">
+    <div className="flex gap-4 p-4 sm:p-5 rounded-2xl border border-outline-variant/8 bg-surface">
+      {/* Left Column: Avatar + Linked Badge */}
+      <div className="flex flex-col items-center shrink-0">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xl font-headline font-bold text-emerald-400">
           {initialOf(connection.otherName)}
         </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="truncate font-headline text-sm font-bold text-foreground">{connection.otherName || "—"}</h4>
-          <p className="label-sm text-[10px] tracking-wider text-foreground/35">{formatRelationship(connection.iSeeThemAs)}</p>
-        </div>
-        {scorePct !== null && (
-          <div className="shrink-0 text-right">
-            <span className={`font-headline text-lg font-bold tabular-nums leading-none ${scorePalette.text}`}>
-              {scorePct}
-              <span className="ml-0.5 text-[10px] font-body text-foreground/40">%</span>
-            </span>
-          </div>
-        )}
+        <span className="mt-2.5 inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-400">
+          <Check className="h-2.5 w-2.5 shrink-0" /> {t('newDashboard.linked') || "LINKED"}
+        </span>
       </div>
-      <span className="inline-block self-start rounded-md bg-emerald-400/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-400">
-        {t('newDashboard.linked')}
-      </span>
-      <div className="grid grid-cols-2 gap-2">
-        <Link href="/family" className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary">
-          {t('dashboard.familyViewBond')}
-        </Link>
-        <button
-          onClick={onRunCompatibility}
-          className="rounded-lg border border-outline-variant/10 bg-surface-variant/[0.02] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/30 hover:text-secondary"
-        >
-          {isCompatibilityBlocked ? <Lock className="inline h-3 w-3 mr-1 shrink-0" /> : null}
-          {t('dashboard.familyRunCompatibility')}
-        </button>
+
+      {/* Right Column: Name, Relationship, Score, and Buttons */}
+      <div className="flex-1 flex flex-col justify-between min-w-0 min-h-[92px]">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h4 className="truncate font-headline text-sm font-bold text-foreground">
+              {connection.otherName || "—"}
+            </h4>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/45 mt-0.5">
+              {formatRelationship(connection.iSeeThemAs)}
+            </p>
+          </div>
+          {scorePct !== null && (
+            <div className="shrink-0 text-right leading-none">
+              <span className={`font-headline text-2xl font-bold tabular-nums ${scorePalette.text}`}>
+                {scorePct}
+                <span className="text-[10px] font-body text-foreground/45 ml-0.5">%</span>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Buttons */}
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <Link
+            href="/family"
+            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5"
+          >
+            {t('dashboard.familyViewBond') || "View Bond"}
+          </Link>
+          <button
+            onClick={onRunCompatibility}
+            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5 flex items-center justify-center gap-1"
+          >
+            {isCompatibilityBlocked && <Lock className="h-2.5 w-2.5 shrink-0" />}
+            {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -518,6 +625,7 @@ export default function DashboardHome() {
   const greeting = t(useGreeting());
   const { user, refreshProfile, isLoading: userLoading } = useAuth();
   const { tier, totalCredits, isLoaded: paywallLoaded, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
+  const isFree = useMemo(() => (tier || 'free').toLowerCase() === 'free', [tier]);
   const [activePaywallData, setActivePaywallData] = useState<PaywallData | null>(null);
   const { data: horoscope, isLoading: horoscopeLoading, profileLocationRequired } = useDailyHoroscope();
   const { data: transits, isLoading: transitsLoading } = useTransitsToday();
@@ -540,115 +648,7 @@ export default function DashboardHome() {
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isAdviceModalOpen, setIsAdviceModalOpen] = useState(false);
   const hasAnalyzedRef = useRef<string | null>(null);
-
-  const [leftContentHeight, setLeftContentHeight] = useState<number | undefined>(undefined);
-  const [rightContentHeight, setRightContentHeight] = useState<number | undefined>(undefined);
-
-  const leftObserverRef = useRef<ResizeObserver | null>(null);
-  const rightObserverRef = useRef<ResizeObserver | null>(null);
-
-  const leftContentRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (leftObserverRef.current) {
-      leftObserverRef.current.disconnect();
-      leftObserverRef.current = null;
-    }
-    if (node) {
-      const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setLeftContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
-        }
-      });
-      observer.observe(node);
-      leftObserverRef.current = observer;
-    }
-  }, []);
-
-  const rightContentRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (rightObserverRef.current) {
-      rightObserverRef.current.disconnect();
-      rightObserverRef.current = null;
-    }
-    if (node) {
-      const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setRightContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
-        }
-      });
-      observer.observe(node);
-      rightObserverRef.current = observer;
-    }
-  }, []);
-
-  const leftTotalHeight = leftContentHeight !== undefined ? leftContentHeight + 44 : undefined;
-  const rightTotalHeight = rightContentHeight !== undefined ? rightContentHeight + 36 : undefined;
-
-  const commonHeight = (leftTotalHeight !== undefined && rightTotalHeight !== undefined)
-    ? Math.min(leftTotalHeight, rightTotalHeight)
-    : undefined;
-
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-    setIsLargeScreen(mediaQuery.matches);
-    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
-
-  const cardHeightStyle = (isLargeScreen && commonHeight !== undefined)
-    ? { height: `${commonHeight}px` }
-    : undefined;
-
-  const [familyContentHeight, setFamilyContentHeight] = useState<number | undefined>(undefined);
-  const [snapshotContentHeight, setSnapshotContentHeight] = useState<number | undefined>(undefined);
-
-  const familyObserverRef = useRef<ResizeObserver | null>(null);
-  const snapshotObserverRef = useRef<ResizeObserver | null>(null);
-
-  const familyContentRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (familyObserverRef.current) {
-      familyObserverRef.current.disconnect();
-      familyObserverRef.current = null;
-    }
-    if (node) {
-      const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setFamilyContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
-        }
-      });
-      observer.observe(node);
-      familyObserverRef.current = observer;
-    }
-  }, []);
-
-  const snapshotContentRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (snapshotObserverRef.current) {
-      snapshotObserverRef.current.disconnect();
-      snapshotObserverRef.current = null;
-    }
-    if (node) {
-      const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          setSnapshotContentHeight(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
-        }
-      });
-      observer.observe(node);
-      snapshotObserverRef.current = observer;
-    }
-  }, []);
-
-  const familyTotalHeight = familyContentHeight !== undefined ? familyContentHeight + 48 : undefined;
-  const snapshotTotalHeight = snapshotContentHeight !== undefined ? snapshotContentHeight + 48 : undefined;
-
-  const commonLowerHeight = (familyTotalHeight !== undefined && snapshotTotalHeight !== undefined)
-    ? Math.min(familyTotalHeight, snapshotTotalHeight)
-    : undefined;
-
-  const lowerCardHeightStyle = (isLargeScreen && commonLowerHeight !== undefined)
-    ? { height: `${commonLowerHeight}px` }
-    : undefined;
+  const [capDialog, setCapDialog] = useState<{ open: boolean; limit?: number; currentTier?: string; message?: string } | null>(null);
 
   useEffect(() => {
     if (userLoading || !user?.email || hasAnalyzedRef.current === user.email) return;
@@ -697,7 +697,11 @@ export default function DashboardHome() {
   ]);
 
   useEffect(() => {
-    if (isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope')) {
+    if (
+      paywallLoaded &&
+      (isFree || (isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope')))
+    ) {
+      setAllForecastsLoading(false);
       return;
     }
     const date = todayISO();
@@ -746,7 +750,7 @@ export default function DashboardHome() {
       setAllWeeklyForecasts(newForecasts);
       setAllForecastsLoading(false);
     });
-  }, [language, isFeatureBlocked, getFeaturePaywall]);
+  }, [language, isFree, paywallLoaded, isFeatureBlocked, getFeaturePaywall]);
 
   const currentDate = useMemo(
     () =>
@@ -761,19 +765,25 @@ export default function DashboardHome() {
 
   const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
   const overallScore = useMemo(() => {
-    if (!horoscope) return 73;
+    if (!horoscope) return 0;
     const scores = AREA_LIST.map((area) => getAreaScore(horoscope, area));
     const sum = scores.reduce((acc, val) => acc + val, 0);
     return Math.round(sum / AREA_LIST.length);
   }, [horoscope]);
-  const overallColor = getAreaColor("general", overallScore);
-  const overallPhaseHex = overallColor.main;
-  const overallPhaseGlow = overallColor.glow;
+  const overallPhaseHex = AREA_COLORS.overall.main;
+  const overallPhaseGlow = AREA_COLORS.overall.glow;
   // Only the *initial* fetch (no data yet) should show skeletons. Once the
   // request settles we render real scores, or the graceful fallback numbers if
   // the backend returned nothing — never the fabricated 73/70 *during* loading
   // (that placeholder-then-real swap is the "wrong data then correct" flash).
   const scoreLoading = horoscopeLoading && !horoscope;
+  const fullDailyHoroscopeBlocked =
+    paywallLoaded && (isFree || isFeatureBlocked('full_daily_horoscope'));
+  const hasWeeklyForecasts = Object.values(allWeeklyForecasts).some((f) => f !== null);
+  const lifeAreasLoading =
+    scoreLoading ||
+    !paywallLoaded ||
+    (!fullDailyHoroscopeBlocked && (allForecastsLoading || !hasWeeklyForecasts));
   const rashiLoading = userLoading || (!user?.moonSign && !user?.sunSign && !user?.lagnaSign);
   const scoreBand = overallScore >= 75
     ? t('newDashboard.todaysEnergy.bandFavorable')
@@ -787,6 +797,48 @@ export default function DashboardHome() {
   // Real family + chart data (replaces the previously-hardcoded placeholders).
   const { data: familyMembers, isLoading: familyLoading } = useFamilyMembers();
   const { data: familyConnections, isLoading: connectionsLoading } = useFamilyConnections();
+
+  const allItems = useMemo(() => {
+    const membersList = familyMembers || [];
+    const connectionsList = familyConnections || [];
+    const mappedMembers = membersList.map(m => ({ type: 'member' as const, id: String(m.id), data: m }));
+    const mappedConnections = connectionsList.map(c => ({ type: 'connection' as const, id: String(c.connectionId), data: c }));
+    return [...mappedMembers, ...mappedConnections];
+  }, [familyMembers, familyConnections]);
+
+  const slots = useMemo(() => {
+    const result: Array<
+      | { type: 'member'; id: string; data: FamilyMember }
+      | { type: 'connection'; id: string; data: FamilyConnection }
+      | { type: 'add'; isLocked: boolean; lockType?: 'pro' | 'premium' }
+    > = [];
+
+    const tierLower = (tier || 'free').toLowerCase();
+    let unlockedLimit = 1;
+    if (tierLower === 'premium') {
+      unlockedLimit = 6;
+    } else if (tierLower === 'pro') {
+      unlockedLimit = 3;
+    }
+
+    for (let i = 0; i < unlockedLimit; i++) {
+      if (i < allItems.length) {
+        result.push(allItems[i]);
+      } else {
+        result.push({ type: 'add', isLocked: false });
+      }
+    }
+
+    for (let i = unlockedLimit; i < 6; i++) {
+      let lockType: 'pro' | 'premium' = 'premium';
+      if (tierLower === 'free' && i < 3) {
+        lockType = 'pro';
+      }
+      result.push({ type: 'add', isLocked: true, lockType });
+    }
+
+    return result;
+  }, [allItems, tier]);
   const kundliStats = useMemo(() => parseKundliStats(user?.astrologyData), [user?.astrologyData]);
 
   // Format a dasha period like "May 2026 — May 2044" from ISO/loose date strings.
@@ -1011,9 +1063,12 @@ export default function DashboardHome() {
     const bestItem = sortedScores[0];
     const worstItem = sortedScores[sortedScores.length - 1];
 
-    const stableAreaName = stabilitySortedAreas.find(
-      (area) => area !== bestItem?.area && area !== worstItem?.area
-    ) || "general";
+    const middleItem = sortedScores[Math.floor((sortedScores.length - 1) / 2)];
+    const stableAreaName = fullDailyHoroscopeBlocked
+      ? middleItem?.area
+      : stabilitySortedAreas.find(
+          (area) => area !== bestItem?.area && area !== worstItem?.area
+        );
 
     const stableItem = lifeAreas.find((item) => item.area === stableAreaName);
 
@@ -1023,65 +1078,70 @@ export default function DashboardHome() {
     if (bestItem) {
       result.push({
         ...bestItem,
-        badge: "Best Today",
+        badge: SIGNAL_BADGES.BEST.label,
         arrow: "up",
-        badgeColor: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+        badgeColor: `text-[${SIGNAL_BADGES.BEST.main}] bg-[${SIGNAL_BADGES.BEST.bg}] border-[rgba(34,197,94,0.28)]`,
+        badgeStyle: { color: SIGNAL_BADGES.BEST.main, backgroundColor: SIGNAL_BADGES.BEST.bg, borderColor: "rgba(34,197,94,0.28)" },
       });
     }
 
-    // 2. Stable Card (Middle)
     if (stableItem) {
       result.push({
         ...stableItem,
-        badge: "Stable This Week",
+        badge: SIGNAL_BADGES.STABLE.label,
         arrow: "side",
-        badgeColor: "text-sky-400 bg-sky-400/10 border-sky-400/20",
+        badgeColor: `text-[${SIGNAL_BADGES.STABLE.main}] bg-[${SIGNAL_BADGES.STABLE.bg}] border-[rgba(56,189,248,0.28)]`,
+        badgeStyle: { color: SIGNAL_BADGES.STABLE.main, backgroundColor: SIGNAL_BADGES.STABLE.bg, borderColor: "rgba(56,189,248,0.28)" },
       });
     }
 
-    // 3. Worst Card (Right)
     if (worstItem && worstItem.area !== bestItem?.area) {
       result.push({
         ...worstItem,
-        badge: "Needs Attention",
+        badge: SIGNAL_BADGES.WORST.label,
         arrow: "down",
-        badgeColor: "text-rose-400 bg-rose-400/10 border-rose-400/20",
+        badgeColor: `text-[${SIGNAL_BADGES.WORST.main}] bg-[${SIGNAL_BADGES.WORST.bg}] border-[rgba(239,68,68,0.28)]`,
+        badgeStyle: { color: SIGNAL_BADGES.WORST.main, backgroundColor: SIGNAL_BADGES.WORST.bg, borderColor: "rgba(239,68,68,0.28)" },
       });
     }
 
     return result;
-  }, [lifeAreas, stabilitySortedAreas]);
+  }, [fullDailyHoroscopeBlocked, lifeAreas, stabilitySortedAreas]);
 
   // Set default activeArea to the Stable area on load
   const hasSetDefaultActiveRef = useRef(false);
   useEffect(() => {
     if (hasSetDefaultActiveRef.current) return;
-    const hasForecastsLoaded = Object.values(allWeeklyForecasts).some((f) => f !== null);
-    if (!allForecastsLoading && hasForecastsLoaded && stabilitySortedAreas.length > 0 && lifeAreas.length > 0) {
-      const sortedScores = [...lifeAreas].sort((a, b) => b.score - a.score);
-      const bestItem = sortedScores[0];
-      const worstItem = sortedScores[sortedScores.length - 1];
-      const stableAreaName = stabilitySortedAreas.find(
-        (area) => area !== bestItem?.area && area !== worstItem?.area
-      );
-      if (stableAreaName) {
-        setActiveArea(stableAreaName);
-        hasSetDefaultActiveRef.current = true;
-      }
-    } else if (lifeAreas.length > 0 && activeArea === "career") {
-      // If horoscope is loaded but forecasts aren't, default to best area to avoid showing general or career if not best
-      const sortedScores = [...lifeAreas].sort((a, b) => b.score - a.score);
-      const bestItem = sortedScores[0];
-      if (bestItem) {
-        setActiveArea(bestItem.area);
-      }
+    if (!horoscope || lifeAreas.length === 0) return;
+
+    const sortedScores = [...lifeAreas].sort((a, b) => b.score - a.score);
+    const bestItem = sortedScores[0];
+    const worstItem = sortedScores[sortedScores.length - 1];
+    const stableAreaName = fullDailyHoroscopeBlocked
+      ? sortedScores[Math.floor((sortedScores.length - 1) / 2)]?.area
+      : stabilitySortedAreas.find(
+          (area) => area !== bestItem?.area && area !== worstItem?.area
+        );
+
+    if (
+      stableAreaName &&
+      (fullDailyHoroscopeBlocked || (!allForecastsLoading && hasWeeklyForecasts))
+    ) {
+      setActiveArea(stableAreaName);
+      hasSetDefaultActiveRef.current = true;
     }
-  }, [allForecastsLoading, allWeeklyForecasts, stabilitySortedAreas, lifeAreas, activeArea]);
+  }, [
+    allForecastsLoading,
+    fullDailyHoroscopeBlocked,
+    hasWeeklyForecasts,
+    stabilitySortedAreas,
+    lifeAreas,
+    horoscope,
+  ]);
 
   const activeAreaHex = useMemo(() => {
-    const score = getAreaScore(horoscope, activeArea);
-    return getAreaColor(activeArea, score).main;
-  }, [activeArea, horoscope]);
+    return AREA_COLORS[activeArea].main;
+  }, [activeArea]);
 
   const activeAreaInsight = useMemo(() => {
     const rawInsight = getAreaInsight(horoscope, activeArea);
@@ -1177,7 +1237,7 @@ export default function DashboardHome() {
             <div className="w-full">
               <h1 className="font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px] 3xl:text-[56px]">
                 {greeting},{" "}
-                <span className="bg-gradient-to-r from-[var(--flare-gold)] via-secondary to-[var(--secondary)] bg-clip-text text-transparent">
+                <span style={{ color: TEXT_COLORS.heading }}>
                   {userLoading ? "..." : userName}
                 </span>
               </h1>
@@ -1231,17 +1291,17 @@ export default function DashboardHome() {
         {scoreLoading ? (
           <DailyHoroscopeCardSkeleton />
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2 lg:items-start relative z-10">
+          <div className="relative z-10 grid gap-6 min-[1280px]:grid-cols-2 min-[1280px]:items-start">
             {/* Left Card: Your Day Today */}
             <DarkPanel 
-              className="py-4.5 px-4 sm:py-5.5 sm:px-5 flex flex-col gap-4 overflow-y-auto pr-1"
-              style={cardHeightStyle}
+              className="py-4.5 px-4 sm:py-5.5 sm:px-5 flex flex-col gap-4"
+              borderVariant="glow-premium"
             >
-              <div ref={leftContentRef} className="flex flex-col gap-4 w-full">
+              <div className="flex flex-col gap-4 w-full">
               {/* Combined Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-1">
                 <div>
-                  <h2 className="text-xl font-headline font-bold text-foreground">
+                  <h2 className="text-xl font-headline font-bold" style={{ color: TEXT_COLORS.heading }}>
                     Your Day Today
                   </h2>
                 </div>
@@ -1277,9 +1337,13 @@ export default function DashboardHome() {
                     </div>
                     <span
                       className="mt-2.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
-                      style={{ color: overallPhaseHex, backgroundColor: `${overallPhaseGlow}1f` }}
+                      style={{
+                        color: STATUS_COLORS[getScorePhase(overallScore)].main,
+                        backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
+                        borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
+                      }}
                     >
-                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: overallPhaseHex }} />
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
                       {scoreBand}
                     </span>
                   </div>
@@ -1367,7 +1431,7 @@ export default function DashboardHome() {
 
                 {/* AI Astrologers Section */}
                 <div className="space-y-3 mt-auto pt-2">
-                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1.3fr] items-stretch gap-3 w-full">
+                  <div className="grid w-full grid-cols-1 items-stretch gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.3fr)]">
                     {/* Left Card: Choose from AI Astrologers */}
                     <button
                       onClick={() => {
@@ -1387,7 +1451,7 @@ export default function DashboardHome() {
                         <h4 className="text-xs font-black uppercase tracking-[0.15em] text-purple-400">
                           CHOOSE FROM AI ASTROLOGERS
                         </h4>
-                        <p className="text-[11px] text-foreground/50 mt-0.5 whitespace-nowrap">
+                        <p className="mt-0.5 truncate text-[11px] text-foreground/50">
                           Browse and select your personal guide
                         </p>
                       </div>
@@ -1395,7 +1459,7 @@ export default function DashboardHome() {
 
                     {/* OR Separator Column */}
                     <div className="flex items-center justify-center py-1 md:py-0">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#18122B] border border-white/20 text-[9px] font-black text-foreground/60 shadow-lg">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface border border-white/20 text-[9px] font-black text-foreground/60 shadow-lg">
                         OR
                       </span>
                     </div>
@@ -1448,55 +1512,66 @@ export default function DashboardHome() {
           </DarkPanel>
 
             {/* Right Card: Your Life Areas */}
-            <DarkPanel 
-              className="py-3.5 px-4 sm:py-4.5 sm:px-5 flex flex-col gap-4 overflow-y-auto pr-1"
-              style={cardHeightStyle}
+          <DarkPanel
+            className="py-3.5 px-4 sm:py-4.5 sm:px-5 flex flex-col gap-4"
+            borderVariant="gradient-cosmic"
             >
-              <div ref={rightContentRef} className="flex flex-col gap-4 w-full">
-                <div className="flex flex-col gap-4">
-                {/* Sub-header for Current Week */}
-                <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
-                  <div>
-                    <h3 className="text-[14px] font-black uppercase tracking-[0.22em] text-foreground">
-                      {t('newDashboard.currentWeek.title') || "Your Life Areas"}
-                    </h3>
-                    <p className="mt-1 text-xs text-foreground/50 font-medium text-secondary/80">
-                      Today’s strongest and weakest signals
-                    </p>
-                  </div>
-                  <Link
-                    href="/lifeareas"
-                    className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] text-secondary border border-secondary/30 bg-secondary/10 hover:bg-secondary/20 hover:border-secondary/50 px-3 py-1.5 rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md shadow-secondary/5"
-                  >
-                    <span>View All</span>
-                    <ArrowRight className="h-3 w-3 text-secondary animate-pulse" />
-                  </Link>
+            <div className="flex flex-col gap-4 w-full">
+              <div className="flex flex-col gap-4">
+              {/* Sub-header for Current Week */}
+              <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
+                <div>
+                    <h3 className="text-[14px] font-black uppercase tracking-[0.22em]" style={{ color: TEXT_COLORS.heading }}>
+                    {t('newDashboard.currentWeek.title') || "Your Life Areas"}
+                  </h3>
+                  <p className="mt-1 text-xs font-medium" style={{ color: TEXT_COLORS.muted }}>
+                    Today's strongest and weakest signals
+                  </p>
                 </div>
+                <Link
+                  href="/lifeareas"
+                  className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  style={{
+                    color: BRAND_GOLD.main,
+                    borderColor: BRAND_GOLD.border,
+                    backgroundColor: BRAND_GOLD.soft,
+                  }}
+                >
+                  <span>View All</span>
+                  <ArrowRight className="h-3 w-3" style={{ color: BRAND_GOLD.main }} />
+                </Link>
+              </div>
 
-                {/* Life Areas grid acting as the activeArea selector */}
+              {/* Life Areas grid acting as the activeArea selector */}
+              {lifeAreasLoading ? (
                 <div className="grid grid-cols-3 gap-3">
-                  {dashboardLifeAreas.map(({ area, label, score, theme, badge, badgeColor, arrow }) => {
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="h-28 animate-pulse rounded-2xl bg-surface-variant/[0.04] border border-outline-variant/8" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {dashboardLifeAreas.map(({ area, label, score, theme, badge, badgeStyle, arrow }) => {
                     const Icon = theme.icon;
-                    const phaseColor = getAreaColor(area, score);
-                    const cardColorHex = phaseColor.main;
-
+                    const cardColorHex = AREA_COLORS[area].main;
                     const isLucide = area === "general" || area === "spiritual";
                     const isSelected = activeArea === area;
                     return (
                       <button
                         key={area}
+                        data-testid={`dashboard-life-area-${area}`}
                         onClick={() => setActiveArea(area)}
                         className={`group flex flex-col items-center rounded-2xl border py-2.5 px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
-                          isSelected
-                            ? "bg-white/[0.04] opacity-100"
-                            : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant opacity-40 hover:opacity-80"
+                        isSelected
+                          ? "bg-white/[0.04] opacity-100"
+                          : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant opacity-40 hover:opacity-80"
                         }`}
                         style={{
                           borderColor: isSelected ? `${cardColorHex}60` : undefined,
                           boxShadow: isSelected ? `0 0 20px ${cardColorHex}30` : undefined,
                         }}
                       >
-                        <AreaRing score={score} color={cardColorHex} label={label}>
+                      <AreaRing score={score} color={cardColorHex} label={label}>
                           <span
                             className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
                             style={{ color: cardColorHex }}
@@ -1506,26 +1581,37 @@ export default function DashboardHome() {
                           <span className="text-base font-black leading-none tabular-nums" style={{ color: cardColorHex }}>
                             {score}
                           </span>
-                        </AreaRing>
-                        <p className="mt-2 font-headline text-xs font-bold leading-tight">{label}</p>
-                        {badge && (
-                          <span className={`mt-1.5 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.06em] px-1.5 py-0.5 rounded border ${badgeColor}`}>
-                            {arrow === "up" && <span className="text-[9px] leading-none">▲</span>}
-                            {arrow === "side" && <span className="text-[9px] leading-none">◆</span>}
-                            {arrow === "down" && <span className="text-[9px] leading-none">▼</span>}
-                            <span>{badge}</span>
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                      </AreaRing>
+                          <p className="mt-2 font-headline text-xs font-bold leading-tight">{label}</p>
+                          {badge && (
+                            <span className={`mt-1.5 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.06em] px-1.5 py-0.5 rounded border`} style={badgeStyle}>
+                              {arrow === "up" && <span className="text-[9px] leading-none">▲</span>}
+                              {arrow === "side" && <span className="text-[9px] leading-none">◆</span>}
+                              {arrow === "down" && <span className="text-[9px] leading-none">▼</span>}
+                              <span>{badge}</span>
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 </div>
 
                 {/* Grid layout: Insight on Left, Chart on Right (40% / 60% ratio) */}
                 <div className="grid gap-4 lg:grid-cols-[2fr_3fr] lg:items-start pt-0 mt-3">
                   {/* Left Column: Selected Area Insight */}
-                  <div className="space-y-3 text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl">
-                    {activeAreaInsight ? (
+                  <div className="relative space-y-3 text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl min-h-[150px]">
+                    {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
+                      <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                    ) : lifeAreasLoading ? (
+                      <div className="space-y-2">
+                        <div className="h-3.5 w-24 rounded bg-surface-variant/20 animate-pulse" />
+                        <div className="h-2 w-full rounded bg-surface-variant/20 animate-pulse" />
+                        <div className="h-2 w-full rounded bg-surface-variant/20 animate-pulse" />
+                        <div className="h-2 w-2/3 rounded bg-surface-variant/20 animate-pulse" />
+                      </div>
+                    ) : activeAreaInsight ? (
                       <>
                         <div>
                           <h4 className="text-xs font-black uppercase tracking-[0.15em] mb-2" style={{ color: activeAreaHex }}>
@@ -1596,7 +1682,6 @@ export default function DashboardHome() {
                   </div>
                 </div>
               </div>
-            </div>
           </DarkPanel>
           </div>
         )}
@@ -1604,114 +1689,147 @@ export default function DashboardHome() {
 
       {/* FAMILY + CHART SNAPSHOT — 2 Column Row */}
       <div className="relative z-10 mx-auto max-w-[1760px] px-4 sm:px-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-[3fr_2fr] lg:items-stretch">
+        <div className="grid grid-cols-1 gap-6 min-[1280px]:grid-cols-[3fr_2fr] min-[1280px]:items-stretch">
 
           {/* LEFT — Family Compatibility */}
           <DarkPanel 
-            className="p-6 flex flex-col gap-4 overflow-y-auto pr-1"
-            style={lowerCardHeightStyle}
+            className="p-6 flex flex-col gap-4"
+            borderVariant="muted"
           >
-            <div ref={familyContentRef} className="flex flex-col gap-4 w-full">
-              <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-400/10 border border-rose-400/20">
-                  <Heart className="h-4 w-4 text-rose-400" />
+            <div className="flex flex-col gap-4 w-full">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-400/10 border border-rose-400/20">
+                    <Heart className="h-5 w-5 text-rose-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="font-headline text-sm sm:text-base font-bold text-foreground truncate">
+                      {t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}
+                    </h2>
+                    <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-[0.14em] font-bold truncate">
+                      {t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="font-headline text-sm font-bold text-foreground">
-                    {t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}
-                  </h2>
-                  <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-[0.14em] font-bold">
-                    {t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}
-                  </p>
+                <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                  <button
+                    onClick={() => {
+                      if (isFree && allItems.length >= 1) {
+                        setCapDialog({ open: true, currentTier: tier ?? undefined, limit: 1 });
+                      } else if (tier?.toLowerCase() === 'pro' && allItems.length >= 6) {
+                        setCapDialog({ open: true, currentTier: tier ?? undefined, limit: 6 });
+                      } else {
+                        router.push('/family');
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{t('newDashboard.familyFriends.addMember') || "Add Member"}</span>
+                    <span className="sm:hidden">{t('family.addShort') || "Add"}</span>
+                  </button>
+                  <span className="h-3 w-px bg-outline-variant/30" aria-hidden="true" />
+                  <Link
+                    href="/family"
+                    aria-label={t('newDashboard.familyFriends.title')}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-foreground/75 hover:text-secondary transition-colors"
+                  >
+                    {t('newDashboard.lifeAreas.viewAll') || "View All"} <ArrowRight className="inline h-3 w-3" />
+                  </Link>
                 </div>
               </div>
-              <Link
-                href="/family"
-                aria-label={t('newDashboard.familyFriends.title')}
-                className="shrink-0 text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary"
-              >
-                {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
-              </Link>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {familyLoading && !familyMembers && connectionsLoading && !familyConnections ? (
-                [0, 1, 2].map((i) => (
-                  <div key={i} className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 shrink-0 rounded-full bg-surface-variant/20 animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-3 w-24 rounded bg-surface-variant/20 animate-pulse" />
-                        <div className="h-2 w-16 rounded bg-surface-variant/20 animate-pulse" />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {familyLoading && !familyMembers && connectionsLoading && !familyConnections ? (
+                  [0, 1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex gap-4 p-4 rounded-2xl border border-outline-variant/8 bg-surface animate-pulse">
+                      <div className="flex flex-col items-center gap-2.5 shrink-0">
+                        <div className="h-12 w-12 rounded-full bg-surface-variant/20" />
+                        <div className="h-4 w-12 rounded bg-surface-variant/20" />
+                      </div>
+                      <div className="flex-1 space-y-3 py-1">
+                        <div className="h-3 w-28 rounded bg-surface-variant/20" />
+                        <div className="h-2 w-16 rounded bg-surface-variant/20" />
+                        <div className="h-5 w-full rounded bg-surface-variant/20 mt-2" />
                       </div>
                     </div>
-                    <div className="h-5 w-24 rounded bg-surface-variant/20 animate-pulse" />
-                  </div>
-                ))
-              ) : (
-                <>
-                  {familyMembers?.map((m) => {
-                    const blocked = isFeatureBlocked('family_compatibility');
-                    return (
-                      <DashboardFamilyMemberCard
-                        key={`m-${m.id}`}
-                        member={m}
-                        t={t}
-                        isCompatibilityBlocked={blocked}
-                        onRunCompatibility={() => {
-                          const pw = getFeaturePaywall('family_compatibility');
-                          if (blocked && pw) { setActivePaywallData(pw); return; }
-                          router.push('/kundli/match');
-                        }}
-                      />
-                    );
-                  })}
-                  {familyConnections?.map((c) => {
-                    const blocked = isFeatureBlocked('family_compatibility');
-                    return (
-                      <DashboardConnectionCard
-                        key={`c-${c.connectionId}`}
-                        connection={c}
-                        t={t}
-                        isCompatibilityBlocked={blocked}
-                        onRunCompatibility={() => {
-                          const pw = getFeaturePaywall('family_compatibility');
-                          if (blocked && pw) { setActivePaywallData(pw); return; }
-                          router.push('/kundli/match');
-                        }}
-                      />
-                    );
-                  })}
-                </>
-              )}
-
-              <Link
-                href="/family"
-                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-secondary/30 bg-secondary/5 p-4 text-center transition-all hover:border-secondary/50"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/40 text-secondary">
-                  <Users className="h-7 w-7" />
-                </div>
-                <div>
-                  <p className="mb-1 text-sm font-bold text-foreground">{t('newDashboard.familyFriends.addMember')}</p>
-                  <p className="text-[10px] leading-relaxed text-foreground/40">{t('dashboard.familyAddSubtitle')}</p>
-                </div>
-                <span className="flex items-center gap-1.5 rounded-xl border-2 border-secondary/50 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/10">
-                  <Users className="h-3 w-3" />
-                  {t('newDashboard.familyFriends.addMember')}
-                </span>
-              </Link>
-            </div>
+                  ))
+                ) : (
+                  <>
+                    {slots.map((slot, index) => {
+                      if (slot.type === 'member') {
+                        const blocked = isFeatureBlocked('family_compatibility');
+                        return (
+                          <DashboardFamilyMemberCard
+                            key={`m-${slot.id}`}
+                            member={slot.data}
+                            t={t}
+                            isCompatibilityBlocked={blocked}
+                            onRunCompatibility={() => {
+                              const pw = getFeaturePaywall('family_compatibility');
+                              if (blocked && pw) { setActivePaywallData(pw); return; }
+                              router.push(`/family?member=${slot.id}&run=1`);
+                            }}
+                          />
+                        );
+                      } else if (slot.type === 'connection') {
+                        const blocked = isFeatureBlocked('family_compatibility');
+                        return (
+                          <DashboardConnectionCard
+                            key={`c-${slot.id}`}
+                            connection={slot.data}
+                            t={t}
+                            isCompatibilityBlocked={blocked}
+                            onRunCompatibility={() => {
+                              const pw = getFeaturePaywall('family_compatibility');
+                              if (blocked && pw) { setActivePaywallData(pw); return; }
+                              router.push('/family');
+                            }}
+                          />
+                        );
+                      } else {
+                        return (
+                          <DashboardAddMemberCard
+                            key={`add-${index}`}
+                            isLocked={slot.isLocked}
+                            lockType={slot.lockType}
+                            onClick={() => {
+                              if (slot.isLocked) {
+                                if (slot.lockType === 'pro') {
+                                  setCapDialog({
+                                    open: true,
+                                    currentTier: tier ?? undefined,
+                                    limit: 3,
+                                    message: "Upgrade to Pro to unlock up to 3 family members, or Premium for unlimited access."
+                                  });
+                                } else {
+                                  setCapDialog({
+                                    open: true,
+                                    currentTier: tier ?? undefined,
+                                    limit: 6,
+                                    message: "Upgrade to Premium to unlock all 6 family slots on your dashboard and enjoy unlimited cosmic bonds."
+                                  });
+                                }
+                              } else {
+                                router.push('/family');
+                              }
+                            }}
+                          />
+                        );
+                      }
+                    })}
+                  </>
+                )}
+              </div>
             </div>
           </DarkPanel>
 
           {/* RIGHT — Chart Snapshot (40%) */}
           <DarkPanel 
-            className="p-6 flex flex-col justify-between overflow-y-auto pr-1"
-            style={lowerCardHeightStyle}
+            className="p-6 flex flex-col justify-between"
+            borderVariant="muted"
           >
-            <div ref={snapshotContentRef} className="flex flex-col gap-4 w-full h-full justify-between">
+            <div className="flex flex-col gap-4 w-full h-full justify-between">
               <div>
                 <div className="mb-6 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -1820,7 +1938,7 @@ export default function DashboardHome() {
 
         <div>
           {/* MEET YOUR AI ASTROLOGERS */}
-            <DarkPanel className="p-6">
+            <DarkPanel className="p-6" borderVariant="top-gold">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-5 w-5 items-center justify-center">
@@ -1909,7 +2027,7 @@ export default function DashboardHome() {
         </div>
 
         {/* COSMIC PORTALS — Full Width */}
-        <DarkPanel className="mt-8 p-6">
+        <DarkPanel className="mt-8 p-6" borderVariant="muted">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-5 w-5 items-center justify-center">
@@ -1924,11 +2042,11 @@ export default function DashboardHome() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {[
               { icon: <MessageSquare className="h-5 w-5" />, title: t('dashboard.consultNaviAi'), desc: t('newDashboard.portalChatDesc'), action: t('dashboard.consultAi'), href: "/chat", color: "var(--secondary)", requiresFeature: 'chat_message' as PaywallFeatureKey },
-              { icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli'), desc: t('dashboard.janamKundliDesc'), action: t('dashboard.openChart'), href: "/kundli", color: "#60a5fa", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-              { icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync'), desc: t('newDashboard.portalSoulmateDesc'), action: t('dashboard.analyzeMatch'), href: "/kundli/match", color: "#fb7185", requiresFeature: 'match_report' as PaywallFeatureKey },
-              { icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse'), desc: t('newDashboard.portalPulseDesc'), action: t('newDashboard.viewToday'), href: "/horoscope/forecast", color: "#34d399", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
-              { icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary'), desc: t('newDashboard.portalRashiDesc'), action: t('dashboard.openLibrary'), href: "/rashis", color: "var(--flare-lavender)" },
-              { icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions'), desc: t('newDashboard.portalSessionsDesc'), action: t('dashboard.joinSession'), href: "/consult", color: "var(--flare-gold)", requiresFeature: 'guided_consult' as PaywallFeatureKey },
+              { icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli'), desc: t('dashboard.janamKundliDesc'), action: t('dashboard.openChart'), href: "/kundli", color: PORTAL_COLORS.kundli, requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+              { icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync'), desc: t('newDashboard.portalSoulmateDesc'), action: t('dashboard.analyzeMatch'), href: "/kundli/match", color: PORTAL_COLORS.match, requiresFeature: 'match_report' as PaywallFeatureKey },
+              { icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse'), desc: t('newDashboard.portalPulseDesc'), action: t('newDashboard.viewToday'), href: "/horoscope/forecast", color: PORTAL_COLORS.forecast, requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
+              { icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary'), desc: t('newDashboard.portalRashiDesc'), action: t('dashboard.openLibrary'), href: "/rashis", color: PORTAL_COLORS.rashi },
+              { icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions'), desc: t('newDashboard.portalSessionsDesc'), action: t('dashboard.joinSession'), href: "/consult", color: PORTAL_COLORS.sessions, requiresFeature: 'guided_consult' as PaywallFeatureKey },
             ].map((portal, idx) => {
               const isLocked = portal.requiresFeature ? isFeatureBlocked(portal.requiresFeature) : false;
               const paywallData = portal.requiresFeature ? getFeaturePaywall(portal.requiresFeature) : null;
@@ -2020,7 +2138,7 @@ export default function DashboardHome() {
       <AnimatePresence>
         {pendingPrompt && (
           <motion.div
-            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto p-4 sm:items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -2079,6 +2197,13 @@ export default function DashboardHome() {
           />
         )}
       </AnimatePresence>
+
+      <FamilyCapDialog
+        open={!!capDialog}
+        onClose={() => setCapDialog(null)}
+        currentTier={capDialog?.currentTier || tier || 'free'}
+        limit={capDialog?.limit || 1}
+      />
 
       <AnimatePresence>
         {isPanchangModalOpen && (
@@ -2158,7 +2283,7 @@ export default function DashboardHome() {
       <AnimatePresence>
         {isRahuKaalModalOpen && (
           <motion.div
-            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto p-4 sm:items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -2218,7 +2343,7 @@ export default function DashboardHome() {
                     <h3 className="text-xs font-black uppercase tracking-[0.16em] text-secondary mb-2">
                       Astrological Caution Points
                     </h3>
-                    <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
+                    <div className="space-y-2.5">
                       {horoscope.alerts.secondary.map((alert, idx) => (
                         <div key={idx} className="flex gap-3 items-start rounded-xl border border-outline-variant/10 bg-surface-variant/[0.02] p-3 transition hover:bg-surface-variant/[0.04]">
                           <span className="text-amber-500 mt-1 shrink-0">•</span>
@@ -2249,7 +2374,7 @@ export default function DashboardHome() {
       <AnimatePresence>
         {isNotesModalOpen && (
           <motion.div
-            className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto p-4 sm:items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -2318,7 +2443,7 @@ export default function DashboardHome() {
                       <h3 className="text-[10px] font-black uppercase tracking-[0.16em] mb-2" style={{ color: activeAreaHex }}>
                         Celestial Insights
                       </h3>
-                      <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-3 text-sm text-foreground/80 leading-relaxed max-h-[220px] overflow-y-auto pr-1">
+                      <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-3 text-sm text-foreground/80 leading-relaxed">
                         {(transits?.notableTransits?.length
                           ? transits.notableTransits
                           : horoscope?.astro_explanations?.items?.map(item => item.simple) || [
@@ -2339,7 +2464,7 @@ export default function DashboardHome() {
                 ) : (
                   /* Standard Personal Notes for other categories */
                   activeAreaNotes.length > 0 ? (
-                    <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-2 text-sm text-foreground/80 leading-relaxed max-h-[200px] overflow-y-auto pr-1">
+                    <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4 space-y-2 text-sm text-foreground/80 leading-relaxed">
                       {activeAreaNotes.map((note, idx) => (
                         <p key={idx}>{note}</p>
                       ))}

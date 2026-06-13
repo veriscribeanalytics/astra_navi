@@ -485,7 +485,13 @@ export default function ProfileSettingsPage() {
                             <a href="/plans" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/15 hover:bg-secondary/15 hover:border-secondary/25 transition-all">
                                 <Wallet className="w-4 h-4 text-secondary" />
                                 <span className="text-[11px] font-bold text-secondary tabular-nums">{totalCredits ?? 0} {t('plans.naviCredits')}</span>
-                                <span className="text-[8px] font-bold text-secondary/50 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{tier?.toUpperCase() || 'FREE'}</span>
+                                <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                                  (tier || '').toLowerCase() === 'premium'
+                                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                                    : (tier || '').toLowerCase() === 'pro'
+                                    ? 'bg-purple-500/10 text-purple-300 border-purple-500/20'
+                                    : 'bg-slate-500/10 text-slate-400 border-slate-500/25'
+                                }`}>{tier?.toUpperCase() || 'FREE'}</span>
                                 <ArrowRight className="w-3 h-3 text-secondary/40" />
                             </a>
                         </div>

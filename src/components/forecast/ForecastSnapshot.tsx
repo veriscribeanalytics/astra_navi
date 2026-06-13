@@ -4,7 +4,7 @@ import React from 'react';
 import Card from '@/components/ui/Card';
 import { Sparkles, Calendar, AlertTriangle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { getAreaColor } from '@/data/lifeAreaColors';
+import { AREA_COLORS, BRAND_GOLD } from '@/data/lifeAreaColors';
 import type { ForecastArea } from '@/data/areaThemes';
 
 interface InsightData {
@@ -42,9 +42,8 @@ interface ForecastSnapshotProps {
 export default function ForecastSnapshot({ insight, summary, range, theme, area, t }: ForecastSnapshotProps) {
   const score = insight ? insight.score : (summary?.average_score ?? 50);
 
-  const phaseColor = getAreaColor(area, score);
-  const phaseHex = phaseColor.main;
-  const phaseGlow = phaseColor.glow;
+  const phaseHex = AREA_COLORS[area].main;
+  const phaseGlow = AREA_COLORS[area].glow;
 
   const deriveLabel = (s: number) => {
     if (s >= 70) return t('forecast.labelFavorable');
@@ -84,7 +83,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
     <Card padding="lg" className="border-white/5 bg-surface/80 backdrop-blur-md shadow-xl flex flex-col gap-6 overflow-hidden relative">
       {/* Title */}
       <div>
-        <span className="text-[10px] sm:text-xs font-bold text-secondary uppercase tracking-[0.25em] block mb-1">
+        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] block mb-1" style={{ color: BRAND_GOLD.main }}>
           {t('forecast.todaysSnapshot')}
         </span>
       </div>
@@ -123,7 +122,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
             {t('horoscope.dominantForce')}
           </span>
           <span className="text-xs sm:text-sm font-bold text-foreground/80 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-secondary animate-pulse" />
+            <Sparkles className="w-3.5 h-3.5 animate-pulse" style={{ color: BRAND_GOLD.main }} />
             {dominantPlanet}
           </span>
         </div>
@@ -132,7 +131,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
             {t('forecast.bestDay')}
           </span>
           <span className="text-xs sm:text-sm font-bold text-foreground/80 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" style={{ color: getAreaColor(area, 80).main }} />
+            <Calendar className="w-3.5 h-3.5" style={{ color: AREA_COLORS[area].main }} />
             {bestDay}
           </span>
         </div>
@@ -141,7 +140,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
             {t('forecast.challengingDay')}
           </span>
           <span className="text-xs sm:text-sm font-bold text-foreground/80 flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 animate-bounce" style={{ color: getAreaColor(area, 30).main }} />
+            <AlertTriangle className="w-3.5 h-3.5 animate-bounce" style={{ color: AREA_COLORS[area].main }} />
             {challengingDay}
           </span>
         </div>

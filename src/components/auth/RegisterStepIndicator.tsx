@@ -14,7 +14,7 @@ const RegisterStepIndicator: React.FC<RegisterStepIndicatorProps> = ({ currentSt
           <div
             key={i}
             className={`h-1 3xl:h-1.5 rounded-full transition-all duration-300 ${
-              i === currentStep ? 'w-8 3xl:w-12 bg-[#c9a03a]' : 'w-2 3xl:w-3 bg-[rgba(190,145,135,0.2)]'
+              i === currentStep ? 'w-8 3xl:w-12 bg-secondary' : 'w-2 3xl:w-3 bg-accent/20'
             }`}
           />
         ))}
@@ -25,7 +25,7 @@ const RegisterStepIndicator: React.FC<RegisterStepIndicatorProps> = ({ currentSt
           <span
             key={i}
             className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-300 ${
-              i === currentStep ? 'text-[#c9a03a]' : 'text-[#9d8cb0]/50'
+              i === currentStep ? 'text-secondary' : 'text-text-muted/50'
             }`}
           >
             {label}
