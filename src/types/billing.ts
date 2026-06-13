@@ -428,7 +428,7 @@ function normalizeCatalogProduct(item: any): CatalogProduct {
   const descriptionEn = item.descriptionEn ?? item.description_en ?? item.description ?? null;
   const descriptionHi = item.descriptionHi ?? item.description_hi ?? null;
   const icon = item.icon ?? null;
-  const color = item.color ?? null;
+  const color = item.color ?? item.metadata?.color ?? null;
   const badge = item.badge ?? item.tag ?? null;
   const isRecommended = item.isRecommended ?? item.is_recommended ?? false;
   const isFeatured = item.isFeatured ?? item.is_featured ?? false;

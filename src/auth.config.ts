@@ -67,15 +67,11 @@ export const authConfig = {
       const isPublicRoute =
         nextUrl.pathname === "/" ||
         nextUrl.pathname.startsWith("/blogs") ||
-        nextUrl.pathname.startsWith("/rashis") ||
         nextUrl.pathname.startsWith("/about") ||
         nextUrl.pathname.startsWith("/support") ||
         nextUrl.pathname.startsWith("/careers") ||
         nextUrl.pathname.startsWith("/plans") ||
-        nextUrl.pathname.startsWith("/kundli") ||
-        nextUrl.pathname.startsWith("/consult") ||
-        nextUrl.pathname.startsWith("/chat") ||
-        nextUrl.pathname.startsWith("/family") ||
+        nextUrl.pathname.startsWith("/services") ||
         nextUrl.pathname.startsWith("/horoscope") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||

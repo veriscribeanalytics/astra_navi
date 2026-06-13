@@ -22,6 +22,7 @@ import { Toaster } from "@/hooks/useToast";
 import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
 import { CookieConsentProvider } from "@/context/CookieConsentContext";
 import CookieConsentBanner from "@/components/privacy/CookieConsentBanner";
+import MobileScrollDamper from "@/components/ui/MobileScrollDamper";
 
 export const metadata: Metadata = {
   title: "AstraNavi | Vedic AI Astrology",
@@ -47,9 +48,9 @@ export default async function RootLayout({
   return (
     <html
       lang={languageCookie}
-      className={`${ALL_FONT_VARIABLES} h-full antialiased ${theme}`}
+      className={`${ALL_FONT_VARIABLES} antialiased ${theme}`}
       suppressHydrationWarning
-      data-scroll-behavior="smooth"
+      
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -87,6 +88,7 @@ export default async function RootLayout({
                       <ConditionalFooter />
                       <AskNaviFab />
                       <CookieConsentBanner />
+                      <MobileScrollDamper />
                     </CookieConsentProvider>
                   </ThemeProvider>
                   </PaywallProvider>

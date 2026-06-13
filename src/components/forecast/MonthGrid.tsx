@@ -3,6 +3,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from '@/hooks';
+import { ForecastArea } from '@/data/areaThemes';
+import { AREA_COLORS } from '@/data/lifeAreaColors';
 
 export interface MonthData {
   month: string;
@@ -15,9 +17,10 @@ export interface MonthData {
 
 const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
-export default function MonthGrid({ months, colorHex, selectedMonth, onSelect }: {
+export default function MonthGrid({ months, colorHex, area, selectedMonth, onSelect }: {
   months: MonthData[];
   colorHex: string;
+  area: ForecastArea;
   selectedMonth: string | null;
   onSelect: (month: string) => void;
 }) {
@@ -29,18 +32,17 @@ export default function MonthGrid({ months, colorHex, selectedMonth, onSelect }:
         const monthIdx = date.getMonth();
         const label = t(`forecast.monthsShort.${MONTH_KEYS[monthIdx]}`) || m.month.slice(5);
         const isSelected = selectedMonth === m.month;
-        const isHigh = m.score >= 75;
-        const isLow = m.score <= 45;
+        const phaseColor = AREA_COLORS[area].main;
 
         return (
           <motion.button
             key={m.month}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(m.month)}
-            className={`relative flex flex-col items-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 border-white/5'}`}
+            className={`relative flex flex-col items-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/80 border-white/5'}`}
             style={{ 
-              borderColor: isSelected ? colorHex + '50' : undefined,
-              boxShadow: isSelected ? `0 0 16px ${colorHex}20` : undefined
+              borderColor: isSelected ? colorHex + '50' : phaseColor + '25',
+              boxShadow: isSelected ? `0 0 16px ${colorHex}20` : `0 0 8px ${phaseColor}10`
             }}
           >
             <span 
@@ -49,7 +51,9 @@ export default function MonthGrid({ months, colorHex, selectedMonth, onSelect }:
             >
               {label}
             </span>
-            <span className={`text-lg sm:text-2xl lg:text-3xl font-headline font-bold mb-1.5 ${isSelected ? 'text-foreground font-black' : 'text-foreground/40'}`}>
+            <span className={`text-lg sm:text-2xl lg:text-3xl font-headline font-bold mb-1.5 ${isSelected ? 'text-foreground font-black' : ''}`}
+              style={{ color: isSelected ? undefined : phaseColor }}
+            >
               {m.score}
             </span>
             <div className="w-full h-1 sm:h-1.5 rounded-full overflow-hidden bg-white/5 relative">
@@ -57,7 +61,7 @@ export default function MonthGrid({ months, colorHex, selectedMonth, onSelect }:
                 initial={{ width: 0 }}
                 animate={{ width: `${m.score}%` }}
                 className="absolute inset-0 rounded-full"
-                style={{ backgroundColor: isSelected ? colorHex : (isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b840') }}
+                style={{ backgroundColor: isSelected ? colorHex : phaseColor }}
               />
             </div>
             {m.is_current && (

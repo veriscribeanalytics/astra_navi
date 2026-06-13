@@ -2,69 +2,79 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant 3xl (@media (min-width: 2560px));
 
+/* Hide Navbar during cosmic intro and fade it in when complete */
+html.intro-playing nav {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+html.intro-playing main {
+  padding-top: 0 !important;
+}
+
+/* Fade in the navbar over 0.9s when the intro finishes to match the landing page crossfade */
+html:not(.intro-playing) nav {
+  transition: opacity 0.9s ease, transform 0.9s ease, background-color 0.3s ease, border-color 0.3s ease !important;
+}
+
 html {
-  scroll-behavior: smooth;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
+  font-size: 100%;
+}
+
+html.intro-playing {
+  height: 100%;
   overflow: hidden;
-  font-size: clamp(14px, 0.85vw + 0.5rem, 16px);
 }
 
-@media (min-width: 2560px) {
-  html {
-    font-size: clamp(18px, 0.5vw + 5px, 28px);
-  }
-}
-
-@media (max-width: 1280px) {
-  html {
-    font-size: clamp(13px, 1.2vw + 2px, 15.5px);
-  }
-}
-
-/* Prevent double scrollbars: body is the SOLE scroll container */
-body {
+html.intro-playing body {
   height: 100%;
+  overflow: hidden;
+}
+
+/* Allow standard viewport scrolling */
+body {
+  min-height: 100%;
   width: 100%;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
-  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
 
 /* Global Custom Scrollbar - Premium 4px */
-body, .custom-scrollbar {
+html, body, .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(200, 136, 10, 0.2) transparent;
+  scrollbar-color: var(--brand-gold-soft) transparent;
 }
 
-body::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
+html::-webkit-scrollbar, body::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
-body::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-body::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(200, 136, 10, 0.2);
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--brand-gold-soft);
   border-radius: 20px;
   transition: background 0.3s ease;
 }
 
-body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(200, 136, 10, 0.4);
+html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--secondary) 40%, transparent);
 }
 
 /* Dark Mode Overrides */
-.dark body, .dark .custom-scrollbar {
-  scrollbar-color: rgba(200, 136, 10, 0.15) transparent;
+.dark html, .dark body, .dark .custom-scrollbar {
+  scrollbar-color: color-mix(in srgb, var(--secondary) 15%, transparent) transparent;
 }
 
-.dark body::-webkit-scrollbar-thumb, .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(200, 136, 10, 0.15);
+.dark html::-webkit-scrollbar-thumb, .dark body::-webkit-scrollbar-thumb, .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--secondary) 15%, transparent);
 }
 
 /* Mobile: Use dynamic viewport units to account for browser UI */
@@ -114,7 +124,7 @@ body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:
 
 /* Standard Label Styling */
 .label-sm {
-  @apply text-[12px] sm:text-[13px] font-bold uppercase tracking-widest text-foreground/55;
+  @apply text-ui-caption font-bold uppercase tracking-widest text-foreground/55;
 }
 
 .label-muted {
@@ -122,27 +132,52 @@ body::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:
 }
 
 .label-secondary {
-  @apply text-[12px] sm:text-[13px] font-bold uppercase tracking-widest text-secondary;
+  @apply text-ui-caption font-bold uppercase tracking-widest text-secondary;
 }
 
 /* Mobile AI Button Safety Buffer */
 .safe-bottom-buffer {
-  padding-bottom: 8rem !important;
+  padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
 }
 @media (min-width: 640px) {
   .safe-bottom-buffer {
-    padding-bottom: 3rem !important;
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom)) !important;
   }
+}
+
+.safe-area-navbar {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-fab {
+  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  right: calc(1.25rem + env(safe-area-inset-right));
+}
+
+.safe-area-footer,
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Performance optimization: GPU acceleration */
 .particle-container,
 .rashi-orbit-container,
 [class*="orbit"],
-[class*="particle"] {
+[class*="particle"],
+.stars,
+.cosmic-particles {
   transform: translateZ(0);
   backface-visibility: hidden;
   transition: opacity 400ms ease;
+}
+
+.dark .particle-container,
+.dark [class*="particle"],
+.dark .stars,
+.dark .cosmic-particles {
+  opacity: 0.20;
 }
 
 /* Optimized will-change usage */
@@ -261,21 +296,40 @@ body.skip-disabled .skip-to-content:focus-visible {
   --surface: #f1e4db;
   --surface-variant: #E6D8E0;
   --primary: #2a1a4a;
-  --secondary: #c8880a;
+  --secondary: #C9972E;
   --accent: #d1b8c6;
   --on-primary: #ffffff;
   --on-surface: #2a1a4a;
   --on-surface-variant: #4a3b6a;
   --outline-variant: #d1b8c6;
-  --glow-color: rgba(200, 136, 10, 0.12);
-  --flare-gold: #c8880a;
+  --glow-color: rgba(201, 151, 46, 0.12);
+  --flare-gold: #C9972E;
   --flare-lavender: #a78bd2;
   --flare-ivory: #fff8e6;
+  --flare-violet: #7C3AED;
   --pattern-opacity: 0.25;
   --grain-opacity: 0.05;
   --card-shadow: 0 8px 32px 0 rgba(42, 26, 74, 0.08);
   --border-opacity: 0.3;
-  
+
+  --brand-gold: #C9972E;
+  --brand-gold-hover: #E0B85A;
+  --brand-gold-soft: rgba(201, 151, 46, 0.12);
+  --brand-gold-border: rgba(201, 151, 46, 0.28);
+  --brand-gold-dark: #91710A;
+
+  --text-heading: #2a1a4a;
+  --text-body: #4a3b6a;
+  --text-muted: #6b5f8a;
+  --text-faint: #9a8fb0;
+
+  --hljs-string: #6db36d;
+  --hljs-number: #d4a054;
+  --hljs-title: #5e9fd4;
+  --hljs-builtin: var(--brand-gold);
+  --hljs-attr: #b888d4;
+  --hljs-name: #d45e5e;
+
   /* --- SEMANTIC VARIABLES --- */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -294,28 +348,28 @@ body.skip-disabled .skip-to-content:focus-visible {
 
 /* Font fallbacks for Indian scripts */
 [lang="hi"] body, [lang="mr"] body {
-  font-family: var(--font-noto-devanagari), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-devanagari), var(--font-inter), sans-serif !important;
 }
 [lang="ta"] body {
-  font-family: var(--font-noto-tamil), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-tamil), var(--font-inter), sans-serif !important;
 }
 [lang="te"] body {
-  font-family: var(--font-noto-telugu), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-telugu), var(--font-inter), sans-serif !important;
 }
 [lang="kn"] body {
-  font-family: var(--font-noto-kannada), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-kannada), var(--font-inter), sans-serif !important;
 }
 [lang="bn"] body {
-  font-family: var(--font-noto-bengali), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-bengali), var(--font-inter), sans-serif !important;
 }
 [lang="gu"] body {
-  font-family: var(--font-noto-gujarati), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-gujarati), var(--font-inter), sans-serif !important;
 }
 [lang="ml"] body {
-  font-family: var(--font-noto-malayalam), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-malayalam), var(--font-inter), sans-serif !important;
 }
 [lang="pa"] body {
-  font-family: var(--font-noto-gurmukhi), var(--font-inter), var(--font-dm-sans), sans-serif !important;
+  font-family: var(--font-noto-gurmukhi), var(--font-inter), sans-serif !important;
 }
 
 /* ─── Non-Latin script breathing room ─────────────────────────────────────
@@ -357,6 +411,59 @@ body.skip-disabled .skip-to-content:focus-visible {
 [lang="kn"] button, [lang="kn"] [role="button"],
 [lang="ml"] button, [lang="ml"] [role="button"] {
   line-height: 1.4;
+}
+
+/* ─── Hero typography scale-down for Indic scripts ─────────────────────────
+   Same content length differs ~30% between scripts (e.g. Tamil description
+   wraps to 4 lines where Korean wraps to 2). Without scaling, hero h1
+   blows out the layout in Tamil/Telugu/Malayalam/Kannada/Bengali/etc.
+
+   These rules shrink ONLY the hero h1 + description (.hero-h1, .hero-desc
+   on the LandingPage hero) — not every heading on the site. `!important` is
+   intentional: it guarantees the override wins against Tailwind's responsive
+   `text-*` utilities at every breakpoint, regardless of cascade order or
+   how Tailwind v4 emits the compiled CSS. */
+/* Hero description: slight bump in line-height for breathing room.
+   Don't shrink the text — 16px is the readability floor. */
+/* Cancel the hero grid's `lg:-mt-[120px]` negative margin for Indic scripts.
+   Reason: in English the content fits ~500px in a 640px section, and the
+   -120px margin tightens the visual gap between navbar and hero. In
+   Tamil/Malayalam/etc the content is ~700–800px tall, the section grows to
+   fit it (`min-h-[640px]`), and then the -120px shifts the top of the
+   content ABOVE the section. `overflow-hidden` then chops the heading off.
+   Latin layout is untouched. */
+/* ─── Generic Indic script safety net (NOT per-component) ──────────────────
+   Applied to every block-level text node inside an Indic-script locale.
+   Together with the line-height bump above, this is the single source of
+   truth for "what makes long Tamil/Telugu/Malayalam strings fit narrow
+   mobile containers without breaking the layout."
+
+   Why each property matters:
+   - `overflow-wrap: anywhere` — last-ditch break authority. Indic compound
+     words (sandhi, conjuncts, no-space loanwords) can be 25+ characters
+     and don't have natural Latin word boundaries. Without `anywhere`,
+     `break-word` is too conservative and lets text overflow.
+   - `word-break: normal` — keeps grapheme clusters intact (vowel signs
+     attached to consonants must NOT split apart). Pairs with `anywhere`.
+   - `text-wrap: pretty` — modern browser line-balancing for the LAST few
+     lines of a wrapped block; avoids orphans/runts in mixed English+script
+     banners like "Sign in to continue to நவியுடன் உரையாடுங்கள்".
+   - `hyphens: auto` — disabled. Auto-hyphenation rules for these scripts
+     are sparse/wrong in most engines; let `overflow-wrap` do the work. */
+/* Korean joins this club for `text-wrap: pretty` only — its scripts wrap
+   at every character anyway, so `overflow-wrap: anywhere` would be
+   redundant, but pretty still helps with mixed Latin/Hangul content. */
+/* Authentication forms (login/register/forgot-password) on narrow mobile
+   are the highest-risk surface for Indic overflow because every visible
+   string is a translated chunk of UI copy stuffed into a 320–400px column.
+   This bumps min-height on buttons + reserves vertical breathing room on
+   labels so any locale can grow without distorting the form rhythm. */
+/* Device tier durations */
+@media (max-width: 768px) {
+  /* Kill ALL transitions on mobile — prevents visible theme-switch lag
+     on cards, strips, text, etc. Computed once at page load (cheap),
+     unlike .disable-transitions which forces a full recalc per toggle.
+     Particle/glow elements are exempted below. */
 }
 
 /* ─── Hero typography scale-down for Indic scripts ─────────────────────────
@@ -522,23 +629,36 @@ body.skip-disabled .skip-to-content:focus-visible {
   /* --- SECONDARY THEME: MIDNIGHT (DARK) --- */
   --background: #0e0a20;
   --foreground: #ece8f2;
-  --surface: #0e0a20;
+  --surface: #160d2e;
   --surface-variant: #201840;
   --primary: #ece8f2;
-  --secondary: #c8880a;
+  --secondary: #C9972E;
   --accent: #a87db5;
   --on-primary: #0e0a20;
   --on-surface: #ece8f2;
   --on-surface-variant: #c4b0e0;
   --outline-variant: #3a2860;
-  --glow-color: rgba(200, 136, 10, 0.25);
-  --flare-gold: #e6b05e;
+  --glow-color: rgba(201, 151, 46, 0.10);
+  --flare-gold: #C9972E;
   --flare-lavender: #c4b5fd;
   --flare-ivory: #ece8f2;
+  --flare-violet: #5B21B6;
   --pattern-opacity: 0;
   --grain-opacity: 0;
   --card-shadow: 0 6px 24px 0 rgba(0, 0, 0, 0.25);
   --border-opacity: 0.18;
+
+  --text-heading: #ece8f2;
+  --text-body: #c4b0e0;
+  --text-muted: #9a8fb0;
+  --text-faint: #7a6fa0;
+
+  --brand-gold: #C9972E;
+  --brand-gold-hover: #E0B85A;
+  --brand-gold-soft: rgba(201, 151, 46, 0.12);
+  --brand-gold-border: rgba(201, 151, 46, 0.28);
+  --brand-gold-dark: #7a5c0a;
+  --hljs-name: #d45e5e;
 }
 
 @theme inline {
@@ -555,12 +675,28 @@ body.skip-disabled .skip-to-content:focus-visible {
   --color-accent: var(--accent);
   --color-glow: var(--glow-color);
   --color-flare-gold: var(--flare-gold);
+  --color-text-heading: var(--text-heading);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-hover: var(--brand-gold-hover);
+  --color-brand-gold-dark: var(--brand-gold-dark);
 
   --font-headline: var(--font-playfair), serif;
-  --font-body: var(--font-inter), var(--font-dm-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  --font-label: var(--font-inter), var(--font-dm-sans), sans-serif;
-  --font-sans: var(--font-inter), var(--font-dm-sans), sans-serif;
-  
+  --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-label: var(--font-inter), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+
+  --text-ui-micro: 0.75rem;
+  --text-ui-caption: 0.8125rem;
+  --text-ui-small: 0.875rem;
+  --text-ui-body: 1rem;
+  --text-ui-lead: 1.125rem;
+  --text-ui-title-sm: 1.25rem;
+  --text-ui-title: 1.5rem;
+  --text-ui-display: clamp(2.25rem, 5vw, 4.5rem);
+
   --shadow-card: var(--card-shadow);
 }
 
@@ -610,16 +746,78 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 ::selection { background-color: var(--secondary); color: var(--on-primary); }
 
 @utility gold-gradient {
-  background: linear-gradient(135deg, #c8880a 0%, #e6b05e 50%, #c8880a 100%);
+  background: linear-gradient(135deg, var(--brand-gold) 0%, var(--brand-gold-hover) 50%, var(--brand-gold) 100%);
 }
 
 @utility cosmic-glow {
-  box-shadow: 0 0 20px var(--glow-color), 0 0 40px color-mix(in srgb, var(--glow-color) 30%, transparent);
+  box-shadow: 0 0 12px var(--glow-color), 0 0 24px color-mix(in srgb, var(--glow-color) 25%, transparent);
 }
 
 @utility dark-glass {
   background: var(--surface);
-  border: 1px solid rgba(200, 136, 10, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.30);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.40);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.30);
+}
+
+.border-muted {
+  border-top: 1px solid rgba(201, 151, 46, 0.15);
+  border-left: 1px solid rgba(201, 151, 46, 0.10);
+  border-right: 1px solid rgba(0, 0, 0, 0.30);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.40);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.30);
+}
+
+.border-glow-premium {
+  border-top: 1px solid rgba(201, 151, 46, 0.35);
+  border-left: 1px solid rgba(201, 151, 46, 0.20);
+  border-right: 1px solid rgba(0, 0, 0, 0.30);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.40);
+  box-shadow:
+    inset 0 2px 0 rgba(201, 151, 46, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 12px 40px rgba(0, 0, 0, 0.50),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.border-gradient-cosmic {
+  border-top: 1px solid rgba(139, 92, 246, 0.30);
+  border-left: 1px solid rgba(139, 92, 246, 0.18);
+  border-right: 1px solid rgba(0, 0, 0, 0.30);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.40);
+  box-shadow:
+    inset 0 2px 0 rgba(139, 92, 246, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 12px 40px rgba(0, 0, 0, 0.50),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.border-top-gold {
+  border-top: 2px solid rgba(201, 151, 46, 0.40);
+  border-left: 1px solid rgba(201, 151, 46, 0.12);
+  border-right: 1px solid rgba(0, 0, 0, 0.30);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.40);
+  box-shadow:
+    inset 0 2px 0 rgba(201, 151, 46, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 -4px 12px rgba(201, 151, 46, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.50),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.border-dashed-locked {
+  border: 1px dashed rgba(201, 151, 46, 0.15);
+  box-shadow: var(--card-shadow);
 }
 
 /* ─── Auth page cosmic design classes ─────────────────────────────────────
@@ -701,8 +899,8 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   font-family: var(--font-headline);
   font-weight: 700;
   font-size: 22px;
-  color: #1a0e2e;
-  background: linear-gradient(135deg, #ffd15a 0%, #e5a529 50%, #d4911e 100%);
+  color: var(--on-primary);
+  background: linear-gradient(135deg, var(--brand-gold-hover) 0%, var(--brand-gold) 50%, var(--brand-gold) 100%);
   box-shadow:
     0 0 40px color-mix(in srgb, var(--secondary) 35%, transparent),
     0 4px 20px color-mix(in srgb, var(--secondary) 20%, transparent);
@@ -938,30 +1136,30 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 .ai-message-content .hljs-string,
 .ai-message-content .hljs-addition,
 .ai-message-content .hljs-template-tag,
-.ai-message-content .hljs-template-variable { color: #6db36d; }
+.ai-message-content .hljs-template-variable { color: var(--hljs-string); }
 .ai-message-content .hljs-comment,
 .ai-message-content .hljs-quote { color: var(--on-surface-variant); opacity: 0.5; font-style: italic; }
 .ai-message-content .hljs-number,
 .ai-message-content .hljs-literal,
 .ai-message-content .hljs-variable,
-.ai-message-content .hljs-template-variable { color: #d4a054; }
+.ai-message-content .hljs-template-variable { color: var(--hljs-number); }
 .ai-message-content .hljs-title,
 .ai-message-content .hljs-section,
-.ai-message-content .hljs-function { color: #5e9fd4; font-weight: 600; }
-.ai-message-content .hljs-built_in { color: #c88a1a; }
+.ai-message-content .hljs-function { color: var(--hljs-title); font-weight: 600; }
+.ai-message-content .hljs-built_in { color: var(--hljs-builtin); }
 .ai-message-content .hljs-type,
 .ai-message-content .hljs-class { color: #d4a054; }
 .ai-message-content .hljs-symbol,
 .ai-message-content .hljs-bullet,
 .ai-message-content .hljs-meta { color: var(--secondary); }
 .ai-message-content .hljs-attr,
-.ai-message-content .hljs-attribute { color: #b888d4; }
+.ai-message-content .hljs-attribute { color: var(--hljs-attr); }
 .ai-message-content .hljs-name,
-.ai-message-content .hljs-tag { color: #d45e5e; }
+.ai-message-content .hljs-tag { color: var(--hljs-name); }
 .ai-message-content .hljs-subst { color: var(--on-surface-variant); }
-.ai-message-content .hljs-deletion { color: #d45e5e; background: rgba(212,94,94,0.08); }
-.ai-message-content .hljs-regexp { color: #6db36d; }
-.ai-message-content .hljs-link { color: #5e9fd4; }
+.ai-message-content .hljs-deletion { color: var(--hljs-name); background: color-mix(in srgb, var(--hljs-name) 8%, transparent); }
+.ai-message-content .hljs-regexp { color: var(--hljs-string); }
+.ai-message-content .hljs-link { color: var(--hljs-title); }
 .ai-message-content .hljs-emphasis { font-style: italic; }
 .ai-message-content .hljs-strong { font-weight: 700; }
 
@@ -1026,7 +1224,7 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  box-shadow: 0 2px 6px rgba(200,136,10,0.3);
+  box-shadow: 0 2px 6px var(--brand-gold-soft);
   z-index: 5;
 }
 .msg-pin-badge svg { width: 10px; height: 10px; }
@@ -1083,11 +1281,11 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  background: rgba(212,94,94,0.08);
-  border: 1px solid rgba(212,94,94,0.15);
+  background: color-mix(in srgb, var(--hljs-name) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hljs-name) 15%, transparent);
   border-radius: 10px;
   font-size: 12px;
-  color: #d45e5e;
+  color: var(--hljs-name);
   margin-top: 4px;
 }
 
@@ -1822,8 +2020,9 @@ html:has(.chat-layout) body {
 }
 
 /* DASHBOARD SHELL */
-html:has(.dashboard-shell), html:has(.dashboard-shell) body { height: 100vh; overflow: hidden; }
-body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+html:has(.dashboard-shell) { height: 100vh; overflow: hidden; }
+html:has(.dashboard-shell) body { min-height: 100vh; }
+body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height: 100%; }
 
 .dashboard-shell {
   position: fixed; top: var(--navbar-height, 85px);
@@ -1833,7 +2032,7 @@ body:has(.dashboard-shell)>main { display: flex; flex-direction: column; height:
 
 /* GPT-style logged-in dashboard shell — forces dark theme on navbar */
 body:has(.gpt-dashboard-shell) {
-  background: var(--surface);
+  background: var(--background);
 }
 
 body:has(.gpt-dashboard-shell) nav {
@@ -1853,10 +2052,6 @@ body:has(.gpt-dashboard-shell) nav [class*="text-primary"] {
 
 body:has(.gpt-dashboard-shell) nav [class*="text-on-surface-variant"] {
   color: color-mix(in srgb, var(--foreground) 62%, transparent) !important;
-}
-
-body:has(.gpt-dashboard-shell) footer {
-  display: none;
 }
 
 /* CELESTIAL ANIMATIONS */
@@ -1891,7 +2086,7 @@ body:has(.gpt-dashboard-shell) footer {
 @utility animate-slow-mesh { animation: slow-mesh 30s ease infinite; }
 @utility animate-orbit { animation: orbit 3s linear infinite; }
 @utility animate-orbit-reverse { animation: orbit-reverse 4s linear infinite; }
-@utility no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
+@utility no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; &::-webkit-scrollbar { display: none !important; } }
 
 
 @utility mesh-gradient {
@@ -1911,7 +2106,7 @@ body:has(.gpt-dashboard-shell) footer {
 }
 
 @utility gold-glow {
-  box-shadow: 0 0 15px rgba(200, 136, 10, 0.3), 0 0 30px rgba(200, 136, 10, 0.1);
+  box-shadow: none;
 }
 
 @keyframes shimmer {
@@ -2029,3 +2224,5 @@ html.avatar-theme-pulse body::after {
   .text-\[18px\] { font-size: 25px; }
   .text-\[19px\] { font-size: 27px; }
 }
+
+

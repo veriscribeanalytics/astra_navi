@@ -12,7 +12,7 @@ export default function PlanetIcon({ planet, size = "w-12 h-12", imageSize = 64,
     const key = normalizePlanetName(planet);
     return (
         <div className={`${size} relative flex items-center justify-center shrink-0 ${className}`}>
-            <div className="absolute inset-[-6px] blur-[28px] opacity-35 rounded-full" style={{ backgroundColor: PLANET_COLORS[key] || '#c8880a' }} />
+            <div className="absolute inset-[-6px] blur-[28px] opacity-35 rounded-full" style={{ backgroundColor: PLANET_COLORS[key] || 'var(--secondary)' }} />
             {PLANET_TO_ICON[key] ? (
                 <Image src={PLANET_TO_ICON[key]} alt={planet} width={imageSize} height={imageSize} className="w-full h-full object-contain relative z-10 drop-shadow-xl" />
             ) : (

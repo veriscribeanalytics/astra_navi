@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 const devConnectSrc = isDev
-  ? ` ws: http://localhost:* http://127.0.0.1:* http://192.168.1.4:* ws://192.168.1.4:*${
+  ? ` ws: http://localhost:* http://127.0.0.1:* http://192.168.1.4:* ws://192.168.1.4:* http://192.168.1.9:* ws://192.168.1.9:*${
       process.env.DEV_ORIGIN
         ? (() => {
             const clean = process.env.DEV_ORIGIN.replace(/^(https?:\/\/)?/, "");
@@ -40,6 +40,11 @@ const nextConfig: NextConfig = {
       "192.168.1.4:3001",
       "192.168.1.4:3002",
       "192.168.1.4:3003",
+      "192.168.1.9",
+      "192.168.1.9:3000",
+      "192.168.1.9:3001",
+      "192.168.1.9:3002",
+      "192.168.1.9:3003",
     ];
     if (process.env.DEV_ORIGIN) {
       const clean = process.env.DEV_ORIGIN.replace(/^(https?:\/\/)?/, "");

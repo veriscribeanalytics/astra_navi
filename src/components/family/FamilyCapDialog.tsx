@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Crown, X, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useTranslation, useFocusTrap } from '@/hooks';
+import { usePaywallContext } from '@/context/PaywallContext';
 
 export interface FamilyCapDialogProps {
     open: boolean;
@@ -21,7 +22,11 @@ export interface FamilyCapDialogProps {
  *  Mirrors PaywallCard's modal styling and routes to /plans. */
 export default function FamilyCapDialog({ open, onClose, message, currentTier, limit }: FamilyCapDialogProps) {
     const { t } = useTranslation();
+    const { getTierColor } = usePaywallContext();
     const modalRef = useFocusTrap<HTMLDivElement>(open);
+    const currentTierColor = getTierColor(currentTier);
+    const upgradeTier = currentTier?.toLowerCase() === 'pro' ? 'premium' : 'pro';
+    const upgradeTierColor = getTierColor(upgradeTier);
 
     if (!open) return null;
 
@@ -51,7 +56,8 @@ export default function FamilyCapDialog({ open, onClose, message, currentTier, l
                     onClick={(e) => e.stopPropagation()}
                     role="dialog"
                     aria-modal="true"
-                    className="relative w-full max-w-md bg-surface rounded-[24px] sm:rounded-[32px] border border-secondary/20 shadow-2xl overflow-hidden"
+                    className="relative w-full max-w-md bg-surface rounded-[24px] sm:rounded-[32px] border border-[var(--upgrade-tier-color)]/25 shadow-2xl overflow-hidden"
+                    style={{ '--upgrade-tier-color': upgradeTierColor } as React.CSSProperties}
                 >
                     <button
                         onClick={onClose}
@@ -61,11 +67,14 @@ export default function FamilyCapDialog({ open, onClose, message, currentTier, l
                         <X className="w-5 h-5 text-foreground/70 group-hover:text-foreground transition-colors" />
                     </button>
 
-                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-amber-500/[0.02] pointer-events-none" />
+                    <div
+                        className="absolute inset-0 pointer-events-none opacity-[0.06]"
+                        style={{ background: 'radial-gradient(circle at top, var(--upgrade-tier-color), transparent 65%)' }}
+                    />
 
                     <div className="relative z-10 p-6 sm:p-8 flex flex-col items-center text-center gap-5">
-                        <div className="w-16 h-16 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shadow-[0_0_30px_rgba(200,136,10,0.1)]">
-                            <Crown className="w-8 h-8 text-secondary" />
+                        <div className="w-16 h-16 rounded-2xl bg-[var(--upgrade-tier-color)]/10 border border-[var(--upgrade-tier-color)]/25 text-[var(--upgrade-tier-color)] flex items-center justify-center">
+                            <Crown className="w-8 h-8" />
                         </div>
 
                         <h3 className="text-xl font-headline font-bold text-foreground leading-tight">
@@ -77,7 +86,10 @@ export default function FamilyCapDialog({ open, onClose, message, currentTier, l
                         </p>
 
                         {currentTier && (
-                            <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">
+                            <p
+                                className="text-[10px] font-bold uppercase tracking-widest text-[var(--tier-color)]"
+                                style={{ '--tier-color': currentTierColor } as React.CSSProperties}
+                            >
                                 {(t('paywall.currentTier') || 'Current tier: {tier}').replace('{tier}', currentTier)}
                             </p>
                         )}

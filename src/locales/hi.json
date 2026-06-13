@@ -467,7 +467,7 @@
     "categoryHealth": "स्वास्थ्य",
     "categoryLove": "प्रेम",
     "categoryFinance": "वित्त",
-    "categoryGeneral": "सामान्य दृष्टिकोण",
+    "categoryGeneral": "सामान्य",
     "categorySpiritual": "आध्यात्मिक",
     "weeklyForecast": "साप्ताहिक भविष्यवाणी",
     "past": "अतीत",
@@ -1850,11 +1850,16 @@
       "alertTime": "सतर्क रहें",
       "aiChat": "Navi से पूछें",
       "fullReading": "पूरी रीडिंग",
+      "clickForForecast": "{area} फलादेश के लिए क्लिक करें",
+      "openForecast": "{area} फलादेश खोलें",
+      "personalNotesBtn": "व्यक्तिगत नोट्स",
       "rising": "बढ़ रहा है",
       "tithi": "तिथि",
       "nakshatra": "नक्षत्र",
       "openingDashboard": "आपका डैशबोर्ड खुल रहा है...",
       "scoreImpressive": "आपका {label} स्कोर प्रभावशाली है!",
+      "topAreaStrongest": "आज आपका सबसे मजबूत क्षेत्र है",
+      "topAreaFocus": "आज का फोकस",
       "goodTimeDesc": "महत्वपूर्ण कार्यों और निर्णयों के लिए शुभ समय।",
       "cautionTimeDesc": "नया काम शुरू करने या बड़ी प्रतिबद्धताएं करने से बचें।",
       "askNaviInChat": "Navi से चैट में पूछें?",
@@ -1883,6 +1888,13 @@
         "sun": "रविवार"
       }
     },
+    "currentWeek": {
+      "title": "आपके जीवन के क्षेत्र",
+      "description": "आज और वर्तमान सप्ताह की भविष्यवाणी के लिए एक जीवन क्षेत्र चुनें"
+    },
+    "currentWeekChartTitle": "वर्तमान सप्ताह",
+    "insight": "दृष्टिकोण",
+    "astrologicalFactors": "ज्योतिषीय कारक",
     "lifeAreas": {
       "title": "जीवन के क्षेत्र",
       "viewAll": "सभी देखें",
@@ -1890,7 +1902,7 @@
       "career": "करियर",
       "finance": "वित्त",
       "health": "स्वास्थ्य",
-      "general": "सामान्य दृष्टिकोण",
+      "general": "सामान्य",
       "spiritual": "आध्यात्मिक",
       "statusExcellent": "उत्कृष्ट",
       "statusGood": "अच्छा",

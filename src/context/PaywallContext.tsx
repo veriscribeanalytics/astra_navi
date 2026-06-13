@@ -1,10 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { usePaywall } from '@/hooks/usePaywall';
 import { clientFetch } from '@/lib/apiClient';
-import { normalizeBalanceResponse, BalanceResponse } from '@/types/billing';
+import { normalizeBalanceResponse, BalanceResponse, CatalogResponse, normalizeCatalogResponse } from '@/types/billing';
 import {
   PaywallFeatureKey,
   PaywallData,
@@ -38,9 +38,21 @@ interface PaywallContextType {
   activePaywall: PaywallData | null;
   /** Clear the active paywall state. */
   clearActivePaywall: () => void;
+  /** Dynamically loaded catalog response. */
+  catalog: CatalogResponse | null;
+  /** Color of the user's current tier, dynamically retrieved from the catalog API. */
+  tierColor: string;
+  /** Resolve any subscription tier to its catalog color. */
+  getTierColor: (tier?: string | null) => string;
 }
 
 const PaywallContext = createContext<PaywallContextType | undefined>(undefined);
+
+const DEFAULT_TIER_COLORS: Record<string, string> = {
+  free: '#6B7280',
+  pro: '#7C3AED',
+  premium: '#D97706',
+};
 
 export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn, isLoading: authLoading } = useAuth();
@@ -49,6 +61,7 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [tier, setTier] = useState<string | null>(null);
   const [totalCredits, setTotalCredits] = useState<number | null>(null);
   const [balance, setBalance] = useState<BalanceResponse | null>(null);
+  const [catalog, setCatalog] = useState<CatalogResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
@@ -57,9 +70,35 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Batch check on dashboard load when user is authenticated
   const doBatchCheck = useCallback(async () => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      setIsLoading(true);
+      try {
+        const catRes = await clientFetch('/api/entitlements/catalog');
+        if (catRes.ok) {
+          const catRaw = await catRes.json();
+          setCatalog(normalizeCatalogResponse(catRaw));
+        }
+        setIsLoaded(true);
+      } catch (err) {
+        console.warn('[PaywallContext] Guest catalog fetch failed:', err);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
     setIsLoading(true);
     try {
+      // Fetch catalog first
+      try {
+        const catRes = await clientFetch('/api/entitlements/catalog');
+        if (catRes.ok) {
+          const catRaw = await catRes.json();
+          setCatalog(normalizeCatalogResponse(catRaw));
+        }
+      } catch (catErr) {
+        console.warn('[PaywallContext] Catalog fetch failed:', catErr);
+      }
+
       const result = await checkAllFeatures();
       if (result) {
         // Defensive: ensure features is an array before normalizing
@@ -124,6 +163,8 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
       doBatchCheck();
     }
     if (!isLoggedIn) {
+      // For guest users, fetch catalog at least once so styles load
+      doBatchCheck();
       // Reset on logout
       setFeatures(null);
       setTier(null);
@@ -163,6 +204,17 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPaywall(null);
   }, [setPaywall]);
 
+  const getTierColor = useCallback((requestedTier?: string | null) => {
+    const normalizedTier = (requestedTier || 'free').toLowerCase();
+    const catalogColor = catalog?.subscriptions.find(
+      subscription => subscription.tier?.toLowerCase() === normalizedTier
+    )?.color;
+
+    return catalogColor || DEFAULT_TIER_COLORS[normalizedTier] || DEFAULT_TIER_COLORS.free;
+  }, [catalog]);
+
+  const tierColor = useMemo(() => getTierColor(tier), [getTierColor, tier]);
+
   return (
     <PaywallContext.Provider value={{
       features,
@@ -177,6 +229,9 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
       refreshVersion,
       activePaywall,
       clearActivePaywall,
+      catalog,
+      tierColor,
+      getTierColor,
     }}>
       {children}
     </PaywallContext.Provider>

@@ -5,10 +5,13 @@ import { motion } from 'motion/react';
 import type { MonthlyDay } from '@/types/forecast';
 import { todayISO } from '@/utils/forecastError';
 import { useTranslation } from '@/hooks';
+import { ForecastArea } from '@/data/areaThemes';
+import { AREA_COLORS, STATUS_COLORS } from '@/data/lifeAreaColors';
 
 interface MonthlyDayGridProps {
   days: MonthlyDay[];
   colorHex: string;
+  area: ForecastArea;
   selectedDate: string | null;
   onSelect: (date: string) => void;
 }
@@ -20,7 +23,7 @@ function jsWeekdayIndex(isoDate: string): number {
   return d.getDay();
 }
 
-export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect }: MonthlyDayGridProps) {
+export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onSelect }: MonthlyDayGridProps) {
   const { t } = useTranslation();
 
   if (!days.length) return null;
@@ -46,16 +49,14 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
         {Array.from({ length: leadingBlanks }).map((_, i) => (
-          <div key={`lead-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface/10 border border-white/[0.02]" />
+          <div key={`lead-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface/80 border border-white/[0.02]" />
         ))}
 
         {days.map(day => {
           const isSelected = selectedDate === day.date;
           const isToday = day.date === today;
-          const isHigh = day.score >= 75;
-          const isLow = day.score <= 45;
+          const phaseColor = AREA_COLORS[area].main;
           const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
-          const scoreColor = isHigh ? '#22c55e' : isLow ? '#ef4444' : '#94a3b8';
           let weekdayName = day.weekday;
           if (!weekdayName && day.date) {
             const dateObj = new Date(day.date + 'T00:00:00');
@@ -72,7 +73,7 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
                 .replace('{weekday}', weekdayName || '')
                 .replace('{date}', day.date)
                 .replace('{score}', String(day.score))}
-              className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 hover:bg-surface/50 hover:border-white/15'}`}
+              className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/80 hover:bg-surface hover:border-white/15'}`}
               style={{
                 borderColor: isSelected
                   ? colorHex + '80'
@@ -91,7 +92,7 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
               </span>
               <span
                 className="text-[10px] sm:text-[11px] font-bold leading-none"
-                style={{ color: isSelected ? colorHex : scoreColor }}
+                style={{ color: isSelected ? colorHex : phaseColor }}
               >
                 {day.score}
               </span>
@@ -100,7 +101,7 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
                 className="absolute bottom-0 left-0 h-[2px] rounded-full"
                 style={{
                   width: `${Math.max(day.score, 6)}%`,
-                  backgroundColor: isSelected ? colorHex : scoreColor + '70',
+                  backgroundColor: isSelected ? colorHex : phaseColor + '70',
                 }}
               />
               {isToday && (
@@ -114,22 +115,22 @@ export default function MonthlyDayGrid({ days, colorHex, selectedDate, onSelect 
         })}
 
         {Array.from({ length: trailingBlanks }).map((_, i) => (
-          <div key={`trail-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface/10 border border-white/[0.02]" />
+          <div key={`trail-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface/80 border border-white/[0.02]" />
         ))}
       </div>
 
       {/* Legend */}
       <div className="flex items-center gap-4 mt-1 px-1">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS.EXCELLENT.main }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.legendHigh')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-slate-400" />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS.MIXED.main }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.legendAverage')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-red-500" />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS.BAD.main }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.legendChallenging')}</span>
         </div>
         <div className="flex items-center gap-1.5 ml-auto">

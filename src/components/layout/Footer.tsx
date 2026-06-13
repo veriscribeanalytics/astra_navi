@@ -16,8 +16,15 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="w-full pt-8 sm:pt-14 pb-6 sm:pb-8 px-4 sm:px-8 lg:px-12 bg-background border-t border-secondary/10 relative z-20">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2400px] mx-auto">
+        <footer className="safe-area-footer relative isolate w-full overflow-hidden min-h-[560px]">
+            <img
+                src="/images/footer.png"
+                alt=""
+                className="absolute inset-0 z-0 h-full w-full object-cover object-[center_bottom]"
+            />
+            <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background/80 via-background/40 to-background/85 pointer-events-none" />
+            <div className="relative z-[2] px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto">
                 <div className="col-span-2 md:col-span-1 space-y-3 sm:space-y-4">
                     <div className="font-headline text-xl sm:text-2xl text-primary font-bold">Astra Navi</div>
                     <p className="text-xs text-primary/60 font-medium leading-relaxed max-w-[240px]">
@@ -31,7 +38,7 @@ const Footer = () => {
                     <h5 className="font-bold text-primary mb-3 sm:mb-5 uppercase tracking-widest text-[10px] sm:text-xs">{t('footer.services')}</h5>
                     <ul className="space-y-2 sm:space-y-3 font-body text-xs sm:text-sm text-primary/60 font-medium">
                         <li><Link className="hover:text-secondary transition-colors" href="/chat">{t('nav.consultNavi')}</Link></li>
-                        <li><Link className="hover:text-secondary transition-colors" href="/rashis">{t('nav.zodiacSigns')}</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/services">{t('nav.services') || 'Our Services'}</Link></li>
                         <li><Link className="hover:text-secondary transition-colors" href="/kundli">{t('nav.birthChart')}</Link></li>
                         <li className="flex items-center text-on-surface-variant/40">
                             <span>{t('footer.sacredItems')}</span>
@@ -80,10 +87,11 @@ const Footer = () => {
             <div className="mt-8 sm:mt-12 pt-6 border-t border-secondary/5 text-center">
                 <p
                     className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-body font-bold"
-                    style={{ color: 'rgba(212, 160, 23, 0.5)' }}
+                    style={{ color: 'color-mix(in srgb, var(--secondary) 50%, transparent)' }}
                 >
                     © {currentYear} Astra Navi. {t('footer.copyright')}
                 </p>
+            </div>
             </div>
         </footer>
     );

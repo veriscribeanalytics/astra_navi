@@ -145,32 +145,65 @@ export const CookieConsentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const sessionIdRef = useRef<string>('');
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount with a delayed banner trigger for first-visit/policy updates
   useEffect(() => {
     sessionIdRef.current = getOrCreateSessionId();
 
     const saved = loadSavedPreferences();
+    let timer: NodeJS.Timeout | undefined;
 
     if (saved) {
       // Policy version check — if policy was updated, show banner again
       const needsReconsent = saved.consentedVersion !== PRIVACY_POLICY_VERSION;
 
-      setState({
-        showBanner: needsReconsent,
-        preferencesOpen: false,
-        preferences: needsReconsent ? DEFAULT_CONSENT_PREFERENCES : saved.preferences,
-        hasConsented: !needsReconsent,
-        consentedAt: needsReconsent ? null : saved.consentedAt,
-        consentedVersion: needsReconsent ? null : saved.consentedVersion,
-      });
+      if (needsReconsent) {
+        setState({
+          showBanner: false,
+          preferencesOpen: false,
+          preferences: DEFAULT_CONSENT_PREFERENCES,
+          hasConsented: false,
+          consentedAt: null,
+          consentedVersion: null,
+        });
+
+        // Delay showing banner by 5 seconds (5000ms)
+        timer = setTimeout(() => {
+          setState((prev) => ({
+            ...prev,
+            showBanner: true,
+          }));
+        }, 5000);
+      } else {
+        setState({
+          showBanner: false,
+          preferencesOpen: false,
+          preferences: saved.preferences,
+          hasConsented: true,
+          consentedAt: saved.consentedAt,
+          consentedVersion: saved.consentedVersion,
+        });
+      }
     } else {
-      // No saved consent — show banner
+      // No saved consent — show banner after a 5-second (5000ms) delay
       setState((prev) => ({
         ...prev,
-        showBanner: true,
+        showBanner: false,
         hasConsented: false,
       }));
+
+      timer = setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          showBanner: true,
+        }));
+      }, 5000);
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, []);
 
   const applyConsent = useCallback(

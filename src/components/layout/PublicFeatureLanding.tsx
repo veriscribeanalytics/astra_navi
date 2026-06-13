@@ -129,7 +129,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* VEDIC HOOK + QUICK STATS — Full-width band                */}
             {/* ═══════════════════════════════════════════════════════════ */}
             <section className="w-full border-y border-outline-variant/10 bg-surface-variant/5 mb-10 sm:mb-14">
-                <div className="max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-8 lg:px-12 py-8 sm:py-10">
+                <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                         {/* Quote */}
                         <div className="lg:col-span-7 relative">
@@ -168,7 +168,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* ═══════════════════════════════════════════════════════════ */}
             {/* FEATURE BENTO GRID — Full-width with side labels          */}
             {/* ═══════════════════════════════════════════════════════════ */}
-            <section className="w-full px-4 sm:px-8 lg:px-12 max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto mb-10 sm:mb-14">
+            <section className="w-full px-4 sm:px-6 lg:px-8 max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto mb-10 sm:mb-14">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     
                     {/* Left label */}
@@ -207,7 +207,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
             {/* TRUST + BENEFITS — Full-width with 3-column layout        */}
             {/* ═══════════════════════════════════════════════════════════ */}
             <section className="w-full border-t border-outline-variant/10 pt-10 sm:pt-14 pb-16">
-                <div className="max-w-[1600px] 2xl:max-w-[1900px] 3xl:max-w-[2200px] mx-auto px-4 sm:px-8 lg:px-12">
+                <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         
                         {/* Privacy card — left */}
@@ -269,7 +269,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
                             viewport={{ once: true }}
                             className="lg:col-span-4"
                         >
-                            <Card className="border-secondary/20 !p-6 sm:!p-8 text-center h-full flex flex-col items-center justify-center bg-gradient-to-br from-secondary/5 via-transparent to-secondary/5">
+                            <Card className="border-secondary/20 !p-6 sm:!p-8 text-center h-full flex flex-col items-center justify-center bg-surface">
                                 <div className="w-14 h-14 rounded-2xl bg-secondary/15 border border-secondary/20 flex items-center justify-center mb-4">
                                     <Zap className="w-7 h-7 text-secondary" />
                                 </div>

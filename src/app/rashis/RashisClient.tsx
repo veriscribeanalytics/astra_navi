@@ -204,7 +204,7 @@ export default function RashisClient() {
         }, [selectedRashi.nameEn, viewMode, language]);
 
     return (
-        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-2 sm:px-4 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center justify-center">
+        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-4 sm:px-6 lg:px-8 pb-4 safe-bottom-buffer relative overflow-hidden flex flex-col items-center justify-center">
 
             <div className="max-w-[1350px] w-full mx-auto relative z-10 flex flex-col lg:flex-row gap-6 lg:gap-10 justify-center">
 

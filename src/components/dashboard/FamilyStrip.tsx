@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Users, ChevronRight, Link2, Sparkles, ArrowRight } from 'lucide-react';
+import { Plus, Users, ChevronRight, Link2, Sparkles, ArrowRight, Lock } from 'lucide-react';
 import {
   useFamilyMembers,
   useFamilyConnections,
@@ -10,9 +10,11 @@ import {
   useFamilyReports,
   useFamilyCompatibility,
   useTranslation,
+  usePaywallContext,
 } from '@/hooks';
 import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from '@/types/family';
 import { computeFamilyMemberStatus, bandPalette } from '@/lib/familyStatus';
+import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const formatRelationship = (rel: FamilyMember['relationshipType']): string =>
   rel ? rel.charAt(0).toUpperCase() + rel.slice(1) : '';
@@ -192,41 +194,135 @@ const FamilyConnectionCard: React.FC<{ connection: FamilyConnection }> = ({ conn
   );
 };
 
-const AddMemberCard: React.FC = () => {
+const AddMemberCard: React.FC<{ onClick?: () => void; isLocked?: boolean; lockType?: 'pro' | 'premium' }> = ({ onClick, isLocked, lockType }) => {
   const { t } = useTranslation();
+  const { getTierColor } = usePaywallContext();
+  const lockColor = getTierColor(lockType);
+
+  let title = t('dashboard.familyAdd') || "Add Member";
+  let subtitle = t('dashboard.familyAddSubtitle') || "Add family or friends to compare charts and emotional patterns.";
+  let buttonText = "Add";
+  let borderClass = "border-secondary/25 hover:border-secondary/60";
+  let bgClass = "bg-gradient-to-br from-secondary/5 via-surface to-surface";
+
+  if (isLocked) {
+    borderClass = "border-[var(--lock-color)]/30 hover:border-[var(--lock-color)]/60";
+    bgClass = "bg-[var(--lock-color)]/[0.03]";
+    buttonText = lockType === 'pro' ? "Get Pro" : "Get Premium";
+    title = lockType === 'pro' ? "Get Pro to Unlock" : "Get Premium to Unlock";
+    subtitle = lockType === 'pro' ? "Unlock up to 3 slots." : "Unlock all 6 slots.";
+  }
+
+  const content = (
+    <>
+      <div
+        className="absolute inset-0 rounded-[24px] pointer-events-none"
+        style={{ background: `radial-gradient(circle at top right, ${isLocked ? 'var(--lock-color)' : 'rgba(212,175,55,0.10)'} 0%, transparent 60%)`, opacity: isLocked ? 0.08 : 1 }}
+        aria-hidden
+      />
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform mb-3 ${
+        isLocked
+          ? 'bg-[var(--lock-color)]/10 border border-[var(--lock-color)]/30 text-[var(--lock-color)]'
+          : 'bg-secondary/15 border border-secondary/30 text-secondary'
+      }`}>
+        {isLocked ? <Lock className="w-6 h-6" /> : <Plus className="w-7 h-7" />}
+      </div>
+      <p className="text-[14px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors">
+        {title}
+      </p>
+      <p className="mt-1.5 text-[11px] text-foreground/60 leading-relaxed text-center max-w-[26ch]">
+        {subtitle}
+      </p>
+      <span className={`mt-4 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${
+        isLocked
+          ? 'bg-[var(--lock-color)]/10 border border-[var(--lock-color)]/30 text-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/20'
+          : 'bg-secondary/10 border border-secondary/30 text-secondary group-hover:bg-secondary/20'
+      }`}>
+        {isLocked ? <Lock className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
+        {buttonText}
+      </span>
+    </>
+  );
+
+  if (isLocked) {
+    return (
+      <div
+        onClick={onClick}
+        className={`group relative flex flex-col items-center justify-center p-5 rounded-[24px] border hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(212,175,55,0.1)] transition-all duration-300 min-h-[200px] cursor-pointer ${borderClass} ${bgClass}`}
+        style={{ '--lock-color': lockColor } as React.CSSProperties}
+        aria-label={title}
+      >
+        {content}
+      </div>
+    );
+  }
+
   return (
     <Link
       href="/family"
-      className="group relative flex flex-col items-center justify-center p-5 rounded-[24px] bg-gradient-to-br from-secondary/5 via-surface to-surface border border-secondary/25 hover:border-secondary/60 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(212,175,55,0.18)] transition-all duration-300 min-h-[200px]"
-      aria-label={t('dashboard.familyAdd')}
+      className={`group relative flex flex-col items-center justify-center p-5 rounded-[24px] border hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(212,175,55,0.18)] transition-all duration-300 min-h-[200px] ${borderClass} ${bgClass}`}
+      aria-label={title}
     >
-      <div className="absolute inset-0 rounded-[24px] bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.10),transparent_60%)] pointer-events-none" aria-hidden />
-      <div className="w-14 h-14 rounded-2xl bg-secondary/15 border border-secondary/30 text-secondary flex items-center justify-center group-hover:scale-105 transition-transform mb-3">
-        <Plus className="w-7 h-7" />
-      </div>
-      <p className="text-[14px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors">
-        {t('dashboard.familyAdd')}
-      </p>
-      <p className="mt-1.5 text-[11px] text-foreground/60 leading-relaxed text-center max-w-[26ch]">
-        {t('dashboard.familyAddSubtitle')}
-      </p>
-      <span className="mt-4 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-bold uppercase tracking-widest group-hover:bg-secondary/20 transition-colors">
-        <Sparkles className="w-3 h-3" />
-        Add
-      </span>
+      {content}
     </Link>
   );
 };
 
 const FamilyStrip: React.FC = () => {
   const { t } = useTranslation();
+  const { tier } = usePaywallContext();
   const { data: members, isLoading } = useFamilyMembers();
   const { data: connections, isLoading: connectionsLoading } = useFamilyConnections();
+  const [capDialog, setCapDialog] = React.useState<{ open: boolean; limit?: number; currentTier?: string; message?: string } | null>(null);
 
   const showSkeleton = (isLoading && !members) || (connectionsLoading && !connections);
   const hasMembers = !!members && members.length > 0;
   const hasConnections = !!connections && connections.length > 0;
   const isEmpty = !showSkeleton && !hasMembers && !hasConnections;
+
+  const allItems = React.useMemo(() => {
+    const membersList = members || [];
+    const connectionsList = connections || [];
+    const mappedMembers = membersList.map(m => ({ type: 'member' as const, id: String(m.id), data: m }));
+    const mappedConnections = connectionsList.map(c => ({ type: 'connection' as const, id: String(c.connectionId), data: c }));
+    return [...mappedMembers, ...mappedConnections];
+  }, [members, connections]);
+
+  const isFree = React.useMemo(() => (tier || 'free').toLowerCase() === 'free', [tier]);
+
+  const slots = React.useMemo(() => {
+    const result: Array<
+      | { type: 'member'; id: string; data: FamilyMember }
+      | { type: 'connection'; id: string; data: FamilyConnection }
+      | { type: 'add'; isLocked: boolean; lockType?: 'pro' | 'premium' }
+    > = [];
+
+    const tierLower = (tier || 'free').toLowerCase();
+    let unlockedLimit = 1;
+    if (tierLower === 'premium') {
+      unlockedLimit = 6;
+    } else if (tierLower === 'pro') {
+      unlockedLimit = 3;
+    }
+
+    for (let i = 0; i < unlockedLimit; i++) {
+      if (i < allItems.length) {
+        result.push(allItems[i]);
+      } else {
+        result.push({ type: 'add', isLocked: false });
+      }
+    }
+
+    for (let i = unlockedLimit; i < 6; i++) {
+      let lockType: 'pro' | 'premium' = 'premium';
+      if (tierLower === 'free' && i < 3) {
+        lockType = 'pro';
+      }
+      result.push({ type: 'add', isLocked: true, lockType });
+    }
+
+    return result;
+  }, [allItems, tier]);
 
   return (
     <section className="mt-12 sm:mt-20 mx-auto max-w-6xl">
@@ -245,6 +341,31 @@ const FamilyStrip: React.FC = () => {
         </p>
         {!isEmpty && (
           <div className="mt-5 flex items-center justify-center gap-2">
+            <button
+              onClick={() => {
+                if (isFree && allItems.length >= 1) {
+                  setCapDialog({
+                    open: true,
+                    currentTier: tier ?? undefined,
+                    limit: 1,
+                    message: "Upgrade to Pro to unlock up to 3 family members, or Premium for unlimited access."
+                  });
+                } else if (tier?.toLowerCase() === 'pro' && allItems.length >= 6) {
+                  setCapDialog({
+                    open: true,
+                    currentTier: tier ?? undefined,
+                    limit: 6,
+                    message: "Upgrade to Premium to unlock all 6 family slots on your dashboard and enjoy unlimited cosmic bonds."
+                  });
+                } else {
+                  window.location.href = '/family';
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary/20 text-[11px] font-bold uppercase tracking-widest transition-colors cursor-pointer"
+            >
+              <Plus className="w-3 h-3" />
+              {t('dashboard.familyAdd')}
+            </button>
             <Link
               href="/family"
               className="inline-flex items-center gap-1 px-3 py-2 rounded-full border border-outline-variant/30 text-[11px] font-bold text-foreground/50 hover:text-secondary hover:border-secondary/40 uppercase tracking-widest transition-colors"
@@ -252,20 +373,13 @@ const FamilyStrip: React.FC = () => {
               {t('dashboard.familyViewAll')}
               <ChevronRight className="w-3 h-3" />
             </Link>
-            <Link
-              href="/family"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary/20 text-[11px] font-bold uppercase tracking-widest transition-colors"
-            >
-              <Plus className="w-3 h-3" />
-              {t('dashboard.familyAdd')}
-            </Link>
           </div>
         )}
       </div>
 
       {showSkeleton ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
               className="flex flex-col p-5 rounded-[24px] bg-surface border border-outline-variant/20 min-h-[200px]"
@@ -307,15 +421,50 @@ const FamilyStrip: React.FC = () => {
         </Link>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {members?.map((m) => (
-            <FamilyMemberCard key={`m-${m.id}`} member={m} />
-          ))}
-          {connections?.map((c) => (
-            <FamilyConnectionCard key={`c-${c.connectionId}`} connection={c} />
-          ))}
-          <AddMemberCard />
+          {slots.map((slot, index) => {
+            if (slot.type === 'member') {
+              return <FamilyMemberCard key={`m-${slot.id}`} member={slot.data} />;
+            } else if (slot.type === 'connection') {
+              return <FamilyConnectionCard key={`c-${slot.id}`} connection={slot.data} />;
+            } else {
+              return (
+                <AddMemberCard
+                  key={`add-${index}`}
+                  isLocked={slot.isLocked}
+                  lockType={slot.lockType}
+                  onClick={() => {
+                    if (slot.isLocked) {
+                      if (slot.lockType === 'pro') {
+                         setCapDialog({
+                           open: true,
+                           currentTier: tier ?? undefined,
+                           limit: 3,
+                           message: "Upgrade to Pro to unlock up to 3 family members, or Premium for unlimited access."
+                         });
+                       } else {
+                         setCapDialog({
+                           open: true,
+                           currentTier: tier ?? undefined,
+                           limit: 6,
+                          message: "Upgrade to Premium to unlock all 6 family slots on your dashboard and enjoy unlimited cosmic bonds."
+                        });
+                      }
+                    }
+                  }}
+                />
+              );
+            }
+          })}
         </div>
       )}
+
+      <FamilyCapDialog
+        open={!!capDialog}
+        onClose={() => setCapDialog(null)}
+        currentTier={capDialog?.currentTier || tier || 'free'}
+        limit={capDialog?.limit || 1}
+        message={capDialog?.message}
+      />
     </section>
   );
 };

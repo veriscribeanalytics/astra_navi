@@ -13,6 +13,11 @@ interface InsightData {
   dominant_planet?: string;
   alerts?: (string | { simple: string; technical?: string })[];
   transits?: Record<string, { sign: string; house_from_lagna?: number }>;
+  mood?: string | { value: string; type: string };
+  lucky_color?: string;
+  lucky_number?: number;
+  dominant_planet_meaning?: string;
+  weekday?: string;
 }
 
 const SubHeader = ({ label, color }: { label: string; color: string }) => (
@@ -29,7 +34,7 @@ const SubHeader = ({ label, color }: { label: string; color: string }) => (
   </div>
 );
 
-export default function ForecastInsight({ data, colorHex }: { data: InsightData | null; colorHex: string }) {
+export default function ForecastInsight({ data, colorHex, isWide = false }: { data: InsightData | null; colorHex: string; isWide?: boolean }) {
   const { t } = useTranslation();
   if (!data) return null;
 
@@ -37,34 +42,10 @@ export default function ForecastInsight({ data, colorHex }: { data: InsightData 
     ? new Date(data.month + '-01').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
     : data.date || '';
 
-  return (
-    <motion.div
-      key={data.month || data.date}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-6 sm:p-8 rounded-2xl sm:rounded-[32px] bg-surface/40 border border-white/5 shadow-xl flex flex-col gap-6"
-    >
-      {/* Eyebrow and Title */}
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-[9px] sm:text-[11px] font-black text-secondary uppercase tracking-[0.2em] block mb-0.5 animate-pulse">
-            {t('horoscope.detailedInsight')}
-          </span>
-          <h4 className="text-lg sm:text-2xl font-headline font-bold text-foreground">{displayLabel}</h4>
-        </div>
-        {data.dominant_planet && (
-          <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2">
-            <div className="flex flex-col items-end">
-              <span className="text-[7px] sm:text-[8px] font-bold text-foreground/30 uppercase">{t('horoscope.dominantForce')}</span>
-              <span className="text-[10px] sm:text-xs font-bold text-foreground/80">{data.dominant_planet}</span>
-            </div>
-            <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center animate-pulse">
-              <Sparkles className="w-4 h-4 text-secondary" />
-            </div>
-          </div>
-        )}
-      </div>
+  const hasRightColumn = data.mood || data.lucky_color || data.lucky_number != null || (data.transits && Object.keys(data.transits).length > 0);
 
+  const leftColumnContent = (
+    <div className="flex flex-col gap-6">
       {/* Main Forecast */}
       {data.text && (
         <div>
@@ -80,7 +61,7 @@ export default function ForecastInsight({ data, colorHex }: { data: InsightData 
         <div>
           <SubHeader label={t('forecast.whatItMeans')} color={colorHex} />
           <p className="text-xs sm:text-sm text-foreground/70 leading-relaxed">
-            {t('forecast.whatItMeansBody')
+            {data.dominant_planet_meaning || t('forecast.whatItMeansBody')
               .replace('{planet}', data.dominant_planet || '')
               .replace('{score}', String(data.score))}
           </p>
@@ -102,6 +83,36 @@ export default function ForecastInsight({ data, colorHex }: { data: InsightData 
               );
             })}
           </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const rightColumnContent = (
+    <div className="flex flex-col gap-6">
+      {/* Day Attributes: Mood, Lucky Color, Lucky Number */}
+      {(data.mood || data.lucky_color || data.lucky_number != null) && (
+        <div className="grid grid-cols-3 gap-3 border-t border-b border-white/5 py-4">
+          {data.mood && (
+            <div className="flex flex-col p-2.5 rounded-xl bg-white/[0.01] border border-white/5 text-center sm:text-left">
+              <span className="text-[8px] sm:text-[9px] font-black text-foreground/45 uppercase tracking-wider">{t('forecast.mood')}</span>
+              <span className="text-xs sm:text-sm font-bold text-foreground/85 mt-0.5 capitalize">
+                {typeof data.mood === 'object' ? data.mood.value : data.mood}
+              </span>
+            </div>
+          )}
+          {data.lucky_color && (
+            <div className="flex flex-col p-2.5 rounded-xl bg-white/[0.01] border border-white/5 text-center sm:text-left">
+              <span className="text-[8px] sm:text-[9px] font-black text-foreground/45 uppercase tracking-wider">{t('forecast.luckyColor')}</span>
+              <span className="text-xs sm:text-sm font-bold text-foreground/85 mt-0.5">{data.lucky_color}</span>
+            </div>
+          )}
+          {data.lucky_number != null && (
+            <div className="flex flex-col p-2.5 rounded-xl bg-white/[0.01] border border-white/5 text-center sm:text-left">
+              <span className="text-[8px] sm:text-[9px] font-black text-foreground/45 uppercase tracking-wider">{t('forecast.luckyNumber')}</span>
+              <span className="text-xs sm:text-sm font-bold text-foreground/85 mt-0.5">{data.lucky_number}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -127,6 +138,47 @@ export default function ForecastInsight({ data, colorHex }: { data: InsightData 
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Eyebrow and Title */}
+      <div className="flex items-center justify-between pr-10">
+        <div>
+          <span className="text-[9px] sm:text-[11px] font-black text-secondary uppercase tracking-[0.2em] block mb-0.5 animate-pulse">
+            {t('horoscope.detailedInsight')}
+          </span>
+          <h4 className="text-lg sm:text-2xl font-headline font-bold text-foreground">{displayLabel}</h4>
+        </div>
+        {data.dominant_planet && (
+          <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2">
+            <div className="flex flex-col items-end">
+              <span className="text-[7px] sm:text-[8px] font-bold text-foreground/30 uppercase">{t('horoscope.dominantForce')}</span>
+              <span className="text-[10px] sm:text-xs font-bold text-foreground/80">{data.dominant_planet}</span>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center animate-pulse">
+              <Sparkles className="w-4 h-4 text-secondary" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {isWide && hasRightColumn ? (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+          <div className="lg:col-span-7">
+            {leftColumnContent}
+          </div>
+          <div className="lg:col-span-5">
+            {rightColumnContent}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {leftColumnContent}
+          {rightColumnContent}
+        </div>
+      )}
+    </div>
   );
 }
