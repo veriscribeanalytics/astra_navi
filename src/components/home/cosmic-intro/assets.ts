@@ -65,5 +65,5 @@ export const RASHIS: RashiAsset[] = [
     { src: '/icons/rashi/pisces.png', glyph: '♓', name: 'Pisces' },
 ];
 
-/** sessionStorage key — intro plays once per browser session. */
+/** Session cookie shared by all tabs — intro plays once per browser session. */
 export const INTRO_SEEN_KEY = 'astranavi_intro_seen_v3';

@@ -24,8 +24,15 @@ export default function MobileScrollDamper() {
     useEffect(() => {
         if (typeof window === 'undefined' || !('ontouchstart' in window)) return;
 
-        const scroller = document.body;
         const docEl = document.documentElement;
+        const htmlOverflow = window.getComputedStyle(docEl).overflowY;
+        const bodyOverflow = window.getComputedStyle(document.body).overflowY;
+        const bodyOwnsScroll =
+            (htmlOverflow === 'hidden' || htmlOverflow === 'clip') &&
+            (bodyOverflow === 'auto' || bodyOverflow === 'scroll');
+        const scroller = bodyOwnsScroll
+            ? document.body
+            : (document.scrollingElement as HTMLElement | null) ?? docEl;
 
         let startX    = 0;
         let startY    = 0;

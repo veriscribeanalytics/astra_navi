@@ -577,7 +577,7 @@ export default function ForecastPage() {
         {loading ? (
           <div className="flex flex-col gap-6 animate-pulse" aria-busy="true" aria-label={t('forecast.loading')}>
             {/* Overview & Chart Card Skeleton */}
-            <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/80">
+            <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 sm:p-8">
                 <div className="lg:col-span-5 flex flex-col gap-6">
                   <div className="h-6 w-32 rounded bg-surface-variant/25" />
@@ -594,7 +594,7 @@ export default function ForecastPage() {
             </Card>
 
             {/* Days Breakdown Skeleton */}
-            <Card padding="lg" className="border-white/5 bg-surface/80 !rounded-[32px]">
+            <Card padding="lg" className="border-white/5 bg-surface !rounded-[32px]">
               <div className="h-5 w-48 rounded bg-surface-variant/25 mb-6" />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 {[0, 1, 2, 3, 4, 5, 6].map(i => (
@@ -604,7 +604,7 @@ export default function ForecastPage() {
             </Card>
           </div>
         ) : (error && !isBlocked) ? (
-          <Card padding="lg" className="border-white/5 bg-surface/80 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
+          <Card padding="lg" className="border-white/5 bg-surface flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
             <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
               <AlertTriangle className="w-7 h-7 text-red-400" />
             </div>
@@ -621,7 +621,7 @@ export default function ForecastPage() {
             </button>
           </Card>
         ) : (!hasData && !isBlocked) ? (
-          <Card padding="lg" className="border-white/5 bg-surface/80 flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
+          <Card padding="lg" className="border-white/5 bg-surface flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">
             <div className="w-14 h-14 rounded-full bg-surface-variant/15 flex items-center justify-center">
               <TrendingUp className="w-7 h-7 text-foreground/30" />
             </div>
@@ -643,7 +643,7 @@ export default function ForecastPage() {
               
               {/* Card 1: Overview & Chart */}
               {activeOverview && activeNavigation && (
-                <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface/80 relative">
+                <Card padding="none" className="!rounded-2xl sm:!rounded-[32px] overflow-hidden border-white/5 shadow-xl bg-surface relative">
                   {range === 'monthly' ? (
                     /* Monthly layout: col1 = calendar, col2 = 2 rows (ratings top, chart bottom) */
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 p-6 sm:p-8 items-start">
@@ -920,7 +920,7 @@ export default function ForecastPage() {
 
               {/* Card 2: 7 Days Breakdown (or monthly/yearly grids) */}
               {range === '7d' && activeWeekly?.days && (
-                <Card className="border-white/5 bg-surface/80 shadow-xl !rounded-[32px] p-6 sm:p-8">
+                <Card className="border-white/5 bg-surface shadow-xl !rounded-[32px] p-6 sm:p-8">
                   <h3 className="text-lg font-headline font-bold text-foreground mb-6">7-Day Breakdown</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                     {activeWeekly.days.map(day => {
@@ -973,7 +973,7 @@ export default function ForecastPage() {
               {/* Monthly calendar is now embedded inside Card 1 for range === 'monthly' */}
 
               {range === 'yearly' && activeYearly?.months && (
-                <Card className="border-white/5 bg-surface/80 shadow-xl !rounded-[32px] p-6 sm:p-8">
+                <Card className="border-white/5 bg-surface shadow-xl !rounded-[32px] p-6 sm:p-8">
                   <h3 className="text-lg font-headline font-bold text-foreground mb-6">Yearly Outlook</h3>
                   <MonthGrid
                     months={activeYearly.months}

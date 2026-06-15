@@ -2,18 +2,35 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant 3xl (@media (min-width: 2560px));
 
-/* Hide Navbar during cosmic intro and fade it in when complete */
-html.intro-playing nav {
+/* Hide app chrome/content while the first-load intro uses the site background. */
+html.intro-pending nav,
+html.intro-playing nav,
+html.intro-pending footer,
+html.intro-playing footer,
+html.intro-pending .skip-to-content,
+html.intro-playing .skip-to-content,
+html.intro-pending .app-ask-navi-fab,
+html.intro-playing .app-ask-navi-fab,
+html.intro-pending .app-cookie-consent,
+html.intro-playing .app-cookie-consent {
   opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
   transition: none !important;
 }
+
+html.intro-pending main,
+html.intro-playing main:not(:has(.intro)) {
+  visibility: hidden;
+}
+
+html.intro-pending main,
 html.intro-playing main {
   padding-top: 0 !important;
 }
 
 /* Fade in the navbar over 0.9s when the intro finishes to match the landing page crossfade */
-html:not(.intro-playing) nav {
+html:not(.intro-playing):not(.intro-pending) nav {
   transition: opacity 0.9s ease, transform 0.9s ease, background-color 0.3s ease, border-color 0.3s ease !important;
 }
 
@@ -23,14 +40,22 @@ html {
   font-size: 100%;
 }
 
+html.intro-pending,
 html.intro-playing {
   height: 100%;
   overflow: hidden;
 }
 
+html.intro-pending body,
 html.intro-playing body {
   height: 100%;
   overflow: hidden;
+}
+
+.session-intro-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
 }
 
 /* Allow standard viewport scrolling */

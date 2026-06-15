@@ -23,6 +23,8 @@ import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
 import { CookieConsentProvider } from "@/context/CookieConsentContext";
 import CookieConsentBanner from "@/components/privacy/CookieConsentBanner";
 import MobileScrollDamper from "@/components/ui/MobileScrollDamper";
+import SessionIntroGate from "@/components/home/cosmic-intro/SessionIntroGate";
+import { INTRO_SEEN_KEY } from "@/components/home/cosmic-intro/assets";
 
 export const metadata: Metadata = {
   title: "AstraNavi | Vedic AI Astrology",
@@ -36,7 +38,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get("theme")?.value;
-  const theme = themeCookie === "dark" ? "dark" : "light";
+  const theme = themeCookie === "light" ? "light" : "dark";
   // Read language cookie so server renders in the user's preferred language,
   // eliminating hydration mismatches between SSR and client.
   const languageCookie = cookieStore.get("NEXT_LOCALE")?.value || "en";
@@ -53,6 +55,11 @@ export default async function RootLayout({
       
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(location.pathname!="/intro"&&!document.cookie.split(";").some(function(c){return c.trim()===${JSON.stringify(`${INTRO_SEEN_KEY}=1`)}})){document.documentElement.classList.add("intro-pending")}`,
+          }}
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -79,6 +86,7 @@ export default async function RootLayout({
                       </Suspense>
 
                       <OptimizedBackgrounds />
+                      <SessionIntroGate />
                       <Toaster />
 
                       <Navbar />

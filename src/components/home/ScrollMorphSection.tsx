@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -22,6 +22,24 @@ const ASTROLOGERS = [
   { name: 'Rishi', role: 'Deep Chart Sage', avatar: '/images/avatars/RISHI_AVATAR.jpeg', specialty: 'Divisional charts & spiritual path', icon: BookOpen, color: 'from-purple-500/20 to-violet-600/20' },
 ];
 
+const MOBILE_PREVIEWS = [
+  {
+    src: '/images/dashboard-mobile.png',
+    alt: 'AstraNavi mobile dashboard',
+    className: 'object-cover',
+  },
+  {
+    src: '/images/kundli-mobile.png',
+    alt: 'AstraNavi mobile Kundli',
+    className: 'object-cover',
+  },
+  {
+    src: '/images/forecast-desktop.png',
+    alt: 'AstraNavi forecast preview',
+    className: 'object-cover object-center',
+  },
+];
+
 function clamp(v: number, min: number, max: number) { return Math.min(max, Math.max(min, v)); }
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 function smoothstep(e0: number, e1: number, v: number) {
@@ -38,6 +56,16 @@ function getNavHeight() {
 
 function isMobileLayout() { return typeof window !== 'undefined' && window.innerWidth <= 1024; }
 
+function getPageScroller(): Window | HTMLElement {
+  const htmlOverflow = window.getComputedStyle(document.documentElement).overflowY;
+  const bodyOverflow = window.getComputedStyle(document.body).overflowY;
+  const bodyOwnsScroll =
+    (htmlOverflow === 'hidden' || htmlOverflow === 'clip') &&
+    (bodyOverflow === 'auto' || bodyOverflow === 'scroll');
+
+  return bodyOwnsScroll ? document.body : window;
+}
+
 interface Rect { x: number; y: number; w: number; h: number; r: number }
 
 function rectLerp(a: Rect, b: Rect, t: number): Rect {
@@ -50,7 +78,7 @@ export default function ScrollMorphSection() {
   const phoneNotchRef = useRef<HTMLDivElement>(null);
   const browserChromeRef = useRef<HTMLDivElement>(null);
   const urlTextRef = useRef<HTMLDivElement>(null);
-  const mobileShotRef = useRef<HTMLImageElement>(null);
+  const mobileShotRef = useRef<HTMLDivElement>(null);
   const dashShotRef = useRef<HTMLImageElement>(null);
   const kundliShotRef = useRef<HTMLImageElement>(null);
   const forecastShotRef = useRef<HTMLImageElement>(null);
@@ -66,6 +94,15 @@ export default function ScrollMorphSection() {
 
   const stRef = useRef<ScrollTrigger | null>(null);
   const lastProgressRef = useRef(0);
+  const [mobilePreviewIndex, setMobilePreviewIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setMobilePreviewIndex((current) => (current + 1) % MOBILE_PREVIEWS.length);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const getRects = useCallback(() => {
     const section = sectionRef.current;
@@ -98,9 +135,9 @@ export default function ScrollMorphSection() {
 
     const endWMax = Math.min(rightAreaW, 1100);
     let endW = endWMax;
-    let endH = endW * 10 / 16;
-    const maxH = sh * 0.78;
-    if (endH > maxH) { endH = maxH; endW = endH * 16 / 10; }
+    let endH = endW * 11 / 16;
+    const maxH = sh * 0.84;
+    if (endH > maxH) { endH = maxH; endW = endH * 16 / 11; }
     const endX = rightAreaX + (rightAreaW - endW) / 2;
     const endY = (sh - endH) / 2;
 
@@ -249,9 +286,11 @@ export default function ScrollMorphSection() {
     if (!section) return;
 
     render(0);
+    const scroller = getPageScroller();
 
     const st = ScrollTrigger.create({
       trigger: section,
+      scroller,
       start: () => `top top+=${getNavHeight()}`,
       end: () => `+=${window.innerHeight * (isMobileLayout() ? 5.5 : 6.8)}`,
       scrub: 0.85,
@@ -382,9 +421,7 @@ export default function ScrollMorphSection() {
           <div className="absolute top-0 inset-x-0 h-3 bg-[#070514] flex justify-center items-center z-20">
             <div className="w-8 h-0.5 rounded-full bg-on-surface-variant/20" />
           </div>
-          <div className="w-full h-full pt-3">
-            <img src="/images/kundli-mobile.png" alt="Kundli Peek" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-          </div>
+          <MobilePreviewStack activeIndex={(mobilePreviewIndex + 1) % MOBILE_PREVIEWS.length} className="pt-3" />
         </div>
       </div>
 
@@ -393,13 +430,7 @@ export default function ScrollMorphSection() {
           <div className="absolute top-0 inset-x-0 h-3 bg-[#070514] flex justify-center items-center z-20">
             <div className="w-8 h-0.5 rounded-full bg-on-surface-variant/20" />
           </div>
-          <div className="w-full h-full pt-3 relative flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_center,rgba(200,136,10,0.15)_0%,rgba(14,10,32,1)_70%)]">
-            <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center border border-secondary/35 mb-2">
-              <Sparkles className="w-4 h-4 text-secondary" />
-            </div>
-            <div className="text-[9px] font-bold text-primary/45 uppercase tracking-[0.2em] font-body text-center">Transit Forecast</div>
-            <div className="text-[8px] text-on-surface-variant/35 mt-1 font-body">Coming Soon</div>
-          </div>
+          <MobilePreviewStack activeIndex={(mobilePreviewIndex + 2) % MOBILE_PREVIEWS.length} className="pt-3" />
         </div>
       </div>
 
@@ -420,11 +451,36 @@ export default function ScrollMorphSection() {
           <div className="w-10" />
         </div>
 
-        <img ref={mobileShotRef} src="/images/dashboard-mobile.png" alt="AstraNavi Mobile Dashboard" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0, willChange: 'opacity, transform' }} />
+        <div ref={mobileShotRef} className="absolute inset-0" style={{ opacity: 0, willChange: 'opacity, transform' }}>
+          <MobilePreviewStack activeIndex={mobilePreviewIndex} />
+        </div>
         <img ref={dashShotRef} src="/images/dashboard-desktop.png" alt="AstraNavi Desktop Dashboard" className="absolute left-0 right-0 bottom-0 right-[34px] w-full h-full object-contain bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform' }} />
         <img ref={kundliShotRef} src="/images/kundli-desktop.png" alt="AstraNavi Kundli Desktop" className="absolute left-0 right-0 bottom-0 right-[34px] w-full h-full object-contain bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform' }} />
         <img ref={forecastShotRef} src="/images/forecast-desktop.png" alt="AstraNavi Forecast Desktop" className="absolute left-0 top-[34px] right-0 bottom-0 w-full h-full object-contain bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform' }} />
       </div>
     </section>
+  );
+}
+
+function MobilePreviewStack({
+  activeIndex,
+  className = '',
+}: {
+  activeIndex: number;
+  className?: string;
+}) {
+  return (
+    <div className={`absolute inset-0 bg-[#070514] ${className}`}>
+      {MOBILE_PREVIEWS.map((preview, index) => (
+        <img
+          key={preview.src}
+          src={preview.src}
+          alt={preview.alt}
+          className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${preview.className} ${
+            index === activeIndex ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      ))}
+    </div>
   );
 }

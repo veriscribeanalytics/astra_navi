@@ -80,7 +80,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
   };
 
   return (
-    <Card padding="lg" className="border-white/5 bg-surface/80 backdrop-blur-md shadow-xl flex flex-col gap-6 overflow-hidden relative">
+    <Card padding="lg" className="border-white/5 bg-surface shadow-xl flex flex-col gap-6 overflow-hidden relative">
       {/* Title */}
       <div>
         <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] block mb-1" style={{ color: BRAND_GOLD.main }}>
