@@ -29,6 +29,7 @@ import {
     useFamilyConnectionCompatibilityPreflight,
     useFamilyReports,
     useFamilyConnections,
+    useFamilyFamilyConnections,
     useFamilyConnectionCompatibility,
     sendInvite,
     updateConnection,
@@ -37,6 +38,7 @@ import {
 import {
     type FamilyMember,
     type FamilyConnection,
+    type FamilyConnectionKind,
     type FamilyRelationshipType,
     type FamilyGender,
     type CompatibilityLang,
@@ -44,7 +46,9 @@ import {
     COMPATIBILITY_CREDIT_COST,
     familyRosterLimit,
 } from '@/types/family';
-import { parseInviteErrorByStatus, familyCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { useCountdown } from '@/lib/useCountdown';
+import ConnectionKindPicker from '@/components/family/ConnectionKindPicker';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import FamilyChartView from '@/components/family/FamilyChartView';
 import CompatibilityReport, {
@@ -131,7 +135,11 @@ export default function FamilyClient() {
     const { tier } = usePaywallContext();
     const { success, error: toastError } = useToast();
     const { data: members, isLoading, error, refetch } = useFamilyMembers();
-    const { data: connections, refetch: refetchConnections } = useFamilyConnections();
+    // As of migration 059, /connections is friends-only; family links come from
+    // the dedicated /family endpoint.
+    const { data: friendConnections, refetch: refetchFriends } = useFamilyConnections();
+    const { data: familyConnections, refetch: refetchFamily } = useFamilyFamilyConnections();
+    const refetchConnections = () => { refetchFriends(); refetchFamily(); };
 
     const [view, setView] = useState<'list' | 'form' | 'detail' | 'invite' | 'connectionDetail'>('list');
     const [editing, setEditing] = useState<FamilyMember | null>(null);
@@ -164,8 +172,10 @@ export default function FamilyClient() {
     }, [memberIdParam, members, autoRunParam]);
 
     const manualCount = members?.length ?? 0;
-    const linkedCount = connections?.length ?? 0;
-    const totalCount = manualCount + linkedCount;
+    const familyLinkedCount = familyConnections?.length ?? 0;
+    // Friends are unlimited and never count against the roster cap — only manual
+    // members + family-kind connections do.
+    const totalCount = manualCount + familyLinkedCount;
     // null limit = unlimited (premium). Free: 1, Pro: 6.
     const rosterLimit = familyRosterLimit(tier);
     const atFreeCap = rosterLimit != null && totalCount >= rosterLimit;
@@ -307,7 +317,8 @@ export default function FamilyClient() {
                 {view === 'list' && (
                     <FamilyList
                         members={members}
-                        connections={connections}
+                        familyConnections={familyConnections}
+                        friendConnections={friendConnections}
                         isLoading={isLoading}
                         error={error}
                         onOpen={openDetail}
@@ -408,7 +419,8 @@ export default function FamilyClient() {
 
 interface FamilyListProps {
     members: FamilyMember[] | null;
-    connections: FamilyConnection[] | null;
+    familyConnections: FamilyConnection[] | null;
+    friendConnections: FamilyConnection[] | null;
     isLoading: boolean;
     error: string | null;
     onOpen: (m: FamilyMember) => void;
@@ -419,12 +431,15 @@ interface FamilyListProps {
     atFreeCap: boolean;
 }
 
-function FamilyList({ members, connections, isLoading, error, onOpen, onOpenConnection, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
+function FamilyList({ members, familyConnections, friendConnections, isLoading, error, onOpen, onOpenConnection, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
     const { t } = useTranslation();
 
     const hasMembers = !!members && members.length > 0;
-    const hasConnections = !!connections && connections.length > 0;
-    const isEmpty = !hasMembers && !hasConnections;
+    const familyLinks = familyConnections ?? [];
+    const friendLinks = friendConnections ?? [];
+    const hasFamilySection = hasMembers || familyLinks.length > 0;
+    const hasFriends = friendLinks.length > 0;
+    const isEmpty = !hasFamilySection && !hasFriends;
 
     if (isLoading && !members) {
         return (
@@ -469,75 +484,115 @@ function FamilyList({ members, connections, isLoading, error, onOpen, onOpenConn
         );
     }
 
+    const familyCount = (members?.length ?? 0) + familyLinks.length;
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(members ?? []).map((m) => (
-                <Card key={`m-${m.id}`} variant="default" padding="md" hoverable>
-                    <div className="flex items-start gap-3">
-                        {m.avatar ? (
-                            <div
-                                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
-                                style={{
-                                    color: m.avatar.accentColor || 'var(--secondary)',
-                                    borderColor: `${m.avatar.accentColor || 'var(--secondary)'}33`,
-                                    backgroundColor: `${m.avatar.accentColor || 'var(--secondary)'}11`
-                                }}
-                            >
-                                {React.createElement(getFamilyIcon(m.avatar.iconKey), { className: 'w-5 h-5' })}
-                            </div>
-                        ) : (
-                            <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
-                                {m.name.charAt(0).toUpperCase()}
+        <div className="space-y-8">
+            {/* My Family — manual members + family-kind links (counts against cap) */}
+            {hasFamilySection && (
+                <section className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-secondary" />
+                        <h2 className="text-[12px] font-bold text-secondary uppercase tracking-widest">
+                            {t('family.myFamily') || 'My Family'}
+                            <span className="ml-2 text-on-surface-variant/40">({familyCount})</span>
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {(members ?? []).map((m) => (
+                            <MemberCard key={`m-${m.id}`} member={m} onOpen={() => onOpen(m)} onEdit={() => onEdit(m)} onDelete={() => onDelete(m)} />
+                        ))}
+                        {familyLinks.map((c) => (
+                            <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Friends — friend-kind links (unlimited, never count against cap) */}
+            {hasFriends && (
+                <section className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <Heart className="w-4 h-4 text-sky-400" />
+                        <h2 className="text-[12px] font-bold text-sky-300 uppercase tracking-widest">
+                            {t('family.friendsSection') || 'Friends'}
+                            <span className="ml-2 text-on-surface-variant/40">({friendLinks.length})</span>
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {friendLinks.map((c) => (
+                            <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
+                        ))}
+                    </div>
+                </section>
+            )}
+        </div>
+    );
+}
+
+function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMember; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
+    return (
+        <Card variant="default" padding="md" hoverable>
+            <div className="flex items-start gap-3">
+                {m.avatar ? (
+                    <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
+                        style={{
+                            color: m.avatar.accentColor || 'var(--secondary)',
+                            borderColor: `${m.avatar.accentColor || 'var(--secondary)'}33`,
+                            backgroundColor: `${m.avatar.accentColor || 'var(--secondary)'}11`
+                        }}
+                    >
+                        {React.createElement(getFamilyIcon(m.avatar.iconKey), { className: 'w-5 h-5' })}
+                    </div>
+                ) : (
+                    <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
+                        {m.name.charAt(0).toUpperCase()}
+                    </div>
+                )}
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-headline font-bold text-primary truncate">{m.name}</h3>
+                    <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
+                        {m.relationshipType}
+                    </p>
+                    <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
+                        <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3 h-3 opacity-50" /> {m.dob}
+                        </div>
+                        {m.tob && (
+                            <div className="flex items-center gap-1.5">
+                                <Clock className="w-3 h-3 opacity-50" /> {m.tob}
                             </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-base font-headline font-bold text-primary truncate">{m.name}</h3>
-                            <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
-                                {m.relationshipType}
-                            </p>
-                            <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
-                                <div className="flex items-center gap-1.5">
-                                    <Calendar className="w-3 h-3 opacity-50" /> {m.dob}
-                                </div>
-                                {m.tob && (
-                                    <div className="flex items-center gap-1.5">
-                                        <Clock className="w-3 h-3 opacity-50" /> {m.tob}
-                                    </div>
-                                )}
-                                {m.pob && (
-                                    <div className="flex items-center gap-1.5 truncate">
-                                        <MapPin className="w-3 h-3 opacity-50 shrink-0" />
-                                        <span className="truncate">{m.pob}</span>
-                                    </div>
-                                )}
+                        {m.pob && (
+                            <div className="flex items-center gap-1.5 truncate">
+                                <MapPin className="w-3 h-3 opacity-50 shrink-0" />
+                                <span className="truncate">{m.pob}</span>
                             </div>
-                            <div className="flex items-center gap-1 mt-4">
-                                <Button variant="primary" size="sm" onClick={() => onOpen(m)} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
-                                    Open
-                                </Button>
-                                <button
-                                    onClick={() => onEdit(m)}
-                                    className="p-2 rounded-xl text-on-surface-variant/75 hover:text-secondary hover:bg-secondary/5 transition-colors"
-                                    aria-label="Edit"
-                                >
-                                    <Pencil className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => onDelete(m)}
-                                    className="p-2 rounded-xl text-on-surface-variant/75 hover:text-red-500 hover:bg-red-500/5 transition-colors"
-                                    aria-label="Remove"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
+                        )}
                     </div>
-                </Card>
-            ))}
-            {(connections ?? []).map((c) => (
-                <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
-            ))}
-        </div>
+                    <div className="flex items-center gap-1 mt-4">
+                        <Button variant="primary" size="sm" onClick={onOpen} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
+                            Open
+                        </Button>
+                        <button
+                            onClick={onEdit}
+                            className="p-2 rounded-xl text-on-surface-variant/75 hover:text-secondary hover:bg-secondary/5 transition-colors"
+                            aria-label="Edit"
+                        >
+                            <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={onDelete}
+                            className="p-2 rounded-xl text-on-surface-variant/75 hover:text-red-500 hover:bg-red-500/5 transition-colors"
+                            aria-label="Remove"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Card>
     );
 }
 
@@ -566,9 +621,15 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-base font-headline font-bold text-primary truncate">{c.otherName}</h3>
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/30">
+                        <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                            c.kind === 'friend'
+                                ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                                : 'bg-secondary/10 text-secondary border-secondary/30'
+                        }`}>
                             <Link2 className="w-2.5 h-2.5" />
-                            {t('family.linkedBadge') || 'Linked'}
+                            {c.kind === 'friend'
+                                ? (t('family.connectionKindFriend') || 'Friend')
+                                : (t('family.connectionKindFamily') || 'Family')}
                         </span>
                     </div>
                     <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
@@ -1340,29 +1401,38 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
     const { error: toastError } = useToast();
 
     const [email, setEmail] = useState('');
-    const [relationship, setRelationship] = useState<FamilyRelationshipType>('friend');
+    const [kind, setKind] = useState<FamilyConnectionKind>('friend');
+    const [relationship, setRelationship] = useState<FamilyRelationshipType>('mother');
     const [message, setMessage] = useState('');
     const [emailTouched, setEmailTouched] = useState(false);
     const [isSending, setIsSending] = useState(false);
+    /** Set when the backend rejects a re-invite with DECLINE_COOLDOWN_ACTIVE. */
+    const [cooldownUntil, setCooldownUntil] = useState<string | null>(null);
+    const cooldown = useCountdown(cooldownUntil);
 
     const emailValid = EMAIL_REGEX.test(email.trim());
     const emailError = emailTouched && !emailValid ? (t('family.inviteEmailInvalid') || 'Enter a valid email') : undefined;
+    const blockedByCooldown = !!cooldownUntil && !cooldown.expired;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setEmailTouched(true);
-        if (!emailValid || isSending) return;
+        if (!emailValid || isSending || blockedByCooldown) return;
         setIsSending(true);
         const res = await sendInvite({
             email: email.trim(),
-            relationshipType: relationship,
+            kind,
+            ...(kind === 'family' ? { relationshipType: relationship } : {}),
             message: message.trim() || undefined,
         });
         setIsSending(false);
         if (res.ok) {
+            setCooldownUntil(null);
             onSent();
             return;
         }
+        const retryAfter = cooldownRetryAfter(res.raw);
+        if (retryAfter) setCooldownUntil(retryAfter);
         toastError(parseInviteErrorByStatus(res.status, res.raw, t));
     };
 
@@ -1391,23 +1461,13 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                     error={emailError}
                 />
 
-                <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
-                        {t('family.inviteRelationshipLabel') || 'Relationship'}
-                        <span className="text-secondary ml-1">*</span>
-                    </label>
-                    <select
-                        value={relationship}
-                        onChange={(e) => setRelationship(e.target.value as FamilyRelationshipType)}
-                        className="w-full bg-surface border border-outline-variant/30 rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 sm:py-3.5 md:py-4 text-sm sm:text-base text-primary"
-                    >
-                        {RELATIONSHIP_TYPES.map((r) => (
-                            <option key={r.value} value={r.value}>
-                                {r.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <ConnectionKindPicker
+                    kind={kind}
+                    onKindChange={setKind}
+                    relationshipType={relationship}
+                    onRelationshipChange={setRelationship}
+                    disabled={isSending}
+                />
 
                 <div className="space-y-2">
                     <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
@@ -1423,6 +1483,13 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                     />
                 </div>
 
+                {blockedByCooldown && (
+                    <div className="flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
+                        <Clock className="w-3.5 h-3.5 shrink-0" />
+                        {(t('family.inviteCooldownRetry') || 'Try again in {time}').replace('{time}', cooldown.label)}
+                    </div>
+                )}
+
                 <div className="flex items-center justify-end gap-3 pt-2">
                     <Button type="button" variant="ghost" onClick={onCancel} disabled={isSending}>
                         {t('common.cancel') || 'Cancel'}
@@ -1432,7 +1499,7 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                         variant="primary"
                         loading={isSending}
                         leftIcon={<Send className="w-4 h-4" />}
-                        disabled={!emailValid}
+                        disabled={!emailValid || blockedByCooldown}
                     >
                         {isSending
                             ? (t('family.inviteSending') || 'Sending…')

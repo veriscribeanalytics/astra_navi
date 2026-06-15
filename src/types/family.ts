@@ -321,6 +321,11 @@ export interface FamilyBlock {
 
 export type FamilyInviteStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'revoked';
 
+/** Connections + invites are split into two kinds. `family` counts against the
+ *  roster cap, supports relationship labels and manual-member merge. `friend` is
+ *  unlimited, always labelled "friend", and never merges. */
+export type FamilyConnectionKind = 'family' | 'friend';
+
 export type FamilyMergeMatchScore = 'exact' | 'high' | 'partial';
 
 export interface FamilyMergeCandidate {
@@ -332,6 +337,8 @@ export interface FamilyMergeCandidate {
 
 export interface FamilyInvite {
   id: number;
+  /** family | friend. Defaults to 'family' for back-compat with pre-059 payloads. */
+  kind: FamilyConnectionKind;
   requesterEmail: string;
   inviteeEmail: string;
   requesterRelationshipType: FamilyRelationshipType;
@@ -349,6 +356,8 @@ export interface FamilyInvite {
 
 export interface FamilyConnection {
   connectionId: number;
+  /** family | friend. Defaults to 'family' for back-compat with pre-059 payloads. */
+  kind: FamilyConnectionKind;
   otherEmail: string;
   otherName: string;
   iSeeThemAs: FamilyRelationshipType;
@@ -372,7 +381,10 @@ export interface FamilyInviteAcceptResponse {
 export interface FamilyInviteSendPayload {
   username?: string;
   email?: string;
-  relationshipType: FamilyRelationshipType;
+  /** Omit ⇒ backend defaults to 'family'. For 'friend', `relationshipType` is
+   *  ignored server-side (forced to 'friend') so it can be omitted. */
+  kind?: FamilyConnectionKind;
+  relationshipType?: FamilyRelationshipType;
   message?: string;
 }
 
@@ -397,6 +409,7 @@ export const FAMILY_INVITE_ERROR_CODES = [
   'DECLINE_COOLDOWN_ACTIVE',
   'INVITE_NOT_PENDING',
   'MERGE_CANDIDATE_MISMATCH',
+  'MERGE_NOT_SUPPORTED',
   'SHARING_REQUIRED',
   'USERNAME_TAKEN',
   'INVITE_BLOCKED',

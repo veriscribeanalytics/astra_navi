@@ -49,6 +49,7 @@ import type { HoroscopeData } from "@/types/horoscope";
 import {
   useFamilyMembers,
   useFamilyConnections,
+  useFamilyFamilyConnections,
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
@@ -610,7 +611,13 @@ export default function DashboardHome() {
 
   // Real family + chart data (replaces the previously-hardcoded placeholders).
   const { data: familyMembers, isLoading: familyLoading } = useFamilyMembers();
-  const { data: familyConnections, isLoading: connectionsLoading } = useFamilyConnections();
+  // Migration 059 split linked people across two endpoints — merge them (family
+  // first) so the dashboard keeps showing family + friends together.
+  const { data: friendConnectionsData, isLoading: friendConnectionsLoading } = useFamilyConnections();
+  const { data: linkedFamilyData, isLoading: familyConnectionsLoading } = useFamilyFamilyConnections();
+  const familyConnections = [...(linkedFamilyData ?? []), ...(friendConnectionsData ?? [])];
+  const connectionsLoading = friendConnectionsLoading || familyConnectionsLoading;
+  const connectionsLoaded = friendConnectionsData !== null || linkedFamilyData !== null;
   const kundliStats = useMemo(() => parseKundliStats(user?.astrologyData), [user?.astrologyData]);
 
   // Format a dasha period like "May 2026 — May 2044" from ISO/loose date strings.
@@ -1286,7 +1293,7 @@ export default function DashboardHome() {
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {familyLoading && !familyMembers && connectionsLoading && !familyConnections ? (
+                {familyLoading && !familyMembers && connectionsLoading && !connectionsLoaded ? (
                   [0, 1].map((i) => (
                     <div key={i} className="flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-4">
                       <div className="flex items-center gap-3">
@@ -1317,7 +1324,7 @@ export default function DashboardHome() {
                         />
                       );
                     })}
-                    {familyConnections?.map((c) => {
+                    {familyConnections.map((c) => {
                       const blocked = isFeatureBlocked('family_compatibility');
                       return (
                         <DashboardConnectionCard

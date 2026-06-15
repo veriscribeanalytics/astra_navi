@@ -6,6 +6,7 @@ import { Plus, Users, ChevronRight, Link2, Sparkles, ArrowRight } from 'lucide-r
 import {
   useFamilyMembers,
   useFamilyConnections,
+  useFamilyFamilyConnections,
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
@@ -221,11 +222,17 @@ const AddMemberCard: React.FC = () => {
 const FamilyStrip: React.FC = () => {
   const { t } = useTranslation();
   const { data: members, isLoading } = useFamilyMembers();
-  const { data: connections, isLoading: connectionsLoading } = useFamilyConnections();
+  // Migration 059 split linked people across two endpoints — merge them so the
+  // strip still shows family + friends together (family first).
+  const { data: friendConnections, isLoading: friendsLoading } = useFamilyConnections();
+  const { data: familyConnections, isLoading: familyLoading } = useFamilyFamilyConnections();
+  const connections = [...(familyConnections ?? []), ...(friendConnections ?? [])];
+  const connectionsLoading = friendsLoading || familyLoading;
+  const connectionsLoaded = friendConnections !== null || familyConnections !== null;
 
-  const showSkeleton = (isLoading && !members) || (connectionsLoading && !connections);
+  const showSkeleton = (isLoading && !members) || (connectionsLoading && !connectionsLoaded);
   const hasMembers = !!members && members.length > 0;
-  const hasConnections = !!connections && connections.length > 0;
+  const hasConnections = connections.length > 0;
   const isEmpty = !showSkeleton && !hasMembers && !hasConnections;
 
   return (
@@ -310,7 +317,7 @@ const FamilyStrip: React.FC = () => {
           {members?.map((m) => (
             <FamilyMemberCard key={`m-${m.id}`} member={m} />
           ))}
-          {connections?.map((c) => (
+          {connections.map((c) => (
             <FamilyConnectionCard key={`c-${c.connectionId}`} connection={c} />
           ))}
           <AddMemberCard />

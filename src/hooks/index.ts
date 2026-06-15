@@ -47,6 +47,7 @@ export {
     useIncomingInvites,
     useOutgoingInvites,
     useFamilyConnections,
+    useFamilyFamilyConnections,
     useFamilyConnectionCompatibility,
     sendInvite,
     acceptInvite,

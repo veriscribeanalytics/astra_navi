@@ -70,13 +70,40 @@ export function familyCapDetail(body: unknown): FamilyCapDetail | null {
     };
 }
 
+/** Detect a DECLINE_COOLDOWN_ACTIVE body (code at top level or nested under
+ *  `detail`/`error`) and pull out the absolute `retryAfter` ISO timestamp so the
+ *  caller can render a countdown and disable the re-invite CTA. Returns null when
+ *  it's not a cooldown error or no usable timestamp is present. */
+export function cooldownRetryAfter(body: unknown): string | null {
+    if (!body || typeof body !== 'object') return null;
+    const b = body as Record<string, unknown>;
+    const errObj = b.error && typeof b.error === 'object' ? b.error as Record<string, unknown> : null;
+    const detail = b.detail && typeof b.detail === 'object' ? b.detail as Record<string, unknown> : null;
+
+    const code = (
+        typeof b.code === 'string' ? b.code
+        : errObj && typeof errObj.code === 'string' ? errObj.code as string
+        : typeof b.error === 'string' ? b.error
+        : detail && typeof detail.code === 'string' ? detail.code as string
+        : null
+    );
+    if (code !== 'DECLINE_COOLDOWN_ACTIVE') return null;
+
+    const src = errObj ?? detail ?? b;
+    const retry = src.retryAfter ?? src.retry_after ?? b.retryAfter ?? b.retry_after;
+    return typeof retry === 'string' && retry.trim() !== '' ? retry : null;
+}
+
 function extractCode(body: unknown): FamilyInviteErrorCode | null {
     if (!body || typeof body !== 'object') return null;
     const b = body as Record<string, unknown>;
     const detail = b.detail && typeof b.detail === 'object' ? b.detail as Record<string, unknown> : null;
+    // Some endpoints (e.g. DECLINE_COOLDOWN_ACTIVE) nest the code under an `error` object.
+    const errObj = b.error && typeof b.error === 'object' ? b.error as Record<string, unknown> : null;
     const raw = (
         typeof b.code === 'string' ? b.code
         : typeof b.error === 'string' ? b.error
+        : errObj && typeof errObj.code === 'string' ? errObj.code
         : detail && typeof detail.code === 'string' ? detail.code
         : null
     );
@@ -89,6 +116,7 @@ function extractCode(body: unknown): FamilyInviteErrorCode | null {
         'DECLINE_COOLDOWN_ACTIVE',
         'INVITE_NOT_PENDING',
         'MERGE_CANDIDATE_MISMATCH',
+        'MERGE_NOT_SUPPORTED',
         'SHARING_REQUIRED',
         'USERNAME_TAKEN',
         'INVITE_BLOCKED',
@@ -106,6 +134,7 @@ function mapCodeToCopy(code: FamilyInviteErrorCode | null, t: Translator): strin
         case 'DECLINE_COOLDOWN_ACTIVE': return t('family.inviteErrorCooldown');
         case 'INVITE_NOT_PENDING': return t('family.inviteErrorNotPending');
         case 'MERGE_CANDIDATE_MISMATCH': return t('family.inviteErrorMergeStale');
+        case 'MERGE_NOT_SUPPORTED': return t('family.inviteErrorMergeNotSupported');
         case 'SHARING_REQUIRED': return t('family.sharingRequired');
         case 'INVITE_BLOCKED': return t('family.inviteErrorBlocked');
         case 'USERNAME_TAKEN': return t('family.usernameTaken');

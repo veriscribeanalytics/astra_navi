@@ -15,6 +15,7 @@ import type {
     FamilyCompatibilityPreflight,
     FamilyInvite,
     FamilyConnection,
+    FamilyConnectionKind,
     FamilyInviteSendPayload,
     FamilyInviteAcceptPayload,
     FamilyInviteAcceptResponse,
@@ -868,6 +869,12 @@ export function useFamilyReports(memberId: number | string | null) {
 /* Invites + linked connections                                        */
 /* ------------------------------------------------------------------ */
 
+/** Coerce a raw `kind` value into FamilyConnectionKind, defaulting to 'family'
+ *  for back-compat with pre-059 payloads that omit it. */
+function normalizeKind(raw: unknown): FamilyConnectionKind {
+    return raw === 'friend' ? 'friend' : 'family';
+}
+
 /** Normalize a single invite entry from the backend (snake or camel casing). */
 function normalizeInvite(raw: unknown): FamilyInvite | null {
     if (!raw || typeof raw !== 'object') return null;
@@ -885,6 +892,7 @@ function normalizeInvite(raw: unknown): FamilyInvite | null {
 
     return {
         id,
+        kind: normalizeKind(pick<string>('kind', 'kind')),
         requesterEmail: (pick<string>('requester_email', 'requesterEmail') ?? '') as string,
         inviteeEmail: (pick<string>('invitee_email', 'inviteeEmail') ?? '') as string,
         requesterRelationshipType: pick<FamilyInvite['requesterRelationshipType']>(
@@ -930,6 +938,7 @@ export function normalizeConnection(raw: unknown): FamilyConnection | null {
     if (connectionId === undefined) return null;
     return {
         connectionId,
+        kind: normalizeKind(pick<string>('kind', 'kind')),
         otherEmail: (pick<string>('other_email', 'otherEmail') ?? '') as string,
         otherName: (pick<string>('other_name', 'otherName') ?? '') as string,
         iSeeThemAs: pick<FamilyConnection['iSeeThemAs']>('i_see_them_as', 'iSeeThemAs') as FamilyConnection['iSeeThemAs'],
@@ -996,7 +1005,9 @@ export function useOutgoingInvites() {
     return useInvitesList('/api/family/invites/outgoing');
 }
 
-export function useFamilyConnections() {
+/** Shared connection-list fetcher. The endpoint determines the kind:
+ *  `/api/family/connections` → friends, `/api/family/family` → family. */
+function useConnectionsList(endpoint: '/api/family/connections' | '/api/family/family') {
     const [data, setData] = useState<FamilyConnection[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -1005,7 +1016,7 @@ export function useFamilyConnections() {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await clientFetch('/api/family/connections');
+            const res = await clientFetch(endpoint);
             const body = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(body.error || body.detail || 'Failed to load connections');
@@ -1017,13 +1028,24 @@ export function useFamilyConnections() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [endpoint]);
 
     useEffect(() => {
         fetchConnections();
     }, [fetchConnections]);
 
     return { data, isLoading, error, refetch: fetchConnections };
+}
+
+/** Friend-kind linked connections. As of migration 059, `/connections` returns
+ *  friends only — family links live on {@link useFamilyFamilyConnections}. */
+export function useFamilyConnections() {
+    return useConnectionsList('/api/family/connections');
+}
+
+/** Family-kind linked connections (counts against the roster cap). */
+export function useFamilyFamilyConnections() {
+    return useConnectionsList('/api/family/family');
 }
 
 /* ----- Mutations ----- */

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, ChevronDown, Trash2, Link2, Search,
+    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, Clock, Trash2, Link2, Search,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -13,6 +13,7 @@ import {
     useIncomingInvites,
     useOutgoingInvites,
     useFamilyConnections,
+    useFamilyFamilyConnections,
     sendInvite,
     acceptInvite,
     acceptInviteMerge,
@@ -25,11 +26,14 @@ import {
 } from '@/hooks';
 import type {
     FamilyConnection,
+    FamilyConnectionKind,
     FamilyInvite,
     FamilyMergeCandidate,
     FamilyRelationshipType,
 } from '@/types/family';
-import { parseInviteErrorByStatus, familyCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, inviteErrorCode, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { useCountdown } from '@/lib/useCountdown';
+import ConnectionKindPicker from '@/components/family/ConnectionKindPicker';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
@@ -56,26 +60,44 @@ const FamilyInvitesClient: React.FC = () => {
 
     const incoming = useIncomingInvites();
     const outgoing = useOutgoingInvites();
-    const connections = useFamilyConnections();
+    // As of migration 059, family + friend connections come from two endpoints;
+    // merge them (family first) for the single Connections list.
+    const friendConnections = useFamilyConnections();
+    const familyConnections = useFamilyFamilyConnections();
+    const connectionItems: FamilyConnection[] = [
+        ...(familyConnections.data ?? []),
+        ...(friendConnections.data ?? []),
+    ];
+    const connectionsLoading = friendConnections.isLoading || familyConnections.isLoading;
+    const connectionsLoaded = friendConnections.data !== null || familyConnections.data !== null;
+    const refetchConnections = () => {
+        friendConnections.refetch();
+        familyConnections.refetch();
+    };
 
     /* FAMILY_FREE_TIER_CAP upgrade dialog (send + accept paths). */
     const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
 
     /* ----- Send invite form state ----- */
     const [inviteEmail, setInviteEmail] = useState('');
-    const [inviteRelationship, setInviteRelationship] = useState<FamilyRelationshipType>('friend');
+    const [inviteKind, setInviteKind] = useState<FamilyConnectionKind>('friend');
+    const [inviteRelationship, setInviteRelationship] = useState<FamilyRelationshipType>('mother');
     const [inviteMessage, setInviteMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const [sendCooldownUntil, setSendCooldownUntil] = useState<string | null>(null);
+    const sendCooldown = useCountdown(sendCooldownUntil);
+    const sendBlockedByCooldown = !!sendCooldownUntil && !sendCooldown.expired;
 
     const emailValid = EMAIL_REGEX.test(inviteEmail.trim());
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!emailValid || isSending) return;
+        if (!emailValid || isSending || sendBlockedByCooldown) return;
         setIsSending(true);
         const res = await sendInvite({
             email: inviteEmail.trim(),
-            relationshipType: inviteRelationship,
+            kind: inviteKind,
+            ...(inviteKind === 'family' ? { relationshipType: inviteRelationship } : {}),
             message: inviteMessage.trim() || undefined,
         });
         setIsSending(false);
@@ -83,9 +105,12 @@ const FamilyInvitesClient: React.FC = () => {
             toastSuccess(t('family.inviteSent'));
             setInviteEmail('');
             setInviteMessage('');
+            setSendCooldownUntil(null);
             outgoing.refetch();
         } else {
             const cap = familyCapDetail(res.raw);
+            const retryAfter = cooldownRetryAfter(res.raw);
+            if (retryAfter) setSendCooldownUntil(retryAfter);
             if (cap) setCapDialog(cap);
             else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
@@ -100,13 +125,16 @@ const FamilyInvitesClient: React.FC = () => {
     const [mergeChoice, setMergeChoice] = useState<Record<number, boolean>>({});
 
     const getMergeChoice = (invite: FamilyInvite): boolean => {
-        if (!invite.mergeCandidate) return false;
+        // Merge is family-only; friends never carry a candidate or merge.
+        if (invite.kind !== 'family' || !invite.mergeCandidate) return false;
         return mergeChoice[invite.id] ?? true;
     };
 
     const handleAccept = async (invite: FamilyInvite) => {
         setAcceptingInviteId(invite.id);
-        const preAcceptCandidate = invite.mergeCandidate;
+        // Friend invites never merge — only consider candidates for family invites.
+        const isFamily = invite.kind === 'family';
+        const preAcceptCandidate = isFamily ? invite.mergeCandidate : undefined;
         const wantsMerge = getMergeChoice(invite);
 
         const res = await acceptInvite(invite.id);
@@ -120,19 +148,23 @@ const FamilyInvitesClient: React.FC = () => {
             return;
         }
 
-        const postAcceptCandidate = (res.data as { mergeCandidate?: FamilyMergeCandidate }).mergeCandidate;
+        const postAcceptCandidate = isFamily
+            ? (res.data as { mergeCandidate?: FamilyMergeCandidate }).mergeCandidate
+            : undefined;
         const candidate = wantsMerge ? (preAcceptCandidate ?? postAcceptCandidate) : null;
 
         if (candidate) {
             const mergeRes = await acceptInviteMerge(invite.id, candidate.memberId);
             setAcceptingInviteId(null);
-            if (mergeRes.ok) {
+            // MERGE_NOT_SUPPORTED (e.g. a friend invite slipped through) — the base
+            // accept already succeeded, so treat it as a normal accept.
+            if (mergeRes.ok || inviteErrorCode(mergeRes.raw) === 'MERGE_NOT_SUPPORTED') {
                 toastSuccess(t('family.inviteStatusAccepted'));
             } else {
                 toastError(parseInviteErrorByStatus(mergeRes.status, mergeRes.raw, t));
             }
             incoming.refetch();
-            connections.refetch();
+            refetchConnections();
             return;
         }
 
@@ -146,7 +178,7 @@ const FamilyInvitesClient: React.FC = () => {
             toastSuccess(t('family.inviteStatusAccepted'));
         }
         incoming.refetch();
-        connections.refetch();
+        refetchConnections();
     };
 
     const handleConfirmMerge = async () => {
@@ -154,13 +186,13 @@ const FamilyInvitesClient: React.FC = () => {
         setIsMerging(true);
         const res = await acceptInviteMerge(mergePrompt.inviteId, mergePrompt.candidate.memberId);
         setIsMerging(false);
-        if (res.ok) {
+        if (res.ok || inviteErrorCode(res.raw) === 'MERGE_NOT_SUPPORTED') {
             toastSuccess(t('family.inviteStatusAccepted'));
         } else {
             toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
         setMergePrompt(null);
-        connections.refetch();
+        refetchConnections();
     };
 
     const [decliningInviteId, setDecliningInviteId] = useState<number | null>(null);
@@ -198,7 +230,7 @@ const FamilyInvitesClient: React.FC = () => {
         if (!res.ok) {
             toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
-        connections.refetch();
+        refetchConnections();
     };
 
     const [disconnectPrompt, setDisconnectPrompt] = useState<FamilyConnection | null>(null);
@@ -214,7 +246,7 @@ const FamilyInvitesClient: React.FC = () => {
             toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
         setDisconnectPrompt(null);
-        connections.refetch();
+        refetchConnections();
     };
 
     return (
@@ -257,37 +289,25 @@ const FamilyInvitesClient: React.FC = () => {
                         <h2 className="text-[12px] font-bold text-secondary uppercase tracking-widest mb-2">
                             {t('family.inviteByEmail')}
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
-                                    {t('family.inviteEmailLabel')}<span className="text-secondary ml-1">*</span>
-                                </label>
-                                <Input
-                                    type="email"
-                                    placeholder={t('family.inviteEmailPlaceholder')}
-                                    value={inviteEmail}
-                                    onChange={(e) => setInviteEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
-                                    {t('family.inviteRelationshipLabel')}<span className="text-secondary ml-1">*</span>
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        value={inviteRelationship}
-                                        onChange={(e) => setInviteRelationship(e.target.value as FamilyRelationshipType)}
-                                        className="w-full appearance-none bg-surface border border-outline-variant/30 rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 sm:py-3.5 md:py-4 text-sm sm:text-base text-primary pr-10"
-                                    >
-                                        {RELATIONSHIP_TYPES.map((r) => (
-                                            <option key={r.value} value={r.value}>{r.label}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant/40" />
-                                </div>
-                            </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
+                                {t('family.inviteEmailLabel')}<span className="text-secondary ml-1">*</span>
+                            </label>
+                            <Input
+                                type="email"
+                                placeholder={t('family.inviteEmailPlaceholder')}
+                                value={inviteEmail}
+                                onChange={(e) => setInviteEmail(e.target.value)}
+                                required
+                            />
                         </div>
+                        <ConnectionKindPicker
+                            kind={inviteKind}
+                            onKindChange={setInviteKind}
+                            relationshipType={inviteRelationship}
+                            onRelationshipChange={setInviteRelationship}
+                            disabled={isSending}
+                        />
                         <div className="space-y-2">
                             <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
                                 {t('family.inviteMessageLabel')}
@@ -300,8 +320,14 @@ const FamilyInvitesClient: React.FC = () => {
                                 maxLength={500}
                             />
                         </div>
+                        {sendBlockedByCooldown && (
+                            <div className="flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
+                                <Clock className="w-3.5 h-3.5 shrink-0" />
+                                {(t('family.inviteCooldownRetry') || 'Try again in {time}').replace('{time}', sendCooldown.label)}
+                            </div>
+                        )}
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={!emailValid || isSending}>
+                            <Button type="submit" disabled={!emailValid || isSending || sendBlockedByCooldown}>
                                 {isSending ? (
                                     <span className="inline-flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -378,16 +404,16 @@ const FamilyInvitesClient: React.FC = () => {
                 <section className="space-y-3">
                     <h2 className="text-[12px] font-bold text-secondary uppercase tracking-widest">
                         {t('family.invitesTabConnections')}
-                        {connections.data && connections.data.length > 0 && (
-                            <span className="ml-2 text-on-surface-variant/40">({connections.data.length})</span>
+                        {connectionItems.length > 0 && (
+                            <span className="ml-2 text-on-surface-variant/40">({connectionItems.length})</span>
                         )}
                     </h2>
-                    {connections.isLoading && !connections.data ? (
+                    {connectionsLoading && !connectionsLoaded ? (
                         <SectionSkeleton />
-                    ) : !connections.data || connections.data.length === 0 ? (
+                    ) : connectionItems.length === 0 ? (
                         <EmptyRow text={t('family.invitesEmptyConnections')} />
                     ) : (
-                        connections.data.map((conn) => (
+                        connectionItems.map((conn) => (
                             <ConnectionRow
                                 key={conn.connectionId}
                                 connection={conn}
@@ -445,6 +471,21 @@ const FamilyInvitesClient: React.FC = () => {
 
 /* ============================== Row helpers ============================== */
 
+/** Small Family/Friend pill shown on invite + connection rows. */
+const KindBadge: React.FC<{ kind: FamilyConnectionKind }> = ({ kind }) => {
+    const { t } = useTranslation();
+    const isFamily = kind === 'family';
+    return (
+        <span className={`shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+            isFamily
+                ? 'bg-secondary/10 text-secondary border-secondary/30'
+                : 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+        }`}>
+            {isFamily ? (t('family.connectionKindFamily') || 'Family') : (t('family.connectionKindFriend') || 'Friend')}
+        </span>
+    );
+};
+
 const SectionSkeleton: React.FC = () => (
     <div className="space-y-2">
         {[0, 1].map(i => (
@@ -489,7 +530,8 @@ const InviteRow: React.FC<InviteRowProps> = ({
 
     const counterpartyEmail = kind === 'incoming' ? invite.requesterEmail : invite.inviteeEmail;
     const counterpartyName = kind === 'incoming' ? invite.requesterName : invite.inviteeName;
-    const showMergeOffer = kind === 'incoming' && isPending && !!invite.mergeCandidate;
+    // Merge is family-only; friends never carry a candidate.
+    const showMergeOffer = kind === 'incoming' && isPending && invite.kind === 'family' && !!invite.mergeCandidate;
 
     return (
         <Card variant="bordered" padding="md" hoverable={false} className="!rounded-2xl">
@@ -499,6 +541,7 @@ const InviteRow: React.FC<InviteRowProps> = ({
                         <p className="text-[14px] font-headline font-semibold text-foreground truncate">
                             {counterpartyName || counterpartyEmail}
                         </p>
+                        <KindBadge kind={invite.kind} />
                         <span className={`shrink-0 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                             isPending
                                 ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
@@ -607,6 +650,7 @@ const ConnectionRow: React.FC<ConnectionRowProps> = ({ connection, onToggleShari
                         <p className="text-[14px] font-headline font-semibold text-foreground truncate">
                             {connection.otherName || connection.otherEmail}
                         </p>
+                        <KindBadge kind={connection.kind} />
                     </div>
                     {connection.otherName && (
                         <p className="text-[11px] text-on-surface-variant/40 truncate mb-2">{connection.otherEmail}</p>
