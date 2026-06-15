@@ -128,30 +128,38 @@ export default function CurrentPlanSection() {
   const activePacks = packs.filter(p => p.status === 'active');
   if (!hasSubscription && activePacks.length === 0) return null;
 
-  const isPremium = (subscription?.planTier || '').toLowerCase() === 'premium';
-  const tierAccent = isPremium ? 'purple' : 'secondary';
-  const tierIcon = isPremium ? Crown : Shield;
+  const { catalog } = usePaywallContext();
+  const planTier = (subscription?.planTier || '').toLowerCase();
+  const isPremium = planTier === 'premium';
+  const isPro = planTier === 'pro';
+  const isFree = planTier === 'free' || !subscription;
+
+  const TierIcon = isPremium ? Crown : isPro ? Sparkles : Shield;
+
+  const activeSub = catalog?.subscriptions.find(s => s.tier?.toLowerCase() === planTier);
+  const planColor = activeSub?.color || (isPremium ? '#D97706' : isPro ? '#7C3AED' : '#6B7280');
 
   return (
-    <Card padding="md" variant="bordered" className="!rounded-[28px] border-secondary/20 overflow-hidden relative">
+    <Card
+      padding="md"
+      variant="bordered"
+      className="!rounded-[28px] border-secondary/20 overflow-hidden relative"
+      style={{ '--plan-color': planColor } as React.CSSProperties}
+    >
       {/* Subtle inner glow */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
-          background: isPremium
-            ? 'radial-gradient(ellipse 50% 100% at 10% 50%, rgba(168,130,255,0.9) 0%, transparent 70%)'
-            : 'radial-gradient(ellipse 50% 100% at 10% 50%, rgba(200,136,10,0.8) 0%, transparent 70%)',
+          background: `radial-gradient(ellipse 50% 100% at 10% 50%, var(--plan-color) 0%, transparent 70%)`,
         }}
       />
 
       <div className="relative space-y-4">
         {/* Section header */}
         <div className="flex items-center gap-2">
-          <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${
-            isPremium ? 'bg-purple-500/10 border border-purple-400/20' : 'bg-secondary/10 border border-secondary/20'
-          }`}>
-            <Star className={`w-3.5 h-3.5 ${isPremium ? 'text-purple-400' : 'text-secondary'}`} />
+          <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 bg-[var(--plan-color)]/10 border border-[var(--plan-color)]/20">
+            <Star className="w-3.5 h-3.5 text-secondary" />
           </div>
-          <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isPremium ? 'text-purple-400' : 'text-secondary'}`}>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary">
             {t('plans.currentPlan')}
           </span>
           <div className="h-[1px] flex-1 bg-gradient-to-r from-secondary/15 to-transparent" />
@@ -159,25 +167,17 @@ export default function CurrentPlanSection() {
 
         {/* Active subscription */}
         {hasSubscription ? (
-          <div className={`flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-500 ${
-            isPremium
-              ? 'bg-purple-500/[0.03] border-purple-400/15'
-              : 'bg-secondary/[0.03] border-secondary/10'
-          }`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-              isPremium
-                ? 'bg-purple-500/10 border-purple-400/25 text-purple-400'
-                : 'bg-secondary/10 border-secondary/20 text-secondary'
-            }`}>
-              <Crown className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-500 bg-[var(--plan-color)]/[0.03] border-[var(--plan-color)]/15">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-[var(--plan-color)]/10 border-[var(--plan-color)]/25 text-[var(--plan-color)]">
+              <TierIcon className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-primary/80">
-                {t('plans.currentSubscription')}: <span className={isPremium ? 'text-purple-300' : 'text-secondary'}>{subscription.productId}</span>
+                {t('plans.currentSubscription')}: <span className="text-secondary">{subscription.productId}</span>
               </p>
               <div className="flex items-center gap-3 text-[10px] text-primary/35 mt-1 flex-wrap">
                 <span className="flex items-center gap-1">
-                  <Zap className={`w-3 h-3 ${isPremium ? 'text-purple-400/50' : 'text-secondary/50'}`} />
+                  <Zap className="w-3 h-3 text-secondary/50" />
                   {subscription.creditsRemaining}/{subscription.creditsMonthly} {t('plans.naviCredits')}
                 </span>
                 {subscription.cycleEnd && (
@@ -188,11 +188,7 @@ export default function CurrentPlanSection() {
                 )}
               </div>
             </div>
-            <span className={`text-[8px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full border ${
-              isPremium
-                ? 'bg-purple-500/10 text-purple-300 border-purple-400/20'
-                : 'bg-secondary/10 text-secondary border-secondary/20'
-            }`}>
+            <span className="text-[8px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full border bg-[var(--plan-color)]/10 text-[var(--plan-color)] border-[var(--plan-color)]/20">
               {subscription.planTier}
             </span>
           </div>

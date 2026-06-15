@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen pt-20 sm:pt-28 pb-12 sm:pb-20 flex flex-col relative z-10 px-4 sm:px-6 max-w-4xl mx-auto space-y-8 scale-content">
+    <div className="min-h-screen pt-20 sm:pt-28 pb-12 sm:pb-20 flex flex-col relative z-10 px-4 sm:px-6 lg:px-8 max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto space-y-8 scale-content">
       {/* Title Header */}
       <section className="text-center space-y-4 max-w-2xl mx-auto">
         <span className="text-[10px] sm:text-xs font-bold tracking-[0.15em] sm:tracking-[0.2em] text-secondary uppercase bg-secondary/10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full inline-block">

@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { PaywallData, SuggestedProduct } from '@/types/paywall';
 import { useTranslation, useFocusTrap } from '@/hooks';
+import { usePaywallContext } from '@/context/PaywallContext';
 
 interface PaywallCardProps {
   paywall: PaywallData;
@@ -32,6 +33,7 @@ interface PaywallCardProps {
  */
 export default function PaywallCard({ paywall, variant = 'inline', onClose }: PaywallCardProps) {
   const { t, language } = useTranslation();
+  const { getTierColor } = usePaywallContext();
   const modalRef = useFocusTrap<HTMLDivElement>(variant === 'modal');
 
   // Pick title/description based on language, check local translations first
@@ -66,6 +68,12 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
 
   // Suggested products (array per backend spec)
   const products: SuggestedProduct[] = paywall.suggestedProducts || [];
+  const currentTierColor = getTierColor(paywall.tier);
+  const getProductTierColor = (product: SuggestedProduct) => product.color || getTierColor(product.tier);
+  const badgeTier = ['free', 'pro', 'premium'].find(
+    tier => paywall.badge?.toLowerCase().includes(tier)
+  );
+  const paywallTierColor = paywall.color || getTierColor(badgeTier || products[0]?.tier);
 
   // Build the CTA link: /plans?feature={featureKey}&product={firstProductId}
   const ctaHref = `/plans?feature=${encodeURIComponent(paywall.featureKey)}${
@@ -95,25 +103,29 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
         padding="md"
         variant="bordered"
         hoverable={false}
-        className="!rounded-[24px] border-secondary/20 bg-gradient-to-b from-secondary/[0.05] to-surface relative overflow-hidden"
+        className="!rounded-[24px] border-[var(--paywall-tier-color)]/25 bg-surface relative overflow-hidden"
+        style={{ '--paywall-tier-color': paywallTierColor } as React.CSSProperties}
       >
         {/* Subtle background glow */}
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-amber-500/[0.02] pointer-events-none" />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.06]"
+          style={{ background: 'radial-gradient(circle at top, var(--paywall-tier-color), transparent 65%)' }}
+        />
 
         <div className="relative z-10 flex flex-col items-center text-center gap-4 py-2">
           {/* Icon + Badge */}
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shadow-[0_0_20px_rgba(200,136,10,0.08)]">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--paywall-tier-color)]/10 border border-[var(--paywall-tier-color)]/20 text-[var(--paywall-tier-color)] flex items-center justify-center">
               {paywallIcon ? (
                 <span className="text-2xl">{paywallIcon}</span>
               ) : paywall.isSoft ? (
-                <Sparkles className="w-7 h-7 text-secondary" />
+                <Sparkles className="w-7 h-7" />
               ) : (
-                <Lock className="w-7 h-7 text-secondary" />
+                <Lock className="w-7 h-7" />
               )}
             </div>
             {paywall.badge && (
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20">
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full bg-[var(--paywall-tier-color)]/15 text-[var(--paywall-tier-color)] border border-[var(--paywall-tier-color)]/20">
                 {paywall.badge}
               </span>
             )}
@@ -148,15 +160,16 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                 <Link
                   key={product.productId}
                   href={`/plans?feature=${encodeURIComponent(paywall.featureKey)}&product=${encodeURIComponent(product.productId)}`}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary/[0.06] border border-secondary/10 hover:bg-secondary/[0.1] hover:border-secondary/20 transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--product-tier-color)]/[0.06] border border-[var(--product-tier-color)]/15 hover:bg-[var(--product-tier-color)]/[0.1] hover:border-[var(--product-tier-color)]/30 transition-all group"
+                  style={{ '--product-tier-color': getProductTierColor(product) } as React.CSSProperties}
                 >
                   {product.icon ? (
                     <span className="text-lg shrink-0">{product.icon}</span>
                   ) : (
-                    <Shield className="w-4 h-4 text-secondary shrink-0" />
+                    <Shield className="w-4 h-4 text-[var(--product-tier-color)] shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-bold text-secondary">{getProductName(product)}</p>
+                    <p className="text-[12px] font-bold text-[var(--product-tier-color)]">{getProductName(product)}</p>
                     <div className="flex items-center gap-2">
                       {getProductPrice(product) && (
                         <p className="text-[10px] text-foreground/40 font-bold">{getProductPrice(product)}</p>
@@ -169,11 +182,11 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                     </div>
                   </div>
                   {product.tier && (
-                    <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
+                    <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--product-tier-color)]/10 text-[var(--product-tier-color)] border border-[var(--product-tier-color)]/20">
                       {product.tier}
                     </span>
                   )}
-                  <ArrowRight className="w-3.5 h-3.5 text-secondary/40 group-hover:text-secondary group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[var(--product-tier-color)]/40 group-hover:text-[var(--product-tier-color)] group-hover:translate-x-0.5 transition-all" />
                 </Link>
               ))}
             </div>
@@ -181,7 +194,10 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
 
           {/* Tier info */}
           {paywall.tier && (
-            <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">
+            <p
+              className="text-[10px] font-bold uppercase tracking-widest text-[var(--current-tier-color)]"
+              style={{ '--current-tier-color': currentTierColor } as React.CSSProperties}
+            >
               {t('paywall.currentTier') ? t('paywall.currentTier').replace('{tier}', paywall.tier) : `Current tier: ${paywall.tier}`}
             </p>
           )}
@@ -215,38 +231,41 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative rounded-[24px] overflow-hidden min-h-[290px]"
+        className="relative rounded-[24px] overflow-hidden min-h-[230px]"
+        style={{ '--paywall-tier-color': paywallTierColor } as React.CSSProperties}
       >
         {/* Blurred backdrop overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/90 to-surface/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 p-4 sm:p-5 text-center min-h-[290px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/90 to-surface/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 p-4 sm:p-5 text-center min-h-[230px]">
           {/* Close button */}
           {onClose && (
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/50 border border-outline-variant/20 flex items-center justify-center text-foreground/40 hover:text-foreground hover:border-secondary/30 transition-all z-20"
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/80 border border-outline-variant/20 flex items-center justify-center text-foreground/40 hover:text-foreground hover:border-secondary/30 transition-all z-20"
             >
               <X className="w-4 h-4" />
             </button>
           )}
 
-          <div className="w-12 h-12 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-            {paywallIcon ? (
-              <span className="text-xl">{paywallIcon}</span>
-            ) : paywall.isSoft ? (
-              <Sparkles className="w-6 h-6 text-secondary" />
-            ) : (
-              <Lock className="w-6 h-6 text-secondary" />
+          {/* Symbol + Pro Badge in one row */}
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-[var(--paywall-tier-color)]/10 border border-[var(--paywall-tier-color)]/20 text-[var(--paywall-tier-color)] flex items-center justify-center">
+              {paywallIcon ? (
+                <span className="text-lg">{paywallIcon}</span>
+              ) : paywall.isSoft ? (
+                <Sparkles className="w-5 h-5" />
+              ) : (
+                <Lock className="w-5 h-5" />
+              )}
+            </div>
+            {paywall.badge && (
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full bg-[var(--paywall-tier-color)]/10 text-[var(--paywall-tier-color)] border border-[var(--paywall-tier-color)]/20">
+                {paywall.badge}
+              </span>
             )}
           </div>
 
-          {paywall.badge && (
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
-              {paywall.badge}
-            </span>
-          )}
-
           <h3 className="text-base font-headline font-bold text-foreground leading-tight">{title}</h3>
-          <p className="text-xs text-foreground/60 leading-relaxed">{description}</p>
+          <p className="text-xs text-foreground/60 leading-relaxed max-w-sm">{description}</p>
 
           {(paywall.credits !== undefined || paywall.creditsRequired !== undefined) && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-variant/20 border border-outline-variant/10">
@@ -259,30 +278,43 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             </div>
           )}
 
-          {/* Suggested products (first product only for overlay — space limited) */}
-          {products.length > 0 && (
-            <Link
-              href={`/plans?feature=${encodeURIComponent(paywall.featureKey)}&product=${encodeURIComponent(products[0].productId)}`}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/[0.06] border border-secondary/10 hover:bg-secondary/[0.1] hover:border-secondary/20 transition-all group"
-            >
-              {products[0].icon ? (
-                <span className="text-sm">{products[0].icon}</span>
-              ) : (
-                <Star className="w-3.5 h-3.5 text-secondary" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-secondary">{getProductName(products[0])}</p>
-                {getProductPrice(products[0]) && (
-                  <p className="text-[9px] text-foreground/40 font-bold">{getProductPrice(products[0])}</p>
-                )}
-              </div>
-              <ArrowRight className="w-3 h-3 text-secondary/40 group-hover:text-secondary transition-colors" />
-            </Link>
-          )}
+          {/* Both buttons in one row */}
+          <div className="flex flex-row items-stretch justify-center gap-3 w-full max-w-[360px] mt-1">
+            {products.length > 0 && (
+              <Link
+                href={`/plans?feature=${encodeURIComponent(paywall.featureKey)}&product=${encodeURIComponent(products[0].productId)}`}
+                className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 rounded-[24px] bg-[var(--product-tier-color)]/[0.06] border border-[var(--product-tier-color)]/15 hover:bg-[var(--product-tier-color)]/[0.1] hover:border-[var(--product-tier-color)]/30 transition-all group text-left min-h-[44px]"
+                style={{ '--product-tier-color': getProductTierColor(products[0]) } as React.CSSProperties}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  {products[0].icon ? (
+                    <span className="text-sm shrink-0">{products[0].icon}</span>
+                  ) : (
+                    <Star className="w-3.5 h-3.5 text-[var(--product-tier-color)] shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[var(--product-tier-color)] truncate">
+                      {getProductName(products[0])}
+                    </p>
+                    {getProductPrice(products[0]) && (
+                      <p className="text-[9px] text-foreground/40 font-bold">{getProductPrice(products[0])}</p>
+                    )}
+                  </div>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-[var(--product-tier-color)]/40 group-hover:text-[var(--product-tier-color)] group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+            )}
 
-          <Button href={ctaHref} variant="primary" size="sm" className="rounded-xl" rightIcon={<ArrowRight className="w-3 h-3" />}>
-            {t('paywall.viewPlans') || "View Plans"}
-          </Button>
+            <Button
+              href={ctaHref}
+              variant="primary"
+              size="sm"
+              className={`flex items-center justify-center font-bold text-[11px] tracking-wider uppercase px-4 ${products.length > 0 ? 'flex-1' : 'w-auto'}`}
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+            >
+              {t('paywall.viewPlans') || "View Plans"}
+            </Button>
+          </div>
         </div>
       </motion.div>
     );
@@ -308,7 +340,8 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             onClick={e => e.stopPropagation()}
-            className="relative w-full max-w-md bg-surface rounded-[24px] sm:rounded-[32px] border border-secondary/20 shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md bg-surface rounded-[24px] sm:rounded-[32px] border border-[var(--paywall-tier-color)]/25 shadow-2xl overflow-hidden"
+            style={{ '--paywall-tier-color': paywallTierColor } as React.CSSProperties}
           >
             {/* Close */}
             {onClose && (
@@ -321,22 +354,25 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
             )}
 
             {/* Background glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-amber-500/[0.02] pointer-events-none" />
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.06]"
+              style={{ background: 'radial-gradient(circle at top, var(--paywall-tier-color), transparent 65%)' }}
+            />
 
             <div className="relative z-10 p-6 sm:p-8 flex flex-col items-center text-center gap-5">
               {/* Icon + Badge */}
               <div className="flex items-center gap-3">
-                <div className="w-16 h-16 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shadow-[0_0_30px_rgba(200,136,10,0.1)]">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--paywall-tier-color)]/10 border border-[var(--paywall-tier-color)]/20 text-[var(--paywall-tier-color)] flex items-center justify-center">
                   {paywallIcon ? (
                     <span className="text-3xl">{paywallIcon}</span>
                   ) : paywall.isSoft ? (
-                    <Sparkles className="w-8 h-8 text-secondary" />
+                    <Sparkles className="w-8 h-8" />
                   ) : (
-                    <Lock className="w-8 h-8 text-secondary" />
+                    <Lock className="w-8 h-8" />
                   )}
                 </div>
                 {paywall.badge && (
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full bg-[var(--paywall-tier-color)]/15 text-[var(--paywall-tier-color)] border border-[var(--paywall-tier-color)]/20">
                     {paywall.badge}
                   </span>
                 )}
@@ -371,15 +407,16 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                     <Link
                       key={product.productId}
                       href={`/plans?feature=${encodeURIComponent(paywall.featureKey)}&product=${encodeURIComponent(product.productId)}`}
-                      className="flex items-center gap-3 px-5 py-4 rounded-xl bg-secondary/[0.06] border border-secondary/10 hover:bg-secondary/[0.1] hover:border-secondary/20 transition-all w-full group"
+                      className="flex items-center gap-3 px-5 py-4 rounded-xl bg-[var(--product-tier-color)]/[0.06] border border-[var(--product-tier-color)]/15 hover:bg-[var(--product-tier-color)]/[0.1] hover:border-[var(--product-tier-color)]/30 transition-all w-full group"
+                      style={{ '--product-tier-color': getProductTierColor(product) } as React.CSSProperties}
                     >
                       {product.icon ? (
                         <span className="text-xl shrink-0">{product.icon}</span>
                       ) : (
-                        <Shield className="w-5 h-5 text-secondary shrink-0" />
+                        <Shield className="w-5 h-5 text-[var(--product-tier-color)] shrink-0" />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-bold text-secondary">{getProductName(product)}</p>
+                        <p className="text-[13px] font-bold text-[var(--product-tier-color)]">{getProductName(product)}</p>
                         <div className="flex items-center gap-2">
                           {getProductPrice(product) && (
                             <p className="text-[10px] text-foreground/40 font-bold">{getProductPrice(product)}</p>
@@ -392,11 +429,11 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
                         </div>
                       </div>
                       {product.tier && (
-                        <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/15">
+                        <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--product-tier-color)]/10 text-[var(--product-tier-color)] border border-[var(--product-tier-color)]/20">
                           {product.tier}
                         </span>
                       )}
-                      <ArrowRight className="w-4 h-4 text-secondary/40 group-hover:text-secondary group-hover:translate-x-0.5 transition-all" />
+                      <ArrowRight className="w-4 h-4 text-[var(--product-tier-color)]/40 group-hover:text-[var(--product-tier-color)] group-hover:translate-x-0.5 transition-all" />
                     </Link>
                   ))}
                 </div>
@@ -404,7 +441,10 @@ export default function PaywallCard({ paywall, variant = 'inline', onClose }: Pa
 
               {/* Tier info */}
               {paywall.tier && (
-                <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">
+                <p
+                  className="text-[10px] font-bold uppercase tracking-widest text-[var(--current-tier-color)]"
+                  style={{ '--current-tier-color': currentTierColor } as React.CSSProperties}
+                >
                   {t('paywall.currentTier') ? t('paywall.currentTier').replace('{tier}', paywall.tier) : `Current tier: ${paywall.tier}`}
                 </p>
               )}

@@ -181,7 +181,7 @@ const ChatSidebar: React.FC = () => {
       </div>
 
       <div className="px-3 pb-1.5 shrink-0">
-        <div className="flex items-center gap-2 bg-surface/70 border border-outline-variant/20 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 bg-surface/80 border border-outline-variant/20 rounded-lg px-3 py-2">
           <Search className="w-4 h-4 text-foreground/40 shrink-0" />
           <input
             type="text"

@@ -87,7 +87,7 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
                 {/* Chat Navi Card */}
                 <Link href="/chat" className="group">
-                    <Card className="border-outline-variant/30 hover:border-secondary/50 transition-all duration-500 h-[340px] sm:h-[440px] flex flex-col relative overflow-hidden" padding="md">
+                    <Card className="border-outline-variant/30 hover:border-secondary/50 transition-all duration-500 min-h-[340px] sm:min-h-[440px] flex flex-col relative overflow-hidden" padding="md">
                         <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="relative z-10 flex flex-col items-center text-center justify-center h-full">
                             <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-secondary/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform shadow-inner">
@@ -107,7 +107,7 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
                 </Link>
 
                 {/* Horoscope Portal */}
-                <Card className="border-outline-variant/30 flex flex-col h-[340px] sm:h-full items-center text-center justify-center" padding="md">
+                <Card className="border-outline-variant/30 flex flex-col min-h-[340px] sm:min-h-[440px] items-center text-center justify-center" padding="md">
                     <div className="flex flex-col items-center justify-center w-full">
                         <Sparkles className="text-secondary w-8 h-8 sm:w-10 sm:h-10 mb-3 sm:mb-4 animate-pulse" />
                         <h3 className="text-base sm:text-xl font-headline font-bold text-primary mb-1 uppercase tracking-wider sm:tracking-widest">{t('landing.forecastTitle')}</h3>
@@ -148,7 +148,7 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
                 </Card>
 
                 {/* Kundli Form Portal */}
-                <Card className="border-secondary/30 flex flex-col h-[340px] sm:h-full relative overflow-hidden" padding="md">
+                <Card className="border-secondary/30 flex flex-col min-h-[340px] sm:min-h-[440px] relative overflow-hidden" padding="md">
                     <AnimatePresence mode="wait">
                         {isCalculating && teaserMode.type === 'kundli' ? (
                             <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-3">
@@ -188,7 +188,7 @@ export default function PortalsSection({ t, sectionVariants }: PortalsSectionPro
                 </Card>
 
                 {/* Compatibility Portal */}
-                <Card className="border-outline-variant/30 flex flex-col h-[340px] sm:h-full relative overflow-hidden" padding="md">
+                <Card className="border-outline-variant/30 flex flex-col min-h-[340px] sm:min-h-[440px] relative overflow-hidden" padding="md">
                     <AnimatePresence mode="wait">
                         {isCalculating && teaserMode.type === 'match' ? (
                             <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center h-full space-y-3">

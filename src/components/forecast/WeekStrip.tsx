@@ -33,7 +33,7 @@ export default function WeekStrip({ days, colorHex, selectedDate, onSelect }: We
           <button
             key={day.date}
             onClick={() => onSelect(day.date)}
-            className={`flex flex-col items-center p-1.5 sm:p-3 lg:scale-110 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/30 border-white/5 hover:border-white/10'}`}
+            className={`flex flex-col items-center p-1.5 sm:p-3 lg:scale-110 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/80 border-white/5 hover:border-white/10'}`}
             style={{
               borderColor: isSelected ? colorHex + '50' : undefined,
               boxShadow: isSelected ? `0 0 32px ${colorHex}25` : undefined,

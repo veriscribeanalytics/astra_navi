@@ -139,7 +139,7 @@ const FamilyDiscoverClient: React.FC = () => {
 
     return (
         <div className="min-h-screen pt-[calc(var(--navbar-height,64px)+1.5rem)] pb-12">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 {/* Header */}
                 <header>
                     <Link

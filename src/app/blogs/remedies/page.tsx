@@ -101,7 +101,7 @@ export default function RemediesPage() {
     const router = useRouter();
 
     return (
-        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-4 relative overflow-hidden flex flex-col items-center">
+        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] px-4 sm:px-6 lg:px-8 relative overflow-hidden flex flex-col items-center">
             {/* Background Decorations */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[10%] right-[5%] w-[40%] h-[40%] bg-secondary/5 blur-[120px] rounded-full"></div>

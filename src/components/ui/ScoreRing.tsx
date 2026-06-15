@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { AREA_COLORS } from "@/data/lifeAreaColors";
+import type { ForecastArea } from "@/data/areaThemes";
 
 interface ScoreRingProps {
     score: number;
@@ -14,36 +16,35 @@ interface ScoreRingProps {
     };
     label?: string;
     animated?: boolean;
+    area?: ForecastArea | "overall";
 }
 
-export default function ScoreRing({ score, maxScore = 100, size = 88, tier, label = "Score", animated = true }: ScoreRingProps) {
+export default function ScoreRing({ score, maxScore = 100, size = 88, tier, label = "Score", animated = true, area }: ScoreRingProps) {
     const [animatedScore, setAnimatedScore] = useState(animated ? 0 : score);
-    const normalizedSize = 100; // Standardize internal coordinate space
-    const radius = 42; 
+    const normalizedSize = 100;
+    const radius = 42;
     const strokeWidth = 6;
     const circumference = 2 * Math.PI * radius;
     const percentage = (score / maxScore) * 100;
-    
+
     useEffect(() => {
         if (!animated) return;
 
         let startTime: number | null = null;
         const duration = 1500;
-        
+
         const animate = (timestamp: number) => {
             if (!startTime) startTime = timestamp;
             const elapsed = timestamp - startTime;
             const progressRatio = Math.min(elapsed / duration, 1);
-            
-            // Cubic bezier ease out for a smoother feel
             const easeOut = 1 - Math.pow(1 - progressRatio, 3);
             setAnimatedScore(Math.floor(easeOut * score));
-            
+
             if (progressRatio < 1) {
                 requestAnimationFrame(animate);
             }
         };
-        
+
         const timer = setTimeout(() => requestAnimationFrame(animate), 200);
         return () => clearTimeout(timer);
     }, [score, animated]);
@@ -51,29 +52,24 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
     const progress = circumference - (animatedScore / maxScore) * circumference;
 
     const getCelestialColor = () => {
-        if (percentage >= 80) return '#D4A017'; // Solar Gold
-        if (percentage >= 60) return '#E8832A'; // Radiant Amber
-        if (percentage >= 40) return '#E84A2A'; // Warm Earth
-        return '#C83A2A'; // Deep Mars
+        if (percentage >= 80) return '#14B8A6';
+        if (percentage >= 60) return '#22C55E';
+        if (percentage >= 40) return '#F59E0B';
+        return '#EF4444';
     };
 
-    const color = tier?.color || getCelestialColor();
+    const color = tier?.color || (area ? AREA_COLORS[area].main : getCelestialColor());
+    const glowColor = area ? AREA_COLORS[area].glow : color;
     const isLarge = size >= 90;
 
     return (
         <div className={`flex flex-col items-center gap-4 sm:gap-6`}>
             <div className="relative" style={{ width: size, height: size }}>
-                {isLarge && (
-                    <div 
-                        className="absolute inset-0 rounded-full blur-2xl opacity-20 transition-colors duration-1000"
-                        style={{ backgroundColor: color }}
-                    />
-                )}
                 <svg className="w-full h-full -rotate-90 relative z-10 p-1" viewBox={`0 0 ${normalizedSize} ${normalizedSize}`}>
-                    <circle 
-                        cx={normalizedSize / 2} cy={normalizedSize / 2} r={radius} 
-                        fill="none" stroke="currentColor" strokeWidth={strokeWidth} 
-                        className="text-surface-variant/20" 
+                    <circle
+                        cx={normalizedSize / 2} cy={normalizedSize / 2} r={radius}
+                        fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+                        className="text-surface-variant/20"
                     />
                     <motion.circle
                         cx={normalizedSize / 2} cy={normalizedSize / 2} r={radius}
@@ -91,7 +87,7 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
                         </span>
                         <div className="flex flex-col items-center mt-1">
                             <span className="text-[8px] sm:text-[9px] text-foreground/45 font-bold uppercase tracking-[0.15em]">
-                                {label || (maxScore === 100 ? 'General Outlook' : `/ ${maxScore}`)}
+                                {label || (maxScore === 100 ? 'General' : `/ ${maxScore}`)}
                             </span>
                         </div>
                     </div>

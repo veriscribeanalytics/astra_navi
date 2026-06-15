@@ -20,7 +20,7 @@ export default function WorkInProgress({
     const displayDescription = description || t('chat.workInProgressDesc');
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl w-full text-center">
                 <div className="relative inline-block mb-8">
                     <div className="absolute inset-0 bg-secondary/20 blur-3xl rounded-full"></div>

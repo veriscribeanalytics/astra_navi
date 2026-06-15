@@ -359,7 +359,7 @@ export default function KundliPage() {
     if (loading) {
         return (
             <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)]">
-                <div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+                <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
                     {/* Header skeleton */}
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div className="flex items-center gap-3">
@@ -480,7 +480,7 @@ export default function KundliPage() {
                 <PaywallCard paywall={paywallData} variant="modal" onClose={() => setPaywallData(null)} />
             )}
 
-            <div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+            <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
 
                 {/* ═══ 1. PAGE HEADER ═══ */}
                 <header className="flex items-center justify-between gap-3 flex-wrap">

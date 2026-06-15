@@ -58,7 +58,7 @@ function MatchContent() {
     }
 
     return (
-        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] py-10 sm:py-20 px-4">
+        <div className="min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)] py-10 sm:py-20 px-4 sm:px-6 lg:px-8">
             <MatchClient />
         </div>
     );

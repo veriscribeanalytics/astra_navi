@@ -1,6 +1,28 @@
 export interface HoroscopeData {
   user?: { sign: string; name: string };
-  meta?: { date: string; date_display: string; generated_at: string };
+  meta?: {
+    date: string;
+    date_display: string;
+    generated_at: string;
+    panchanga?: {
+      tithi: string;
+      nakshatra: string;
+      yoga: string;
+      karana: string;
+      vaara: string;
+      rahukaal?: {
+        date: string;
+        weekday: string;
+        start: string;
+        end: string;
+        startIso: string;
+        endIso: string;
+        durationMinutes: number;
+        segment: number;
+        source: string;
+      };
+    };
+  };
   score?: {
     overall: number;
     areas: {
@@ -14,20 +36,29 @@ export interface HoroscopeData {
   };
   lucky?: { color: string; number: number };
   mood?: { value: string; type: string } | string;
-  planetary?: { dominant_planet: string; active_dasha: string };
+  planetary?: {
+    dominant_planet: string;
+    active_dasha: string;
+    retrograde?: string[];
+  };
   areas_text?: {
-    career: { insight: string; tone: string };
-    love: { insight: string; tone: string };
-    health: { insight: string; tone: string };
-    finance: { insight: string; tone: string };
-    general?: { insight: string; tone: string };
-    spiritual?: { insight: string; tone: string };
+    career: { insight: string; tone: string; personal_notes?: string[] };
+    love: { insight: string; tone: string; personal_notes?: string[] };
+    health: { insight: string; tone: string; personal_notes?: string[] };
+    finance: { insight: string; tone: string; personal_notes?: string[] };
+    general?: { insight: string; tone: string; personal_notes?: string[] };
+    spiritual?: { insight: string; tone: string; personal_notes?: string[] };
   };
   alerts?: {
     primary: { technical: string; simple: string; type: string; importance: string };
     secondary: Array<{ technical: string; simple: string; type: string; importance: string }>;
   };
-  time_triggers?: Array<{ start: string; end: string; type: string; label: string; advice: string }>;
+  time_triggers?: Array<{ start: string; end: string; type: string; label: string; advice: string; reason?: string }>;
+  current_state?: {
+    energy: string;
+    derived_from: string[];
+    advice_now: string;
+  };
   astro_explanations?: {
     enabled: boolean;
     items: Array<{ technical: string; simple: string; importance: string }>;

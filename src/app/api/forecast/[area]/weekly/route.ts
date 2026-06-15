@@ -23,10 +23,12 @@ export async function GET(
         const { searchParams } = new URL(req.url);
         const date = searchParams.get('date');
         const lang = searchParams.get('lang') || null;
+        const chartContext = searchParams.get('chart_context');
         const fullLangName = languageCodeToName(lang);
 
         const query = new URLSearchParams();
         if (date) query.set('date', date);
+        if (chartContext) query.set('chart_context', chartContext);
         query.set('lang', fullLangName);
 
         const url = `/api/forecast/${area}/weekly?${query.toString()}`;

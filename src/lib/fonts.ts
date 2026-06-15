@@ -1,4 +1,4 @@
-import { Playfair_Display, DM_Sans, Inter, Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu, Noto_Sans_Kannada, Noto_Sans_Bengali, Noto_Sans_Gujarati, Noto_Sans_Malayalam, Noto_Sans_Gurmukhi } from "next/font/google";
+import { Playfair_Display, Inter, Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu, Noto_Sans_Kannada, Noto_Sans_Bengali, Noto_Sans_Gujarati, Noto_Sans_Malayalam, Noto_Sans_Gurmukhi } from "next/font/google";
 
 export const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -12,13 +12,6 @@ export const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-  display: 'swap',
-});
-
-export const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
   display: 'swap',
 });
 
@@ -89,7 +82,6 @@ export const notoGurmukhi = Noto_Sans_Gurmukhi({
 export const ALL_FONT_VARIABLES = [
   playfair.variable,
   inter.variable,
-  dmSans.variable,
   notoDevanagari.variable,
   notoTamil.variable,
   notoTelugu.variable,

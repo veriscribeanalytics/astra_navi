@@ -58,7 +58,7 @@ export default function OptimizedBackgrounds() {
   return (
     <div className={`transition-opacity duration-700 ${visualOpacity} pointer-events-none fixed inset-0 z-[-10]`}>
       {/* SunFlares - Always visible, lightweight */}
-      <SunFlares />
+      {/* <SunFlares /> */}
 
       {/* Rashi Orbit Background removed as requested */}
 

@@ -1,291 +1,167 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-    Sparkles, Compass, Brain, MessageSquare, Heart, Activity, CheckCircle, User 
-} from 'lucide-react';
+import { motion } from 'motion/react';
+import { Sparkles, ArrowRight, MessageSquare } from 'lucide-react';
 import Button from '../ui/Button';
-import CardSwap, { Card as SwapCard } from '@/components/ui/CardSwap';
+import LandingImage from './LandingImage';
 
-export interface HeroSectionProps {
-    slides: {
-        tag: string;
-        title: React.ReactNode;
-        desc: string;
-        stats: { v: string; l: string }[];
-        btn1: { label: string; action?: string; href?: string };
-        btn2: { label: string; action?: string; href?: string };
-    }[];
-    activeSlide: number;
-    setActiveSlide: React.Dispatch<React.SetStateAction<number>>;
-    setInteractionTick: React.Dispatch<React.SetStateAction<number>>;
-    t: (key: string) => string;
-}
-
-export default function HeroSection({
-    slides,
-    activeSlide,
-    setActiveSlide,
-    setInteractionTick,
-    t
-}: HeroSectionProps) {
-    const router = useRouter();
-
+export default function HeroSection() {
     return (
-        <section
-            onPointerDown={() => setInteractionTick(prev => prev + 1)}
-            // `lg:min-h-[640px]` (not the previous fixed `lg:h-[640px]`) so the
-            // section can grow when translated text is taller — Tamil, Malayalam,
-            // and other curly scripts produce significantly taller copy and were
-            // being clipped at the top by `overflow-hidden`.
-            className="relative min-h-[500px] sm:min-h-[600px] lg:min-h-[640px] flex items-center px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden border-b border-outline-variant/10 pt-24 sm:pt-20 lg:pt-0 pb-12 lg:pb-16"
-        >
-            <motion.div 
-                initial={{ opacity: 0.1, scale: 0.8 }}
-                animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.05, 1] }}
-                transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-[-10%] right-[-10%] w-[250px] lg:w-[600px] h-[250px] lg:h-[600px] bg-[var(--glow-color)] blur-[60px] rounded-full -z-10 opacity-30 dark:opacity-60 will-change-transform"
-            ></motion.div>
-            
-            <div className="hero-grid max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 lg:gap-12 items-center relative z-10 py-6 sm:py-10 lg:py-0 lg:-mt-[120px]">
+        <section className="relative flex flex-col items-center overflow-hidden px-4 sm:px-8 lg:px-16 pt-28 sm:pt-32 lg:pt-36 pb-16 lg:pb-24 max-w-[1440px] mx-auto w-full">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
                 
-                {/* Left: Rotating Text Content */}
-                <div className="lg:col-span-6 relative flex flex-col justify-start text-center lg:text-left min-h-[360px] sm:min-h-[440px]">
-                    <AnimatePresence mode="wait">
-                        <motion.div 
-                            key={activeSlide}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            transition={{ duration: 0.5, ease: "easeInOut" }}
-                            className="space-y-3 sm:space-y-6 flex flex-col justify-start pt-0 sm:pt-4 lg:pt-10"
+                {/* LEFT COLUMN — Copy (on Desktop) / TOP (on Mobile) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: 'easeOut' }}
+                    className="lg:col-span-6 flex flex-col text-center lg:text-left items-center lg:items-start"
+                >
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/35 mb-6">
+                        <Sparkles className="text-secondary w-3.5 h-3.5" />
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-secondary font-body">
+                            AI-Powered Vedic Astrology
+                        </span>
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="font-headline font-bold text-primary leading-[1.1] mb-5 text-4xl sm:text-5xl lg:text-[3.5rem] tracking-tight">
+                        Your Cosmic Journey,<br />
+                        <span className="text-secondary italic">Finally Understood.</span>
+                    </h1>
+
+                    {/* Short Text */}
+                    <p className="text-sm sm:text-base md:text-lg text-on-surface-variant/80 max-w-xl leading-relaxed font-body mb-8">
+                        AI-powered Vedic astrology for daily guidance, Kundli insights, forecasts, and personal questions.
+                    </p>
+
+                    {/* Desktop CTA Buttons */}
+                    <div className="hidden lg:flex flex-row items-center gap-4 w-full">
+                        <Button
+                            href="/kundli"
+                            size="lg"
+                            rightIcon={<ArrowRight className="w-4 h-4" />}
+                            className="gold-gradient shadow-xl px-8"
                         >
-                            <div className="inline-flex w-fit mx-auto lg:mx-0 items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-secondary/10 border border-secondary/30">
-                                <Sparkles className="text-secondary w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                <span className="text-[9px] sm:text-[12px] uppercase tracking-[0.15em] font-bold text-secondary font-body">
-                                    {slides[activeSlide]?.tag}
-                                </span>
+                            Generate Free Kundli
+                        </Button>
+                        <Button
+                            href="/chat"
+                            variant="secondary"
+                            size="lg"
+                            leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />}
+                            className="px-8 border-outline-variant/40 text-primary hover:border-secondary/50"
+                        >
+                            Ask Navi
+                        </Button>
+                    </div>
+                </motion.div>
+
+                {/* RIGHT COLUMN — Stacked Screenshots (on Desktop) / MIDDLE (on Mobile) */}
+                <div className="lg:col-span-6 relative flex items-center justify-center min-h-[360px] sm:min-h-[460px] lg:min-h-[520px] w-full mt-4 lg:mt-0">
+                    <div className="relative w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[480px] h-[340px] sm:h-[440px] lg:h-[500px] flex items-center justify-center">
+                        {/* Glow specifically behind the images */}
+                        <div className="absolute w-[220px] sm:w-[320px] h-[220px] sm:h-[320px] bg-[var(--glow-color)] blur-[80px] rounded-full -z-20 pointer-events-none opacity-90" />
+                        <div className="absolute w-[180px] sm:w-[260px] h-[180px] sm:h-[260px] bg-accent/15 blur-[90px] rounded-full -z-20 pointer-events-none opacity-70 animate-pulse" />
+                        
+                        {/* 1. Left Peek (Kundli) */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -30, rotate: -10 }}
+                            animate={{ opacity: 0.85, x: -95, rotate: -16 }}
+                            transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+                            className="absolute left-[15%] top-[8%] w-[130px] sm:w-[170px] lg:w-[200px] rounded-[24px] sm:rounded-[32px] border-[4px] border-surface-variant/80 bg-[#070514] shadow-2xl overflow-hidden -z-10 aspect-[1170/2532] select-none pointer-events-none hidden sm:block"
+                        >
+                            <div className="absolute top-0 inset-x-0 h-3 bg-[#070514] flex justify-center items-center z-20">
+                                <div className="w-8 h-0.5 rounded-full bg-on-surface-variant/20" />
                             </div>
-                            
-                            <h1 className="hero-h1 text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-headline font-bold text-primary leading-[1.15]">
-                                {slides[activeSlide]?.title}
-                            </h1>
-
-                            <p className="hero-desc text-xs sm:text-base md:text-base text-on-surface-variant max-w-xl leading-relaxed font-normal font-body mx-auto lg:mx-0 opacity-80">
-                                {slides[activeSlide]?.desc}
-                            </p>
-                            
-                            <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-0 sm:pt-1">
-                                <Button
-                                    onClick={() => {
-                                        const action = slides[activeSlide]?.btn1.action;
-                                        if (action) {
-                                            document.getElementById(action)?.scrollIntoView({behavior:'smooth'});
-                                        } else {
-                                            router.push(slides[activeSlide]?.btn1.href || '/chat');
-                                        }
-                                    }}
-                                    size="lg"
-                                    className="gold-gradient shadow-xl px-6 sm:px-10 w-full sm:w-auto text-sm sm:text-base whitespace-nowrap text-center"
-                                >
-                                    {slides[activeSlide]?.btn1.label}
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        const action = slides[activeSlide]?.btn2.action;
-                                        if (action) {
-                                            document.getElementById(action)?.scrollIntoView({behavior:'smooth'});
-                                        } else {
-                                            router.push(slides[activeSlide]?.btn2.href || '/chat');
-                                        }
-                                    }}
-                                    variant="ghost"
-                                    size="lg"
-                                    className="border border-outline-variant/30 px-6 sm:px-10 w-full sm:w-auto text-primary text-sm sm:text-base whitespace-nowrap text-center"
-                                >
-                                    {slides[activeSlide]?.btn2.label}
-                                </Button>
-                            </div>
-
-                            <div className="mt-auto pb-2 space-y-2 sm:space-y-3">
-                                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 text-[8px] sm:text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-wider sm:tracking-widest py-2 border-t border-outline-variant/10">
-                                    <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> {t('landing.standards.bphs')}</span>
-                                    <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> {t('landing.standards.languages')}</span>
-                                    <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-emerald-500" /> {t('landing.standards.aiPrecision')}</span>
-                                </div>
-
-                                <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-10">
-                                    {slides[activeSlide]?.stats.map((stat, idx) => (
-                                        <div key={idx} className="flex flex-col">
-                                            <div className="text-base sm:text-xl font-bold text-secondary font-body">{stat.v}</div>
-                                            <div className="text-[8px] sm:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-on-surface-variant/50 font-bold font-body">{stat.l}</div>
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className="w-full h-full pt-3">
+                                <LandingImage
+                                    src="/images/kundli-mobile.png"
+                                    alt="Kundli Peek"
+                                    placeholderName="Kundli Chart"
+                                    aspectRatio="aspect-[1170/2532]"
+                                    type="mobile"
+                                    icon="kundli"
+                                />
                             </div>
                         </motion.div>
-                    </AnimatePresence>
-                </div>
 
-                {/* Right: Permanent Visuals - Synced with activeSlide */}
-                <div className="hidden lg:flex lg:col-span-6 relative h-[480px] w-full items-center justify-center">
-                    <div className="relative w-full h-full flex items-center justify-center">
-                        
-                        <CardSwap 
-                            width={300} 
-                            height={480} 
-                            cardDistance={40} 
-                            verticalDistance={55} 
-                            activeIndex={activeSlide}
+                        {/* 2. Right Peek (Forecast) */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 30, rotate: 10 }}
+                            animate={{ opacity: 0.85, x: 95, rotate: 16 }}
+                            transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
+                            className="absolute right-[15%] top-[8%] w-[130px] sm:w-[170px] lg:w-[200px] rounded-[24px] sm:rounded-[32px] border-[4px] border-surface-variant/80 bg-[#070514] shadow-2xl overflow-hidden -z-10 aspect-[1170/2532] select-none pointer-events-none hidden lg:block"
                         >
-                            {/* CARD 1: KUNDLI DECODED */}
-                            <SwapCard className="bg-[#12122b] border-[8px] border-outline-variant/30 overflow-hidden relative">
-                                <div className="absolute top-4 right-4 z-20">
-                                    <div className="px-3 py-1.5 rounded-lg bg-secondary/90 backdrop-blur-sm border border-white/20 shadow-lg">
-                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest">{t('landing.hero.bphsCertified')}</span>
-                                    </div>
+                            <div className="absolute top-0 inset-x-0 h-3 bg-[#070514] flex justify-center items-center z-20">
+                                <div className="w-8 h-0.5 rounded-full bg-on-surface-variant/20" />
+                            </div>
+                            <div className="w-full h-full pt-3 relative flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_center,rgba(200,136,10,0.15)_0%,rgba(14,10,32,1)_70%)]">
+                                <div className="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center border border-secondary/35 mb-2 animate-pulse">
+                                    <Sparkles className="w-4 h-4 text-secondary" />
                                 </div>
-                                <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
-                                <div className="p-6 pt-10 space-y-6">
-                                    <div className="h-28 w-full rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-                                        <div className="text-center px-4">
-                                            <div className="text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">{t('landing.hero.authenticJyotish')}</div>
-                                            <div className="text-white font-headline text-lg">{t('landing.janamKundliTitle')}</div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {[1,2,3,4,5,6].map(i => (
-                                            <div key={i} className="h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-secondary/40 font-bold">Bhava {i}</div>
-                                        ))}
-                                    </div>
-                                    <div className="h-20 w-full rounded-2xl bg-gradient-to-br from-secondary/20 to-transparent border border-secondary/10 p-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-                                            <span className="text-[9px] font-bold text-white uppercase tracking-wider">{t('landing.hero.scripturalInsight')}</span>
-                                        </div>
-                                        <p className="text-[10px] text-white/50 leading-tight">Accurate Dasha & Varga calculations based on Brihat Parashara Hora Shastra.</p>
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-secondary flex items-center justify-center shadow-lg"><Compass className="text-white w-5 h-5" /></div>
-                            </SwapCard>
+                                <div className="text-[9px] font-bold text-primary/45 uppercase tracking-[0.2em] font-body">Transit Forecast</div>
+                                <div className="text-[8px] text-on-surface-variant/35 mt-1 font-body">Coming Soon</div>
+                            </div>
+                        </motion.div>
 
-                            {/* CARD 2: AI NAVI CHAT */}
-                            <SwapCard className="bg-[#0a1824] border-[8px] border-outline-variant/30 overflow-hidden">
-                                <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
-                                <div className="p-6 pt-10 space-y-4">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><Brain className="text-white w-5 h-5" /></div>
-                                        <div>
-                                            <div className="text-white text-xs font-bold">{t('landing.chatNaviTitle')}</div>
-                                            <div className="text-blue-400 text-[9px] flex items-center gap-1 font-bold"><div className="w-1 h-1 rounded-full bg-blue-400" /> {t('common.online')}</div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <div className="max-w-[85%] self-start p-3 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 text-[10px] text-white/70">
-                                            {"\"How does Jupiter's transit affect my career this month?\""}
-                                        </div>
-                                        <div className="max-w-[90%] self-end ml-auto p-3 rounded-2xl rounded-tr-none bg-blue-500/20 border border-blue-500/30 text-[10px] text-blue-100 italic">
-                                            {"\"Jupiter in your 10th house brings professional expansion. Focus on leadership...\""}
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto h-9 w-full rounded-full bg-white/5 border border-white/10 flex items-center px-4 justify-between">
-                                        <span className="text-[10px] text-white/30">{t('landing.hero.askNavi')}</span>
-                                        <MessageSquare className="w-3 h-3 text-blue-400" />
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg"><MessageSquare className="text-white w-5 h-5" /></div>
-                            </SwapCard>
-
-                            {/* CARD 3: SOULMATE SYNC */}
-                            <SwapCard className="bg-[#240a12] border-[8px] border-outline-variant/30 overflow-hidden">
-                                <div className="absolute top-4 right-4 z-20">
-                                    <div className="px-3 py-1.5 rounded-lg bg-rose-500/90 backdrop-blur-sm border border-white/20 shadow-lg">
-                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest">{t('landing.hero.ashtakootMilan')}</span>
-                                    </div>
-                                </div>
-                                <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
-                                <div className="p-6 pt-10 space-y-6">
-                                    <div className="h-28 w-full rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-                                        <div className="text-center px-4">
-                                            <div className="text-rose-400 text-[9px] font-bold uppercase tracking-widest mb-1">{t('landing.hero.gunaMatching')}</div>
-                                            <div className="text-white font-headline text-xl">28/36 Gunas</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-around items-center py-2">
-                                        <div className="w-14 h-14 rounded-full border border-rose-500/30 flex items-center justify-center relative">
-                                            <User className="text-rose-400 w-6 h-6" />
-                                        </div>
-                                        <div className="w-8 h-px bg-rose-500/20" />
-                                        <div className="w-14 h-14 rounded-full border border-rose-500/30 flex items-center justify-center relative">
-                                            <User className="text-pink-400 w-6 h-6" />
-                                        </div>
-                                    </div>
-                                    <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-rose-500/20 to-transparent border border-rose-500/10 flex flex-col items-center justify-center text-center p-2">
-                                        <div className="text-[11px] font-bold text-rose-300 uppercase tracking-widest mb-0.5">{t('landing.hero.highCompatibility')}</div>
-                                        <p className="text-[9px] text-white/40 leading-tight">Strong emotional & spiritual bond.</p>
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center shadow-lg"><Heart className="text-white w-5 h-5" /></div>
-                            </SwapCard>
-
-                            {/* CARD 4: DAILY ENERGY */}
-                            <SwapCard className="bg-[#0a2414] border-[8px] border-outline-variant/30 overflow-hidden">
-                                <div className="absolute top-0 w-full h-6 bg-transparent flex justify-center items-end pb-1"><div className="w-16 h-1 rounded-full bg-white/20"></div></div>
-                                <div className="p-6 pt-10 space-y-6">
-                                    <div className="h-28 w-full rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center justify-center">
-                                        <div className="text-emerald-400 text-2xl font-headline font-bold">85%</div>
-                                        <div className="text-[9px] text-emerald-400/60 font-bold uppercase tracking-widest">{t('landing.hero.dailyAlignment')}</div>
-                                    </div>
-                                    <div className="space-y-3">
-                                        {[
-                                            { l: 'Energy', v: 'High', c: 'bg-emerald-400' },
-                                            { l: 'Focus', v: 'Sharp', c: 'bg-blue-400' },
-                                        ].map((s, i) => (
-                                            <div key={i} className="flex items-center justify-between">
-                                                <span className="text-[10px] text-white/50">{s.l}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-20 h-1 rounded-full bg-white/5 overflow-hidden">
-                                                        <div className={`h-full ${s.c} w-[80%]`} />
-                                                    </div>
-                                                    <span className="text-[9px] font-bold text-white">{s.v}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="h-16 w-full rounded-2xl bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/10 p-3">
-                                        <div className="text-[9px] text-emerald-300 uppercase font-bold mb-0.5">{t('landing.hero.transitTip')}</div>
-                                        <p className="text-[10px] text-white/60 italic leading-tight">{"\"Auspicious time for new beginnings.\""}</p>
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"><Activity className="text-white w-5 h-5" /></div>
-                            </SwapCard>
-                        </CardSwap>
+                        {/* 3. Main Phone Screenshot (Dashboard) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
+                            className="relative z-10 w-[180px] sm:w-[230px] lg:w-[260px] rounded-[32px] sm:rounded-[42px] border-[6px] sm:border-[8px] border-surface-variant/80 bg-[#070514] shadow-2xl overflow-hidden aspect-[1170/2532]"
+                        >
+                            <div className="absolute top-0 inset-x-0 h-4 bg-[#070514] flex justify-center items-center z-20">
+                                <div className="w-16 h-1 rounded-full bg-on-surface-variant/20" />
+                            </div>
+                            <div className="w-full h-full pt-4">
+                                <LandingImage
+                                    src="/images/dashboard-mobile.png"
+                                    alt="AstraNavi Dashboard"
+                                    placeholderName="Dashboard UI"
+                                    aspectRatio="aspect-[1170/2532]"
+                                    type="mobile"
+                                    icon="dashboard"
+                                />
+                            </div>
+                        </motion.div>
+                        
+                        {/* Single subtle peek behind the phone on mobile/small viewports */}
+                        <div className="absolute inset-0 flex items-center justify-center sm:hidden -z-10">
+                            <div className="w-[150px] aspect-[1170/2532] border-[4px] border-surface-variant/80 bg-[#070514]/90 rounded-[24px] rotate-[-16deg] -translate-x-12 opacity-40 pointer-events-none" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Hero Slider Indicators - Centered at bottom */}
-            <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex justify-center gap-0 sm:gap-0 z-30">
-                {slides.map((_, idx) => (
-                    <button 
-                        key={idx}
-                        onClick={() => {
-                            setActiveSlide(idx);
-                            setInteractionTick(prev => prev + 1);
-                        }}
-                        className="flex items-center justify-center w-[44px] h-[44px] bg-transparent"
-                        aria-label={`Go to slide ${idx + 1}`}
+                {/* BOTTOM COLUMN — CTA Buttons (on Mobile only) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="flex lg:hidden flex-col sm:flex-row items-center gap-3 w-full mt-4"
+                >
+                    <Button
+                        href="/kundli"
+                        size="lg"
+                        rightIcon={<ArrowRight className="w-4 h-4" />}
+                        className="gold-gradient shadow-xl px-8 w-full sm:w-1/2"
                     >
-                        <span 
-                            className={`block rounded-full ${activeSlide === idx 
-                                ? 'w-5 h-[6px] bg-secondary shadow-[0_0_8px_rgba(212,175,55,0.4)]' 
-                                : 'w-[6px] h-[6px] bg-secondary/20 hover:bg-secondary/40'
-                            }`} 
-                        />
-                    </button>
-                ))}
+                        Generate Free Kundli
+                    </Button>
+                    <Button
+                        href="/chat"
+                        variant="secondary"
+                        size="lg"
+                        leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />}
+                        className="px-8 w-full sm:w-1/2 border-outline-variant/40 text-primary"
+                    >
+                        Ask Navi
+                    </Button>
+                </motion.div>
+
             </div>
         </section>
     );

@@ -465,11 +465,41 @@ export default function ProfileSettingsPage() {
     };
 
     return (
-        <main className="min-h-[calc(100dvh-var(--navbar-height,64px))] py-6 sm:py-10 px-4 flex flex-col items-center justify-start relative overflow-x-hidden bg-[var(--bg)]">
+        <main className="min-h-[calc(100dvh-var(--navbar-height,64px))] py-6 sm:py-10 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-start relative overflow-x-hidden bg-[var(--bg)]">
             {ToastContainer}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
             
-            <div className={`w-full mx-auto relative z-10 ${isOnboarding ? 'max-w-6xl flex flex-col lg:flex-row gap-6 lg:gap-10 items-start' : 'max-w-xl'}`}>
+            {/* Centered page header (only when NOT onboarding) */}
+            {!isOnboarding && (
+                <div className="w-full max-w-6xl mx-auto text-center mb-8 mt-4 relative z-10">
+                    <div className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow w-14 h-14 sm:w-16 sm:h-16 mb-4 sm:mb-6">
+                        <User className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
+                    </div>
+                    <h1 className="font-headline font-bold text-primary text-3xl sm:text-4xl mb-3">{t('profile.page.title')}</h1>
+                    <p className="font-body text-on-surface-variant max-w-md mx-auto text-sm">
+                        {t('profile.page.description')}
+                    </p>
+                    {/* Credit Balance */}
+                    {paywallLoaded && (
+                        <div className="flex items-center justify-center gap-2 mt-3">
+                            <a href="/plans" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/15 hover:bg-secondary/15 hover:border-secondary/25 transition-all">
+                                <Wallet className="w-4 h-4 text-secondary" />
+                                <span className="text-[11px] font-bold text-secondary tabular-nums">{totalCredits ?? 0} {t('plans.naviCredits')}</span>
+                                <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                                  (tier || '').toLowerCase() === 'premium'
+                                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                                    : (tier || '').toLowerCase() === 'pro'
+                                    ? 'bg-purple-500/10 text-purple-300 border-purple-500/20'
+                                    : 'bg-slate-500/10 text-slate-400 border-slate-500/25'
+                                }`}>{tier?.toUpperCase() || 'FREE'}</span>
+                                <ArrowRight className="w-3 h-3 text-secondary/40" />
+                            </a>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className={`w-full mx-auto relative z-10 max-w-6xl ${isOnboarding ? 'flex flex-col lg:flex-row gap-6 lg:gap-10 items-start' : 'grid grid-cols-1 lg:grid-cols-3 gap-8'}`}>
                 {isOnboarding && (
                     <aside className="w-full lg:w-[360px] lg:sticky lg:top-24 shrink-0">
                     <div className="text-left p-5 sm:p-6 bg-gradient-to-br from-secondary/5 to-secondary/10 border border-secondary/20 rounded-[28px] animate-in fade-in slide-in-from-left-4 duration-500 space-y-5">
@@ -626,27 +656,18 @@ export default function ProfileSettingsPage() {
                     </aside>
                 )}
 
-                <div className={isOnboarding ? 'flex-1 min-w-0' : ''}>
-                <div className={`text-center ${isOnboarding ? 'mb-6 mt-2' : 'mb-10 mt-8'}`}>
-                    <div className={`inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow ${isOnboarding ? 'w-12 h-12 sm:w-14 sm:h-14 mb-3 sm:mb-4' : 'w-14 h-14 sm:w-16 sm:h-16 mb-4 sm:mb-6'}`}>
-                        <User className={`text-secondary ${isOnboarding ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'}`} />
-                    </div>
-                    <h1 className={`font-headline font-bold text-primary ${isOnboarding ? 'text-2xl sm:text-3xl mb-2' : 'text-3xl sm:text-4xl mb-3'}`}>{t('profile.page.title')}</h1>
-                    <p className={`font-body text-on-surface-variant max-w-md mx-auto ${isOnboarding ? 'text-xs sm:text-sm' : 'text-sm'}`}>
-                        {t('profile.page.description')}
-                    </p>
-                    {/* Credit Balance — only shown when NOT in onboarding */}
-                    {!isOnboarding && paywallLoaded && (
-                        <div className="flex items-center justify-center gap-2 mt-3">
-                            <a href="/plans" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/15 hover:bg-secondary/15 hover:border-secondary/25 transition-all">
-                                <Wallet className="w-4 h-4 text-secondary" />
-                                <span className="text-[11px] font-bold text-secondary tabular-nums">{totalCredits ?? 0} {t('plans.naviCredits')}</span>
-                                <span className="text-[8px] font-bold text-secondary/50 uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/15">{tier?.toUpperCase() || 'FREE'}</span>
-                                <ArrowRight className="w-3 h-3 text-secondary/40" />
-                            </a>
+                <div className={isOnboarding ? 'flex-1 min-w-0' : 'lg:col-span-2'}>
+                {isOnboarding && (
+                    <div className="text-center mb-6 mt-2">
+                        <div className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow w-12 h-12 sm:w-14 sm:h-14 mb-3 sm:mb-4">
+                            <User className="text-secondary w-6 h-6 sm:w-7 sm:h-7" />
                         </div>
-                    )}
-                </div>
+                        <h1 className="font-headline font-bold text-primary text-2xl sm:text-3xl mb-2">{t('profile.page.title')}</h1>
+                        <p className="font-body text-on-surface-variant max-w-md mx-auto text-xs sm:text-sm">
+                            {t('profile.page.description')}
+                        </p>
+                    </div>
+                )}
 
                 <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -962,32 +983,36 @@ export default function ProfileSettingsPage() {
                         </div>
                     </form>
                 </Card>
+                </div>
 
                 {!isOnboarding && (
-                    <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 mt-8" hoverable={false}>
-                        <div className="space-y-6">
-                            <div>
-                                <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('profile.page.securitySection.title')}</h3>
-                                <p className="text-sm text-on-surface-variant">{t('profile.page.securitySection.description')}</p>
-                            </div>
+                    <aside className="w-full lg:col-span-1 shrink-0">
+                        {/* Security Section Card */}
+                        <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('profile.page.securitySection.title')}</h3>
+                                    <p className="text-sm text-on-surface-variant">{t('profile.page.securitySection.description')}</p>
+                                </div>
 
-                            <div className="pt-4 border-t border-outline-variant/10 space-y-4">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    fullWidth
-                                    onClick={() => router.push('/profile/security')}
-                                >
-                                    {t('profile.page.securitySection.button')}
-                                </Button>
+                                <div className="pt-4 border-t border-outline-variant/10 space-y-4">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        fullWidth
+                                        onClick={() => router.push('/profile/security')}
+                                    >
+                                        {t('profile.page.securitySection.button')}
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    </Card>
+                        </Card>
+
+                        {/* Discovery Settings Card */}
+                        <ProfileDiscoverySettings />
+                    </aside>
                 )}
-
-                {!isOnboarding && <ProfileDiscoverySettings />}
-                </div>
-            </div>
+            </div>        
 
             {/* DST Conflict Dialog */}
             {showDstDialog && (

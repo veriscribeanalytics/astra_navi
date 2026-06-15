@@ -60,7 +60,7 @@ function KundliContent() {
     return (
       <>
         <KundliClient />
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 pb-8">
+        <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <p className="text-[10px] text-primary/25 leading-relaxed text-center">
             Your birth chart is processed using AES-256 encrypted computation. Chart data is shared with AI/LLM providers for analysis only, in accordance with our{' '}
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">

@@ -14,39 +14,151 @@ interface ProductCardProps {
 }
 
 /** Tier → visual theme mapping. */
-function getTierTheme(tier: string | undefined) {
-  const t = (tier || '').toLowerCase();
-  if (t === 'premium' || t === 'disciple') return {
-    accent: 'from-amber-400 via-amber-500 to-yellow-300',
-    glow: 'shadow-amber-500/20',
-    ring: 'ring-amber-400/40',
-    bg: 'bg-amber-500/[0.04]',
-    badge: 'bg-amber-500/15 text-amber-300 border-amber-400/30',
-    icon: 'text-amber-400',
-    iconBg: 'bg-amber-500/10 border-amber-400/25',
-    tagGrad: 'from-amber-500 to-yellow-400',
-    label: 'Premium',
-  };
-  if (t === 'pro' || t === 'devotee') return {
-    accent: 'from-violet-400 via-purple-500 to-indigo-300',
-    glow: 'shadow-purple-500/20',
-    ring: 'ring-purple-400/40',
-    bg: 'bg-purple-500/[0.04]',
-    badge: 'bg-purple-500/15 text-purple-300 border-purple-400/30',
-    icon: 'text-purple-400',
-    iconBg: 'bg-purple-500/10 border-purple-400/25',
-    tagGrad: 'from-purple-500 to-indigo-400',
-    label: 'Pro',
-  };
+/** Hex color or Tier → visual theme mapping. */
+function getProductTheme(product: CatalogProduct) {
+  const hex = (product.color || '').toUpperCase();
+
+  if (hex === '#7C3AED' || hex === '#8B5CF6') {
+    // Purple / Violet
+    return {
+      accent: 'from-violet-400 via-purple-500 to-indigo-300',
+      glow: 'shadow-purple-500/20',
+      ring: 'ring-purple-400/40',
+      bg: 'bg-purple-500/[0.04]',
+      badge: 'bg-purple-500/15 text-purple-300 border-purple-400/30',
+      icon: 'text-purple-400',
+      iconBg: 'bg-purple-500/10 border-purple-400/25',
+      tagGrad: 'from-purple-500 to-indigo-400',
+      label: 'Pro',
+    };
+  }
+  if (hex === '#D97706' || hex === '#F59E0B') {
+    // Amber / Gold / Orange
+    return {
+      accent: 'from-amber-400 via-amber-500 to-yellow-300',
+      glow: 'shadow-amber-500/20',
+      ring: 'ring-amber-400/40',
+      bg: 'bg-amber-500/[0.04]',
+      badge: 'bg-amber-500/15 text-amber-300 border-amber-400/30',
+      icon: 'text-amber-400',
+      iconBg: 'bg-amber-500/10 border-amber-400/25',
+      tagGrad: 'from-amber-500 to-yellow-400',
+      label: 'Premium',
+    };
+  }
+  if (hex === '#10B981') {
+    // Emerald / Green
+    return {
+      accent: 'from-emerald-400 via-emerald-500 to-teal-300',
+      glow: 'shadow-emerald-500/20',
+      ring: 'ring-emerald-400/40',
+      bg: 'bg-emerald-500/[0.04]',
+      badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30',
+      icon: 'text-emerald-400',
+      iconBg: 'bg-emerald-500/10 border-emerald-400/25',
+      tagGrad: 'from-emerald-500 to-teal-400',
+      label: 'Credits',
+    };
+  }
+  if (hex === '#3B82F6') {
+    // Blue
+    return {
+      accent: 'from-blue-400 via-blue-500 to-cyan-300',
+      glow: 'shadow-blue-500/20',
+      ring: 'ring-blue-400/40',
+      bg: 'bg-blue-500/[0.04]',
+      badge: 'bg-blue-500/15 text-blue-300 border-blue-400/30',
+      icon: 'text-blue-400',
+      iconBg: 'bg-blue-500/10 border-blue-400/25',
+      tagGrad: 'from-blue-500 to-cyan-400',
+      label: 'Career',
+    };
+  }
+  if (hex === '#EC4899') {
+    // Pink
+    return {
+      accent: 'from-pink-400 via-pink-500 to-rose-300',
+      glow: 'shadow-pink-500/20',
+      ring: 'ring-pink-400/40',
+      bg: 'bg-pink-500/[0.04]',
+      badge: 'bg-pink-500/15 text-pink-300 border-pink-400/30',
+      icon: 'text-pink-400',
+      iconBg: 'bg-pink-500/10 border-pink-400/25',
+      tagGrad: 'from-pink-500 to-rose-400',
+      label: 'Marriage',
+    };
+  }
+  if (hex === '#EF4444') {
+    // Red
+    return {
+      accent: 'from-red-400 via-red-500 to-rose-400',
+      glow: 'shadow-red-500/20',
+      ring: 'ring-red-400/40',
+      bg: 'bg-red-500/[0.04]',
+      badge: 'bg-red-500/15 text-red-300 border-red-400/30',
+      icon: 'text-red-400',
+      iconBg: 'bg-red-500/10 border-red-400/25',
+      tagGrad: 'from-red-500 to-rose-500',
+      label: 'Match',
+    };
+  }
+  if (hex === '#6B7280' || hex === '#64748B') {
+    // Gray / Slate
+    return {
+      accent: 'from-slate-400 via-slate-500 to-slate-300',
+      glow: 'shadow-slate-500/20',
+      ring: 'ring-slate-400/40',
+      bg: 'bg-slate-500/[0.04]',
+      badge: 'bg-slate-500/15 text-slate-300 border-slate-400/30',
+      icon: 'text-slate-400',
+      iconBg: 'bg-slate-500/10 border-slate-400/25',
+      tagGrad: 'from-slate-500 to-slate-400',
+      label: 'Free',
+    };
+  }
+
+  // Tier-based fallback
+  const tier = (product as any).tier;
+  if (tier) {
+    const t = tier.toLowerCase();
+    if (t === 'premium' || t === 'disciple') {
+      return {
+        accent: 'from-amber-400 via-amber-500 to-yellow-300',
+        glow: 'shadow-amber-500/20',
+        ring: 'ring-amber-400/40',
+        bg: 'bg-amber-500/[0.04]',
+        badge: 'bg-amber-500/15 text-amber-300 border-amber-400/30',
+        icon: 'text-amber-400',
+        iconBg: 'bg-amber-500/10 border-amber-400/25',
+        tagGrad: 'from-amber-500 to-yellow-400',
+        label: 'Premium',
+      };
+    }
+    if (t === 'pro' || t === 'devotee') {
+      return {
+        accent: 'from-violet-400 via-purple-500 to-indigo-300',
+        glow: 'shadow-purple-500/20',
+        ring: 'ring-purple-400/40',
+        bg: 'bg-purple-500/[0.04]',
+        badge: 'bg-purple-500/15 text-purple-300 border-purple-400/30',
+        icon: 'text-purple-400',
+        iconBg: 'bg-purple-500/10 border-purple-400/25',
+        tagGrad: 'from-purple-500 to-indigo-400',
+        label: 'Pro',
+      };
+    }
+  }
+
+  // Default fallback
   return {
-    accent: 'from-secondary/70 via-secondary to-secondary/40',
-    glow: 'shadow-secondary/15',
-    ring: 'ring-secondary/30',
-    bg: 'bg-secondary/[0.03]',
-    badge: 'bg-secondary/10 text-secondary border-secondary/25',
-    icon: 'text-secondary',
-    iconBg: 'bg-secondary/10 border-secondary/20',
-    tagGrad: 'from-secondary to-secondary/60',
+    accent: 'from-slate-400 via-slate-500 to-slate-300',
+    glow: 'shadow-slate-500/20',
+    ring: 'ring-slate-400/40',
+    bg: 'bg-slate-500/[0.04]',
+    badge: 'bg-slate-500/15 text-slate-300 border-slate-400/30',
+    icon: 'text-slate-400',
+    iconBg: 'bg-slate-500/10 border-slate-400/25',
+    tagGrad: 'from-slate-500 to-slate-400',
     label: 'Free',
   };
 }
@@ -111,8 +223,7 @@ export default function ProductCard({
     : `₹${effectivePriceInr}`;
   const originalPrice = hasActiveSale ? `₹${product.priceInr}` : null;
 
-  const tier = isSubscription(product) ? product.tier : undefined;
-  const theme = getTierTheme(tier);
+  const theme = getProductTheme(product);
   const TierIcon = isCurrentPlan ? Crown : isHighlighted ? Gem : isSub ? Shield : Star;
   const features = isSub
     ? getSubscriptionFeatures(product.tier, t)
@@ -139,9 +250,9 @@ export default function ProductCard({
       {/* Card body */}
       <div
         className={`relative h-full flex flex-col rounded-[24px] sm:rounded-[28px] overflow-hidden border transition-all duration-500
-          bg-surface/80 backdrop-blur-xl
+          bg-surface/80 backdrop-blur-xl hover:scale-[1.015] hover:-translate-y-1
           ${isHighlighted
-            ? 'border-transparent shadow-2xl shadow-secondary/10'
+            ? `border-transparent shadow-2xl ${theme.glow}`
             : isCurrentPlan
               ? 'border-secondary/25 shadow-lg shadow-secondary/5'
               : 'border-outline-variant/15 hover:border-outline-variant/30 shadow-sm hover:shadow-lg'
@@ -194,11 +305,9 @@ export default function ProductCard({
             </div>
             <div className="min-w-0">
               <h3 className="text-base sm:text-lg lg:text-xl font-headline font-bold text-primary leading-tight truncate">{name}</h3>
-              {isSub && product.tier && (
-                <span className={`text-[7px] sm:text-[8px] font-black uppercase tracking-[0.15em] px-2 sm:px-2.5 py-0.5 rounded-full border ${theme.badge} inline-block mt-0.5 sm:mt-1`}>
-                  {theme.label}
-                </span>
-              )}
+              <span className={`text-[7px] sm:text-[8px] font-black uppercase tracking-[0.15em] px-2 sm:px-2.5 py-0.5 rounded-full border ${theme.badge} inline-block mt-0.5 sm:mt-1`}>
+                {theme.label}
+              </span>
             </div>
           </div>
 
@@ -272,7 +381,7 @@ export default function ProductCard({
           <button
             onClick={() => onSelect(product)}
             disabled={isCurrentPlan}
-            className={`w-full py-3 sm:py-3.5 lg:py-4 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs lg:text-sm uppercase tracking-[0.12em] sm:tracking-[0.15em] transition-all duration-500 cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2
+            className={`w-full py-3 sm:py-3.5 lg:py-4 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs lg:text-sm uppercase tracking-[0.12em] sm:tracking-[0.15em] transition-all duration-500 cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 relative overflow-hidden group/btn
               ${isCurrentPlan
                 ? 'bg-primary/[0.04] text-primary/25 border border-outline-variant/15 cursor-default'
                 : isHighlighted
@@ -281,6 +390,14 @@ export default function ProductCard({
               }
             `}
           >
+            {isHighlighted && !isCurrentPlan && (
+              <div 
+                className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-[25deg] -translate-x-[150%] pointer-events-none"
+                style={{
+                  animation: 'shimmer-sweep 2.2s infinite ease-in-out',
+                }}
+              />
+            )}
             {isCurrentPlan ? (
               t('plans.currentPlanButton')
             ) : (
