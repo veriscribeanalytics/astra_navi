@@ -6,7 +6,6 @@ import { Plus, Users, ChevronRight, Link2, Sparkles, ArrowRight, Lock } from 'lu
 import {
   useFamilyMembers,
   useFamilyConnections,
-  useFamilyFamilyConnections,
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
@@ -17,7 +16,7 @@ import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from '@/
 import { computeFamilyMemberStatus, bandPalette } from '@/lib/familyStatus';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
-const formatRelationship = (rel: FamilyMember['relationshipType']): string =>
+const formatRelationship = (rel: FamilyMember['relationshipType'] | null | undefined): string =>
   rel ? rel.charAt(0).toUpperCase() + rel.slice(1) : '';
 
 const initialOf = (name: string): string => {
@@ -273,14 +272,14 @@ const FamilyStrip: React.FC = () => {
   const { t } = useTranslation();
   const { tier } = usePaywallContext();
   const { data: members, isLoading } = useFamilyMembers();
-  // Migration 059 split linked people across two endpoints. Friends are uncapped;
-  // only members + family-kind links count toward the dashboard slot cap.
-  const { data: friendConnections, isLoading: friendsLoading } = useFamilyConnections();
-  const { data: linkedFamily, isLoading: familyLoading } = useFamilyFamilyConnections();
+  // /connections returns all active connections, each carrying `isFamily`.
+  // Family links are capped; the rest are uncapped extras.
+  const { data: allConnections, isLoading: connectionsLoading } = useFamilyConnections();
+  const linkedFamily = React.useMemo(() => (allConnections ?? []).filter(c => c.isFamily), [allConnections]);
+  const friendConnections = React.useMemo(() => (allConnections ?? []).filter(c => !c.isFamily), [allConnections]);
   // Merged list (family first) for the empty/has-content checks only.
-  const connections = [...(linkedFamily ?? []), ...(friendConnections ?? [])];
-  const connectionsLoading = friendsLoading || familyLoading;
-  const connectionsLoaded = friendConnections !== null || linkedFamily !== null;
+  const connections = [...linkedFamily, ...friendConnections];
+  const connectionsLoaded = allConnections !== null;
   const [capDialog, setCapDialog] = React.useState<{ open: boolean; limit?: number; currentTier?: string; message?: string } | null>(null);
 
   const showSkeleton = (isLoading && !members) || (connectionsLoading && !connectionsLoaded);

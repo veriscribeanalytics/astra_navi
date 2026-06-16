@@ -5,8 +5,10 @@ import { backendFetch } from '@/lib/backendClient';
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
- * POST /api/family/invites/[id]/accept/merge
- * -> confirm merging a manual member into the just-created linked connection.
+ * POST /api/family/connections/[id]/merge
+ * -> confirm merging a manual family member into this linked connection.
+ *    Requires a relationship label to already be set on the connection;
+ *    the backend returns 409 MERGE_LABEL_REQUIRED otherwise.
  */
 export async function POST(req: NextRequest, { params }: Ctx) {
     try {
@@ -17,7 +19,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
         const { id } = await params;
         const body = await req.json().catch(() => ({}));
 
-        const response = await backendFetch(`/api/family/invites/${encodeURIComponent(id)}/accept/merge`, {
+        const response = await backendFetch(`/api/family/connections/${encodeURIComponent(id)}/merge`, {
             method: 'POST',
             userEmail: user.email,
             accessToken,
@@ -35,7 +37,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
-        console.error('[family/invites/[id]/accept/merge POST] error:', error);
+        console.error('[family/connections/[id]/merge POST] error:', error);
         return NextResponse.json({ error: 'Failed to merge member into connection.' }, { status: 500 });
     }
 }

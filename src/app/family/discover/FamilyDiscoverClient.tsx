@@ -18,10 +18,9 @@ import {
     useToast,
 } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import type { FamilyConnectionKind, FamilyDiscoverResult, FamilyRelationshipType } from '@/types/family';
+import type { FamilyDiscoverResult } from '@/types/family';
 import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { useCountdown } from '@/lib/useCountdown';
-import ConnectionKindPicker from '@/components/family/ConnectionKindPicker';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,6 +39,8 @@ const FamilyDiscoverClient: React.FC = () => {
 
     const { user } = useAuth();
     const hasHandle = !!user?.username;
+    const myUsername = (user?.username ?? '').toLowerCase();
+    const myEmail = (user?.email ?? '').toLowerCase();
 
     const { query, setQuery, results, isLoading, error, setResultStatus, removeResult } = useFamilyDiscover();
     const outgoing = useOutgoingInvites();
@@ -47,31 +48,22 @@ const FamilyDiscoverClient: React.FC = () => {
     /* FAMILY_FREE_TIER_CAP upgrade dialog. */
     const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
 
-    /* ----- Invite (kind + relationship picker per row) ----- */
-    const [pickerFor, setPickerFor] = useState<string | null>(null);
-    const [pickerKind, setPickerKind] = useState<FamilyConnectionKind>('friend');
-    const [pickerRelationship, setPickerRelationship] = useState<FamilyRelationshipType>('mother');
+    /* ----- Invite (plain — one click, no relationship/kind at invite time) ----- */
     const [invitingUsername, setInvitingUsername] = useState<string | null>(null);
     /** username → DECLINE_COOLDOWN_ACTIVE retryAfter ISO timestamp. */
     const [cooldownByUsername, setCooldownByUsername] = useState<Record<string, string>>({});
 
-    const openPicker = (username: string) => {
-        setPickerFor(username);
-        setPickerKind('friend');
-        setPickerRelationship('mother');
-    };
-
     const handleInvite = async (result: FamilyDiscoverResult) => {
+        // Guard against self-invites client-side (backend also rejects with 400).
+        if (result.username.toLowerCase() === myUsername) {
+            toastError(t('family.inviteErrorSelf') || "You can't invite yourself.");
+            return;
+        }
         setInvitingUsername(result.username);
-        const res = await sendInvite({
-            username: result.username,
-            kind: pickerKind,
-            ...(pickerKind === 'family' ? { relationshipType: pickerRelationship } : {}),
-        });
+        const res = await sendInvite({ username: result.username });
         setInvitingUsername(null);
         if (res.ok) {
             toastSuccess(t('family.discoverInviteSent', { name: result.name || result.username }));
-            setPickerFor(null);
             setResultStatus(result.username, 'pending');
             outgoing.refetch();
         } else {
@@ -100,29 +92,33 @@ const FamilyDiscoverClient: React.FC = () => {
         setBlockTarget(null);
     };
 
-    /* ----- Secondary: invite by email ----- */
+    /* ----- Secondary: invite by email (plain) ----- */
     const [inviteEmail, setInviteEmail] = useState('');
-    const [emailKind, setEmailKind] = useState<FamilyConnectionKind>('friend');
-    const [emailRelationship, setEmailRelationship] = useState<FamilyRelationshipType>('mother');
+    const [emailMessage, setEmailMessage] = useState('');
     const [isSendingEmail, setIsSendingEmail] = useState(false);
     const [emailCooldownUntil, setEmailCooldownUntil] = useState<string | null>(null);
     const emailCooldown = useCountdown(emailCooldownUntil);
     const emailBlockedByCooldown = !!emailCooldownUntil && !emailCooldown.expired;
     const emailValid = EMAIL_REGEX.test(inviteEmail.trim());
+    const emailIsSelf = inviteEmail.trim().toLowerCase() === myEmail && !!myEmail;
 
     const handleSendEmail = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!emailValid || isSendingEmail || emailBlockedByCooldown) return;
+        if (emailIsSelf) {
+            toastError(t('family.inviteErrorSelf') || "You can't invite yourself.");
+            return;
+        }
         setIsSendingEmail(true);
         const res = await sendInvite({
             email: inviteEmail.trim(),
-            kind: emailKind,
-            ...(emailKind === 'family' ? { relationshipType: emailRelationship } : {}),
+            ...(emailMessage.trim() ? { message: emailMessage.trim() } : {}),
         });
         setIsSendingEmail(false);
         if (res.ok) {
             toastSuccess(t('family.inviteSent'));
             setInviteEmail('');
+            setEmailMessage('');
             setEmailCooldownUntil(null);
             outgoing.refetch();
         } else {
@@ -214,14 +210,8 @@ const FamilyDiscoverClient: React.FC = () => {
                                 <ResultRow
                                     key={r.username}
                                     result={r}
-                                    isPicking={pickerFor === r.username}
-                                    pickerKind={pickerKind}
-                                    onPickerKindChange={setPickerKind}
-                                    pickerRelationship={pickerRelationship}
-                                    onPickerRelationshipChange={setPickerRelationship}
-                                    onOpenPicker={() => openPicker(r.username)}
-                                    onCancelPicker={() => setPickerFor(null)}
-                                    onConfirmInvite={() => handleInvite(r)}
+                                    isSelf={r.username.toLowerCase() === myUsername}
+                                    onInvite={() => handleInvite(r)}
                                     isInviting={invitingUsername === r.username}
                                     onBlock={() => setBlockTarget(r)}
                                     cooldownUntil={cooldownByUsername[r.username] ?? null}
@@ -255,15 +245,22 @@ const FamilyDiscoverClient: React.FC = () => {
                                 value={inviteEmail}
                                 onChange={(e) => setInviteEmail(e.target.value)}
                                 required
+                                error={emailIsSelf ? (t('family.inviteErrorSelf') || "You can't invite yourself.") : undefined}
                             />
                         </div>
-                        <ConnectionKindPicker
-                            kind={emailKind}
-                            onKindChange={setEmailKind}
-                            relationshipType={emailRelationship}
-                            onRelationshipChange={setEmailRelationship}
-                            disabled={isSendingEmail}
-                        />
+                        <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
+                                {t('family.inviteMessageLabel')}
+                            </label>
+                            <textarea
+                                value={emailMessage}
+                                onChange={(e) => setEmailMessage(e.target.value)}
+                                rows={2}
+                                maxLength={500}
+                                placeholder={t('family.inviteMessagePlaceholder') || "Add a note (optional)…"}
+                                className="w-full bg-surface border border-outline-variant/30 rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 text-sm text-primary resize-none"
+                            />
+                        </div>
                         {emailBlockedByCooldown && (
                             <div className="flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
                                 <Clock className="w-3.5 h-3.5 shrink-0" />
@@ -271,7 +268,7 @@ const FamilyDiscoverClient: React.FC = () => {
                             </div>
                         )}
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={!emailValid || isSendingEmail || emailBlockedByCooldown}>
+                            <Button type="submit" disabled={!emailValid || emailIsSelf || isSendingEmail || emailBlockedByCooldown}>
                                 {isSendingEmail ? (
                                     <span className="inline-flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -319,14 +316,8 @@ const FamilyDiscoverClient: React.FC = () => {
 
 interface ResultRowProps {
     result: FamilyDiscoverResult;
-    isPicking: boolean;
-    pickerKind: FamilyConnectionKind;
-    onPickerKindChange: (k: FamilyConnectionKind) => void;
-    pickerRelationship: FamilyRelationshipType;
-    onPickerRelationshipChange: (v: FamilyRelationshipType) => void;
-    onOpenPicker: () => void;
-    onCancelPicker: () => void;
-    onConfirmInvite: () => void;
+    isSelf: boolean;
+    onInvite: () => void;
     isInviting: boolean;
     onBlock: () => void;
     /** DECLINE_COOLDOWN_ACTIVE retryAfter for this user, if any. */
@@ -334,8 +325,7 @@ interface ResultRowProps {
 }
 
 const ResultRow: React.FC<ResultRowProps> = ({
-    result, isPicking, pickerKind, onPickerKindChange, pickerRelationship, onPickerRelationshipChange,
-    onOpenPicker, onCancelPicker, onConfirmInvite, isInviting, onBlock, cooldownUntil,
+    result, isSelf, onInvite, isInviting, onBlock, cooldownUntil,
 }) => {
     const { t } = useTranslation();
     const status = result.relationshipStatus;
@@ -351,6 +341,11 @@ const ResultRow: React.FC<ResultRowProps> = ({
                 <div className="min-w-0 flex-1">
                     <p className="text-[14px] font-semibold text-foreground truncate">
                         {result.name || result.username}
+                        {isSelf && (
+                            <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/40">
+                                {t('family.youLabel') || 'You'}
+                            </span>
+                        )}
                     </p>
                     <p className="text-[11px] text-on-surface-variant/50 truncate">
                         @{result.username}
@@ -358,7 +353,7 @@ const ResultRow: React.FC<ResultRowProps> = ({
                     </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                    {status === 'connected' ? (
+                    {isSelf ? null : status === 'connected' ? (
                         <Link
                             href="/family/invites"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-[12px] font-medium transition-colors"
@@ -371,14 +366,15 @@ const ResultRow: React.FC<ResultRowProps> = ({
                             <Check className="w-3.5 h-3.5" />
                             {t('family.discoverRequested')}
                         </span>
-                    ) : !isPicking ? (
+                    ) : (
                         <>
                             <button
                                 type="button"
-                                onClick={onOpenPicker}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/15 hover:bg-secondary/25 text-secondary text-[12px] font-medium transition-colors"
+                                onClick={onInvite}
+                                disabled={isInviting || blockedByCooldown}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/15 hover:bg-secondary/25 disabled:opacity-50 text-secondary text-[12px] font-medium transition-colors"
                             >
-                                <UserPlus className="w-3.5 h-3.5" />
+                                {isInviting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />}
                                 {t('family.discoverInvite')}
                             </button>
                             <button
@@ -391,44 +387,15 @@ const ResultRow: React.FC<ResultRowProps> = ({
                                 <Ban className="w-3.5 h-3.5" />
                             </button>
                         </>
-                    ) : null}
+                    )}
                 </div>
             </div>
 
-            {/* Kind + relationship picker (expanded) */}
-            {isPicking && status === 'none' && (
-                <div className="mt-3 border-t border-outline-variant/10 pt-3 space-y-3">
-                    <ConnectionKindPicker
-                        kind={pickerKind}
-                        onKindChange={onPickerKindChange}
-                        relationshipType={pickerRelationship}
-                        onRelationshipChange={onPickerRelationshipChange}
-                        disabled={isInviting}
-                    />
-                    {blockedByCooldown && (
-                        <div className="flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
-                            <Clock className="w-3.5 h-3.5 shrink-0" />
-                            {(t('family.inviteCooldownRetry') || 'Try again in {time}').replace('{time}', cooldown.label)}
-                        </div>
-                    )}
-                    <div className="flex gap-2 justify-end">
-                        <Button type="button" size="sm" onClick={onConfirmInvite} disabled={isInviting || blockedByCooldown}>
-                            {isInviting ? (
-                                <span className="inline-flex items-center gap-2">
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    {t('family.inviteSending')}
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center gap-2">
-                                    <Send className="w-3.5 h-3.5" />
-                                    {t('family.discoverRelationshipConfirm')}
-                                </span>
-                            )}
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={onCancelPicker} disabled={isInviting}>
-                            {t('family.discoverRelationshipCancel')}
-                        </Button>
-                    </div>
+            {/* Re-invite cooldown banner */}
+            {!isSelf && status === 'none' && blockedByCooldown && (
+                <div className="mt-3 flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
+                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                    {(t('family.inviteCooldownRetry') || 'Try again in {time}').replace('{time}', cooldown.label)}
                 </div>
             )}
         </div>

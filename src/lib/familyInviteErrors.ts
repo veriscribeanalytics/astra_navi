@@ -116,6 +116,7 @@ function extractCode(body: unknown): FamilyInviteErrorCode | null {
         'DECLINE_COOLDOWN_ACTIVE',
         'INVITE_NOT_PENDING',
         'MERGE_CANDIDATE_MISMATCH',
+        'MERGE_LABEL_REQUIRED',
         'MERGE_NOT_SUPPORTED',
         'SHARING_REQUIRED',
         'USERNAME_TAKEN',
@@ -134,6 +135,7 @@ function mapCodeToCopy(code: FamilyInviteErrorCode | null, t: Translator): strin
         case 'DECLINE_COOLDOWN_ACTIVE': return t('family.inviteErrorCooldown');
         case 'INVITE_NOT_PENDING': return t('family.inviteErrorNotPending');
         case 'MERGE_CANDIDATE_MISMATCH': return t('family.inviteErrorMergeStale');
+        case 'MERGE_LABEL_REQUIRED': return t('family.inviteErrorMergeLabelRequired');
         case 'MERGE_NOT_SUPPORTED': return t('family.inviteErrorMergeNotSupported');
         case 'SHARING_REQUIRED': return t('family.sharingRequired');
         case 'INVITE_BLOCKED': return t('family.inviteErrorBlocked');

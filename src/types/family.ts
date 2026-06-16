@@ -321,11 +321,6 @@ export interface FamilyBlock {
 
 export type FamilyInviteStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'revoked';
 
-/** Connections + invites are split into two kinds. `family` counts against the
- *  roster cap, supports relationship labels and manual-member merge. `friend` is
- *  unlimited, always labelled "friend", and never merges. */
-export type FamilyConnectionKind = 'family' | 'friend';
-
 export type FamilyMergeMatchScore = 'exact' | 'high' | 'partial';
 
 export interface FamilyMergeCandidate {
@@ -335,13 +330,13 @@ export interface FamilyMergeCandidate {
   matchScore?: FamilyMergeMatchScore;
 }
 
+/** Invites are plain (post-migration 059): a target + an optional message. There
+ *  is no relationship label or kind at invite time — the label is chosen later,
+ *  when sharing is enabled. */
 export interface FamilyInvite {
   id: number;
-  /** family | friend. Defaults to 'family' for back-compat with pre-059 payloads. */
-  kind: FamilyConnectionKind;
   requesterEmail: string;
   inviteeEmail: string;
-  requesterRelationshipType: FamilyRelationshipType;
   message: string | null;
   status: FamilyInviteStatus;
   expiresAt: string;
@@ -349,19 +344,21 @@ export interface FamilyInvite {
   respondedAt: string | null;
   requesterName: string | null;
   inviteeName: string | null;
-  /** Backend may inline a merge candidate on incoming pending invites so the
-   *  UI can offer "link them when you accept?" pre-accept. Absence is normal. */
-  mergeCandidate?: FamilyMergeCandidate;
 }
 
+/** A linked connection. `isFamily` is true only once **both** sides have enabled
+ *  sharing — it's derived from mutual sharing, not a stored kind. Relationship
+ *  labels are nullable until each side sets one when enabling sharing. */
 export interface FamilyConnection {
   connectionId: number;
-  /** family | friend. Defaults to 'family' for back-compat with pre-059 payloads. */
-  kind: FamilyConnectionKind;
+  /** True once both sides share. Drives the Family vs. plain-connection split. */
+  isFamily: boolean;
   otherEmail: string;
   otherName: string;
-  iSeeThemAs: FamilyRelationshipType;
-  theySeeMeAs: FamilyRelationshipType;
+  /** Null until you set a label when enabling sharing. */
+  iSeeThemAs: FamilyRelationshipType | null;
+  /** Null until they set a label on their side. */
+  theySeeMeAs: FamilyRelationshipType | null;
   myAvatarKey: string | null;
   avatar: FamilyAvatar | null;
   myNotes: string | null;
@@ -372,32 +369,38 @@ export interface FamilyConnection {
   disconnected: boolean;
 }
 
+/** Accept returns the standard connection shape. No merge candidate here anymore
+ *  — merge is offered when you set a relationship label via PATCH. */
 export interface FamilyInviteAcceptResponse {
   connection: FamilyConnection;
-  mergeCandidate?: FamilyMergeCandidate;
 }
 
-/** Send by exactly one of `username` or `email`. */
+/** Send by exactly one of `username` or `email`, plus an optional message. */
 export interface FamilyInviteSendPayload {
   username?: string;
   email?: string;
-  /** Omit ⇒ backend defaults to 'family'. For 'friend', `relationshipType` is
-   *  ignored server-side (forced to 'friend') so it can be omitted. */
-  kind?: FamilyConnectionKind;
-  relationshipType?: FamilyRelationshipType;
   message?: string;
 }
 
+/** Accept takes only an optional avatar to use for the new connection. */
 export interface FamilyInviteAcceptPayload {
-  relationshipOverride?: FamilyRelationshipType;
   avatarKey?: string;
 }
 
+/** PATCH a connection. Enabling sharing + a relationship label together is what
+ *  promotes a pair to family (once the other side also shares). */
 export interface FamilyConnectionUpdatePayload {
   sharingWithThem?: boolean;
   avatarKey?: string | null;
   notes?: string;
   relationshipOverride?: FamilyRelationshipType;
+}
+
+/** PATCH /connections/{id} echoes the updated connection and may include a
+ *  `mergeCandidate` when the new label matches a manual family member. */
+export interface FamilyConnectionUpdateResponse {
+  connection: FamilyConnection;
+  mergeCandidate?: FamilyMergeCandidate;
 }
 
 /** Error codes returned on invite/connection/discovery/block endpoints. */
@@ -409,6 +412,7 @@ export const FAMILY_INVITE_ERROR_CODES = [
   'DECLINE_COOLDOWN_ACTIVE',
   'INVITE_NOT_PENDING',
   'MERGE_CANDIDATE_MISMATCH',
+  'MERGE_LABEL_REQUIRED',
   'MERGE_NOT_SUPPORTED',
   'SHARING_REQUIRED',
   'USERNAME_TAKEN',

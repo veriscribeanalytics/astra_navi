@@ -9,12 +9,13 @@ import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "../ui/LanguagePicker";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import NotificationBell from "./NotificationBell";
+import MessagesBell from "./MessagesBell";
 import { useAuth } from "@/context/AuthContext";
 import { useToast, useTranslation } from "@/hooks";
 import {
     User, LogOut, Menu, X, ChevronDown, Sparkles,
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard,
-    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users
+    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users, MessageCircle
 } from "lucide-react";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { getTierLabel } from "@/types/billing";
@@ -56,6 +57,12 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                         href: "/family",
                         icon: <Users className="w-4 h-4" />,
                         desc: t('nav.myFamilyDesc')
+                    },
+                    {
+                        label: t('nav.messages') || 'Messages',
+                        href: "/messages",
+                        icon: <MessageCircle className="w-4 h-4" />,
+                        desc: t('nav.messagesDesc') || 'Private chats with your connections'
                     },
                 ]
             },
@@ -498,6 +505,7 @@ const Navbar: React.FC = () => {
                         </div>
                     ) : (
                         <div className="flex items-center gap-3 lg:gap-4">
+                        <MessagesBell />
                         <NotificationBell />
                         <div className="relative z-50" ref={desktopUserDropdownRef}>
                             <button
@@ -571,6 +579,7 @@ const Navbar: React.FC = () => {
                         </Link>
                     ) : (
                         <>
+                        <MessagesBell buttonClassName="w-8 h-8" />
                         <NotificationBell />
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
                             <button 

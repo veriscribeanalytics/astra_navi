@@ -12,6 +12,7 @@ import OptimizedBackgrounds from "@/components/ui/OptimizedBackgrounds";
 import SkipLink from "@/components/layout/SkipLink";
 import { AuthProvider } from "@/context/AuthContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { MessagesProvider } from "@/context/MessagesContext";
 import OnboardingGate from "@/components/auth/OnboardingGate";
 import { ChatProvider } from "@/context/ChatContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -68,6 +69,7 @@ export default async function RootLayout({
             <LanguageProvider initialLanguage={languageCookie}>
               <AuthProvider>
                 <NotificationProvider>
+                <MessagesProvider>
                 <ChatProvider>
                   <PaywallProvider>
                   <ThemeProvider>
@@ -93,6 +95,7 @@ export default async function RootLayout({
                   </ThemeProvider>
                   </PaywallProvider>
                 </ChatProvider>
+                </MessagesProvider>
                 </NotificationProvider>
               </AuthProvider>
             </LanguageProvider>

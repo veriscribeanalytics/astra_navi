@@ -29,7 +29,6 @@ import {
     useFamilyConnectionCompatibilityPreflight,
     useFamilyReports,
     useFamilyConnections,
-    useFamilyFamilyConnections,
     useFamilyConnectionCompatibility,
     sendInvite,
     updateConnection,
@@ -38,7 +37,6 @@ import {
 import {
     type FamilyMember,
     type FamilyConnection,
-    type FamilyConnectionKind,
     type FamilyRelationshipType,
     type FamilyGender,
     type CompatibilityLang,
@@ -48,7 +46,8 @@ import {
 } from '@/types/family';
 import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { useCountdown } from '@/lib/useCountdown';
-import ConnectionKindPicker from '@/components/family/ConnectionKindPicker';
+import MakeFamilyDialog from '@/components/family/MakeFamilyDialog';
+import OpenMessageButton from '@/components/family/OpenMessageButton';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import FamilyChartView from '@/components/family/FamilyChartView';
 import CompatibilityReport, {
@@ -135,11 +134,12 @@ export default function FamilyClient() {
     const { tier } = usePaywallContext();
     const { success, error: toastError } = useToast();
     const { data: members, isLoading, error, refetch } = useFamilyMembers();
-    // As of migration 059, /connections is friends-only; family links come from
-    // the dedicated /family endpoint.
-    const { data: friendConnections, refetch: refetchFriends } = useFamilyConnections();
-    const { data: familyConnections, refetch: refetchFamily } = useFamilyFamilyConnections();
-    const refetchConnections = () => { refetchFriends(); refetchFamily(); };
+    // /connections returns all active connections, each carrying `isFamily`.
+    // Split client-side: family links count against the roster cap; the rest don't.
+    const { data: allConnections, refetch: refetchAll } = useFamilyConnections();
+    const familyConnections = useMemo(() => (allConnections ?? []).filter(c => c.isFamily), [allConnections]);
+    const otherConnections = useMemo(() => (allConnections ?? []).filter(c => !c.isFamily), [allConnections]);
+    const refetchConnections = () => { refetchAll(); };
 
     const [view, setView] = useState<'list' | 'form' | 'detail' | 'invite' | 'connectionDetail'>('list');
     const [editing, setEditing] = useState<FamilyMember | null>(null);
@@ -172,9 +172,9 @@ export default function FamilyClient() {
     }, [memberIdParam, members, autoRunParam]);
 
     const manualCount = members?.length ?? 0;
-    const familyLinkedCount = familyConnections?.length ?? 0;
-    // Friends are unlimited and never count against the roster cap — only manual
-    // members + family-kind connections do.
+    const familyLinkedCount = familyConnections.length;
+    // Only manual members + family connections (mutually sharing) count against
+    // the roster cap; plain connections are unlimited.
     const totalCount = manualCount + familyLinkedCount;
     // null limit = unlimited (premium). Free: 1, Pro: 6.
     const rosterLimit = familyRosterLimit(tier);
@@ -318,7 +318,7 @@ export default function FamilyClient() {
                     <FamilyList
                         members={members}
                         familyConnections={familyConnections}
-                        friendConnections={friendConnections}
+                        otherConnections={otherConnections}
                         isLoading={isLoading}
                         error={error}
                         onOpen={openDetail}
@@ -419,8 +419,8 @@ export default function FamilyClient() {
 
 interface FamilyListProps {
     members: FamilyMember[] | null;
-    familyConnections: FamilyConnection[] | null;
-    friendConnections: FamilyConnection[] | null;
+    familyConnections: FamilyConnection[];
+    otherConnections: FamilyConnection[];
     isLoading: boolean;
     error: string | null;
     onOpen: (m: FamilyMember) => void;
@@ -431,15 +431,15 @@ interface FamilyListProps {
     atFreeCap: boolean;
 }
 
-function FamilyList({ members, familyConnections, friendConnections, isLoading, error, onOpen, onOpenConnection, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
+function FamilyList({ members, familyConnections, otherConnections, isLoading, error, onOpen, onOpenConnection, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
     const { t } = useTranslation();
 
     const hasMembers = !!members && members.length > 0;
     const familyLinks = familyConnections ?? [];
-    const friendLinks = friendConnections ?? [];
+    const otherLinks = otherConnections ?? [];
     const hasFamilySection = hasMembers || familyLinks.length > 0;
-    const hasFriends = friendLinks.length > 0;
-    const isEmpty = !hasFamilySection && !hasFriends;
+    const hasOthers = otherLinks.length > 0;
+    const isEmpty = !hasFamilySection && !hasOthers;
 
     if (isLoading && !members) {
         return (
@@ -488,7 +488,7 @@ function FamilyList({ members, familyConnections, friendConnections, isLoading, 
 
     return (
         <div className="space-y-8">
-            {/* My Family — manual members + family-kind links (counts against cap) */}
+            {/* My Family — manual members + family connections (counts against cap) */}
             {hasFamilySection && (
                 <section className="space-y-3">
                     <div className="flex items-center gap-2">
@@ -509,18 +509,18 @@ function FamilyList({ members, familyConnections, friendConnections, isLoading, 
                 </section>
             )}
 
-            {/* Friends — friend-kind links (unlimited, never count against cap) */}
-            {hasFriends && (
+            {/* Other connections — not yet family (no mutual sharing). Uncapped. */}
+            {hasOthers && (
                 <section className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-sky-400" />
+                        <Link2 className="w-4 h-4 text-sky-400" />
                         <h2 className="text-[12px] font-bold text-sky-300 uppercase tracking-widest">
-                            {t('family.friendsSection') || 'Friends'}
-                            <span className="ml-2 text-on-surface-variant/40">({friendLinks.length})</span>
+                            {t('family.connectionsOtherGroup') || 'Other connections'}
+                            <span className="ml-2 text-on-surface-variant/40">({otherLinks.length})</span>
                         </h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {friendLinks.map((c) => (
+                        {otherLinks.map((c) => (
                             <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
                         ))}
                     </div>
@@ -622,19 +622,21 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
                     <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-base font-headline font-bold text-primary truncate">{c.otherName}</h3>
                         <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
-                            c.kind === 'friend'
-                                ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
-                                : 'bg-secondary/10 text-secondary border-secondary/30'
+                            c.isFamily
+                                ? 'bg-secondary/10 text-secondary border-secondary/30'
+                                : 'bg-sky-500/10 text-sky-300 border-sky-500/30'
                         }`}>
                             <Link2 className="w-2.5 h-2.5" />
-                            {c.kind === 'friend'
-                                ? (t('family.connectionKindFriend') || 'Friend')
-                                : (t('family.connectionKindFamily') || 'Family')}
+                            {c.isFamily
+                                ? (t('family.connectionKindFamily') || 'Family')
+                                : (t('family.connectionStatusConnected') || 'Connected')}
                         </span>
                     </div>
-                    <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
-                        {c.iSeeThemAs}
-                    </p>
+                    {c.iSeeThemAs && (
+                        <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
+                            {c.iSeeThemAs}
+                        </p>
+                    )}
                     <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
                         <div className="flex items-center gap-1.5 truncate">
                             <Mail className="w-3 h-3 opacity-50 shrink-0" />
@@ -653,6 +655,9 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
                         <Button variant="primary" size="sm" onClick={onManage} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
                             {t('family.manage') || 'Manage'}
                         </Button>
+                        {!c.disconnected && (
+                            <OpenMessageButton connectionId={c.connectionId} variant="ghost" />
+                        )}
                     </div>
                 </div>
             </div>
@@ -1401,8 +1406,6 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
     const { error: toastError } = useToast();
 
     const [email, setEmail] = useState('');
-    const [kind, setKind] = useState<FamilyConnectionKind>('friend');
-    const [relationship, setRelationship] = useState<FamilyRelationshipType>('mother');
     const [message, setMessage] = useState('');
     const [emailTouched, setEmailTouched] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -1421,9 +1424,7 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
         setIsSending(true);
         const res = await sendInvite({
             email: email.trim(),
-            kind,
-            ...(kind === 'family' ? { relationshipType: relationship } : {}),
-            message: message.trim() || undefined,
+            ...(message.trim() ? { message: message.trim() } : {}),
         });
         setIsSending(false);
         if (res.ok) {
@@ -1461,14 +1462,6 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                     error={emailError}
                 />
 
-                <ConnectionKindPicker
-                    kind={kind}
-                    onKindChange={setKind}
-                    relationshipType={relationship}
-                    onRelationshipChange={setRelationship}
-                    disabled={isSending}
-                />
-
                 <div className="space-y-2">
                     <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
                         {t('family.inviteMessageLabel') || 'Add a note (optional)'}
@@ -1482,6 +1475,10 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                         className="w-full bg-surface border border-outline-variant/30 hover:border-secondary/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary outline-none transition-all rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 text-sm text-primary placeholder:text-primary/40 resize-none"
                     />
                 </div>
+
+                <p className="text-[11px] text-on-surface-variant/55 ml-1">
+                    {t('family.invitePlainHint') || 'You can mark them as family later, once you connect.'}
+                </p>
 
                 {blockedByCooldown && (
                     <div className="flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
@@ -1558,7 +1555,10 @@ function FamilyConnectionDetail({
     >(null);
 
     const accent = connection.avatar?.accentColor || 'var(--secondary)';
-    const creditCost = COMPATIBILITY_CREDIT_COST[connection.iSeeThemAs] ?? 5;
+    const creditCost = (connection.iSeeThemAs ? COMPATIBILITY_CREDIT_COST[connection.iSeeThemAs] : undefined) ?? 5;
+    /* Become-family flow (pick a label + enable sharing) and its cap dialog. */
+    const [makeFamilyOpen, setMakeFamilyOpen] = useState(false);
+    const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
     const alreadyPaidForLang = useMemo(
         () => compat?.lang === lang,
         [compat, lang]
@@ -1589,6 +1589,8 @@ function FamilyConnectionDetail({
     const persist = async (payload: Parameters<typeof updateConnection>[1]) => {
         const res = await updateConnection(connection.connectionId, payload);
         if (!res.ok || !res.data) {
+            const cap = familyCapDetail(res.raw);
+            if (cap) { setCapDialog(cap); return false; }
             toastError(parseInviteErrorByStatus(res.status, res.raw, t));
             return false;
         }
@@ -1597,6 +1599,12 @@ function FamilyConnectionDetail({
     };
 
     const toggleShare = async () => {
+        // Enabling sharing for the first time needs a relationship label — open the
+        // become-family flow so the user picks one (and we can offer a merge).
+        if (!connection.sharingWithThem && !connection.iSeeThemAs) {
+            setMakeFamilyOpen(true);
+            return;
+        }
         setTogglingShare(true);
         const ok = await persist({ sharingWithThem: !connection.sharingWithThem });
         setTogglingShare(false);
@@ -1717,7 +1725,9 @@ function FamilyConnectionDetail({
         avatar: connection.avatar ? { iconKey: connection.avatar.iconKey, accentColor: connection.avatar.accentColor } : null,
         verified: true,
         hasBirthDetails: false,
-        relationshipLabel: (t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs),
+        relationshipLabel: connection.iSeeThemAs
+            ? (t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs)
+            : undefined,
     };
 
     /* SHARING_REQUIRED inline gate — branches on which side is blocking. Shared
@@ -1806,25 +1816,40 @@ function FamilyConnectionDetail({
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <h2 className="text-xl font-headline font-bold text-primary">{connection.otherName}</h2>
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/30">
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                                connection.isFamily
+                                    ? 'bg-secondary/10 text-secondary border-secondary/30'
+                                    : 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                            }`}>
                                 <Link2 className="w-3 h-3" />
-                                {t('family.linkedBadge') || 'Linked'}
+                                {connection.isFamily
+                                    ? (t('family.connectionKindFamily') || 'Family')
+                                    : (t('family.connectionStatusConnected') || 'Connected')}
                             </span>
                         </div>
-                        <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
-                            {connection.iSeeThemAs}
-                        </p>
+                        {connection.iSeeThemAs && (
+                            <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
+                                {connection.iSeeThemAs}
+                            </p>
+                        )}
                         <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
                             <div className="flex items-center gap-1.5 truncate">
                                 <Mail className="w-3 h-3 opacity-50 shrink-0" />
                                 <span className="truncate">{connection.otherEmail}</span>
                             </div>
-                            <p className="text-[11px] text-on-surface-variant/75">
-                                {(t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs)}
-                                {' · '}
-                                {(t('family.connectionTheySeeMeAs') || 'They see you as {label}').replace('{label}', connection.theySeeMeAs)}
-                            </p>
+                            {(connection.iSeeThemAs || connection.theySeeMeAs) && (
+                                <p className="text-[11px] text-on-surface-variant/75">
+                                    {connection.iSeeThemAs && (t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs)}
+                                    {connection.iSeeThemAs && connection.theySeeMeAs && ' · '}
+                                    {connection.theySeeMeAs && (t('family.connectionTheySeeMeAs') || 'They see you as {label}').replace('{label}', connection.theySeeMeAs)}
+                                </p>
+                            )}
                         </div>
+                        {!connection.disconnected && (
+                            <div className="mt-3">
+                                <OpenMessageButton connectionId={connection.connectionId} variant="secondary" />
+                            </div>
+                        )}
                     </div>
                 </div>
             </Card>
@@ -2135,6 +2160,27 @@ function FamilyConnectionDetail({
                     onClose={() => setActivePaywall(null)}
                 />
             )}
+
+            {makeFamilyOpen && (
+                <MakeFamilyDialog
+                    open={true}
+                    connection={connection}
+                    onClose={() => setMakeFamilyOpen(false)}
+                    onUpdated={(updated) => {
+                        onUpdated(updated);
+                        setSharingBlocked(null);
+                    }}
+                    onFreeTierCap={(detail) => setCapDialog(detail)}
+                />
+            )}
+
+            <FamilyCapDialog
+                open={!!capDialog}
+                onClose={() => setCapDialog(null)}
+                message={capDialog?.message}
+                currentTier={capDialog?.currentTier}
+                limit={capDialog?.limit}
+            />
         </div>
     );
 }

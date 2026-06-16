@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { UserPlus, Heart, UserX, Bell } from 'lucide-react';
+import { UserPlus, Heart, UserX, Bell, MessageCircle } from 'lucide-react';
 import { useRelativeTime } from '@/hooks/useRealTime';
 import type { AppNotification } from '@/types/notifications';
 
@@ -13,6 +13,8 @@ function iconFor(type: string): React.ReactNode {
             return <Heart className="w-4 h-4" />;
         case 'family_invite_declined':
             return <UserX className="w-4 h-4" />;
+        case 'family_message_received':
+            return <MessageCircle className="w-4 h-4" />;
         default:
             return <Bell className="w-4 h-4" />;
     }

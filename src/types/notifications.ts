@@ -13,6 +13,7 @@ export type NotificationType =
     | 'family_invite_received'
     | 'family_invite_accepted'
     | 'family_invite_declined'
+    | 'family_message_received'
     | (string & {});
 
 export interface AppNotification {
@@ -37,7 +38,7 @@ export interface NotificationFeedResponse {
  * informational / an unknown type. Switch on `type`, not on `data`, so future
  * types degrade gracefully (render title/body, no navigation).
  */
-export function deepLinkFor(n: Pick<AppNotification, 'type'>): string | null {
+export function deepLinkFor(n: Pick<AppNotification, 'type' | 'data'>): string | null {
     switch (n.type) {
         case 'family_invite_received':
             // The invite is data.inviteId; the incoming-invites screen lists it.
@@ -48,6 +49,13 @@ export function deepLinkFor(n: Pick<AppNotification, 'type'>): string | null {
         case 'family_invite_declined':
             // Informational: no destination.
             return null;
+        case 'family_message_received': {
+            // Deep-link straight to the thread carried in data.threadId.
+            const threadId = n.data?.threadId ?? n.data?.thread_id;
+            return typeof threadId === 'number' || typeof threadId === 'string'
+                ? `/messages/${threadId}`
+                : '/messages';
+        }
         default:
             return null;
     }

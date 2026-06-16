@@ -51,10 +51,10 @@ export {
     useFamilyConnectionCompatibility,
     sendInvite,
     acceptInvite,
-    acceptInviteMerge,
     declineInvite,
     revokeInvite,
     updateConnection,
+    mergeConnection,
     deleteConnection,
     useFamilyDiscover,
     setUsername,
@@ -67,3 +67,7 @@ export { useAvatarTheme } from './useAvatarTheme';
 export { useDailyHoroscope } from './useDailyHoroscope';
 export { useNotificationFeed } from './useNotifications';
 export type { UseNotificationFeedOptions } from './useNotifications';
+export { useThreads } from './useThreads';
+export type { UseThreadsResult } from './useThreads';
+export { useThreadMessages } from './useThreadMessages';
+export type { UseThreadMessagesResult, OptimisticMessage, SendResult } from './useThreadMessages';

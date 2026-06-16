@@ -54,7 +54,6 @@ import DailyHoroscopeCardSkeleton from "@/components/dashboard/DailyHoroscopeCar
 import {
   useFamilyMembers,
   useFamilyConnections,
-  useFamilyFamilyConnections,
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
@@ -797,12 +796,12 @@ export default function DashboardHome() {
 
   // Real family + chart data (replaces the previously-hardcoded placeholders).
   const { data: familyMembers, isLoading: familyLoading } = useFamilyMembers();
-  // Migration 059 split linked people across two endpoints. Friends are uncapped;
-  // only members + family-kind links count toward the dashboard slot cap.
-  const { data: friendConnections, isLoading: friendConnectionsLoading } = useFamilyConnections();
-  const { data: linkedFamily, isLoading: familyConnectionsLoading } = useFamilyFamilyConnections();
-  const connectionsLoading = friendConnectionsLoading || familyConnectionsLoading;
-  const connectionsLoaded = friendConnections !== null || linkedFamily !== null;
+  // /connections returns all active connections, each carrying `isFamily`.
+  // Family links (mutual sharing) count toward the dashboard slot cap; the rest don't.
+  const { data: allConnections, isLoading: connectionsLoading } = useFamilyConnections();
+  const linkedFamily = useMemo(() => (allConnections ?? []).filter(c => c.isFamily), [allConnections]);
+  const friendConnections = useMemo(() => (allConnections ?? []).filter(c => !c.isFamily), [allConnections]);
+  const connectionsLoaded = allConnections !== null;
 
   // Capped items (count against the tier slots): manual members + family-kind links.
   const allItems = useMemo(() => {

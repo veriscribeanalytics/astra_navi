@@ -2,15 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
 
-/** GET /api/family/family -> list my family connections (the subset where both
- *  sides share). Each item carries `isFamily: true`. */
+/** GET /api/messages/threads -> inbox list, newest activity first. */
 export async function GET(req: NextRequest) {
     try {
         const authContext = await getAuthContext(req);
         if (!authContext) return unauthorizedResponse();
         const { user, accessToken } = authContext;
 
-        const response = await backendFetch('/api/family/family', {
+        const response = await backendFetch('/api/messages/threads', {
             userEmail: user.email,
             accessToken,
         });
@@ -19,7 +18,7 @@ export async function GET(req: NextRequest) {
 
         if (!response.ok) {
             return NextResponse.json(
-                { error: data.error || data.detail || 'Failed to load family connections.', ...data },
+                { error: data.error || data.detail || 'Failed to load conversations.', ...data },
                 { status: response.status }
             );
         }
@@ -31,7 +30,7 @@ export async function GET(req: NextRequest) {
             },
         });
     } catch (error) {
-        console.error('[family/family GET] error:', error);
-        return NextResponse.json({ error: 'Failed to load family connections.' }, { status: 500 });
+        console.error('[messages/threads GET] error:', error);
+        return NextResponse.json({ error: 'Failed to load conversations.' }, { status: 500 });
     }
 }

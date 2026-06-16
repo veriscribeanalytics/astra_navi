@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, Clock, Trash2, Link2, Search,
+    Mail, Send, ChevronLeft, Check, X, Loader2, Heart, Clock, Trash2, Users, Search,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -13,10 +13,8 @@ import {
     useIncomingInvites,
     useOutgoingInvites,
     useFamilyConnections,
-    useFamilyFamilyConnections,
     sendInvite,
     acceptInvite,
-    acceptInviteMerge,
     declineInvite,
     revokeInvite,
     updateConnection,
@@ -26,15 +24,13 @@ import {
 } from '@/hooks';
 import type {
     FamilyConnection,
-    FamilyConnectionKind,
     FamilyInvite,
-    FamilyMergeCandidate,
     FamilyRelationshipType,
 } from '@/types/family';
-import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, inviteErrorCode, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { useCountdown } from '@/lib/useCountdown';
-import ConnectionKindPicker from '@/components/family/ConnectionKindPicker';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
+import MakeFamilyDialog from '@/components/family/MakeFamilyDialog';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'mother', label: 'Mother' },
@@ -47,9 +43,10 @@ const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'other', label: 'Other' },
 ];
 
-const relationshipLabel = (rel: FamilyRelationshipType | string): string => {
+const relationshipLabel = (rel: FamilyRelationshipType | string | null): string => {
+    if (!rel) return '';
     const found = RELATIONSHIP_TYPES.find(r => r.value === rel);
-    return found ? found.label : (rel || '');
+    return found ? found.label : rel;
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,28 +57,23 @@ const FamilyInvitesClient: React.FC = () => {
 
     const incoming = useIncomingInvites();
     const outgoing = useOutgoingInvites();
-    // As of migration 059, family + friend connections come from two endpoints;
-    // merge them (family first) for the single Connections list.
-    const friendConnections = useFamilyConnections();
-    const familyConnections = useFamilyFamilyConnections();
-    const connectionItems: FamilyConnection[] = [
-        ...(familyConnections.data ?? []),
-        ...(friendConnections.data ?? []),
-    ];
-    const connectionsLoading = friendConnections.isLoading || familyConnections.isLoading;
-    const connectionsLoaded = friendConnections.data !== null || familyConnections.data !== null;
-    const refetchConnections = () => {
-        friendConnections.refetch();
-        familyConnections.refetch();
-    };
+    // A single source of truth: /connections returns all active connections, each
+    // carrying `isFamily`. We split family vs. plain client-side.
+    const connections = useFamilyConnections();
+    const connectionItems: FamilyConnection[] = connections.data ?? [];
+    const familyItems = connectionItems.filter(c => c.isFamily);
+    const otherItems = connectionItems.filter(c => !c.isFamily);
+    const connectionsLoading = connections.isLoading;
+    const connectionsLoaded = connections.data !== null;
+    const refetchConnections = () => connections.refetch();
 
-    /* FAMILY_FREE_TIER_CAP upgrade dialog (send + accept paths). */
+    /* FAMILY_FREE_TIER_CAP upgrade dialog (send + accept + become-family). */
     const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
+    /* Become-family flow (pick a label + enable sharing) for a chosen connection. */
+    const [makeFamilyFor, setMakeFamilyFor] = useState<FamilyConnection | null>(null);
 
-    /* ----- Send invite form state ----- */
+    /* ----- Send invite form state (plain: email + optional message) ----- */
     const [inviteEmail, setInviteEmail] = useState('');
-    const [inviteKind, setInviteKind] = useState<FamilyConnectionKind>('friend');
-    const [inviteRelationship, setInviteRelationship] = useState<FamilyRelationshipType>('mother');
     const [inviteMessage, setInviteMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [sendCooldownUntil, setSendCooldownUntil] = useState<string | null>(null);
@@ -96,9 +88,7 @@ const FamilyInvitesClient: React.FC = () => {
         setIsSending(true);
         const res = await sendInvite({
             email: inviteEmail.trim(),
-            kind: inviteKind,
-            ...(inviteKind === 'family' ? { relationshipType: inviteRelationship } : {}),
-            message: inviteMessage.trim() || undefined,
+            ...(inviteMessage.trim() ? { message: inviteMessage.trim() } : {}),
         });
         setIsSending(false);
         if (res.ok) {
@@ -116,82 +106,20 @@ const FamilyInvitesClient: React.FC = () => {
         }
     };
 
-    /* ----- Accept / decline / merge state ----- */
+    /* ----- Accept / decline / revoke (plain — no merge at accept) ----- */
     const [acceptingInviteId, setAcceptingInviteId] = useState<number | null>(null);
-    const [mergePrompt, setMergePrompt] = useState<{ inviteId: number; candidate: FamilyMergeCandidate } | null>(null);
-    const [isMerging, setIsMerging] = useState(false);
-    /** Per-invite "link them when I accept" checkbox. Defaults to true when an
-     *  invite carries an inline mergeCandidate; user can untick to skip merge. */
-    const [mergeChoice, setMergeChoice] = useState<Record<number, boolean>>({});
-
-    const getMergeChoice = (invite: FamilyInvite): boolean => {
-        // Merge is family-only; friends never carry a candidate or merge.
-        if (invite.kind !== 'family' || !invite.mergeCandidate) return false;
-        return mergeChoice[invite.id] ?? true;
-    };
-
     const handleAccept = async (invite: FamilyInvite) => {
         setAcceptingInviteId(invite.id);
-        // Friend invites never merge — only consider candidates for family invites.
-        const isFamily = invite.kind === 'family';
-        const preAcceptCandidate = isFamily ? invite.mergeCandidate : undefined;
-        const wantsMerge = getMergeChoice(invite);
-
         const res = await acceptInvite(invite.id);
-
-        if (!res.ok || !res.data) {
-            setAcceptingInviteId(null);
+        setAcceptingInviteId(null);
+        if (res.ok) {
+            toastSuccess(t('family.inviteStatusAccepted'));
+        } else {
             const cap = familyCapDetail(res.raw);
             if (cap) setCapDialog(cap);
             else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
-            incoming.refetch();
-            return;
-        }
-
-        const postAcceptCandidate = isFamily
-            ? (res.data as { mergeCandidate?: FamilyMergeCandidate }).mergeCandidate
-            : undefined;
-        const candidate = wantsMerge ? (preAcceptCandidate ?? postAcceptCandidate) : null;
-
-        if (candidate) {
-            const mergeRes = await acceptInviteMerge(invite.id, candidate.memberId);
-            setAcceptingInviteId(null);
-            // MERGE_NOT_SUPPORTED (e.g. a friend invite slipped through) — the base
-            // accept already succeeded, so treat it as a normal accept.
-            if (mergeRes.ok || inviteErrorCode(mergeRes.raw) === 'MERGE_NOT_SUPPORTED') {
-                toastSuccess(t('family.inviteStatusAccepted'));
-            } else {
-                toastError(parseInviteErrorByStatus(mergeRes.status, mergeRes.raw, t));
-            }
-            incoming.refetch();
-            refetchConnections();
-            return;
-        }
-
-        setAcceptingInviteId(null);
-
-        // No pre-accept candidate the user chose to merge with: if the backend
-        // surfaced a post-accept candidate (legacy/race path), prompt as before.
-        if (!preAcceptCandidate && postAcceptCandidate) {
-            setMergePrompt({ inviteId: invite.id, candidate: postAcceptCandidate });
-        } else {
-            toastSuccess(t('family.inviteStatusAccepted'));
         }
         incoming.refetch();
-        refetchConnections();
-    };
-
-    const handleConfirmMerge = async () => {
-        if (!mergePrompt) return;
-        setIsMerging(true);
-        const res = await acceptInviteMerge(mergePrompt.inviteId, mergePrompt.candidate.memberId);
-        setIsMerging(false);
-        if (res.ok || inviteErrorCode(res.raw) === 'MERGE_NOT_SUPPORTED') {
-            toastSuccess(t('family.inviteStatusAccepted'));
-        } else {
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
-        }
-        setMergePrompt(null);
         refetchConnections();
     };
 
@@ -224,11 +152,19 @@ const FamilyInvitesClient: React.FC = () => {
     /* ----- Connection mutations ----- */
     const [togglingConnId, setTogglingConnId] = useState<number | null>(null);
     const handleToggleSharing = async (conn: FamilyConnection) => {
+        // Turning sharing ON without a label yet → run the become-family flow so
+        // the user picks how they know them (and we can offer a merge).
+        if (!conn.sharingWithThem && !conn.iSeeThemAs) {
+            setMakeFamilyFor(conn);
+            return;
+        }
         setTogglingConnId(conn.connectionId);
         const res = await updateConnection(conn.connectionId, { sharingWithThem: !conn.sharingWithThem });
         setTogglingConnId(null);
         if (!res.ok) {
-            toastError(parseInviteErrorByStatus(res.status, res.raw, t));
+            const cap = familyCapDetail(res.raw);
+            if (cap) setCapDialog(cap);
+            else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
         refetchConnections();
     };
@@ -248,6 +184,17 @@ const FamilyInvitesClient: React.FC = () => {
         setDisconnectPrompt(null);
         refetchConnections();
     };
+
+    const renderConnection = (conn: FamilyConnection) => (
+        <ConnectionRow
+            key={conn.connectionId}
+            connection={conn}
+            onToggleSharing={() => handleToggleSharing(conn)}
+            onMakeFamily={() => setMakeFamilyFor(conn)}
+            onDisconnect={() => setDisconnectPrompt(conn)}
+            isToggling={togglingConnId === conn.connectionId}
+        />
+    );
 
     return (
         <div className="min-h-screen pt-[calc(var(--navbar-height,64px)+1.5rem)] pb-12">
@@ -283,7 +230,7 @@ const FamilyInvitesClient: React.FC = () => {
                     </p>
                 </header>
 
-                {/* Send invite form */}
+                {/* Send invite form (plain) */}
                 <Card variant="bordered" padding="md" hoverable={false}>
                     <form onSubmit={handleSend} className="space-y-4">
                         <h2 className="text-[12px] font-bold text-secondary uppercase tracking-widest mb-2">
@@ -301,13 +248,6 @@ const FamilyInvitesClient: React.FC = () => {
                                 required
                             />
                         </div>
-                        <ConnectionKindPicker
-                            kind={inviteKind}
-                            onKindChange={setInviteKind}
-                            relationshipType={inviteRelationship}
-                            onRelationshipChange={setInviteRelationship}
-                            disabled={isSending}
-                        />
                         <div className="space-y-2">
                             <label className="text-[10px] uppercase tracking-widest text-primary font-bold ml-1 block">
                                 {t('family.inviteMessageLabel')}
@@ -318,8 +258,12 @@ const FamilyInvitesClient: React.FC = () => {
                                 rows={2}
                                 className="w-full bg-surface border border-outline-variant/30 rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 text-sm text-primary resize-none"
                                 maxLength={500}
+                                placeholder={t('family.inviteMessagePlaceholder') || "Add a note (optional)…"}
                             />
                         </div>
+                        <p className="text-[11px] text-on-surface-variant/55 ml-1">
+                            {t('family.invitePlainHint') || 'You can mark them as family later, once you connect.'}
+                        </p>
                         {sendBlockedByCooldown && (
                             <div className="flex items-center gap-2 text-[12px] text-amber-400 bg-amber-500/5 border border-amber-500/30 rounded-2xl px-3 py-2">
                                 <Clock className="w-3.5 h-3.5 shrink-0" />
@@ -366,10 +310,6 @@ const FamilyInvitesClient: React.FC = () => {
                                 onDecline={() => handleDecline(invite)}
                                 isAccepting={acceptingInviteId === invite.id}
                                 isDeclining={decliningInviteId === invite.id}
-                                mergeChecked={getMergeChoice(invite)}
-                                onMergeCheckedChange={(next) =>
-                                    setMergeChoice(prev => ({ ...prev, [invite.id]: next }))
-                                }
                             />
                         ))
                     )}
@@ -413,34 +353,36 @@ const FamilyInvitesClient: React.FC = () => {
                     ) : connectionItems.length === 0 ? (
                         <EmptyRow text={t('family.invitesEmptyConnections')} />
                     ) : (
-                        connectionItems.map((conn) => (
-                            <ConnectionRow
-                                key={conn.connectionId}
-                                connection={conn}
-                                onToggleSharing={() => handleToggleSharing(conn)}
-                                onDisconnect={() => setDisconnectPrompt(conn)}
-                                isToggling={togglingConnId === conn.connectionId}
-                            />
-                        ))
+                        <div className="space-y-5">
+                            {familyItems.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-secondary/70 ml-1">
+                                        {t('family.connectionsFamilyGroup') || 'Family'} ({familyItems.length})
+                                    </p>
+                                    {familyItems.map(renderConnection)}
+                                </div>
+                            )}
+                            {otherItems.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 ml-1">
+                                        {t('family.connectionsOtherGroup') || 'Other connections'} ({otherItems.length})
+                                    </p>
+                                    {otherItems.map(renderConnection)}
+                                </div>
+                            )}
+                        </div>
                     )}
                 </section>
             </div>
 
-            {/* Merge prompt */}
-            {mergePrompt && (
-                <ConfirmDialog
-                    isOpen={true}
-                    onClose={() => setMergePrompt(null)}
-                    onConfirm={handleConfirmMerge}
-                    title={t('family.inviteMergeTitle')}
-                    message={t('family.inviteMergeBody', {
-                        name: mergePrompt.candidate.name,
-                        dob: mergePrompt.candidate.dob,
-                    })}
-                    confirmText={t('family.inviteMergeConfirm')}
-                    cancelText={t('family.inviteMergeCancel')}
-                    variant="warning"
-                    isLoading={isMerging}
+            {/* Become-family flow */}
+            {makeFamilyFor && (
+                <MakeFamilyDialog
+                    open={true}
+                    connection={makeFamilyFor}
+                    onClose={() => setMakeFamilyFor(null)}
+                    onUpdated={() => refetchConnections()}
+                    onFreeTierCap={(detail) => setCapDialog(detail)}
                 />
             )}
 
@@ -471,17 +413,13 @@ const FamilyInvitesClient: React.FC = () => {
 
 /* ============================== Row helpers ============================== */
 
-/** Small Family/Friend pill shown on invite + connection rows. */
-const KindBadge: React.FC<{ kind: FamilyConnectionKind }> = ({ kind }) => {
+/** Family pill shown on connection rows once both sides share. */
+const FamilyBadge: React.FC = () => {
     const { t } = useTranslation();
-    const isFamily = kind === 'family';
     return (
-        <span className={`shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${
-            isFamily
-                ? 'bg-secondary/10 text-secondary border-secondary/30'
-                : 'bg-sky-500/10 text-sky-300 border-sky-500/30'
-        }`}>
-            {isFamily ? (t('family.connectionKindFamily') || 'Family') : (t('family.connectionKindFriend') || 'Friend')}
+        <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border bg-secondary/10 text-secondary border-secondary/30">
+            <Users className="w-2.5 h-2.5" />
+            {t('family.connectionKindFamily') || 'Family'}
         </span>
     );
 };
@@ -509,14 +447,10 @@ interface InviteRowProps {
     isAccepting?: boolean;
     isDeclining?: boolean;
     isRevoking?: boolean;
-    /** Incoming-only: state of the "link them when I accept" checkbox. */
-    mergeChecked?: boolean;
-    onMergeCheckedChange?: (next: boolean) => void;
 }
 
 const InviteRow: React.FC<InviteRowProps> = ({
     invite, kind, onAccept, onDecline, onRevoke, isAccepting, isDeclining, isRevoking,
-    mergeChecked, onMergeCheckedChange,
 }) => {
     const { t } = useTranslation();
     const isPending = invite.status === 'pending';
@@ -530,8 +464,6 @@ const InviteRow: React.FC<InviteRowProps> = ({
 
     const counterpartyEmail = kind === 'incoming' ? invite.requesterEmail : invite.inviteeEmail;
     const counterpartyName = kind === 'incoming' ? invite.requesterName : invite.inviteeName;
-    // Merge is family-only; friends never carry a candidate.
-    const showMergeOffer = kind === 'incoming' && isPending && invite.kind === 'family' && !!invite.mergeCandidate;
 
     return (
         <Card variant="bordered" padding="md" hoverable={false} className="!rounded-2xl">
@@ -541,7 +473,6 @@ const InviteRow: React.FC<InviteRowProps> = ({
                         <p className="text-[14px] font-headline font-semibold text-foreground truncate">
                             {counterpartyName || counterpartyEmail}
                         </p>
-                        <KindBadge kind={invite.kind} />
                         <span className={`shrink-0 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                             isPending
                                 ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
@@ -555,40 +486,10 @@ const InviteRow: React.FC<InviteRowProps> = ({
                     {counterpartyName && (
                         <p className="text-[11px] text-on-surface-variant/40 truncate">{counterpartyEmail}</p>
                     )}
-                    <p className="mt-1 text-[12px] text-on-surface-variant/60">
-                        {relationshipLabel(invite.requesterRelationshipType)}
-                    </p>
                     {invite.message && (
                         <p className="mt-2 text-[12px] text-on-surface-variant/70 italic border-l-2 border-secondary/30 pl-2">
                             {invite.message}
                         </p>
-                    )}
-                    {showMergeOffer && invite.mergeCandidate && (
-                        <label className="mt-3 flex items-start gap-2 p-2.5 rounded-xl border border-secondary/30 bg-secondary/5 cursor-pointer hover:bg-secondary/10 transition-colors">
-                            <input
-                                type="checkbox"
-                                checked={!!mergeChecked}
-                                onChange={(e) => onMergeCheckedChange?.(e.target.checked)}
-                                disabled={isAccepting || isDeclining}
-                                className="mt-0.5 accent-secondary shrink-0"
-                            />
-                            <div className="min-w-0 flex-1">
-                                <p className="text-[12px] font-semibold text-secondary flex items-center gap-1.5">
-                                    <Link2 className="w-3 h-3" />
-                                    {(t('family.inviteMergePreAccept') ||
-                                        'Looks like you already have {name} in your tree — link them when you accept?')
-                                        .replace('{name}', invite.mergeCandidate.name)}
-                                    {invite.mergeCandidate.matchScore === 'exact' && (
-                                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-1.5 py-0.5">
-                                            {t('family.mergeMatchExact') || 'Match'}
-                                        </span>
-                                    )}
-                                </p>
-                                <p className="text-[11px] text-on-surface-variant/70 mt-0.5">
-                                    {invite.mergeCandidate.name} · {invite.mergeCandidate.dob}
-                                </p>
-                            </div>
-                        </label>
                     )}
                 </div>
                 {isPending && (
@@ -635,12 +536,15 @@ const InviteRow: React.FC<InviteRowProps> = ({
 interface ConnectionRowProps {
     connection: FamilyConnection;
     onToggleSharing: () => void;
+    onMakeFamily: () => void;
     onDisconnect: () => void;
     isToggling: boolean;
 }
 
-const ConnectionRow: React.FC<ConnectionRowProps> = ({ connection, onToggleSharing, onDisconnect, isToggling }) => {
+const ConnectionRow: React.FC<ConnectionRowProps> = ({ connection, onToggleSharing, onMakeFamily, onDisconnect, isToggling }) => {
     const { t } = useTranslation();
+    // Offer "Make family" when this isn't family yet and we haven't set a label.
+    const canMakeFamily = !connection.isFamily && !connection.sharingWithThem;
     return (
         <Card variant="bordered" padding="md" hoverable={false} className="!rounded-2xl">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -650,15 +554,21 @@ const ConnectionRow: React.FC<ConnectionRowProps> = ({ connection, onToggleShari
                         <p className="text-[14px] font-headline font-semibold text-foreground truncate">
                             {connection.otherName || connection.otherEmail}
                         </p>
-                        <KindBadge kind={connection.kind} />
+                        {connection.isFamily && <FamilyBadge />}
                     </div>
                     {connection.otherName && (
                         <p className="text-[11px] text-on-surface-variant/40 truncate mb-2">{connection.otherEmail}</p>
                     )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[12px] text-on-surface-variant/60">
-                        <p>{t('family.connectionISeeThemAs', { label: relationshipLabel(connection.iSeeThemAs) })}</p>
-                        <p>{t('family.connectionTheySeeMeAs', { label: relationshipLabel(connection.theySeeMeAs) })}</p>
-                    </div>
+                    {(connection.iSeeThemAs || connection.theySeeMeAs) && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[12px] text-on-surface-variant/60">
+                            {connection.iSeeThemAs && (
+                                <p>{t('family.connectionISeeThemAs', { label: relationshipLabel(connection.iSeeThemAs) })}</p>
+                            )}
+                            {connection.theySeeMeAs && (
+                                <p>{t('family.connectionTheySeeMeAs', { label: relationshipLabel(connection.theySeeMeAs) })}</p>
+                            )}
+                        </div>
+                    )}
                     <div className="mt-3 flex items-center gap-2 text-[11px] text-on-surface-variant/60">
                         <span className={`px-2 py-0.5 rounded-full border ${
                             connection.theyShareWithMe
@@ -670,19 +580,30 @@ const ConnectionRow: React.FC<ConnectionRowProps> = ({ connection, onToggleShari
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 shrink-0 sm:items-end">
-                    <button
-                        type="button"
-                        onClick={onToggleSharing}
-                        disabled={isToggling}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50 ${
-                            connection.sharingWithThem
-                                ? 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300'
-                                : 'bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface-variant/70'
-                        }`}
-                    >
-                        {isToggling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                        {t(connection.sharingWithThem ? 'family.connectionSharingOn' : 'family.connectionSharingOff')}
-                    </button>
+                    {canMakeFamily ? (
+                        <button
+                            type="button"
+                            onClick={onMakeFamily}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/15 hover:bg-secondary/25 text-secondary text-[12px] font-medium transition-colors"
+                        >
+                            <Users className="w-3.5 h-3.5" />
+                            {t('family.makeFamilyCta') || 'Add to family'}
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={onToggleSharing}
+                            disabled={isToggling}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50 ${
+                                connection.sharingWithThem
+                                    ? 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300'
+                                    : 'bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface-variant/70'
+                            }`}
+                        >
+                            {isToggling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                            {t(connection.sharingWithThem ? 'family.connectionSharingOn' : 'family.connectionSharingOff')}
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={onDisconnect}

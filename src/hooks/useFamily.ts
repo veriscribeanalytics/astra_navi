@@ -15,7 +15,6 @@ import type {
     FamilyCompatibilityPreflight,
     FamilyInvite,
     FamilyConnection,
-    FamilyConnectionKind,
     FamilyInviteSendPayload,
     FamilyInviteAcceptPayload,
     FamilyInviteAcceptResponse,
@@ -869,13 +868,8 @@ export function useFamilyReports(memberId: number | string | null) {
 /* Invites + linked connections                                        */
 /* ------------------------------------------------------------------ */
 
-/** Coerce a raw `kind` value into FamilyConnectionKind, defaulting to 'family'
- *  for back-compat with pre-059 payloads that omit it. */
-function normalizeKind(raw: unknown): FamilyConnectionKind {
-    return raw === 'friend' ? 'friend' : 'family';
-}
-
-/** Normalize a single invite entry from the backend (snake or camel casing). */
+/** Normalize a single invite entry from the backend (snake or camel casing).
+ *  Invites are plain post-059 — no kind, no relationship, no merge candidate. */
 function normalizeInvite(raw: unknown): FamilyInvite | null {
     if (!raw || typeof raw !== 'object') return null;
     const r = raw as Record<string, unknown>;
@@ -887,17 +881,10 @@ function normalizeInvite(raw: unknown): FamilyInvite | null {
     const id = pick<number>('id', 'id');
     if (id === undefined) return null;
 
-    const rawCandidate = pick<unknown>('merge_candidate', 'mergeCandidate');
-    const mergeCandidate = normalizeMergeCandidate(rawCandidate);
-
     return {
         id,
-        kind: normalizeKind(pick<string>('kind', 'kind')),
         requesterEmail: (pick<string>('requester_email', 'requesterEmail') ?? '') as string,
         inviteeEmail: (pick<string>('invitee_email', 'inviteeEmail') ?? '') as string,
-        requesterRelationshipType: pick<FamilyInvite['requesterRelationshipType']>(
-            'requester_relationship_type', 'requesterRelationshipType'
-        ) as FamilyInvite['requesterRelationshipType'],
         message: (pick<string | null>('message', 'message') ?? null) as string | null,
         status: pick<FamilyInvite['status']>('status', 'status') as FamilyInvite['status'],
         expiresAt: (pick<string>('expires_at', 'expiresAt') ?? '') as string,
@@ -905,12 +892,11 @@ function normalizeInvite(raw: unknown): FamilyInvite | null {
         respondedAt: (pick<string | null>('responded_at', 'respondedAt') ?? null) as string | null,
         requesterName: (pick<string | null>('requester_name', 'requesterName') ?? null) as string | null,
         inviteeName: (pick<string | null>('invitee_name', 'inviteeName') ?? null) as string | null,
-        ...(mergeCandidate ? { mergeCandidate } : {}),
     };
 }
 
-/** Normalize a merge candidate (returned inline on /incoming invites and inside
- *  the /accept response). Accepts snake or camel casing; null/undefined → null. */
+/** Normalize a merge candidate (returned inline on a PATCH that sets a relationship
+ *  label). Accepts snake or camel casing; null/undefined → null. */
 export function normalizeMergeCandidate(raw: unknown): FamilyMergeCandidate | null {
     if (!raw || typeof raw !== 'object') return null;
     const r = raw as Record<string, unknown>;
@@ -925,7 +911,14 @@ export function normalizeMergeCandidate(raw: unknown): FamilyMergeCandidate | nu
     };
 }
 
-/** Normalize a single connection entry (snake or camel casing). */
+/** Coerce a raw relationship value into FamilyRelationshipType | null. Labels are
+ *  nullable until each side picks one when enabling sharing. */
+function normalizeRelationshipLabel(raw: unknown): FamilyConnection['iSeeThemAs'] {
+    return (typeof raw === 'string' && raw ? raw : null) as FamilyConnection['iSeeThemAs'];
+}
+
+/** Normalize a single connection entry (snake or camel casing). `isFamily` is the
+ *  derived mutual-sharing flag that replaced the old `kind`. */
 export function normalizeConnection(raw: unknown): FamilyConnection | null {
     if (!raw || typeof raw !== 'object') return null;
     const r = raw as Record<string, unknown>;
@@ -938,11 +931,11 @@ export function normalizeConnection(raw: unknown): FamilyConnection | null {
     if (connectionId === undefined) return null;
     return {
         connectionId,
-        kind: normalizeKind(pick<string>('kind', 'kind')),
+        isFamily: !!pick<boolean>('is_family', 'isFamily'),
         otherEmail: (pick<string>('other_email', 'otherEmail') ?? '') as string,
         otherName: (pick<string>('other_name', 'otherName') ?? '') as string,
-        iSeeThemAs: pick<FamilyConnection['iSeeThemAs']>('i_see_them_as', 'iSeeThemAs') as FamilyConnection['iSeeThemAs'],
-        theySeeMeAs: pick<FamilyConnection['theySeeMeAs']>('they_see_me_as', 'theySeeMeAs') as FamilyConnection['theySeeMeAs'],
+        iSeeThemAs: normalizeRelationshipLabel(pick<string>('i_see_them_as', 'iSeeThemAs')),
+        theySeeMeAs: normalizeRelationshipLabel(pick<string>('they_see_me_as', 'theySeeMeAs')),
         myAvatarKey: (pick<string | null>('my_avatar_key', 'myAvatarKey') ?? null) as string | null,
         avatar: (pick<FamilyAvatar | null>('avatar', 'avatar') ?? null) as FamilyAvatar | null,
         myNotes: (pick<string | null>('my_notes', 'myNotes') ?? null) as string | null,
@@ -1005,8 +998,10 @@ export function useOutgoingInvites() {
     return useInvitesList('/api/family/invites/outgoing');
 }
 
-/** Shared connection-list fetcher. The endpoint determines the kind:
- *  `/api/family/connections` → friends, `/api/family/family` → family. */
+/** Shared connection-list fetcher. `/api/family/connections` returns **all**
+ *  active connections; `/api/family/family` returns the **family subset** (both
+ *  sides sharing). Each item carries `isFamily` so callers can also split the
+ *  full list client-side without a second request. */
 function useConnectionsList(endpoint: '/api/family/connections' | '/api/family/family') {
     const [data, setData] = useState<FamilyConnection[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -1037,13 +1032,13 @@ function useConnectionsList(endpoint: '/api/family/connections' | '/api/family/f
     return { data, isLoading, error, refetch: fetchConnections };
 }
 
-/** Friend-kind linked connections. As of migration 059, `/connections` returns
- *  friends only — family links live on {@link useFamilyFamilyConnections}. */
+/** All active connections. Read `isFamily` per item to split family vs. plain. */
 export function useFamilyConnections() {
     return useConnectionsList('/api/family/connections');
 }
 
-/** Family-kind linked connections (counts against the roster cap). */
+/** The family subset (connections where both sides share). Equivalent to
+ *  filtering {@link useFamilyConnections} by `isFamily`, served by the backend. */
 export function useFamilyFamilyConnections() {
     return useConnectionsList('/api/family/family');
 }
@@ -1095,17 +1090,6 @@ export async function acceptInvite(
     );
 }
 
-export async function acceptInviteMerge(
-    inviteId: number | string,
-    candidateMemberId: number
-): Promise<MutationResult<FamilyInviteAcceptResponse>> {
-    return postJson<FamilyInviteAcceptResponse>(
-        `/api/family/invites/${encodeURIComponent(String(inviteId))}/accept/merge`,
-        { candidateMemberId },
-        'POST'
-    );
-}
-
 export async function declineInvite(inviteId: number | string): Promise<MutationResult> {
     return postJson(`/api/family/invites/${encodeURIComponent(String(inviteId))}/decline`, undefined, 'POST');
 }
@@ -1114,17 +1098,51 @@ export async function revokeInvite(inviteId: number | string): Promise<MutationR
     return postJson(`/api/family/invites/${encodeURIComponent(String(inviteId))}`, undefined, 'DELETE');
 }
 
+/** Result of a connection PATCH: the updated connection plus an optional merge
+ *  candidate surfaced when the relationship label matches a manual member. */
+export interface ConnectionUpdateResult extends MutationResult<FamilyConnection> {
+    /** Present when setting `relationshipOverride` matched a manual family member. */
+    mergeCandidate?: FamilyMergeCandidate;
+}
+
 export async function updateConnection(
     connectionId: number | string,
     payload: FamilyConnectionUpdatePayload
-): Promise<MutationResult<FamilyConnection>> {
+): Promise<ConnectionUpdateResult> {
     const result = await postJson<unknown>(
         `/api/family/connections/${encodeURIComponent(String(connectionId))}`,
         payload,
         'PATCH'
     );
+    if (!result.ok) return result as ConnectionUpdateResult;
+    // Backend may return either the bare connection or { connection, mergeCandidate }.
+    const raw = result.data as Record<string, unknown> | null;
+    const connectionSource = raw && typeof raw === 'object' && 'connection' in raw ? raw.connection : raw;
+    const candidate = raw && typeof raw === 'object'
+        ? normalizeMergeCandidate(raw.mergeCandidate ?? raw.merge_candidate)
+        : null;
+    return {
+        ...result,
+        data: normalizeConnection(connectionSource),
+        ...(candidate ? { mergeCandidate: candidate } : {}),
+    };
+}
+
+/** Confirm merging a manual family member into this connection. Requires a
+ *  relationship label to have been set first (else 409 MERGE_LABEL_REQUIRED). */
+export async function mergeConnection(
+    connectionId: number | string,
+    candidateMemberId: number
+): Promise<MutationResult<FamilyConnection>> {
+    const result = await postJson<unknown>(
+        `/api/family/connections/${encodeURIComponent(String(connectionId))}/merge`,
+        { candidateMemberId },
+        'POST'
+    );
     if (!result.ok) return result as MutationResult<FamilyConnection>;
-    return { ...result, data: normalizeConnection(result.data) };
+    const raw = result.data as Record<string, unknown> | null;
+    const connectionSource = raw && typeof raw === 'object' && 'connection' in raw ? raw.connection : raw;
+    return { ...result, data: normalizeConnection(connectionSource) };
 }
 
 export async function deleteConnection(connectionId: number | string): Promise<MutationResult> {
