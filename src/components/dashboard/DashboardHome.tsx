@@ -756,52 +756,79 @@ export default function DashboardHome() {
       return;
     }
     const date = todayISO();
+    // Per-user, per-lang, per-day key so a refresh restores instantly without
+    // refetching (the 6-area data used to vanish on reload and re-fan-out 6
+    // requests, tripping the per-user rate limit → 429s).
+    const cacheKey = `astranavi_weekly_forecasts:${user?.email || "anon"}:${language}:${date}`;
+    const WEEKLY_CACHE_TTL = 10 * 60 * 1000;
+
+    try {
+      const raw = sessionStorage.getItem(cacheKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { timestamp: number; forecasts: Record<ForecastArea, ForecastData | null> };
+        if (Date.now() - parsed.timestamp < WEEKLY_CACHE_TTL) {
+          setAllWeeklyForecasts(parsed.forecasts);
+          setAllForecastsLoading(false);
+          return;
+        }
+      }
+    } catch {
+      /* corrupt/unavailable sessionStorage — fall through to fetch */
+    }
+
     setAllForecastsLoading(true);
 
-    Promise.all(
-      AREA_LIST.map(async (area) => {
-        try {
-          const res = await clientFetch(`/api/forecast/${area}/weekly?date=${date}&lang=${language}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && Array.isArray(data.days)) {
-              return {
-                area,
-                data: {
-                  area: data.area as ForecastArea,
-                  days: data.days.map((d: any) => ({
-                    date: d.date,
-                    is_today: d.is_today ?? (d.date === date),
-                    score: d.score,
-                    text: d.text || "",
-                    dominant_planet: d.dominant_planet || "",
-                    personalized_alerts: d.alerts || [],
-                    transits: d.transits,
-                  })),
-                  summary: data.summary || {
-                    best_day: "",
-                    worst_day: "",
-                    average_score: 70,
-                    trend: "stable",
-                  },
-                },
-              };
-            }
+    const mapForecast = (area: ForecastArea, data: any): ForecastData | null => {
+      if (!data || !Array.isArray(data.days)) return null;
+      return {
+        area: (data.area as ForecastArea) || area,
+        days: data.days.map((d: any) => ({
+          date: d.date,
+          is_today: d.is_today ?? (d.date === date),
+          score: d.score,
+          text: d.text || "",
+          dominant_planet: d.dominant_planet || "",
+          personalized_alerts: d.alerts || [],
+          transits: d.transits,
+        })),
+        summary: data.summary || {
+          best_day: "",
+          worst_day: "",
+          average_score: 70,
+          trend: "stable",
+        },
+      };
+    };
+
+    (async () => {
+      const emptyForecasts: Record<ForecastArea, ForecastData | null> = {
+        general: null, love: null, career: null, finance: null, health: null, spiritual: null,
+      };
+      try {
+        const res = await clientFetch(`/api/forecast/all/weekly?date=${date}&lang=${language}`);
+        if (res.ok) {
+          const payload = await res.json();
+          const newForecasts = { ...emptyForecasts };
+          AREA_LIST.forEach((area) => {
+            newForecasts[area] = mapForecast(area, payload?.forecasts?.[area]);
+          });
+          setAllWeeklyForecasts(newForecasts);
+          try {
+            sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), forecasts: newForecasts }));
+          } catch {
+            /* sessionStorage full/unavailable — non-fatal */
           }
-        } catch (err) {
-          console.warn(`[GptDashboard] Failed to fetch forecast for ${area}:`, err);
+        } else {
+          setAllWeeklyForecasts(emptyForecasts);
         }
-        return { area, data: null };
-      })
-    ).then((results) => {
-      const newForecasts = {} as Record<ForecastArea, ForecastData | null>;
-      results.forEach(({ area, data }) => {
-        newForecasts[area] = data;
-      });
-      setAllWeeklyForecasts(newForecasts);
-      setAllForecastsLoading(false);
-    });
-  }, [language, isFree, paywallLoaded, isFeatureBlocked, getFeaturePaywall]);
+      } catch (err) {
+        console.warn("[GptDashboard] Failed to fetch weekly forecasts:", err);
+        setAllWeeklyForecasts(emptyForecasts);
+      } finally {
+        setAllForecastsLoading(false);
+      }
+    })();
+  }, [language, isFree, paywallLoaded, isFeatureBlocked, getFeaturePaywall, user?.email]);
 
   const currentDate = useMemo(
     () =>
