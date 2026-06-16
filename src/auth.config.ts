@@ -73,6 +73,7 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/plans") ||
         nextUrl.pathname.startsWith("/services") ||
         nextUrl.pathname.startsWith("/horoscope") ||
+        nextUrl.pathname.startsWith("/intro") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||
         nextUrl.pathname.startsWith("/logout");

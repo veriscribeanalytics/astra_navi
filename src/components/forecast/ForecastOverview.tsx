@@ -46,7 +46,7 @@ export default function ForecastOverview({
       key={overview.title}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-[28px] bg-surface/80 border border-white/5 shadow-lg flex flex-col gap-4 overflow-hidden"
+      className="relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-[28px] bg-surface border border-white/5 shadow-lg flex flex-col gap-4 overflow-hidden"
     >
       <div
         className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 blur-[80px] pointer-events-none"

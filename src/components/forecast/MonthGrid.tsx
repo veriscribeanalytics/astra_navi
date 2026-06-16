@@ -39,7 +39,7 @@ export default function MonthGrid({ months, colorHex, area, selectedMonth, onSel
             key={m.month}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(m.month)}
-            className={`relative flex flex-col items-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/80 border-white/5'}`}
+            className={`relative flex flex-col items-center p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface border-white/5 hover:bg-surface-variant/25'}`}
             style={{ 
               borderColor: isSelected ? colorHex + '50' : phaseColor + '25',
               boxShadow: isSelected ? `0 0 16px ${colorHex}20` : `0 0 8px ${phaseColor}10`

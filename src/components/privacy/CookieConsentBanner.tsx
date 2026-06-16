@@ -67,7 +67,7 @@ const CookieConsentBanner: React.FC = () => {
         role="dialog"
         aria-modal="false"
         aria-label="Cookie consent"
-        className="safe-area-bottom fixed bottom-0 left-0 right-0 z-[1001] animate-in slide-in-from-bottom duration-500"
+        className="app-cookie-consent safe-area-bottom fixed bottom-0 left-0 right-0 z-[1001] animate-in slide-in-from-bottom duration-500"
       >
         <div className="max-w-7xl 2xl:max-w-[1800px] 3xl:max-w-[2400px] mx-auto p-3 sm:p-4">
           <div className="bg-surface/98 backdrop-blur-xl border border-secondary/20 rounded-2xl sm:rounded-3xl shadow-2xl shadow-black/40 p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row lg:items-center gap-4 sm:gap-5">

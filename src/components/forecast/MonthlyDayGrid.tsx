@@ -49,7 +49,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
         {Array.from({ length: leadingBlanks }).map((_, i) => (
-          <div key={`lead-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface/80 border border-white/[0.02]" />
+          <div key={`lead-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface border border-white/[0.02]" />
         ))}
 
         {days.map(day => {
@@ -73,7 +73,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
                 .replace('{weekday}', weekdayName || '')
                 .replace('{date}', day.date)
                 .replace('{score}', String(day.score))}
-              className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface/80 hover:bg-surface hover:border-white/15'}`}
+              className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface hover:bg-surface-variant/25 hover:border-white/15'}`}
               style={{
                 borderColor: isSelected
                   ? colorHex + '80'
@@ -115,7 +115,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
         })}
 
         {Array.from({ length: trailingBlanks }).map((_, i) => (
-          <div key={`trail-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface/80 border border-white/[0.02]" />
+          <div key={`trail-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface border border-white/[0.02]" />
         ))}
       </div>
 

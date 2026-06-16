@@ -12,7 +12,6 @@ import { Theme, ThemeContextValue } from '@/types/theme';
 import { detectDeviceTier, DeviceTier } from '@/utils/deviceTier';
 import {
   getStoredTheme,
-  getSystemTheme,
   applyThemeWithOptimization,
   getCurrentTheme,
 } from '@/utils/themeManager';
@@ -27,7 +26,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'light',
+  defaultTheme = 'dark',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [deviceTier, setDeviceTier] = useState<DeviceTier>('mid');
@@ -48,9 +47,9 @@ export function ThemeProvider({
       document.documentElement.setAttribute('data-device-tier', tier);
     }
 
-    // Initialize theme from storage or system preference
+    // Respect an explicit saved choice; new visitors start in dark mode.
     const storedTheme = getStoredTheme();
-    const initialTheme = storedTheme || getSystemTheme();
+    const initialTheme = storedTheme || defaultTheme;
     
     setThemeState(initialTheme);
 
@@ -65,7 +64,7 @@ export function ThemeProvider({
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [defaultTheme]);
 
   const setTheme = useCallback(
     (newTheme: Theme) => {

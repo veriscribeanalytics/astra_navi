@@ -99,8 +99,13 @@ function AreaRing({
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.max(0, Math.min(100, score)) / 100) * circumference;
 
+  const isDefaultSize = size === 80;
+
   return (
-    <div className="relative mx-auto animate-fade-in" style={{ width: size, height: size }}>
+    <div
+      className={isDefaultSize ? "relative mx-auto shrink-0 w-[60px] h-[60px] sm:w-[72px] sm:h-[72px] md:w-[80px] md:h-[80px] animate-fade-in" : "relative mx-auto shrink-0 animate-fade-in"}
+      style={isDefaultSize ? undefined : { width: size, height: size }}
+    >
       <svg
         role="img"
         aria-label={label ? `${label} score: ${score} out of 100` : `Score: ${score} out of 100`}
@@ -505,7 +510,7 @@ export default function LifeAreasClient() {
         </header>
 
         {/* 6 Grid Cards selector */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 w-full">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 w-full">
           {lifeAreas.map(({ area, label, score, theme }) => {
             const Icon = theme.icon;
             const phaseHex = AREA_COLORS[area].main;
@@ -525,7 +530,7 @@ export default function LifeAreasClient() {
                   newParams.set('area', area);
                   router.replace(`${window.location.pathname}?${newParams.toString()}`);
                 }}
-                className={`group flex flex-col items-center rounded-2xl border py-3 px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
+                className={`group flex flex-col items-center rounded-2xl border py-2.5 px-1.5 sm:py-3 sm:px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
                   isSelected
                     ? "bg-surface opacity-100 shadow-lg scale-[1.02]"
                     : "border-white/20 bg-surface/80 hover:border-white/30 hover:bg-surface"
@@ -537,12 +542,12 @@ export default function LifeAreasClient() {
               >
                 <AreaRing score={score} color={phaseHex} label={label}>
                   <span
-                    className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
+                    className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center overflow-hidden rounded-full"
                     style={{ color: phaseHex }}
                   >
-                    <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
+                    <Icon className={isLucide ? "h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current" : "h-4.5 w-4.5 sm:h-5 sm:w-5 object-cover"} />
                   </span>
-                  <span className="text-base font-black leading-none tabular-nums" style={{ color: phaseHex }}>
+                  <span className="text-sm sm:text-base font-black leading-none tabular-nums" style={{ color: phaseHex }}>
                     <span data-testid={`life-area-score-${area}`}>{score}</span>
                   </span>
                 </AreaRing>

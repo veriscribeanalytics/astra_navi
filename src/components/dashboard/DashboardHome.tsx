@@ -321,8 +321,13 @@ function AreaRing({
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.max(0, Math.min(100, score)) / 100) * circumference;
 
+  const isDefaultSize = size === 80;
+
   return (
-    <div className="relative mx-auto" style={{ width: size, height: size }}>
+    <div
+      className={isDefaultSize ? "relative mx-auto shrink-0 w-[60px] h-[60px] sm:w-[72px] sm:h-[72px] md:w-[80px] md:h-[80px]" : "relative mx-auto shrink-0"}
+      style={isDefaultSize ? undefined : { width: size, height: size }}
+    >
       <svg
         role="img"
         aria-label={label ? `${label} score: ${score} out of 100` : `Score: ${score} out of 100`}
@@ -480,61 +485,90 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
   const hasScore = typeof activeScore === "number";
   const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
-  const scorePalette = bandPalette(activeBand ?? "");
+  const ringColor = activeBand === 'Excellent' ? '#34d399' :
+                    activeBand === 'Good' ? '#fbbf24' :
+                    activeBand === 'Average' ? '#fb923c' :
+                    activeBand === 'Challenging' ? '#f87171' : '#a78bfa';
 
   return (
-    <div className="flex gap-4 p-4 sm:p-5 rounded-2xl border border-outline-variant/8 bg-surface">
-      {/* Left Column: Avatar + Status Badge */}
-      <div className="flex flex-col items-center shrink-0">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 border border-secondary/20 text-xl font-headline font-bold text-secondary">
-          {initialOf(member.name)}
-        </div>
-        <span className={`mt-2.5 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider border ${
-          status?.kind === 'incomplete'
-            ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-            : 'bg-secondary/10 border-secondary/20 text-secondary'
-        }`}>
-          {status ? t(status.labelKey) : 'MANUAL'}
-        </span>
-      </div>
+    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-outline-variant/8 bg-surface">
+      {/* Header Row */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Left Side: Avatar + Name / Info */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative shrink-0">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 border border-secondary/20 text-xl font-headline font-bold text-secondary">
+              {initialOf(member.name)}
+            </div>
+            {/* Status indicator dot */}
+            {status?.kind === 'stable' && (
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
+            )}
+            {status?.kind === 'needsAttention' && (
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-amber-400" />
+            )}
+            {status?.kind === 'incomplete' && (
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-red-400" />
+            )}
+          </div>
 
-      {/* Right Column: Name, Relationship, Score, and Buttons */}
-      <div className="flex-1 flex flex-col justify-between min-w-0 min-h-[92px]">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h4 className="truncate font-headline text-sm font-bold text-foreground">
+          <div className="min-w-0 flex flex-col">
+            <h4 className="truncate font-headline text-base font-bold text-foreground">
               {member.name || "—"}
             </h4>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/45 mt-0.5">
-              {formatRelationship(member.relationshipType)}
+            <p className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/45 mt-0.5">
+              <span className="capitalize">{formatRelationship(member.relationshipType)}</span>
+              {status && (
+                <>
+                  <span>•</span>
+                  <span className={status.classes.split(' ').filter(c => !c.startsWith('bg-') && !c.startsWith('border-')).join(' ')}>
+                    {t(status.labelKey)}
+                  </span>
+                </>
+              )}
             </p>
           </div>
-          {scorePct !== null && (
-            <div className="shrink-0 text-right leading-none">
-              <span className={`font-headline text-2xl font-bold tabular-nums ${scorePalette.text}`}>
-                {scorePct}
-                <span className="text-[10px] font-body text-foreground/45 ml-0.5">%</span>
-              </span>
-            </div>
-          )}
         </div>
 
-        {/* Buttons */}
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          <Link
-            href={`/family?member=${member.id}`}
-            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5"
-          >
-            {t('dashboard.familyViewBond') || "View Bond"}
-          </Link>
-          <button
-            onClick={onRunCompatibility}
-            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5 flex items-center justify-center gap-1"
-          >
-            {isCompatibilityBlocked && <Lock className="h-2.5 w-2.5 shrink-0" />}
-            {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
-          </button>
+        {/* Right Side: Circular Match Gauge */}
+        {scorePct !== null && (
+          <div className="shrink-0">
+            <AreaRing score={scorePct} color={ringColor} size={64} label="Match Score">
+              <span className="text-xs sm:text-sm font-black leading-none tabular-nums" style={{ color: ringColor }}>
+                {scorePct}
+              </span>
+            </AreaRing>
+          </div>
+        )}
+      </div>
+
+      {/* Middle Row: Teaser / Description Box */}
+      {scorePct !== null && (
+        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] text-left">
+          <Sparkles className="h-4 w-4 text-secondary shrink-0 mt-0.5 animate-pulse" />
+          <p className="text-xs text-foreground/80 leading-relaxed">
+            {compat?.relationship_actions?.today || compat?.verdict || summary?.verdict || t('dashboard.familyNoVerdict') || "Steady bond today. Good energy for conversations and shared decisions."}
+          </p>
         </div>
+      )}
+
+      {/* Footer Buttons */}
+      <div className="flex items-center justify-between gap-3 mt-1.5">
+        <button
+          onClick={onRunCompatibility}
+          className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border border-amber-500/20 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
+          {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
+        </button>
+
+        <Link
+          href={`/family?member=${member.id}`}
+          className="text-secondary hover:text-secondary-hover font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
+        >
+          <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
+          <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+        </Link>
       </div>
     </div>
   );
@@ -563,57 +597,74 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
 
   const hasScore = typeof activeScore === "number";
   const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
-  const scorePalette = bandPalette(activeBand ?? "");
+  const ringColor = activeBand === 'Excellent' ? '#34d399' :
+                    activeBand === 'Good' ? '#fbbf24' :
+                    activeBand === 'Average' ? '#fb923c' :
+                    activeBand === 'Challenging' ? '#f87171' : '#a78bfa';
 
   return (
-    <div className="flex gap-4 p-4 sm:p-5 rounded-2xl border border-outline-variant/8 bg-surface">
-      {/* Left Column: Avatar + Linked Badge */}
-      <div className="flex flex-col items-center shrink-0">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xl font-headline font-bold text-emerald-400">
-          {initialOf(connection.otherName)}
-        </div>
-        <span className="mt-2.5 inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-400">
-          <Check className="h-2.5 w-2.5 shrink-0" /> {t('newDashboard.linked') || "LINKED"}
-        </span>
-      </div>
+    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-outline-variant/8 bg-surface">
+      {/* Header Row */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Left Side: Avatar + Name / Info */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative shrink-0">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xl font-headline font-bold text-emerald-400">
+              {initialOf(connection.otherName)}
+            </div>
+            {/* Green indicator dot at the bottom right */}
+            <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
+          </div>
 
-      {/* Right Column: Name, Relationship, Score, and Buttons */}
-      <div className="flex-1 flex flex-col justify-between min-w-0 min-h-[92px]">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h4 className="truncate font-headline text-sm font-bold text-foreground">
+          <div className="min-w-0 flex flex-col">
+            <h4 className="truncate font-headline text-base font-bold text-foreground">
               {connection.otherName || "—"}
             </h4>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/45 mt-0.5">
-              {formatRelationship(connection.iSeeThemAs)}
+            <p className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/45 mt-0.5">
+              <span className="capitalize">{formatRelationship(connection.iSeeThemAs)}</span>
             </p>
           </div>
-          {scorePct !== null && (
-            <div className="shrink-0 text-right leading-none">
-              <span className={`font-headline text-2xl font-bold tabular-nums ${scorePalette.text}`}>
-                {scorePct}
-                <span className="text-[10px] font-body text-foreground/45 ml-0.5">%</span>
-              </span>
-            </div>
-          )}
         </div>
 
-        {/* Buttons */}
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          <Link
-            href="/family"
-            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5"
-          >
-            {t('dashboard.familyViewBond') || "View Bond"}
-          </Link>
-          <button
-            onClick={onRunCompatibility}
-            className="rounded-lg border border-outline-variant/15 bg-surface-variant/[0.02] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-foreground/60 transition-all hover:border-secondary/35 hover:text-secondary hover:bg-secondary/5 flex items-center justify-center gap-1"
-          >
-            {isCompatibilityBlocked && <Lock className="h-2.5 w-2.5 shrink-0" />}
-            {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
-          </button>
+        {/* Right Side: Circular Match Gauge */}
+        {scorePct !== null && (
+          <div className="shrink-0">
+            <AreaRing score={scorePct} color={ringColor} size={64} label="Match Score">
+              <span className="text-xs sm:text-sm font-black leading-none tabular-nums" style={{ color: ringColor }}>
+                {scorePct}
+              </span>
+            </AreaRing>
+          </div>
+        )}
+      </div>
+
+      {/* Middle Row: Teaser / Description Box */}
+      {scorePct !== null && (
+        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] text-left">
+          <Sparkles className="h-4 w-4 text-secondary shrink-0 mt-0.5 animate-pulse" />
+          <p className="text-xs text-foreground/80 leading-relaxed">
+            {compat?.relationship_actions?.today || compat?.verdict || summary?.verdict || t('dashboard.familyNoVerdict') || "Steady bond today. Good energy for conversations and shared decisions."}
+          </p>
         </div>
+      )}
+
+      {/* Footer Buttons */}
+      <div className="flex items-center justify-between gap-3 mt-1.5">
+        <button
+          onClick={onRunCompatibility}
+          className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border border-amber-500/20 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
+          {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
+        </button>
+
+        <Link
+          href="/family"
+          className="text-secondary hover:text-secondary-hover font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
+        >
+          <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
+          <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+        </Link>
       </div>
     </div>
   );
@@ -1561,7 +1612,7 @@ export default function DashboardHome() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {dashboardLifeAreas.map(({ area, label, score, theme, badge, badgeStyle, arrow }) => {
                     const Icon = theme.icon;
                     const cardColorHex = AREA_COLORS[area].main;
@@ -1572,7 +1623,7 @@ export default function DashboardHome() {
                         key={area}
                         data-testid={`dashboard-life-area-${area}`}
                         onClick={() => setActiveArea(area)}
-                        className={`group flex flex-col items-center rounded-2xl border py-2.5 px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
+                        className={`group flex flex-col items-center rounded-2xl border py-2 px-1.5 sm:py-2.5 sm:px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
                         isSelected
                           ? "bg-white/[0.04] opacity-100"
                           : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant opacity-40 hover:opacity-80"
@@ -1584,12 +1635,12 @@ export default function DashboardHome() {
                       >
                       <AreaRing score={score} color={cardColorHex} label={label}>
                           <span
-                            className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
+                            className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center overflow-hidden rounded-full"
                             style={{ color: cardColorHex }}
                           >
-                            <Icon className={isLucide ? "h-3.5 w-3.5 fill-current" : "h-5 w-5 object-cover"} />
+                            <Icon className={isLucide ? "h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current" : "h-4.5 w-4.5 sm:h-5 sm:w-5 object-cover"} />
                           </span>
-                          <span className="text-base font-black leading-none tabular-nums" style={{ color: cardColorHex }}>
+                          <span className="text-sm sm:text-base font-black leading-none tabular-nums" style={{ color: cardColorHex }}>
                             {score}
                           </span>
                       </AreaRing>
@@ -1912,6 +1963,78 @@ export default function DashboardHome() {
                               {item.subtext}
                             </p>
                           )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Cosmic Snapshot Details (fills the empty space) */}
+              <div className="flex-1 flex flex-col justify-center py-4 border-t border-outline-variant/8 mt-4">
+                <p className="text-[10px] font-black tracking-[0.2em] text-foreground/40 uppercase mb-3 text-left">
+                  Cosmic Alignment Details
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    {
+                      label: "Nakshatra (Birth Star)",
+                      value: kundliStats?.nakshatra || "...",
+                      subtext: kundliStats?.nakshatraLord ? `Lord: ${kundliStats.nakshatraLord}` : "Astrological Star",
+                      icon: <Star className="h-4 w-4 text-amber-400" />
+                    },
+                    {
+                      label: "Moon Phase",
+                      value: kundliStats?.moonPhase || "...",
+                      subtext: "Current Lunar Cycle",
+                      icon: <Moon className="h-4 w-4 text-purple-400" />
+                    },
+                    {
+                      label: "Dasha Time Remaining",
+                      value: kundliStats?.dashaRemaining || "...",
+                      subtext: "Active Dasha Period",
+                      icon: <Gem className="h-4 w-4 text-emerald-400" />,
+                      requiresFeature: 'kundli_premium' as PaywallFeatureKey
+                    },
+                    {
+                      label: "Lucky Elements",
+                      value: horoscope?.lucky_color || horoscope?.lucky?.color ? `${horoscope.lucky_color || horoscope.lucky?.color}` : "...",
+                      subtext: horoscope?.lucky_number || horoscope?.lucky?.number ? `Lucky Number: ${horoscope.lucky_number || horoscope.lucky?.number}` : "Daily Alignment",
+                      icon: <Sparkles className="h-4 w-4 text-blue-400" />
+                    }
+                  ].map((stat, sIdx) => {
+                    const isBlocked = stat.requiresFeature ? isFeatureBlocked(stat.requiresFeature) : false;
+                    const paywallData = stat.requiresFeature ? getFeaturePaywall(stat.requiresFeature) : null;
+                    return (
+                      <div
+                        key={sIdx}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => {
+                          if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
+                          router.push('/kundli');
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
+                            router.push('/kundli');
+                          }
+                        }}
+                        className="relative flex gap-3 rounded-2xl border border-outline-variant/8 bg-surface-variant/[0.02] p-3 text-left transition-all hover:border-secondary/35 hover:bg-surface-variant/4 cursor-pointer"
+                      >
+                        {isBlocked && (
+                          <div className="absolute top-2 right-2 text-secondary bg-surface/80 rounded-full p-0.5 border border-outline-variant/10 shadow-sm z-10">
+                            <Lock className="h-2.5 w-2.5" />
+                          </div>
+                        )}
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-variant/10 border border-outline-variant/8">
+                          {stat.icon}
+                        </div>
+                        <div className="min-w-0 leading-tight">
+                          <p className="text-[9px] font-bold text-foreground/45 uppercase tracking-wider">{stat.label}</p>
+                          <p className={`font-headline text-xs font-bold text-foreground truncate mt-1 ${isBlocked ? "blur-[2px] select-none opacity-50" : ""}`}>{stat.value}</p>
+                          <p className={`text-[9px] text-foreground/45 truncate mt-0.5 ${isBlocked ? "blur-[2px] select-none opacity-50" : ""}`}>{stat.subtext}</p>
                         </div>
                       </div>
                     );

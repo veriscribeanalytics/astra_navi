@@ -31,6 +31,7 @@ const EXEMPT_PREFIXES = [
   '/login',
   '/register',
   '/logout',
+  '/intro',
   '/forgot-password',
   '/reset-password',
   '/privacy',
