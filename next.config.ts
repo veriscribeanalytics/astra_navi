@@ -72,6 +72,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'api.veriscribeanalytics.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
+    minimumCacheTTL: 60,
   },
 
   // Proxy backend static assets (e.g. avatar images) through the frontend

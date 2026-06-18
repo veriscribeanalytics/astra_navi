@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { AREA_COLORS } from "@/data/lifeAreaColors";
+import { getAreaPhaseMain, getAreaPhaseGlowColor } from "@/data/lifeAreaColors";
 import type { ForecastArea } from "@/data/areaThemes";
 
 interface ScoreRingProps {
@@ -58,8 +58,8 @@ export default function ScoreRing({ score, maxScore = 100, size = 88, tier, labe
         return '#EF4444';
     };
 
-    const color = tier?.color || (area ? AREA_COLORS[area].main : getCelestialColor());
-    const glowColor = area ? AREA_COLORS[area].glow : color;
+    const color = tier?.color || (area ? getAreaPhaseMain(area, score) : getCelestialColor());
+    const glowColor = area ? getAreaPhaseGlowColor(area, score) : color;
     const isLarge = size >= 90;
 
     return (

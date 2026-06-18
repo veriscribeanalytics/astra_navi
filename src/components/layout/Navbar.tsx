@@ -547,13 +547,27 @@ const Navbar: React.FC = () => {
             {/* ===== MOBILE/TABLET NAVBAR (<xl) ===== */}
             <div className="flex xl:hidden items-center px-4 py-2 w-full relative h-[56px]">
                 {/* Left Section (33%) */}
-                <div className="flex-[1] flex justify-start">
+                <div className="flex-[1] flex justify-start items-center gap-2 min-w-0">
                     <button 
                         onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                        className="p-2.5 -ml-2 text-primary/80 hover:text-primary transition-all rounded-xl hover:bg-primary/5 active:scale-90"
+                        className="p-2.5 -ml-2 text-primary/80 hover:text-primary transition-all rounded-xl hover:bg-primary/5 active:scale-90 shrink-0"
                     >
                         {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
+                    {isLoggedIn && isLoaded && (
+                        <Link
+                            href="/plans"
+                            aria-label={t('plans.naviCredits')}
+                            className="h-8 min-w-0 max-w-[78px] rounded-xl border border-[var(--tier-color)]/70 bg-[var(--tier-color)]/80 px-2.5 text-white shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                            style={{ '--tier-color': tierColor } as React.CSSProperties}
+                        >
+                            <Wallet className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11px] font-black tabular-nums truncate">{totalCredits ?? 0}</span>
+                        </Link>
+                    )}
+                    <div className="max-[479px]:hidden min-[720px]:hidden">
+                        <LanguagePicker />
+                    </div>
                 </div>
 
                 {/* Center Section - Prevent overlap on extra-narrow screens by hiding "Astra Navi" text below 390px */}
@@ -566,7 +580,12 @@ const Navbar: React.FC = () => {
 
                 {/* Right Section */}
                 <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
-                    <ThemeToggle />
+                    <div className="max-[719px]:hidden">
+                        <LanguagePicker />
+                    </div>
+                    <div className="max-[479px]:hidden">
+                        <ThemeToggle />
+                    </div>
                     {isLoading ? (
                         <div className="h-8 w-[68px] rounded-xl bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
                     ) : !isLoggedIn ? (
@@ -622,6 +641,24 @@ const Navbar: React.FC = () => {
             
             <div className={`xl:hidden fixed top-[var(--navbar-height,56px)] left-0 right-0 max-h-[calc(100vh-var(--navbar-height,56px))] bg-surface border-b border-secondary/15 shadow-2xl z-[105] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
                 <div className="p-5 space-y-7 pb-12">
+                    <div className="hidden max-[479px]:grid gap-4 pb-5 border-b border-outline-variant/30">
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">{t('profile.basicInfo.language')}</span>
+                            <LanguagePicker
+                                align="right"
+                                buttonClassName="min-w-[116px] justify-between rounded-xl bg-secondary/5 px-3 py-2"
+                                dropdownClassName="right-0 w-[min(18rem,calc(100vw-2.5rem))]"
+                            />
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">Theme</span>
+                                <span className="text-[11px] text-on-surface-variant/50">Light or dark mode</span>
+                            </div>
+                            <ThemeToggle />
+                        </div>
+                    </div>
+
                     {navSections.map((section) => (
                         <div key={section.id} className="space-y-3">
                             <h3 className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em] px-3 opacity-80">{section.label}</h3>
@@ -648,12 +685,6 @@ const Navbar: React.FC = () => {
                             </div>
                         </div>
                     ))}
-
-                    {/* Preferences Row (Language Picker) on Mobile */}
-                    <div className="pt-5 border-t border-outline-variant/30 flex items-center justify-between">
-                        <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">{t('profile.basicInfo.language')}</span>
-                        <LanguagePicker />
-                    </div>
 
                     {!isLoggedIn && (
                         <div className="pt-2">
