@@ -87,7 +87,19 @@ const CountryFlag: React.FC<{ code: string; className?: string }> = ({ code, cla
   return <>{flags[code] || <span className={className}>{code}</span>}</>;
 };
 
-const LanguagePicker: React.FC = () => {
+interface LanguagePickerProps {
+  className?: string;
+  buttonClassName?: string;
+  dropdownClassName?: string;
+  align?: 'left' | 'right';
+}
+
+const LanguagePicker: React.FC<LanguagePickerProps> = ({
+  className = '',
+  buttonClassName = '',
+  dropdownClassName = '',
+  align = 'right',
+}) => {
   const { language, setLanguage, availableLanguages } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -113,10 +125,10 @@ const LanguagePicker: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-secondary/5 transition-all text-[11px] font-bold text-primary/70 hover:text-secondary uppercase tracking-widest border border-outline-variant/10"
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-secondary/5 transition-all text-[11px] font-bold text-primary/70 hover:text-secondary uppercase tracking-widest border border-outline-variant/10 ${buttonClassName}`}
       >
         <CountryFlag code={getCountryCode(currentLanguage.code)} className="shrink-0 rounded-[2px] overflow-hidden opacity-90" />
         <span className="hidden sm:inline">{currentLanguage.nativeName}</span>
@@ -130,7 +142,7 @@ const LanguagePicker: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full right-0 mt-2 w-48 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl overflow-hidden z-[300]"
+            className={`absolute top-full ${align === 'left' ? 'left-0' : 'right-0'} mt-2 w-48 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl overflow-hidden z-[300] ${dropdownClassName}`}
           >
             <div className="p-1.5 max-h-[320px] overflow-y-auto scrollbar-hide">
               {availableLanguages.map((lang) => (

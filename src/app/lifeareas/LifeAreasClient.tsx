@@ -6,11 +6,12 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePaywallContext } from '@/context/PaywallContext';
 import PaywallCard from '@/components/paywall/PaywallCard';
+import LockedPreview from '@/components/paywall/LockedPreview';
 import type { PaywallData } from '@/types/paywall';
 import { useDailyHoroscope, useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
 import { AREA_LIST, AREA_THEMES, ForecastArea } from '@/data/areaThemes';
-import { AREA_COLORS, TEXT_COLORS, BRAND_GOLD } from '@/data/lifeAreaColors';
+import { getAreaPhaseMain, TEXT_COLORS, BRAND_GOLD } from '@/data/lifeAreaColors';
 import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
 import { todayISO } from '@/utils/forecastError';
 import type { HoroscopeData } from '@/types/horoscope';
@@ -53,6 +54,30 @@ const areaDescriptions: Record<ForecastArea, string> = {
   spiritual: "Inner growth and clarity are strong.",
 };
 
+/**
+ * Sample 7-day curve used ONLY inside the locked paywall preview, to show the
+ * shape of the weekly chart without revealing real scores. This fake data must
+ * never be shown to paid users, in skeletons, or anywhere outside a paywall.
+ */
+function buildSampleWeek(): ForecastDay[] {
+  const scores = [62, 70, 58, 78, 66, 84, 72];
+  const base = new Date();
+  base.setDate(base.getDate() - 3);
+  return scores.map((score, i) => {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    return {
+      date: iso,
+      is_today: i === 3,
+      score,
+      text: "",
+      dominant_planet: "",
+      personalized_alerts: [],
+    } as ForecastDay;
+  });
+}
+
 function resolveAreaLabel(t: (key: string) => string, area: ForecastArea) {
   const key = `newDashboard.lifeAreas.${area}`;
   const translated = t(key);
@@ -80,6 +105,16 @@ function getAreaInsight(horoscope: HoroscopeData | null, area: ForecastArea) {
   } | null;
   const legacyKey = area === "love" ? "relationships" : area === "finance" ? "finances" : area;
   return legacy?.areas?.[legacyKey]?.text || areaDescriptions[area];
+}
+
+function getAreaAction(horoscope: HoroscopeData | null, area: ForecastArea) {
+  if (area === "general") {
+    const tip = horoscope?.tip;
+    if (typeof tip === "string") return tip;
+    return tip?.text || "";
+  }
+  const areasText = horoscope?.areas_text as Partial<Record<ForecastArea, { action?: string }>> | undefined;
+  return areasText?.[area]?.action || "";
 }
 
 function AreaRing({
@@ -139,7 +174,17 @@ function DarkPanel({ children, className = "", style }: { children: React.ReactN
   );
 }
 
-function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]; colorHex: string; areaLabel: string }) {
+function WeeklyOutlookChart({
+  days,
+  colorHex,
+  areaLabel,
+  lockedPreview = false,
+}: {
+  days: ForecastDay[];
+  colorHex: string;
+  areaLabel: string;
+  lockedPreview?: boolean;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [W, setW] = useState(600);
 
@@ -177,36 +222,38 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
   return (
     <div ref={containerRef} className="w-full">
       {/* Visually hidden text alternative for screen readers (WCAG 1.1.1) */}
-      <div
-        style={{
-          position: "absolute",
-          width: "1px",
-          height: "1px",
-          padding: 0,
-          margin: "-1px",
-          overflow: "hidden",
-          clip: "rect(0, 0, 0, 0)",
-          whiteSpace: "nowrap",
-          border: 0,
-        }}
-      >
-        <h3>Weekly {areaLabel} Forecast Data</h3>
-        <ul>
-          {days.map((d) => {
-            const date = dt(d.date);
-            const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
-            return (
-              <li key={d.date}>
-                {weekday}, {date.getDate()}: {d.score} out of 100{d.is_today ? " (Today)" : ""}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {!lockedPreview && (
+        <div
+          style={{
+            position: "absolute",
+            width: "1px",
+            height: "1px",
+            padding: 0,
+            margin: "-1px",
+            overflow: "hidden",
+            clip: "rect(0, 0, 0, 0)",
+            whiteSpace: "nowrap",
+            border: 0,
+          }}
+        >
+          <h3>Weekly {areaLabel} Forecast Data</h3>
+          <ul>
+            {days.map((d) => {
+              const date = dt(d.date);
+              const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+              return (
+                <li key={d.date}>
+                  {weekday}, {date.getDate()}: {d.score} out of 100{d.is_today ? " (Today)" : ""}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       <svg
         role="img"
-        aria-label={`Weekly ${areaLabel} forecast chart`}
+        aria-label={lockedPreview ? `Locked weekly ${areaLabel} forecast preview` : `Weekly ${areaLabel} forecast chart`}
         viewBox={`0 0 ${W} ${H}`}
         className="h-[180px] w-full overflow-visible"
       >
@@ -255,9 +302,11 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
             <g key={i}>
               {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
               <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "var(--surface)"} stroke={colorHex} strokeWidth="2" />
-              <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.95}>
-                {d.score}
-              </text>
+              {!lockedPreview && (
+                <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.95}>
+                  {d.score}
+                </text>
+              )}
               <text x={p.x} y={H - 16} textAnchor="middle" fontSize="12" fontWeight="800" letterSpacing="0.5" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.85}>
                 {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
               </text>
@@ -281,6 +330,16 @@ export default function LifeAreasClient() {
   const [activePaywallData, setActivePaywallData] = useState<PaywallData | null>(null);
 
   const { data: horoscope, isLoading: horoscopeLoading } = useDailyHoroscope();
+
+  const sampleWeek = useMemo(() => buildSampleWeek(), []);
+
+  const tr = React.useCallback(
+    (key: string, fallback: string, params?: Record<string, string | number>) => {
+      const translated = params ? t(key, params) : t(key);
+      return translated && translated !== key ? translated : fallback;
+    },
+    [t]
+  );
 
   // Retrieve selected area from query params if present, else default to 'general'
   const initialArea = useMemo(() => {
@@ -345,13 +404,15 @@ export default function LifeAreasClient() {
   }, [horoscope, t]);
 
   const activeAreaLabel = useMemo(() => resolveAreaLabel(t, activeArea), [t, activeArea]);
-  const activeAreaHex = useMemo(() => AREA_COLORS[activeArea].main, [activeArea]);
+  const activeAreaHex = useMemo(() => getAreaPhaseMain(activeArea, getAreaScore(horoscope, activeArea)), [activeArea, horoscope]);
 
   const activeAreaInsight = useMemo(() => {
     const rawInsight = getAreaInsight(horoscope, activeArea);
     if (!rawInsight) return "";
     return rawInsight;
   }, [horoscope, activeArea]);
+
+  const activeAreaAction = useMemo(() => getAreaAction(horoscope, activeArea), [horoscope, activeArea]);
 
   const activeAreaNotes = useMemo(() => {
     if (activeArea === "general") {
@@ -513,7 +574,7 @@ export default function LifeAreasClient() {
         <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 w-full">
           {lifeAreas.map(({ area, label, score, theme }) => {
             const Icon = theme.icon;
-            const phaseHex = AREA_COLORS[area].main;
+            const phaseHex = getAreaPhaseMain(area, score);
             const isLucide = area === "general" || area === "spiritual";
             const isSelected = activeArea === area;
             
@@ -580,7 +641,26 @@ export default function LifeAreasClient() {
             <div className="flex flex-col justify-between gap-5 bg-surface-variant/[0.025] py-4.5 px-4.5 rounded-2xl border border-white/5">
               <div className="relative space-y-4 text-left min-h-[120px]">
                 {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
-                  <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                  <LockedPreview
+                    className="min-h-[170px]"
+                    message={tr('paywall.unlockInsight', "Unlock to read your personalized insight")}
+                    ctas={[
+                      {
+                        label: tr('paywall.viewPlans', "View Plans"),
+                        href: `/plans?feature=full_daily_horoscope`,
+                      },
+                    ]}
+                  >
+                    {/* Sample (non-real) faded insight lines — scoped to paywall only. */}
+                    <div className="space-y-2.5 py-1">
+                      <p className="text-xs font-black uppercase tracking-[0.15em]" style={{ color: activeAreaHex }}>
+                        {activeAreaLabel} Insight
+                      </p>
+                      <p className="text-sm leading-relaxed text-foreground/75">
+                        Practice giving without a fixed expectation. Spending energy on patterns keeps the night calm and your focus steady.
+                      </p>
+                    </div>
+                  </LockedPreview>
                 ) : activeAreaInsight ? (
                   <div>
                     <h4 className="text-xs font-black uppercase tracking-[0.15em] mb-2" style={{ color: activeAreaHex }}>
@@ -589,6 +669,19 @@ export default function LifeAreasClient() {
                     <p className="text-sm leading-relaxed text-foreground/80">
                       {activeAreaInsight}
                     </p>
+                    {activeAreaAction && (
+                      <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-white/8 bg-white/[0.02] px-3.5 py-2.5">
+                        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: activeAreaHex }} />
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.15em] mb-0.5" style={{ color: TEXT_COLORS.muted }}>
+                            Today&apos;s Action
+                          </p>
+                          <p className="text-sm leading-relaxed text-foreground/85">
+                            {activeAreaAction}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-foreground/40 italic">
@@ -667,7 +760,20 @@ export default function LifeAreasClient() {
                 </h4>
                 <div className="relative rounded-2xl overflow-hidden w-full bg-surface-variant/[0.035] px-4 py-4 min-h-[200px] flex flex-col justify-center border border-white/5">
                   {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
-                    <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                    <LockedPreview
+                      compact
+                      className="min-h-[190px]"
+                      message={tr('paywall.unlockWeeklyTrend', "Unlock to see your 7-day trend")}
+                      ctas={[{ label: tr('paywall.viewPlans', "View Plans"), href: `/plans?feature=full_daily_horoscope` }]}
+                    >
+                      {/* Sample (non-real) preview curve — scoped to the paywall only. */}
+                      <WeeklyOutlookChart
+                        days={sampleWeek}
+                        colorHex={activeAreaHex}
+                        areaLabel={resolveAreaLabel(t, activeArea)}
+                        lockedPreview
+                      />
+                    </LockedPreview>
                   ) : forecastLoading || !forecast ? (
                     <div className="h-[180px] animate-pulse rounded-2xl bg-surface-variant/[0.04]" />
                   ) : (

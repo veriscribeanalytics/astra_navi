@@ -36,6 +36,7 @@ import { usePaywallContext } from "@/context/PaywallContext";
 import { useChat } from "@/context/ChatContext";
 import { getTierLabel } from "@/types/billing";
 import PaywallCard from "@/components/paywall/PaywallCard";
+import LockedPreview from "@/components/paywall/LockedPreview";
 import type { PaywallFeatureKey, PaywallData } from "@/types/paywall";
 import { useDailyHoroscope, useTranslation, useTransitsToday } from "@/hooks";
 import { useGreeting } from "@/hooks/useGreeting";
@@ -43,7 +44,7 @@ import { LOCALE_BY_LANGUAGE } from "@/locales";
 import { clientFetch } from "@/lib/apiClient";
 import { getRashiData } from "@/lib/astrology";
 import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
-import { AREA_COLORS, STATUS_COLORS, SIGNAL_BADGES, BRAND_GOLD, TEXT_COLORS, getScorePhase } from "@/data/lifeAreaColors";
+import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS, SIGNAL_BADGES, BRAND_GOLD, TEXT_COLORS, getScorePhase } from "@/data/lifeAreaColors";
 import { PORTAL_COLORS } from "@/data/portalColors";
 import type { ForecastDay } from "@/components/dashboard/MiniChart";
 // import Particles from "@/components/ui/Particles";
@@ -83,6 +84,16 @@ type ChatPrompt = {
   message: string;
 };
 
+type WeeklyForecastApiDay = {
+  date: string;
+  is_today?: boolean;
+  score: number;
+  text?: string;
+  dominant_planet?: string;
+  alerts?: ForecastDay["personalized_alerts"];
+  transits?: ForecastDay["transits"];
+};
+
 const areaLabelFallback: Record<ForecastArea, string> = {
   love: "Love",
   career: "Career",
@@ -100,6 +111,33 @@ const areaDescriptions: Record<ForecastArea, string> = {
   general: "Positive momentum in your overall journey.",
   spiritual: "Inner growth and clarity are strong.",
 };
+
+const DASHBOARD_SECTION_TITLE_CLASS = "font-headline text-xl font-bold leading-tight tracking-tight text-foreground";
+const DASHBOARD_SECTION_SUBTITLE_CLASS = "mt-1 text-xs font-medium text-foreground/55";
+
+/**
+ * Sample 7-day curve used ONLY inside the locked paywall preview, to show the
+ * shape of the weekly chart without revealing real scores. This fake data must
+ * never be shown to paid users, in skeletons, or anywhere outside a paywall.
+ */
+function buildSampleWeek(): ForecastDay[] {
+  const scores = [62, 70, 58, 78, 66, 84, 72];
+  const base = new Date();
+  base.setDate(base.getDate() - 3);
+  return scores.map((score, i) => {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    return {
+      date: iso,
+      is_today: i === 3,
+      score,
+      text: "",
+      dominant_planet: "",
+      personalized_alerts: [],
+    } as ForecastDay;
+  });
+}
 
 function resolveAreaLabel(t: (key: string) => string, area: ForecastArea) {
   const key = `newDashboard.lifeAreas.${area}`;
@@ -130,6 +168,17 @@ function getAreaInsight(horoscope: HoroscopeData | null, area: ForecastArea) {
   } | null;
   const legacyKey = area === "love" ? "relationships" : area === "finance" ? "finances" : area;
   return legacy?.areas?.[legacyKey]?.text || "";
+}
+
+function getAreaAction(horoscope: HoroscopeData | null, area: ForecastArea) {
+  if (!horoscope) return "";
+  if (area === "general") {
+    const tip = horoscope?.tip;
+    if (typeof tip === "string") return tip;
+    return tip?.text || "";
+  }
+  const areasText = horoscope?.areas_text as Partial<Record<ForecastArea, { action?: string }>> | undefined;
+  return areasText?.[area]?.action || "";
 }
 
 function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"], horoscope?: HoroscopeData | null) {
@@ -170,14 +219,24 @@ function RingScore({ score, size = 132, color }: { score: number; size?: number;
   );
 }
 
-function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]; colorHex: string; areaLabel: string }) {
+function WeeklyOutlookChart({
+  days,
+  colorHex,
+  areaLabel,
+  lockedPreview = false,
+}: {
+  days: ForecastDay[];
+  colorHex: string;
+  areaLabel: string;
+  lockedPreview?: boolean;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [W, setW] = useState(600);
 
   useEffect(() => {
     if (!containerRef.current) return;
     const obs = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         const width = entry.contentRect.width;
         if (width > 0) {
           setW(width);
@@ -208,37 +267,38 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
 
   return (
     <div ref={containerRef} className="w-full">
-      {/* Visually hidden text alternative for screen readers (WCAG 1.1.1) */}
-      <div
-        style={{
-          position: "absolute",
-          width: "1px",
-          height: "1px",
-          padding: 0,
-          margin: "-1px",
-          overflow: "hidden",
-          clip: "rect(0, 0, 0, 0)",
-          whiteSpace: "nowrap",
-          border: 0,
-        }}
-      >
-        <h3>Weekly {areaLabel} Forecast Data</h3>
-        <ul>
-          {days.map((d) => {
-            const date = dt(d.date);
-            const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
-            return (
-              <li key={d.date}>
-                {weekday}, {date.getDate()}: {d.score} out of 100{d.is_today ? " (Today)" : ""}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {!lockedPreview && (
+        <div
+          style={{
+            position: "absolute",
+            width: "1px",
+            height: "1px",
+            padding: 0,
+            margin: "-1px",
+            overflow: "hidden",
+            clip: "rect(0, 0, 0, 0)",
+            whiteSpace: "nowrap",
+            border: 0,
+          }}
+        >
+          <h3>Weekly {areaLabel} Forecast Data</h3>
+          <ul>
+            {days.map((d) => {
+              const date = dt(d.date);
+              const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+              return (
+                <li key={d.date}>
+                  {weekday}, {date.getDate()}: {d.score} out of 100{d.is_today ? " (Today)" : ""}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       <svg
         role="img"
-        aria-label={`Weekly ${areaLabel} forecast chart`}
+        aria-label={lockedPreview ? `Locked weekly ${areaLabel} forecast preview` : `Weekly ${areaLabel} forecast chart`}
         viewBox={`0 0 ${W} ${H}`}
         className="h-[180px] w-full overflow-visible"
       >
@@ -287,9 +347,11 @@ function WeeklyOutlookChart({ days, colorHex, areaLabel }: { days: ForecastDay[]
             <g key={i}>
               {isToday && <circle cx={p.x} cy={p.y} r="7" fill={colorHex} opacity="0.2" />}
               <circle cx={p.x} cy={p.y} r={isToday ? 4 : 3} fill={isToday ? colorHex : "var(--surface)"} stroke={colorHex} strokeWidth="2" />
-              <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.95}>
-                {d.score}
-              </text>
+              {!lockedPreview && (
+                <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.95}>
+                  {d.score}
+                </text>
+              )}
               <text x={p.x} y={H - 16} textAnchor="middle" fontSize="12" fontWeight="800" letterSpacing="0.5" fill={isToday ? colorHex : "var(--foreground)"} opacity={isToday ? 1 : 0.85}>
                 {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
               </text>
@@ -401,55 +463,126 @@ function DashboardAddMemberCard({
   const { t } = useTranslation();
   const { getTierColor } = usePaywallContext();
   const lockColor = getTierColor(lockType);
+  const lockedCtaLabel = lockType === 'pro' ? "Add more with Pro" : "Add more with Premium";
 
-  let title = t('newDashboard.familyFriends.addMember') || "Add Member";
-  let subtitle = t('dashboard.familyAddSubtitle') || "Add family or friends to compare charts and emotional patterns.";
-  let buttonText = t('newDashboard.familyFriends.addMember') || "ADD MEMBER";
+  const title = t('newDashboard.familyFriends.addMember') || "Add Member";
+  const buttonText = t('newDashboard.familyFriends.addMember') || "ADD MEMBER";
   let bgClass = "bg-secondary/[0.01] border-secondary/35 hover:border-secondary/60 hover:bg-secondary/[0.04]";
-  let textClass = "text-secondary";
-  let buttonBorderClass = "border-secondary/50 group-hover:border-secondary group-hover:bg-secondary/10";
+  const textClass = "text-secondary";
+  const buttonBorderClass = "border-secondary/50 group-hover:border-secondary group-hover:bg-secondary/10";
 
   if (isLocked) {
     if (lockType === 'pro') {
-      title = "Get Pro to Unlock";
-      subtitle = "Unlock up to 3 slots and get deeper insights.";
-      buttonText = "GET PRO";
       bgClass = "bg-[var(--lock-color)]/[0.03] border-[var(--lock-color)]/25 hover:border-[var(--lock-color)]/55 hover:bg-[var(--lock-color)]/[0.06]";
-      textClass = "text-[var(--lock-color)]";
-      buttonBorderClass = "border-[var(--lock-color)]/40 group-hover:border-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/10";
     } else {
-      title = "Get Premium to Unlock";
-      subtitle = "Unlock all 6 slots and unlimited cosmic compatibility.";
-      buttonText = "GET PREMIUM";
       bgClass = "bg-[var(--lock-color)]/[0.03] border-[var(--lock-color)]/25 hover:border-[var(--lock-color)]/55 hover:bg-[var(--lock-color)]/[0.06]";
-      textClass = "text-[var(--lock-color)]";
-      buttonBorderClass = "border-[var(--lock-color)]/40 group-hover:border-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/10";
     }
+  }
+
+  if (isLocked) {
+    return (
+      <div
+        onClick={onClick}
+        className={`group relative min-h-[210px] cursor-pointer overflow-hidden rounded-2xl border p-4 text-center transition-all ${bgClass}`}
+        style={{ '--lock-color': lockColor } as React.CSSProperties}
+      >
+        <div className="pointer-events-none select-none blur-[4px]" aria-hidden="true">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="relative shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/10 font-headline text-xl font-bold text-emerald-300">
+                  N
+                </div>
+                <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
+              </div>
+              <div className="min-w-0 text-left">
+                <p className="truncate font-headline text-base font-bold text-foreground/75">New bond</p>
+                <p className="mt-0.5 text-[10px] font-bold text-foreground/40">Invite pending</p>
+              </div>
+            </div>
+            <AreaRing score={74} color={lockColor} size={64} label="Locked bond preview">
+              <span className="text-xs font-black leading-none tabular-nums" style={{ color: lockColor }}>
+                74
+              </span>
+            </AreaRing>
+          </div>
+
+          <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] p-3.5 text-left">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+            <p className="text-xs leading-relaxed text-foreground/70">
+              Your shared energy preview appears here after a member is added.
+            </p>
+          </div>
+        </div>
+
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-surface/35 px-4 backdrop-blur-[1px]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[var(--lock-color)]/60 bg-surface/80 text-[var(--lock-color)] shadow-[0_0_24px_rgba(0,0,0,0.22)]">
+            <Lock className="h-6 w-6" />
+          </div>
+          <p className="max-w-[20ch] text-sm font-bold leading-snug text-foreground">
+            Add more members
+          </p>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--lock-color)]/55 bg-[var(--lock-color)]/[0.08] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[var(--lock-color)] transition-all group-hover:border-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/12">
+            <Plus className="h-3 w-3" />
+            {lockedCtaLabel}
+          </span>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div
       onClick={onClick}
-      className={`group flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed p-5 text-center cursor-pointer transition-all min-h-[170px] ${bgClass}`}
+      className={`group relative min-h-[210px] cursor-pointer overflow-hidden rounded-2xl border border-dashed p-4 text-center transition-all ${bgClass}`}
       style={{ '--lock-color': lockColor } as React.CSSProperties}
     >
-      <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed transition-transform group-hover:scale-105 ${
-        isLocked ? 'border-[var(--lock-color)]/40 text-[var(--lock-color)]' : 'border-secondary/40 text-secondary/70'
-      }`}>
-        {isLocked ? <Lock className="h-5 w-5" /> : <Users className="h-6 w-6" />}
+      <div className="pointer-events-none select-none blur-[4px]" aria-hidden="true">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="relative shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-secondary/25 bg-secondary/10 font-headline text-xl font-bold text-secondary">
+                N
+              </div>
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="truncate font-headline text-base font-bold text-foreground/75">New member</p>
+              <p className="mt-0.5 text-[10px] font-bold text-foreground/40">Bond preview</p>
+            </div>
+          </div>
+          <AreaRing score={72} color={BRAND_GOLD.main} size={64} label="Member preview">
+            <span className="text-xs font-black leading-none tabular-nums" style={{ color: BRAND_GOLD.main }}>
+              72
+            </span>
+          </AreaRing>
+        </div>
+
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] p-3.5 text-left">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+          <p className="text-xs leading-relaxed text-foreground/70">
+            Add someone to reveal your daily bond insight.
+          </p>
+        </div>
       </div>
-      <div className="space-y-1">
-        <p className="text-sm font-bold text-foreground flex items-center justify-center gap-1.5 group-hover:text-secondary transition-colors">
-          {title}
-        </p>
-        <p className="text-[10px] leading-relaxed text-foreground/45 max-w-[24ch] mx-auto">
-          {subtitle}
-        </p>
+
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-surface/20 px-4 backdrop-blur-[1px]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/55 bg-surface/75 text-secondary shadow-[0_0_24px_rgba(0,0,0,0.22)] transition-transform group-hover:scale-105">
+          <Plus className="h-6 w-6" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-bold leading-snug text-foreground group-hover:text-secondary transition-colors">
+            {title}
+          </p>
+          <p className="max-w-[20ch] text-[10px] font-semibold leading-relaxed text-foreground/45">
+            Add someone to reveal the score.
+          </p>
+        </div>
+        <span className={`inline-flex items-center gap-1.5 rounded-full border bg-transparent px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${textClass} ${buttonBorderClass}`}>
+          <Users className="h-3 w-3" />
+          {buttonText}
+        </span>
       </div>
-      <span className={`flex items-center gap-1.5 rounded-full border bg-transparent px-4 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${textClass} ${buttonBorderClass}`}>
-        {isLocked ? <Lock className="h-2.5 w-2.5" /> : <Users className="h-2.5 w-2.5" />}
-        {buttonText}
-      </span>
     </div>
   );
 }
@@ -673,6 +806,13 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
 export default function DashboardHome() {
   const router = useRouter();
   const { t, language } = useTranslation();
+  const tr = useCallback(
+    (key: string, fallback: string, params?: Record<string, string | number>) => {
+      const translated = params ? t(key, params) : t(key);
+      return translated && translated !== key ? translated : fallback;
+    },
+    [t]
+  );
   const greeting = t(useGreeting());
   const { user, refreshProfile, isLoading: userLoading } = useAuth();
   const { tier, totalCredits, isLoaded: paywallLoaded, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
@@ -769,7 +909,7 @@ export default function DashboardHome() {
                 area,
                 data: {
                   area: data.area as ForecastArea,
-                  days: data.days.map((d: any) => ({
+                  days: (data.days as WeeklyForecastApiDay[]).map((d) => ({
                     date: d.date,
                     is_today: d.is_today ?? (d.date === date),
                     score: d.score,
@@ -817,12 +957,17 @@ export default function DashboardHome() {
   const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
   const overallScore = useMemo(() => {
     if (!horoscope) return 0;
+    const apiOverall = horoscope.score?.overall ?? horoscope.overall_score;
+    if (typeof apiOverall === "number") return Math.round(apiOverall);
     const scores = AREA_LIST.map((area) => getAreaScore(horoscope, area));
     const sum = scores.reduce((acc, val) => acc + val, 0);
     return Math.round(sum / AREA_LIST.length);
   }, [horoscope]);
-  const overallPhaseHex = AREA_COLORS.overall.main;
-  const overallPhaseGlow = AREA_COLORS.overall.glow;
+  const overallPhaseHex = getAreaPhaseMain("overall", overallScore);
+  const overallPhaseGlow = getAreaPhaseGlowColor("overall", overallScore);
+  // Sample-only week for the locked weekly-chart paywall preview (never shown to
+  // paid users or as real data — see buildSampleWeek).
+  const sampleWeek = useMemo(() => buildSampleWeek(), []);
   // Only the *initial* fetch (no data yet) should show skeletons. Once the
   // request settles we render real scores, or the graceful fallback numbers if
   // the backend returned nothing — never the fabricated 73/70 *during* loading
@@ -1042,7 +1187,7 @@ export default function DashboardHome() {
     }
 
     return null;
-  }, [horoscope?.time_triggers]);
+  }, [horoscope]);
 
   const isRahuKaalEnded = useMemo(() => {
     const rk = transits?.panchanga?.rahukaal || horoscope?.meta?.panchanga?.rahukaal;
@@ -1191,8 +1336,8 @@ export default function DashboardHome() {
   ]);
 
   const activeAreaHex = useMemo(() => {
-    return AREA_COLORS[activeArea].main;
-  }, [activeArea]);
+    return getAreaPhaseMain(activeArea, getAreaScore(horoscope, activeArea));
+  }, [activeArea, horoscope]);
 
   const activeAreaInsight = useMemo(() => {
     const rawInsight = getAreaInsight(horoscope, activeArea);
@@ -1214,6 +1359,8 @@ export default function DashboardHome() {
     if (activeArea === "general") return "neutral";
     return horoscope?.areas_text?.[activeArea as keyof typeof horoscope.areas_text]?.tone || "neutral";
   }, [horoscope, activeArea]);
+
+  const activeAreaAction = useMemo(() => getAreaAction(horoscope, activeArea), [horoscope, activeArea]);
 
   const topLifeArea = [...lifeAreas].sort((a, b) => b.score - a.score)[0];
   const rawHeadline =
@@ -1352,7 +1499,7 @@ export default function DashboardHome() {
               {/* Combined Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-1">
                 <div>
-                  <h2 className="text-xl font-headline font-bold" style={{ color: TEXT_COLORS.heading }}>
+                  <h2 className={DASHBOARD_SECTION_TITLE_CLASS}>
                     Your Day Today
                   </h2>
                 </div>
@@ -1379,7 +1526,7 @@ export default function DashboardHome() {
               {/* Left Side Content */}
               <div className="flex-grow flex flex-col gap-3">
                 {/* 3-column Grid for Ratings, Advice, Lotus */}
-                <div className="grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)_190px] lg:items-stretch">
+                <div className="grid gap-3 min-[480px]:max-[1020px]:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] min-[480px]:max-[1020px]:items-stretch lg:grid-cols-[180px_minmax(0,1fr)_190px] lg:items-stretch">
                   {/* Ratings Card */}
                   <div className="flex flex-col items-center text-center lg:items-start lg:text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full justify-center">
                     <p className="label-secondary font-black tracking-[0.2em]">{t('newDashboard.todaysEnergy.title')}</p>
@@ -1407,14 +1554,14 @@ export default function DashboardHome() {
                         onClick={() => setIsAdviceModalOpen(true)}
                         className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors cursor-pointer text-left w-fit"
                       >
-                        Today's Advice for You <ArrowRight className="inline h-3.5 w-3.5" />
+                        Today&apos;s Advice for You <ArrowRight className="inline h-3.5 w-3.5" />
                       </button>
                     )}
                   </div>
 
                   {/* Lotus Card */}
                   <div className="hidden justify-center lg:flex items-center bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full">
-                    <Image src="/images/lotus.svg" alt="" width={130} height={90} className="drop-shadow-[0_0_30px_rgba(168,85,247,0.18)]" />
+                    <Image src="/images/lotus.svg" alt="" width={135} height={90} unoptimized className="drop-shadow-[0_0_30px_rgba(168,85,247,0.18)]" />
                   </div>
                 </div>
 
@@ -1572,11 +1719,11 @@ export default function DashboardHome() {
               {/* Sub-header for Current Week */}
               <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
                 <div>
-                    <h3 className="text-[14px] font-black uppercase tracking-[0.22em]" style={{ color: TEXT_COLORS.heading }}>
+                  <h2 className={DASHBOARD_SECTION_TITLE_CLASS}>
                     {t('newDashboard.currentWeek.title') || "Your Life Areas"}
-                  </h3>
-                  <p className="mt-1 text-xs font-medium" style={{ color: TEXT_COLORS.muted }}>
-                    Today's strongest and weakest signals
+                  </h2>
+                  <p className={DASHBOARD_SECTION_SUBTITLE_CLASS}>
+                    Today&apos;s strongest and weakest signals
                   </p>
                 </div>
                 <Link
@@ -1604,7 +1751,7 @@ export default function DashboardHome() {
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {dashboardLifeAreas.map(({ area, label, score, theme, badge, badgeStyle, arrow }) => {
                     const Icon = theme.icon;
-                    const cardColorHex = AREA_COLORS[area].main;
+                    const cardColorHex = getAreaPhaseMain(area, score);
                     const isLucide = area === "general" || area === "spiritual";
                     const isSelected = activeArea === area;
                     return (
@@ -1654,7 +1801,30 @@ export default function DashboardHome() {
                   {/* Left Column: Selected Area Insight */}
                   <div className="relative space-y-3 text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl min-h-[150px]">
                     {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
-                      <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                      <LockedPreview
+                        className="min-h-[170px]"
+                        message={tr('paywall.unlockInsight', "Unlock to read your personalized insight")}
+                        ctas={[
+                          {
+                            label: tr('newDashboard.todaysEnergy.openForecast', `Open ${activeAreaLabel} Forecast`, { area: activeAreaLabel }),
+                            href: `/plans?feature=full_daily_horoscope`,
+                          },
+                          {
+                            label: tr('newDashboard.todaysEnergy.personalNotesBtn', "Personalized Notes"),
+                            href: `/plans?feature=full_daily_horoscope`,
+                          },
+                        ]}
+                      >
+                        {/* Sample (non-real) faded insight lines — scoped to paywall only. */}
+                        <div className="space-y-2.5 py-1">
+                          <p className="text-xs font-black uppercase tracking-[0.15em]" style={{ color: activeAreaHex }}>
+                            {activeAreaLabel} {t('newDashboard.insight') || "Insight"}
+                          </p>
+                          <p className="text-sm leading-relaxed text-foreground/75">
+                            Practice giving without a fixed expectation. Spending energy on patterns keeps the night calm and your focus steady.
+                          </p>
+                        </div>
+                      </LockedPreview>
                     ) : lifeAreasLoading ? (
                       <div className="space-y-2">
                         <div className="h-3.5 w-24 rounded bg-surface-variant/20 animate-pulse" />
@@ -1671,6 +1841,15 @@ export default function DashboardHome() {
                           <p className="text-sm leading-relaxed text-foreground/75">
                             {activeAreaInsight}
                           </p>
+                          {activeAreaAction && (
+                            <div className="mt-2.5 flex items-start gap-2 rounded-xl border px-3 py-2" style={{ borderColor: `${activeAreaHex}33`, backgroundColor: `${activeAreaHex}0d` }}>
+                              <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: activeAreaHex }} />
+                              <p className="text-xs leading-relaxed text-foreground/80">
+                                <span className="font-black uppercase tracking-wider" style={{ color: activeAreaHex }}>{tr('newDashboard.todaysEnergy.actionLabel', "Do this")}: </span>
+                                {activeAreaAction}
+                              </p>
+                            </div>
+                          )}
                         </div>
 
                         <div className="mt-auto pt-2 flex flex-row gap-3 w-full">
@@ -1723,7 +1902,20 @@ export default function DashboardHome() {
                     </h4>
                     <div className="relative rounded-2xl overflow-hidden w-full bg-surface-variant/[0.035] px-4 py-4 min-h-[230px] flex flex-col justify-center">
                       {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
-                        <PaywallCard paywall={getFeaturePaywall('full_daily_horoscope')!} variant="overlay" />
+                        <LockedPreview
+                          compact
+                          className="min-h-[190px]"
+                          message={tr('paywall.unlockWeeklyTrend', "Unlock to see your 7-day trend")}
+                          ctas={[{ label: tr('paywall.viewPlans', "View Plans"), href: `/plans?feature=full_daily_horoscope` }]}
+                        >
+                          {/* Sample (non-real) preview curve — scoped to the paywall only. */}
+                          <WeeklyOutlookChart
+                            days={sampleWeek}
+                            colorHex={AREA_THEMES[activeArea].hex}
+                            areaLabel={resolveAreaLabel(t, activeArea)}
+                            lockedPreview
+                          />
+                        </LockedPreview>
                       ) : forecastLoading || !forecast ? (
                         <div className="h-[180px] animate-pulse rounded-2xl bg-surface-variant/[0.04]" />
                       ) : (
@@ -1754,7 +1946,7 @@ export default function DashboardHome() {
                     <Heart className="h-5 w-5 text-rose-400" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="font-headline text-sm sm:text-base font-bold text-foreground truncate">
+                    <h2 className={`${DASHBOARD_SECTION_TITLE_CLASS} truncate`}>
                       {t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}
                     </h2>
                     <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-[0.14em] font-bold truncate">
@@ -1887,7 +2079,7 @@ export default function DashboardHome() {
                     <div className="flex h-5 w-5 items-center justify-center">
                       <Orbit className="h-5 w-5 text-blue-400" />
                     </div>
-                    <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.chartSnapshot')}</h3>
+                    <h2 className={DASHBOARD_SECTION_TITLE_CLASS}>{t('newDashboard.chartSnapshot')}</h2>
                   </div>
                   <Link href="/kundli" aria-label={t('newDashboard.myChart.viewDetails')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
                     {t('newDashboard.myChart.viewDetails')} <ArrowRight className="inline h-3 w-3" />
@@ -1910,6 +2102,7 @@ export default function DashboardHome() {
                     const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
                     const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
                     const planetImg = getPlanetImage(item.sublabel);
+                    const lockedPreviewText = idx === 0 ? "Planetary period" : "Sub-period insight";
 
                     return (
                       <div
@@ -1928,31 +2121,48 @@ export default function DashboardHome() {
                             router.push('/kundli');
                           }
                         }}
-                        className="relative flex flex-col items-center justify-center rounded-2xl border border-outline-variant/8 bg-surface p-3 transition-all hover:border-secondary/30 hover:bg-surface-variant cursor-pointer text-center min-h-[140px]"
+                        className="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border border-outline-variant/8 bg-surface p-3 text-center transition-all hover:border-secondary/30 hover:bg-surface-variant"
                       >
-                        {isBlocked && (
-                          <div className="absolute top-2 right-2 text-secondary bg-surface/80 rounded-full p-1 border border-outline-variant/10 shadow-sm z-10">
-                            <Lock className="h-3 w-3" />
-                          </div>
+                        {isBlocked ? (
+                          <>
+                            <div className="pointer-events-none flex w-full flex-col items-center justify-center blur-[4px]" aria-hidden="true">
+                              <img
+                                src={idx === 0 ? "/icons/planets/saturn.png" : "/icons/planets/moon.png"}
+                                alt=""
+                                className="mb-2 h-12 w-12 object-contain opacity-70"
+                              />
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/45">{item.label}</p>
+                              <p className="mt-1 font-headline text-sm font-bold text-foreground/75">{lockedPreviewText}</p>
+                            </div>
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-surface/25 px-3 backdrop-blur-[1px]">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed border-secondary/55 bg-surface/80 text-secondary shadow-[0_0_20px_rgba(0,0,0,0.2)]">
+                                <Lock className="h-5 w-5" />
+                              </div>
+                              <p className="text-[11px] font-black uppercase tracking-wider text-secondary">Unlock chart detail</p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="relative mb-2 shrink-0">
+                            <img
+                              src={planetImg}
+                              alt={item.sublabel || "Planet"}
+                              className="h-12 w-12 object-contain"
+                            />
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center items-center min-w-0 w-full">
+                              <p className="text-[10px] font-bold tracking-wider text-foreground/45 uppercase truncate">{item.label}</p>
+                              <p className="font-headline text-sm sm:text-base font-bold text-foreground truncate mt-0.5">
+                                {item.sublabel}
+                              </p>
+                              {item.subtext && (
+                                <p className="text-[9px] sm:text-[10px] text-foreground/45 truncate mt-0.5">
+                                  {item.subtext}
+                                </p>
+                              )}
+                            </div>
+                          </>
                         )}
-                        <div className="relative mb-2 shrink-0">
-                          <img
-                            src={planetImg}
-                            alt={item.sublabel || "Planet"}
-                            className="h-12 w-12 object-contain"
-                          />
-                        </div>
-                        <div className="flex-1 flex flex-col justify-center min-w-0 w-full">
-                          <p className="text-[10px] font-bold tracking-wider text-foreground/45 uppercase truncate">{item.label}</p>
-                          <p className={`font-headline text-sm sm:text-base font-bold text-foreground truncate mt-0.5 ${isBlocked ? "blur-[2px] select-none opacity-50" : ""}`}>
-                            {item.sublabel}
-                          </p>
-                          {item.subtext && (
-                            <p className={`text-[9px] sm:text-[10px] text-foreground/45 truncate mt-0.5 ${isBlocked ? "blur-[2.5px] select-none opacity-50" : ""}`}>
-                              {item.subtext}
-                            </p>
-                          )}
-                        </div>
                       </div>
                     );
                   })}
@@ -2010,21 +2220,39 @@ export default function DashboardHome() {
                             router.push('/kundli');
                           }
                         }}
-                        className="relative flex gap-3 rounded-2xl border border-outline-variant/8 bg-surface-variant/[0.02] p-3 text-left transition-all hover:border-secondary/35 hover:bg-surface-variant/4 cursor-pointer"
+                        className="relative flex min-h-[86px] cursor-pointer gap-3 overflow-hidden rounded-2xl border border-outline-variant/8 bg-surface-variant/[0.02] p-3 text-left transition-all hover:border-secondary/35 hover:bg-surface-variant/4"
                       >
-                        {isBlocked && (
-                          <div className="absolute top-2 right-2 text-secondary bg-surface/80 rounded-full p-0.5 border border-outline-variant/10 shadow-sm z-10">
-                            <Lock className="h-2.5 w-2.5" />
-                          </div>
+                        {isBlocked ? (
+                          <>
+                            <div className="pointer-events-none flex min-w-0 flex-1 gap-3 blur-[4px]" aria-hidden="true">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-outline-variant/8 bg-surface-variant/10">
+                                {stat.icon}
+                              </div>
+                              <div className="min-w-0 leading-tight">
+                                <p className="text-[9px] font-bold uppercase tracking-wider text-foreground/45">{stat.label}</p>
+                                <p className="mt-1 font-headline text-xs font-bold text-foreground/75">Timeline insight</p>
+                                <p className="mt-0.5 text-[9px] text-foreground/45">Premium chart timing</p>
+                              </div>
+                            </div>
+                            <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-surface/25 px-3 backdrop-blur-[1px]">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-dashed border-secondary/55 bg-surface/80 text-secondary">
+                                <Lock className="h-4 w-4" />
+                              </div>
+                              <span className="text-[10px] font-black uppercase tracking-wider text-secondary">Unlock timing</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-variant/10 border border-outline-variant/8">
+                              {stat.icon}
+                            </div>
+                            <div className="min-w-0 leading-tight">
+                              <p className="text-[9px] font-bold text-foreground/45 uppercase tracking-wider">{stat.label}</p>
+                              <p className="font-headline text-xs font-bold text-foreground truncate mt-1">{stat.value}</p>
+                              <p className="text-[9px] text-foreground/45 truncate mt-0.5">{stat.subtext}</p>
+                            </div>
+                          </>
                         )}
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-variant/10 border border-outline-variant/8">
-                          {stat.icon}
-                        </div>
-                        <div className="min-w-0 leading-tight">
-                          <p className="text-[9px] font-bold text-foreground/45 uppercase tracking-wider">{stat.label}</p>
-                          <p className={`font-headline text-xs font-bold text-foreground truncate mt-1 ${isBlocked ? "blur-[2px] select-none opacity-50" : ""}`}>{stat.value}</p>
-                          <p className={`text-[9px] text-foreground/45 truncate mt-0.5 ${isBlocked ? "blur-[2px] select-none opacity-50" : ""}`}>{stat.subtext}</p>
-                        </div>
                       </div>
                     );
                   })}
@@ -2661,7 +2889,7 @@ export default function DashboardHome() {
               </div>
 
               <h2 className="font-headline text-2xl font-bold mb-1">
-                Today's Advice
+                Today&apos;s Advice
               </h2>
               <p className="text-xs text-foreground/50 mb-6 uppercase tracking-wider">
                 Cosmic Guidance for You

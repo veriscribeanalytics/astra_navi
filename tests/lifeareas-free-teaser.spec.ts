@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mockAllApis, mockPaywallApi, mockSession } from './auth-helpers';
+import { mockAllApis, mockPaywallApi, mockSession, mockProfileApi } from './auth-helpers';
 
 const AREA_SCORES = {
   career: 98,
@@ -17,6 +17,17 @@ test('free users can see life-area scores while insights and forecasts stay payw
     name: 'Ankit Prasad',
   });
   await mockAllApis(page);
+  await mockProfileApi(page, {
+    id: 'free-user',
+    email: 'free@example.com',
+    name: 'Ankit Prasad',
+    dob: '1990-01-01',
+    tob: '12:00',
+    pob: 'Delhi',
+    birthLatitude: 28.6139,
+    birthLongitude: 77.2090,
+    birthTimezoneName: 'Asia/Kolkata',
+  }, true);
   await mockPaywallApi(page, {
     tier: 'free',
     totalCredits: 0,

@@ -9,7 +9,7 @@ import { usePaywallContext } from '@/context/PaywallContext';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { PaywallData } from '@/types/paywall';
 import { AREA_THEMES, AREA_LIST, ForecastArea } from '@/data/areaThemes';
-import { AREA_COLORS, STATUS_COLORS, BRAND_GOLD, TEXT_COLORS, getScorePhase } from '@/data/lifeAreaColors';
+import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS, BRAND_GOLD, TEXT_COLORS, getScorePhase } from '@/data/lifeAreaColors';
 import Card from '@/components/ui/Card';
 import ForecastChart, { ChartPoint } from './ForecastChart';
 import MonthGrid, { MonthData } from './MonthGrid';
@@ -490,6 +490,10 @@ export default function ForecastPage() {
 
   const summary = range === '7d' ? activeWeekly?.summary : range === 'monthly' ? activeMonthly?.summary : activeYearly?.summary;
 
+  // Area color now shifts with the period's average score (area × phase).
+  const areaHex = getAreaPhaseMain(area, summary?.average_score ?? 0);
+  const areaGlow = getAreaPhaseGlowColor(area, summary?.average_score ?? 0);
+
   const activeOverview = useMemo(() => {
     if (range === '7d') return activeWeekly?.overview;
     if (range === 'monthly') return activeMonthly?.overview;
@@ -653,7 +657,7 @@ export default function ForecastPage() {
                         <div className="flex items-center justify-between gap-3">
                           <span
                             className="px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
-                            style={{ color: AREA_COLORS[area].main, backgroundColor: AREA_COLORS[area].main + '12' }}
+                            style={{ color: areaHex, backgroundColor: areaHex + '12' }}
                           >
                             {activePeriodLabel}
                           </span>
@@ -681,7 +685,7 @@ export default function ForecastPage() {
                         {activeMonthly?.days && (
                           <MonthlyDayGrid
                             days={activeMonthly.days}
-                            colorHex={AREA_COLORS[area].main}
+                            colorHex={areaHex}
                             area={area}
                             selectedDate={selectedDay}
                             onSelect={openDayDetailModal}
@@ -700,10 +704,10 @@ export default function ForecastPage() {
                               {activeOverview.tone && (
                                 <span
                                   className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                                  style={{ color: resolveTone(activeOverview.tone, AREA_COLORS[area].main).color, backgroundColor: resolveTone(activeOverview.tone, AREA_COLORS[area].main).color + '12' }}
+                                  style={{ color: resolveTone(activeOverview.tone, areaHex).color, backgroundColor: resolveTone(activeOverview.tone, areaHex).color + '12' }}
                                 >
-                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, AREA_COLORS[area].main).color }} />
-                                  {t(resolveTone(activeOverview.tone, AREA_COLORS[area].main).labelKey) || activeOverview.tone}
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, areaHex).color }} />
+                                  {t(resolveTone(activeOverview.tone, areaHex).labelKey) || activeOverview.tone}
                                 </span>
                               )}
                               {activeOverview.key_theme && (
@@ -716,7 +720,7 @@ export default function ForecastPage() {
                             {summary && (
                               <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[10px] font-bold">
                                 <div className="flex items-center gap-1.5">
-                                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: AREA_COLORS[area].main }} />
+                                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: areaHex }} />
                                   <span className="text-foreground/40">{t('forecast.best')}:</span>
                                   <span className="text-foreground/70">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span>
                                 </div>
@@ -727,7 +731,7 @@ export default function ForecastPage() {
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-foreground/40">{t('forecast.avg')}:</span>
-                                  <span style={{ color: AREA_COLORS[area].main }}>{summary.average_score}</span>
+                                  <span style={{ color: areaHex }}>{summary.average_score}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-foreground/40">{t('forecast.trend')}:</span>
@@ -747,15 +751,15 @@ export default function ForecastPage() {
                                     className="fill-none transition-all duration-1000"
                                     strokeWidth="6" strokeLinecap="round"
                                     style={{
-                                      stroke: AREA_COLORS[area].main,
+                                      stroke: areaHex,
                                       strokeDasharray: '251.3',
                                       strokeDashoffset: (251.3 - (251.3 * (summary?.average_score ?? 0)) / 100).toString(),
-                                      filter: `drop-shadow(0 0 8px ${AREA_COLORS[area].glow}50)`
+                                      filter: `drop-shadow(0 0 8px ${areaGlow}50)`
                                     }}
                                   />
                                 </svg>
                                 <div className="absolute flex flex-col items-center justify-center">
-                                  <span className="text-4xl font-headline font-black" style={{ color: AREA_COLORS[area].main }}>{summary?.average_score ?? 0}</span>
+                                  <span className="text-4xl font-headline font-black" style={{ color: areaHex }}>{summary?.average_score ?? 0}</span>
                                   <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">/ 100</span>
                                 </div>
                               </div>
@@ -776,7 +780,7 @@ export default function ForecastPage() {
                         <div className="h-44 sm:h-52 w-full pt-5">
                           <ForecastChart
                             points={chartPoints}
-                            colorHex={AREA_COLORS[area].main}
+                            colorHex={areaHex}
                             activeLabel={activeLabel || undefined}
                             onSelect={(d) => { setSelectedDay(d); openDayDetailModal(d); }}
                           />
@@ -795,7 +799,7 @@ export default function ForecastPage() {
                           <div className="flex items-center justify-between gap-3">
                             <span
                               className="px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
-                              style={{ color: AREA_COLORS[area].main, backgroundColor: AREA_COLORS[area].main + '12' }}
+                              style={{ color: areaHex, backgroundColor: areaHex + '12' }}
                             >
                               {activePeriodLabel}
                             </span>
@@ -825,10 +829,10 @@ export default function ForecastPage() {
                             {activeOverview.tone && (
                               <span
                                 className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                                style={{ color: resolveTone(activeOverview.tone, AREA_COLORS[area].main).color, backgroundColor: resolveTone(activeOverview.tone, AREA_COLORS[area].main).color + '12' }}
+                                style={{ color: resolveTone(activeOverview.tone, areaHex).color, backgroundColor: resolveTone(activeOverview.tone, areaHex).color + '12' }}
                               >
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, AREA_COLORS[area].main).color }} />
-                                {t(resolveTone(activeOverview.tone, AREA_COLORS[area].main).labelKey) || activeOverview.tone}
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, areaHex).color }} />
+                                {t(resolveTone(activeOverview.tone, areaHex).labelKey) || activeOverview.tone}
                               </span>
                             )}
                             {activeOverview.key_theme && (
@@ -851,15 +855,15 @@ export default function ForecastPage() {
                                   className="fill-none transition-all duration-1000"
                                   strokeWidth="6" strokeLinecap="round"
                                   style={{
-                                    stroke: AREA_COLORS[area].main,
+                                    stroke: areaHex,
                                     strokeDasharray: '251.3',
                                     strokeDashoffset: (251.3 - (251.3 * (summary?.average_score ?? 0)) / 100).toString(),
-                                    filter: `drop-shadow(0 0 8px ${AREA_COLORS[area].glow}50)`
+                                    filter: `drop-shadow(0 0 8px ${areaGlow}50)`
                                   }}
                                 />
                               </svg>
                               <div className="absolute flex flex-col items-center justify-center">
-                                <span className="text-4xl font-headline font-black" style={{ color: AREA_COLORS[area].main }}>{summary?.average_score ?? 0}</span>
+                                <span className="text-4xl font-headline font-black" style={{ color: areaHex }}>{summary?.average_score ?? 0}</span>
                                 <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">/ 100</span>
                               </div>
                             </div>
@@ -878,7 +882,7 @@ export default function ForecastPage() {
                         {summary && (
                           <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[10px] font-bold pt-4 border-t border-white/5 mt-auto">
                             <div className="flex items-center gap-1.5">
-                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: AREA_COLORS[area].main }} />
+                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: areaHex }} />
                               <span className="text-foreground/40">{t('forecast.best')}:</span>
                               <span className="text-foreground/70">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span>
                             </div>
@@ -889,7 +893,7 @@ export default function ForecastPage() {
                             </div>
                             <div className="flex items-center gap-1.5">
                               <span className="text-foreground/40">{t('forecast.avg')}:</span>
-                              <span style={{ color: AREA_COLORS[area].main }}>{summary.average_score}</span>
+                              <span style={{ color: areaHex }}>{summary.average_score}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <span className="text-foreground/40">{t('forecast.trend')}:</span>
@@ -906,7 +910,7 @@ export default function ForecastPage() {
                         <div className="h-64 sm:h-72 w-full pt-2">
                           <ForecastChart
                             points={chartPoints}
-                            colorHex={AREA_COLORS[area].main}
+                            colorHex={areaHex}
                             activeLabel={activeLabel || undefined}
                             onSelect={range === 'yearly' ? (m) => setSelectedMonth(m) : (d) => { setSelectedDay(d); openDayDetailModal(d); }}
                           />
@@ -941,7 +945,7 @@ export default function ForecastPage() {
                           key={day.date}
                           className={`flex flex-col justify-between items-center p-5 rounded-2xl border transition-all text-center gap-4 ${isToday ? 'bg-secondary/5 border-secondary/20 shadow-md' : 'bg-surface-variant/5 border-white/5 hover:border-white/10'}`}
                           style={{
-                            boxShadow: isToday ? `0 0 20px ${AREA_COLORS[area].main}10` : undefined,
+                            boxShadow: isToday ? `0 0 20px ${getAreaPhaseMain(area, day.score)}10` : undefined,
                           }}
                         >
                           <div className="space-y-1">
@@ -953,7 +957,7 @@ export default function ForecastPage() {
                           </div>
 
                           <div className="flex flex-col items-center gap-1">
-                            <span className="text-2xl font-headline font-black" style={{ color: AREA_COLORS[area].main }}>{day.score}</span>
+                            <span className="text-2xl font-headline font-black" style={{ color: getAreaPhaseMain(area, day.score) }}>{day.score}</span>
                             <span className="text-[8px] font-bold text-foreground/40 uppercase tracking-widest">Score</span>
                           </div>
 
@@ -977,7 +981,7 @@ export default function ForecastPage() {
                   <h3 className="text-lg font-headline font-bold text-foreground mb-6">Yearly Outlook</h3>
                   <MonthGrid
                     months={activeYearly.months}
-                    colorHex={AREA_COLORS[area].main}
+                    colorHex={areaHex}
                     area={area}
                     selectedMonth={selectedMonth}
                     onSelect={openMonthDetailModal}
@@ -1019,7 +1023,7 @@ export default function ForecastPage() {
               >
                 <X className="w-4 h-4" />
               </button>
-              <ForecastInsight data={detailModalData} colorHex={AREA_COLORS[area].main} isWide={range === '7d'} />
+              <ForecastInsight data={detailModalData} colorHex={areaHex} isWide={range === '7d'} />
             </motion.div>
           </div>
         )}

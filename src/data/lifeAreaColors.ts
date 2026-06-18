@@ -34,41 +34,67 @@ export interface TextColorSet {
   faint: string;
 }
 
-export const AREA_COLORS: Record<"overall" | ForecastArea, AreaColorSet> = {
+type AreaPhasePair = Pick<AreaColorSet, "main" | "glow">;
+
+// Each area now carries its own 5-step phase gradient (area × phase). The color
+// is rating-dependent again: an area's hue shifts as its score moves through the
+// BAD → EXCELLENT bands. See getScorePhase() for the cutoffs.
+export const AREA_PHASE_COLORS: Record<"overall" | ForecastArea, Record<ScorePhase, AreaPhasePair>> = {
+  // Aurora: indigo → violet → cyan → blue
   overall: {
-    main: "#818CF8",
-    glow: "#C7D2FE",
-    soft: "rgba(129, 140, 248, 0.14)",
+    BAD: { main: "#1E1B4B", glow: "#6366F1" },
+    WEAK: { main: "#3730A3", glow: "#818CF8" },
+    MIXED: { main: "#6D5DF6", glow: "#BDB4FE" },
+    GOOD: { main: "#0891B2", glow: "#67E8F9" },
+    EXCELLENT: { main: "#0284C7", glow: "#BAE6FD" },
   },
+  // Traffic light
   general: {
-    main: "#CBD5E1",
-    glow: "#E2E8F0",
-    soft: "rgba(203, 213, 225, 0.12)",
+    BAD: { main: "#DC2626", glow: "#F87171" },
+    WEAK: { main: "#F97316", glow: "#FDBA74" },
+    MIXED: { main: "#F59E0B", glow: "#FBBF24" },
+    GOOD: { main: "#22C55E", glow: "#86EFAC" },
+    EXCELLENT: { main: "#047857", glow: "#6EE7B7" },
   },
+  // Pink / rose
   love: {
-    main: "#F472B6",
-    glow: "#F9A8D4",
-    soft: "rgba(244, 114, 182, 0.14)",
+    BAD: { main: "#BE123C", glow: "#FB7185" },
+    WEAK: { main: "#E11D48", glow: "#FB7185" },
+    MIXED: { main: "#F43F5E", glow: "#FDA4AF" },
+    GOOD: { main: "#DB2777", glow: "#F472B6" },
+    EXCELLENT: { main: "#BE185D", glow: "#F9A8D4" },
   },
+  // Slate → blue / indigo
   career: {
-    main: "#60A5FA",
-    glow: "#93C5FD",
-    soft: "rgba(96, 165, 250, 0.14)",
+    BAD: { main: "#334155", glow: "#64748B" },
+    WEAK: { main: "#475569", glow: "#94A3B8" },
+    MIXED: { main: "#2563EB", glow: "#60A5FA" },
+    GOOD: { main: "#3B82F6", glow: "#93C5FD" },
+    EXCELLENT: { main: "#6366F1", glow: "#A5B4FC" },
   },
+  // Stone → gold → emerald
   finance: {
-    main: "#34D399",
-    glow: "#A7F3D0",
-    soft: "rgba(52, 211, 153, 0.14)",
+    BAD: { main: "#78716C", glow: "#D6D3D1" },
+    WEAK: { main: "#A16207", glow: "#FACC15" },
+    MIXED: { main: "#059669", glow: "#34D399" },
+    GOOD: { main: "#16A34A", glow: "#6EE7B7" },
+    EXCELLENT: { main: "#065F46", glow: "#34D399" },
   },
+  // Grey → lime → teal
   health: {
-    main: "#2DD4BF",
-    glow: "#99F6E4",
-    soft: "rgba(45, 212, 191, 0.14)",
+    BAD: { main: "#4B5563", glow: "#9CA3AF" },
+    WEAK: { main: "#4D7C0F", glow: "#A3E635" },
+    MIXED: { main: "#0F766E", glow: "#2DD4BF" },
+    GOOD: { main: "#0D9488", glow: "#5EEAD4" },
+    EXCELLENT: { main: "#14B8A6", glow: "#99F6E4" },
   },
+  // Violet → purple
   spiritual: {
-    main: "#A78BFA",
-    glow: "#DDD6FE",
-    soft: "rgba(167, 139, 250, 0.16)",
+    BAD: { main: "#3B0764", glow: "#6D28D9" },
+    WEAK: { main: "#5B21B6", glow: "#A78BFA" },
+    MIXED: { main: "#7C3AED", glow: "#C4B5FD" },
+    GOOD: { main: "#8B5CF6", glow: "#C4B5FD" },
+    EXCELLENT: { main: "#6D28D9", glow: "#DDD6FE" },
   },
 };
 
@@ -140,16 +166,28 @@ export function getScorePhase(score: number): ScorePhase {
   return "BAD";
 }
 
+// The phase used for an area's *identity* color when no score is available
+// (icons, neutral chrome). GOOD reads as the area's "signature" hue.
+const IDENTITY_PHASE: ScorePhase = "GOOD";
+
+export function getAreaPhaseColors(area: ForecastArea | "overall", score: number): AreaPhasePair {
+  return AREA_PHASE_COLORS[area][getScorePhase(score)];
+}
+
+export function getAreaPhaseMain(area: ForecastArea | "overall", score: number): string {
+  return getAreaPhaseColors(area, score).main;
+}
+
+export function getAreaPhaseGlowColor(area: ForecastArea | "overall", score: number): string {
+  return getAreaPhaseColors(area, score).glow;
+}
+
 export function getAreaMainColor(area: ForecastArea | "overall"): string {
-  return AREA_COLORS[area].main;
+  return AREA_PHASE_COLORS[area][IDENTITY_PHASE].main;
 }
 
 export function getAreaGlowColor(area: ForecastArea | "overall"): string {
-  return AREA_COLORS[area].glow;
-}
-
-export function getAreaSoftColor(area: ForecastArea | "overall"): string {
-  return AREA_COLORS[area].soft;
+  return AREA_PHASE_COLORS[area][IDENTITY_PHASE].glow;
 }
 
 export function getStatusColor(phase: ScorePhase): StatusColorSet {
@@ -168,22 +206,21 @@ export function getStatusBorderColor(score: number): string {
   return STATUS_COLORS[getScorePhase(score)].border;
 }
 
-// Legacy compat — kept so existing callers still work, but area color is now
-// the *identity* color (not rating-dependent).
+// Legacy compat — area color is now rating-dependent again (area × phase),
+// so these correctly honor the score that was always passed in.
 export interface PhaseColor {
   main: string;
   glow: string;
 }
 
 export function getAreaColor(area: ForecastArea, score: number): PhaseColor {
-  const ac = AREA_COLORS[area];
-  return { main: ac.main, glow: ac.glow };
+  return getAreaPhaseColors(area, score);
 }
 
 export function getAreaPhaseHex(area: ForecastArea, score: number): string {
-  return AREA_COLORS[area].main;
+  return getAreaPhaseColors(area, score).main;
 }
 
 export function getAreaPhaseGlow(area: ForecastArea, score: number): string {
-  return AREA_COLORS[area].glow;
+  return getAreaPhaseColors(area, score).glow;
 }

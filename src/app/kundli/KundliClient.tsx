@@ -13,19 +13,52 @@ import Button from "@/components/ui/Button";
 import {
     Sparkles, Home, Lock,
     ArrowLeft, RefreshCw, ChevronLeft, ChevronRight,
-    Info, MessageSquare, X
+    Info, MessageSquare, X, TrendingUp, CalendarDays, Activity
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { PLANET_GLYPHS, PLANET_COLORS, SIGN_TO_ICON, PLANET_TO_ICON, getDignityStyle } from "@/lib/astrology";
+import { PLANET_GLYPHS, PLANET_COLORS, PLANET_TO_ICON, getDignityStyle } from "@/lib/astrology";
 import PlanetIcon from "@/components/ui/astrology/PlanetIcon";
 import KundliSvg from "@/components/ui/astrology/KundliSvg";
 import { Skeleton, SkeletonCircle, SkeletonText } from "@/components/ui/Skeleton";
 
 // ─── Types ───────────────────────────────────────────────────
 interface Occupant { planet: string; dignity: string; retrograde: boolean; }
-interface HouseData { house: number; name: string; areas: string[]; sign: string; lord: string; lordHouse: number; occupants: Occupant[]; interpretation: (string | { technical: string; simple: string })[]; }
+interface HouseData {
+    house: number;
+    name: string;
+    areas: string[];
+    sign: string;
+    lord: string;
+    lordHouse: number;
+    lord_house?: number;
+    lord_dignity?: string;
+    lord_interpretation?: string;
+    ashtakavarga_score?: number;
+    strength_assessment?: string;
+    occupants: Occupant[];
+    interpretation: (string | { technical: string; simple: string })[];
+}
 interface Yoga { name: string; effect: string; }
-interface PlanetData { planet: string; sign: string; house: number; degree: number; dignity: string; shadbala: number; retrograde: boolean; conjunctions: string[]; lordOf: number[]; interpretation: (string | { technical: string; simple: string })[]; yogas: Yoga[]; }
+interface PlanetData {
+    planet: string;
+    sign: string;
+    house: number;
+    degree: number;
+    dignity: string;
+    shadbala: number;
+    shadbala_percent?: number;
+    retrograde: boolean;
+    combust?: boolean;
+    nakshatra?: string;
+    nakshatra_pada?: number;
+    conjunctions: string[];
+    conjunction_interpretations?: string[];
+    house_placement_interpretation?: string;
+    lordOf: number[];
+    lord_of?: number[];
+    interpretation: (string | { technical: string; simple: string })[];
+    yogas: Yoga[];
+}
 interface DashaData {
     active?: { type: string; planet: string; start: string; end: string }[];
     rows?: { planet: string; dates: string; type?: string; active?: boolean }[];
@@ -34,11 +67,69 @@ interface DashaData {
     remaining?: string;
     explanation: (string | { technical: string; simple: string })[];
 }
-interface AnalysisData { houses: HouseData[]; planets: PlanetData[]; dasha: DashaData; }
+interface ChartSummary {
+    headline?: string;
+    overview?: string;
+    strengths?: string[];
+    challenges?: string[];
+    overall_tone?: string;
+}
+interface AscendantData {
+    sign?: string;
+    degree?: number;
+    nakshatra?: string;
+    interpretation?: string;
+}
+interface PlanetStrengthItem {
+    rank: number;
+    planet: string;
+    shadbala: number;
+    dignity: string;
+    summary?: string;
+}
+interface AshtakavargaData {
+    house_scores?: number[];
+    strongest_houses?: { house: number; score: number; area: string }[];
+    weakest_houses?: { house: number; score: number; area: string }[];
+}
+interface TransitItem {
+    planet: string;
+    current_sign: string;
+    current_house_in_natal: number;
+    transit_interpretation?: string;
+}
+interface TransitsData {
+    date?: string;
+    planets?: TransitItem[];
+}
+interface KeyTheme {
+    theme?: string;
+    title?: string;
+    interpretation?: string;
+}
+interface AnalysisData {
+    identity?: { name?: string; birth_details?: string; ayanamsa?: string; chart_style?: string };
+    chart_summary?: ChartSummary;
+    ascendant?: AscendantData;
+    houses: HouseData[];
+    planets: PlanetData[];
+    dasha: DashaData;
+    ashtakavarga?: AshtakavargaData;
+    planet_strength_ranking?: PlanetStrengthItem[];
+    transits?: TransitsData;
+    key_themes?: KeyTheme[];
+}
 
 type InterpItem = string | { technical: string; simple: string } | undefined | null;
 const simpleText = (item: InterpItem): string => (!item ? '' : typeof item === 'object' ? item.simple : item);
 const techText = (item: InterpItem): string | null => (!item ? null : typeof item === 'object' ? item.technical : null);
+const EMPTY = '----';
+const displayValue = (value: unknown): string => {
+    if (value === null || value === undefined || value === '') return EMPTY;
+    if (Array.isArray(value)) return value.length ? value.join(', ') : EMPTY;
+    return String(value);
+};
+const degreeValue = (value: unknown): string => typeof value === 'number' && Number.isFinite(value) ? `${value.toFixed(2)} deg` : EMPTY;
 
 type AccentKey = 'secondary' | 'amber' | 'emerald' | 'blue';
 const ACCENT_BAR: Record<AccentKey, string> = {
@@ -179,15 +270,18 @@ export default function KundliPage() {
                 payload.planets = (payload.planets as Record<string, unknown>[]).map((p) => ({
                     ...p,
                     yogas: (p.yogas as Yoga[]) || [],
-                    interpretation: (p.interpretation as (string | { technical: string; simple: string })[]) || [],
+                    interpretation: (p.interpretation as (string | { technical: string; simple: string })[])
+                        || [p.house_placement_interpretation, p.nakshatra_interpretation, p.dignity_interpretation].filter(Boolean),
                     conjunctions: (p.conjunctions as string[]) || [],
-                    lordOf: (p.lordOf as number[]) || []
+                    lordOf: (p.lordOf as number[]) || (p.lord_of as number[]) || []
                 }));
 
                 payload.houses = (payload.houses as Record<string, unknown>[]).map((h) => ({
                     ...h,
                     occupants: (h.occupants as Occupant[]) || [],
-                    interpretation: (h.interpretation as (string | { technical: string; simple: string })[]) || [],
+                    lordHouse: (h.lordHouse as number) || (h.lord_house as number) || 0,
+                    interpretation: (h.interpretation as (string | { technical: string; simple: string })[])
+                        || [h.lord_interpretation].filter(Boolean),
                     areas: (h.areas as string[]) || []
                 }));
 
@@ -309,7 +403,6 @@ export default function KundliPage() {
     }, [updateCarouselEdges, data]);
 
     const lagnaSign = useMemo(() => data?.houses.find(h => h.house === 1)?.sign || null, [data]);
-    const sunPlanet = useMemo(() => data?.planets.find(p => p.planet === 'Sun'), [data]);
     const moonPlanet = useMemo(() => data?.planets.find(p => p.planet === 'Moon'), [data]);
     const allYogas = useMemo(() => data ? data.planets.flatMap(p => p.yogas.map(y => ({ ...y, planet: p.planet }))) : [], [data]);
 
@@ -330,11 +423,46 @@ export default function KundliPage() {
         return data.houses;
     }, [data, houseFilter]);
 
-    const strongHouses = useMemo(() => {
+    const topPlanetStrengths = useMemo(() => {
         if (!data) return [];
-        return data.houses
-            .filter(h => h.occupants.some(o => ['Exalted', 'Swakshetra', 'Moolatrikona'].includes(o.dignity)) || h.occupants.length >= 2)
-            .map(h => h.house);
+        if (data.planet_strength_ranking?.length) return data.planet_strength_ranking.slice(0, 5);
+        return [...data.planets]
+            .sort((a, b) => (b.shadbala || 0) - (a.shadbala || 0))
+            .slice(0, 5)
+            .map((p, idx) => ({
+                rank: idx + 1,
+                planet: p.planet,
+                shadbala: p.shadbala || 0,
+                dignity: p.dignity || '',
+                summary: `${p.planet} is among your strongest planets.`,
+            }));
+    }, [data]);
+
+    const derivedStrengths = useMemo(() => {
+        if (!data) return [];
+        const explicit = data.chart_summary?.strengths || [];
+        if (explicit.length) return explicit;
+        const strongest = data.ashtakavarga?.strongest_houses?.slice(0, 2).map(h => `Strong ${h.area} house score (${h.score})`) || [];
+        const exalted = data.planets
+            .filter(p => String(p.dignity).toLowerCase() === 'exalted')
+            .map(p => `${p.planet} exalted in ${p.sign}`);
+        return [...exalted, ...strongest].slice(0, 4);
+    }, [data]);
+
+    const derivedChallenges = useMemo(() => {
+        if (!data) return [];
+        const explicit = data.chart_summary?.challenges || [];
+        if (explicit.length) return explicit;
+        const weakest = data.ashtakavarga?.weakest_houses?.slice(0, 2).map(h => `Lower ${h.area} house score (${h.score})`) || [];
+        const debilitated = data.planets
+            .filter(p => String(p.dignity).toLowerCase() === 'debilitated')
+            .map(p => `${p.planet} debilitated in ${p.sign}`);
+        return [...debilitated, ...weakest].slice(0, 4);
+    }, [data]);
+
+    const currentDashaBadges = useMemo(() => {
+        const active = data?.dasha?.active || [];
+        return active.slice(0, 3).map(period => `${period.planet} ${period.type}`);
     }, [data]);
 
     const hasPremiumGrid = lockedSections.has('ashtakavarga')
@@ -480,7 +608,7 @@ export default function KundliPage() {
                 <PaywallCard paywall={paywallData} variant="modal" onClose={() => setPaywallData(null)} />
             )}
 
-            <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
+            <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4">
 
                 {/* ═══ 1. PAGE HEADER ═══ */}
                 <header className="flex items-center justify-between gap-3 flex-wrap">
@@ -521,33 +649,72 @@ export default function KundliPage() {
                     </div>
                 </header>
 
-                {/* ═══ 2. CORE IDENTITY ═══ */}
-                <section>
-                    <SectionHeading title="Core Identity" />
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                        {[
-                            { label: 'Ascendant', tag: 'Lagna', sign: lagnaSign, color: 'text-secondary' },
-                            { label: 'Moon Sign', tag: 'Rashi', sign: moonPlanet?.sign, color: 'text-indigo-300' },
-                            { label: 'Sun Sign', tag: 'Surya', sign: sunPlanet?.sign, color: 'text-amber-400' },
-                        ].map((item, i) => (
-                            <Card key={i} padding="sm" hoverable={false} className="!rounded-[24px]">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 relative shrink-0">
-                                        <Image
-                                            src={SIGN_TO_ICON[item.sign || 'Aries'] || '/icons/rashi/aries.png'}
-                                            alt={item.label}
-                                            fill
-                                            className="object-contain drop-shadow-[0_0_14px_rgba(200,136,10,0.22)]"
-                                        />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className={`text-[10px] font-bold ${item.color} uppercase tracking-[0.2em]`}>{item.label}</p>
-                                        <p className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight mt-0.5">{item.sign || '—'}</p>
-                                        <p className="text-[10px] text-foreground/55 font-bold uppercase tracking-wider mt-0.5">{item.tag}</p>
-                                    </div>
+                {/* Report-first Kundli overview */}
+                <section className="grid grid-cols-1 xl:grid-cols-[minmax(340px,0.82fr)_1.35fr] gap-4 items-stretch">
+                    <Card padding="md" hoverable={false} className="!rounded-[24px]">
+                        <div className="h-full flex flex-col">
+                            <div className="flex items-start justify-between gap-3 mb-4">
+                                <div>
+                                    <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em]">Kundli Chart</p>
+                                    <h2 className="text-2xl sm:text-3xl font-headline font-bold text-foreground leading-tight mt-1">
+                                        {displayValue(data.identity?.chart_style)}
+                                    </h2>
                                 </div>
-                            </Card>
-                        ))}
+                                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-secondary/12 text-secondary border border-secondary/25">
+                                    {displayValue(data.chart_summary?.overall_tone)}
+                                </span>
+                            </div>
+                            <div className="bg-surface-variant/15 rounded-[20px] p-3 sm:p-4 border border-outline-variant/12 flex items-center justify-center grow min-h-[260px]">
+                                <KundliSvg className="w-full max-w-[440px] mx-auto drop-shadow-xl" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mt-4">
+                                <MetricTile label="Ayanamsa" value={data.identity?.ayanamsa} />
+                                <MetricTile label="Birth Details" value={data.identity?.birth_details} />
+                            </div>
+                        </div>
+                    </Card>
+
+                    <div className="space-y-3">
+                        <Card padding="md" hoverable={false} className="!rounded-[24px]">
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.25em]">Personal Report</p>
+                                    <h2 className="text-2xl sm:text-4xl font-headline font-bold text-foreground leading-tight mt-1">
+                                        {displayValue(data.chart_summary?.headline)}
+                                    </h2>
+                                    <p className="text-sm sm:text-[15px] text-foreground/68 leading-relaxed mt-3">
+                                        {displayValue(data.chart_summary?.overview)}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                    <MetricTile label="Ascendant" value={data.ascendant?.sign || lagnaSign} />
+                                    <MetricTile label="Moon Sign" value={moonPlanet?.sign} />
+                                    <MetricTile label="Moon Nakshatra" value={moonPlanet?.nakshatra} />
+                                    <MetricTile label="Asc Degree" value={degreeValue(data.ascendant?.degree)} />
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {[data.ascendant?.sign && `${data.ascendant.sign} Ascendant`, moonPlanet?.dignity && `Moon ${moonPlanet.dignity}`, ...currentDashaBadges]
+                                        .filter(Boolean)
+                                        .map((badge, idx) => (
+                                            <span key={idx} className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-surface-variant/20 text-foreground/70 border border-outline-variant/15">
+                                                {badge}
+                                            </span>
+                                        ))}
+                                    {currentDashaBadges.length === 0 && (
+                                        <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-surface-variant/20 text-foreground/70 border border-outline-variant/15">
+                                            {EMPTY}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </Card>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <InsightList title="Strengths" items={derivedStrengths} accent="emerald" />
+                            <InsightList title="Focus Areas" items={derivedChallenges} accent="amber" />
+                        </div>
                     </div>
                 </section>
 
@@ -589,7 +756,7 @@ export default function KundliPage() {
                         )}
                         <div
                             ref={planetTrackRef}
-                            className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth no-scrollbar px-5 sm:px-14 py-5"
+                            className="flex gap-2.5 sm:gap-3 overflow-x-auto scroll-smooth no-scrollbar px-4 sm:px-12 py-3.5"
                         >
                             {data.planets.map(planet => {
                                 const dignity = getDignityStyle(planet.dignity);
@@ -600,13 +767,13 @@ export default function KundliPage() {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.94 }}
                                         onClick={() => handlePlanetClick(planet)}
-                                        className={`flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group rounded-2xl px-2 py-2 transition-all ${isSelected
+                                        className={`flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group rounded-2xl px-2 py-1.5 transition-all ${isSelected
                                                 ? 'bg-secondary/10 ring-1 ring-secondary/40'
                                                 : 'hover:bg-surface-variant/15'
                                             }`}
                                     >
                                         <motion.div layoutId={`planet-fly-${planet.planet}`}>
-                                            <PlanetIcon planet={planet.planet} size="w-[60px] h-[60px] sm:w-[72px] sm:h-[72px]" />
+                                            <PlanetIcon planet={planet.planet} size="w-[54px] h-[54px] sm:w-[62px] sm:h-[62px]" />
                                         </motion.div>
                                         <p className="text-[12px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors leading-none mt-1">
                                             {planet.planet}
@@ -621,38 +788,37 @@ export default function KundliPage() {
                                 );
                             })}
                         </div>
+                        <AnimatePresence mode="wait">
+                            {selectedPlanet && (
+                                <motion.div
+                                    ref={insightRef}
+                                    key={`planet-${selectedPlanet.planet}`}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.25 }}
+                                    className="border-t border-outline-variant/12"
+                                >
+                                    <div className="px-4 sm:px-6 py-4">
+                                        <div className="flex items-center justify-between gap-3 mb-3">
+                                            <SectionHeading title="Selected Planet" accent="amber" />
+                                            <button
+                                                onClick={closeInsight}
+                                                className="flex items-center gap-1 text-[10px] font-bold text-foreground/55 hover:text-secondary uppercase tracking-wider transition-colors"
+                                            >
+                                                <X className="w-3 h-3" /> Close
+                                            </button>
+                                        </div>
+                                        <PlanetDetail planet={selectedPlanet} compact />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </Card>
                 </section>
 
                 {/* ═══ 4. CHART + HOUSES ═══ */}
-                <section className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-5">
-                    {/* Chart */}
-                    <Card padding="sm" hoverable={false} className="!rounded-[24px]">
-                        <div className="p-1 sm:p-2">
-                            <SectionHeading title="Vedic Birth Chart" />
-                            <div className="bg-surface-variant/15 rounded-[20px] p-4 sm:p-6 border border-outline-variant/12 flex items-center justify-center">
-                                <KundliSvg className="w-full max-w-[460px] mx-auto drop-shadow-xl" />
-                            </div>
-                            <div className="mt-4 grid grid-cols-3 gap-2">
-                                <div className="bg-surface-variant/15 rounded-[14px] p-3 border border-outline-variant/12">
-                                    <p className="text-[9px] font-bold text-foreground/55 uppercase tracking-widest">Ascendant</p>
-                                    <p className="text-[14px] font-headline font-bold text-foreground mt-1 leading-none">{lagnaSign || '—'}</p>
-                                </div>
-                                <div className="bg-surface-variant/15 rounded-[14px] p-3 border border-outline-variant/12">
-                                    <p className="text-[9px] font-bold text-foreground/55 uppercase tracking-widest">Moon</p>
-                                    <p className="text-[14px] font-headline font-bold text-foreground mt-1 leading-none">{moonPlanet?.sign || '—'}</p>
-                                </div>
-                                <div className="bg-surface-variant/15 rounded-[14px] p-3 border border-outline-variant/12">
-                                    <p className="text-[9px] font-bold text-foreground/55 uppercase tracking-widest">Strong Houses</p>
-                                    <p className="text-[14px] font-headline font-bold text-foreground mt-1 leading-none">
-                                        {strongHouses.length ? strongHouses.slice(0, 4).map(h => `H${h}`).join(', ') : '—'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </Card>
-
-                    {/* Houses */}
+                <section>
                     <Card padding="sm" hoverable={false} className="!rounded-[24px]">
                         <div className="p-1 sm:p-2">
                             <div className="flex items-center gap-2 mb-3">
@@ -673,7 +839,7 @@ export default function KundliPage() {
                                     ))}
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 gap-2.5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
                                 {filteredHouses.map(house => {
                                     const hasOcc = house.occupants.length > 0;
                                     const isSelected = selectedHouse?.house === house.house;
@@ -682,7 +848,7 @@ export default function KundliPage() {
                                         <button
                                             key={house.house}
                                             onClick={() => handleHouseClick(house)}
-                                            className={`text-left rounded-[16px] p-3 border transition-all relative overflow-hidden ${isSelected
+                                            className={`text-left rounded-[16px] p-3 border transition-all relative overflow-hidden min-h-[126px] ${isSelected
                                                     ? 'bg-secondary/10 border-secondary/45 ring-1 ring-secondary/30'
                                                     : hasOcc
                                                         ? 'bg-surface/40 border-outline-variant/20 hover:border-secondary/35'
@@ -691,7 +857,7 @@ export default function KundliPage() {
                                         >
                                             {hasOcc && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-secondary/55 rounded-l-[14px]" />}
                                             <div className="mb-1.5">
-                                                <p className="text-[14px] font-headline font-bold text-foreground leading-tight">{house.name.split('(')[0].trim()}</p>
+                                                <p className="text-[14px] font-headline font-bold text-foreground leading-tight truncate">{house.name.split('(')[0].trim()}</p>
                                                 <p className="text-[10px] text-foreground/65 font-bold uppercase tracking-wider mt-0.5">
                                                     H{house.house} · {house.sign} · Lord {house.lord}
                                                 </p>
@@ -731,17 +897,17 @@ export default function KundliPage() {
 
                 {/* ═══ 5. SELECTION INSIGHT ═══ */}
                 <AnimatePresence mode="wait">
-                    {(selectedPlanet || selectedHouse) && (
+                    {selectedHouse && (
                         <motion.section
                             ref={insightRef}
-                            key={selectedPlanet?.planet || `house-${selectedHouse?.house}`}
+                            key={`house-${selectedHouse.house}`}
                             initial={{ opacity: 0, y: 14 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.25 }}
                         >
                             <SectionHeading
-                                title={selectedPlanet ? 'Selected Planet' : 'Selected House'}
+                                title="Selected House"
                                 hint={
                                     <button
                                         onClick={closeInsight}
@@ -752,8 +918,7 @@ export default function KundliPage() {
                                 }
                             />
                             <Card padding="md" hoverable={false} className="!rounded-[24px]">
-                                {selectedPlanet && <PlanetDetail planet={selectedPlanet} />}
-                                {selectedHouse && <HouseDetail house={selectedHouse} />}
+                                <HouseDetail house={selectedHouse} />
                             </Card>
                         </motion.section>
                     )}
@@ -779,6 +944,19 @@ export default function KundliPage() {
                 </section>
 
                 {/* ═══ 7. COSMIC STRENGTHS ═══ */}
+                <section className="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-5">
+                    <PlanetStrengthReport items={topPlanetStrengths} />
+                    <AshtakavargaReport data={data.ashtakavarga} />
+                </section>
+
+                <section>
+                    <TransitReport data={data.transits} />
+                </section>
+
+                <section>
+                    <LifeThemes themes={data.key_themes} />
+                </section>
+
                 {allYogas.length > 0 && (
                     <section>
                         <SectionHeading
@@ -905,12 +1083,172 @@ export default function KundliPage() {
 
 // ─── Subcomponents ──────────────────────────────────────────
 
-function PlanetDetail({ planet }: { planet: PlanetData }) {
+function MetricTile({ label, value }: { label: string; value: unknown }) {
+    return (
+        <div className="bg-surface-variant/15 rounded-[14px] p-3 border border-outline-variant/12 min-h-[64px]">
+            <p className="text-[9px] font-bold text-foreground/55 uppercase tracking-widest">{label}</p>
+            <p className="text-[14px] font-headline font-bold text-foreground mt-1 leading-tight break-words">
+                {displayValue(value)}
+            </p>
+        </div>
+    );
+}
+
+function InsightList({ title, items, accent }: { title: string; items: string[]; accent: AccentKey }) {
+    const visible = items.length ? items : [EMPTY, EMPTY, EMPTY];
+    return (
+        <Card padding="md" hoverable={false} className="!rounded-[24px] h-full">
+            <SectionHeading title={title} accent={accent} />
+            <div className="space-y-2">
+                {visible.slice(0, 4).map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-2 rounded-[14px] bg-surface-variant/12 border border-outline-variant/10 px-3 py-2.5">
+                        <span className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${ACCENT_BAR[accent]}`} />
+                        <p className="text-[13px] text-foreground/74 leading-snug">{displayValue(item)}</p>
+                    </div>
+                ))}
+            </div>
+        </Card>
+    );
+}
+
+function PlanetStrengthReport({ items }: { items: PlanetStrengthItem[] }) {
+    const visible = items.length ? items : [];
+    const max = Math.max(...visible.map(item => item.shadbala || 0), 8);
+    return (
+        <Card padding="md" hoverable={false} className="!rounded-[24px] h-full">
+            <SectionHeading title="Planet Strength" accent="blue" hint={<TrendingUp className="w-4 h-4 text-blue-400" />} />
+            <div className="space-y-3">
+                {visible.length ? visible.map(item => {
+                    const pct = Math.min(100, Math.max(8, ((item.shadbala || 0) / max) * 100));
+                    const dignity = getDignityStyle(item.dignity);
+                    return (
+                        <div key={`${item.rank}-${item.planet}`} className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[12px] font-bold text-foreground/45 w-5">#{item.rank}</span>
+                                <span className="text-[13px] font-headline font-bold text-foreground">{displayValue(item.planet)}</span>
+                                <span className={`ml-auto text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${dignity.bg} ${dignity.text} ${dignity.border}`}>
+                                    {displayValue(dignity.label)}
+                                </span>
+                                <span className="text-[12px] font-bold text-secondary w-10 text-right">{item.shadbala ? item.shadbala.toFixed(1) : EMPTY}</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-surface-variant/25 overflow-hidden">
+                                <div className="h-full rounded-full bg-gradient-to-r from-blue-400/80 to-secondary/85" style={{ width: `${pct}%` }} />
+                            </div>
+                        </div>
+                    );
+                }) : (
+                    <PlaceholderRows rows={5} />
+                )}
+            </div>
+        </Card>
+    );
+}
+
+function AshtakavargaReport({ data }: { data?: AshtakavargaData }) {
+    return (
+        <Card padding="md" hoverable={false} className="!rounded-[24px] h-full">
+            <SectionHeading title="Life Areas" accent="emerald" hint={<Activity className="w-4 h-4 text-emerald-400" />} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <AreaScoreColumn title="Strongest" items={data?.strongest_houses || []} accent="emerald" />
+                <AreaScoreColumn title="Needs Attention" items={data?.weakest_houses || []} accent="amber" />
+            </div>
+        </Card>
+    );
+}
+
+function AreaScoreColumn({ title, items, accent }: { title: string; items: { house: number; score: number; area: string }[]; accent: AccentKey }) {
+    const visible = items.length ? items : [
+        { house: 0, score: 0, area: EMPTY },
+        { house: 0, score: 0, area: EMPTY },
+        { house: 0, score: 0, area: EMPTY },
+    ];
+    return (
+        <div className="space-y-2">
+            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${ACCENT_TEXT[accent]}`}>{title}</p>
+            {visible.slice(0, 3).map((item, idx) => (
+                <div key={idx} className="rounded-[14px] bg-surface-variant/12 border border-outline-variant/10 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                        <p className="text-[13px] font-bold text-foreground">{displayValue(item.area)}</p>
+                        <span className="text-[11px] font-bold text-foreground/60">{item.house ? `H${item.house}` : EMPTY}</span>
+                    </div>
+                    <p className="text-[11px] text-foreground/55 mt-1">Score: {item.score ? item.score : EMPTY}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function TransitReport({ data }: { data?: TransitsData }) {
+    const planets = data?.planets || [];
+    return (
+        <Card padding="md" hoverable={false} className="!rounded-[24px]">
+            <SectionHeading
+                title="Current Transits"
+                hint={
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-foreground/55 uppercase tracking-widest">
+                        <CalendarDays className="w-3.5 h-3.5" /> {displayValue(data?.date)}
+                    </span>
+                }
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {planets.length ? planets.map(item => (
+                    <div key={item.planet} className="rounded-[16px] bg-surface-variant/12 border border-outline-variant/10 p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg" style={{ color: PLANET_COLORS[item.planet] }}>
+                                {PLANET_GLYPHS[item.planet] || '*'}
+                            </span>
+                            <p className="text-[13px] font-headline font-bold text-foreground">{displayValue(item.planet)}</p>
+                            <span className="ml-auto text-[10px] font-bold text-secondary uppercase tracking-wider">H{displayValue(item.current_house_in_natal)}</span>
+                        </div>
+                        <p className="text-[11px] font-bold text-foreground/55 uppercase tracking-widest mb-1">{displayValue(item.current_sign)}</p>
+                        <p className="text-[12px] text-foreground/70 leading-snug">{displayValue(item.transit_interpretation)}</p>
+                    </div>
+                )) : (
+                    <div className="sm:col-span-2 lg:col-span-3">
+                        <PlaceholderRows rows={3} />
+                    </div>
+                )}
+            </div>
+        </Card>
+    );
+}
+
+function LifeThemes({ themes }: { themes?: KeyTheme[] }) {
+    const visible = themes?.length ? themes : [{ theme: EMPTY, title: EMPTY, interpretation: EMPTY }];
+    return (
+        <Card padding="md" hoverable={false} className="!rounded-[24px]">
+            <SectionHeading title="Key Themes" accent="amber" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {visible.map((theme, idx) => (
+                    <div key={idx} className="rounded-[16px] bg-amber-500/[0.05] border border-amber-500/15 p-4">
+                        <p className="text-[10px] font-bold text-amber-400 uppercase tracking-[0.22em]">{displayValue(theme.theme)}</p>
+                        <h3 className="text-[16px] font-headline font-bold text-foreground mt-1">{displayValue(theme.title)}</h3>
+                        <p className="text-[13px] text-foreground/70 leading-relaxed mt-2">{displayValue(theme.interpretation)}</p>
+                    </div>
+                ))}
+            </div>
+        </Card>
+    );
+}
+
+function PlaceholderRows({ rows }: { rows: number }) {
+    return (
+        <div className="space-y-2">
+            {Array.from({ length: rows }).map((_, idx) => (
+                <div key={idx} className="rounded-[14px] bg-surface-variant/12 border border-outline-variant/10 px-3 py-2.5">
+                    <p className="text-[13px] text-foreground/55">{EMPTY}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function PlanetDetail({ planet, compact = false }: { planet: PlanetData; compact?: boolean }) {
     const dignity = getDignityStyle(planet.dignity);
     return (
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className={`flex flex-col ${compact ? 'lg:flex-row gap-4' : 'md:flex-row gap-6'}`}>
             {/* Left: giant icon */}
-            <div className="md:w-[220px] shrink-0 flex flex-col items-center text-center">
+            <div className={`${compact ? 'lg:w-[190px]' : 'md:w-[220px]'} shrink-0 flex flex-col items-center text-center`}>
                 <div className="relative mb-4">
                     <div
                         className="absolute inset-[-30px] rounded-full blur-[60px] opacity-30"
@@ -920,10 +1258,10 @@ function PlanetDetail({ planet }: { planet: PlanetData }) {
                         layoutId={`planet-fly-${planet.planet}`}
                         transition={{ type: 'spring', stiffness: 180, damping: 24 }}
                     >
-                        <PlanetIcon planet={planet.planet} size="w-[140px] h-[140px] sm:w-[160px] sm:h-[160px]" />
+                        <PlanetIcon planet={planet.planet} size={compact ? "w-[96px] h-[96px] sm:w-[116px] sm:h-[116px]" : "w-[140px] h-[140px] sm:w-[160px] sm:h-[160px]"} />
                     </motion.div>
                 </div>
-                <h3 className="text-2xl xl:text-3xl font-headline font-bold text-foreground leading-none">{planet.planet}</h3>
+                <h3 className={`${compact ? 'text-xl xl:text-2xl' : 'text-2xl xl:text-3xl'} font-headline font-bold text-foreground leading-none`}>{planet.planet}</h3>
                 <p className="text-[11px] font-bold text-secondary uppercase tracking-[0.25em] mt-2">
                     {planet.sign} · House {planet.house}
                 </p>
@@ -940,12 +1278,12 @@ function PlanetDetail({ planet }: { planet: PlanetData }) {
             </div>
 
             {/* Right: stats + interpretation + yogas */}
-            <div className="flex-1 min-w-0 space-y-5">
+            <div className={`flex-1 min-w-0 ${compact ? 'space-y-3' : 'space-y-5'}`}>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
                         { l: 'Degree', v: `${planet.degree.toFixed(2)}°` },
-                        { l: 'Shadbala', v: planet.shadbala > 0 ? planet.shadbala.toFixed(1) : '—' },
-                        { l: 'Lord Of', v: planet.lordOf?.length ? `H${planet.lordOf.join(', H')}` : '—' },
+                        { l: 'Shadbala', v: planet.shadbala > 0 ? planet.shadbala.toFixed(1) : EMPTY },
+                        { l: 'Lord Of', v: planet.lordOf?.length ? `H${planet.lordOf.join(', H')}` : EMPTY },
                         { l: 'Sign', v: planet.sign },
                     ].map((stat, i) => (
                         <div key={i} className="flex flex-col px-3 py-2.5 bg-surface-variant/15 rounded-[12px] border border-outline-variant/12">
@@ -972,8 +1310,8 @@ function PlanetDetail({ planet }: { planet: PlanetData }) {
                     <h4 className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
                         <Info className="w-3.5 h-3.5" /> Cosmic Interpretation
                     </h4>
-                    <div className="space-y-3">
-                        {planet.interpretation.map((item, i) => {
+                    <div className={compact ? "grid grid-cols-1 lg:grid-cols-2 gap-3" : "space-y-3"}>
+                        {planet.interpretation.slice(0, compact ? 2 : planet.interpretation.length).map((item, i) => {
                             const simple = simpleText(item);
                             const tech = techText(item);
                             return (
@@ -1148,7 +1486,7 @@ function DashaTimeline({ dasha }: { dasha: DashaData }) {
                 {hasActive && dasha.active?.map((period, idx) => {
                     const start = new Date(period.start);
                     const end = new Date(period.end);
-                    const { pct, rem } = progress[idx] || { pct: 0, rem: '—' };
+                    const { pct, rem } = progress[idx] || { pct: 0, rem: EMPTY };
                     const isMaha = period.type === 'Mahadasha';
                     return (
                         <div
@@ -1219,7 +1557,7 @@ function DashaTimeline({ dasha }: { dasha: DashaData }) {
                             <span className="text-[13px] font-bold text-secondary uppercase tracking-wider">
                                 {(() => {
                                     const d = dasha.currentMahaDasha || dasha.current;
-                                    if (typeof d === 'object' && d !== null) return d.planet || d.name || '—';
+                                    if (typeof d === 'object' && d !== null) return d.planet || d.name || EMPTY;
                                     return d;
                                 })()}
                             </span>

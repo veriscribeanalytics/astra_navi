@@ -2329,6 +2329,8 @@
     "currentTier": "Current tier: {tier}",
     "viewPlansUpgrade": "View Plans & Upgrade",
     "viewPlans": "View Plans",
+    "unlockInsight": "Unlock to read your personalized insight",
+    "unlockWeeklyTrend": "Unlock to see your 7-day trend",
     "products": {
       "pro_monthly": "Pro Monthly",
       "credit_pack_10": "10 Credits Pack"

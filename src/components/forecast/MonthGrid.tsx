@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from '@/hooks';
 import { ForecastArea } from '@/data/areaThemes';
-import { AREA_COLORS } from '@/data/lifeAreaColors';
+import { getAreaPhaseMain } from '@/data/lifeAreaColors';
 
 export interface MonthData {
   month: string;
@@ -32,7 +32,7 @@ export default function MonthGrid({ months, colorHex, area, selectedMonth, onSel
         const monthIdx = date.getMonth();
         const label = t(`forecast.monthsShort.${MONTH_KEYS[monthIdx]}`) || m.month.slice(5);
         const isSelected = selectedMonth === m.month;
-        const phaseColor = AREA_COLORS[area].main;
+        const phaseColor = getAreaPhaseMain(area, m.score);
 
         return (
           <motion.button

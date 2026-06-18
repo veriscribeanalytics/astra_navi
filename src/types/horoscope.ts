@@ -42,12 +42,12 @@ export interface HoroscopeData {
     retrograde?: string[];
   };
   areas_text?: {
-    career: { insight: string; tone: string; personal_notes?: string[] };
-    love: { insight: string; tone: string; personal_notes?: string[] };
-    health: { insight: string; tone: string; personal_notes?: string[] };
-    finance: { insight: string; tone: string; personal_notes?: string[] };
-    general?: { insight: string; tone: string; personal_notes?: string[] };
-    spiritual?: { insight: string; tone: string; personal_notes?: string[] };
+    career: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
+    love: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
+    health: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
+    finance: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
+    general?: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
+    spiritual?: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
   };
   alerts?: {
     primary: { technical: string; simple: string; type: string; importance: string };

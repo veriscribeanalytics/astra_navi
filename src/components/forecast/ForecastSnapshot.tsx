@@ -4,7 +4,7 @@ import React from 'react';
 import Card from '@/components/ui/Card';
 import { Sparkles, Calendar, AlertTriangle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { AREA_COLORS, BRAND_GOLD } from '@/data/lifeAreaColors';
+import { getAreaPhaseMain, getAreaPhaseGlowColor, BRAND_GOLD } from '@/data/lifeAreaColors';
 import type { ForecastArea } from '@/data/areaThemes';
 
 interface InsightData {
@@ -42,8 +42,8 @@ interface ForecastSnapshotProps {
 export default function ForecastSnapshot({ insight, summary, range, theme, area, t }: ForecastSnapshotProps) {
   const score = insight ? insight.score : (summary?.average_score ?? 50);
 
-  const phaseHex = AREA_COLORS[area].main;
-  const phaseGlow = AREA_COLORS[area].glow;
+  const phaseHex = getAreaPhaseMain(area, score);
+  const phaseGlow = getAreaPhaseGlowColor(area, score);
 
   const deriveLabel = (s: number) => {
     if (s >= 70) return t('forecast.labelFavorable');
@@ -131,7 +131,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
             {t('forecast.bestDay')}
           </span>
           <span className="text-xs sm:text-sm font-bold text-foreground/80 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" style={{ color: AREA_COLORS[area].main }} />
+            <Calendar className="w-3.5 h-3.5" style={{ color: phaseHex }} />
             {bestDay}
           </span>
         </div>
@@ -140,7 +140,7 @@ export default function ForecastSnapshot({ insight, summary, range, theme, area,
             {t('forecast.challengingDay')}
           </span>
           <span className="text-xs sm:text-sm font-bold text-foreground/80 flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 animate-bounce" style={{ color: AREA_COLORS[area].main }} />
+            <AlertTriangle className="w-3.5 h-3.5 animate-bounce" style={{ color: phaseHex }} />
             {challengingDay}
           </span>
         </div>
