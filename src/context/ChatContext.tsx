@@ -15,6 +15,11 @@ import type { FamilyCompatibilityResponse, FamilyRelationshipType } from '@/type
 const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
 const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
+const STREAM_TOKEN_REVEAL_DELAY_MS = 14;
+
+const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+const splitStreamToken = (token: string): string[] => token.match(/\S+\s*|\s+/g) ?? [token];
 
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
@@ -39,6 +44,7 @@ export interface FileAttachment {
 export interface PendingChatAction {
   type: 'run_compatibility';
   memberId: number;
+  source?: 'manual' | 'linked' | string;
   memberName: string;
   relationshipType: FamilyRelationshipType | string;
   creditCost: number;
@@ -47,6 +53,12 @@ export interface PendingChatAction {
    *  `memberId`; when set we hit /connections/{id}/compatibility. */
   connectionId?: number;
 }
+
+export const getPendingActionKey = (action: Pick<PendingChatAction, 'memberId' | 'source' | 'connectionId'>): string => {
+  const isLinked = action.source === 'linked' || action.connectionId !== undefined;
+  const id = isLinked ? (action.connectionId ?? action.memberId) : action.memberId;
+  return `${isLinked ? 'linked' : 'manual'}:${id}`;
+};
 
 export interface ResolvedChatAction {
   status: 'running' | 'done' | 'error';
@@ -105,7 +117,7 @@ export interface ChatMessage {
   agentRounds?: number;
   toolTrajectory?: { name: string; args?: Record<string, unknown>; ok?: boolean; error?: string | null; ms?: number }[];
   /** Local-only: per-pendingAction state once the user has tapped approve. */
-  resolvedActions?: Record<number, ResolvedChatAction>;
+  resolvedActions?: Record<string, ResolvedChatAction>;
   createdAt: string;
 }
 
@@ -183,7 +195,7 @@ interface ChatContextType {
   selectedAvatarId: string;
   setSelectedAvatarId: (avatarId: string) => void;
   isLoadingAvatars: boolean;
-  resolvePendingAction: (messageId: string, memberId: number, connectionId?: number) => Promise<void>;
+  resolvePendingAction: (messageId: string, action: PendingChatAction) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -452,9 +464,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let streamDone = false;
       let persistedAiMsgId: string | null = null;
 
-      let lastUpdate = 0;
-      const updateInterval = 50;
-
       if (reader) {
         while (!streamDone) {
           if (abortController.signal.aborted) {
@@ -564,12 +573,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     })() : m.errorMessage,
                   } : m)
                 } : null);
-              } else if (data.token) {
-                fullText += data.token;
-                const now = Date.now();
-                if (now - lastUpdate > updateInterval) {
+              } else if (typeof data.token === 'string' && data.token.length > 0) {
+                for (const tokenPart of splitStreamToken(data.token)) {
+                  fullText += tokenPart;
                   setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
-                  lastUpdate = now;
+                  await delay(STREAM_TOKEN_REVEAL_DELAY_MS);
+                  if (abortController.signal.aborted) {
+                    streamDone = true;
+                    break;
+                  }
                 }
               }
               currentEventName = '';
@@ -593,7 +605,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const localAiMsg = prev.messages.find(m => m.id === persistedAiMsgId || m.id === aiMsgId);
               if (!localAiMsg) return backendChat;
               const backendAiMsg = backendChat.messages.find(m => m.id === persistedAiMsgId) ?? backendChat.messages.find(m => m.type === 'ai' && m.text === localAiMsg.text);
-              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory)) {
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.pendingActions || localAiMsg.toolLoopExceeded !== undefined || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory || localAiMsg.resolvedActions)) {
                 const merged = backendChat.messages.map(m => {
                   if (m.id === backendAiMsg.id) {
                     return {
@@ -618,11 +630,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       avatarCreditCost: localAiMsg.avatarCreditCost ?? m.avatarCreditCost,
                       errorCode: localAiMsg.errorCode ?? m.errorCode,
                       opener: localAiMsg.opener ?? m.opener,
+                      pendingActions: localAiMsg.pendingActions ?? m.pendingActions,
+                      toolLoopExceeded: localAiMsg.toolLoopExceeded ?? m.toolLoopExceeded,
                       agentic: localAiMsg.agentic ?? m.agentic,
                       planSteps: localAiMsg.planSteps ?? m.planSteps,
                       reflections: localAiMsg.reflections ?? m.reflections,
                       agentRounds: localAiMsg.agentRounds ?? m.agentRounds,
                       toolTrajectory: localAiMsg.toolTrajectory ?? m.toolTrajectory,
+                      resolvedActions: localAiMsg.resolvedActions ?? m.resolvedActions,
                     };
                   }
                   return m;
@@ -718,7 +733,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatarIdForRegen = target?.avatarId ?? selectedAvatarId ?? undefined;
       return {
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null, opener: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined } : m),
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null, opener: undefined, pendingActions: undefined, toolLoopExceeded: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined, resolvedActions: undefined } : m),
       };
     });
 
@@ -751,6 +766,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           summaryIncluded: metadata.summaryIncluded ?? m.summaryIncluded,
           persona: metadata.persona ?? m.persona,
           errorCode: metadata.errorCode ?? m.errorCode,
+          pendingActions: Array.isArray(metadata.pendingActions) ? metadata.pendingActions : m.pendingActions,
+          toolLoopExceeded: typeof metadata.toolLoopExceeded === 'boolean' ? metadata.toolLoopExceeded : m.toolLoopExceeded,
+          agentic: typeof metadata.agentic === 'boolean' ? metadata.agentic : m.agentic,
+          planSteps: Array.isArray(metadata.planSteps) ? metadata.planSteps : m.planSteps,
+          reflections: Array.isArray(metadata.reflections) ? metadata.reflections : m.reflections,
+          agentRounds: typeof metadata.agentRounds === 'number' ? metadata.agentRounds : m.agentRounds,
+          toolTrajectory: Array.isArray(metadata.toolTrajectory) ? metadata.toolTrajectory : m.toolTrajectory,
         } : m),
       } : null);
       loadChats();
@@ -928,20 +950,21 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // ── Resolve a pendingAction the AI proposed ──
-  // Right now only `run_compatibility` exists. When `connectionId` is set the
-  // proposal is for a linked-family connection (hits /connections/{id}/...);
-  // otherwise we use the manual /members/{id}/... endpoint. The resolved
-  // result is keyed by memberId on the message so the UI can render the
-  // inline result card next to the original action button.
+  // Right now only `run_compatibility` exists. Backend sends `source` from the
+  // agentic tool list; linked entries use memberId as the connection id.
   // 402s route through the same paywall surface as the chat-send endpoint so
   // the UX feels consistent (PaywallCard pops on either flow).
-  const resolvePendingAction = useCallback(async (messageId: string, memberId: number, connectionId?: number) => {
+  const resolvePendingAction = useCallback(async (messageId: string, action: PendingChatAction) => {
+    const isLinked = action.source === 'linked' || action.connectionId !== undefined;
+    const targetId = isLinked ? (action.connectionId ?? action.memberId) : action.memberId;
+    const actionKey = getPendingActionKey(action);
+
     const setActionState = (next: ResolvedChatAction) => {
       setActiveChat(prev => prev ? {
         ...prev,
         messages: prev.messages.map(m => m.id === messageId ? {
           ...m,
-          resolvedActions: { ...(m.resolvedActions ?? {}), [memberId]: next },
+          resolvedActions: { ...(m.resolvedActions ?? {}), [actionKey]: next },
         } : m),
       } : null);
     };
@@ -949,9 +972,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActionState({ status: 'running' });
 
     try {
-      const url = connectionId !== undefined
-        ? `/api/family/connections/${encodeURIComponent(String(connectionId))}/compatibility?lang=${encodeURIComponent(language)}`
-        : `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility?lang=${encodeURIComponent(language)}`;
+      const url = isLinked
+        ? `/api/family/connections/${encodeURIComponent(String(targetId))}/compatibility?lang=${encodeURIComponent(language)}`
+        : `/api/family/members/${encodeURIComponent(String(action.memberId))}/compatibility?lang=${encodeURIComponent(language)}`;
       const res = await clientFetch(url);
       const body = await res.json().catch(() => ({}));
 

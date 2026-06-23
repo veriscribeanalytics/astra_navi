@@ -151,7 +151,7 @@ export default function LocationSearch({
     return (
         <div className="space-y-2 w-full text-left" ref={containerRef}>
             {label && (
-                <label className="text-[10px] sm:text-[10px] uppercase tracking-widest text-primary font-bold ml-1 font-body block">
+                <label className="text-[11px] sm:text-xs uppercase tracking-widest text-[#D8D2E2] font-bold ml-1 font-body block">
                     {label}
                     {required && <span className="text-secondary ml-1">*</span>}
                 </label>
@@ -177,12 +177,12 @@ export default function LocationSearch({
                     aria-autocomplete="list"
                     aria-controls={listboxId}
                     aria-invalid={error ? 'true' : 'false'}
-                    className={`w-full bg-surface border transition-all outline-none text-primary placeholder:text-primary/40 font-body rounded-[20px] sm:rounded-[24px] pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-3.5 md:py-4 text-sm sm:text-base ${
+                    className={`w-full bg-surface border transition-all outline-none text-[#F1EDF6] placeholder:text-[#888197] font-body rounded-[20px] sm:rounded-[24px] pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-3.5 md:py-4 text-[15px] sm:text-base ${
                         error
                             ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500'
                             : selected
-                                ? 'border-secondary/50 focus:ring-2 focus:ring-secondary/30 focus:border-secondary'
-                                : 'border-outline-variant/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary'
+                                ? 'border-[rgba(201,151,46,0.70)] focus:ring-2 focus:ring-[rgba(201,151,46,0.20)] focus:border-[rgba(201,151,46,0.70)]'
+                                : 'border-[rgba(196,181,253,0.10)] hover:border-[rgba(196,181,253,0.22)] focus:ring-2 focus:ring-[rgba(201,151,46,0.20)] focus:border-[rgba(201,151,46,0.70)]'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                 />
                 {query && !disabled && (
@@ -253,7 +253,7 @@ export default function LocationSearch({
                 </p>
             )}
             {helperText && !error && !selected && (
-                <p className="text-[10px] sm:text-xs text-on-surface-variant/60 ml-1">{helperText}</p>
+                <p className="text-xs text-[#AAA3B8] ml-1">{helperText}</p>
             )}
         </div>
     );

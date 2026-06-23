@@ -8,11 +8,13 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
+  Ban,
   Bell,
   Calendar,
   Check,
   ChevronRight,
   Coins,
+  Flower2,
   Gem,
   Globe,
   Heart,
@@ -25,6 +27,7 @@ import {
   Sparkles,
   Star,
   Sun,
+  Target,
   Users,
   Wallet,
   X,
@@ -46,15 +49,16 @@ import { getRashiData } from "@/lib/astrology";
 import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
 import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS, SIGNAL_BADGES, BRAND_GOLD, TEXT_COLORS, getScorePhase } from "@/data/lifeAreaColors";
 import { PORTAL_COLORS } from "@/data/portalColors";
+
 import type { ForecastDay } from "@/components/dashboard/MiniChart";
 // import Particles from "@/components/ui/Particles";
 import { catmullRomToBezier, catmullRomArea } from "@/utils/chartCurve";
 import { todayISO } from "@/utils/forecastError";
 import type { HoroscopeData } from "@/types/horoscope";
 import DailyHoroscopeCardSkeleton from "@/components/dashboard/DailyHoroscopeCardSkeleton";
+import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
 import {
   useFamilyMembers,
-  useFamilyConnections,
   useFamilyCompatibilityPreflight,
   useFamilyReports,
   useFamilyCompatibility,
@@ -65,7 +69,7 @@ import {
 } from "@/hooks/useFamily";
 import { parseKundliStats } from "@/lib/kundliStats";
 import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
-import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from "@/types/family";
+import type { FamilyMember, FamilyConnection } from "@/types/family";
 import FamilyCapDialog from "@/components/family/FamilyCapDialog";
 
 interface ForecastData {
@@ -304,9 +308,9 @@ function WeeklyOutlookChart({
       >
         <defs>
           <linearGradient id={`wk-${gid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colorHex} stopOpacity="0.18" />
-            <stop offset="60%" stopColor={colorHex} stopOpacity="0.06" />
-            <stop offset="100%" stopColor={colorHex} stopOpacity="0" />
+            <stop offset="0%" stopColor={colorHex} stopOpacity="0.14" />
+            <stop offset="50%" stopColor={colorHex} stopOpacity="0.05" />
+            <stop offset="100%" stopColor={colorHex} stopOpacity="0.02" />
           </linearGradient>
         </defs>
 
@@ -315,7 +319,7 @@ function WeeklyOutlookChart({
           const y = yOf(v);
           return (
             <g key={v}>
-              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="1" />
+              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="#C4B5FD" strokeOpacity="0.08" strokeWidth="1" />
               <text x={PAD.left - 15} y={y + 3.5} textAnchor="end" fontSize="12" fontWeight="700" fill="var(--foreground)" opacity="0.85">{v}</text>
             </g>
           );
@@ -461,22 +465,17 @@ function DashboardAddMemberCard({
   lockType?: 'pro' | 'premium'
 }) {
   const { t } = useTranslation();
-  const { getTierColor } = usePaywallContext();
-  const lockColor = getTierColor(lockType);
   const lockedCtaLabel = lockType === 'pro' ? "Add more with Pro" : "Add more with Premium";
 
   const title = t('newDashboard.familyFriends.addMember') || "Add Member";
   const buttonText = t('newDashboard.familyFriends.addMember') || "ADD MEMBER";
-  let bgClass = "bg-secondary/[0.01] border-secondary/35 hover:border-secondary/60 hover:bg-secondary/[0.04]";
-  const textClass = "text-secondary";
-  const buttonBorderClass = "border-secondary/50 group-hover:border-secondary group-hover:bg-secondary/10";
+  const gold = '#C9972E';
+  let bgClass = "bg-[#C9972E]/1 border-[#C9972E]/25 hover:border-[#C9972E]/40 hover:bg-[#C9972E]/3";
+  const textClass = "text-[#C9972E]";
+  const buttonBorderClass = "border-[#C9972E]/30 group-hover:border-[#C9972E]/50 group-hover:bg-[#C9972E]/8";
 
   if (isLocked) {
-    if (lockType === 'pro') {
-      bgClass = "bg-[var(--lock-color)]/[0.03] border-[var(--lock-color)]/25 hover:border-[var(--lock-color)]/55 hover:bg-[var(--lock-color)]/[0.06]";
-    } else {
-      bgClass = "bg-[var(--lock-color)]/[0.03] border-[var(--lock-color)]/25 hover:border-[var(--lock-color)]/55 hover:bg-[var(--lock-color)]/[0.06]";
-    }
+    bgClass = "bg-[#20163B]/30 border-[#C9972E]/20 hover:border-[#C9972E]/35";
   }
 
   if (isLocked) {
@@ -484,45 +483,43 @@ function DashboardAddMemberCard({
       <div
         onClick={onClick}
         className={`group relative min-h-[210px] cursor-pointer overflow-hidden rounded-2xl border p-4 text-center transition-all ${bgClass}`}
-        style={{ '--lock-color': lockColor } as React.CSSProperties}
       >
-        <div className="pointer-events-none select-none blur-[4px]" aria-hidden="true">
+        <div className="pointer-events-none select-none blur-[3px] opacity-70" aria-hidden="true">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="relative shrink-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/10 font-headline text-xl font-bold text-emerald-300">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#C9972E]/25 bg-[#20163B] font-headline text-xl font-bold text-[#C9972E]">
                   N
                 </div>
-                <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
               </div>
               <div className="min-w-0 text-left">
-                <p className="truncate font-headline text-base font-bold text-foreground/75">New bond</p>
-                <p className="mt-0.5 text-[10px] font-bold text-foreground/40">Invite pending</p>
+                <p className="truncate font-headline text-base font-bold tracking-tight text-[#F4EFE7]/75">New bond</p>
+                <p className="mt-0.5 text-[10px] font-bold text-[#928BA5]">Invite pending</p>
               </div>
             </div>
-            <AreaRing score={74} color={lockColor} size={64} label="Locked bond preview">
-              <span className="text-xs font-black leading-none tabular-nums" style={{ color: lockColor }}>
+            <AreaRing score={74} color={gold} size={64} label="Locked bond preview">
+              <span className="text-xs font-black leading-none tabular-nums" style={{ color: gold }}>
                 74
               </span>
             </AreaRing>
           </div>
 
-          <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] p-3.5 text-left">
-            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
-            <p className="text-xs leading-relaxed text-foreground/70">
+          <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] p-3.5 text-left">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#C9972E]" />
+            <p className="text-xs leading-relaxed text-[#C8C3D6]/80">
               Your shared energy preview appears here after a member is added.
             </p>
           </div>
         </div>
 
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-surface/35 px-4 backdrop-blur-[1px]">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[var(--lock-color)]/60 bg-surface/80 text-[var(--lock-color)] shadow-[0_0_24px_rgba(0,0,0,0.22)]">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[#150B2D]/88 px-4 backdrop-blur-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[#C9972E]/40 bg-[#20163B] text-[#C9972E] shadow-[0_0_24px_rgba(0,0,0,0.35)]">
             <Lock className="h-6 w-6" />
           </div>
-          <p className="max-w-[20ch] text-sm font-bold leading-snug text-foreground">
+          <p className="max-w-[20ch] text-sm font-bold leading-snug text-[#F4EFE7]">
             Add more members
           </p>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--lock-color)]/55 bg-[var(--lock-color)]/[0.08] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[var(--lock-color)] transition-all group-hover:border-[var(--lock-color)] group-hover:bg-[var(--lock-color)]/12">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9972E]/30 bg-[#C9972E]/8 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[#C9972E] transition-all group-hover:border-[#C9972E]/45 group-hover:bg-[#C9972E]/12">
             <Plus className="h-3 w-3" />
             {lockedCtaLabel}
           </span>
@@ -535,50 +532,48 @@ function DashboardAddMemberCard({
     <div
       onClick={onClick}
       className={`group relative min-h-[210px] cursor-pointer overflow-hidden rounded-2xl border border-dashed p-4 text-center transition-all ${bgClass}`}
-      style={{ '--lock-color': lockColor } as React.CSSProperties}
     >
-      <div className="pointer-events-none select-none blur-[4px]" aria-hidden="true">
+      <div className="pointer-events-none select-none blur-[3px] opacity-70" aria-hidden="true">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <div className="relative shrink-0">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-secondary/25 bg-secondary/10 font-headline text-xl font-bold text-secondary">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#C9972E]/25 bg-[#20163B] font-headline text-xl font-bold text-[#C9972E]">
                 N
               </div>
-              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
             </div>
             <div className="min-w-0 text-left">
-              <p className="truncate font-headline text-base font-bold text-foreground/75">New member</p>
-              <p className="mt-0.5 text-[10px] font-bold text-foreground/40">Bond preview</p>
+              <p className="truncate font-headline text-base font-bold tracking-tight text-[#F4EFE7]/75">New member</p>
+              <p className="mt-0.5 text-[10px] font-bold text-[#928BA5]">Bond preview</p>
             </div>
           </div>
-          <AreaRing score={72} color={BRAND_GOLD.main} size={64} label="Member preview">
-            <span className="text-xs font-black leading-none tabular-nums" style={{ color: BRAND_GOLD.main }}>
+          <AreaRing score={72} color={gold} size={64} label="Member preview">
+            <span className="text-xs font-black leading-none tabular-nums" style={{ color: gold }}>
               72
             </span>
           </AreaRing>
         </div>
 
-        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] p-3.5 text-left">
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
-          <p className="text-xs leading-relaxed text-foreground/70">
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] p-3.5 text-left">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#C9972E]" />
+          <p className="text-xs leading-relaxed text-[#C8C3D6]/80">
             Add someone to reveal your daily bond insight.
           </p>
         </div>
       </div>
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-surface/20 px-4 backdrop-blur-[1px]">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-secondary/55 bg-surface/75 text-secondary shadow-[0_0_24px_rgba(0,0,0,0.22)] transition-transform group-hover:scale-105">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[#150B2D]/70 px-4 backdrop-blur-sm">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[#C9972E]/40 bg-[#20163B] text-[#C9972E] shadow-[0_0_24px_rgba(0,0,0,0.3)] transition-transform group-hover:scale-105">
           <Plus className="h-6 w-6" />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-bold leading-snug text-foreground group-hover:text-secondary transition-colors">
+          <p className="text-sm font-bold leading-snug text-[#F4EFE7] group-hover:text-[#C9972E] transition-colors">
             {title}
           </p>
-          <p className="max-w-[20ch] text-[10px] font-semibold leading-relaxed text-foreground/45">
+          <p className="max-w-[20ch] text-[10px] font-semibold leading-relaxed text-[#928BA5]">
             Add someone to reveal the score.
           </p>
         </div>
-        <span className={`inline-flex items-center gap-1.5 rounded-full border bg-transparent px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${textClass} ${buttonBorderClass}`}>
+        <span className={`inline-flex items-center gap-1.5 rounded-full border border-[#C9972E]/30 bg-transparent px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${textClass} ${buttonBorderClass}`}>
           <Users className="h-3 w-3" />
           {buttonText}
         </span>
@@ -589,68 +584,64 @@ function DashboardAddMemberCard({
 
 /** Dashboard family-member card backed by real member data + compatibility status. */
 function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibilityBlocked }: { member: FamilyMember } & FamilyCardActionProps) {
-  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
-  const { data: reports } = useFamilyReports(member.id);
-  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member.id);
-  const { data: summary } = useFamilyCompatibilitySummary(member.id, 'en');
+  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member);
+  const { data: reports } = useFamilyReports(member);
+  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member);
+  const { data: summary } = useFamilyCompatibilitySummary(member, 'en');
 
   useEffect(() => {
-    if (member.id) {
-      fetchPreflight();
-    }
-  }, [member.id, fetchPreflight]);
+    fetchPreflight();
+  }, [fetchPreflight]);
 
   useEffect(() => {
-    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning && member.id) {
+    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning) {
       fetchCompatibility('en');
     }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, member.id]);
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility]);
 
-  const activeBand = (compat?.band ?? summary?.band) as FamilyCompatibilityBand | undefined;
   const activeScore = compat?.score ?? summary?.score;
 
   const status = computeFamilyMemberStatus({
     member,
     preflight,
     reports,
-    band: activeBand ?? null,
+    band: compat?.band ?? summary?.band ?? null,
   });
 
   const hasScore = typeof activeScore === "number";
   const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
-  const ringColor = activeBand === 'Excellent' ? '#34d399' :
-                    activeBand === 'Good' ? '#fbbf24' :
-                    activeBand === 'Average' ? '#fb923c' :
-                    activeBand === 'Challenging' ? '#f87171' : '#a78bfa';
+  const ringColor = scorePct !== null && scorePct >= 70 ? '#3DD6A0' :
+                    scorePct !== null && scorePct >= 55 ? '#E5A33A' :
+                    scorePct !== null ? '#D96B78' : '#C9972E';
 
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-outline-variant/8 bg-surface">
+    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
       {/* Header Row */}
       <div className="flex items-center justify-between gap-4">
         {/* Left Side: Avatar + Name / Info */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 border border-secondary/20 text-xl font-headline font-bold text-secondary">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#20163B] border border-[#C9972E]/25 text-xl font-headline font-bold text-[#C9972E]">
               {initialOf(member.name)}
             </div>
             {/* Status indicator dot */}
             {status?.kind === 'stable' && (
-              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-[#180F32] bg-[#3DD6A0]" />
             )}
             {status?.kind === 'needsAttention' && (
-              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-amber-400" />
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-[#180F32] bg-[#E5A33A]" />
             )}
             {status?.kind === 'incomplete' && (
-              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-red-400" />
+              <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-[#180F32] bg-[#D96B78]" />
             )}
           </div>
 
           <div className="min-w-0 flex flex-col">
-            <h4 className="truncate font-headline text-base font-bold text-foreground">
+            <h4 className="truncate font-headline text-base font-bold tracking-tight text-[#F4EFE7]">
               {member.name || "—"}
             </h4>
-            <p className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/45 mt-0.5">
-              <span className="capitalize">{formatRelationship(member.relationshipType)}</span>
+            <p className="flex items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5">
+              <span className="capitalize">{member.relationshipType ? formatRelationship(member.relationshipType) : t('family.relationshipNotSet') || 'Connection'}</span>
               {status && (
                 <>
                   <span>•</span>
@@ -677,9 +668,9 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
       {/* Middle Row: Teaser / Description Box */}
       {scorePct !== null && (
-        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] text-left">
-          <Sparkles className="h-4 w-4 text-secondary shrink-0 mt-0.5 animate-pulse" />
-          <p className="text-xs text-foreground/80 leading-relaxed">
+        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] text-left">
+          <Sparkles className="h-4 w-4 text-[#C9972E] shrink-0 mt-0.5 animate-pulse" />
+          <p className="text-xs text-[#C8C3D6] leading-relaxed">
             {compat?.relationship_actions?.today || compat?.verdict || summary?.verdict || t('dashboard.familyNoVerdict') || "Steady bond today. Good energy for conversations and shared decisions."}
           </p>
         </div>
@@ -689,7 +680,7 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
       <div className="flex items-center justify-between gap-3 mt-1.5">
         <button
           onClick={onRunCompatibility}
-          className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border border-amber-500/20 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
         >
           {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
           {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
@@ -697,7 +688,7 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
         <Link
           href={`/family?member=${member.id}`}
-          className="text-secondary hover:text-secondary-hover font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
+          className="text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
         >
           <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
@@ -725,35 +716,35 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
     }
   }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, connection.connectionId]);
 
-  const activeBand = (compat?.band ?? summary?.band) as FamilyCompatibilityBand | undefined;
   const activeScore = compat?.score ?? summary?.score;
 
   const hasScore = typeof activeScore === "number";
   const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
-  const ringColor = activeBand === 'Excellent' ? '#34d399' :
-                    activeBand === 'Good' ? '#fbbf24' :
-                    activeBand === 'Average' ? '#fb923c' :
-                    activeBand === 'Challenging' ? '#f87171' : '#a78bfa';
+  const ringColor = scorePct !== null && scorePct >= 70 ? '#3DD6A0' :
+                    scorePct !== null && scorePct >= 55 ? '#E5A33A' :
+                    scorePct !== null ? '#D96B78' : '#C9972E';
+  const statusDotColor = scorePct !== null && scorePct >= 70 ? '#3DD6A0' :
+                         scorePct !== null && scorePct >= 55 ? '#E5A33A' :
+                         scorePct !== null ? '#D96B78' : '#C9972E';
 
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-outline-variant/8 bg-surface">
+    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
       {/* Header Row */}
       <div className="flex items-center justify-between gap-4">
         {/* Left Side: Avatar + Name / Info */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xl font-headline font-bold text-emerald-400">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#20163B] border border-[#C9972E]/25 text-xl font-headline font-bold text-[#C9972E]">
               {initialOf(connection.otherName)}
             </div>
-            {/* Green indicator dot at the bottom right */}
-            <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400" />
+            <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-[#180F32]" style={{ backgroundColor: statusDotColor }} />
           </div>
 
           <div className="min-w-0 flex flex-col">
-            <h4 className="truncate font-headline text-base font-bold text-foreground">
+            <h4 className="truncate font-headline text-base font-bold tracking-tight text-[#F4EFE7]">
               {connection.otherName || "—"}
             </h4>
-            <p className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/45 mt-0.5">
+            <p className="flex items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5">
               <span className="capitalize">{formatRelationship(connection.iSeeThemAs)}</span>
             </p>
           </div>
@@ -773,9 +764,9 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
 
       {/* Middle Row: Teaser / Description Box */}
       {scorePct !== null && (
-        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-secondary/10 bg-secondary/[0.03] text-left">
-          <Sparkles className="h-4 w-4 text-secondary shrink-0 mt-0.5 animate-pulse" />
-          <p className="text-xs text-foreground/80 leading-relaxed">
+        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] text-left">
+          <Sparkles className="h-4 w-4 text-[#C9972E] shrink-0 mt-0.5 animate-pulse" />
+          <p className="text-xs text-[#C8C3D6] leading-relaxed">
             {compat?.relationship_actions?.today || compat?.verdict || summary?.verdict || t('dashboard.familyNoVerdict') || "Steady bond today. Good energy for conversations and shared decisions."}
           </p>
         </div>
@@ -785,7 +776,7 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
       <div className="flex items-center justify-between gap-3 mt-1.5">
         <button
           onClick={onRunCompatibility}
-          className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border border-amber-500/20 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
         >
           {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
           {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
@@ -793,7 +784,7 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
 
         <Link
           href="/family"
-          className="text-secondary hover:text-secondary-hover font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
+          className="text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
         >
           <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
@@ -994,7 +985,7 @@ export default function DashboardHome() {
     [language]
   );
 
-  const userName = user?.name || user?.email?.split("@")[0] || t("common.user");
+  const userName = user?.name?.trim().split(/\s+/)[0] || user?.email?.split("@")[0] || t("common.user");
   const overallScore = useMemo(() => {
     if (!horoscope) return 0;
     const apiOverall = horoscope.score?.overall ?? horoscope.overall_score;
@@ -1032,25 +1023,15 @@ export default function DashboardHome() {
 
   // Real family + chart data (replaces the previously-hardcoded placeholders).
   const { data: familyMembers, isLoading: familyLoading } = useFamilyMembers();
-  // /connections returns all active connections, each carrying `isFamily`.
-  // Family links (mutual sharing) count toward the dashboard slot cap; the rest don't.
-  const { data: allConnections, isLoading: connectionsLoading } = useFamilyConnections();
-  const linkedFamily = useMemo(() => (allConnections ?? []).filter(c => c.isFamily), [allConnections]);
-  const friendConnections = useMemo(() => (allConnections ?? []).filter(c => !c.isFamily), [allConnections]);
-  const connectionsLoaded = allConnections !== null;
 
-  // Capped items (count against the tier slots): manual members + family-kind links.
   const allItems = useMemo(() => {
     const membersList = familyMembers || [];
-    const familyList = linkedFamily || [];
-    const mappedMembers = membersList.map(m => ({ type: 'member' as const, id: String(m.id), data: m }));
-    const mappedConnections = familyList.map(c => ({ type: 'connection' as const, id: String(c.connectionId), data: c }));
-    return [...mappedMembers, ...mappedConnections];
-  }, [familyMembers, linkedFamily]);
+    return membersList.map(m => ({ type: 'member' as const, id: String(m.id), source: m.source, data: m }));
+  }, [familyMembers]);
 
   const slots = useMemo(() => {
     const result: Array<
-      | { type: 'member'; id: string; data: FamilyMember }
+      | { type: 'member'; id: string; source: 'manual' | 'linked'; data: FamilyMember }
       | { type: 'connection'; id: string; data: FamilyConnection }
       | { type: 'add'; isLocked: boolean; lockType?: 'pro' | 'premium' }
     > = [];
@@ -1071,11 +1052,6 @@ export default function DashboardHome() {
       }
     }
 
-    // Friends never consume a slot — append them as uncapped real cards.
-    for (const c of (friendConnections ?? [])) {
-      result.push({ type: 'connection', id: String(c.connectionId), data: c });
-    }
-
     for (let i = unlockedLimit; i < 6; i++) {
       let lockType: 'pro' | 'premium' = 'premium';
       if (tierLower === 'free' && i < 3) {
@@ -1085,7 +1061,7 @@ export default function DashboardHome() {
     }
 
     return result;
-  }, [allItems, friendConnections, tier]);
+  }, [allItems, tier]);
   const kundliStats = useMemo(() => parseKundliStats(user?.astrologyData), [user?.astrologyData]);
 
   // Format a dasha period like "May 2026 — May 2044" from ISO/loose date strings.
@@ -1327,8 +1303,8 @@ export default function DashboardHome() {
         ...bestItem,
         badge: SIGNAL_BADGES.BEST.label,
         arrow: "up",
-        badgeColor: `text-[${SIGNAL_BADGES.BEST.main}] bg-[${SIGNAL_BADGES.BEST.bg}] border-[rgba(34,197,94,0.28)]`,
-        badgeStyle: { color: SIGNAL_BADGES.BEST.main, backgroundColor: SIGNAL_BADGES.BEST.bg, borderColor: "rgba(34,197,94,0.28)" },
+        badgeColor: `text-[${SIGNAL_BADGES.BEST.main}] bg-[${SIGNAL_BADGES.BEST.bg}] border-[${SIGNAL_BADGES.BEST.border}]`,
+        badgeStyle: { color: SIGNAL_BADGES.BEST.main, backgroundColor: SIGNAL_BADGES.BEST.bg, borderColor: SIGNAL_BADGES.BEST.border },
       });
     }
 
@@ -1337,8 +1313,8 @@ export default function DashboardHome() {
         ...stableItem,
         badge: SIGNAL_BADGES.STABLE.label,
         arrow: "side",
-        badgeColor: `text-[${SIGNAL_BADGES.STABLE.main}] bg-[${SIGNAL_BADGES.STABLE.bg}] border-[rgba(56,189,248,0.28)]`,
-        badgeStyle: { color: SIGNAL_BADGES.STABLE.main, backgroundColor: SIGNAL_BADGES.STABLE.bg, borderColor: "rgba(56,189,248,0.28)" },
+        badgeColor: `text-[${SIGNAL_BADGES.STABLE.main}] bg-[${SIGNAL_BADGES.STABLE.bg}] border-[${SIGNAL_BADGES.STABLE.border}]`,
+        badgeStyle: { color: SIGNAL_BADGES.STABLE.main, backgroundColor: SIGNAL_BADGES.STABLE.bg, borderColor: SIGNAL_BADGES.STABLE.border },
       });
     }
 
@@ -1347,8 +1323,8 @@ export default function DashboardHome() {
         ...worstItem,
         badge: SIGNAL_BADGES.WORST.label,
         arrow: "down",
-        badgeColor: `text-[${SIGNAL_BADGES.WORST.main}] bg-[${SIGNAL_BADGES.WORST.bg}] border-[rgba(239,68,68,0.28)]`,
-        badgeStyle: { color: SIGNAL_BADGES.WORST.main, backgroundColor: SIGNAL_BADGES.WORST.bg, borderColor: "rgba(239,68,68,0.28)" },
+        badgeColor: `text-[${SIGNAL_BADGES.WORST.main}] bg-[${SIGNAL_BADGES.WORST.bg}] border-[${SIGNAL_BADGES.WORST.border}]`,
+        badgeStyle: { color: SIGNAL_BADGES.WORST.main, backgroundColor: SIGNAL_BADGES.WORST.bg, borderColor: SIGNAL_BADGES.WORST.border },
       });
     }
 
@@ -1387,8 +1363,8 @@ export default function DashboardHome() {
   ]);
 
   const activeAreaHex = useMemo(() => {
-    return getAreaPhaseMain(activeArea, getAreaScore(horoscope, activeArea));
-  }, [activeArea, horoscope]);
+    return AREA_THEMES[activeArea].hex;
+  }, [activeArea]);
 
   const activeAreaInsight = useMemo(() => {
     const rawInsight = getAreaInsight(horoscope, activeArea);
@@ -1429,7 +1405,7 @@ export default function DashboardHome() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10">
             <ShieldAlert className="h-7 w-7 text-secondary" />
           </div>
-          <h1 className="font-headline text-2xl font-bold">Exact birth location required</h1>
+          <h1 className="font-headline text-2xl font-bold tracking-tight leading-tight">Exact birth location required</h1>
           <p className="mt-3 text-sm leading-6 text-foreground/60">
             Please confirm your exact birth location and timezone in your profile for personalized horoscope calculations.
           </p>
@@ -1454,18 +1430,9 @@ export default function DashboardHome() {
           <div className="flex flex-col gap-2 w-full">
             {/* Row 1: Date/Panchang & Career Score */}
             <div className="flex flex-wrap items-center justify-start gap-x-8 gap-y-2 w-full pb-1">
-              <div className="flex flex-wrap items-center gap-3 label-sm tracking-[0.24em] text-foreground/58">
+              <div className="flex flex-wrap items-center gap-3 label-sm text-foreground/58">
                 <span aria-hidden="true" className="h-px w-12 bg-secondary/50" />
                 <span>{currentDate}</span>
-                <span>•</span>
-                <button
-                  onClick={() => setIsPanchangModalOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-full border border-secondary/35 bg-secondary/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-secondary hover:bg-secondary/20 hover:border-secondary/50 transition cursor-pointer active:scale-95 shrink-0"
-                >
-                  <Calendar className="h-3 w-3 text-secondary shrink-0" />
-                  <span>{t('newDashboard.panchang.title')}</span>
-                  <ChevronRight className="h-3 w-3 text-secondary shrink-0" />
-                </button>
               </div>
               <div>
                 {scoreLoading ? (
@@ -1474,8 +1441,8 @@ export default function DashboardHome() {
                   <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Star className="h-4 w-4 fill-secondary text-secondary" />
                     {topLifeArea.score >= 80
-                      ? <>{topLifeArea.label} {t('newDashboard.todaysEnergy.topAreaStrongest')} <span className="font-black text-emerald-400">{topLifeArea.score}%</span></>
-                      : <>{t('newDashboard.todaysEnergy.topAreaFocus')}: <span className="font-black" style={{ color: AREA_THEMES[topLifeArea.area].hex }}>{topLifeArea.label}</span> · <span className="font-black text-emerald-400">{topLifeArea.score}%</span></>
+                      ? <>{topLifeArea.label} {t('newDashboard.todaysEnergy.topAreaStrongest')} <span className="font-black" style={{ color: '#2FD3A0' }}>{topLifeArea.score}%</span></>
+                      : <>{t('newDashboard.todaysEnergy.topAreaFocus')}: <span className="font-black" style={{ color: AREA_THEMES[topLifeArea.area].hex }}>{topLifeArea.label}</span> · <span className="font-black" style={{ color: '#2FD3A0' }}>{topLifeArea.score}%</span></>
                     }
                   </p>
                 )}
@@ -1483,7 +1450,8 @@ export default function DashboardHome() {
             </div>
 
             {/* Row 2: Greeting */}
-            <div className="w-full">
+            <div className="flex items-center gap-4 w-full">
+              <ProfileImageUpload size={52} className="hidden sm:flex" editable={false} />
               <h1 className="font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px] 3xl:text-[56px]">
                 {greeting},{" "}
                 <span style={{ color: TEXT_COLORS.heading }}>
@@ -1499,12 +1467,12 @@ export default function DashboardHome() {
               [1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center gap-1 rounded-xl border border-outline-variant/12 bg-surface-variant/[0.035] px-1.5 py-1 text-center sm:min-w-[110px] sm:flex-row sm:gap-2.5 sm:px-2.5 sm:text-left animate-pulse"
+                  className="flex flex-col items-center gap-1 rounded-xl border border-[#C4B5FD]/10 bg-[#130B29] px-1.5 py-1 text-center sm:min-w-[110px] sm:flex-row sm:gap-2.5 sm:px-2.5 sm:text-left animate-pulse"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-variant/20 sm:h-[38px] sm:w-[38px]" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#130B29] border border-[#C9972E]/20 sm:h-[38px] sm:w-[38px]" />
                   <div className="min-w-0 space-y-1 flex-1">
-                    <div className="h-1 w-8 rounded bg-surface-variant/20" />
-                    <div className="h-2.5 w-12 rounded bg-surface-variant/20" />
+                    <div className="h-1 w-8 rounded bg-[#C9972E]/20" />
+                    <div className="h-2.5 w-12 rounded bg-[#F4EFE7]/10" />
                   </div>
                 </div>
               ))
@@ -1518,18 +1486,18 @@ export default function DashboardHome() {
                   key={item.label}
                   href={item.data?.id ? `/rashis?sign=${item.data.id}` : "/rashis"}
                   aria-label={`${item.label}: ${item.data?.name || item.fallback}`}
-                  className="group flex flex-col items-center gap-1 rounded-xl border border-outline-variant/12 bg-surface-variant/[0.035] px-1.5 py-1 text-center transition hover:border-secondary/40 hover:bg-secondary/8 sm:min-w-[110px] sm:flex-row sm:gap-2.5 sm:px-2.5 sm:text-left"
+                  className="group flex flex-col items-center gap-1 rounded-xl border border-[#C4B5FD]/10 bg-[#130B29] px-1.5 py-1 text-center transition hover:border-[#C9972E]/28 sm:min-w-[110px] sm:flex-row sm:gap-2.5 sm:px-2.5 sm:text-left"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary/25 bg-background sm:h-[38px] sm:w-[38px]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#C9972E]/25 bg-[#130B29] sm:h-[38px] sm:w-[38px]">
                     {item.data?.icon ? (
                       <Image src={item.data.icon} alt={item.data.name} width={24} height={24} className="h-5.5 w-5.5 object-contain sm:h-6.5 sm:w-6.5" />
                     ) : (
-                      <Sparkles className="h-3 w-3 text-secondary sm:h-4 sm:w-4" />
+                      <Sparkles className="h-3 w-3 text-[#C9972E] sm:h-4 sm:w-4" />
                     )}
                   </div>
                   <div className="min-w-0 leading-tight">
-                    <p className="text-[7px] font-black uppercase tracking-[0.12em] text-foreground/50 sm:text-[8.5px]">{item.label}</p>
-                    <p className="mt-0.5 truncate font-headline text-xs font-bold text-foreground sm:text-[14.5px]">{item.data?.name || item.fallback}</p>
+                    <p className="text-[7px] font-black uppercase tracking-[0.12em] text-[#928BA5] sm:text-[8.5px]">{item.label}</p>
+                    <p className="mt-0.5 truncate font-headline text-xs font-bold text-[#F4EFE7] sm:text-[14.5px]">{item.data?.name || item.fallback}</p>
                   </div>
                 </Link>
               ))
@@ -1556,18 +1524,18 @@ export default function DashboardHome() {
                 </div>
                 
                 {/* Lucky items & Mood - smaller than header */}
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-foreground/70 justify-center md:justify-end">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-variant/70 px-2.5 py-1">
+                <div className="flex flex-wrap items-center gap-2 text-[13px] font-bold text-[#C8C3D6] justify-center md:justify-end">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9972E]/12 bg-[#241744] px-2.5 py-1">
                     <span className="h-2 w-2 rounded-full bg-gradient-to-br from-purple-400 to-purple-700" />
                     {t('newDashboard.cosmicInsight.luckyColor')}: {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-variant/70 px-2.5 py-1">
-                    <Star className="h-3 w-3 text-secondary" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9972E]/12 bg-[#241744] px-2.5 py-1">
+                    <Star className="h-3 w-3 text-[#C9972E]" />
                     {t('newDashboard.cosmicInsight.luckyNumber')}: {(horoscope?.lucky?.number ?? horoscope?.lucky_number) ?? "7"}
                   </span>
                   {horoscope?.mood && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-variant/70 px-2.5 py-1">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9972E]/12 bg-[#241744] px-2.5 py-1">
+                      <span className="h-2 w-2 rounded-full bg-[#9B6DDE]" />
                       Cosmic Mood: {typeof horoscope.mood === 'object' ? horoscope.mood.value : horoscope.mood}
                     </span>
                   )}
@@ -1576,11 +1544,11 @@ export default function DashboardHome() {
 
               {/* Left Side Content */}
               <div className="flex-grow flex flex-col gap-3">
-                {/* 3-column Grid for Ratings, Advice, Lotus */}
-                <div className="grid gap-3 min-[480px]:max-[1020px]:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] min-[480px]:max-[1020px]:items-stretch lg:grid-cols-[180px_minmax(0,1fr)_190px] lg:items-stretch">
-                  {/* Ratings Card */}
-                  <div className="flex flex-col items-center text-center lg:items-start lg:text-left bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full justify-center">
-                    <p className="label-secondary font-black tracking-[0.2em]">{t('newDashboard.todaysEnergy.title')}</p>
+                {/* Main Row: Today's Energy | (Headline + [Tree | Guidance]) */}
+                <div className="grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-stretch">
+                  {/* Zone 1: Today's Energy */}
+                  <div className="flex flex-col items-center text-center bg-surface-variant/[0.035] py-4 px-4 rounded-2xl h-full justify-center">
+                    <p className="label-secondary">{t('newDashboard.todaysEnergy.title')}</p>
                     <div className="mt-3">
                       <RingScore score={overallScore} color={overallPhaseHex} />
                     </div>
@@ -1597,46 +1565,109 @@ export default function DashboardHome() {
                     </span>
                   </div>
 
-                  {/* Advice Card */}
-                  <div className="space-y-3 bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full flex flex-col justify-center text-left">
-                    <h2 className="font-headline text-lg font-bold leading-snug sm:text-xl">{headline}</h2>
-                    {horoscope?.current_state?.advice_now && (
-                      <button
-                        onClick={() => setIsAdviceModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors cursor-pointer text-left w-fit"
-                      >
-                        Today&apos;s Advice for You <ArrowRight className="inline h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
+                  {/* Zone 2: Headline (full width) + [ Cosmic Tree | Guidance box ] */}
+                  <div className="flex flex-col gap-3">
+                    {/* Headline + Advice — spans full width */}
+                    <div className="px-1">
+                      <h2 className="font-headline text-xl font-bold leading-tight tracking-tight sm:text-2xl">{headline}</h2>
+                      {horoscope?.current_state?.advice_now && (
+                        <button
+                          onClick={() => setIsAdviceModalOpen(true)}
+                          className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors cursor-pointer text-left w-fit"
+                        >
+                          Today&apos;s Advice for You <ArrowRight className="inline h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
 
-                  {/* Lotus Card */}
-                  <div className="hidden justify-center lg:flex items-center bg-surface-variant/[0.035] py-3 px-4 rounded-2xl h-full">
-                    <Image src="/images/lotus.svg" alt="" width={135} height={90} unoptimized className="drop-shadow-[0_0_30px_rgba(168,85,247,0.18)]" />
+                    {/* Row: Cosmic Tree | Guidance box */}
+                    <div className="grid flex-grow gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-stretch">
+                      {/* Cosmic Tree */}
+                      <div className="flex items-center justify-center min-h-[200px]">
+                        <Image src="/images/cosmic-tree.png" alt="" width={280} height={280} unoptimized className="h-auto w-auto max-h-[270px] object-contain" />
+                      </div>
+
+                      {/* Guidance bordered box */}
+                      <div className="flex flex-col gap-3 rounded-2xl border border-purple-400/15 bg-surface-variant/[0.05] p-4 h-full">
+                        <p className="label-secondary">Guidance For Today</p>
+                        <p className="text-sm leading-relaxed text-foreground/75">
+                          {horoscope?.guidance?.summary || (
+                            <span className="italic text-foreground/40">Personalized guidance will appear here soon.</span>
+                          )}
+                        </p>
+
+                        {/* Best For / Avoid / Approach mini-cards (horizontal) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div className="flex items-center gap-2.5 rounded-xl border border-[#2FD3A0]/20 bg-[#2FD3A0]/4 p-2.5">
+                            <Target className="h-5 w-5 shrink-0 text-[#2FD3A0]" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-semibold text-[#928BA5]">Best For:</p>
+                              <p className="truncate text-xs font-bold text-[#F4EFE7]">{horoscope?.guidance?.best_for || "—"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2.5 rounded-xl border border-[#F05B68]/20 bg-[#F05B68]/4 p-2.5">
+                            <Ban className="h-5 w-5 shrink-0 text-[#F05B68]" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-semibold text-[#928BA5]">Avoid:</p>
+                              <p className="truncate text-xs font-bold text-[#F4EFE7]">{horoscope?.guidance?.avoid || "—"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2.5 rounded-xl border border-[#9B6DDE]/20 bg-[#9B6DDE]/4 p-2.5">
+                            <Flower2 className="h-5 w-5 shrink-0 text-[#9B6DDE]" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-semibold text-[#928BA5]">Approach:</p>
+                              <p className="truncate text-xs font-bold text-[#F4EFE7]">{horoscope?.guidance?.approach || "—"}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Choose AI Astrologer CTA — gold color preserved */}
+                        <button
+                          onClick={() => {
+                            if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
+                              setActivePaywallData(getFeaturePaywall('chat_message')!);
+                              return;
+                            }
+                            localStorage.removeItem("astranavi_pending_message");
+                            router.push("/chat");
+                          }}
+                          className="mt-auto w-full flex items-center gap-3 rounded-2xl border border-[#C9972E]/25 bg-[#B88924] py-3 px-4 text-left text-[#1A0E32] hover:bg-[#C9972E] transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#C9972E]/50"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1A0E32]/10 text-[#1A0E32]">
+                            <Sparkles className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0 flex-grow">
+                            <h4 className="text-sm font-bold text-[#1A0E32]">Choose AI Astrologer to Talk</h4>
+                            <p className="mt-0.5 truncate text-[11px] text-[#1A0E32]/80">Talk to your personal guide.</p>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-[#1A0E32]/70 shrink-0" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Good Time & Rahu Kaal Cards */}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left">
-                    <div className="flex items-start gap-4 w-full">
-                      <Sun className="h-8 w-8 shrink-0 text-emerald-400" />
+                    <div className="flex items-start gap-4 w-full border border-[#C9972E]/15 bg-[#130B29] rounded-2xl p-4">
+                      <Sun className="h-8 w-8 shrink-0 text-[#2FD3A0]" />
                       <div className="flex-grow min-w-0">
-                        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-emerald-400 mb-2">{t('newDashboard.todaysEnergy.goodTime')}</p>
+                        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#2FD3A0] mb-2">{t('newDashboard.todaysEnergy.goodTime')}</p>
                         {activeTrigger ? (
                           <div className="space-y-3">
                             <div>
                               <div className="flex items-center justify-between gap-2 flex-wrap">
-                                <span className="font-bold text-sm text-foreground">{activeTrigger.label}</span>
-                                <span className="text-[11px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full shrink-0">{activeTrigger.start} - {activeTrigger.end}</span>
+                                <span className="font-bold text-sm text-[#F4EFE7]">{activeTrigger.label}</span>
+                                <span className="text-[11px] font-black text-[#2FD3A0] bg-[#2FD3A0]/10 px-2 py-0.5 rounded-full shrink-0">{activeTrigger.start} - {activeTrigger.end}</span>
                               </div>
-                              <p className="mt-1 text-xs text-foreground/58 leading-normal">{activeTrigger.advice}</p>
+                              <p className="mt-1 text-xs text-[#C8C3D6] leading-normal">{activeTrigger.advice}</p>
                             </div>
                           </div>
                         ) : (
                           <>
-                            <p className="mt-2 text-lg font-bold">19:00 - 20:00</p>
-                            <p className="mt-1 text-sm leading-6 text-foreground/58">{t('newDashboard.todaysEnergy.goodTimeDesc')}</p>
+                            <p className="mt-2 text-lg font-bold text-[#F4EFE7]">19:00 - 20:00</p>
+                            <p className="mt-1 text-sm leading-6 text-[#C8C3D6]">{t('newDashboard.todaysEnergy.goodTimeDesc')}</p>
                           </>
                         )}
                       </div>
@@ -1644,18 +1675,18 @@ export default function DashboardHome() {
                   </div>
 
                   <div className="rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left">
-                    <div className="flex items-start gap-4 w-full">
-                      <AlertTriangle className="h-8 w-8 shrink-0 fill-amber-400/15 text-amber-400" />
-                      <div className="flex-grow min-w-0">
-                        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-amber-400 mb-2">
+                    <div className="flex items-start gap-4 w-full border border-[#C9972E]/15 bg-[#130B29] rounded-2xl p-4">
+                      <AlertTriangle className="h-8 w-8 shrink-0 fill-[#F05B68]/15 text-[#F05B68]" />
+                      <div className="flex-grow min-w-0 ">
+                        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#F05B68] mb-2">
                           {`${t('newDashboard.panchang.rahuKaal')} / ${t('newDashboard.todaysEnergy.alertTime')}`}
                         </p>
                         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                          <span className="font-bold text-sm text-foreground">{t('newDashboard.panchang.rahuKaal')}</span>
+                          <span className="font-bold text-sm text-[#F4EFE7]">{t('newDashboard.panchang.rahuKaal')}</span>
                           <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 ${
                             isRahuKaalEnded
-                              ? "text-foreground/40 bg-surface-variant/20"
-                              : "text-red-500 bg-red-500/10"
+                              ? "text-[#928BA5] bg-[#241744]"
+                              : "text-[#F05B68] bg-[#F05B68]/10"
                           }`}>
                             {formatRahuKaal(transits, horoscope)}
                           </span>
@@ -1664,98 +1695,20 @@ export default function DashboardHome() {
                           <div className="mt-3">
                             <button
                               onClick={() => setIsRahuKaalModalOpen(true)}
-                              className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                              className="text-[11px] font-bold uppercase tracking-wider text-[#F05B68] hover:text-[#F05B68]/80 transition-colors inline-flex items-center gap-1 cursor-pointer"
                             >
                               <span>View Details</span>
-                              <ChevronRight className="h-3.5 w-3.5 text-secondary shrink-0" />
+                              <ChevronRight className="h-3.5 w-3.5 text-[#F05B68] shrink-0" />
                             </button>
                           </div>
                         ) : (
-                          <p className="mt-1 text-xs text-foreground/58 leading-normal">{t('newDashboard.todaysEnergy.cautionTimeDesc')}</p>
+                          <p className="mt-1 text-xs text-[#C8C3D6] leading-normal">{t('newDashboard.todaysEnergy.cautionTimeDesc')}</p>
                         )}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* AI Astrologers Section */}
-                <div className="space-y-3 mt-auto pt-2">
-                  <div className="grid w-full grid-cols-1 items-stretch gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.3fr)]">
-                    {/* Left Card: Choose from AI Astrologers */}
-                    <button
-                      onClick={() => {
-                        if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
-                          setActivePaywallData(getFeaturePaywall('chat_message')!);
-                          return;
-                        }
-                        localStorage.removeItem("astranavi_pending_message");
-                        router.push("/chat");
-                      }}
-                      className="w-full flex items-center gap-3 rounded-2xl border border-purple-500/30 bg-purple-950/10 py-3 px-4 text-left hover:bg-purple-950/20 transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-black uppercase tracking-[0.15em] text-purple-400">
-                          CHOOSE FROM AI ASTROLOGERS
-                        </h4>
-                        <p className="mt-0.5 truncate text-[11px] text-foreground/50">
-                          Browse and select your personal guide
-                        </p>
-                      </div>
-                    </button>
-
-                    {/* OR Separator Column */}
-                    <div className="flex items-center justify-center py-1 md:py-0">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface border border-white/20 text-[9px] font-black text-foreground/60 shadow-lg">
-                        OR
-                      </span>
-                    </div>
-
-                    {/* Right Card: Ask Navi / Arya / Meera / Anand / Vidya / Rishi */}
-                    <button
-                      onClick={() => {
-                        if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
-                          setActivePaywallData(getFeaturePaywall('chat_message')!);
-                          return;
-                        }
-                        setSelectedAvatarId(activeAvatar.avatarId);
-                        localStorage.setItem(
-                          "astranavi_pending_message",
-                          `I want to consult with ${activeAvatar.name} about my ${activeAreaLabel.toLowerCase()} area.`
-                        );
-                        router.push("/chat");
-                      }}
-                      className="w-full flex items-center justify-between gap-3 rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left hover:bg-white/[0.02] transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white/10">
-                          <Image
-                             src={activeAvatar.imageUrl}
-                             alt={activeAvatar.name}
-                             fill
-                             className="object-cover"
-                           />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-xs text-foreground">
-                              Ask {activeAvatar.name} about {activeAreaLabel}
-                            </span>
-                            <span className="text-[9px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full shrink-0 uppercase tracking-wide">
-                              RECOMMENDED
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-foreground/50 mt-0.5 truncate max-w-[200px] md:max-w-[190px] xl:max-w-[230px] 2xl:max-w-[280px]">
-                            {activeAvatar.desc}
-                          </p>
-                        </div>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-foreground/45 shrink-0 ml-auto" />
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </DarkPanel>
@@ -1802,7 +1755,7 @@ export default function DashboardHome() {
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {dashboardLifeAreas.map(({ area, label, score, theme, badge, badgeStyle, arrow }) => {
                     const Icon = theme.icon;
-                    const cardColorHex = getAreaPhaseMain(area, score);
+                    const cardColorHex = AREA_THEMES[area].hex;
                     const isLucide = area === "general" || area === "spiritual";
                     const isSelected = activeArea === area;
                     return (
@@ -1811,38 +1764,40 @@ export default function DashboardHome() {
                         data-testid={`dashboard-life-area-${area}`}
                         onClick={() => setActiveArea(area)}
                         className={`group flex flex-col items-center rounded-2xl border py-2 px-1.5 sm:py-2.5 sm:px-3 text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
-                        isSelected
-                          ? "bg-white/[0.04] opacity-100"
-                          : "border-white/30 bg-surface/80 hover:border-white/50 hover:bg-surface-variant opacity-40 hover:opacity-80"
+                          isSelected
+                            ? "bg-[#21153C] text-[#F4EFE7]"
+                            : "border-white/20 bg-surface/80 text-[#F4EFE7]/75 hover:border-white/40 hover:bg-surface-variant"
                         }`}
                         style={{
-                          borderColor: isSelected ? `${cardColorHex}60` : undefined,
-                          boxShadow: isSelected ? `0 0 20px ${cardColorHex}30` : undefined,
+                          borderColor: isSelected ? `${cardColorHex}73` : undefined,
+                          boxShadow: isSelected ? `0 0 18px ${cardColorHex}14` : undefined,
                         }}
                       >
-                      <AreaRing score={score} color={cardColorHex} label={label}>
-                          <span
-                            className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center overflow-hidden rounded-full"
-                            style={{ color: cardColorHex }}
-                          >
-                            <Icon className={isLucide ? "h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current" : "h-4.5 w-4.5 sm:h-5 sm:w-5 object-cover"} />
-                          </span>
-                          <span className="text-sm sm:text-base font-black leading-none tabular-nums" style={{ color: cardColorHex }}>
-                            {score}
-                          </span>
-                      </AreaRing>
-                          <p className="mt-2 font-headline text-xs font-bold leading-tight">{label}</p>
-                          {badge && (
-                            <span className={`mt-1.5 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.06em] px-1.5 py-0.5 rounded border`} style={badgeStyle}>
-                              {arrow === "up" && <span className="text-[9px] leading-none">▲</span>}
-                              {arrow === "side" && <span className="text-[9px] leading-none">◆</span>}
-                              {arrow === "down" && <span className="text-[9px] leading-none">▼</span>}
-                              <span>{badge}</span>
+                        <div className={isSelected ? "opacity-100" : "opacity-60"}>
+                          <AreaRing score={score} color={cardColorHex} label={label}>
+                            <span
+                              className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center overflow-hidden rounded-full"
+                              style={{ color: cardColorHex }}
+                            >
+                              <Icon className={isLucide ? "h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current" : "h-4.5 w-4.5 sm:h-5 sm:w-5 object-cover"} />
                             </span>
-                          )}
-                        </button>
-                      );
-                    })}
+                            <span className="text-sm sm:text-base font-black leading-none tabular-nums" style={{ color: cardColorHex }}>
+                              {score}
+                            </span>
+                          </AreaRing>
+                        </div>
+                        <p className="mt-2 font-headline text-xs font-bold leading-tight">{label}</p>
+                        {badge && (
+                          <span className={`mt-1.5 inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.06em] px-1.5 py-0.5 rounded border ${isSelected ? 'opacity-100' : 'opacity-60'}`} style={badgeStyle}>
+                            {arrow === "up" && <span className="text-[9px] leading-none">▲</span>}
+                            {arrow === "side" && <span className="text-[9px] leading-none">◆</span>}
+                            {arrow === "down" && <span className="text-[9px] leading-none">▼</span>}
+                            <span>{badge}</span>
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                   </div>
                 )}
                 </div>
@@ -1904,40 +1859,61 @@ export default function DashboardHome() {
                         </div>
 
                         <div className="mt-auto pt-2 flex flex-row gap-3 w-full">
-                          <Link
-                            href={`/horoscope/forecast?area=${activeArea}`}
-                            className="flex-1 flex items-center justify-center text-center rounded-xl px-3 py-2.5 text-[11px] font-black uppercase tracking-wider transition-all"
-                            style={{
-                              color: activeAreaHex,
-                              borderWidth: "1px",
-                              borderStyle: "solid",
-                              borderColor: `${activeAreaHex}4d`,
-                              backgroundColor: `${activeAreaHex}0d`,
-                            }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${activeAreaHex}1a`; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${activeAreaHex}0d`; }}
-                          >
-                            {t('newDashboard.todaysEnergy.openForecast', { area: activeAreaLabel }) || `Open ${activeAreaLabel} Forecast`}
-                          </Link>
-
                           {(activeAreaNotes.length > 0 || activeAreaTone) && (
-                            <button
-                              onClick={() => setIsNotesModalOpen(true)}
-                              className="flex-1 flex items-center justify-center text-center rounded-xl px-3 py-2.5 text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer"
-                              style={{
-                                color: activeAreaHex,
-                                borderWidth: "1px",
-                                borderStyle: "solid",
-                                borderColor: `${activeAreaHex}4d`,
-                                backgroundColor: `${activeAreaHex}0d`,
-                              }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = `${activeAreaHex}1a`; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = `${activeAreaHex}0d`; }}
-                            >
-                              {t('newDashboard.todaysEnergy.personalNotesBtn') || "Personalized Notes"}
-                            </button>
+                          <button
+                            onClick={() => setIsNotesModalOpen(true)}
+                            className="w-full flex items-center justify-center gap-1.5 text-center rounded-xl border border-[#F4EFE7]/15 bg-[#241744] px-3 py-2.5 text-[11px] font-black uppercase tracking-wider text-[#C8C3D6] transition-all hover:bg-[#2a1d45] cursor-pointer"
+                          >
+                            {t('newDashboard.todaysEnergy.personalNotesBtn') || "Personalized Notes"}
+                            <ChevronRight className="h-3.5 w-3.5 text-[#928BA5]" />
+                          </button>
                           )}
                         </div>
+                         {/* Right Card: Ask Navi / Arya / Meera / Anand / Vidya / Rishi */}
+                         <button
+                           onClick={() => {
+                             if (isFeatureBlocked('chat_message') && getFeaturePaywall('chat_message')) {
+                               setActivePaywallData(getFeaturePaywall('chat_message')!);
+                               return;
+                             }
+                             setSelectedAvatarId(activeAvatar.avatarId);
+                             localStorage.setItem(
+                               "astranavi_pending_message",
+                               `I want to consult with ${activeAvatar.name} about my ${activeAreaLabel.toLowerCase()} area.`
+                             );
+                             router.push("/chat");
+                           }}
+                           className="group relative w-full flex flex-col gap-2 rounded-2xl border border-[var(--area-color)]/35 bg-[#21153C] py-3 px-4 text-left transition hover:bg-[var(--area-color)]/12 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--area-color)]/50"
+                           style={{ '--area-color': activeAreaHex } as React.CSSProperties}
+                         >
+                           <div className="flex items-center justify-between gap-2">
+                             <span className="inline-flex items-center gap-1 text-[10px] font-black text-[var(--area-color)] uppercase tracking-wide">
+                               Recommended
+                             </span>
+                             <ArrowRight className="h-4 w-4 text-[var(--area-color)] shrink-0 transition-transform group-hover:translate-x-0.5" />
+                           </div>
+                           <div className="flex items-center gap-3 min-w-0">
+                             <div className="flex flex-col items-center shrink-0">
+                               <div className="relative h-10 w-10 overflow-hidden rounded-full border border-[var(--area-color)]/30">
+                                 <Image
+                                   src={activeAvatar.imageUrl}
+                                   alt={activeAvatar.name}
+                                   fill
+                                   className="object-cover"
+                                 />
+                               </div>
+                               <span className="mt-1 text-[12px] font-bold leading-none text-[#AFA8C0]">
+                                 {activeAvatar.name}
+                               </span>
+                             </div>
+                             <div className="min-w-0">
+                               <h4 className="font-bold text-lg text-[#F4EFE7]">
+                                 Ask me about {activeAreaLabel}
+                               </h4>
+                               <p className="text-[13px] text-[#AFA8C0]">Talk to your personal guide.</p>
+                             </div>
+                           </div>
+                         </button>
                       </>
                     ) : (
                       <p className="text-sm text-foreground/50 italic">
@@ -1948,9 +1924,26 @@ export default function DashboardHome() {
 
                   {/* Right Column: Weekly Chart */}
                   <div className="w-full">
-                    <h4 className="text-xs font-black uppercase tracking-[0.15em] text-secondary mb-2 text-left">
-                      {t('newDashboard.currentWeekChartTitle') || "Current Week"}
-                    </h4>
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <h4 className="text-xs font-black uppercase tracking-[0.15em] text-secondary text-left">
+                        {t('newDashboard.currentWeekChartTitle') || "Current Week"}
+                      </h4>
+                      <Link
+                        href={`/horoscope/forecast?area=${activeArea}`}
+                        className="shrink-0 flex items-center justify-center text-center rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all"
+                        style={{
+                          color: activeAreaHex,
+                          borderWidth: "1px",
+                          borderStyle: "solid",
+                          borderColor: `${activeAreaHex}4d`,
+                          backgroundColor: `${activeAreaHex}0d`,
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${activeAreaHex}1a`; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${activeAreaHex}0d`; }}
+                      >
+                        {t('newDashboard.todaysEnergy.openForecast', { area: activeAreaLabel }) || `Open ${activeAreaLabel} Forecast`}
+                      </Link>
+                    </div>
                     <div className="relative rounded-2xl overflow-hidden w-full bg-surface-variant/[0.035] px-4 py-4 min-h-[230px] flex flex-col justify-center">
                       {isFeatureBlocked('full_daily_horoscope') && getFeaturePaywall('full_daily_horoscope') ? (
                         <LockedPreview
@@ -1987,21 +1980,23 @@ export default function DashboardHome() {
 
           {/* LEFT — Family Compatibility */}
           <DarkPanel 
-            className="p-6 flex flex-col gap-4"
+            className="p-6 flex flex-col gap-4 !bg-[#150B2D]"
             borderVariant="muted"
           >
             <div className="flex flex-col gap-4 w-full">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-400/10 border border-rose-400/20">
-                    <Heart className="h-5 w-5 text-rose-400" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#C9972E]/10 border border-[#C9972E]/25">
+                    <Users className="h-5 w-5 text-[#C9972E]" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className={`${DASHBOARD_SECTION_TITLE_CLASS} truncate`}>
-                      {t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}
+                    <h2 className="font-headline text-xl font-bold leading-tight tracking-tight text-[#F4EFE7]">
+                      <span className="sm:hidden">{t('newDashboard.familyFriends.compatibilityTitleShort') || "Family"}</span>
+                      <span className="hidden sm:inline">{t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}</span>
                     </h2>
-                    <p className="text-[9px] text-foreground/40 mt-0.5 uppercase tracking-[0.14em] font-bold truncate">
-                      {t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}
+                    <p className="text-[9px] text-[#928BA5] mt-0.5 uppercase tracking-[0.14em] font-bold">
+                      <span className="sm:hidden">{t('newDashboard.familyFriends.compatibilitySubtitleShort') || "Bonds & alignment"}</span>
+                      <span className="hidden sm:inline">{t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}</span>
                     </p>
                   </div>
                 </div>
@@ -2016,17 +2011,17 @@ export default function DashboardHome() {
                         router.push('/family');
                       }
                     }}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary/80 transition-colors"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#C9972E] hover:text-[#C9972E]/80 transition-colors"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{t('newDashboard.familyFriends.addMember') || "Add Member"}</span>
                     <span className="sm:hidden">{t('family.addShort') || "Add"}</span>
                   </button>
-                  <span className="h-3 w-px bg-outline-variant/30" aria-hidden="true" />
+                  <span className="h-3 w-px bg-[#F4EFE7]/15" aria-hidden="true" />
                   <Link
                     href="/family"
-                    aria-label={t('newDashboard.familyFriends.title')}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-foreground/75 hover:text-secondary transition-colors"
+                    aria-label={t('newDashboard.familyFriends.title') || 'View all family'}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#C8C3D6] hover:text-[#C9972E] transition-colors"
                   >
                     {t('newDashboard.lifeAreas.viewAll') || "View All"} <ArrowRight className="inline h-3 w-3" />
                   </Link>
@@ -2034,17 +2029,17 @@ export default function DashboardHome() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {familyLoading && !familyMembers && connectionsLoading && !connectionsLoaded ? (
+                {familyLoading && !familyMembers ? (
                   [0, 1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex gap-4 p-4 rounded-2xl border border-outline-variant/8 bg-surface animate-pulse">
+                    <div key={i} className="flex gap-4 p-4 rounded-2xl border border-[#F4EFE7]/6 bg-[#180F32] animate-pulse">
                       <div className="flex flex-col items-center gap-2.5 shrink-0">
-                        <div className="h-12 w-12 rounded-full bg-surface-variant/20" />
-                        <div className="h-4 w-12 rounded bg-surface-variant/20" />
+                        <div className="h-12 w-12 rounded-full bg-[#20163B]" />
+                        <div className="h-4 w-12 rounded bg-[#20163B]" />
                       </div>
                       <div className="flex-1 space-y-3 py-1">
-                        <div className="h-3 w-28 rounded bg-surface-variant/20" />
-                        <div className="h-2 w-16 rounded bg-surface-variant/20" />
-                        <div className="h-5 w-full rounded bg-surface-variant/20 mt-2" />
+                        <div className="h-3 w-28 rounded bg-[#20163B]" />
+                        <div className="h-2 w-16 rounded bg-[#20163B]" />
+                        <div className="h-5 w-full rounded bg-[#20163B] mt-2" />
                       </div>
                     </div>
                   ))
@@ -2055,14 +2050,14 @@ export default function DashboardHome() {
                         const blocked = isFeatureBlocked('family_compatibility');
                         return (
                           <DashboardFamilyMemberCard
-                            key={`m-${slot.id}`}
+                            key={`m-${slot.source}-${slot.id}`}
                             member={slot.data}
                             t={t}
                             isCompatibilityBlocked={blocked}
                             onRunCompatibility={() => {
                               const pw = getFeaturePaywall('family_compatibility');
                               if (blocked && pw) { setActivePaywallData(pw); return; }
-                              router.push(`/family?member=${slot.id}&run=1`);
+                              router.push(`/family?member=${slot.id}&source=${slot.source}&run=1`);
                             }}
                           />
                         );
@@ -2120,35 +2115,30 @@ export default function DashboardHome() {
 
           {/* RIGHT — Chart Snapshot (40%) */}
           <DarkPanel 
-            className="p-6 flex flex-col justify-between"
+            className="p-6 flex flex-col justify-between !bg-[#150B2D]"
             borderVariant="muted"
           >
             <div className="flex flex-col gap-4 w-full h-full justify-between">
               <div>
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-5 w-5 items-center justify-center">
-                      <Orbit className="h-5 w-5 text-blue-400" />
-                    </div>
-                    <h2 className={DASHBOARD_SECTION_TITLE_CLASS}>{t('newDashboard.chartSnapshot')}</h2>
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-5 w-5 items-center justify-center">
+                    <Orbit className="h-5 w-5 text-[#C9972E]" />
                   </div>
-                  <Link href="/kundli" aria-label={t('newDashboard.myChart.viewDetails')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
-                    {t('newDashboard.myChart.viewDetails')} <ArrowRight className="inline h-3 w-3" />
-                  </Link>
+                  <h2 className={DASHBOARD_SECTION_TITLE_CLASS}>{t('newDashboard.chartSnapshot')}</h2>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     ...(mahadashaSub
-                      ? [{ label: t('newDashboard.myChart.mahadasha'), sublabel: mahadashaSub, subtext: mahadashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                      ? [{ label: t('newDashboard.myChart.mahadasha') || "Major period", sublabel: mahadashaSub, subtext: mahadashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
                       : horoscope?.planetary?.active_dasha
-                        ? [{ label: t('newDashboard.myChart.mahadasha'), sublabel: horoscope.planetary.active_dasha, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
-                        : [{ label: t('newDashboard.myChart.mahadasha'), sublabel: "..." }]),
+                        ? [{ label: t('newDashboard.myChart.mahadasha') || "Major period", sublabel: horoscope.planetary.active_dasha, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                        : [{ label: t('newDashboard.myChart.mahadasha') || "Major period", sublabel: "Calculating…" }]),
                     ...(antardashaSub
-                      ? [{ label: t('newDashboard.myChart.antardasha'), sublabel: antardashaSub, subtext: antardashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
-                      : [{ label: t('newDashboard.myChart.antardasha'), sublabel: "..." }]),
+                      ? [{ label: t('newDashboard.myChart.antardasha') || "Sub-period", sublabel: antardashaSub, subtext: antardashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
+                      : [{ label: t('newDashboard.myChart.antardasha') || "Sub-period", sublabel: "Calculating…" }]),
                     (horoscope?.planetary?.dominant_planet
                       ? { label: "Dominant Planet", sublabel: horoscope.planetary.dominant_planet }
-                      : { label: "Dominant Planet", sublabel: "..." }),
+                      : { label: "Dominant Planet", sublabel: "Calculating…" }),
                   ].map((item, idx) => {
                     const isBlocked = item.requiresFeature ? isFeatureBlocked(item.requiresFeature) : false;
                     const paywallData = item.requiresFeature ? getFeaturePaywall(item.requiresFeature) : null;
@@ -2172,42 +2162,44 @@ export default function DashboardHome() {
                             router.push('/kundli');
                           }
                         }}
-                        className="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border border-outline-variant/8 bg-surface p-3 text-center transition-all hover:border-secondary/30 hover:bg-surface-variant"
+                        className="relative flex min-h-[150px] cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border border-[#C4B5FD]/10 bg-[#190F33] p-3 text-left transition-all hover:border-[#C9972E]/28"
                       >
                         {isBlocked ? (
                           <>
-                            <div className="pointer-events-none flex w-full flex-col items-center justify-center blur-[4px]" aria-hidden="true">
+                            <div className="pointer-events-none flex w-full items-center gap-3 blur-[4px]" aria-hidden="true">
                               <img
                                 src={idx === 0 ? "/icons/planets/saturn.png" : "/icons/planets/moon.png"}
                                 alt=""
-                                className="mb-2 h-12 w-12 object-contain opacity-70"
+                                className="h-16 w-16 shrink-0 object-contain opacity-70"
                               />
-                              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/45">{item.label}</p>
-                              <p className="mt-1 font-headline text-sm font-bold text-foreground/75">{lockedPreviewText}</p>
+                              <div className="min-w-0">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-[#928BA5]">{item.label}</p>
+                                <p className="mt-1 font-headline text-base font-bold text-[#F4EFE7]">{lockedPreviewText}</p>
+                              </div>
                             </div>
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-surface/25 px-3 backdrop-blur-[1px]">
-                              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed border-secondary/55 bg-surface/80 text-secondary shadow-[0_0_20px_rgba(0,0,0,0.2)]">
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-[#150B2D]/70 px-3 backdrop-blur-sm">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed border-[#C9972E]/40 bg-[#190F33] text-[#C9972E] shadow-[0_0_20px_rgba(0,0,0,0.2)]">
                                 <Lock className="h-5 w-5" />
                               </div>
-                              <p className="text-[11px] font-black uppercase tracking-wider text-secondary">Unlock chart detail</p>
+                              <p className="text-[11px] font-black uppercase tracking-wider text-[#C9972E]">Unlock chart detail</p>
                             </div>
                           </>
                         ) : (
                           <>
-                            <div className="relative mb-2 shrink-0">
-                            <img
-                              src={planetImg}
-                              alt={item.sublabel || "Planet"}
-                              className="h-12 w-12 object-contain"
-                            />
+                            <div className="relative shrink-0">
+                              <img
+                                src={planetImg}
+                                alt={item.sublabel || "Planet"}
+                                className="h-16 w-16 object-contain"
+                              />
                             </div>
-                            <div className="flex-1 flex flex-col justify-center items-center min-w-0 w-full">
-                              <p className="text-[10px] font-bold tracking-wider text-foreground/45 uppercase truncate">{item.label}</p>
-                              <p className="font-headline text-sm sm:text-base font-bold text-foreground truncate mt-0.5">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-[#928BA5] truncate">{item.label}</p>
+                              <p className="mt-1 font-headline text-base font-bold text-[#F4EFE7] truncate">
                                 {item.sublabel}
                               </p>
                               {item.subtext && (
-                                <p className="text-[9px] sm:text-[10px] text-foreground/45 truncate mt-0.5">
+                                <p className="text-[10px] text-[#AFA8C0] truncate mt-0.5">
                                   {item.subtext}
                                 </p>
                               )}
@@ -2220,99 +2212,99 @@ export default function DashboardHome() {
                 </div>
               </div>
 
-              {/* Cosmic Snapshot Details (fills the empty space) */}
-              <div className="flex-1 flex flex-col justify-center py-4 border-t border-outline-variant/8 mt-4">
-                <p className="text-[10px] font-black tracking-[0.2em] text-foreground/40 uppercase mb-3 text-left">
-                  Cosmic Alignment Details
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    {
-                      label: "Nakshatra (Birth Star)",
-                      value: kundliStats?.nakshatra || "...",
-                      subtext: kundliStats?.nakshatraLord ? `Lord: ${kundliStats.nakshatraLord}` : "Astrological Star",
-                      icon: <Star className="h-4 w-4 text-amber-400" />
-                    },
-                    {
-                      label: "Moon Phase",
-                      value: kundliStats?.moonPhase || "...",
-                      subtext: "Current Lunar Cycle",
-                      icon: <Moon className="h-4 w-4 text-purple-400" />
-                    },
-                    {
-                      label: "Dasha Time Remaining",
-                      value: kundliStats?.dashaRemaining || "...",
-                      subtext: "Active Dasha Period",
-                      icon: <Gem className="h-4 w-4 text-emerald-400" />,
-                      requiresFeature: 'kundli_premium' as PaywallFeatureKey
-                    },
-                    {
-                      label: "Lucky Elements",
-                      value: horoscope?.lucky_color || horoscope?.lucky?.color ? `${horoscope.lucky_color || horoscope.lucky?.color}` : "...",
-                      subtext: horoscope?.lucky_number || horoscope?.lucky?.number ? `Lucky Number: ${horoscope.lucky_number || horoscope.lucky?.number}` : "Daily Alignment",
-                      icon: <Sparkles className="h-4 w-4 text-blue-400" />
-                    }
-                  ].map((stat, sIdx) => {
-                    const isBlocked = stat.requiresFeature ? isFeatureBlocked(stat.requiresFeature) : false;
-                    const paywallData = stat.requiresFeature ? getFeaturePaywall(stat.requiresFeature) : null;
-                    return (
-                      <div
-                        key={sIdx}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => {
+              {/* Cosmic Snapshot Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  {
+                    label: "Nakshatra (Birth Star)",
+                    value: kundliStats?.nakshatra || "Calculating…",
+                    subtext: kundliStats?.nakshatraLord ? `Lord: ${kundliStats.nakshatraLord}` : "Astrological Star",
+                    icon: <Star className="h-4 w-4 text-[#9B6DDE]" />,
+                    color: "#9B6DDE"
+                  },
+                  {
+                    label: "Moon Phase",
+                    value: kundliStats?.moonPhase || "Calculating…",
+                    subtext: "Current Lunar Cycle",
+                    icon: <Moon className="h-4 w-4 text-[#9B6DDE]" />,
+                    color: "#9B6DDE"
+                  },
+                  {
+                    label: "Dasha Time Remaining",
+                    value: kundliStats?.dashaRemaining || "Calculating…",
+                    subtext: "Active Dasha Period",
+                    icon: <Gem className="h-4 w-4 text-[#C9972E]" />,
+                    color: "#C9972E",
+                    requiresFeature: 'kundli_premium' as PaywallFeatureKey
+                  },
+                  {
+                    label: "Lucky Elements",
+                    value: horoscope?.lucky_color || horoscope?.lucky?.color ? `${horoscope.lucky_color || horoscope.lucky?.color}` : "Calculating…",
+                    subtext: horoscope?.lucky_number || horoscope?.lucky?.number ? `Lucky Number: ${horoscope.lucky_number || horoscope.lucky?.number}` : "Daily Alignment",
+                    icon: <Sparkles className="h-4 w-4 text-[#C9972E]" />,
+                    color: "#C9972E"
+                  }
+                ].map((stat, sIdx) => {
+                  const isBlocked = stat.requiresFeature ? isFeatureBlocked(stat.requiresFeature) : false;
+                  const paywallData = stat.requiresFeature ? getFeaturePaywall(stat.requiresFeature) : null;
+                  const accent = stat.color as string;
+                  return (
+                    <div
+                      key={sIdx}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
+                        router.push('/kundli');
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
                           if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
                           router.push('/kundli');
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            if (isBlocked && paywallData) { setActivePaywallData(paywallData); return; }
-                            router.push('/kundli');
-                          }
-                        }}
-                        className="relative flex min-h-[86px] cursor-pointer gap-3 overflow-hidden rounded-2xl border border-outline-variant/8 bg-surface-variant/[0.02] p-3 text-left transition-all hover:border-secondary/35 hover:bg-surface-variant/4"
-                      >
-                        {isBlocked ? (
-                          <>
-                            <div className="pointer-events-none flex min-w-0 flex-1 gap-3 blur-[4px]" aria-hidden="true">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-outline-variant/8 bg-surface-variant/10">
-                                {stat.icon}
-                              </div>
-                              <div className="min-w-0 leading-tight">
-                                <p className="text-[9px] font-bold uppercase tracking-wider text-foreground/45">{stat.label}</p>
-                                <p className="mt-1 font-headline text-xs font-bold text-foreground/75">Timeline insight</p>
-                                <p className="mt-0.5 text-[9px] text-foreground/45">Premium chart timing</p>
-                              </div>
-                            </div>
-                            <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-surface/25 px-3 backdrop-blur-[1px]">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-dashed border-secondary/55 bg-surface/80 text-secondary">
-                                <Lock className="h-4 w-4" />
-                              </div>
-                              <span className="text-[10px] font-black uppercase tracking-wider text-secondary">Unlock timing</span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-variant/10 border border-outline-variant/8">
+                        }
+                      }}
+                      className="relative flex min-h-[110px] cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border border-[#C4B5FD]/10 bg-[#190F33] p-3 text-left transition-all hover:border-[#C9972E]/28"
+                    >
+                      {isBlocked ? (
+                        <>
+                          <div className="pointer-events-none flex min-w-0 flex-1 items-center gap-3 blur-[4px]" aria-hidden="true">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#C9972E]/20 bg-[#C9972E]/10">
                               {stat.icon}
                             </div>
                             <div className="min-w-0 leading-tight">
-                              <p className="text-[9px] font-bold text-foreground/45 uppercase tracking-wider">{stat.label}</p>
-                              <p className="font-headline text-xs font-bold text-foreground truncate mt-1">{stat.value}</p>
-                              <p className="text-[9px] text-foreground/45 truncate mt-0.5">{stat.subtext}</p>
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-[#928BA5]">{stat.label}</p>
+                              <p className="mt-1 font-headline text-xs font-bold text-[#F4EFE7]">Timeline insight</p>
+                              <p className="mt-0.5 text-[9px] text-[#AFA8C0]">Premium chart timing</p>
                             </div>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                          </div>
+                          <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-[#150B2D]/70 px-3 backdrop-blur-sm">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-dashed border-[#C9972E]/40 bg-[#190F33] text-[#C9972E]">
+                              <Lock className="h-4 w-4" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-wider text-[#C9972E]">Unlock timing</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/10" style={{ '--accent': accent } as React.CSSProperties}>
+                            {stat.icon}
+                          </div>
+                          <div className="min-w-0 leading-tight">
+                            <p className="text-[9px] font-bold uppercase tracking-wider text-[#928BA5]">{stat.label}</p>
+                            <p className="font-headline text-sm font-bold text-[#F4EFE7] truncate mt-1">{stat.value}</p>
+                            <p className="text-[10px] text-[#AFA8C0] truncate mt-0.5">{stat.subtext}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <Link
               href="/kundli"
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-secondary/50 bg-secondary/10 px-4 py-3 text-[11px] font-black uppercase tracking-wider text-secondary transition-all hover:border-secondary/70 hover:bg-secondary/15"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#C9972E]/30 bg-[#C9972E]/10 px-4 py-2.5 text-[11px] font-black uppercase tracking-wider text-[#C9972E] transition-all hover:bg-[#C9972E]/15"
             >
               <Sparkles className="h-4 w-4" />
               {t('newDashboard.myChart.exploreFullAnalysis')}
@@ -2323,35 +2315,35 @@ export default function DashboardHome() {
       </div>
 
       {/* EXPLORE YOUR COSMIC NETWORK SECTION */}
-      <div className="relative z-10 mx-auto max-w-[1760px] px-4 py-12 sm:px-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-4 py-10 sm:px-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
         {/* Section Header */}
-        <div className="mb-10 text-center">
+        <div className="mb-6 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
             <Sparkles className="h-4 w-4 text-secondary" />
-            <span className="label-secondary text-[10px] font-black tracking-[0.3em]">{t('newDashboard.guidanceHub')}</span>
+            <span className="label-secondary">{t('newDashboard.guidanceHub')}</span>
           </div>
-          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-foreground sm:text-[42px] 3xl:text-[56px]">
+          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-[#F4EFE7] sm:text-[42px] 3xl:text-[56px]">
             {t('newDashboard.exploreCosmicNetwork')}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-foreground/55">
+          <p className="mt-2 text-sm leading-relaxed text-[#AAA3B8]">
             {t('newDashboard.cosmicNetworkDesc')}
           </p>
         </div>
 
         <div>
           {/* MEET YOUR AI ASTROLOGERS */}
-            <DarkPanel className="p-6" borderVariant="top-gold">
-              <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-5 w-5 items-center justify-center">
-                    <div aria-hidden="true" className="h-2 w-2 rotate-45 border border-secondary bg-secondary/20" />
-                  </div>
-                  <h3 className="label-sm font-black tracking-[0.24em]">{t('newDashboard.meetYourAiAstrologers')}</h3>
+          <DarkPanel className="p-6" borderVariant="top-gold">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-5 w-5 items-center justify-center">
+                  <div aria-hidden="true" className="h-2 w-2 rotate-45 border border-secondary bg-secondary/20" />
                 </div>
-                <Link href="/chat" aria-label={t('newDashboard.meetYourAiAstrologers')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
-                  {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
-                </Link>
+                <h3 className="label-sm">{t('newDashboard.meetYourAiAstrologers')}</h3>
               </div>
+              <Link href="/chat" aria-label={t('newDashboard.meetYourAiAstrologers')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
+                {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
+              </Link>
+            </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {[
                   { name: "Navi", role: t('newDashboard.guides.navi.role'), desc: t('newDashboard.guides.navi.desc'), credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
@@ -2361,70 +2353,67 @@ export default function DashboardHome() {
                   { name: "Vidya", role: t('newDashboard.guides.vidya.role'), desc: t('newDashboard.guides.vidya.desc'), credits: 2, avatarId: "finance_mentor", img: "/images/avatars/VIDYA_AVATAR.jpeg" },
                   { name: "Rishi", role: t('newDashboard.guides.rishi.role'), desc: t('newDashboard.guides.rishi.desc'), credits: 3, avatarId: "astro_sage", img: "/images/avatars/RISHI_AVATAR.jpeg" },
                 ].map((guide) => {
-                  const isLocked = isFeatureBlocked('chat_message');
-                  const paywallData = getFeaturePaywall('chat_message');
+                const isLocked = isFeatureBlocked('chat_message');
+                const paywallData = getFeaturePaywall('chat_message');
 
-                  return (
-                    <div key={guide.name} className={`group flex flex-col items-center text-center ${isLocked ? 'opacity-60' : ''}`}>
-                      <div className="relative mb-4">
-                        <div className={`h-[92px] w-[92px] overflow-hidden rounded-full border-[3px] bg-surface transition-all ${
-                          isLocked
-                            ? 'border-outline-variant/20'
-                            : 'border-secondary/50 group-hover:border-secondary/80 group-hover:gold-glow'
-                        }`}>
-                          <Image
-                            src={guide.img}
-                            alt={guide.name}
-                            width={92}
-                            height={92}
-                            className="h-full w-full object-cover"
-                          />
-                          {isLocked && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
-                              <Lock className="h-6 w-6 text-foreground/80" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-secondary/40 bg-surface px-2.5 py-1 text-[9px] font-bold text-secondary shadow-lg">
-                          <Coins className="h-2.5 w-2.5" />
-                          {guide.credits} {guide.credits > 1 ? t('dashboard.creditPlural') : t('dashboard.creditSingular')}
-                        </div>
-                      </div>
-                      <h4 className="mb-1 mt-1 font-headline text-base font-bold text-foreground">{guide.name}</h4>
-                      <p className="mb-2 label-sm text-[9px] tracking-[0.15em] text-foreground/40">{guide.role}</p>
-                      <p className="mb-3 line-clamp-2 min-h-[32px] 3xl:min-h-[40px] text-[10.5px] 3xl:text-[14px] leading-relaxed text-foreground/45">{guide.desc}</p>
-                      <button
-                        onClick={() => {
-                          if (isLocked && paywallData) {
-                            setActivePaywallData(paywallData);
-                            return;
-                          }
-                          setSelectedAvatarId(guide.avatarId);
-                          askInChat(t('chatWithNavi'), `I want to consult with ${guide.name} about my chart.`);
-                        }}
-                        className={`flex items-center gap-1.5 rounded-xl border-2 px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
-                          isLocked
-                            ? 'border-outline-variant/20 bg-transparent text-foreground/50 cursor-pointer hover:bg-white/5'
-                            : 'border-secondary/50 bg-transparent text-secondary hover:border-secondary/70 hover:bg-secondary/10'
-                        }`}
-                      >
-                        {isLocked ? (
-                          <>
-                            <Lock className="h-3 w-3" />
-                            {t('newDashboard.guides.locked')}
-                          </>
-                        ) : (
-                          <>
-                            <MessageSquare className="h-3 w-3" />
-                            {t('dashboard.startChat')}
-                          </>
+                return (
+                  <div key={guide.name} className={`group flex h-full flex-col items-center rounded-[22px] border border-transparent bg-transparent px-3 py-4 text-center transition-all hover:border-[#C9972E]/20 hover:bg-white/[0.025] ${isLocked ? 'opacity-60' : ''}`}>
+                    <div className="flex flex-col items-center">
+                      <div className={`relative h-[92px] w-[92px] overflow-hidden rounded-full border-[3px] bg-surface transition-all ${isLocked ? 'border-[#C4B5FD]/20' : 'border-[#C9972E]/50 group-hover:border-[#C9972E]'}`}>
+                        <Image
+                          src={guide.img}
+                          alt={guide.name}
+                          width={92}
+                          height={92}
+                          className="h-full w-full object-cover saturate-[0.9]"
+                        />
+                        <div className="pointer-events-none absolute inset-0 rounded-full bg-[#241744]/25" />
+                        {isLocked && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                            <Lock className="h-6 w-6 text-[#F4EFE7]/80" />
+                          </div>
                         )}
-                      </button>
+                      </div>
+                      <div className="mt-2 inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-[#C9972E]/40 bg-[#190F33] px-2.5 py-1 text-[9px] font-bold text-[#C9972E] shadow-sm">
+                        <Coins className="h-2.5 w-2.5" />
+                        {guide.credits} {guide.credits === 1 ? 'credit/message' : 'credits/message'}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </DarkPanel>
+                    <h4 className="mb-1 mt-3 font-headline text-base font-bold tracking-tight leading-tight text-[#F4EFE7]">{guide.name}</h4>
+                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.13em] text-[#AFA8C0]">{guide.role}</p>
+                    <p className="mb-3 line-clamp-2 flex-1 text-[11px] leading-relaxed text-[#AAA3B8]">{guide.desc}</p>
+                    <button
+                      onClick={() => {
+                        if (isLocked && paywallData) {
+                          setActivePaywallData(paywallData);
+                          return;
+                        }
+                        setSelectedAvatarId(guide.avatarId);
+                        askInChat(t('chatWithNavi'), `I want to consult with ${guide.name} about my chart.`);
+                      }}
+                      className={`mt-auto inline-flex w-full max-w-[148px] items-center justify-center gap-1.5 rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                        isLocked
+                          ? 'border-[#C4B5FD]/20 bg-transparent text-[#AFA8C0] cursor-pointer hover:bg-white/5 hover:text-[#F4EFE7]'
+                          : 'border-[#C9972E]/50 bg-transparent text-[#C9972E] hover:border-[#C9972E] hover:bg-[#C9972E] hover:text-[#170C2D]'
+                      }`}
+                    >
+                      {isLocked ? (
+                        <>
+                          <Lock className="h-3 w-3" />
+                          {t('newDashboard.guides.locked')}
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="h-3 w-3" />
+                          {t('dashboard.startChat')}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </DarkPanel>
 
         </div>
 
@@ -2435,7 +2424,7 @@ export default function DashboardHome() {
               <div className="flex h-5 w-5 items-center justify-center">
                 <div aria-hidden="true" className="h-2 w-2 rotate-45 border border-secondary bg-secondary/20" />
               </div>
-              <h3 className="label-sm font-black tracking-[0.24em]">{t('dashboard.cosmicPortals')}</h3>
+              <h3 className="label-sm">{t('dashboard.cosmicPortals')}</h3>
             </div>
             <Link href="/chat" aria-label={t('newDashboard.exploreAllPortals')} className="text-[11px] font-bold uppercase tracking-wider text-secondary hover:text-secondary">
               {t('newDashboard.exploreAllPortals')} <ArrowRight className="inline h-3 w-3" />
@@ -2443,13 +2432,14 @@ export default function DashboardHome() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {[
-              { icon: <MessageSquare className="h-5 w-5" />, title: t('dashboard.consultNaviAi'), desc: t('newDashboard.portalChatDesc'), action: t('dashboard.consultAi'), href: "/chat", color: "var(--secondary)", requiresFeature: 'chat_message' as PaywallFeatureKey },
-              { icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli'), desc: t('dashboard.janamKundliDesc'), action: t('dashboard.openChart'), href: "/kundli", color: PORTAL_COLORS.kundli, requiresFeature: 'kundli_premium' as PaywallFeatureKey },
-              { icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync'), desc: t('newDashboard.portalSoulmateDesc'), action: t('dashboard.analyzeMatch'), href: "/kundli/match", color: PORTAL_COLORS.match, requiresFeature: 'match_report' as PaywallFeatureKey },
-              { icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse'), desc: t('newDashboard.portalPulseDesc'), action: t('newDashboard.viewToday'), href: "/horoscope/forecast", color: PORTAL_COLORS.forecast, requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
-              { icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary'), desc: t('newDashboard.portalRashiDesc'), action: t('dashboard.openLibrary'), href: "/rashis", color: PORTAL_COLORS.rashi },
-              { icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions'), desc: t('newDashboard.portalSessionsDesc'), action: t('dashboard.joinSession'), href: "/consult", color: PORTAL_COLORS.sessions, requiresFeature: 'guided_consult' as PaywallFeatureKey },
+              { key: 'chat', icon: <MessageSquare className="h-5 w-5" />, title: t('dashboard.consultNaviAi'), desc: t('newDashboard.portalChatDesc'), action: t('dashboard.consultAi'), href: "/chat", featured: true, requiresFeature: 'chat_message' as PaywallFeatureKey },
+              { key: 'kundli', icon: <Globe className="h-5 w-5" />, title: t('dashboard.janamKundli'), desc: t('dashboard.janamKundliDesc'), action: t('dashboard.openChart'), href: "/kundli", requiresFeature: 'kundli_premium' as PaywallFeatureKey },
+              { key: 'match', icon: <Heart className="h-5 w-5" />, title: t('dashboard.soulmateSync'), desc: t('newDashboard.portalSoulmateDesc'), action: t('dashboard.analyzeMatch'), href: "/kundli/match", requiresFeature: 'match_report' as PaywallFeatureKey },
+              { key: 'forecast', icon: <Sun className="h-5 w-5" />, title: t('dashboard.dailyPulse'), desc: t('newDashboard.portalPulseDesc'), action: t('newDashboard.viewToday'), href: "/horoscope/forecast", requiresFeature: 'full_daily_horoscope' as PaywallFeatureKey },
+              { key: 'rashi', icon: <Orbit className="h-5 w-5" />, title: t('newDashboard.rashiLibrary'), desc: t('newDashboard.portalRashiDesc'), action: t('dashboard.openLibrary'), href: "/rashis" },
+              { key: 'sessions', icon: <Sparkles className="h-5 w-5" />, title: t('dashboard.sessions'), desc: t('newDashboard.portalSessionsDesc'), action: t('dashboard.joinSession'), href: "/consult", requiresFeature: 'guided_consult' as PaywallFeatureKey },
             ].map((portal, idx) => {
+              const accent = PORTAL_COLORS[portal.key];
               const isLocked = portal.requiresFeature ? isFeatureBlocked(portal.requiresFeature) : false;
               const paywallData = portal.requiresFeature ? getFeaturePaywall(portal.requiresFeature) : null;
               const showProBadge = portal.requiresFeature && isLocked && paywallData?.isSoft;
@@ -2479,10 +2469,24 @@ export default function DashboardHome() {
                       }
                     }
                   }}
-                  className={`group relative flex flex-col gap-3 rounded-2xl border border-outline-variant/8 bg-surface p-5 transition-all cursor-pointer ${
-                    isLocked ? 'opacity-60 hover:border-outline-variant/10' : 'hover:-translate-y-0.5 hover:border-secondary/30 hover:bg-surface-variant'
+                  className={`group relative flex flex-col gap-3 rounded-2xl border bg-surface p-5 transition-all cursor-pointer ${
+                    portal.featured
+                      ? 'border-[rgba(196,181,253,0.12)]'
+                      : 'border-[rgba(196,181,253,0.10)]'
+                  } ${
+                    isLocked
+                      ? 'opacity-60 hover:border-[rgba(196,181,253,0.12)]'
+                      : 'hover:-translate-y-0.5 hover:border-[#D3A83D]/25 hover:bg-surface-variant/30'
                   }`}
                 >
+                  {/* Featured / Most Popular label */}
+                  {portal.featured && (
+                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-[#D3A83D]/40 bg-[#D3A83D]/12 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-[#D3A83D]">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      Most Popular
+                    </div>
+                  )}
+
                   {/* Pro Badge */}
                   {showProBadge && (
                     <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-secondary to-amber-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-on-primary">
@@ -2500,18 +2504,21 @@ export default function DashboardHome() {
                   )}
 
                   <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl border"
-                    style={{ backgroundColor: `${portal.color}1f`, borderColor: `${portal.color}33`, color: portal.color }}
+                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(196,181,253,0.12)] bg-[#21163D] transition-colors group-hover:border-[rgba(196,181,253,0.18)]"
+                    style={{ color: accent }}
                   >
                     {portal.icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="mb-1.5 font-headline text-base font-bold text-foreground">{portal.title}</h4>
-                    <p className="line-clamp-3 text-[11px] leading-relaxed text-foreground/45">{portal.desc}</p>
+                    <h4 className="mb-1.5 font-headline text-base font-bold tracking-tight leading-tight text-[#F4EFE7]">{portal.title}</h4>
+                    <p className="line-clamp-3 text-[11px] leading-relaxed text-[#AAA3B8]">{portal.desc}</p>
                   </div>
                   <button
-                    className={`mt-auto flex items-center justify-center gap-2 rounded-xl border-2 px-3 py-2 text-[10px] font-black uppercase tracking-wider transition-all`}
-                    style={{ borderColor: `${portal.color}50`, backgroundColor: 'transparent', color: portal.color }}
+                    className={`mt-auto flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                      portal.featured
+                        ? 'border-[#D3A83D] bg-[#D3A83D] text-[#150B2D] hover:bg-[#E8C456] hover:border-[#E8C456]'
+                        : 'border-[rgba(201,151,46,0.38)] bg-transparent text-[#D3A83D] hover:border-[#D3A83D] hover:bg-[#D3A83D]/8'
+                    }`}
                   >
                     {isLocked && <Lock className="h-3 w-3 mr-1 shrink-0" />}
                     {isLocked ? t('newDashboard.unlock') : portal.action} <ArrowRight className="h-3 w-3" />
@@ -2571,10 +2578,10 @@ export default function DashboardHome() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
                 <MessageSquare className="h-6 w-6" />
               </div>
-              <h2 id="chat-confirm-title" className="font-headline text-2xl font-bold">{t('newDashboard.todaysEnergy.askNaviInChat')}</h2>
+              <h2 id="chat-confirm-title" className="font-headline text-2xl font-bold tracking-tight leading-tight">{t('newDashboard.todaysEnergy.askNaviInChat')}</h2>
               <p className="mt-2 text-sm leading-6 text-foreground/60">{t('newDashboard.todaysEnergy.askNaviConfirmDesc')}</p>
               <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-4">
-                <p className="label-secondary text-[11px] font-black tracking-[0.2em]">{pendingPrompt.title}</p>
+                <p className="label-secondary">{pendingPrompt.title}</p>
                 <p className="mt-2 text-sm leading-6 text-foreground/82">{pendingPrompt.message}</p>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -2641,7 +2648,7 @@ export default function DashboardHome() {
                 <Calendar className="h-6 w-6" />
               </div>
 
-              <h2 className="font-headline text-2xl font-bold mb-1">
+              <h2 className="font-headline text-2xl font-bold tracking-tight leading-tight mb-1">
                 {t('newDashboard.panchang.title')}
               </h2>
               <p className="text-sm text-foreground/60 mb-6">
@@ -2716,7 +2723,7 @@ export default function DashboardHome() {
                 <AlertTriangle className="h-6 w-6 text-amber-500" />
               </div>
 
-              <h2 className="font-headline text-2xl font-bold mb-1">
+              <h2 className="font-headline text-2xl font-bold tracking-tight leading-tight mb-1">
                 {t('newDashboard.panchang.rahuKaal')} & Alerts
               </h2>
               <p className="text-sm text-foreground/60 mb-6">
@@ -2816,7 +2823,7 @@ export default function DashboardHome() {
                 <Sparkles className="h-6 w-6" />
               </div>
 
-              <h2 className="font-headline text-2xl font-bold mb-1">
+              <h2 className="font-headline text-2xl font-bold tracking-tight leading-tight mb-1">
                 Personalized Notes
               </h2>
               <p className="text-xs text-foreground/50 mb-4 uppercase tracking-wider">
@@ -2881,9 +2888,9 @@ export default function DashboardHome() {
                     <span className="font-bold text-sm text-foreground/50">Cosmic Tone:</span>
                     <span className={`text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full shrink-0 ${
                       activeAreaTone === "positive"
-                        ? "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20"
+                        ? "text-[#35CFA0] bg-[#35CFA0]/10 border border-[#35CFA0]/20"
                         : activeAreaTone === "negative" || activeAreaTone === "caution"
-                        ? "text-red-400 bg-red-400/10 border border-red-400/20"
+                        ? "text-[#E16272] bg-[#E16272]/10 border border-[#E16272]/20"
                         : "text-foreground/45 bg-surface-variant/30 border border-white/5"
                     }`}>
                       {activeAreaTone}
@@ -2939,7 +2946,7 @@ export default function DashboardHome() {
                 <Sparkles className="h-6 w-6" />
               </div>
 
-              <h2 className="font-headline text-2xl font-bold mb-1">
+              <h2 className="font-headline text-2xl font-bold tracking-tight leading-tight mb-1">
                 Today&apos;s Advice
               </h2>
               <p className="text-xs text-foreground/50 mb-6 uppercase tracking-wider">

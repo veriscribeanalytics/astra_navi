@@ -35,6 +35,9 @@ function extractThreads(body: unknown): MessageThread[] {
     return raw.map(normalizeThread).filter((t): t is MessageThread => t !== null);
 }
 
+/** Poll cadence for the inbox while the tab is visible. */
+const INBOX_POLL_INTERVAL_MS = 10000;
+
 export interface UseThreadsResult {
     threads: MessageThread[];
     isLoading: boolean;
@@ -78,6 +81,26 @@ export function useThreads(options: { enabled?: boolean } = {}): UseThreadsResul
 
     useEffect(() => {
         if (enabled) void refetch();
+    }, [enabled, refetch]);
+
+    // Visibility-aware polling so previews/unread stay fresh without a manual
+    // refresh. Pauses when the tab is hidden; refetches immediately on return.
+    useEffect(() => {
+        if (!enabled) return;
+        let interval: ReturnType<typeof setInterval> | null = null;
+        const start = () => {
+            if (interval == null) interval = setInterval(() => void refetch(), INBOX_POLL_INTERVAL_MS);
+        };
+        const stop = () => {
+            if (interval != null) { clearInterval(interval); interval = null; }
+        };
+        const onVisibility = () => {
+            if (document.visibilityState === 'visible') { void refetch(); start(); }
+            else stop();
+        };
+        if (document.visibilityState === 'visible') start();
+        document.addEventListener('visibilitychange', onVisibility);
+        return () => { stop(); document.removeEventListener('visibilitychange', onVisibility); };
     }, [enabled, refetch]);
 
     const totalUnread = threads.reduce((sum, t) => sum + t.unreadCount, 0);

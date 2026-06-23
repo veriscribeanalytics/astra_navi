@@ -22,7 +22,7 @@ interface InsightData {
 
 const SubHeader = ({ label, color }: { label: string; color: string }) => (
   <div className="flex items-center gap-3.5 mb-3">
-    <span className="text-[10px] lg:text-[11px] 3xl:text-xs font-black uppercase tracking-[0.25em] text-foreground/45">
+    <span className="text-[10px] lg:text-[11px] 3xl:text-xs font-black uppercase tracking-[0.25em] text-foreground/60">
       {label}
     </span>
     <div className="h-[1px] flex-1 bg-white/5 relative">
@@ -60,7 +60,7 @@ export default function ForecastInsight({ data, colorHex, isWide = false }: { da
       {data.dominant_planet && (
         <div>
           <SubHeader label={t('forecast.whatItMeans')} color={colorHex} />
-          <p className="text-xs sm:text-sm text-foreground/70 leading-relaxed">
+          <p className="text-xs sm:text-sm text-foreground/85 leading-relaxed">
             {data.dominant_planet_meaning || t('forecast.whatItMeansBody')
               .replace('{planet}', data.dominant_planet || '')
               .replace('{score}', String(data.score))}
@@ -78,7 +78,7 @@ export default function ForecastInsight({ data, colorHex, isWide = false }: { da
               return (
                 <div key={i} className="flex items-start gap-2.5">
                   <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: colorHex }} />
-                  <span className="text-[12px] text-foreground/60 leading-snug">{text}</span>
+                  <span className="text-[12px] text-foreground/85 leading-snug">{text}</span>
                 </div>
               );
             })}

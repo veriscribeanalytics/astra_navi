@@ -39,7 +39,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
         {WEEKDAY_KEYS.map((key, i) => (
           <div
             key={i}
-            className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center ${i === 0 || i === 6 ? 'text-foreground/30' : 'text-foreground/40'}`}
+            className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-center ${i === 0 || i === 6 ? 'text-foreground/45' : 'text-foreground/55'}`}
           >
             {t(`forecast.weekdays.${key}`)}
           </div>
@@ -49,7 +49,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
         {Array.from({ length: leadingBlanks }).map((_, i) => (
-          <div key={`lead-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface border border-white/[0.02]" />
+          <div key={`lead-${i}`} className="aspect-[4/3] sm:aspect-[1.25/1] rounded-lg sm:rounded-xl bg-surface border border-white/[0.04]" />
         ))}
 
         {days.map(day => {
@@ -73,25 +73,35 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
                 .replace('{weekday}', weekdayName || '')
                 .replace('{date}', day.date)
                 .replace('{score}', String(day.score))}
-              className={`relative flex flex-col items-center justify-between aspect-square sm:aspect-[1.15] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface hover:bg-surface-variant/25 hover:border-white/15'}`}
+              className={`relative flex flex-col items-center justify-between aspect-[4/3] sm:aspect-[1.25/1] py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all cursor-pointer overflow-hidden ${isSelected ? 'bg-surface shadow-lg' : 'bg-surface hover:bg-surface-variant/25 hover:border-white/15'}`}
               style={{
                 borderColor: isSelected
-                  ? colorHex + '80'
+                  ? colorHex + '90'
                   : isToday
-                    ? colorHex + '55'
-                    : 'rgba(255,255,255,0.05)',
+                    ? colorHex + '70'
+                    : 'rgba(255,255,255,0.08)',
                 boxShadow: isSelected ? `0 0 20px ${colorHex}30, inset 0 0 0 1px ${colorHex}30` : undefined,
-                backgroundColor: isSelected ? undefined : isToday ? colorHex + '08' : undefined,
+                backgroundColor: isSelected ? colorHex + '08' : isToday ? colorHex + '08' : undefined,
               }}
             >
+              <div className="flex flex-col items-center leading-tight">
+                <span
+                  className={`text-xs sm:text-sm font-headline font-semibold leading-none ${isSelected ? 'text-foreground' : isToday ? '' : 'text-foreground/65'}`}
+                  style={{ color: isToday && !isSelected ? colorHex : undefined }}
+                >
+                  {dayOfMonth}
+                </span>
+                {isToday && (
+                  <span
+                    className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider mt-0.5"
+                    style={{ color: colorHex }}
+                  >
+                    {t('forecast.today')}
+                  </span>
+                )}
+              </div>
               <span
-                className={`text-[11px] sm:text-sm font-headline font-semibold leading-none ${isSelected ? 'text-foreground' : isToday ? '' : 'text-foreground/55'}`}
-                style={{ color: isToday && !isSelected ? colorHex : undefined }}
-              >
-                {dayOfMonth}
-              </span>
-              <span
-                className="text-[10px] sm:text-[11px] font-bold leading-none"
+                className="text-[11px] sm:text-sm font-bold leading-none"
                 style={{ color: isSelected ? colorHex : phaseColor }}
               >
                 {day.score}
@@ -101,21 +111,15 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
                 className="absolute bottom-0 left-0 h-[2px] rounded-full"
                 style={{
                   width: `${Math.max(day.score, 6)}%`,
-                  backgroundColor: isSelected ? colorHex : phaseColor + '70',
+                  backgroundColor: isSelected ? colorHex : phaseColor + '80',
                 }}
               />
-              {isToday && (
-                <span
-                  className="absolute top-1 right-1 w-1 h-1 rounded-full"
-                  style={{ backgroundColor: colorHex }}
-                />
-              )}
             </motion.button>
           );
         })}
 
         {Array.from({ length: trailingBlanks }).map((_, i) => (
-          <div key={`trail-${i}`} className="aspect-square sm:aspect-[1.15] rounded-lg sm:rounded-xl bg-surface border border-white/[0.02]" />
+          <div key={`trail-${i}`} className="aspect-[4/3] sm:aspect-[1.25/1] rounded-lg sm:rounded-xl bg-surface border border-white/[0.04]" />
         ))}
       </div>
 
@@ -123,7 +127,7 @@ export default function MonthlyDayGrid({ days, colorHex, area, selectedDate, onS
       <div className="flex items-center gap-4 mt-1 px-1">
         <div className="flex items-center gap-1.5 ml-auto">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: colorHex }} />
-          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/40">{t('forecast.today')}</span>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/55">{t('forecast.today')}</span>
         </div>
       </div>
     </div>

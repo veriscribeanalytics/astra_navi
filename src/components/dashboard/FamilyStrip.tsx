@@ -84,9 +84,9 @@ const BondEnergyHint: React.FC<{ label: string }> = ({ label }) => (
 
 const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
   const { t } = useTranslation();
-  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
-  const { data: reports } = useFamilyReports(member.id);
-  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member.id);
+  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member);
+  const { data: reports } = useFamilyReports(member);
+  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member);
 
   useEffect(() => {
     fetchPreflight();
@@ -109,7 +109,7 @@ const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
 
   return (
     <Link
-      href={`/family?member=${member.id}`}
+      href={`/family?member=${member.id}&source=${member.source}`}
       className="group flex flex-col p-5 rounded-[24px] bg-surface border border-outline-variant/20 hover:border-secondary/40 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(212,175,55,0.10)] transition-all duration-300"
       aria-label={`Open ${member.name}'s bond`}
     >
@@ -122,7 +122,7 @@ const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
             {member.name || '—'}
           </p>
           <p className="mt-0.5 text-[10px] uppercase tracking-widest text-foreground/55 font-bold">
-            {formatRelationship(member.relationshipType)}
+            {member.relationshipType ? formatRelationship(member.relationshipType) : (t('family.relationshipNotSet') || 'Connection')}
           </p>
         </div>
         {status && (
@@ -289,22 +289,22 @@ const FamilyStrip: React.FC = () => {
 
   // Items that count against the tier slot cap: manual members + family-kind links.
   // Friends are uncapped and injected separately into `slots` below.
-  const allItems = React.useMemo(() => {
-    const membersList = members || [];
-    const familyList = linkedFamily || [];
-    const mappedMembers = membersList.map(m => ({ type: 'member' as const, id: String(m.id), data: m }));
-    const mappedConnections = familyList.map(c => ({ type: 'connection' as const, id: String(c.connectionId), data: c }));
-    return [...mappedMembers, ...mappedConnections];
-  }, [members, linkedFamily]);
+    // /api/family/members already includes linked family connections, so we no
+    // longer need to merge a separate family-connections list here. Key every
+    // item by (source, id) because manual member ids can collide with connection ids.
+    const allItems = React.useMemo(() => {
+        const membersList = members || [];
+        return membersList.map(m => ({ type: 'member' as const, id: String(m.id), source: m.source, data: m }));
+    }, [members]);
 
   const isFree = React.useMemo(() => (tier || 'free').toLowerCase() === 'free', [tier]);
 
-  const slots = React.useMemo(() => {
-    const result: Array<
-      | { type: 'member'; id: string; data: FamilyMember }
-      | { type: 'connection'; id: string; data: FamilyConnection }
-      | { type: 'add'; isLocked: boolean; lockType?: 'pro' | 'premium' }
-    > = [];
+    const slots = React.useMemo(() => {
+        const result: Array<
+            | { type: 'member'; id: string; source: 'manual' | 'linked'; data: FamilyMember }
+            | { type: 'connection'; id: string; data: FamilyConnection }
+            | { type: 'add'; isLocked: boolean; lockType?: 'pro' | 'premium' }
+        > = [];
 
     const tierLower = (tier || 'free').toLowerCase();
     let unlockedLimit = 1;
@@ -347,7 +347,7 @@ const FamilyStrip: React.FC = () => {
             {t('dashboard.familyEyebrow')}
           </span>
         </div>
-        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight">
+        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight leading-tight">
           {t('nav.myFamily')}
         </h2>
         <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-foreground/40 max-w-md mx-auto leading-relaxed px-4">
@@ -382,6 +382,7 @@ const FamilyStrip: React.FC = () => {
             </button>
             <Link
               href="/family"
+              aria-label={t('dashboard.familyViewAll') || 'View all family'}
               className="inline-flex items-center gap-1 px-3 py-2 rounded-full border border-outline-variant/30 text-[11px] font-bold text-foreground/50 hover:text-secondary hover:border-secondary/40 uppercase tracking-widest transition-colors"
             >
               {t('dashboard.familyViewAll')}
@@ -437,7 +438,7 @@ const FamilyStrip: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {slots.map((slot, index) => {
             if (slot.type === 'member') {
-              return <FamilyMemberCard key={`m-${slot.id}`} member={slot.data} />;
+              return <FamilyMemberCard key={`m-${slot.source}-${slot.id}`} member={slot.data} />;
             } else if (slot.type === 'connection') {
               return <FamilyConnectionCard key={`c-${slot.id}`} connection={slot.data} />;
             } else {

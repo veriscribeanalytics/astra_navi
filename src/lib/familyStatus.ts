@@ -17,6 +17,7 @@ interface ComputeStatusInput {
 }
 
 function isIncomplete(m: FamilyMember): boolean {
+    if (m.source === 'linked') return false; // linked synastry is computed server-side
     if (!m.dob || !m.tob || !m.pob) return true;
     if (m.latitude === 0 && m.longitude === 0) return true;
     return false;
@@ -41,7 +42,7 @@ export function computeFamilyMemberStatus({
         return {
             kind: 'incomplete',
             labelKey: 'dashboard.familyStatusIncomplete',
-            classes: 'bg-red-500/10 text-red-400 border-red-500/30',
+            classes: 'bg-[#D96B78]/10 text-[#D96B78] border-[#D96B78]/30',
         };
     }
 
@@ -49,7 +50,7 @@ export function computeFamilyMemberStatus({
         return {
             kind: 'needsAttention',
             labelKey: 'dashboard.familyStatusNeedsAttention',
-            classes: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+            classes: 'bg-[#E5A33A]/10 text-[#E5A33A] border-[#E5A33A]/30',
         };
     }
 
@@ -57,7 +58,7 @@ export function computeFamilyMemberStatus({
         return {
             kind: 'stable',
             labelKey: 'dashboard.familyStatusStable',
-            classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+            classes: 'bg-[#3DD6A0]/10 text-[#3DD6A0] border-[#3DD6A0]/30',
         };
     }
 
@@ -65,7 +66,7 @@ export function computeFamilyMemberStatus({
         return {
             kind: 'new',
             labelKey: 'dashboard.familyStatusNew',
-            classes: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+            classes: 'bg-[#C9972E]/10 text-[#C9972E] border-[#C9972E]/30',
         };
     }
 

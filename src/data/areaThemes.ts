@@ -49,10 +49,10 @@ const SpiritualIcon = (props: LucideProps) => React.createElement(Sparkles, prop
 
 export const AREA_THEMES: Record<ForecastArea, Omit<AreaTheme, "key">> = {
   career: { color: "text-blue-400", bg: "bg-blue-400/10", hex: "#60A5FA", icon: CareerIcon },
-  health: { color: "text-teal-400", bg: "bg-teal-400/10", hex: "#2DD4BF", icon: HealthIcon },
-  love: { color: "text-pink-400", bg: "bg-pink-400/10", hex: "#F472B6", icon: LoveIcon },
+  health: { color: "text-[#24C7A5]", bg: "bg-[#24C7A5]/10", hex: "#24C7A5", icon: HealthIcon },
+  love: { color: "text-[#F0527D]", bg: "bg-[#F0527D]/10", hex: "#F0527D", icon: LoveIcon },
   finance: { color: "text-emerald-400", bg: "bg-emerald-400/10", hex: "#34D399", icon: FinanceIcon },
-  general: { color: "text-slate-300", bg: "bg-slate-300/10", hex: "#CBD5E1", icon: GeneralIcon },
+  general: { color: "text-[#D9A12E]", bg: "bg-[#D9A12E]/10", hex: "#D9A12E", icon: GeneralIcon },
   spiritual: { color: "text-violet-400", bg: "bg-violet-400/10", hex: "#A78BFA", icon: SpiritualIcon },
 };
 

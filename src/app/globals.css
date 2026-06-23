@@ -149,7 +149,7 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .custo
 
 /* Standard Label Styling */
 .label-sm {
-  @apply text-ui-caption font-bold uppercase tracking-widest text-foreground/55;
+  @apply text-ui-caption font-black uppercase tracking-[0.2em] text-foreground/55;
 }
 
 .label-muted {
@@ -157,7 +157,7 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .custo
 }
 
 .label-secondary {
-  @apply text-ui-caption font-bold uppercase tracking-widest text-secondary;
+  @apply text-ui-caption font-black uppercase tracking-[0.2em] text-secondary;
 }
 
 /* Mobile AI Button Safety Buffer */
@@ -338,7 +338,7 @@ body.skip-disabled .skip-to-content:focus-visible {
   --border-opacity: 0.3;
 
   --brand-gold: #C9972E;
-  --brand-gold-hover: #E0B85A;
+  --brand-gold-hover: #D8AD43;
   --brand-gold-soft: rgba(201, 151, 46, 0.12);
   --brand-gold-border: rgba(201, 151, 46, 0.28);
   --brand-gold-dark: #91710A;
@@ -679,7 +679,7 @@ body.skip-disabled .skip-to-content:focus-visible {
   --text-faint: #7a6fa0;
 
   --brand-gold: #C9972E;
-  --brand-gold-hover: #E0B85A;
+  --brand-gold-hover: #D8AD43;
   --brand-gold-soft: rgba(201, 151, 46, 0.12);
   --brand-gold-border: rgba(201, 151, 46, 0.28);
   --brand-gold-dark: #7a5c0a;
@@ -778,6 +778,28 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   box-shadow: 0 0 12px var(--glow-color), 0 0 24px color-mix(in srgb, var(--glow-color) 25%, transparent);
 }
 
+/* ─── Daily Rewards screen ─────────────────────────────────────────────────
+   Ambient, decorative loops only. Class names deliberately avoid the magic
+   substrings ("spin"/"glow"/"particle"/…) that the ≤768px block keeps alive
+   and force-clamps to 400ms — so on mobile and under prefers-reduced-motion
+   these simply stop, and the screen degrades to a calm static state. The
+   one-shot claim choreography (shockwave, sparkles, count-up, node lock) is
+   driven by motion/react and gated on useReducedMotion(), not by these. */
+@keyframes reward-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes reward-halo-rotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes reward-ray-breathe {
+  0%, 100% { opacity: 0.30; transform: scale(1); }
+  50%      { opacity: 0.65; transform: scale(1.07); }
+}
+.reward-seal-breathe { animation: reward-breathe 3.2s ease-in-out infinite; will-change: transform; }
+.reward-seal-halo    { animation: reward-halo-rotate 9s linear infinite; will-change: transform; }
+.reward-day7-rays    { animation: reward-ray-breathe 3.6s ease-in-out infinite; will-change: opacity, transform; }
+
 @utility dark-glass {
   background: var(--surface);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -804,12 +826,12 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
 }
 
 .border-glow-premium {
-  border-top: 1px solid rgba(201, 151, 46, 0.35);
-  border-left: 1px solid rgba(201, 151, 46, 0.20);
+  border-top: 1px solid rgba(201, 151, 46, 0.25);
+  border-left: 1px solid rgba(201, 151, 46, 0.12);
   border-right: 1px solid rgba(0, 0, 0, 0.30);
   border-bottom: 1px solid rgba(0, 0, 0, 0.40);
   box-shadow:
-    inset 0 2px 0 rgba(201, 151, 46, 0.08),
+    inset 0 2px 0 rgba(201, 151, 46, 0.05),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35),
     0 12px 40px rgba(0, 0, 0, 0.50),
     0 4px 12px rgba(0, 0, 0, 0.35);

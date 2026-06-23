@@ -30,7 +30,7 @@ const AvatarShowcase: React.FC = () => {
             {t('dashboard.yourGuides')}
           </span>
         </div>
-        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight">
+        <h2 className="text-2xl sm:text-4xl font-headline font-bold text-primary tracking-tight leading-tight">
           {t('dashboard.meetYourGuides')}
         </h2>
         <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-foreground/40 max-w-md mx-auto leading-relaxed px-4">

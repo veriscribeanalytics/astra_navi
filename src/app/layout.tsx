@@ -24,6 +24,7 @@ import AsyncStylesheet from "@/components/ui/AsyncStylesheet";
 import { CookieConsentProvider } from "@/context/CookieConsentContext";
 import CookieConsentBanner from "@/components/privacy/CookieConsentBanner";
 import MobileScrollDamper from "@/components/ui/MobileScrollDamper";
+import DailyRewardModal from "@/components/rewards/DailyRewardModal";
 import SessionIntroGate from "@/components/home/cosmic-intro/SessionIntroGate";
 import { INTRO_SEEN_KEY } from "@/components/home/cosmic-intro/assets";
 
@@ -90,6 +91,7 @@ export default async function RootLayout({
                       <OptimizedBackgrounds />
                       <SessionIntroGate />
                       <Toaster />
+                      <DailyRewardModal />
 
                       <Navbar />
                       <main id="main-content" className="flex-grow relative z-10 dark:bg-transparent pt-[var(--navbar-height,64px)]">

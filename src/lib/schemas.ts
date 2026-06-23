@@ -29,6 +29,10 @@ export const RegisterSchema = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  firstName: z.string().min(2, "First name must be at least 2 characters").max(50).optional().or(emptyToUndefined),
+  lastName: z.string().max(50).optional().or(emptyToUndefined),
+  // Legacy single-field name. No longer sent by the forms (split into
+  // firstName/lastName), kept optional so older clients/payloads still validate.
   name: z.string().min(2, "Name is required").max(100).optional().or(emptyToUndefined),
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),
@@ -91,6 +95,9 @@ export const PasswordResetCompleteSchema = z.object({
 });
 
 export const ProfileUpdateSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters").max(50).optional().or(emptyToUndefined),
+  lastName: z.string().max(50).optional().or(emptyToUndefined),
+  // Legacy single-field name — kept optional for backward compat (forms now send firstName/lastName).
   name: z.string().min(2, "Name is required").max(100).optional(),
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().or(emptyToUndefined),
   tob: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)").optional().or(emptyToUndefined),

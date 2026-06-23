@@ -193,7 +193,7 @@ function ReportHeader({ themName, onBack }: { themName: string; onBack: () => vo
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-headline font-bold text-primary leading-tight">
                         {t('family.reportTitle') || 'Family Compatibility Report'}
                     </h1>
-                    <p className="text-[12px] sm:text-sm text-on-surface-variant/70 truncate">
+                    <p className="text-[12px] sm:text-sm text-on-surface-variant/85 truncate">
                         {(t('family.reportSubtitle') || 'Detailed report for you and {name}').replace('{name}', themName)}
                     </p>
                 </div>
@@ -203,8 +203,8 @@ function ReportHeader({ themName, onBack }: { themName: string; onBack: () => vo
 }
 
 function ActionBar({
-    totalCredits, onRerun, onViewFullReport, askNaviHref, onEdit, rerunLoading, cached, freeRerun,
-}: Pick<CompatibilityReportProps, 'totalCredits' | 'onRerun' | 'onViewFullReport' | 'askNaviHref' | 'onEdit' | 'rerunLoading' | 'cached' | 'freeRerun'>) {
+    totalCredits, askNaviHref, onEdit, cached, freeRerun,
+}: Pick<CompatibilityReportProps, 'totalCredits' | 'askNaviHref' | 'onEdit' | 'cached' | 'freeRerun'>) {
     const { t } = useTranslation();
     return (
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -216,36 +216,24 @@ function ActionBar({
             )}
             {cached && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-1">
-                    {t('family.cachedBadge') || 'Cached'}
+                    Cached
                 </span>
             )}
             {freeRerun && !cached && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-1">
-                    {t('family.freeRerunBadge') || 'Free re-run'}
+                    Free re-run
                 </span>
             )}
 
             <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                 {onEdit && (
                     <Button variant="ghost" size="sm" onClick={onEdit} leftIcon={<FileText className="w-3.5 h-3.5" />}>
-                        {t('common.edit') || 'Edit'}
+                        Edit member
                     </Button>
                 )}
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={onRerun}
-                    loading={rerunLoading}
-                    leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
-                >
-                    {t('family.refreshRerun') || 'Refresh / Re-run'}
-                </Button>
-                <Button variant="primary" size="sm" onClick={onViewFullReport} leftIcon={<FileText className="w-3.5 h-3.5" />}>
-                    {t('family.viewFullReport') || 'View Full Report'}
-                </Button>
                 <Link href={askNaviHref}>
                     <Button variant="ghost" size="sm" leftIcon={<MessageCircle className="w-3.5 h-3.5" />}>
-                        {t('family.askNavi') || 'Ask Navi'}
+                        Ask Navi
                     </Button>
                 </Link>
             </div>
@@ -279,7 +267,7 @@ export function SubjectPanel({ subject, roleLabel, align }: { subject: ReportSub
         <div className={`flex items-center gap-3 sm:gap-4 min-w-0 ${isRight ? 'flex-row-reverse text-right' : 'text-left'}`}>
             {avatar}
             <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold">{roleLabel}</p>
+                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/75 font-bold">{roleLabel}</p>
                 <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
                     <h3 className="text-lg sm:text-xl font-headline font-bold text-primary truncate">{subject.name}</h3>
                     {subject.verified && (
@@ -288,29 +276,65 @@ export function SubjectPanel({ subject, roleLabel, align }: { subject: ReportSub
                 </div>
 
                 {subject.hasBirthDetails ? (
-                    <div className="mt-1 space-y-0.5 text-[12px] text-on-surface-variant/75">
+                    <div className="mt-1 space-y-0.5 text-[12px] text-on-surface-variant/90">
                         <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                            {symbol && <span className="text-secondary/80 font-bold">{symbol}</span>}
-                            <Calendar className="w-3 h-3 opacity-50 shrink-0" />
+                            {symbol && <span className="text-secondary/90 font-bold">{symbol}</span>}
+                            <Calendar className="w-3 h-3 opacity-60 shrink-0" />
                             <span>{formatDob(subject.dob)}</span>
-                            <span className="opacity-40">·</span>
+                            <span className="opacity-50">·</span>
                             <span>{formatTob(subject.tob)}</span>
                         </div>
-                        {subject.pob && (
+                        {subject.pob ? (
                             <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                                <MapPin className="w-3 h-3 opacity-50 shrink-0" />
+                                <MapPin className="w-3 h-3 opacity-60 shrink-0" />
                                 <span className="truncate max-w-[200px]">{subject.pob}</span>
                             </div>
-                        )}
+                        ) : null}
                     </div>
                 ) : (
-                    <div className="mt-1 space-y-0.5">
+                    <div className="mt-1 space-y-1">
                         {subject.relationshipLabel && (
-                            <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold">{subject.relationshipLabel}</p>
+                            <p className="text-[11px] uppercase tracking-wider text-secondary/90 font-bold">{subject.relationshipLabel}</p>
                         )}
-                        <p className="text-[11px] text-on-surface-variant/55 italic">
-                            {t('family.birthDetailsPrivate') || 'Birth details kept private'}
-                        </p>
+                        {(subject.dob || subject.tob || subject.pob) ? (
+                            <div className="space-y-0.5 text-[12px] text-on-surface-variant/90">
+                                <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+                                    {symbol && <span className="text-secondary/90 font-bold">{symbol}</span>}
+                                    <Calendar className="w-3 h-3 opacity-60 shrink-0" />
+                                    <span>{formatDob(subject.dob)}</span>
+                                    <span className="opacity-50">·</span>
+                                    <span>{formatTob(subject.tob)}</span>
+                                </div>
+                                {subject.pob && (
+                                    <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+                                        <MapPin className="w-3 h-3 opacity-60 shrink-0" />
+                                        <span className="truncate max-w-[200px]">{subject.pob}</span>
+                                    </div>
+                                )}
+                                <div className={`flex items-center gap-2 pt-0.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-300">
+                                        <AlertCircle className="w-3 h-3" /> Birth details incomplete
+                                    </span>
+                                    <span className="text-[10px] font-bold text-secondary underline decoration-secondary/30 underline-offset-2">
+                                        Add details
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className={`flex items-center gap-2 pt-0.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-300">
+                                    <AlertCircle className="w-3 h-3" />
+                                    {subject.verified
+                                        ? 'Birth details not shared'
+                                        : 'Birth details incomplete'}
+                                </span>
+                                {!subject.verified && (
+                                    <span className="text-[10px] font-bold text-secondary underline decoration-secondary/30 underline-offset-2">
+                                        Add details
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -325,7 +349,7 @@ export function HeroScore({ score, band }: { score: number; band: string }) {
     const clamped = valid ? Math.max(0, Math.min(100, Math.round(score))) : null;
     return (
         <div className="flex flex-col items-center text-center px-2">
-            <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/70 font-bold">
+            <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/80 font-bold">
                 {t('family.overallCompatibility') || 'Overall Compatibility'}
             </p>
             <div className="flex items-baseline gap-1.5 mt-1">
@@ -344,10 +368,15 @@ export function HeroScore({ score, band }: { score: number; band: string }) {
     );
 }
 
-function TimeframeCards({ actions, band }: { actions: FamilyCompatibilityResponse['relationship_actions']; band: string }) {
+const TIMEFRAME_TONES: Record<string, { label: string; classes: string }> = {
+    today: { label: 'Favourable', classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+    week: { label: 'Supportive', classes: 'bg-teal-500/10 text-teal-300 border-teal-500/30' },
+    long: { label: 'Stable', classes: 'bg-sky-500/10 text-sky-300 border-sky-500/30' },
+};
+
+function TimeframeCards({ actions }: { actions: FamilyCompatibilityResponse['relationship_actions'] }) {
     const { t } = useTranslation();
     if (!actions) return null;
-    const tone = timeframeTone(band);
     const items = [
         { key: 'today', label: t('family.timeframeToday') || 'Today', text: actions.today, icon: <Sun className="w-5 h-5" /> },
         { key: 'week', label: t('family.timeframeThisWeek') || 'This Week', text: actions.this_week, icon: <Calendar className="w-5 h-5" /> },
@@ -357,22 +386,27 @@ function TimeframeCards({ actions, band }: { actions: FamilyCompatibilityRespons
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {items.map((it) => (
-                <Card key={it.key} variant="default" padding="md" hoverable={false}>
-                    <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
-                            {it.icon}
+            {items.map((it) => {
+                const tone = TIMEFRAME_TONES[it.key];
+                return (
+                    <Card key={it.key} variant="default" padding="md" hoverable={false}>
+                        <div className="flex items-start gap-3">
+                            <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                                {it.icon}
+                            </div>
+                            <div className="min-w-0">
+                                <h4 className="text-sm font-headline font-bold text-secondary">{it.label}</h4>
+                                <p className="text-[13px] text-on-surface-variant/90 leading-relaxed mt-0.5">{it.text}</p>
+                                {tone && (
+                                    <span className={`mt-2 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tone.classes}`}>
+                                        {tone.label}
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <div className="min-w-0">
-                            <h4 className="text-sm font-headline font-bold text-secondary">{it.label}</h4>
-                            <p className="text-[12px] text-on-surface-variant/80 leading-relaxed mt-0.5">{it.text}</p>
-                            <span className={`mt-2 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tone.classes}`}>
-                                {t(tone.labelKey) || tone.fallback}
-                            </span>
-                        </div>
-                    </div>
-                </Card>
-            ))}
+                    </Card>
+                );
+            })}
         </div>
     );
 }
@@ -385,29 +419,37 @@ function HighlightColumn({
     items: FamilyCompatibilityResponse['strengths'];
     variant: 'strength' | 'tension';
 }) {
-    if (!items || items.length === 0) return null;
+    const { t } = useTranslation();
     const isStrength = variant === 'strength';
     const accent = isStrength ? 'text-emerald-400' : 'text-orange-400';
     const RowIcon = isStrength ? CheckCircle2 : AlertCircle;
     return (
-        <div className="min-w-0">
-            <div className={`flex items-center gap-1.5 mb-3 ${accent}`}>
+        <div className="h-full rounded-2xl border border-outline-variant/15 bg-surface-variant/20 p-4">
+            <div className={`flex items-center gap-1.5 mb-2.5 ${accent}`}>
                 {icon}
                 <p className="text-[11px] font-bold uppercase tracking-widest">{title}</p>
             </div>
-            <ul className="space-y-2.5">
-                {items.map((it, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                        <RowIcon className={`w-4 h-4 shrink-0 mt-0.5 ${accent}`} />
-                        <div className="min-w-0">
-                            <p className="text-[13px] text-on-surface-variant/90 leading-snug">{it.factor}</p>
-                            {it.text && it.text !== it.factor && (
-                                <p className="text-[11px] text-on-surface-variant/60 leading-snug mt-0.5">{it.text}</p>
-                            )}
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            {items && items.length > 0 ? (
+                <ul className="space-y-2">
+                    {items.map((it, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                            <RowIcon className={`w-4 h-4 shrink-0 mt-0.5 ${accent}`} />
+                            <div className="min-w-0">
+                                <p className="text-[13px] text-on-surface-variant/95 leading-snug">{it.factor}</p>
+                                {it.text && it.text !== it.factor && (
+                                    <p className="text-[11px] text-on-surface-variant/75 leading-snug mt-0.5">{it.text}</p>
+                                )}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="text-[12px] text-on-surface-variant/65 italic">
+                    {isStrength
+                        ? (t('family.noStrengths') || 'No major strengths highlighted.')
+                        : (t('family.noTensions') || 'No major tension points highlighted.')}
+                </p>
+            )}
         </div>
     );
 }
@@ -415,15 +457,15 @@ function HighlightColumn({
 function GuidancePanel({ advice }: { advice: FamilyCompatibilityAdvice }) {
     const { t } = useTranslation();
     return (
-        <Card variant="default" padding="lg" hoverable={false}>
+        <Card variant="default" padding="lg" hoverable={false} className="h-full">
             <div className="flex items-center gap-2 mb-4 text-secondary">
                 <Sparkles className="w-4 h-4" />
                 <h3 className="text-sm font-headline font-bold text-primary">{t('family.familyGuidance') || 'Family Guidance'}</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <AdviceCard icon={<MessageCircle className="w-3.5 h-3.5" />} label={t('family.guidanceCommunication') || 'Communication'} text={advice.communication_style} accent="text-sky-400" />
-                <AdviceCard icon={<HandHeart className="w-3.5 h-3.5" />} label={t('family.guidanceBestSupport') || 'Best Support'} text={advice.best_support_method} accent="text-rose-400" />
-                <AdviceCard icon={<Lock className="w-3.5 h-3.5" />} label={t('family.guidanceBoundaries') || 'Boundaries'} text={advice.boundaries_or_cautions} accent="text-amber-400" />
+                <AdviceCard icon={<MessageCircle className="w-3.5 h-3.5" />} label={t('family.guidanceCommunication') || 'Communication'} text={advice.communication_style} accent="text-sky-300" />
+                <AdviceCard icon={<HandHeart className="w-3.5 h-3.5" />} label={t('family.guidanceBestSupport') || 'Best Support'} text={advice.best_support_method} accent="text-rose-300" />
+                <AdviceCard icon={<Lock className="w-3.5 h-3.5" />} label={t('family.guidanceBoundaries') || 'Boundaries'} text={advice.boundaries_or_cautions} accent="text-amber-300" />
                 <AdviceCard icon={<ArrowRight className="w-3.5 h-3.5" />} label={t('family.guidanceNextStep') || 'Next Step'} text={advice.next_step} accent="text-secondary" />
             </div>
         </Card>
@@ -440,35 +482,35 @@ export function AdviceCard({
 }) {
     if (!text?.trim()) return null;
     return (
-        <div className="rounded-2xl border border-outline-variant/30 p-3 bg-surface">
+        <div className="rounded-2xl border border-outline-variant/25 p-3 bg-surface-variant/10">
             <div className={`flex items-center gap-1.5 mb-1.5 ${accent}`}>
                 {icon}
                 <p className="text-[11px] font-bold">{label}</p>
             </div>
-            <p className="text-[12px] text-on-surface-variant/80 leading-relaxed">{text}</p>
+            <p className="text-[13px] text-on-surface-variant/90 leading-relaxed">{text}</p>
         </div>
     );
 }
 
-/** Factor Breakdown — a row per factor: name + sub-label, Impact pill, score /100,
- *  expand chevron revealing the summary/note. */
+/** Factor Breakdown — a row per factor: name + sub-label, Impact pill, expand chevron
+ *  revealing the summary/note. Score numbers are hidden until real per-factor scores
+ *  are available. */
 export function FactorsBreakdown({ factors }: { factors: FamilyCompatibilityFactor[] }) {
     const { t } = useTranslation();
     const [open, setOpen] = useState<Set<number>>(new Set());
     if (!factors?.length) return null;
 
-    const toggle = (i: number) =>
-        setOpen((prev) => {
-            const next = new Set(prev);
-            if (next.has(i)) next.delete(i); else next.add(i);
-            return next;
-        });
+    const toggle = (i: number) => setOpen((prev) => {
+        const next = new Set(prev);
+        if (next.has(i)) next.delete(i); else next.add(i);
+        return next;
+    });
 
     const impactLabel = (status: string) => {
         switch (status) {
-            case 'strength': return t('family.impactStrength') || 'Strength';
-            case 'tension': return t('family.impactTension') || 'Tension';
-            default: return t('family.impactBalanced') || 'Balanced';
+            case 'strength': return 'Strength';
+            case 'tension': return 'Tension';
+            default: return 'Balanced';
         }
     };
 
@@ -477,21 +519,12 @@ export function FactorsBreakdown({ factors }: { factors: FamilyCompatibilityFact
             <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="w-4 h-4 text-secondary" />
                 <h3 className="text-sm font-headline font-bold text-primary">{t('family.factorBreakdown') || 'Factor Breakdown'}</h3>
-                <span className="text-[10px] text-on-surface-variant/60 font-bold">{factors.length}</span>
-            </div>
-
-            {/* Column labels (desktop) */}
-            <div className="hidden sm:grid grid-cols-[1fr_auto_auto_24px] gap-3 px-3 pb-2 text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-bold">
-                <span>{t('family.factorColFactor') || 'Factor'}</span>
-                <span className="text-center w-24">{t('family.factorColImpact') || 'Impact'}</span>
-                <span className="text-right w-20">{t('family.factorColScore') || 'Score'}</span>
-                <span />
+                <span className="text-[10px] text-on-surface-variant/70 font-bold">{factors.length}</span>
             </div>
 
             <div className="space-y-1.5">
                 {factors.map((f, i) => {
                     const palette = statusPalette(f.status);
-                    const pct = Math.max(0, Math.min(100, Math.round(f.score_percent ?? 0)));
                     const isOpen = open.has(i);
                     const detail = f.summary || f.note || f.detail;
                     return (
@@ -499,7 +532,7 @@ export function FactorsBreakdown({ factors }: { factors: FamilyCompatibilityFact
                             <button
                                 type="button"
                                 onClick={() => toggle(i)}
-                                className="w-full grid grid-cols-[1fr_auto_24px] sm:grid-cols-[1fr_auto_auto_24px] items-center gap-3 px-3 py-3 text-left hover:bg-secondary/5 transition-colors"
+                                className="w-full flex items-center justify-between gap-3 px-3 py-3 text-left hover:bg-secondary/5 transition-colors"
                             >
                                 {/* Factor name + sub-label */}
                                 <div className="flex items-center gap-2.5 min-w-0">
@@ -507,39 +540,27 @@ export function FactorsBreakdown({ factors }: { factors: FamilyCompatibilityFact
                                         <Sparkles className="w-4 h-4" />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[13px] font-bold text-primary truncate">
+                                        <p className="text-[14px] font-bold text-primary truncate">
                                             {f.label || f.name || f.key || `Factor ${i + 1}`}
                                         </p>
                                         {detail && (
-                                            <p className="text-[11px] text-on-surface-variant/60 truncate">{detail}</p>
+                                            <p className="text-[12px] text-on-surface-variant/75 truncate">{detail}</p>
                                         )}
                                     </div>
                                 </div>
-                                {/* Impact pill */}
-                                <span className={`hidden sm:inline-flex w-24 justify-center items-center text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${palette.bg} ${palette.text} ${palette.border}`}>
-                                    {impactLabel(f.status)}
-                                </span>
-                                {/* Score */}
-                                <span className="text-[12px] font-bold text-on-surface-variant/80 tabular-nums text-right sm:w-20 shrink-0">
-                                    {pct} <span className="text-on-surface-variant/45">/ 100</span>
-                                </span>
-                                {isOpen
-                                    ? <ChevronUp className="w-4 h-4 text-on-surface-variant/60 shrink-0" />
-                                    : <ChevronDown className="w-4 h-4 text-on-surface-variant/60 shrink-0" />}
+                                {/* Impact pill + chevron */}
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <span className={`inline-flex justify-center items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${palette.bg} ${palette.text} ${palette.border}`}>
+                                        {impactLabel(f.status)}
+                                    </span>
+                                    {isOpen
+                                        ? <ChevronUp className="w-4 h-4 text-on-surface-variant/70 shrink-0" />
+                                        : <ChevronDown className="w-4 h-4 text-on-surface-variant/70 shrink-0" />}
+                                </div>
                             </button>
-                            {isOpen && (
+                            {isOpen && detail && (
                                 <div className="px-3 pb-3 pt-0 border-t border-outline-variant/15">
-                                    <div className="sm:hidden mt-2">
-                                        <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${palette.bg} ${palette.text} ${palette.border}`}>
-                                            {impactLabel(f.status)}
-                                        </span>
-                                    </div>
-                                    <div className="mt-2 h-1.5 rounded-full bg-outline-variant/20 overflow-hidden">
-                                        <div className={`h-full rounded-full ${palette.bar}`} style={{ width: `${pct}%` }} />
-                                    </div>
-                                    {detail && (
-                                        <p className="mt-2 text-[12px] text-on-surface-variant/75 leading-relaxed">{detail}</p>
-                                    )}
+                                    <p className="mt-2 text-[13px] text-on-surface-variant/90 leading-relaxed">{detail}</p>
                                 </div>
                             )}
                         </div>
@@ -572,11 +593,8 @@ export default function CompatibilityReport({
 
             <ActionBar
                 totalCredits={totalCredits}
-                onRerun={onRerun}
-                onViewFullReport={onViewFullReport}
                 askNaviHref={askNaviHref}
                 onEdit={onEdit}
-                rerunLoading={rerunLoading}
                 cached={cached}
                 freeRerun={freeRerun}
             />
@@ -585,39 +603,45 @@ export default function CompatibilityReport({
 
             {/* YOU vs THEM hero */}
             <Card variant="default" padding="lg" hoverable={false}>
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center gap-6 lg:gap-4">
-                    <SubjectPanel subject={you} roleLabel={t('family.youLabel') || 'You'} align="left" />
-                    <div className="flex justify-center lg:px-6 lg:border-x lg:border-outline-variant/15">
-                        <HeroScore score={data.score} band={band} />
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-3">
+                    <div className="flex-1 min-w-0">
+                        <SubjectPanel subject={you} roleLabel={t('family.youLabel') || 'You'} align="left" />
                     </div>
-                    <SubjectPanel
-                        subject={them}
-                        roleLabel={them.relationshipLabel || (t('family.themLabel') || 'Them')}
-                        align="right"
-                    />
+                    <div className="flex items-center justify-center gap-3 lg:px-2 order-first lg:order-none">
+                        <div className="hidden lg:block h-px w-10 bg-secondary/25" />
+                        <HeroScore score={data.score} band={band} />
+                        <div className="hidden lg:block h-px w-10 bg-secondary/25" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <SubjectPanel
+                            subject={them}
+                            roleLabel={them.relationshipLabel || (t('family.themLabel') || 'Them')}
+                            align="right"
+                        />
+                    </div>
                 </div>
                 {data.verdict && (
-                    <p className="mt-5 pt-5 border-t border-outline-variant/15 text-[13px] text-on-surface-variant/85 leading-relaxed whitespace-pre-line">
+                    <p className="mt-4 pt-4 border-t border-outline-variant/15 text-[13px] text-on-surface-variant/95 leading-relaxed whitespace-pre-line">
                         {data.verdict}
                     </p>
                 )}
                 {data.confidence?.note && (
-                    <p className="mt-2 text-[11px] text-on-surface-variant/65 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
+                    <p className="mt-2 text-[11px] text-on-surface-variant/80 italic leading-relaxed border-l-2 border-outline-variant/30 pl-3">
                         {data.confidence.note}
                     </p>
                 )}
             </Card>
 
             {/* Today / This Week / Long Term */}
-            <TimeframeCards actions={data.relationship_actions} band={band} />
+            <TimeframeCards actions={data.relationship_actions} />
 
             {/* Strengths + Tensions / Guidance */}
             {(hasHighlights || hasAdvice) && (
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-5 items-stretch gap-4">
                     {hasHighlights && (
                         <div className={hasAdvice ? 'lg:col-span-3' : 'lg:col-span-5'}>
-                            <Card variant="default" padding="lg" hoverable={false}>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <Card variant="default" padding="md" hoverable={false} className="h-full">
+                                <div className="grid h-full grid-cols-1 sm:grid-cols-2 items-stretch gap-4">
                                     <HighlightColumn
                                         title={t('family.topStrengths') || 'Top Strengths'}
                                         icon={<TrendingUp className="w-3.5 h-3.5" />}
@@ -647,10 +671,10 @@ export default function CompatibilityReport({
                 <FactorsBreakdown factors={data.factors} />
             )}
 
-            {/* Language picker / re-run footer */}
+            {/* Language picker footer */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
-                <p className="text-[11px] text-on-surface-variant/65">
-                    {(t('family.compatibilityLangNote') || 'Reading in {lang}.').replace('{lang}', lang.toUpperCase())}
+                <p className="text-[12px] text-on-surface-variant/80">
+                    {`Reading in ${lang.toUpperCase()}.`}
                 </p>
                 <div className="flex flex-wrap gap-2 items-center">
                     {langOptions.map((l) => (
@@ -667,9 +691,6 @@ export default function CompatibilityReport({
                             {l.label}
                         </button>
                     ))}
-                    <Button variant="ghost" size="sm" onClick={onRerun} loading={rerunLoading} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
-                        {t('family.refreshRerun') || 'Refresh / Re-run'}
-                    </Button>
                 </div>
             </div>
         </div>

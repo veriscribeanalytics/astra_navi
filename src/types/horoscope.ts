@@ -59,6 +59,12 @@ export interface HoroscopeData {
     derived_from: string[];
     advice_now: string;
   };
+  guidance?: {
+    summary: string;
+    best_for: string;
+    avoid: string;
+    approach: string;
+  };
   astro_explanations?: {
     enabled: boolean;
     items: Array<{ technical: string; simple: string; importance: string }>;

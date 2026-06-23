@@ -33,7 +33,8 @@ export async function POST(
       method: 'POST',
       userEmail: email as string,
       accessToken: accessToken as string,
-      body: JSON.stringify(validation.data)
+      body: JSON.stringify(validation.data),
+      timeoutMs: 0,
     });
 
     if (!response.ok) {
@@ -44,8 +45,8 @@ export async function POST(
     // Return the backend's stream directly to our frontend client
     return new Response(response.body, {
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
       },
     });
 

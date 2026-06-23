@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import { useTranslation, useToast } from '@/hooks';
 import { updateConnection, mergeConnection } from '@/hooks/useFamily';
 import type { FamilyConnection, FamilyRelationshipType, FamilyMergeCandidate } from '@/types/family';
-import { parseInviteErrorByStatus, familyCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, familyPeerTierCapDetail, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 
 /** Relationship label options for promoting a connection to family. */
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; labelKey: string; fallback: string }[] = [
@@ -61,9 +61,14 @@ const MakeFamilyDialog: React.FC<MakeFamilyDialogProps> = ({
         setIsSaving(false);
         if (!res.ok || !res.data) {
             const cap = familyCapDetail(res.raw);
+            const peerCap = familyPeerTierCapDetail(res.raw);
             if (cap) {
                 onFreeTierCap?.(cap);
                 onClose();
+                return;
+            }
+            if (peerCap) {
+                toastError(peerCap.message || "They can't be added as family right now — their list is full.");
                 return;
             }
             toastError(parseInviteErrorByStatus(res.status, res.raw, t));

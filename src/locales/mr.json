@@ -18,6 +18,8 @@
     "returnHome": "घरी परत या"
   },
   "nav": {
+    "dailyRewards": "दैनंदिन बक्षिसे",
+    "dailyRewardsDesc": "दररोज मोफत क्रेडिट्स मिळवा. तुमची मालिका जिवंत ठेवा!",
     "myJourney": "माझा प्रवास",
     "cosmicDashboard": "कॉस्मिक डॅशबोर्ड",
     "cosmicDashboardDesc": "आपले वैयक्तिक विहंगावलोकन आणि दैनंदिन अंतर्दृष्टी.",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, स्कोअर {score}",
     "todayShort": "आज",
-    "weekly": "७ दिवस"
+    "weekly": "७ दिवस",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "तुमची कॉस्मिक क्षमता अनलॉक करा",
@@ -2093,5 +2121,36 @@
         "description": "प्रो योजनेसह मुख्य जीवन विषयाचे अंतर्दृष्टी अनलॉक करा."
       }
     }
+  },
+  "rewards": {
+    "title": "दैनंदिन बक्षिसे",
+    "subtitle": "दररोज मोफत क्रेडिट्स मिळवा — तुमची विश्व-मालिका जिवंत ठेवा.",
+    "claimButton": "आजचे बक्षीस मिळवा",
+    "claimNow": "आता मिळवा",
+    "claimedButton": "आज मिळवले",
+    "claimingButton": "मिळवत आहे…",
+    "streakLabel": "दिवसांची मालिका",
+    "longestStreakLabel": "सर्वात मोठी मालिका",
+    "totalClaimsLabel": "एकूण मिळवलेली",
+    "balanceLabel": "क्रेडिट शिल्लक",
+    "nextRewardLabel": "पुढील बक्षीस",
+    "nextRewardIn": "पुढील बक्षीस यात",
+    "todayReward": "आजचे बक्षीस",
+    "creditsLabel": "क्रेडिट्स",
+    "dayLabel": "दिवस",
+    "bonusLabel": "बोनस",
+    "weekProgress": "या आठवड्यात",
+    "cycleComplete": "दिवस ७ नंतर चक्र पुन्हा सुरू होते",
+    "day7Hint": "महाबोनससाठी दिवस ७ पर्यंत पोहोचा",
+    "claimSuccess": "तुम्ही {credits} क्रेडिट्स मिळवले — {streak} दिवसांची मालिका!",
+    "newBalanceLabel": "नवीन शिल्लक",
+    "claimAlready": "आज आधीच मिळवले आहे. उद्या पुन्हा या!",
+    "claimError": "काहीतरी चुकले. कृपया पुन्हा प्रयत्न करा.",
+    "loadError": "बक्षिसे लोड करता आली नाहीत. कृपया पुन्हा प्रयत्न करा.",
+    "retry": "पुन्हा प्रयत्न करा",
+    "noStreakYet": "आज बक्षीस मिळवून तुमची मालिका सुरू करा!",
+    "streakResetNotice": "एक दिवस चुकल्यास तुमची मालिका दिवस १ वर परत येते.",
+    "howItWorks": "हे कसे चालते",
+    "howItWorksDesc": "दिवसातून एकदा बक्षीस मिळवा. प्रत्येक सलग दिवस तुमची मालिका वाढवतो आणि मोठी बक्षिसे उघडतो — दिवस ७ म्हणजे जॅकपॉट. एक दिवस चुकल्यास तुम्ही दिवस १ पासून पुन्हा सुरू कराल. मध्यरात्री UTC वाजता पुन्हा सेट होते."
   }
 }

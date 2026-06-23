@@ -41,15 +41,16 @@ export const COMPATIBILITY_CREDIT_COST: Record<FamilyRelationshipType, number> =
  *  Free: 1, Pro: 6, Premium: unlimited (`null`). Backend is the source of
  *  truth and enforces the same caps via FAMILY_FREE_TIER_CAP. */
 export function familyRosterLimit(tier: string | null | undefined): number | null {
-  switch ((tier || 'free').toLowerCase()) {
-    case 'premium':
-      return null; // unlimited
-    case 'pro':
-      return 6;
-    case 'free':
-    default:
-      return 1;
+  const normalized = (tier || 'free').toLowerCase().trim();
+  // Treat any paid/unlimited-sounding tier name as unlimited.
+  if (['premium', 'paid', 'unlimited', 'lifetime', 'platinum'].includes(normalized)) {
+    return null; // unlimited
   }
+  if (normalized === 'pro') {
+    return 6;
+  }
+  // Free and any unknown tier default to the free cap.
+  return 1;
 }
 
 /** @deprecated Use {@link familyRosterLimit}. Retained as the free-tier value so
@@ -91,22 +92,40 @@ export interface FamilyCompatibilityPreflight {
  *  shape before handing to React components. */
 export interface FamilyMember {
   id: number;
+  /** `manual` for entries owned by the current user; `linked` for accepted
+   *  connections where both sides share birth details. Key UI lists by the
+   *  combination of (source, id) because ids can collide across the two tables
+   *  (a manual member id can equal a connection id). */
+  source: 'manual' | 'linked';
   name: string;
-  relationshipType: FamilyRelationshipType;
+  /** For manual entries this is always set. For linked entries it reflects
+   *  the label chosen by the current user (`i_see_them_as`) and may be null
+   *  until the user picks one — callers should render a sensible default. */
+  relationshipType: FamilyRelationshipType | null;
   gender: FamilyGender;
-  dob: string;            // YYYY-MM-DD
-  tob: string;            // HH:MM (24h)
-  pob: string;
-  latitude: number;
-  longitude: number;
-  timezoneOffset: number; // hours, e.g. 5.5
+  /** Birth details are only present for manual entries; linked connections
+   *  compute synastry server-side without exposing coordinates. */
+  dob?: string;            // YYYY-MM-DD
+  tob?: string;            // HH:MM (24h)
+  pob?: string;
+  latitude?: number;
+  longitude?: number;
+  timezoneOffset?: number; // hours, e.g. 5.5
   notes?: string | null;
   avatarKey?: string | null;
   avatar?: FamilyAvatar | null;
+  /** For manual entries only — linked entries don't store consent here. */
   consentAcknowledged?: boolean;
   consentAcknowledgedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** Present only when source === 'linked'. Use this (not id) when routing
+   *  sub-actions to /api/family/connections/{connectionId}/... */
+  connectionId?: number;
+  /** Present only when source === 'linked'. */
+  sharingWithUser?: boolean;
+  /** Present only when source === 'linked'. Mirrors the connection flag. */
+  sharingWithThem?: boolean;
 }
 
 export interface FamilyMemberCreatePayload {
@@ -243,7 +262,8 @@ export interface FamilyCompatibilityResponse {
   confidence?: FamilyCompatibilityConfidence;
   lang: CompatibilityLang;
   relationship_type: FamilyRelationshipType;
-  member_id: number;
+  member_id?: number;
+  connection_id?: number;
   credit_cost: number;
   cached: boolean;
 }
@@ -270,11 +290,23 @@ export interface FamilyCompatibilitySummary {
   };
 }
 
-/** 402 paywall body when free-tier cap is hit. */
+/** 402 paywall body when the requesting user's own family roster is full. */
 export interface FamilyFreeTierCapError {
   code: 'FAMILY_FREE_TIER_CAP';
   detail?: string;
   error?: string;
+  currentTier?: string;
+  limit?: number;
+  message?: string;
+}
+
+/** 402 body when promoting a connection to family fails because the *other*
+ *  person's roster is full. This is not an upgrade signal for the current user —
+ *  UI should keep the sharing toggle off and surface a peer-facing message. */
+export interface FamilyPeerTierCapError {
+  code: 'FAMILY_PEER_TIER_CAP';
+  blockedBy: 'them';
+  message?: string;
 }
 
 /** 400 body when the requesting user's own profile is missing birth fields
@@ -407,6 +439,7 @@ export interface FamilyConnectionUpdateResponse {
 export const FAMILY_INVITE_ERROR_CODES = [
   'INVITEE_NO_ACCOUNT',
   'FAMILY_FREE_TIER_CAP',
+  'FAMILY_PEER_TIER_CAP',
   'ALREADY_CONNECTED',
   'INVITE_PENDING',
   'DECLINE_COOLDOWN_ACTIVE',

@@ -111,7 +111,9 @@
     "logoutConfirmMessage": "You will be signed out of your account and redirected to the homepage.",
     "signOut": "Sign Out",
     "account": "Account",
-    "getStarted": "GET STARTED"
+    "getStarted": "GET STARTED",
+    "dailyRewards": "Daily Rewards",
+    "dailyRewardsDesc": "Claim free credits every day. Keep your streak alive!"
   },
   "footer": {
     "tagline": "Preserving the mathematical precision of Jyotish Shastra for the modern individual.",
@@ -1143,7 +1145,33 @@
     },
     "ariaDay": "{weekday} {date}, score {score}",
     "todayShort": "TOD",
-    "weekly": "7D"
+    "weekly": "7D",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "Unlock Your Cosmic Potential",
@@ -1243,7 +1271,16 @@
   },
   "family": {
     "myFamily": "My Family",
+    "tabFamily": "Family",
+    "tabConnections": "Connections",
+    "tabFamilyHint": "People you share birth details with both ways. You can view their chart and run compatibility.",
+    "tabConnectionsHint": "People you're connected with. Enable two-way sharing to move someone into Family and unlock compatibility.",
+    "tabFamilyEmptyTitle": "No family members yet",
+    "tabFamilyEmptyWithConnections": "Turn on two-way sharing with a connection to add them here, or add a member manually.",
+    "tabConnectionsEmptyTitle": "No connections yet",
+    "tabConnectionsEmptyDesc": "Invite someone or accept an invite to start a connection. Connections become Family once you both share details.",
     "subtitle": "Save birth details, view charts, and check compatibility with loved ones.",
+    "addShort": "Add",
     "addMember": "Add Family Member",
     "addFamilyMember": "Add Family Member",
     "editMember": "Edit Family Member",
@@ -1426,6 +1463,11 @@
       "other": "Other"
     }
   },
+  "messages": {
+    "messageCta": "Message",
+    "connectionGone": "You're no longer connected.",
+    "openFailed": "Could not open conversation."
+  },
   "notifications": {
     "title": "Notifications",
     "bellLabel": "Notifications",
@@ -1499,6 +1541,7 @@
         "passwordDigit": "Password must contain at least one number.",
         "passwordSpecial": "Password must contain at least one special character.",
         "nameLength": "Name must be at least 2 characters.",
+        "firstNameLength": "First name must be at least 2 characters.",
         "dobFuture": "Date of birth cannot be in the future.",
         "tobFormat": "Time must be in HH:MM format.",
         "pobLength": "Place name must be at least 2 characters.",
@@ -1527,6 +1570,10 @@
       "confirmPasswordPlaceholder": "Re-enter your password",
       "fullNameLabel": "Full Name",
       "fullNamePlaceholder": "Enter your full name",
+      "firstNameLabel": "First Name",
+      "firstNamePlaceholder": "First name",
+      "lastNameLabel": "Last Name",
+      "lastNamePlaceholder": "Last name",
       "genderLabel": "Gender",
       "selectOption": "Select",
       "genderMale": "Male",
@@ -1909,6 +1956,11 @@
       "fullName": "Full Name",
       "fullNamePlaceholder": "Enter your full name",
       "fullNameHelper": "Your full name as per birth certificate",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "First name",
+      "firstNameHelper": "Your first name as per birth certificate",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Last name",
       "dateOfBirth": "Date of Birth",
       "dateOfBirthHelper": "Your birth date",
       "timeOfBirth": "Time of Birth",
@@ -1951,6 +2003,9 @@
       "errors": {
         "nameTooShort": "Name must be at least 2 characters",
         "nameTooLong": "Name is too long",
+        "firstNameTooShort": "First name must be at least 2 characters",
+        "firstNameTooLong": "First name is too long",
+        "firstNameRequired": "First name is required",
         "dobInFuture": "Birth date cannot be in the future",
         "dobInvalid": "Please enter a valid birth date",
         "pobInvalid": "Please enter a valid place",
@@ -1965,8 +2020,8 @@
     "onboarding": {
       "steps": {
         "name": {
-          "label": "Full Name",
-          "hint": "Your name as per birth certificate"
+          "label": "First Name",
+          "hint": "Your first name as per birth certificate"
         },
         "dob": {
           "label": "Date of Birth",
@@ -2205,7 +2260,9 @@
     "familyFriends": {
       "title": "Family & Friends",
       "compatibilityTitle": "Your Compatibility with Friends & Family Today",
+      "compatibilityTitleShort": "Family",
       "compatibilitySubtitle": "Cosmic bonds & energy alignment",
+      "compatibilitySubtitleShort": "Bonds & alignment",
       "viewAll": "View All",
       "callNow": "Call Now",
       "premium": "Premium",
@@ -2408,5 +2465,39 @@
         "description": "Unlock key life theme insights with a Pro plan."
       }
     }
+  },
+  "rewards": {
+    "title": "Daily Rewards",
+    "subtitle": "Claim free credits every day — keep your cosmic streak alive.",
+    "claimButton": "Claim Today's Reward",
+    "claimNow": "Claim Now",
+    "claimedButton": "Claimed Today",
+    "claimingButton": "Claiming…",
+    "streakLabel": "Day Streak",
+    "longestStreakLabel": "Longest Streak",
+    "totalClaimsLabel": "Total Claims",
+    "balanceLabel": "Credit Balance",
+    "nextRewardLabel": "Next Reward",
+    "nextRewardIn": "Next reward in",
+    "todayReward": "Today's Reward",
+    "creditsLabel": "credits",
+    "dayLabel": "Day",
+    "bonusLabel": "Bonus",
+    "weekProgress": "This Week",
+    "cycleComplete": "Cycle resets after Day 7",
+    "day7Hint": "Reach Day 7 for the mega bonus",
+    "claimSuccess": "You earned {credits} credits — {streak}-day streak!",
+    "newBalanceLabel": "New balance",
+    "claimAlready": "Already claimed today. Come back tomorrow!",
+    "claimError": "Something went wrong. Please try again.",
+    "loadError": "Couldn't load rewards. Please try again.",
+    "retry": "Retry",
+    "noStreakYet": "Start your streak by claiming today!",
+    "streakResetNotice": "Miss a day and your streak resets to Day 1.",
+    "howItWorks": "How it works",
+    "howItWorksDesc": "Claim once a day. Each consecutive day grows your streak and unlocks bigger rewards — Day 7 is the jackpot. Miss a day and you restart at Day 1. Resets at midnight UTC."
+  },
+  "rewardsModal": {
+    "viewFullPage": "View full rewards page"
   }
 }

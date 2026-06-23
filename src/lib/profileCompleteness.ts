@@ -1,6 +1,8 @@
 export interface ProfileLike {
   id?: string;
   email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
   name?: string | null;
   username?: string | null;
   discoverable?: boolean | null;
@@ -17,6 +19,10 @@ export interface ProfileLike {
   birth_longitude?: number | null;
   birth_timezone_name?: string | null;
   birth_timezone_offset_at_birth?: number | null;
+  profileImageUrl?: string | null;
+  profile_image_url?: string | null;
+  chatAvatarImageUrl?: string | null;
+  chat_avatar_image_url?: string | null;
 }
 
 export function normalizeProfileUser<T extends ProfileLike>(user: T): T {
@@ -28,6 +34,8 @@ export function normalizeProfileUser<T extends ProfileLike>(user: T): T {
     birthTimezoneName: user.birthTimezoneName ?? user.birth_timezone_name ?? '',
     birthTimezoneOffsetAtBirth:
       user.birthTimezoneOffsetAtBirth ?? user.birth_timezone_offset_at_birth ?? undefined,
+    profileImageUrl: user.profileImageUrl ?? user.profile_image_url ?? null,
+    chatAvatarImageUrl: user.chatAvatarImageUrl ?? user.chat_avatar_image_url ?? null,
   };
 }
 
@@ -36,7 +44,7 @@ export function isProfileComplete(user?: ProfileLike | null): boolean {
 
   const normalized = normalizeProfileUser(user);
   return Boolean(
-    normalized.name &&
+    (normalized.firstName || normalized.name) &&
       normalized.dob &&
       normalized.tob &&
       normalized.pob &&

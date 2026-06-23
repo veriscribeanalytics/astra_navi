@@ -18,6 +18,8 @@
     "returnHome": "വീട്ടിലേക്ക് മടങ്ങുക"
   },
   "nav": {
+    "dailyRewards": "ദൈനംദിന സമ്മാനങ്ങൾ",
+    "dailyRewardsDesc": "ദിവസവും സൗജന്യ ക്രെഡിറ്റുകൾ നേടൂ. നിങ്ങളുടെ സ്ട്രീക്ക് നിലനിർത്തൂ!",
     "myJourney": "എൻ്റെ യാത്ര",
     "cosmicDashboard": "കോസ്മിക് ഡാഷ്‌ബോർഡ്",
     "cosmicDashboardDesc": "നിങ്ങളുടെ വ്യക്തിഗത അവലോകനവും ദൈനംദിന ഉൾക്കാഴ്ചകളും.",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, സ്കോർ {score}",
     "todayShort": "ഇന്ന്",
-    "weekly": "7ദിനം"
+    "weekly": "7ദിനം",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "നിങ്ങളുടെ കോസ്മിക് സാധ്യതകൾ അൺലോക്ക് ചെയ്യുക",
@@ -2093,5 +2121,36 @@
         "description": "ഒരു പ്രോ പ്ലാൻ ഉപയോഗിച്ച് പ്രധാന ജീവിത തീം ഉൾക്കാഴ്ചകൾ അൺലോക്ക് ചെയ്യുക."
       }
     }
+  },
+  "rewards": {
+    "title": "ദൈനംദിന സമ്മാനങ്ങൾ",
+    "subtitle": "ദിവസവും സൗജന്യ ക്രെഡിറ്റുകൾ നേടൂ — നിങ്ങളുടെ കോസ്മിക് സ്ട്രീക്ക് നിലനിർത്തൂ.",
+    "claimButton": "ഇന്നത്തെ സമ്മാനം നേടൂ",
+    "claimNow": "ഇപ്പോൾ നേടൂ",
+    "claimedButton": "ഇന്ന് നേടിക്കഴിഞ്ഞു",
+    "claimingButton": "നേടുന്നു…",
+    "streakLabel": "ദിവസ സ്ട്രീക്ക്",
+    "longestStreakLabel": "ഏറ്റവും നീണ്ട സ്ട്രീക്ക്",
+    "totalClaimsLabel": "ആകെ നേടിയവ",
+    "balanceLabel": "ക്രെഡിറ്റ് ബാലൻസ്",
+    "nextRewardLabel": "അടുത്ത സമ്മാനം",
+    "nextRewardIn": "അടുത്ത സമ്മാനം ഇനി",
+    "todayReward": "ഇന്നത്തെ സമ്മാനം",
+    "creditsLabel": "ക്രെഡിറ്റുകൾ",
+    "dayLabel": "ദിവസം",
+    "bonusLabel": "ബോണസ്",
+    "weekProgress": "ഈ ആഴ്ച",
+    "cycleComplete": "ദിവസം 7-ന് ശേഷം സൈക്കിൾ പുനഃസജ്ജമാകും",
+    "day7Hint": "മെഗാ ബോണസിന് ദിവസം 7-ൽ എത്തൂ",
+    "claimSuccess": "നിങ്ങൾ {credits} ക്രെഡിറ്റുകൾ നേടി — {streak} ദിവസത്തെ സ്ട്രീക്ക്!",
+    "newBalanceLabel": "പുതിയ ബാലൻസ്",
+    "claimAlready": "ഇന്ന് ഇതിനകം നേടിക്കഴിഞ്ഞു. നാളെ വീണ്ടും വരൂ!",
+    "claimError": "എന്തോ പിഴവ് സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കൂ.",
+    "loadError": "സമ്മാനങ്ങൾ ലോഡ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കൂ.",
+    "retry": "വീണ്ടും ശ്രമിക്കൂ",
+    "noStreakYet": "ഇന്ന് നേടിക്കൊണ്ട് നിങ്ങളുടെ സ്ട്രീക്ക് ആരംഭിക്കൂ!",
+    "streakResetNotice": "ഒരു ദിവസം നഷ്ടമായാൽ നിങ്ങളുടെ സ്ട്രീക്ക് ദിവസം 1-ലേക്ക് പുനഃസജ്ജമാകും.",
+    "howItWorks": "ഇത് എങ്ങനെ പ്രവർത്തിക്കുന്നു",
+    "howItWorksDesc": "ദിവസത്തിൽ ഒരിക്കൽ നേടൂ. തുടർച്ചയായ ഓരോ ദിവസവും നിങ്ങളുടെ സ്ട്രീക്ക് വളർത്തുകയും വലിയ സമ്മാനങ്ങൾ തുറക്കുകയും ചെയ്യും — ദിവസം 7 ആണ് ജാക്ക്പോട്ട്. ഒരു ദിവസം നഷ്ടമായാൽ ദിവസം 1-ൽ നിന്ന് വീണ്ടും തുടങ്ങണം. അർധരാത്രി UTC-യിൽ പുനഃസജ്ജമാകും."
   }
 }

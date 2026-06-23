@@ -117,9 +117,12 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
     }
     
     // Session exists at this point — check for refresh errors
-    if (session?.user?.error === "RefreshAccessTokenError" || session?.user?.error === "TokenReuseError") {
+    if (session?.user?.error === "RefreshAccessTokenError" || session?.user?.error === "TokenReuseError" || session?.user?.error === "GoogleExchangeError") {
       console.error("[clientFetch] Refresh failed with fatal error. Signing out immediately.");
-      await performSignOut(SESSION_RECOVERY_URL, "Session expired. Please log in again.");
+      const callbackUrl = session?.user?.error === "GoogleExchangeError"
+        ? "/login?error=GoogleAuthFailed&sessionCleared=1"
+        : SESSION_RECOVERY_URL;
+      await performSignOut(callbackUrl, "Session expired. Please log in again.");
     }
 
     // If we're in the grace period, wait a bit before retrying to give the cookie time to propagate

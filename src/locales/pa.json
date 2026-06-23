@@ -18,6 +18,8 @@
     "returnHome": "ਘਰ ਵਾਪਸ ਜਾਓ"
   },
   "nav": {
+    "dailyRewards": "ਰੋਜ਼ਾਨਾ ਇਨਾਮ",
+    "dailyRewardsDesc": "ਹਰ ਰੋਜ਼ ਮੁਫ਼ਤ ਕ੍ਰੈਡਿਟ ਲਓ। ਆਪਣੀ ਲੜੀ ਨੂੰ ਜਾਰੀ ਰੱਖੋ!",
     "myJourney": "ਮੇਰਾ ਸਫ਼ਰ",
     "cosmicDashboard": "ਕੌਸਮਿਕ ਡੈਸ਼ਬੋਰਡ",
     "cosmicDashboardDesc": "ਤੁਹਾਡੀ ਨਿੱਜੀ ਸੰਖੇਪ ਜਾਣਕਾਰੀ ਅਤੇ ਰੋਜ਼ਾਨਾ ਇਨਸਾਈਟਸ।",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, ਸਕੋਰ {score}",
     "todayShort": "ਅੱਜ",
-    "weekly": "7 ਦਿਨ"
+    "weekly": "7 ਦਿਨ",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "ਆਪਣੀ ਕੌਸਮਿਕ ਸਮਰੱਥਾ ਨੂੰ ਅਨਲੌਕ ਕਰੋ",
@@ -2093,5 +2121,36 @@
         "description": "ਇੱਕ ਪ੍ਰੋ ਯੋਜਨਾ ਨਾਲ ਮੁੱਖ ਜੀਵਨ ਵਿਸ਼ਿਆਂ ਦੇ ਵਿਸ਼ਲੇਸ਼ਣ ਨੂੰ ਅਨਲੌਕ ਕਰੋ।"
       }
     }
+  },
+  "rewards": {
+    "title": "ਰੋਜ਼ਾਨਾ ਇਨਾਮ",
+    "subtitle": "ਹਰ ਰੋਜ਼ ਮੁਫ਼ਤ ਕ੍ਰੈਡਿਟ ਲਓ — ਆਪਣੀ ਬ੍ਰਹਿਮੰਡੀ ਲੜੀ ਨੂੰ ਜਾਰੀ ਰੱਖੋ।",
+    "claimButton": "ਅੱਜ ਦਾ ਇਨਾਮ ਲਓ",
+    "claimNow": "ਹੁਣੇ ਲਓ",
+    "claimedButton": "ਅੱਜ ਲੈ ਲਿਆ",
+    "claimingButton": "ਲੈ ਰਹੇ ਹਾਂ…",
+    "streakLabel": "ਦਿਨਾਂ ਦੀ ਲੜੀ",
+    "longestStreakLabel": "ਸਭ ਤੋਂ ਲੰਮੀ ਲੜੀ",
+    "totalClaimsLabel": "ਕੁੱਲ ਪ੍ਰਾਪਤੀਆਂ",
+    "balanceLabel": "ਕ੍ਰੈਡਿਟ ਬਕਾਇਆ",
+    "nextRewardLabel": "ਅਗਲਾ ਇਨਾਮ",
+    "nextRewardIn": "ਅਗਲਾ ਇਨਾਮ ਇਸ ਵਿੱਚ",
+    "todayReward": "ਅੱਜ ਦਾ ਇਨਾਮ",
+    "creditsLabel": "ਕ੍ਰੈਡਿਟ",
+    "dayLabel": "ਦਿਨ",
+    "bonusLabel": "ਬੋਨਸ",
+    "weekProgress": "ਇਸ ਹਫ਼ਤੇ",
+    "cycleComplete": "ਦਿਨ 7 ਤੋਂ ਬਾਅਦ ਚੱਕਰ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ",
+    "day7Hint": "ਵੱਡੇ ਬੋਨਸ ਲਈ ਦਿਨ 7 ਤੱਕ ਪਹੁੰਚੋ",
+    "claimSuccess": "ਤੁਸੀਂ {credits} ਕ੍ਰੈਡਿਟ ਕਮਾਏ — {streak}-ਦਿਨਾਂ ਦੀ ਲੜੀ!",
+    "newBalanceLabel": "ਨਵਾਂ ਬਕਾਇਆ",
+    "claimAlready": "ਅੱਜ ਦਾ ਇਨਾਮ ਪਹਿਲਾਂ ਹੀ ਲੈ ਲਿਆ। ਕੱਲ੍ਹ ਫਿਰ ਆਓ!",
+    "claimError": "ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "loadError": "ਇਨਾਮ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "retry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "noStreakYet": "ਅੱਜ ਇਨਾਮ ਲੈ ਕੇ ਆਪਣੀ ਲੜੀ ਸ਼ੁਰੂ ਕਰੋ!",
+    "streakResetNotice": "ਇੱਕ ਦਿਨ ਖੁੰਝ ਗਿਆ ਤਾਂ ਤੁਹਾਡੀ ਲੜੀ ਦਿਨ 1 'ਤੇ ਮੁੜ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗੀ।",
+    "howItWorks": "ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ",
+    "howItWorksDesc": "ਦਿਨ ਵਿੱਚ ਇੱਕ ਵਾਰ ਇਨਾਮ ਲਓ। ਹਰ ਲਗਾਤਾਰ ਦਿਨ ਤੁਹਾਡੀ ਲੜੀ ਵਧਾਉਂਦਾ ਹੈ ਅਤੇ ਵੱਡੇ ਇਨਾਮ ਖੋਲ੍ਹਦਾ ਹੈ — ਦਿਨ 7 ਜੈਕਪਾਟ ਹੈ। ਇੱਕ ਦਿਨ ਖੁੰਝ ਗਿਆ ਤਾਂ ਤੁਸੀਂ ਦਿਨ 1 ਤੋਂ ਮੁੜ ਸ਼ੁਰੂ ਕਰੋਗੇ। ਅੱਧੀ ਰਾਤ UTC 'ਤੇ ਮੁੜ ਸੈੱਟ ਹੁੰਦਾ ਹੈ।"
   }
 }

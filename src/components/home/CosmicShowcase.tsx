@@ -153,8 +153,8 @@ export default function CosmicShowcase() {
               ))}
             </ul>
             <div className="pt-2">
-              <Button href="/kundli" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Generate Free Kundli
+              <Button href="/login?action=register" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                Let&apos;s get started
               </Button>
             </div>
           </motion.div>

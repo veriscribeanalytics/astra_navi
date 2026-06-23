@@ -335,11 +335,11 @@ export default function ScrollMorphSection() {
           AI-powered Vedic astrology for daily guidance, Kundli insights, forecasts, and personal questions.
         </p>
         <div className="hidden lg:flex flex-row items-center gap-4">
-          <Button href="/kundli" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-8">Generate Free Kundli</Button>
+          <Button href="/login?action=register" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-8">Let&apos;s get started</Button>
           <Button href="/chat" variant="secondary" size="lg" leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />} className="px-8 border-outline-variant/40 text-primary hover:border-secondary/50">Ask Navi</Button>
         </div>
         <div className="flex lg:hidden flex-col sm:flex-row items-center gap-3">
-          <Button href="/kundli" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-8 w-full sm:w-1/2">Generate Free Kundli</Button>
+          <Button href="/login?action=register" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-8 w-full sm:w-1/2">Let&apos;s get started</Button>
           <Button href="/chat" variant="secondary" size="lg" leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />} className="px-8 w-full sm:w-1/2 border-outline-variant/40 text-primary">Ask Navi</Button>
         </div>
       </div>
@@ -376,7 +376,7 @@ export default function ScrollMorphSection() {
               </li>
             ))}
           </ul>
-          <div className="pt-2"><Button href="/kundli" rightIcon={<ArrowRight className="w-4 h-4" />}>Generate Free Kundli</Button></div>
+          <div className="pt-2"><Button href="/login?action=register" rightIcon={<ArrowRight className="w-4 h-4" />}>Let&apos;s get started</Button></div>
         </div>
       </div>
 

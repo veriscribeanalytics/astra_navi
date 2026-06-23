@@ -6,7 +6,7 @@ import DOMPurify from 'isomorphic-dompurify';
 import { parseMarkdown, autoFormatAstrology } from '@/utils/markdownParser';
 import Card from '@/components/ui/Card';
 import RatingMeter from '@/components/ui/RatingMeter';
-import { useChat } from '@/context/ChatContext';
+import { getPendingActionKey, useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
@@ -605,35 +605,32 @@ const ChatMessages: React.FC = () => {
                     </details>
                   )}
 
-                  <div className="flex flex-col gap-2">
-                    {splitIntoBubbles(mainText).map((block, bIdx, blocks) => (
-                      <motion.div
-                        key={bIdx}
-                        className="ai-bubble-container"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, ease: 'easeOut' }}
-                      >
-                        <div
-                          className="ai-message-content text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.8] max-w-[65ch]"
-                          dangerouslySetInnerHTML={{ __html: getSanitizedHtml(msg.id + ':' + bIdx, block) }}
-                          onClick={(e) => {
-                            const btn = (e.target as Element).closest('[data-action="copy-code"]');
-                            if (!btn) return;
-                            const wrapper = btn.closest('.code-block-wrapper');
-                            const codeEl = wrapper?.querySelector('code');
-                            if (codeEl) {
-                              navigator.clipboard.writeText(codeEl.textContent || '');
-                              toastSuccess(t('chat.copiedToClipboard'));
-                            }
-                          }}
-                        />
-                        {isStreamingAi && bIdx === blocks.length - 1 && (
-                          <span className="typing-cursor inline-block w-[2px] h-[1em] bg-secondary/70 ml-0.5 rounded-sm align-text-bottom" />
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
+                  {mainText.trim() && (
+                    <motion.div
+                      className="ai-bubble-container"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
+                    >
+                      <div
+                        className="ai-message-content text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.8] max-w-[65ch]"
+                        dangerouslySetInnerHTML={{ __html: getSanitizedHtml(msg.id, mainText) }}
+                        onClick={(e) => {
+                          const btn = (e.target as Element).closest('[data-action="copy-code"]');
+                          if (!btn) return;
+                          const wrapper = btn.closest('.code-block-wrapper');
+                          const codeEl = wrapper?.querySelector('code');
+                          if (codeEl) {
+                            navigator.clipboard.writeText(codeEl.textContent || '');
+                            toastSuccess(t('chat.copiedToClipboard'));
+                          }
+                        }}
+                      />
+                      {isStreamingAi && (
+                        <span className="typing-cursor inline-block w-[2px] h-[1em] bg-secondary/70 ml-0.5 rounded-sm align-text-bottom" />
+                      )}
+                    </motion.div>
+                  )}
 
 {msg.error && (
                     <div className={`flex items-center gap-2 mt-3 p-3 rounded-xl border ${msg.errorCode === 'llm_unavailable' ? 'bg-amber-500/8 border-amber-500/15' : msg.errorCode === 'capacity' ? 'bg-orange-500/8 border-orange-500/15' : 'bg-red-500/8 border-red-500/15'}`}>
@@ -653,7 +650,8 @@ const ChatMessages: React.FC = () => {
                   {msg.pendingActions && msg.pendingActions.length > 0 && (
                     <div className="mt-3 flex flex-col gap-2">
                       {msg.pendingActions.map((action) => {
-                        const resolved = msg.resolvedActions?.[action.memberId];
+                        const actionKey = getPendingActionKey(action);
+                        const resolved = msg.resolvedActions?.[actionKey];
                         const status = resolved?.status;
 
                         if (status === 'done' && resolved?.result) {
@@ -661,7 +659,7 @@ const ChatMessages: React.FC = () => {
                           const topFactors = (resolved.result.factors ?? []).slice(0, 3);
                           return (
                             <Card
-                              key={action.memberId}
+                              key={actionKey}
                               variant="bordered"
                               padding="none"
                               hoverable={false}
@@ -701,11 +699,11 @@ const ChatMessages: React.FC = () => {
                         const isError = status === 'error';
 
                         return (
-                          <div key={action.memberId} className="flex flex-col gap-1.5">
+                          <div key={actionKey} className="flex flex-col gap-1.5">
                             <button
                               type="button"
                               disabled={isRunning || isError}
-                              onClick={() => { haptic(); resolvePendingAction(msg.id, action.memberId, action.connectionId); }}
+                              onClick={() => { haptic(); resolvePendingAction(msg.id, action); }}
                               className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border transition-colors text-left ${
                                 isRunning || isError
                                   ? 'bg-surface-variant/15 border-outline-variant/15 text-on-surface-variant/40 cursor-not-allowed'
@@ -877,8 +875,7 @@ const ChatMessages: React.FC = () => {
               {isAi && isLastAiMsg && !isSending && (
                 <div className="flex flex-nowrap overflow-x-auto gap-1.5 mt-2 ml-10 msg-suggestion-pills">
                   {(() => {
-                    const blocks = splitIntoBubbles(mainText);
-                    const closing = blocks.length > 0 ? parseClosingOptions(blocks[blocks.length - 1]) : [];
+                    const closing = parseClosingOptions(mainText);
                     return closing.length > 0 ? closing : (msg.suggestedQuestions?.slice(0, 3) || getSmartSuggestions(msg));
                   })().map((option, qIdx) => (
                     <motion.button

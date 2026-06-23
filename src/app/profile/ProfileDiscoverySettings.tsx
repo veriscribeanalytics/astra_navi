@@ -132,8 +132,8 @@ const ProfileDiscoverySettings: React.FC = () => {
     };
 
     return (
-        <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 mt-8" hoverable={false}>
-            <div className="space-y-8">
+        <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
+            <div className="space-y-6">
                 {/* Handle */}
                 <div className="space-y-4">
                     <div>
@@ -144,7 +144,7 @@ const ProfileDiscoverySettings: React.FC = () => {
                         <p className="text-sm text-on-surface-variant">{t('profile.discovery.sectionDescription')}</p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                    <div className="flex flex-col xl:flex-row xl:items-start gap-3">
                         <div className="flex-1">
                             <Input
                                 label={t('profile.discovery.usernameLabel')}
@@ -157,7 +157,7 @@ const ProfileDiscoverySettings: React.FC = () => {
                                 autoComplete="off"
                             />
                         </div>
-                        <div className="flex gap-2 sm:pt-7">
+                        <div className="flex flex-wrap xl:flex-col gap-2 xl:pt-8">
                             <Button
                                 type="button"
                                 size="md"
@@ -205,7 +205,7 @@ const ProfileDiscoverySettings: React.FC = () => {
                 </div>
 
                 {/* Blocked list */}
-                <div className="space-y-4 pt-6 border-t border-outline-variant/10">
+                <div className="space-y-4 pt-5 border-t border-outline-variant/10">
                     <div>
                         <h3 className="text-base font-headline font-bold text-primary mb-1 flex items-center gap-2">
                             <Ban className="w-4 h-4 text-on-surface-variant/60" />

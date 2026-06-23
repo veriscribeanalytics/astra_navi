@@ -18,6 +18,8 @@
     "returnHome": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ"
   },
   "nav": {
+    "dailyRewards": "ದೈನಂದಿನ ಬಹುಮಾನಗಳು",
+    "dailyRewardsDesc": "ಪ್ರತಿದಿನ ಉಚಿತ ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಪಡೆಯಿರಿ. ನಿಮ್ಮ ಸರಣಿಯನ್ನು ಜೀವಂತವಾಗಿಡಿ!",
     "myJourney": "ನನ್ನ ಪ್ರಯಾಣ",
     "cosmicDashboard": "ಕಾಸ್ಮಿಕ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     "cosmicDashboardDesc": "ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಅವಲೋಕನ ಮತ್ತು ದೈನಂದಿನ ಒಳನೋಟಗಳು.",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, ಸ್ಕೋರ್ {score}",
     "todayShort": "ಇಂದು",
-    "weekly": "7ದಿನ"
+    "weekly": "7ದಿನ",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "ನಿಮ್ಮ ಬ್ರಹ್ಮಾಂಡದ ಸಾಮರ್ಥ್ಯವನ್ನು ಅನಾವರಣಗೊಳಿಸಿ",
@@ -2093,5 +2121,36 @@
         "description": "ಪ್ರೊ ಯೋಜನೆಯೊಂದಿಗೆ ಪ್ರಮುಖ ಜೀವನ ವಿಷಯದ ಒಳನೋಟಗಳನ್ನು ಅನ್ಲಾಕ್ ಮಾಡಿ."
       }
     }
+  },
+  "rewards": {
+    "title": "ದೈನಂದಿನ ಬಹುಮಾನಗಳು",
+    "subtitle": "ಪ್ರತಿದಿನ ಉಚಿತ ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಪಡೆಯಿರಿ — ನಿಮ್ಮ ಕಾಸ್ಮಿಕ್ ಸರಣಿಯನ್ನು ಜೀವಂತವಾಗಿಡಿ.",
+    "claimButton": "ಇಂದಿನ ಬಹುಮಾನ ಪಡೆಯಿರಿ",
+    "claimNow": "ಈಗಲೇ ಪಡೆಯಿರಿ",
+    "claimedButton": "ಇಂದು ಪಡೆಯಲಾಗಿದೆ",
+    "claimingButton": "ಪಡೆಯಲಾಗುತ್ತಿದೆ…",
+    "streakLabel": "ಸತತ ದಿನಗಳು",
+    "longestStreakLabel": "ಅತಿ ಉದ್ದದ ಸರಣಿ",
+    "totalClaimsLabel": "ಒಟ್ಟು ಪಡೆದಿರುವುದು",
+    "balanceLabel": "ಕ್ರೆಡಿಟ್ ಬಾಕಿ",
+    "nextRewardLabel": "ಮುಂದಿನ ಬಹುಮಾನ",
+    "nextRewardIn": "ಮುಂದಿನ ಬಹುಮಾನ ಇನ್ನು",
+    "todayReward": "ಇಂದಿನ ಬಹುಮಾನ",
+    "creditsLabel": "ಕ್ರೆಡಿಟ್‌ಗಳು",
+    "dayLabel": "ದಿನ",
+    "bonusLabel": "ಬೋನಸ್",
+    "weekProgress": "ಈ ವಾರ",
+    "cycleComplete": "ದಿನ 7ರ ನಂತರ ಚಕ್ರ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ",
+    "day7Hint": "ಮೆಗಾ ಬೋನಸ್‌ಗಾಗಿ ದಿನ 7 ತಲುಪಿ",
+    "claimSuccess": "ನೀವು {credits} ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಗಳಿಸಿದ್ದೀರಿ — {streak}-ದಿನಗಳ ಸರಣಿ!",
+    "newBalanceLabel": "ಹೊಸ ಬಾಕಿ",
+    "claimAlready": "ಇಂದು ಈಗಾಗಲೇ ಪಡೆಯಲಾಗಿದೆ. ನಾಳೆ ಮತ್ತೆ ಬನ್ನಿ!",
+    "claimError": "ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "loadError": "ಬಹುಮಾನಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+    "noStreakYet": "ಇಂದೇ ಪಡೆದು ನಿಮ್ಮ ಸರಣಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿ!",
+    "streakResetNotice": "ಒಂದು ದಿನ ತಪ್ಪಿಸಿದರೆ ನಿಮ್ಮ ಸರಣಿ ದಿನ 1ಕ್ಕೆ ಮರುಹೊಂದುತ್ತದೆ.",
+    "howItWorks": "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
+    "howItWorksDesc": "ದಿನಕ್ಕೆ ಒಮ್ಮೆ ಪಡೆಯಿರಿ. ಪ್ರತಿ ಸತತ ದಿನವೂ ನಿಮ್ಮ ಸರಣಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ ಮತ್ತು ದೊಡ್ಡ ಬಹುಮಾನಗಳನ್ನು ತೆರೆಯುತ್ತದೆ — ದಿನ 7 ಜಾಕ್‌ಪಾಟ್. ಒಂದು ದಿನ ತಪ್ಪಿಸಿದರೆ ದಿನ 1ರಿಂದ ಮತ್ತೆ ಆರಂಭಿಸುತ್ತೀರಿ. ಮಧ್ಯರಾತ್ರಿ UTCಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ."
   }
 }

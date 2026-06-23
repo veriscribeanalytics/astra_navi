@@ -18,6 +18,8 @@
     "returnHome": "મુખ્ય પૃષ્ઠ પર પાછા ફરો"
   },
   "nav": {
+    "dailyRewards": "દૈનિક પુરસ્કાર",
+    "dailyRewardsDesc": "દરરોજ મફત ક્રેડિટ્સ મેળવો. તમારી સળંગ ગણતરી જાળવી રાખો!",
     "myJourney": "મારી સફર",
     "cosmicDashboard": "કોસ્મિક ડેશબોર્ડ",
     "cosmicDashboardDesc": "તમારું વ્યક્તિગત વિહંગાવલોકન અને દૈનિક આંતરદૃષ્ટિ.",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, સ્કોર {score}",
     "todayShort": "આજે",
-    "weekly": "7 દિવસ"
+    "weekly": "7 દિવસ",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "તમારી કોસ્મિક સંભાવનાઓને અનલૉક કરો",
@@ -2093,5 +2121,36 @@
         "description": "પ્રો પ્લાન સાથે મુખ્ય જીવન વિષયની આંતરદૃષ્ટિ અનલોક કરો."
       }
     }
+  },
+  "rewards": {
+    "title": "દૈનિક પુરસ્કાર",
+    "subtitle": "દરરોજ મફત ક્રેડિટ્સ મેળવો — તમારી કોસ્મિક સળંગ ગણતરી જાળવી રાખો.",
+    "claimButton": "આજનો પુરસ્કાર મેળવો",
+    "claimNow": "હમણાં મેળવો",
+    "claimedButton": "આજે મેળવી લીધો",
+    "claimingButton": "મેળવી રહ્યા છીએ…",
+    "streakLabel": "દિવસોની સળંગ ગણતરી",
+    "longestStreakLabel": "સૌથી લાંબી સળંગ ગણતરી",
+    "totalClaimsLabel": "કુલ દાવા",
+    "balanceLabel": "ક્રેડિટ બેલેન્સ",
+    "nextRewardLabel": "આગામી પુરસ્કાર",
+    "nextRewardIn": "આગામી પુરસ્કાર આટલા સમયમાં",
+    "todayReward": "આજનો પુરસ્કાર",
+    "creditsLabel": "ક્રેડિટ્સ",
+    "dayLabel": "દિવસ",
+    "bonusLabel": "બોનસ",
+    "weekProgress": "આ અઠવાડિયે",
+    "cycleComplete": "દિવસ 7 પછી ચક્ર ફરી શરૂ થાય છે",
+    "day7Hint": "મેગા બોનસ માટે દિવસ 7 સુધી પહોંચો",
+    "claimSuccess": "તમે {credits} ક્રેડિટ્સ કમાયા — {streak} દિવસની સળંગ ગણતરી!",
+    "newBalanceLabel": "નવું બેલેન્સ",
+    "claimAlready": "આજે પહેલેથી જ મેળવી લીધો. કાલે પાછા આવો!",
+    "claimError": "કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.",
+    "loadError": "પુરસ્કાર લોડ ન થઈ શક્યા. કૃપા કરીને ફરી પ્રયાસ કરો.",
+    "retry": "ફરી પ્રયાસ કરો",
+    "noStreakYet": "આજે મેળવીને તમારી સળંગ ગણતરી શરૂ કરો!",
+    "streakResetNotice": "એક દિવસ ચૂકો અને તમારી સળંગ ગણતરી દિવસ 1 પર ફરી શરૂ થાય છે.",
+    "howItWorks": "આ કેવી રીતે કામ કરે છે",
+    "howItWorksDesc": "દિવસમાં એક વાર મેળવો. દરેક સળંગ દિવસ તમારી ગણતરી વધારે છે અને મોટા પુરસ્કારો ખોલે છે — દિવસ 7 એ જૅકપૉટ છે. એક દિવસ ચૂકો અને તમે દિવસ 1 પર ફરી શરૂ કરો. મધ્યરાત્રિ UTC પર ફરી સેટ થાય છે."
   }
 }

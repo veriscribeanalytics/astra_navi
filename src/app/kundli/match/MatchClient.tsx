@@ -14,7 +14,8 @@ import LocationSearch, { type LocationResult } from '@/components/ui/LocationSea
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import { 
   Heart, Sparkles, ArrowLeftRight, 
-  RotateCcw, ShieldCheck, ChevronRight, Lock
+  RotateCcw, ShieldCheck, ChevronRight, Lock,
+  Users
 } from 'lucide-react';
 
 // Components
@@ -367,6 +368,35 @@ export default function MatchClient() {
     return labels[name] || { label: name, icon: '✨' };
   };
 
+  const TabBar = () => (
+    <div className="flex justify-center mb-2">
+      <div className="inline-flex p-1 bg-surface border border-outline-variant/10 rounded-2xl">
+        <button
+          type="button"
+          onClick={() => setActiveTab('match')}
+          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+            activeTab === 'match'
+              ? 'bg-secondary text-white shadow-lg'
+              : 'text-foreground/40 hover:text-foreground'
+          }`}
+        >
+          New Match
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('history')}
+          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+            activeTab === 'history'
+              ? 'bg-secondary text-white shadow-lg'
+              : 'text-foreground/40 hover:text-foreground'
+          }`}
+        >
+          History
+        </button>
+      </div>
+    </div>
+  );
+
   if (!isLoggedIn) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
@@ -389,38 +419,13 @@ export default function MatchClient() {
   }
 
   return (
-    <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+    <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
       {ToastContainer}
 
       {/* Paywall Modal — shown when match is hard-blocked (402) */}
       {paywall && (
         <PaywallCard paywall={paywall} variant="modal" onClose={() => setPaywall(null)} />
       )}
-      {/* Tab Switcher */}
-      <div className="flex justify-center mb-10">
-        <div className="inline-flex p-1 bg-surface border border-outline-variant/10 rounded-2xl">
-          <button
-            onClick={() => setActiveTab('match')}
-            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'match' 
-                ? 'bg-secondary text-white shadow-lg' 
-                : 'text-foreground/40 hover:text-foreground'
-            }`}
-          >
-            New Match
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'history' 
-                ? 'bg-secondary text-white shadow-lg' 
-                : 'text-foreground/40 hover:text-foreground'
-            }`}
-          >
-            History
-          </button>
-        </div>
-      </div>
 
       <AnimatePresence mode="wait">
         {activeTab === 'match' ? (
@@ -433,10 +438,10 @@ export default function MatchClient() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-10"
+                  className="space-y-8"
                 >
                   {/* Header Section */}
-                  <div className="text-center space-y-4 max-w-2xl mx-auto">
+                  <div className="text-center space-y-2 max-w-2xl mx-auto">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-bold uppercase tracking-widest">
                       <Heart size={14} className="fill-current" />
                       Ashtakoot Milan
@@ -445,10 +450,12 @@ export default function MatchClient() {
                       Relationship Analysis
                     </h1>
                     <p className="text-foreground/60 leading-relaxed font-body">
-                      Discover your spiritual and personal compatibility using the ancient 36-point Vedic system. 
+                      Discover your spiritual and personal compatibility using the ancient 36-point Vedic system.
                       Enter the birth details of both individuals to begin.
                     </p>
                   </div>
+
+                  <TabBar />
 
                   {/* Forms Section */}
                   <div className="relative">
@@ -461,7 +468,7 @@ export default function MatchClient() {
                           </div>
                           <div>
                             <h3 className="text-lg font-headline font-bold text-foreground leading-tight">First Person</h3>
-                            <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">Groom Details</p>
+                            <p className="text-[11px] text-[#AAA3B8] font-bold uppercase tracking-widest">Groom Details</p>
                           </div>
                         </div>
 
@@ -473,14 +480,15 @@ export default function MatchClient() {
                             onChange={(e) => setPerson1({...person1, name: e.target.value})}
                           />
                           <div className="grid grid-cols-2 gap-4">
-                            <Input 
-                              label="Date of Birth" 
+                            <Input
+                              label="Date of Birth"
                               type="date"
+                              helperText="e.g. 11 Nov 2001"
                               value={person1.dob}
                               onChange={(e) => setPerson1({...person1, dob: e.target.value})}
                             />
-                            <Input 
-                              label="Time of Birth" 
+                            <Input
+                              label="Time of Birth"
                               type="time"
                               value={person1.tob}
                               onChange={(e) => setPerson1({...person1, tob: e.target.value})}
@@ -522,11 +530,13 @@ export default function MatchClient() {
                       </Card>
 
                       <div className="lg:hidden flex justify-center -my-3 relative z-20">
-                        <button 
+                        <button
+                          type="button"
                           onClick={handleSwap}
-                          className="w-12 h-12 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-secondary/50 hover:bg-surface-variant/20 transition-all group shadow-xl active:scale-95"
+                          title="Swap people"
+                          className="w-10 h-10 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-[rgba(201,151,46,0.50)] hover:bg-[rgba(201,151,46,0.15)] hover:shadow-lg transition-all group active:scale-95"
                         >
-                          <ArrowLeftRight className="text-foreground/40 group-hover:text-secondary transition-colors" size={20} />
+                          <ArrowLeftRight className="text-foreground/60 group-hover:text-secondary transition-colors" size={22} />
                         </button>
                       </div>
 
@@ -538,7 +548,7 @@ export default function MatchClient() {
                           </div>
                           <div>
                             <h3 className="text-lg font-headline font-bold text-foreground leading-tight">Second Person</h3>
-                            <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest">Bride Details</p>
+                            <p className="text-[11px] text-[#AAA3B8] font-bold uppercase tracking-widest">Bride Details</p>
                           </div>
                         </div>
 
@@ -550,14 +560,15 @@ export default function MatchClient() {
                             onChange={(e) => setPerson2({...person2, name: e.target.value})}
                           />
                           <div className="grid grid-cols-2 gap-4">
-                            <Input 
-                              label="Date of Birth" 
+                            <Input
+                              label="Date of Birth"
                               type="date"
+                              helperText="e.g. 11 Nov 2001"
                               value={person2.dob}
                               onChange={(e) => setPerson2({...person2, dob: e.target.value})}
                             />
-                            <Input 
-                              label="Time of Birth" 
+                            <Input
+                              label="Time of Birth"
                               type="time"
                               value={person2.tob}
                               onChange={(e) => setPerson2({...person2, tob: e.target.value})}
@@ -595,32 +606,43 @@ export default function MatchClient() {
                               if (!stillMatches) setConfirmedLocationP2(null);
                             }}
                           />
+                          <button
+                            type="button"
+                            onClick={() => error("Select from Family is coming soon.")}
+                            title="Load a family member's profile"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-outline-variant/20 text-xs font-bold text-[#AAA3B8] hover:text-foreground hover:border-secondary/40 hover:bg-secondary/5 transition-all"
+                          >
+                            <Users className="w-4 h-4" />
+                            Select from Family
+                          </button>
                         </div>
                       </Card>
                     </div>
 
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 hidden lg:block">
-                      <button 
+                      <button
+                        type="button"
                         onClick={handleSwap}
-                        className="w-12 h-12 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-secondary/50 hover:bg-surface-variant/20 transition-all group shadow-2xl"
+                        title="Swap people"
+                        className="w-10 h-10 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-[rgba(201,151,46,0.50)] hover:bg-[rgba(201,151,46,0.15)] hover:shadow-lg transition-all group active:scale-95"
                       >
-                        <ArrowLeftRight className="text-foreground/40 group-hover:text-secondary transition-colors" size={20} />
+                        <ArrowLeftRight className="text-foreground/60 group-hover:text-secondary transition-colors" size={22} />
                       </button>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-center gap-4">
-                    <Button 
+                    <button
+                      type="button"
                       onClick={handleMatch}
-                      size="lg"
-                      className="px-12 py-5 !rounded-2xl gold-gradient shadow-2xl shadow-secondary/20 text-[14px] uppercase tracking-[0.2em] font-bold"
                       disabled={isSubmitting}
-                      loading={isSubmitting}
+                      className="inline-flex items-center justify-center gap-2 px-12 py-5 rounded-2xl bg-gradient-to-br from-[#C9972E] via-[#D8AD43] to-[#C9972E] text-[#170C2D] shadow-lg shadow-[rgba(201,151,46,0.16)] hover:shadow-[rgba(201,151,46,0.24)] hover:via-[#D8AD43] active:scale-95 transition-all text-[14px] uppercase tracking-[0.2em] font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                     >
-                      Calculate Compatibility <Sparkles className="ml-2 w-4 h-4" />
-                    </Button>
-                    <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest flex items-center gap-2">
-                      <ShieldCheck size={12} className="text-green-500/40" />
+                      {isSubmitting && <RotateCcw className="w-4 h-4 animate-spin" />}
+                      Calculate Compatibility <Sparkles className="w-4 h-4" />
+                    </button>
+                    <p className="text-[11px] text-[#AAA3B8] font-bold uppercase tracking-widest flex items-center gap-2">
+                      <ShieldCheck size={12} className="text-green-500/60" />
                       Secure & Private Calculation
                     </p>
                   </div>
@@ -756,6 +778,7 @@ export default function MatchClient() {
           </motion.div>
         ) : (
           <motion.div key="history-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+            <TabBar />
             <div className="text-center space-y-2 mb-8">
                <h2 className="text-3xl font-headline font-bold text-foreground">Match History</h2>
                <p className="text-foreground/40 text-sm">Your previously computed matches are saved for your review.</p>

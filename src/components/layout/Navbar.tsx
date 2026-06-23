@@ -15,7 +15,7 @@ import { useToast, useTranslation } from "@/hooks";
 import {
     User, LogOut, Menu, X, ChevronDown, Sparkles,
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard,
-    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users, MessageCircle
+    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users, MessageCircle, Gift
 } from "lucide-react";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { getTierLabel } from "@/types/billing";
@@ -63,6 +63,12 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                         href: "/messages",
                         icon: <MessageCircle className="w-4 h-4" />,
                         desc: t('nav.messagesDesc') || 'Private chats with your connections'
+                    },
+                    {
+                        label: t('nav.dailyRewards') || 'Daily Rewards',
+                        href: "/rewards",
+                        icon: <Gift className="w-4 h-4" />,
+                        desc: t('nav.dailyRewardsDesc') || 'Claim free credits every day!'
                     },
                 ]
             },
@@ -516,7 +522,11 @@ const Navbar: React.FC = () => {
                                 aria-label="User menu"
                             >
                                 <div className="profile-comet-dot absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-surface shadow-sm shadow-emerald-500/20" aria-hidden="true"></div>
-                                <div className="profile-avatar-content text-secondary font-black text-sm uppercase">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
+                                {user?.profileImageUrl ? (
+                                    <Image src={user.profileImageUrl} alt={user?.name || 'User'} width={36} height={36} className="w-full h-full object-cover rounded-full" unoptimized />
+                                ) : (
+                                    <div className="profile-avatar-content text-secondary font-black text-sm uppercase">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
+                                )}
                             </button>
                             {isUserDropdownOpen && (
                                 <div role="menu" aria-label={t('nav.account')} className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
@@ -608,7 +618,11 @@ const Navbar: React.FC = () => {
                                 aria-expanded={isUserDropdownOpen}
                             >
                                 <div className="profile-comet-dot absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-surface shadow-sm shadow-emerald-500/20" aria-hidden="true"></div>
-                                <div className="profile-avatar-content text-secondary font-black text-[10px] uppercase">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
+                                {user?.profileImageUrl ? (
+                                    <Image src={user.profileImageUrl} alt={user?.name || 'User'} width={32} height={32} className="w-full h-full object-cover rounded-full" unoptimized />
+                                ) : (
+                                    <div className="profile-avatar-content text-secondary font-black text-[10px] uppercase">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
+                                )}
                             </button>
                             {isUserDropdownOpen && (
                                 <div role="menu" aria-label={t('nav.account')} className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">

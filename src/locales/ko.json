@@ -18,6 +18,8 @@
     "returnHome": "홈으로 돌아가기"
   },
   "nav": {
+    "dailyRewards": "일일 보상",
+    "dailyRewardsDesc": "매일 무료 크레딧을 받으세요. 연속 기록을 이어가세요!",
     "myJourney": "나의 여정",
     "cosmicDashboard": "우주 대시보드",
     "cosmicDashboardDesc": "개인화된 개요 및 일일 인사이트.",
@@ -381,7 +383,7 @@
     "familyAddSubtitle": "가족이나 친구를 추가하여 차트와 감정 패턴을 비교해보세요.",
     "familyBondEnergy": "유대 에너지",
     "familyViewBond": "유대 보기",
-    "familyRunCompatibility": "궁합 분석",
+    "familyRunCompatibility": "친밀도",
     "familyCompatibilityPending": "분석 대기 중",
     "familyStatusIncomplete": "미완성",
     "familyStatusNeedsAttention": "주의 필요",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, 점수 {score}점",
     "todayShort": "오늘",
-    "weekly": "7일"
+    "weekly": "7일",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "당신의 우주적 잠재력을 깨우세요",
@@ -2093,5 +2121,36 @@
         "description": "Pro 요금제로 주요 인생 테마와 통찰을 해제하세요."
       }
     }
+  },
+  "rewards": {
+    "title": "일일 보상",
+    "subtitle": "매일 무료 크레딧을 받으세요 — 우주의 연속 기록을 이어가세요.",
+    "claimButton": "오늘의 보상 받기",
+    "claimNow": "지금 받기",
+    "claimedButton": "오늘 받기 완료",
+    "claimingButton": "받는 중…",
+    "streakLabel": "연속 일수",
+    "longestStreakLabel": "최장 연속 기록",
+    "totalClaimsLabel": "총 받은 횟수",
+    "balanceLabel": "크레딧 잔액",
+    "nextRewardLabel": "다음 보상",
+    "nextRewardIn": "다음 보상까지",
+    "todayReward": "오늘의 보상",
+    "creditsLabel": "크레딧",
+    "dayLabel": "일차",
+    "bonusLabel": "보너스",
+    "weekProgress": "이번 주",
+    "cycleComplete": "7일차 이후 주기가 초기화됩니다",
+    "day7Hint": "7일차에 도달하면 메가 보너스를 받습니다",
+    "claimSuccess": "{credits} 크레딧을 받았어요 — {streak}일 연속 기록!",
+    "newBalanceLabel": "새 잔액",
+    "claimAlready": "오늘은 이미 받으셨어요. 내일 다시 오세요!",
+    "claimError": "문제가 발생했습니다. 다시 시도해 주세요.",
+    "loadError": "보상을 불러오지 못했습니다. 다시 시도해 주세요.",
+    "retry": "다시 시도",
+    "noStreakYet": "오늘 보상을 받고 연속 기록을 시작하세요!",
+    "streakResetNotice": "하루라도 놓치면 연속 기록이 1일차로 초기화됩니다.",
+    "howItWorks": "이용 방법",
+    "howItWorksDesc": "하루에 한 번 받으세요. 연속으로 받을수록 연속 기록이 늘어나고 더 큰 보상이 열립니다 — 7일차는 잭팟입니다. 하루라도 놓치면 1일차부터 다시 시작합니다. 매일 UTC 자정에 초기화됩니다."
   }
 }

@@ -40,12 +40,12 @@ export default function HeroSection() {
                     {/* Desktop CTA Buttons */}
                     <div className="hidden lg:flex flex-row items-center gap-4 w-full">
                         <Button
-                            href="/kundli"
+                            href="/login?action=register"
                             size="lg"
                             rightIcon={<ArrowRight className="w-4 h-4" />}
                             className="gold-gradient shadow-xl px-8"
                         >
-                            Generate Free Kundli
+                            Let&apos;s get started
                         </Button>
                         <Button
                             href="/chat"
@@ -144,12 +144,12 @@ export default function HeroSection() {
                     className="flex lg:hidden flex-col sm:flex-row items-center gap-3 w-full mt-4"
                 >
                     <Button
-                        href="/kundli"
+                        href="/login?action=register"
                         size="lg"
                         rightIcon={<ArrowRight className="w-4 h-4" />}
                         className="gold-gradient shadow-xl px-8 w-full sm:w-1/2"
                     >
-                        Generate Free Kundli
+                        Let&apos;s get started
                     </Button>
                     <Button
                         href="/chat"

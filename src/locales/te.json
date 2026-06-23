@@ -18,6 +18,8 @@
     "returnHome": "ఇంటికి తిరిగి రండి"
   },
   "nav": {
+    "dailyRewards": "రోజువారీ బహుమతులు",
+    "dailyRewardsDesc": "ప్రతిరోజూ ఉచిత క్రెడిట్‌లను పొందండి. మీ వరుసను కొనసాగించండి!",
     "myJourney": "నా ప్రయాణం",
     "cosmicDashboard": "కాస్మిక్ డాష్‌బోర్డ్",
     "cosmicDashboardDesc": "మీ వ్యక్తిగత స్థూలదృష్టి మరియు రోజువారీ అంతర్దృష్టులు.",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, స్కోరు {score}",
     "todayShort": "నేడు",
-    "weekly": "7 రోజులు"
+    "weekly": "7 రోజులు",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "మీ కాస్మిక్ సామర్థ్యాన్ని అన్‌లాక్ చేయండి",
@@ -2093,5 +2121,36 @@
         "description": "ప్రో ప్లాన్‌తో ముఖ్యమైన జీవిత విషయాల అంతర్దృష్టులను అన్‌లాక్ చేయండి."
       }
     }
+  },
+  "rewards": {
+    "title": "రోజువారీ బహుమతులు",
+    "subtitle": "ప్రతిరోజూ ఉచిత క్రెడిట్‌లను పొందండి — మీ విశ్వ వరుసను కొనసాగించండి.",
+    "claimButton": "నేటి బహుమతిని పొందండి",
+    "claimNow": "ఇప్పుడే పొందండి",
+    "claimedButton": "నేడు పొందారు",
+    "claimingButton": "పొందుతోంది…",
+    "streakLabel": "రోజుల వరుస",
+    "longestStreakLabel": "అతి పొడవైన వరుస",
+    "totalClaimsLabel": "మొత్తం పొందినవి",
+    "balanceLabel": "క్రెడిట్ నిల్వ",
+    "nextRewardLabel": "తదుపరి బహుమతి",
+    "nextRewardIn": "తదుపరి బహుమతి ఇంకా",
+    "todayReward": "నేటి బహుమతి",
+    "creditsLabel": "క్రెడిట్‌లు",
+    "dayLabel": "రోజు",
+    "bonusLabel": "బోనస్",
+    "weekProgress": "ఈ వారం",
+    "cycleComplete": "7వ రోజు తర్వాత చక్రం మళ్లీ మొదలవుతుంది",
+    "day7Hint": "మెగా బోనస్ కోసం 7వ రోజుకు చేరుకోండి",
+    "claimSuccess": "మీరు {credits} క్రెడిట్‌లను సంపాదించారు — {streak}-రోజుల వరుస!",
+    "newBalanceLabel": "కొత్త నిల్వ",
+    "claimAlready": "నేడు ఇప్పటికే పొందారు. రేపు మళ్లీ రండి!",
+    "claimError": "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    "loadError": "బహుమతులను లోడ్ చేయలేకపోయాం. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    "retry": "మళ్లీ ప్రయత్నించండి",
+    "noStreakYet": "నేడు పొందడం ద్వారా మీ వరుసను ప్రారంభించండి!",
+    "streakResetNotice": "ఒక రోజు తప్పిపోతే మీ వరుస 1వ రోజుకు మళ్లీ మొదలవుతుంది.",
+    "howItWorks": "ఇది ఎలా పనిచేస్తుంది",
+    "howItWorksDesc": "రోజుకు ఒకసారి పొందండి. ప్రతి వరుస రోజు మీ వరుసను పెంచుతుంది మరియు పెద్ద బహుమతులను అందిస్తుంది — 7వ రోజు జాక్‌పాట్. ఒక రోజు తప్పిపోతే 1వ రోజు నుండి మళ్లీ మొదలవుతుంది. UTC అర్ధరాత్రి మళ్లీ మొదలవుతుంది."
   }
 }

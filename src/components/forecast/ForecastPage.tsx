@@ -9,13 +9,14 @@ import { usePaywallContext } from '@/context/PaywallContext';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { PaywallData } from '@/types/paywall';
 import { AREA_THEMES, AREA_LIST, ForecastArea } from '@/data/areaThemes';
-import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS, BRAND_GOLD, TEXT_COLORS, getScorePhase } from '@/data/lifeAreaColors';
+import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS } from '@/data/lifeAreaColors';
 import Card from '@/components/ui/Card';
 import ForecastChart, { ChartPoint } from './ForecastChart';
+import ForecastActionPanel from './ForecastActionPanel';
 import MonthGrid, { MonthData } from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
 import MonthlyDayGrid from './MonthlyDayGrid';
-import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Sparkles, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { resolveTone } from '@/utils/forecastTones';
 import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse } from '@/types/forecast';
@@ -520,6 +521,15 @@ export default function ForecastPage() {
     setCursor(nextCursor);
   }, []);
 
+  const friendlyDateLabel = useCallback((value?: string) => {
+    if (!value) return '—';
+    const parsed = new Date(value.includes('T') ? value : value + 'T00:00:00');
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString(language || 'en', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+    return value;
+  }, [language]);
+
   // Does the currently-selected range actually have data to render?
   const hasData =
     range === '7d' ? !!activeWeekly?.days?.length
@@ -538,7 +548,7 @@ export default function ForecastPage() {
     <div className="w-full min-h-[calc(100dvh-var(--navbar-height,64px))] bg-[var(--bg)]">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10 3xl:py-16">
         {/* Header */}
-        <div className="mb-2 flex flex-col items-center text-center">
+        <div className="mb-3 flex flex-col items-center text-center">
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20">
               <TrendingUp className="w-3.5 h-3.5 text-secondary animate-pulse" />
@@ -549,28 +559,28 @@ export default function ForecastPage() {
         </div>
 
         {/* Time range toggle */}
-        <div className="flex gap-1 p-1 rounded-xl bg-surface border border-white/5 w-fit mx-auto mb-2">
+        <div className="flex gap-1 p-1 rounded-xl bg-surface border border-white/5 w-fit mx-auto mb-4">
           {([
             ['7d', 'This Week'],
             ['monthly', 'This Month'],
             ['yearly', 'This Year']
           ] as [TimeRange, string][]).map(([key, label]) => (
             <button key={key} onClick={() => setRange(key)}
-              className={`px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/30 hover:text-foreground/60'}`}>
+              className={`px-4 sm:px-6 py-2.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer min-h-[42px] ${range === key ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-foreground/55 hover:text-foreground/90'}`}>
               {label}
             </button>
           ))}
         </div>
 
         {/* Area pills */}
-        <div className="flex gap-2 overflow-x-auto justify-start md:justify-center scrollbar-hide mb-2 pb-1">
+        <div className="flex gap-2 overflow-x-auto justify-start md:justify-center scrollbar-hide mb-6 pb-1">
           {AREA_LIST.map(a => {
             const th = AREA_THEMES[a];
             const Icon = th.icon;
             const active = area === a;
             return (
               <button key={a} onClick={() => setArea(a)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all shrink-0 cursor-pointer ${active ? `${th.bg} ${th.color} border border-current/20` : 'bg-surface border border-white/5 text-foreground/40 hover:text-foreground/70'}`}>
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all shrink-0 cursor-pointer min-h-[46px] ${active ? `${th.bg} ${th.color} border border-current/20` : 'bg-surface border border-white/5 text-foreground/65 hover:text-foreground/95 hover:border-white/15'}`}>
                 <Icon className="w-4 h-4 animate-pulse" />
                 {t(`horoscope.category${a.charAt(0).toUpperCase() + a.slice(1)}`)}
               </button>
@@ -662,26 +672,26 @@ export default function ForecastPage() {
                             {activePeriodLabel}
                           </span>
                           {/* Arrow Navigation */}
-                          <div className="flex items-center gap-1 shrink-0">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <button
                               onClick={() => activeNavigation.can_go_previous && activeNavigation.previous && handlePrevious(activeNavigation.previous)}
                               disabled={!activeNavigation.can_go_previous}
                               aria-label={t('forecast.previous')}
-                              className="w-8 h-8 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                             >
-                              <ChevronLeft className="w-4 h-4 text-foreground/70" />
+                              <ChevronLeft className="w-5 h-5 text-foreground/75" />
                             </button>
                             <button
                               onClick={() => activeNavigation.can_go_next && activeNavigation.next && handleNext(activeNavigation.next)}
                               disabled={!activeNavigation.can_go_next}
                               aria-label={t('forecast.next')}
-                              className="w-8 h-8 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                             >
-                              <ChevronRight className="w-4 h-4 text-foreground/70" />
+                              <ChevronRight className="w-5 h-5 text-foreground/75" />
                             </button>
                           </div>
                         </div>
-                        <h3 className="text-sm font-bold text-foreground/50 uppercase tracking-widest">Monthly Outlook</h3>
+                        <h3 className="text-sm font-bold text-foreground/65 uppercase tracking-widest mb-2">Monthly Outlook</h3>
                         {activeMonthly?.days && (
                           <MonthlyDayGrid
                             days={activeMonthly.days}
@@ -696,53 +706,11 @@ export default function ForecastPage() {
                       {/* Right Column: Row 1 = ratings, Row 2 = chart */}
                       <div className="lg:col-span-6 flex flex-col justify-between pl-0 lg:pl-6 mt-6 lg:mt-0">
 
-                        {/* Row 1: Rating circle + title/description + badges/stats */}
+                        {/* Row 1: Score ring, title/description and compact stats */}
                         <div className="flex flex-col gap-5 pb-6 border-b border-white/5">
-                          {/* Tone & Theme Badges + Summary Statistics */}
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {activeOverview.tone && (
-                                <span
-                                  className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                                  style={{ color: resolveTone(activeOverview.tone, areaHex).color, backgroundColor: resolveTone(activeOverview.tone, areaHex).color + '12' }}
-                                >
-                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, areaHex).color }} />
-                                  {t(resolveTone(activeOverview.tone, areaHex).labelKey) || activeOverview.tone}
-                                </span>
-                              )}
-                              {activeOverview.key_theme && (
-                                <span className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/70">
-                                  <Sparkles className="w-3.5 h-3.5" style={{ color: BRAND_GOLD.main }} />
-                                  <span className="capitalize">{activeOverview.key_theme}</span>
-                                </span>
-                              )}
-                            </div>
-                            {summary && (
-                              <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[10px] font-bold">
-                                <div className="flex items-center gap-1.5">
-                                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: areaHex }} />
-                                  <span className="text-foreground/40">{t('forecast.best')}:</span>
-                                  <span className="text-foreground/70">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: STATUS_COLORS.BAD.main }} />
-                                  <span className="text-foreground/40">{t('forecast.worst')}:</span>
-                                  <span className="text-foreground/70">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-foreground/40">{t('forecast.avg')}:</span>
-                                  <span style={{ color: areaHex }}>{summary.average_score}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-foreground/40">{t('forecast.trend')}:</span>
-                                  <span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          {/* Avg score circle + title + description */}
-                          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                            <div className="shrink-0">
+                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
+                            {/* Score ring */}
+                            <div className="sm:col-span-4 flex flex-col items-center justify-center">
                               <div className="relative w-36 h-36 flex items-center justify-center">
                                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
                                   <circle cx="48" cy="48" r="40" className="stroke-white/[0.04] fill-none" strokeWidth="6" />
@@ -760,24 +728,66 @@ export default function ForecastPage() {
                                 </svg>
                                 <div className="absolute flex flex-col items-center justify-center">
                                   <span className="text-4xl font-headline font-black" style={{ color: areaHex }}>{summary?.average_score ?? 0}</span>
-                                  <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">/ 100</span>
+                                  <span className="text-[10px] font-bold text-foreground/55 uppercase tracking-widest mt-1">/ 100</span>
                                 </div>
                               </div>
-                              <div className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest text-center mt-2">Avg Score</div>
+                              <div className="text-[11px] font-bold text-foreground/55 uppercase tracking-widest text-center mt-2">Avg Score</div>
                             </div>
-                            <div className="flex-grow space-y-3 text-center sm:text-left">
+
+                            {/* Title, description and chips */}
+                            <div className="sm:col-span-8 flex flex-col gap-3 text-center sm:text-left">
+                              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                {activeOverview.tone && (
+                                  <span
+                                    className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                                    style={{ color: resolveTone(activeOverview.tone, areaHex).color, backgroundColor: resolveTone(activeOverview.tone, areaHex).color + '12' }}
+                                  >
+                                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: resolveTone(activeOverview.tone, areaHex).color }} />
+                                    {t(resolveTone(activeOverview.tone, areaHex).labelKey) || activeOverview.tone}
+                                  </span>
+                                )}
+                                {activeOverview.key_theme && (
+                                  <span className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/80">
+                                    <Sparkles className="w-3.5 h-3.5" style={{ color: areaHex }} />
+                                    <span className="capitalize">{activeOverview.key_theme}</span>
+                                  </span>
+                                )}
+                              </div>
                               <h2 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight tracking-tight">
                                 {activeOverview.title}
                               </h2>
-                              <p className="text-sm sm:text-base text-foreground/75 leading-relaxed">
+                              <p className="text-sm sm:text-base text-foreground/85 leading-relaxed">
                                 {activeOverview.text}
                               </p>
                             </div>
                           </div>
+
+                          {/* Compact summary stats */}
+                          {summary && (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/5">
+                              <div className="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/50">{t('forecast.best')}</span>
+                                <span className="text-sm sm:text-base font-bold text-foreground/90">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).best_month : friendlyDateLabel((summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day)}</span>
+                              </div>
+                              <div className="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/50">{t('forecast.worst')}</span>
+                                <span className="text-sm sm:text-base font-bold text-foreground/90">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : friendlyDateLabel((summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day)}</span>
+                              </div>
+                              <div className="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/50">{t('forecast.avg')}</span>
+                                <span className="text-sm sm:text-base font-bold" style={{ color: areaHex }}>{summary.average_score}</span>
+                              </div>
+                              <div className="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/50">{t('forecast.trend')}</span>
+                                <span className="text-sm sm:text-base font-bold text-foreground/90 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Row 2: Chart */}
-                        <div className="h-44 sm:h-52 w-full pt-5">
+                        <div className="h-72 sm:h-80 lg:h-96 w-full pt-5">
+
                           <ForecastChart
                             points={chartPoints}
                             colorHex={areaHex}
@@ -801,25 +811,25 @@ export default function ForecastPage() {
                               className="px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
                               style={{ color: areaHex, backgroundColor: areaHex + '12' }}
                             >
-                              {activePeriodLabel}
+                              {range === '7d' ? 'Weekly Overview' : activePeriodLabel}
                             </span>
                             {/* Arrow Navigation */}
-                            <div className="flex items-center gap-1 shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0">
                               <button
                                 onClick={() => activeNavigation.can_go_previous && activeNavigation.previous && handlePrevious(activeNavigation.previous)}
                                 disabled={!activeNavigation.can_go_previous}
                                 aria-label={t('forecast.previous')}
-                                className="w-8 h-8 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                               >
-                                <ChevronLeft className="w-4 h-4 text-foreground/70" />
+                                <ChevronLeft className="w-5 h-5 text-foreground/75" />
                               </button>
                               <button
                                 onClick={() => activeNavigation.can_go_next && activeNavigation.next && handleNext(activeNavigation.next)}
                                 disabled={!activeNavigation.can_go_next}
                                 aria-label={t('forecast.next')}
-                                className="w-8 h-8 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                               >
-                                <ChevronRight className="w-4 h-4 text-foreground/70" />
+                                <ChevronRight className="w-5 h-5 text-foreground/75" />
                               </button>
                             </div>
                           </div>
@@ -836,8 +846,8 @@ export default function ForecastPage() {
                               </span>
                             )}
                             {activeOverview.key_theme && (
-                              <span className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/70">
-                                <Sparkles className="w-3.5 h-3.5" style={{ color: BRAND_GOLD.main }} />
+                              <span className="px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/80">
+                                <Sparkles className="w-3.5 h-3.5" style={{ color: areaHex }} />
                                 <span className="capitalize">{activeOverview.key_theme}</span>
                               </span>
                             )}
@@ -864,16 +874,16 @@ export default function ForecastPage() {
                               </svg>
                               <div className="absolute flex flex-col items-center justify-center">
                                 <span className="text-4xl font-headline font-black" style={{ color: areaHex }}>{summary?.average_score ?? 0}</span>
-                                <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">/ 100</span>
+                                <span className="text-[10px] font-bold text-foreground/55 uppercase tracking-widest mt-1">/ 100</span>
                               </div>
                             </div>
-                            <div className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest text-center mt-2">Avg Score</div>
+                            <div className="text-[11px] font-bold text-foreground/55 uppercase tracking-widest text-center mt-2">Avg Score</div>
                           </div>
                           <div className="flex-grow space-y-3 text-center sm:text-left">
                             <h2 className="text-xl sm:text-2xl font-headline font-bold text-foreground leading-tight tracking-tight">
                               {activeOverview.title}
                             </h2>
-                            <p className="text-sm sm:text-base text-foreground/75 leading-relaxed">
+                            <p className="text-sm sm:text-base text-foreground/85 leading-relaxed">
                               {activeOverview.text}
                             </p>
                           </div>
@@ -883,21 +893,21 @@ export default function ForecastPage() {
                           <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[10px] font-bold pt-4 border-t border-white/5 mt-auto">
                             <div className="flex items-center gap-1.5">
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: areaHex }} />
-                              <span className="text-foreground/40">{t('forecast.best')}:</span>
-                              <span className="text-foreground/70">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span>
+                              <span className="text-foreground/55">{t('forecast.best')}:</span>
+                              <span className="text-foreground/80">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).best_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).best_day}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: STATUS_COLORS.BAD.main }} />
-                              <span className="text-foreground/40">{t('forecast.worst')}:</span>
-                              <span className="text-foreground/70">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day}</span>
+                              <span className="text-foreground/55">{t('forecast.worst')}:</span>
+                              <span className="text-foreground/80">{(range as string) === 'yearly' ? (summary as YearlyResponse['summary']).worst_month : (summary as WeeklyResponse['summary'] | MonthlyResponse['summary']).worst_day}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-foreground/40">{t('forecast.avg')}:</span>
+                              <span className="text-foreground/55">{t('forecast.avg')}:</span>
                               <span style={{ color: areaHex }}>{summary.average_score}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-foreground/40">{t('forecast.trend')}:</span>
-                              <span className="text-foreground/70 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span>
+                              <span className="text-foreground/55">{t('forecast.trend')}:</span>
+                              <span className="text-foreground/80 capitalize">{summary.trend === 'improving' ? '📈' : summary.trend === 'declining' ? '📉' : '➡️'} {summary.trend}</span>
                             </div>
                           </div>
                         )}
@@ -906,8 +916,28 @@ export default function ForecastPage() {
 
                       {/* Right Column: Chart */}
                       <div className="lg:col-span-6 flex flex-col justify-between pl-0 lg:pl-6 mt-6 lg:mt-0 w-full h-full">
-                        <h3 className="text-sm font-bold text-foreground/50 uppercase tracking-widest mb-4">Outlook Chart</h3>
-                        <div className="h-64 sm:h-72 w-full pt-2">
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                          <h3 className="text-sm font-bold text-foreground/65 uppercase tracking-widest">Outlook Chart</h3>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => activeNavigation.can_go_previous && activeNavigation.previous && handlePrevious(activeNavigation.previous)}
+                              disabled={!activeNavigation.can_go_previous}
+                              aria-label={t('forecast.previous')}
+                              className="w-9 h-9 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                              <ChevronLeft className="w-5 h-5 text-foreground/75" />
+                            </button>
+                            <button
+                              onClick={() => activeNavigation.can_go_next && activeNavigation.next && handleNext(activeNavigation.next)}
+                              disabled={!activeNavigation.can_go_next}
+                              aria-label={t('forecast.next')}
+                              className="w-9 h-9 rounded-lg border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                              <ChevronRight className="w-5 h-5 text-foreground/75" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="h-72 sm:h-[22rem] lg:h-96 w-full pt-2">
                           <ForecastChart
                             points={chartPoints}
                             colorHex={areaHex}
@@ -919,6 +949,7 @@ export default function ForecastPage() {
 
                     </div>
                   )}
+
                 </Card>
               )}
 
@@ -938,40 +969,62 @@ export default function ForecastPage() {
                       }
                       const weekdayShort = t(`forecast.weekdays.${weekdayKey}`).toUpperCase();
                       const dayOfMonth = parseInt(day.date.slice(-2), 10) || day.date.slice(-2);
-                      const displayDateStr = new Date(day.date).toLocaleDateString(language || 'en', { day: 'numeric', month: 'short' });
+                      const dateObj = new Date(day.date + 'T00:00:00');
+                      const friendlyDate = dateObj.toLocaleDateString(language || 'en', { weekday: 'short', day: 'numeric', month: 'short' });
 
                       return (
-                        <div
+                        <button
                           key={day.date}
-                          className={`flex flex-col justify-between items-center p-5 rounded-2xl border transition-all text-center gap-4 ${isToday ? 'bg-secondary/5 border-secondary/20 shadow-md' : 'bg-surface-variant/5 border-white/5 hover:border-white/10'}`}
+                          onClick={() => isToday ? openDayDetailModal(day.date) : setSelectedDay(day.date)}
+                          className={`flex flex-col justify-between items-center p-5 rounded-2xl border transition-all text-center gap-4 cursor-pointer ${isToday ? 'bg-surface border-secondary/30 shadow-md hover:border-secondary/50' : 'bg-surface-variant/5 border-white/5 hover:border-white/15 hover:bg-surface-variant/10'}`}
                           style={{
-                            boxShadow: isToday ? `0 0 20px ${getAreaPhaseMain(area, day.score)}10` : undefined,
+                            boxShadow: isToday ? `0 0 20px ${getAreaPhaseMain(area, day.score)}15` : undefined,
                           }}
                         >
                           <div className="space-y-1">
-                            <span className={`text-[10px] font-black uppercase tracking-wider ${isToday ? 'text-secondary' : 'text-foreground/45'}`}>
+                            <span className={`text-[10px] font-black uppercase tracking-wider ${isToday ? 'text-secondary' : 'text-foreground/65'}`}>
                               {isToday ? 'TODAY' : weekdayShort}
                             </span>
                             <h4 className="text-xl font-headline font-black text-foreground leading-none">{dayOfMonth}</h4>
-                            <p className="text-[10px] text-foreground/40 font-medium">{displayDateStr}</p>
+                            <p className="text-[10px] font-bold text-foreground/55">{friendlyDate}</p>
                           </div>
 
                           <div className="flex flex-col items-center gap-1">
                             <span className="text-2xl font-headline font-black" style={{ color: getAreaPhaseMain(area, day.score) }}>{day.score}</span>
-                            <span className="text-[8px] font-bold text-foreground/40 uppercase tracking-widest">Score</span>
+                            <span className="text-[8px] font-bold text-foreground/55 uppercase tracking-widest">Score</span>
                           </div>
 
-                          <button
-                            onClick={() => openDayDetailModal(day.date)}
-                            className="w-full py-2 bg-secondary/10 hover:bg-secondary/20 border border-secondary/15 hover:border-secondary/40 text-secondary rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
-                          >
-                            View Details
-                          </button>
-                        </div>
+                          {isToday ? (
+                            <span className="w-full py-2 bg-secondary/10 border border-secondary/30 text-secondary rounded-xl text-[10px] font-black uppercase tracking-widest">
+                              View Details
+                            </span>
+                          ) : (
+                            <span className="w-full py-2 flex items-center justify-center gap-1 text-foreground/45 group-hover:text-foreground/70 transition-colors">
+                              <ChevronRightIcon className="w-4 h-4" />
+                            </span>
+                          )}
+                        </button>
                       );
                     })}
                   </div>
                 </Card>
+              )}
+
+              {/* New: Weekly guidance + AI astrologer CTA */}
+              {range === '7d' && activeWeekly?.days && (
+                <ForecastActionPanel
+                  area={area}
+                  colorHex={areaHex}
+                  best={(summary as WeeklyResponse['summary'])?.best_day}
+                  worst={(summary as WeeklyResponse['summary'])?.worst_day}
+                  average={summary?.average_score}
+                  dominantPlanet={insightData?.dominant_planet}
+                  dominantPlanetMeaning={(insightData as any)?.dominant_planet_meaning}
+                  alerts={insightData?.alerts}
+                  actionText={activeOverview?.text}
+                  periodLabel={activePeriodLabel || ''}
+                  t={t}
+                />
               )}
 
               {/* Monthly calendar is now embedded inside Card 1 for range === 'monthly' */}

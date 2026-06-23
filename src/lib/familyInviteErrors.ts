@@ -42,12 +42,7 @@ export function familyCapDetail(body: unknown): FamilyCapDetail | null {
     const b = body as Record<string, unknown>;
     const detail = b.detail && typeof b.detail === 'object' ? b.detail as Record<string, unknown> : null;
 
-    const code = (
-        typeof b.code === 'string' ? b.code
-        : typeof b.error === 'string' ? b.error
-        : detail && typeof detail.code === 'string' ? detail.code
-        : null
-    );
+    const code = extractCode(body);
     if (code !== 'FAMILY_FREE_TIER_CAP') return null;
 
     // Prefer the nested detail object (spec shape), fall back to top level.
@@ -68,6 +63,24 @@ export function familyCapDetail(body: unknown): FamilyCapDetail | null {
         ...(currentTier !== undefined ? { currentTier } : {}),
         ...(limit !== undefined ? { limit } : {}),
     };
+}
+
+/** Detect a FAMILY_PEER_TIER_CAP body and return the localized, peer-facing
+ *  message. Returns null when it's not a peer-cap error. This is intentionally
+ *  separate from {@link familyCapDetail}: don't show an upgrade dialog, just
+ *  toast the user and keep the sharing toggle off. */
+export function familyPeerTierCapDetail(body: unknown): FamilyCapDetail | null {
+    if (!body || typeof body !== 'object') return null;
+    const b = body as Record<string, unknown>;
+    const code = extractCode(body);
+    if (code !== 'FAMILY_PEER_TIER_CAP') return null;
+
+    const detail = b.detail && typeof b.detail === 'object' ? b.detail as Record<string, unknown> : null;
+    const src = detail ?? b;
+    const message = typeof src.message === 'string' ? src.message
+        : typeof b.message === 'string' ? b.message
+        : "They can't be added as family right now — their list is full.";
+    return { message };
 }
 
 /** Detect a DECLINE_COOLDOWN_ACTIVE body (code at top level or nested under
@@ -111,6 +124,7 @@ function extractCode(body: unknown): FamilyInviteErrorCode | null {
     const known: FamilyInviteErrorCode[] = [
         'INVITEE_NO_ACCOUNT',
         'FAMILY_FREE_TIER_CAP',
+        'FAMILY_PEER_TIER_CAP',
         'ALREADY_CONNECTED',
         'INVITE_PENDING',
         'DECLINE_COOLDOWN_ACTIVE',
@@ -144,6 +158,9 @@ function mapCodeToCopy(code: FamilyInviteErrorCode | null, t: Translator): strin
         case 'BLOCK_TARGET_NOT_FOUND': return t('family.blockErrorNotFound');
         // FAMILY_FREE_TIER_CAP intentionally returns null — caller should route
         // to the existing 402 paywall surface instead of a toast.
+        // FAMILY_PEER_TIER_CAP is handled via familyPeerTierCapDetail() so callers
+        // can surface a peer-facing message without an upgrade CTA.
+        case 'FAMILY_PEER_TIER_CAP': return null;
         default: return null;
     }
 }

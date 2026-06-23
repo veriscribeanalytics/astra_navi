@@ -18,6 +18,8 @@
     "returnHome": "வீட்டிற்குத் திரும்பவும்"
   },
   "nav": {
+    "dailyRewards": "தினசரி வெகுமதிகள்",
+    "dailyRewardsDesc": "தினமும் இலவச கிரெடிட்களைப் பெறுங்கள். உங்கள் தொடர்ச்சியைத் தொடர்ந்து வையுங்கள்!",
     "myJourney": "என் பயணம்",
     "cosmicDashboard": "அண்ட டாஷ்போர்டு",
     "cosmicDashboardDesc": "உங்கள் தனிப்பட்ட மேலோட்டம் மற்றும் தினசரி நுண்ணறிவுகள்.",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, மதிப்பெண் {score}",
     "todayShort": "இன்று",
-    "weekly": "7 நாள்"
+    "weekly": "7 நாள்",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "உங்கள் அண்ட திறனை வெளிப்படுத்துங்கள்",
@@ -2093,5 +2121,36 @@
         "description": "ப்ரோ திட்டத்துடன் முக்கிய வாழ்க்கை கருத்து நுண்ணறிவுகளை அன்லாக் செய்யவும்."
       }
     }
+  },
+  "rewards": {
+    "title": "தினசரி வெகுமதிகள்",
+    "subtitle": "தினமும் இலவச கிரெடிட்களைப் பெறுங்கள் — உங்கள் அண்ட தொடர்ச்சியை உயிர்ப்புடன் வையுங்கள்.",
+    "claimButton": "இன்றைய வெகுமதியைப் பெறுங்கள்",
+    "claimNow": "இப்போதே பெறுங்கள்",
+    "claimedButton": "இன்று பெறப்பட்டது",
+    "claimingButton": "பெறுகிறது…",
+    "streakLabel": "நாள் தொடர்ச்சி",
+    "longestStreakLabel": "நீண்ட தொடர்ச்சி",
+    "totalClaimsLabel": "மொத்தம் பெற்றவை",
+    "balanceLabel": "கிரெடிட் இருப்பு",
+    "nextRewardLabel": "அடுத்த வெகுமதி",
+    "nextRewardIn": "அடுத்த வெகுமதி இதில்",
+    "todayReward": "இன்றைய வெகுமதி",
+    "creditsLabel": "கிரெடிட்கள்",
+    "dayLabel": "நாள்",
+    "bonusLabel": "போனஸ்",
+    "weekProgress": "இந்த வாரம்",
+    "cycleComplete": "நாள் 7-க்குப் பிறகு சுழற்சி மீட்டமைக்கப்படும்",
+    "day7Hint": "மெகா போனஸுக்கு நாள் 7-ஐ அடையுங்கள்",
+    "claimSuccess": "நீங்கள் {credits} கிரெடிட்களைப் பெற்றீர்கள் — {streak}-நாள் தொடர்ச்சி!",
+    "newBalanceLabel": "புதிய இருப்பு",
+    "claimAlready": "இன்று ஏற்கனவே பெறப்பட்டது. நாளை மீண்டும் வாருங்கள்!",
+    "claimError": "ஏதோ தவறு நடந்தது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "loadError": "வெகுமதிகளை ஏற்ற முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "retry": "மீண்டும் முயற்சி",
+    "noStreakYet": "இன்றே பெற்று உங்கள் தொடர்ச்சியைத் தொடங்குங்கள்!",
+    "streakResetNotice": "ஒரு நாள் தவறவிட்டால் உங்கள் தொடர்ச்சி நாள் 1-க்கு மீட்டமைக்கப்படும்.",
+    "howItWorks": "இது எப்படி வேலை செய்கிறது",
+    "howItWorksDesc": "ஒரு நாளைக்கு ஒருமுறை பெறுங்கள். தொடர்ச்சியான ஒவ்வொரு நாளும் உங்கள் தொடர்ச்சியை வளர்த்து, பெரிய வெகுமதிகளைத் திறக்கிறது — நாள் 7 மிகப்பெரிய பரிசு. ஒரு நாள் தவறவிட்டால் நாள் 1-இல் இருந்து மீண்டும் தொடங்குவீர்கள். நள்ளிரவு UTC-இல் மீட்டமைக்கப்படும்."
   }
 }

@@ -19,7 +19,8 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 export interface RegisterData {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   gender: string;
   phoneNumber: string;
   maritalStatus: string;
@@ -58,13 +59,23 @@ const hasSpecial = (p: string) => /[^A-Za-z0-9]/.test(p);
 const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false, onActionClick, socialAuth }) => {
   const { t, language: contextLanguage, setLanguage, availableLanguages } = useTranslation();
   const [step, setStep] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   // DPDP Act 2023 — unbundled consent: separate checkboxes for each purpose
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
   const [data, setData] = useState<RegisterData>({
-    email: '', password: '', confirmPassword: '', name: '', gender: '',
+    email: '', password: '', confirmPassword: '', firstName: '', lastName: '', gender: '',
     phoneNumber: '', maritalStatus: '', occupation: '',
     dob: '', tob: '', pob: '', birthPlaceName: '',
     birthLatitude: undefined, birthLongitude: undefined, birthTimezoneName: '',
@@ -116,7 +127,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
         return null;
       }
       case 1: {
-        if (data.name.trim() && data.name.trim().length < 2) return t('auth.register.validation.nameLength');
+        if (data.firstName.trim() && data.firstName.trim().length < 2) return t('auth.register.validation.firstNameLength');
         return null;
       }
       case 2: {
@@ -161,9 +172,9 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
           if (parsed.field === 'email' || parsed.field === 'password') {
             setStep(0);
             setFieldErrors({ [parsed.field]: getLocalizedErrorMessage(parsed, t) });
-          } else if (parsed.field === 'name') {
+          } else if (parsed.field === 'firstName' || parsed.field === 'lastName' || parsed.field === 'name') {
             setStep(1);
-            setFieldErrors({ name: getLocalizedErrorMessage(parsed, t) });
+            setFieldErrors({ [parsed.field === 'name' ? 'firstName' : parsed.field]: getLocalizedErrorMessage(parsed, t) });
           } else if (parsed.field === 'dob' || parsed.field === 'tob' || parsed.field === 'pob') {
             setStep(2);
             setFieldErrors({ [parsed.field]: getLocalizedErrorMessage(parsed, t) });
@@ -274,7 +285,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
               <PasswordField
                 variant="cosmic"
                 label={t('auth.register.passwordLabel')}
-                placeholder={t('auth.register.passwordPlaceholder')}
+                placeholder={isMobile ? t('auth.register.passwordLabel') : t('auth.register.passwordPlaceholder')}
                 icon={<Lock size={18} className="text-secondary" />}
                 value={data.password}
                 onChange={(e) => update({ password: e.target.value })}
@@ -303,7 +314,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
               <PasswordField
                 variant="cosmic"
                 label={t('auth.register.confirmPasswordLabel')}
-                placeholder={t('auth.register.confirmPasswordPlaceholder')}
+                placeholder={isMobile ? t('auth.register.confirmPasswordLabel') : t('auth.register.confirmPasswordPlaceholder')}
                 icon={<ShieldCheck size={18} className="text-secondary" />}
                 value={data.confirmPassword || ''}
                 onChange={(e) => update({ confirmPassword: e.target.value })}
@@ -316,16 +327,27 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
           {/* Step 1: Personal */}
           {step === 1 && (
             <>
-              <Input
-                variant="cosmic"
-                label={t('auth.register.fullNameLabel')}
-                placeholder={t('auth.register.fullNamePlaceholder')}
-                icon={<UserIcon size={18} className="text-secondary" />}
-                value={data.name}
-                onChange={(e) => update({ name: e.target.value })}
-                error={fieldErrors.name}
-                autoComplete="name"
-              />
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                <Input
+                  variant="cosmic"
+                  label={t('auth.register.firstNameLabel')}
+                  placeholder={t('auth.register.firstNamePlaceholder')}
+                  icon={<UserIcon size={18} className="text-secondary" />}
+                  value={data.firstName}
+                  onChange={(e) => update({ firstName: e.target.value })}
+                  error={fieldErrors.firstName}
+                  autoComplete="given-name"
+                />
+                <Input
+                  variant="cosmic"
+                  label={t('auth.register.lastNameLabel')}
+                  placeholder={t('auth.register.lastNamePlaceholder')}
+                  value={data.lastName}
+                  onChange={(e) => update({ lastName: e.target.value })}
+                  error={fieldErrors.lastName}
+                  autoComplete="family-name"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 <div className="space-y-2">
                   <label htmlFor="register-gender" className="auth-label">

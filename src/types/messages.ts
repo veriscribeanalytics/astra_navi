@@ -29,13 +29,65 @@ export interface Message {
     threadId: number;
     senderEmail: string;
     isMine: boolean;
+    /** May be empty for an image-only message. Null on a deleted tombstone. */
     body: string;
     createdAt: string;
+    /** Short-lived signed GET URL (~15 min). Null for a text-only message. Do
+     *  NOT persist in long-lived caches — re-fetch to refresh. */
+    imageUrl?: string | null;
+    /** Trust these server-returned dimensions (EXIF stripped + re-encoded). */
+    imageWidth?: number | null;
+    imageHeight?: number | null;
+    /** Soft-deleted: render a tombstone; body/imageUrl come back null. */
+    isDeleted?: boolean;
+    /** ISO timestamp if the message was edited, else null. */
+    editedAt?: string | null;
 }
 
 export interface SendMessagePayload {
-    /** Trimmed server-side; must be 1–4000 chars after trim (422 otherwise). */
-    body: string;
+    /** Trimmed server-side; ≤4000 chars. Optional when sending an image alone. */
+    body?: string;
+    /** Permanent object key from a `dm` commit for THIS thread (e.g. `dm/7/<uuid>.jpg`). */
+    imageKey?: string;
+}
+
+/** Upload kinds the backend signer accepts. DM images use `dm`. */
+export type UploadKind = 'profile' | 'chat_avatar' | 'family' | 'dm';
+
+/** POST /api/uploads/sign request. */
+export interface SignUploadRequest {
+    kind: UploadKind;
+    /** Must be one of the allowed image types (see DM_ALLOWED_TYPES). */
+    contentType: string;
+    /** Byte size of the file to upload. */
+    size: number;
+}
+
+/** POST /api/uploads/sign response. */
+export interface SignUploadResponse {
+    /** Signed PUT URL — upload bytes straight to GCS (no auth/cookies). */
+    uploadUrl: string;
+    /** Temporary object key (e.g. `tmp/<uid>/<hex>`) to pass to commit. */
+    objectKey: string;
+    maxBytes: number;
+    /** Echo the signed content type — the PUT's Content-Type MUST equal this. */
+    contentType: string;
+}
+
+/** POST /api/uploads/commit request. `targetId` = threadId for `dm`. */
+export interface CommitUploadRequest {
+    kind: UploadKind;
+    objectKey: string;
+    targetId?: number;
+}
+
+/** POST /api/uploads/commit response. `objectKey` is now PERMANENT. */
+export interface CommitUploadResponse {
+    objectKey: string;
+    /** Signed GET URL for immediate display. */
+    imageUrl: string;
+    width: number;
+    height: number;
 }
 
 export interface MarkReadPayload {

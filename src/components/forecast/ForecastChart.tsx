@@ -15,17 +15,21 @@ export default function ForecastChart({
   colorHex,
   activeLabel,
   onSelect,
+  showStabilityHint = true,
 }: {
   points: ChartPoint[];
   colorHex: string;
   activeLabel?: string;
   onSelect?: (label: string) => void;
+  showStabilityHint?: boolean;
 }) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   if (!points.length) return null;
   const h = 80, w = 240;
   const coords = points.map((p, i) => ({ x: (i / Math.max(points.length - 1, 1)) * w, y: h - (p.score / 100) * h }));
+  const scoreRange = Math.max(...points.map(p => p.score)) - Math.min(...points.map(p => p.score));
+  const subtleMovement = scoreRange <= 8;
   const pathD = catmullRomToBezier(coords);
   const areaD = catmullRomArea(coords, h);
   const id = colorHex.replace('#', '');
@@ -35,6 +39,12 @@ export default function ForecastChart({
 
   return (
     <div className="relative w-full h-full">
+      {showStabilityHint && subtleMovement && (
+        <div className="absolute top-0 right-0 px-2.5 py-1 rounded-lg border border-white/5 bg-white/[0.02] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colorHex }} />
+          <span className="text-[9px] sm:text-[10px] font-bold text-foreground/55 uppercase tracking-wider">Mostly stable</span>
+        </div>
+      )}
       <svg viewBox="-12 -14 264 114" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id={`fc-area-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -50,7 +60,14 @@ export default function ForecastChart({
 
         {[25, 50, 75].map(v => {
           const gy = h - (v / 100) * h;
-          return <line key={v} x1="0" y1={gy} x2={w} y2={gy} stroke="var(--color-foreground)" strokeOpacity="0.06" strokeWidth="0.5" />;
+          return (
+            <g key={v}>
+              <line x1="0" y1={gy} x2={w} y2={gy} stroke="var(--color-foreground)" strokeOpacity="0.06" strokeWidth="0.5" />
+              {dense && (
+                <text x="-10" y={gy + 2.5} textAnchor="middle" fill="var(--color-foreground)" fillOpacity="0.35" fontSize="6.5" fontWeight="bold">{v}</text>
+              )}
+            </g>
+          );
         })}
 
         <path d={areaD} fill={`url(#fc-area-${id})`} />

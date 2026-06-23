@@ -208,7 +208,11 @@ async authorize(credentials) {
   callbacks: {
     async jwt({ token, user, account, trigger, session }) {
       // Google OAuth sign-in: exchange Google id_token for backend tokens
-      if (account?.provider === 'google' && account.id_token) {
+      if (account?.provider === 'google') {
+        if (!account.id_token) {
+          console.error('[Auth] Google OAuth returned no id_token. Available account keys:', Object.keys(account || {}));
+          return { ...token, error: 'GoogleExchangeError' };
+        }
         try {
           const backendUrl = process.env.AI_BACKEND_URL;
           if (!backendUrl) {
@@ -228,7 +232,22 @@ async authorize(credentials) {
           const data = await res.json();
 
           if (!res.ok) {
-            console.error('[Auth] Google OAuth backend exchange failed:', data.error || res.status);
+            console.error('[Auth] Google OAuth backend exchange failed:', {
+              status: res.status,
+              statusText: res.statusText,
+              error: data.error || data.detail || data.message || null,
+              fullResponse: JSON.stringify(data),
+            });
+            return { ...token, error: 'GoogleExchangeError' };
+          }
+
+          if (!data?.user?.id || !data?.accessToken) {
+            console.error('[Auth] Google OAuth backend returned 200 but missing required fields:', {
+              hasUser: !!data?.user,
+              hasUserId: !!data?.user?.id,
+              hasAccessToken: !!data?.accessToken,
+              fullResponse: JSON.stringify(data),
+            });
             return { ...token, error: 'GoogleExchangeError' };
           }
 
@@ -250,7 +269,7 @@ async authorize(credentials) {
             profileComplete: data.profileComplete === true,
           };
         } catch (error) {
-          console.error('[Auth] Google OAuth exchange error:', error);
+          console.error('[Auth] Google OAuth exchange error:', error instanceof Error ? error.message : error);
           return { ...token, error: 'GoogleExchangeError' };
         }
       }

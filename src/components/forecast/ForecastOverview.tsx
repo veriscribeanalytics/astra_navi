@@ -60,19 +60,19 @@ export default function ForecastOverview({
           >
             {periodLabel}
           </span>
-          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/30 truncate hidden sm:inline">
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground/55 truncate hidden sm:inline">
             {t('forecast.overviewLabel')}
           </span>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={handlePrev}
             disabled={!navigation.can_go_previous}
             aria-label={t('forecast.previous')}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
-            <ChevronLeft className="w-4 h-4 text-foreground/70" />
+            <ChevronLeft className="w-5 h-5 text-foreground/75" />
           </button>
           <button
             onClick={handleNext}
@@ -80,7 +80,7 @@ export default function ForecastOverview({
             aria-label={t('forecast.next')}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/5 bg-surface flex items-center justify-center transition-all hover:border-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
-            <ChevronRight className="w-4 h-4 text-foreground/70" />
+            <ChevronRight className="w-5 h-5 text-foreground/75" />
           </button>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function ForecastOverview({
         {overview.title}
       </h2>
 
-      <p className="relative z-10 text-[13px] sm:text-sm lg:text-base text-foreground/70 leading-relaxed">
+      <p className="relative z-10 text-[13px] sm:text-sm lg:text-base text-foreground/85 leading-relaxed">
         {overview.text}
       </p>
 
@@ -104,7 +104,7 @@ export default function ForecastOverview({
           </span>
         )}
         {overview.key_theme && (
-          <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/70">
+          <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-foreground/80">
             <Sparkles className="w-3 h-3 text-secondary/70" />
             <span className="capitalize">{overview.key_theme}</span>
           </span>

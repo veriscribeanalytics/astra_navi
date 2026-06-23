@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clientFetch } from '@/lib/apiClient';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import type {
@@ -26,26 +26,24 @@ import type {
     FamilyDiscoverResult,
     FamilyDiscoverRelationshipStatus,
     FamilyBlock,
+    FamilyGender,
 } from '@/types/family';
 
 /* ------------------------------------------------------------------ */
 /* snake_case (backend) → camelCase (frontend) normalizer              */
 /* ------------------------------------------------------------------ */
 
-/** Backend responses for /api/family/members are snake_case. Convert to the
- *  camelCase FamilyMember shape that the rest of the app consumes. Accepts
- *  either casing so future backend changes don't silently break the UI.
- *
- *  `/api/family/members` also returns linked-connection entries (source:'linked'
- *  with `connectionId` instead of `id`). Those are surfaced via
- *  `useFamilyConnections()` against /api/family/connections — we explicitly
- *  skip them here so manual-only callers stay clean. */
+/** Backend responses for /api/family/members and /api/family/roster are
+ *  snake_case. Convert to the camelCase FamilyMember shape that the rest of
+ *  the app consumes. Accepts either casing. This normalizer now handles both
+ *  manual entries (`source: 'manual'`) and linked connections promoted to
+ *  family (`source: 'linked'`). UI should key list items by (source, id)
+ *  because ids from the two tables can collide. */
 export function normalizeFamilyMember(raw: unknown): FamilyMember | null {
     if (!raw || typeof raw !== 'object') return null;
     const r = raw as Record<string, unknown>;
 
-    // Linked entries don't have member.id and shouldn't be parsed as manual.
-    if (r.source === 'linked') return null;
+    const source = ((r.source as string) === 'linked' ? 'linked' : 'manual') as FamilyMember['source'];
 
     const pick = <T,>(snake: string, camel: string): T | undefined => {
         if (r[snake] !== undefined) return r[snake] as T;
@@ -56,25 +54,44 @@ export function normalizeFamilyMember(raw: unknown): FamilyMember | null {
     const id = pick<number>('id', 'id');
     if (id === undefined) return null;
 
-    return {
+    const base: FamilyMember = {
         id: id as number,
-        name: (pick<string>('name', 'name') ?? '') as string,
-        relationshipType: pick<FamilyMember['relationshipType']>('relationship_type', 'relationshipType') as FamilyMember['relationshipType'],
-        gender: pick<FamilyMember['gender']>('gender', 'gender') as FamilyMember['gender'],
-        dob: (pick<string>('dob', 'dob') ?? '') as string,
-        // backend returns "HH:MM:SS" — trim seconds for form pre-fill compatibility.
-        tob: trimSeconds((pick<string>('tob', 'tob') ?? '') as string),
-        pob: (pick<string>('pob', 'pob') ?? '') as string,
-        latitude: Number(pick<number>('latitude', 'latitude') ?? 0),
-        longitude: Number(pick<number>('longitude', 'longitude') ?? 0),
-        timezoneOffset: Number(pick<number>('timezone_offset', 'timezoneOffset') ?? 0),
-        notes: pick<string | null>('notes', 'notes') ?? null,
+        source,
+        name: (pick<string>('name', 'name') ?? pick<string>('other_name', 'otherName') ?? '') as string,
+        relationshipType: normalizeRelationshipLabel(
+            pick<string>('relationship_type', 'relationshipType') ??
+            pick<string>('i_see_them_as', 'iSeeThemAs')
+        ) as FamilyMember['relationshipType'],
+        gender: (pick<FamilyMember['gender']>('gender', 'gender') ?? 'other') as FamilyGender,
+        dob: pick<string>('dob', 'dob') ?? (source === 'manual' ? '' : undefined),
+        tob: source === 'manual' ? trimSeconds((pick<string>('tob', 'tob') ?? '') as string) : undefined,
+        pob: pick<string>('pob', 'pob') ?? (source === 'manual' ? '' : undefined),
+        latitude: source === 'manual' ? Number(pick<number>('latitude', 'latitude') ?? 0) : undefined,
+        longitude: source === 'manual' ? Number(pick<number>('longitude', 'longitude') ?? 0) : undefined,
+        timezoneOffset: source === 'manual' ? Number(pick<number>('timezone_offset', 'timezoneOffset') ?? 0) : undefined,
+        notes: (source === 'linked'
+            ? (pick<string | null>('notes', 'notes') ?? pick<string | null>('my_notes', 'myNotes') ?? null)
+            : pick<string | null>('notes', 'notes') ?? null) as string | null | undefined,
         avatarKey: pick<string>('avatar_key', 'avatarKey') ?? null,
         avatar: pick<FamilyMember['avatar']>('avatar', 'avatar') ?? null,
-        consentAcknowledged: pick<boolean>('consent_acknowledged', 'consentAcknowledged'),
-        consentAcknowledgedAt: pick<string>('consent_acknowledged_at', 'consentAcknowledgedAt'),
+        consentAcknowledged: source === 'manual' ? pick<boolean>('consent_acknowledged', 'consentAcknowledged') : undefined,
+        consentAcknowledgedAt: source === 'manual' ? pick<string>('consent_acknowledged_at', 'consentAcknowledgedAt') : undefined,
         createdAt: pick<string>('created_at', 'createdAt'),
         updatedAt: pick<string>('updated_at', 'updatedAt'),
+    };
+
+    if (source !== 'linked') return base;
+
+    // Normalize linked-only fields. For linked family entries, backend may set
+    // `id` to `connection_id`; prefer an explicit connection_id when present.
+    return {
+        ...base,
+        connectionId: (pick<number>('connection_id', 'connectionId') ?? id) as number,
+        sharingWithUser: !!(
+            pick<boolean>('sharing_with_user', 'sharingWithUser') ??
+            pick<boolean>('they_share_with_me', 'theyShareWithMe')
+        ),
+        sharingWithThem: !!(pick<boolean>('sharing_with_them', 'sharingWithThem')),
     };
 }
 
@@ -137,18 +154,44 @@ export function useFamilyMembers() {
 /* Single member chart (free)                                          */
 /* ------------------------------------------------------------------ */
 
-export function useFamilyChart(memberId: number | string | null) {
+function memberActionTargets(member: FamilyMember | null | undefined) {
+    if (!member) return null;
+    if (member.source === 'linked') {
+        const targetId = member.connectionId ?? member.id;
+        return {
+            basePath: '/api/family/connections' as const,
+            id: targetId,
+            cachePrefix: `linked:${targetId}`,
+        };
+    }
+ return {
+        basePath: '/api/family/members' as const,
+        id: member.id,
+        cachePrefix: `manual:${member.id}`,
+    };
+}
+
+export function useFamilyChart(member: FamilyMember | null) {
     const [data, setData] = useState<FamilyChartResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const cacheRef = useRef<Map<string, FamilyChartResponse>>(new Map());
 
+    // Memoize on the member's stable identity primitives. Without this,
+    // memberActionTargets() returns a fresh object every render, which would
+    // invalidate every downstream useCallback/useEffect that depends on
+    // `targets` and cause infinite fetch loops (e.g. reports/preflight).
+    const targets = useMemo(
+        () => memberActionTargets(member),
+        [member?.source, member?.id, member?.connectionId],
+    );
+
     const fetchChart = useCallback(async () => {
-        if (memberId === null || memberId === undefined || memberId === '') {
+        if (!targets) {
             setData(null);
             return;
         }
-        const key = String(memberId);
+        const key = targets.cachePrefix;
         const cached = cacheRef.current.get(key);
         if (cached) {
             setData(cached);
@@ -157,7 +200,7 @@ export function useFamilyChart(memberId: number | string | null) {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await clientFetch(`/api/family/members/${encodeURIComponent(key)}/chart`);
+            const res = await clientFetch(`${targets.basePath}/${encodeURIComponent(String(targets.id))}/chart`);
             const body = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(body.error || body.detail || 'Failed to load chart');
@@ -170,7 +213,7 @@ export function useFamilyChart(memberId: number | string | null) {
         } finally {
             setIsLoading(false);
         }
-    }, [memberId]);
+    }, [targets]);
 
     useEffect(() => {
         fetchChart();
@@ -243,19 +286,28 @@ function parseSharingRequired(body: Record<string, unknown>): ParsedSharingRequi
     };
 }
 
-export function useFamilyCompatibility(memberId: number | string | null) {
+export function useFamilyCompatibility(member: FamilyMember | null) {
     const [data, setData] = useState<FamilyCompatibilityResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    /** Cache by `${memberId}:${lang}` so repeat in-session calls don't re-hit the network. */
+    /** Cache by `${source}:${id}:${lang}` so repeat in-session calls don't re-hit the network. */
     const cacheRef = useRef<Map<string, FamilyCompatibilityResponse>>(new Map());
+
+    // Memoize on the member's stable identity primitives. Without this,
+    // memberActionTargets() returns a fresh object every render, which would
+    // invalidate every downstream useCallback/useEffect that depends on
+    // `targets` and cause infinite fetch loops (e.g. reports/preflight).
+    const targets = useMemo(
+        () => memberActionTargets(member),
+        [member?.source, member?.id, member?.connectionId],
+    );
 
     const fetchCompatibility = useCallback(
         async (lang: CompatibilityLang = 'en'): Promise<CompatibilityFetchResult> => {
-            if (memberId === null || memberId === undefined || memberId === '') {
+            if (!targets) {
                 return { ok: false, status: 0, data: null, error: 'No member selected' };
             }
-            const key = `${memberId}:${lang}`;
+            const key = `${targets.cachePrefix}:${lang}`;
             const cached = cacheRef.current.get(key);
             if (cached) {
                 setData(cached);
@@ -264,7 +316,7 @@ export function useFamilyCompatibility(memberId: number | string | null) {
             setIsLoading(true);
             setError(null);
 
-            const url = `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility?lang=${encodeURIComponent(lang)}`;
+            const url = `${targets.basePath}/${encodeURIComponent(String(targets.id))}/compatibility?lang=${encodeURIComponent(lang)}`;
 
             try {
                 // 409 reservation_pending → auto-retry with backoff. Each attempt
@@ -323,7 +375,7 @@ export function useFamilyCompatibility(memberId: number | string | null) {
                 setIsLoading(false);
             }
         },
-        [memberId]
+        [targets]
     );
 
     return { data, isLoading, error, fetchCompatibility, reset: () => setData(null) };
@@ -449,21 +501,30 @@ export interface ConnectionCompatibilitySummaryState extends CompatibilitySummar
 }
 
 /** Auto-fetches the free summary on mount and whenever `lang` changes. Caches by
- *  `${memberId}:${lang}` so re-selecting a language is instant. Summary never
+ *  `${source}:${id}:${lang}` so re-selecting a language is instant. Summary never
  *  consumes credits, so unlike the paid hook this fires automatically. */
-export function useFamilyCompatibilitySummary(memberId: number | string | null, lang: CompatibilityLang = 'en') {
+export function useFamilyCompatibilitySummary(member: FamilyMember | null, lang: CompatibilityLang = 'en') {
     const [data, setData] = useState<FamilyCompatibilitySummary | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [missingBirthFields, setMissingBirthFields] = useState<string[] | undefined>(undefined);
     const cacheRef = useRef<Map<string, FamilyCompatibilitySummary>>(new Map());
 
+    // Memoize on the member's stable identity primitives. Without this,
+    // memberActionTargets() returns a fresh object every render, which would
+    // invalidate every downstream useCallback/useEffect that depends on
+    // `targets` and cause infinite fetch loops (e.g. reports/preflight).
+    const targets = useMemo(
+        () => memberActionTargets(member),
+        [member?.source, member?.id, member?.connectionId],
+    );
+
     const fetchSummary = useCallback(async () => {
-        if (memberId === null || memberId === undefined || memberId === '') {
+        if (!targets) {
             setData(null);
             return;
         }
-        const key = `${memberId}:${lang}`;
+        const key = `${targets.cachePrefix}:${lang}`;
         const cached = cacheRef.current.get(key);
         if (cached) {
             setData(cached);
@@ -475,7 +536,7 @@ export function useFamilyCompatibilitySummary(memberId: number | string | null, 
         setError(null);
         setMissingBirthFields(undefined);
         try {
-            const url = `/api/family/members/${encodeURIComponent(String(memberId))}/compatibility/summary?lang=${encodeURIComponent(lang)}`;
+            const url = `${targets.basePath}/${encodeURIComponent(String(targets.id))}/compatibility/summary?lang=${encodeURIComponent(lang)}`;
             const res = await clientFetch(url);
             const body = await res.json().catch(() => ({}));
             if (res.ok) {
@@ -496,7 +557,7 @@ export function useFamilyCompatibilitySummary(memberId: number | string | null, 
         } finally {
             setIsLoading(false);
         }
-    }, [memberId, lang]);
+    }, [targets, lang]);
 
     useEffect(() => {
         fetchSummary();
@@ -711,20 +772,29 @@ export function useFamilyAvatars() {
     return { data, isLoading, error, refetch: fetchAvatars };
 }
 
-export function useFamilyCompatibilityPreflight(memberId: number | string | null) {
+export function useFamilyCompatibilityPreflight(member: FamilyMember | null) {
     const [data, setData] = useState<FamilyCompatibilityPreflight | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Memoize on the member's stable identity primitives. Without this,
+    // memberActionTargets() returns a fresh object every render, which would
+    // invalidate every downstream useCallback/useEffect that depends on
+    // `targets` and cause infinite fetch loops (e.g. reports/preflight).
+    const targets = useMemo(
+        () => memberActionTargets(member),
+        [member?.source, member?.id, member?.connectionId],
+    );
+
     const fetchPreflight = useCallback(async () => {
-        if (memberId === null || memberId === undefined || memberId === '') {
+        if (!targets) {
             setData(null);
             return null;
         }
         setIsLoading(true);
         setError(null);
         try {
-            const res = await clientFetch(`/api/family/members/${encodeURIComponent(String(memberId))}/compatibility/preflight`);
+            const res = await clientFetch(`${targets.basePath}/${encodeURIComponent(String(targets.id))}/compatibility/preflight`);
             const body = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(body.error || body.detail || 'Failed to check compatibility preflight');
@@ -739,7 +809,7 @@ export function useFamilyCompatibilityPreflight(memberId: number | string | null
         } finally {
             setIsLoading(false);
         }
-    }, [memberId]);
+    }, [targets]);
 
     return { data, isLoading, error, fetchPreflight, reset: () => setData(null) };
 }
@@ -797,7 +867,7 @@ function normalizePreflight(body: Record<string, unknown>): FamilyCompatibilityP
         cachedResultAvailable: !!(body.cached_result_available ?? body.cachedResultAvailable),
         staleDataWarning: !!(body.stale_data_warning ?? body.staleDataWarning),
         creditCost: Number(body.credit_cost ?? body.creditCost ?? 0),
-        relationshipType: (body.relationship_type ?? body.relationshipType) as FamilyCompatibilityPreflight['relationshipType'],
+        relationshipType: (body.relationship_type ?? body.relationshipType ?? 'other') as FamilyCompatibilityPreflight['relationshipType'],
         ...(rawAvailable !== undefined ? { availableCredits: Number(rawAvailable) } : {}),
         ...(rawSufficient !== undefined ? { sufficient: !!rawSufficient } : {}),
         ...(rawPaywall ? { paywall: rawPaywall } : {}),
@@ -814,20 +884,29 @@ export interface FamilyReport {
     createdAt: string;
 }
 
-export function useFamilyReports(memberId: number | string | null) {
+export function useFamilyReports(member: FamilyMember | null) {
     const [data, setData] = useState<FamilyReport[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Memoize on the member's stable identity primitives. Without this,
+    // memberActionTargets() returns a fresh object every render, which would
+    // invalidate every downstream useCallback/useEffect that depends on
+    // `targets` and cause infinite fetch loops (e.g. reports/preflight).
+    const targets = useMemo(
+        () => memberActionTargets(member),
+        [member?.source, member?.id, member?.connectionId],
+    );
+
     const fetchReports = useCallback(async () => {
-        if (memberId === null || memberId === undefined || memberId === '') {
+        if (!targets) {
             setData(null);
             return;
         }
         setIsLoading(true);
         setError(null);
         try {
-            const res = await clientFetch(`/api/family/members/${encodeURIComponent(String(memberId))}/reports`);
+            const res = await clientFetch(`${targets.basePath}/${encodeURIComponent(String(targets.id))}/reports`);
             const body = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(body.error || body.detail || 'Failed to load reports');
@@ -840,7 +919,7 @@ export function useFamilyReports(memberId: number | string | null) {
                     if (typeof id !== 'number') return null;
                     return {
                         id,
-                        memberId: (r.member_id ?? r.memberId ?? 0) as number,
+                        memberId: (r.member_id ?? r.memberId ?? r.connection_id ?? r.connectionId ?? 0) as number,
                         reportType: (r.report_type ?? r.reportType ?? '') as string,
                         title: (r.title ?? '') as string,
                         summary: (r.summary ?? undefined) as string | undefined,
@@ -855,7 +934,7 @@ export function useFamilyReports(memberId: number | string | null) {
         } finally {
             setIsLoading(false);
         }
-    }, [memberId]);
+    }, [targets]);
 
     useEffect(() => {
         fetchReports();

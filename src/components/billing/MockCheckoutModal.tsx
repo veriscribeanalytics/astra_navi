@@ -25,8 +25,10 @@ export interface CheckoutHandler {
   providerId: string;
   /** Display name for the provider (e.g. "Razorpay", "App Store"). */
   providerName: string;
+  /** Pre-create the order if possible. */
+  precreateOrder?: (product: CatalogProduct) => Promise<any>;
   /** Initiate checkout for the given product. Returns a promise that resolves on success. */
-  initiateCheckout: (product: CatalogProduct) => Promise<CheckoutResult>;
+  initiateCheckout: (product: CatalogProduct, precreatedOrderData?: any) => Promise<CheckoutResult>;
 }
 
 export interface CheckoutResult {
@@ -62,21 +64,55 @@ export default function MockCheckoutModal({
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
   const [checkoutSuccess, setCheckoutSuccess] = React.useState(false);
 
+  // Precreated order state (to avoid mobile popup blocking due to async delay)
+  const [precreatedOrder, setPrecreatedOrder] = React.useState<any>(null);
+  const [precreateLoading, setPrecreateLoading] = React.useState(false);
+
   const dialogRef = useFocusTrap<HTMLDivElement>(isOpen);
 
-  // Reset transient checkout state and lock body scroll while open. Without the
-  // reset, a previous product's error/success banner would persist when the
-  // modal is reopened for a different product (the modal stays mounted).
+  // Reset transient checkout state, pre-load script, and lock body scroll while open.
   React.useEffect(() => {
     if (isOpen) {
       setCheckoutError(null);
       setCheckoutSuccess(false);
       setCheckoutLoading(false);
+      setPrecreatedOrder(null);
+
+      // Pre-load Razorpay script in background as soon as modal opens
+      if (typeof window !== 'undefined' && !(window as any).Razorpay) {
+        const scriptId = 'razorpay-checkout-script';
+        if (!document.getElementById(scriptId)) {
+          const script = document.createElement('script');
+          script.id = scriptId;
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.async = true;
+          document.body.appendChild(script);
+        }
+      }
+
       const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => { document.body.style.overflow = prevOverflow; };
     }
   }, [isOpen]);
+
+  // Pre-create the payment order in the background when the modal is opened
+  React.useEffect(() => {
+    if (isOpen && product && checkoutHandler?.precreateOrder) {
+      setPrecreateLoading(true);
+      checkoutHandler.precreateOrder(product)
+        .then((orderData) => {
+          setPrecreatedOrder(orderData);
+        })
+        .catch((err) => {
+          console.error('[MockCheckoutModal] Failed to precreate order:', err);
+          setCheckoutError(err instanceof Error ? err.message : t('plans.checkoutFailed'));
+        })
+        .finally(() => {
+          setPrecreateLoading(false);
+        });
+    }
+  }, [isOpen, product, checkoutHandler, t]);
 
   // Escape-to-close (disabled mid-payment so a charge isn't abandoned ambiguously).
   React.useEffect(() => {
@@ -111,7 +147,8 @@ export default function MockCheckoutModal({
     setCheckoutSuccess(false);
 
     try {
-      const result = await checkoutHandler.initiateCheckout(product);
+      // Pass the precreated order details so initiateCheckout can open the Razorpay iframe synchronously
+      const result = await checkoutHandler.initiateCheckout(product, precreatedOrder);
       if (result.success) {
         setCheckoutSuccess(true);
         // Auto-close after a brief success display
@@ -131,7 +168,8 @@ export default function MockCheckoutModal({
 
   // Determine button state
   const hasRealCheckout = !!checkoutHandler;
-  const buttonDisabled = !hasRealCheckout || checkoutLoading || checkoutSuccess;
+  const isPrecreating = hasRealCheckout && precreateLoading && !precreatedOrder;
+  const buttonDisabled = !hasRealCheckout || checkoutLoading || checkoutSuccess || isPrecreating;
 
   return (
     <AnimatePresence>
@@ -279,6 +317,8 @@ export default function MockCheckoutModal({
                   t('plans.checkoutDone')
                 ) : checkoutLoading ? (
                   t('plans.checkoutProcessing')
+                ) : isPrecreating ? (
+                  "Preparing Secure Checkout..."
                 ) : hasRealCheckout ? (
                   <>
                     {t('plans.buyCredits')} {t('plans.checkoutVia')} {checkoutHandler.providerName} <ArrowRight className="w-4 h-4 ml-2" />

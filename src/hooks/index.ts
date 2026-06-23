@@ -65,6 +65,8 @@ export {
 export type { CompatibilityFetchResult, MutationResult, FamilyReport } from './useFamily';
 export { useAvatarTheme } from './useAvatarTheme';
 export { useDailyHoroscope } from './useDailyHoroscope';
+export { useDailyRewards } from './useDailyRewards';
+export type { UseDailyRewardsReturn } from './useDailyRewards';
 export { useNotificationFeed } from './useNotifications';
 export type { UseNotificationFeedOptions } from './useNotifications';
 export { useThreads } from './useThreads';

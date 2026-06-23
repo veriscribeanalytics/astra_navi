@@ -100,6 +100,36 @@ export function formatChatTimestamp(date: Date | string, yesterdayLabel?: string
 }
 
 /**
+ * True if two dates fall on the same calendar day (local time).
+ */
+export function isSameDay(a: Date | string, b: Date | string): boolean {
+  const da = typeof a === 'string' ? new Date(a) : a;
+  const db = typeof b === 'string' ? new Date(b) : b;
+  return da.toDateString() === db.toDateString();
+}
+
+/**
+ * Format a day divider label for a chat ("Today" / "Yesterday" / full date).
+ */
+export function formatDateDivider(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const now = getCurrentDateTime();
+
+  if (isSameDay(d, now)) return 'Today';
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (isSameDay(d, yesterday)) return 'Yesterday';
+
+  // Within the past week: weekday name; older: full date.
+  const diffDay = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDay < 7) {
+    return new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(d);
+  }
+  return formatDisplayDate(d);
+}
+
+/**
  * Validate and parse date string
  */
 export function parseDate(dateString: string): Date | null {

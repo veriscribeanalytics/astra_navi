@@ -12,13 +12,14 @@ import ProfileDiscoverySettings from './ProfileDiscoverySettings';
 import { useAuth } from '@/context/AuthContext';
 import { usePaywallContext } from '@/context/PaywallContext';
 import { useToast, useTranslation } from '@/hooks';
+import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
 import { LanguageCode } from '@/locales';
 import { clientFetch } from '@/lib/apiClient';
 import { 
     User, Calendar, Clock,
     Save, ArrowLeft, RotateCcw, Sparkles,
     Globe, Bell, Phone, Mail, CheckCircle2,
-    ArrowRight, ChevronDown, Circle, Wallet
+    ArrowRight, Circle, Wallet
 } from 'lucide-react';
 
 const VALID_GENDERS = new Set(["male", "female", "other", "Not Specified"]);
@@ -45,7 +46,8 @@ export default function ProfileSettingsPage() {
     const { ToastContainer, success, error } = useToast();
 
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         dob: '',
         tob: '',
         pob: '',
@@ -67,21 +69,21 @@ export default function ProfileSettingsPage() {
     const [dstRetryData, setDstRetryData] = useState<Partial<typeof formData> | null>(null);
     const saveAttemptRef = useRef(0);
     const [errors, setErrors] = useState({
-        name: '',
+        firstName: '',
         dob: '',
         tob: '',
         pob: '',
         phoneNumber: ''
     });
     const [touched, setTouched] = useState({
-        name: false,
+        firstName: false,
         dob: false,
         tob: false,
         pob: false,
         phoneNumber: false
     });
     const [hasChanges, setHasChanges] = useState(false);
-    const [showChecklist, setShowChecklist] = useState(false); // mobile expand/collapse
+
 
     const updateFormData = (updates: Partial<typeof formData> | ((current: typeof formData) => typeof formData)) => {
         setHasChanges(true);
@@ -92,7 +94,8 @@ export default function ProfileSettingsPage() {
         if (!user || hasChanges) return;
 
         setFormData({
-            name: user.name || '',
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
             dob: user.dob || '',
             tob: user.tob || '',
             pob: user.pob || '',
@@ -123,15 +126,15 @@ export default function ProfileSettingsPage() {
             setSelectedLocation(null);
         }
 
-        setErrors({ name: '', dob: '', tob: '', pob: '', phoneNumber: '' });
-        setTouched({ name: false, dob: false, tob: false, pob: false, phoneNumber: false });
+        setErrors({ firstName: '', dob: '', tob: '', pob: '', phoneNumber: '' });
+        setTouched({ firstName: false, dob: false, tob: false, pob: false, phoneNumber: false });
     }, [user, contextLanguage, hasChanges]);
 
     // --- Compute onboarding steps: all 4 with per-step status for visual checklist ---
     const onboardingSteps = useMemo(() => {
         const hasLocation = !!user?.pob && typeof user?.birthLatitude === 'number' && typeof user?.birthLongitude === 'number' && !!user?.birthTimezoneName;
         return [
-            { id: 'name' as const,   label: t('profile.onboarding.steps.name.label'),               hint: t('profile.onboarding.steps.name.hint'),                     complete: !!user?.name },
+            { id: 'name' as const,   label: t('profile.onboarding.steps.name.label'),               hint: t('profile.onboarding.steps.name.hint'),                     complete: !!user?.firstName },
             { id: 'dob'  as const,   label: t('profile.onboarding.steps.dob.label'),           hint: t('profile.onboarding.steps.dob.hint'),       complete: !!user?.dob },
             { id: 'tob'  as const,   label: t('profile.onboarding.steps.tob.label'),           hint: t('profile.onboarding.steps.tob.hint'),      complete: !!user?.tob },
             { id: 'pob'  as const,   label: t('profile.onboarding.steps.pob.label'), hint: t('profile.onboarding.steps.pob.hint'), complete: hasLocation },
@@ -145,14 +148,14 @@ export default function ProfileSettingsPage() {
         let error = '';
 
         switch (field) {
-            case 'name':
+            case 'firstName':
                 if (!value.trim()) {
                     break;
                 }
                 if (value.trim().length < 2) {
-                    error = t('profile.fields.errors.nameTooShort');
-                } else if (value.trim().length > 100) {
-                    error = t('profile.fields.errors.nameTooLong');
+                    error = t('profile.fields.errors.firstNameTooShort');
+                } else if (value.trim().length > 50) {
+                    error = t('profile.fields.errors.firstNameTooLong');
                 }
                 break;
             case 'dob':
@@ -186,17 +189,17 @@ export default function ProfileSettingsPage() {
 
     const validateForm = () => {
         const newErrors = {
-            name: validateField('name', formData.name),
+            firstName: validateField('firstName', formData.firstName),
             dob: validateField('dob', formData.dob),
             tob: '',
             pob: validateField('pob', formData.pob),
             phoneNumber: ''
         };
 
-        // In onboarding mode, name/dob/tob/pob are all required,
+        // In onboarding mode, firstName/dob/tob/pob are all required,
         // and structured birth location (latitude/longitude/timezone) is also required
         if (isOnboarding) {
-            if (!formData.name.trim()) newErrors.name = t('profile.fields.errors.nameRequired');
+            if (!formData.firstName.trim()) newErrors.firstName = t('profile.fields.errors.firstNameRequired');
             if (!formData.dob) newErrors.dob = t('profile.fields.errors.dobRequired');
             if (!formData.tob) newErrors.tob = t('profile.fields.errors.tobRequired');
             if (!formData.pob.trim()) newErrors.pob = t('profile.fields.errors.pobRequired');
@@ -209,7 +212,7 @@ export default function ProfileSettingsPage() {
         }
 
         setErrors(newErrors);
-        setTouched({ name: true, dob: true, tob: true, pob: true, phoneNumber: true });
+        setTouched({ firstName: true, dob: true, tob: true, pob: true, phoneNumber: true });
         return !Object.values(newErrors).some(e => e !== '');
     };
 
@@ -231,7 +234,7 @@ export default function ProfileSettingsPage() {
         console.log('[ProfileClient.handleSubmit] hasChanges:', hasChanges);
         console.log('[ProfileClient.handleSubmit] isOnboarding:', isOnboarding);
         console.log('[ProfileClient.handleSubmit] formData keys present:', {
-            name: !!formData.name, dob: !!formData.dob, tob: !!formData.tob, pob: !!formData.pob,
+            firstName: !!formData.firstName, dob: !!formData.dob, tob: !!formData.tob, pob: !!formData.pob,
             birthLatitude: formData.birthLatitude, birthLongitude: formData.birthLongitude,
             birthTimezoneName: !!formData.birthTimezoneName,
             birthTimezoneOffsetAtBirth: formData.birthTimezoneOffsetAtBirth,
@@ -428,7 +431,8 @@ export default function ProfileSettingsPage() {
     const handleReset = () => {
         if (user) {
             setFormData({
-                name: user.name || '',
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
                 dob: user.dob || '',
                 tob: user.tob || '',
                 pob: user.pob || '',
@@ -458,24 +462,24 @@ export default function ProfileSettingsPage() {
             } else {
                 setSelectedLocation(null);
             }
-            setErrors({ name: '', dob: '', tob: '', pob: '', phoneNumber: '' });
-            setTouched({ name: false, dob: false, tob: false, pob: false, phoneNumber: false });
+            setErrors({ firstName: '', dob: '', tob: '', pob: '', phoneNumber: '' });
+            setTouched({ firstName: false, dob: false, tob: false, pob: false, phoneNumber: false });
             setHasChanges(false);
         }
     };
 
     return (
-        <main className="min-h-[calc(100dvh-var(--navbar-height,64px))] py-6 sm:py-10 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-start relative overflow-x-hidden bg-[var(--bg)]">
+        <main className={`min-h-[calc(100dvh-var(--navbar-height,64px))] px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-start relative overflow-x-hidden bg-[var(--bg)] ${isOnboarding ? 'py-4 sm:py-6 lg:py-4' : 'py-6 sm:py-10 lg:py-6'}`}>
             {ToastContainer}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none"></div>
-            
+
             {/* Centered page header (only when NOT onboarding) */}
             {!isOnboarding && (
-                <div className="w-full max-w-6xl mx-auto text-center mb-8 mt-4 relative z-10">
-                    <div className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow w-14 h-14 sm:w-16 sm:h-16 mb-4 sm:mb-6">
-                        <User className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
+                <div className="w-full max-w-7xl mx-auto text-center mb-6 mt-2 relative z-10">
+                    <div className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow w-14 h-14 sm:w-16 sm:h-16 mb-4 sm:mb-5">
+                        <ProfileImageUpload size={56} />
                     </div>
-                    <h1 className="font-headline font-bold text-primary text-3xl sm:text-4xl mb-3">{t('profile.page.title')}</h1>
+                    <h1 className="font-headline font-bold text-primary text-3xl sm:text-4xl mb-2">{t('profile.page.title')}</h1>
                     <p className="font-body text-on-surface-variant max-w-md mx-auto text-sm">
                         {t('profile.page.description')}
                     </p>
@@ -499,82 +503,12 @@ export default function ProfileSettingsPage() {
                 </div>
             )}
 
-            <div className={`w-full mx-auto relative z-10 max-w-6xl ${isOnboarding ? 'flex flex-col lg:flex-row gap-6 lg:gap-10 items-start' : 'grid grid-cols-1 lg:grid-cols-3 gap-8'}`}>
+            <div className={`w-full mx-auto relative z-10 ${isOnboarding ? 'max-w-6xl flex flex-col lg:flex-row gap-6 lg:gap-10 items-start' : 'max-w-7xl grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(360px,420px)] gap-6 xl:gap-8 items-start'}`}>
                 {isOnboarding && (
-                    <aside className="w-full lg:w-[360px] lg:sticky lg:top-24 shrink-0">
+                    <aside className="hidden lg:block w-full lg:w-[360px] lg:sticky lg:top-24 shrink-0">
                     <div className="text-left p-5 sm:p-6 bg-gradient-to-br from-secondary/5 to-secondary/10 border border-secondary/20 rounded-[28px] animate-in fade-in slide-in-from-left-4 duration-500 space-y-5">
-                        {/* ========= MOBILE COMPACT BANNER (hidden on desktop) ========= */}
-                        <div className="lg:hidden">
-                            {/* Compact status strip — always visible */}
-                            <button
-                                type="button"
-                                onClick={() => setShowChecklist(v => !v)}
-                                className="w-full flex items-center gap-3 text-left"
-                            >
-                                <div className="w-8 h-8 rounded-lg bg-secondary/15 border border-secondary/25 flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-4 h-4 text-secondary" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[12px] font-bold text-primary truncate">
-                                        {profileProgress.complete === profileProgress.total
-                                            ? t('profile.onboarding.mobile.complete')
-                                            : t('profile.onboarding.mobile.remaining').replace('{n}', String(profileProgress.total - profileProgress.complete))}
-                                    </p>
-                                    <p className="text-[10px] text-on-surface-variant/60">
-                                        {profileProgress.complete === profileProgress.total
-                                            ? t('profile.onboarding.mobile.completeHint')
-                                            : t('profile.onboarding.mobile.remainingHint')}
-                                    </p>
-                                </div>
-                                <ChevronDown className={`w-4 h-4 text-secondary/60 transition-transform duration-200 ${showChecklist ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            {/* Expandable checklist drawer */}
-                            <div className={`grid transition-all duration-300 ease-out ${showChecklist ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'}`}>
-                                <div className="overflow-hidden">
-                                    <div className="space-y-2">
-                                        {onboardingSteps.map((step, i) => (
-                                            <div
-                                                key={step.id}
-                                                className="flex items-start gap-2.5 p-2.5 rounded-xl bg-surface-variant/20 border border-outline-variant/10 animate-in fade-in slide-in-from-top-2 duration-300"
-                                                style={{ animationDelay: `${i * 50}ms` }}
-                                            >
-                                                {step.complete ? (
-                                                    <CheckCircle2 className="w-3.5 h-3.5 text-secondary mt-0.5 shrink-0" />
-                                                ) : (
-                                                    <Circle className="w-3.5 h-3.5 text-secondary/40 mt-0.5 shrink-0 animate-pulse" />
-                                                )}
-                                                <div className="min-w-0">
-                                                    <span className={`text-[12px] font-semibold ${step.complete ? 'text-on-surface-variant/50 line-through' : 'text-primary'}`}>
-                                                        {step.label}
-                                                    </span>
-                                                    {!step.complete && (
-                                                        <span className="text-[10px] text-on-surface-variant/50 block truncate">
-                                                            {step.hint}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {/* Mini progress bar inside expanded drawer */}
-                                    <div className="flex items-center gap-2 mt-3">
-                                        <div className="flex-1 h-1.5 bg-surface-variant/40 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-secondary/60 to-secondary rounded-full transition-all duration-700 ease-out"
-                                                style={{ width: `${(profileProgress.complete / profileProgress.total) * 100}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-[9px] font-bold text-secondary tabular-nums shrink-0">
-                                            {profileProgress.complete}/{profileProgress.total}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ========= DESKTOP FULL SIDEBAR (hidden on mobile) ========= */}
-                        <div className="hidden lg:block space-y-5">
+                        {/* ========= DESKTOP FULL SIDEBAR ========= */}
+                        <div className="space-y-5">
                             {/* Header */}
                             <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-secondary/15 border border-secondary/25 flex items-center justify-center shrink-0">
@@ -656,22 +590,22 @@ export default function ProfileSettingsPage() {
                     </aside>
                 )}
 
-                <div className={isOnboarding ? 'flex-1 min-w-0' : 'lg:col-span-2'}>
+                <div className={isOnboarding ? 'flex-1 min-w-0' : 'min-w-0'}>
                 {isOnboarding && (
-                    <div className="text-center mb-6 mt-2">
-                        <div className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow w-12 h-12 sm:w-14 sm:h-14 mb-3 sm:mb-4">
-                            <User className="text-secondary w-6 h-6 sm:w-7 sm:h-7" />
+                    <div className="text-center mb-4 xl:mb-5">
+                        <div className="inline-flex items-center justify-center rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 cosmic-glow w-16 h-16 sm:w-20 sm:h-20 mb-3 sm:mb-4">
+                            <ProfileImageUpload size={64} className="[&_div]:border-0" />
                         </div>
-                        <h1 className="font-headline font-bold text-primary text-2xl sm:text-3xl mb-2">{t('profile.page.title')}</h1>
+                        <h1 className="font-headline font-bold text-primary text-2xl sm:text-3xl mb-1">{t('profile.page.title')}</h1>
                         <p className="font-body text-on-surface-variant max-w-md mx-auto text-xs sm:text-sm">
                             {t('profile.page.description')}
                         </p>
                     </div>
                 )}
 
-                <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
-                    <form onSubmit={handleSubmit} className="space-y-8">
-                        <div className="grid grid-cols-1 gap-6">
+                <Card padding="md" className={`!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20 ${isOnboarding ? '!p-4 sm:!p-5 xl:!p-6' : ''}`} hoverable={false}>
+                    <form onSubmit={handleSubmit} className={isOnboarding ? "space-y-4 xl:space-y-3" : "space-y-6 xl:space-y-5"}>
+                        <div className={`grid grid-cols-1 xl:grid-cols-2 ${isOnboarding ? 'gap-4 xl:gap-3' : 'gap-6 xl:gap-4'}`}>
                             <Input
                                 label={t('profile.fields.email')}
                                 type="email"
@@ -681,30 +615,39 @@ export default function ProfileSettingsPage() {
                                 disabled
                                 helperText={t('profile.fields.emailHelper')}
                             />
-                            <Input
-                                label={t('profile.fields.fullName')}
-                                placeholder={t('profile.fields.fullNamePlaceholder')}
-                                type="text"
-                                icon={<User className="w-4 h-4" />}
-                                value={formData.name}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    updateFormData({ name: value });
-                                    if (touched.name) {
-                                        setErrors({...errors, name: validateField('name', value)});
-                                    }
-                                }}
-                                onBlur={() => {
-                                    setTouched({...touched, name: true});
-                                    setErrors({...errors, name: validateField('name', formData.name)});
-                                }}
-                                error={touched.name ? errors.name : ''}
-                                helperText={t('profile.fields.fullNameHelper')}
-                                required
-                            />
+                            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isOnboarding ? 'gap-4 xl:gap-3' : 'gap-6 xl:gap-4'}`}>
+                                <Input
+                                    label={t('profile.fields.firstName')}
+                                    placeholder={t('profile.fields.firstNamePlaceholder')}
+                                    type="text"
+                                    icon={<User className="w-4 h-4" />}
+                                    value={formData.firstName}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        updateFormData({ firstName: value });
+                                        if (touched.firstName) {
+                                            setErrors({...errors, firstName: validateField('firstName', value)});
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        setTouched({...touched, firstName: true});
+                                        setErrors({...errors, firstName: validateField('firstName', formData.firstName)});
+                                    }}
+                                    error={touched.firstName ? errors.firstName : ''}
+                                    helperText={t('profile.fields.firstNameHelper')}
+                                    required
+                                />
+                                <Input
+                                    label={t('profile.fields.lastName')}
+                                    placeholder={t('profile.fields.lastNamePlaceholder')}
+                                    type="text"
+                                    value={formData.lastName}
+                                    onChange={(e) => updateFormData({ lastName: e.target.value })}
+                                />
+                            </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isOnboarding ? 'gap-4 xl:gap-3' : 'gap-6 xl:gap-4'}`}>
                             <Input
                                 label={t('profile.fields.dateOfBirth')}
                                 type="date"
@@ -736,59 +679,61 @@ export default function ProfileSettingsPage() {
                             />
                         </div>
 
-                        <LocationSearch
-                            label={t('profile.fields.placeOfBirth')}
-                            placeholder={t('profile.fields.placeOfBirthPlaceholder')}
-                            value={formData.pob || formData.birthPlaceName}
-                            required
-                            confirmedLocation={selectedLocation}
-                            onSelect={(location: LocationResult) => {
-                                updateFormData({
-                                    pob: location.name,
-                                    birthPlaceName: location.name,
-                                    birthLatitude: location.lat,
-                                    birthLongitude: location.lon,
-                                    birthTimezoneName: location.timezone,
-                                });
-                                setSelectedLocation(location);
-                                if (touched.pob) {
-                                    setErrors({...errors, pob: ''});
-                                }
-                            }}
-                            onChange={(text: string) => {
-                                updateFormData({
-                                    pob: text,
-                                    // Clear structured data when user changes text without selecting
-                                    birthPlaceName: selectedLocation?.name === text ? selectedLocation.name : '',
-                                    birthLatitude: selectedLocation?.name === text ? selectedLocation.lat : undefined,
-                                    birthLongitude: selectedLocation?.name === text ? selectedLocation.lon : undefined,
-                                    birthTimezoneName: selectedLocation?.name === text ? selectedLocation.timezone : '',
-                                });
-                                if (!selectedLocation || selectedLocation.name !== text) {
-                                    setSelectedLocation(null);
-                                }
-                                if (touched.pob) {
-                                    setErrors({...errors, pob: validateField('pob', text)});
-                                }
-                            }}
-                            error={touched.pob ? errors.pob : ''}
-                            helperText={t('profile.fields.placeOfBirthHelper')}
-                        />
+                        <div className={`grid grid-cols-1 xl:grid-cols-[minmax(0,1.25fr)_minmax(240px,0.75fr)] ${isOnboarding ? 'gap-4 xl:gap-3' : 'gap-6 xl:gap-4'}`}>
+                            <LocationSearch
+                                label={t('profile.fields.placeOfBirth')}
+                                placeholder={t('profile.fields.placeOfBirthPlaceholder')}
+                                value={formData.pob || formData.birthPlaceName}
+                                required
+                                confirmedLocation={selectedLocation}
+                                onSelect={(location: LocationResult) => {
+                                    updateFormData({
+                                        pob: location.name,
+                                        birthPlaceName: location.name,
+                                        birthLatitude: location.lat,
+                                        birthLongitude: location.lon,
+                                        birthTimezoneName: location.timezone,
+                                    });
+                                    setSelectedLocation(location);
+                                    if (touched.pob) {
+                                        setErrors({...errors, pob: ''});
+                                    }
+                                }}
+                                onChange={(text: string) => {
+                                    updateFormData({
+                                        pob: text,
+                                        // Clear structured data when user changes text without selecting
+                                        birthPlaceName: selectedLocation?.name === text ? selectedLocation.name : '',
+                                        birthLatitude: selectedLocation?.name === text ? selectedLocation.lat : undefined,
+                                        birthLongitude: selectedLocation?.name === text ? selectedLocation.lon : undefined,
+                                        birthTimezoneName: selectedLocation?.name === text ? selectedLocation.timezone : '',
+                                    });
+                                    if (!selectedLocation || selectedLocation.name !== text) {
+                                        setSelectedLocation(null);
+                                    }
+                                    if (touched.pob) {
+                                        setErrors({...errors, pob: validateField('pob', text)});
+                                    }
+                                }}
+                                error={touched.pob ? errors.pob : ''}
+                                helperText={t('profile.fields.placeOfBirthHelper')}
+                            />
 
-                        <Input
-                            label={t('profile.fields.phoneNumber')}
-                            placeholder={t('profile.fields.phoneNumberPlaceholder')}
-                            type="tel"
-                            icon={<Phone className="w-4 h-4" />}
-                            value={formData.phoneNumber}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                updateFormData({ phoneNumber: value });
-                            }}
-                            helperText={t('profile.fields.phoneNumberHelper')}
-                        />
+                            <Input
+                                label={t('profile.fields.phoneNumber')}
+                                placeholder={t('profile.fields.phoneNumberPlaceholder')}
+                                type="tel"
+                                icon={<Phone className="w-4 h-4" />}
+                                value={formData.phoneNumber}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    updateFormData({ phoneNumber: value });
+                                }}
+                                helperText={t('profile.fields.phoneNumberHelper')}
+                            />
+                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div className={`grid grid-cols-1 sm:grid-cols-3 ${isOnboarding ? 'gap-4 xl:gap-3' : 'gap-6 xl:gap-4'}`}>
                             <div className="space-y-1">
                                 <label htmlFor="gender" className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2 block px-1">
                                     {t('profile.fields.gender')}
@@ -848,12 +793,12 @@ export default function ProfileSettingsPage() {
                         </div>
 
                         {/* Language & Preferences Section */}
-                        <div className="space-y-8 pt-4 border-t border-outline-variant/10">
-                            <div className="space-y-4">
+                        <div className={`grid grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] ${isOnboarding ? 'gap-4 xl:gap-3' : 'gap-6 xl:gap-4'} pt-4 border-t border-outline-variant/10`}>
+                            <div className={isOnboarding ? 'space-y-2' : 'space-y-4'}>
                                 <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 block px-1 flex items-center gap-2">
                                     <Globe className="w-4 h-4 text-secondary" /> {t('profile.preferences.language')}
                                 </label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-3 gap-2">
                                     {availableLanguages.map((lang) => (
                                         <button
                                             key={lang.code}
@@ -874,18 +819,18 @@ export default function ProfileSettingsPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className={isOnboarding ? 'space-y-2' : 'space-y-4'}>
                                 <label className="text-[12px] font-bold uppercase tracking-widest text-on-surface-variant/70 block px-1 flex items-center gap-2">
                                     <Bell className="w-4 h-4 text-secondary" /> {t('profile.preferences.cosmicPreferences')}
                                 </label>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className={`grid grid-cols-1 ${isOnboarding ? 'gap-2 xl:gap-1.5' : 'gap-3 xl:gap-2'}`}>
                                     <button
                                         type="button"
                                         onClick={() => updateFormData(current => ({
                                             ...current,
                                             preferences: { ...current.preferences, horoscope: !current.preferences.horoscope }
                                         }))}
-                                        className="flex items-center justify-between p-4 rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group"
+                                        className={`flex items-center justify-between rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group ${isOnboarding ? 'p-3 xl:p-2.5' : 'p-4'}`}
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className={`p-2 rounded-xl transition-colors ${formData.preferences.horoscope ? 'bg-secondary/20 text-secondary' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>
@@ -907,7 +852,7 @@ export default function ProfileSettingsPage() {
                                             ...current,
                                             preferences: { ...current.preferences, notifications: !current.preferences.notifications }
                                         }))}
-                                        className="flex items-center justify-between p-4 rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group"
+                                        className={`flex items-center justify-between rounded-2xl bg-surface-variant/20 border border-outline-variant/10 hover:bg-surface-variant/40 transition-all group ${isOnboarding ? 'p-3 xl:p-2.5' : 'p-4'}`}
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className={`p-2 rounded-xl transition-colors ${formData.preferences.notifications ? 'bg-secondary/20 text-secondary' : 'bg-on-surface-variant/10 text-on-surface-variant/40'}`}>
@@ -926,8 +871,8 @@ export default function ProfileSettingsPage() {
                             </div>
                         </div>
                         {/* DPDP Consent Reaffirmation */}
-                        <div className="pt-4 border-t border-outline-variant/12">
-                          <p className="text-[10px] sm:text-xs text-primary/50 leading-relaxed mb-3">
+                        <div className={`border-t border-outline-variant/12 ${isOnboarding ? 'pt-3' : 'pt-4'}`}>
+                          <p className="text-[10px] sm:text-xs text-primary/50 leading-relaxed mb-2">
                             By saving, you reaffirm your consent for Astra Navi to process your personal data — including birth details — for Vedic astrological computations, AI-powered readings, and personalized insights as described in our{' '}
                             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
                               Privacy Policy
@@ -986,10 +931,10 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 {!isOnboarding && (
-                    <aside className="w-full lg:col-span-1 shrink-0">
+                    <aside className="w-full xl:sticky xl:top-24 shrink-0 space-y-6">
                         {/* Security Section Card */}
                         <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
-                            <div className="space-y-6">
+                            <div className="space-y-5">
                                 <div>
                                     <h3 className="text-xl font-headline font-bold text-primary mb-2">{t('profile.page.securitySection.title')}</h3>
                                     <p className="text-sm text-on-surface-variant">{t('profile.page.securitySection.description')}</p>

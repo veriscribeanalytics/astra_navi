@@ -1,11 +1,18 @@
-export const PORTAL_COLORS = {
-  kundli: "#60A5FA",
-  match: "#FB7185",
-  forecast: "#34D399",
-  consult: "#A78BFA",
-  rashi: "var(--flare-lavender)",
-  chat: "var(--secondary)",
-  sessions: "var(--flare-gold)",
-} as const;
+export type PortalKey =
+  | "chat"
+  | "kundli"
+  | "match"
+  | "forecast"
+  | "rashi"
+  | "sessions"
+  | "consult";
 
-export type PortalKey = keyof typeof PORTAL_COLORS;
+export const PORTAL_COLORS: Record<PortalKey, string> & Record<string, string | undefined> = {
+  chat: "#C9972E",
+  kundli: "#659DEA",
+  match: "#E36A89",
+  forecast: "#35C9A5",
+  rashi: "#A78BD2",
+  sessions: "#C9972E",
+  consult: "#C9972E",
+};

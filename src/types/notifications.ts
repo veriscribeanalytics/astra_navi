@@ -14,6 +14,7 @@ export type NotificationType =
     | 'family_invite_accepted'
     | 'family_invite_declined'
     | 'family_message_received'
+    | 'daily_reward_claimed'
     | (string & {});
 
 export interface AppNotification {
@@ -50,12 +51,13 @@ export function deepLinkFor(n: Pick<AppNotification, 'type' | 'data'>): string |
             // Informational: no destination.
             return null;
         case 'family_message_received': {
-            // Deep-link straight to the thread carried in data.threadId.
             const threadId = n.data?.threadId ?? n.data?.thread_id;
             return typeof threadId === 'number' || typeof threadId === 'string'
                 ? `/messages/${threadId}`
                 : '/messages';
         }
+        case 'daily_reward_claimed':
+            return '/rewards';
         default:
             return null;
     }

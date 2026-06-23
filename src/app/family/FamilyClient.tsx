@@ -7,6 +7,7 @@ import {
     Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
     Crown, TrendingUp, Sparkles, FileText,
     Mail, Send, Link2, Settings, RefreshCw, Search,
+    MoreVertical, Eye, ArrowUpRight, UserPlus, Activity,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -17,20 +18,24 @@ import { useTranslation, useToast, usePaywallContext } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import {
     useFamilyMembers,
-    useFamilyChart,
-    useFamilyCompatibility,
-    useFamilyCompatibilitySummary,
-    useFamilyConnectionCompatibilitySummary,
     createFamilyMember,
     updateFamilyMember,
     deleteFamilyMember,
     useFamilyAvatars,
+    useFamilyChart,
+    useFamilyCompatibility,
     useFamilyCompatibilityPreflight,
     useFamilyConnectionCompatibilityPreflight,
+    useFamilyConnectionCompatibilitySummary,
     useFamilyReports,
     useFamilyConnections,
     useFamilyConnectionCompatibility,
+    useFamilyCompatibilitySummary,
+    useIncomingInvites,
+    useOutgoingInvites,
     sendInvite,
+    acceptInvite,
+    revokeInvite,
     updateConnection,
     deleteConnection,
 } from '@/hooks/useFamily';
@@ -41,10 +46,12 @@ import {
     type FamilyGender,
     type CompatibilityLang,
     type FamilyCompatibilityPreflight,
+    type FamilyInvite,
     COMPATIBILITY_CREDIT_COST,
     familyRosterLimit,
 } from '@/types/family';
-import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, familyPeerTierCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { computeFamilyMemberStatus } from '@/lib/familyStatus';
 import { useCountdown } from '@/lib/useCountdown';
 import MakeFamilyDialog from '@/components/family/MakeFamilyDialog';
 import OpenMessageButton from '@/components/family/OpenMessageButton';
@@ -52,6 +59,7 @@ import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import FamilyChartView from '@/components/family/FamilyChartView';
 import CompatibilityReport, {
     getFamilyIcon,
+    formatDob,
     type ReportSubject,
 } from '@/app/family/CompatibilityReport';
 import CompatibilitySummaryCard from '@/app/family/CompatibilitySummaryCard';
@@ -134,11 +142,14 @@ export default function FamilyClient() {
     const { tier } = usePaywallContext();
     const { success, error: toastError } = useToast();
     const { data: members, isLoading, error, refetch } = useFamilyMembers();
-    // /connections returns all active connections, each carrying `isFamily`.
-    // Split client-side: family links count against the roster cap; the rest don't.
+    // /connections returns all active connections, accepted invites that aren't
+    // mutually sharing yet. Mutually-sharing linked entries now live in `members`.
     const { data: allConnections, refetch: refetchAll } = useFamilyConnections();
-    const familyConnections = useMemo(() => (allConnections ?? []).filter(c => c.isFamily), [allConnections]);
-    const otherConnections = useMemo(() => (allConnections ?? []).filter(c => !c.isFamily), [allConnections]);
+    const { data: incomingInvites } = useIncomingInvites();
+    const { data: outgoingInvites } = useOutgoingInvites();
+    // The connections tab shows ALL accepted connections, including ones that are
+    // already family — that overlap is intentional by backend design.
+    const connections = useMemo(() => allConnections ?? [], [allConnections]);
     const refetchConnections = () => { refetchAll(); };
 
     const [view, setView] = useState<'list' | 'form' | 'detail' | 'invite' | 'connectionDetail'>('list');
@@ -154,6 +165,7 @@ export default function FamilyClient() {
     // to the list and the URL still carries the param.
     const searchParams = useSearchParams();
     const memberIdParam = searchParams?.get('member');
+    const sourceParam = searchParams?.get('source') as FamilyMember['source'] | null;
     const autoRunParam = searchParams?.get('run') === '1';
     const autoOpenedRef = useRef(false);
     // Captured at open time so navigating back and re-opening doesn't re-trigger a run.
@@ -162,20 +174,29 @@ export default function FamilyClient() {
     useEffect(() => {
         if (autoOpenedRef.current) return;
         if (!memberIdParam || !members) return;
-        const found = members.find(m => String(m.id) === memberIdParam);
-        if (found) {
-            setDetailMember(found);
-            setAutoRunMember(autoRunParam);
-            setView('detail');
-            autoOpenedRef.current = true;
+        const found = members.find(m =>
+            String(m.id) === memberIdParam &&
+            (sourceParam ? m.source === sourceParam : true)
+        );
+        if (!found) return;
+        if (found.source === 'linked') {
+            const conn = allConnections?.find(c => c.connectionId === found.connectionId);
+            if (conn) {
+                setDetailConnection(conn);
+                setView('connectionDetail');
+                autoOpenedRef.current = true;
+            }
+            return;
         }
-    }, [memberIdParam, members, autoRunParam]);
+        setDetailMember(found);
+        setAutoRunMember(autoRunParam);
+        setView('detail');
+        autoOpenedRef.current = true;
+    }, [memberIdParam, sourceParam, members, allConnections, autoRunParam]);
 
-    const manualCount = members?.length ?? 0;
-    const familyLinkedCount = familyConnections.length;
-    // Only manual members + family connections (mutually sharing) count against
-    // the roster cap; plain connections are unlimited.
-    const totalCount = manualCount + familyLinkedCount;
+    // /api/family/members now returns manual entries + linked connections where
+    // both sides share. The array length itself is the roster count.
+    const totalCount = members?.length ?? 0;
     // null limit = unlimited (premium). Free: 1, Pro: 6.
     const rosterLimit = familyRosterLimit(tier);
     const atFreeCap = rosterLimit != null && totalCount >= rosterLimit;
@@ -200,6 +221,14 @@ export default function FamilyClient() {
     };
 
     const openDetail = (m: FamilyMember) => {
+        if (m.source === 'linked') {
+            const conn = allConnections?.find(c => c.connectionId === m.connectionId);
+            if (conn) {
+                setDetailConnection(conn);
+                setView('connectionDetail');
+                return;
+            }
+        }
         setDetailMember(m);
         setAutoRunMember(false);
         setView('detail');
@@ -219,6 +248,11 @@ export default function FamilyClient() {
 
     const handleDelete = async () => {
         if (!deletingMember) return;
+        if (deletingMember.source !== 'manual') {
+            // Linked-family entries are managed via connection detail/disonnect.
+            setDeletingMember(null);
+            return;
+        }
         setIsDeleting(true);
         const res = await deleteFamilyMember(deletingMember.id);
         setIsDeleting(false);
@@ -240,60 +274,51 @@ export default function FamilyClient() {
             <div className="max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <header className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-11 h-11 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
-                            <Users className="w-5 h-5" />
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-3 mb-2">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-11 h-11 rounded-2xl bg-[#C9972E]/10 border border-[#C9972E]/20 flex items-center justify-center text-[#C9972E] shrink-0">
+                                <Users className="w-5 h-5" />
+                            </div>
+                            <div className="min-w-0">
+                                <h1 className="text-2xl sm:text-3xl font-headline font-bold text-[#F4EFE7]">
+                                    {t('family.myFamily') || 'My Family'}
+                                </h1>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h1 className="text-2xl sm:text-3xl font-headline font-bold text-primary">
-                                {t('family.myFamily') || 'My Family'}
-                            </h1>
-                            <p className="text-xs sm:text-sm text-on-surface-variant/70 mt-0.5">
-                                {t('family.subtitle') ||
-                                    'Save birth details, view charts, and check compatibility with loved ones.'}
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {view !== 'list' && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={backToList}
-                                    leftIcon={<X className="w-4 h-4" />}
-                                >
-                                    {t('common.back') || 'Back'}
-                                </Button>
-                            )}
-                            {(view === 'list' || view === 'detail' || view === 'connectionDetail') && (
-                                <>
-                                    <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={openAdd}
-                                        leftIcon={<Plus className="w-4 h-4" />}
-                                        disabled={atFreeCap}
-                                    >
-                                        {t('family.addFamilyMember') || 'Add Family Member'}
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={openInvite}
-                                        leftIcon={<Mail className="w-4 h-4" />}
-                                        disabled={atFreeCap}
-                                    >
-                                        {t('family.inviteByEmail') || 'Invite by Email'}
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        href="/family/discover"
-                                        leftIcon={<Search className="w-4 h-4" />}
-                                    >
-                                        {t('family.discoverNavLink') || 'Find people'}
-                                    </Button>
-                                </>
-                            )}
+                        <div className="flex flex-wrap items-center gap-2">
+                {(view === 'list' || view === 'detail' || view === 'connectionDetail') && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={openAdd}
+                            leftIcon={<Plus className="w-4 h-4" />}
+                            disabled={atFreeCap}
+                            className="bg-gradient-to-r from-[#C9972E] to-[#A57E23]"
+                        >
+                            <span className="hidden sm:inline">{t('family.addFamilyMember') || 'Add Family Member'}</span>
+                            <span className="sm:hidden">{t('family.addShort') || 'Add'}</span>
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={openInvite}
+                            leftIcon={<Mail className="w-4 h-4" />}
+                            disabled={atFreeCap}
+                        >
+                            <span className="hidden sm:inline">{t('family.inviteByEmail') || 'Invite'}</span>
+                            <span className="sm:hidden">{t('family.inviteShort') || 'Invite'}</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            href="/family/discover"
+                            leftIcon={<Search className="w-4 h-4" />}
+                        >
+                            {t('family.discoverNavLink') || 'Find people'}
+                        </Button>
+                    </div>
+                )}
                         </div>
                     </div>
 
@@ -314,11 +339,12 @@ export default function FamilyClient() {
                 </header>
 
                 {/* Views */}
-                {view === 'list' && (
+        {view === 'list' && (
                     <FamilyList
                         members={members}
-                        familyConnections={familyConnections}
-                        otherConnections={otherConnections}
+                        connections={connections}
+                        incomingInvites={incomingInvites ?? null}
+                        outgoingInvites={outgoingInvites ?? null}
                         isLoading={isLoading}
                         error={error}
                         onOpen={openDetail}
@@ -417,10 +443,24 @@ export default function FamilyClient() {
 /* LIST                                                                   */
 /* ====================================================================== */
 
+function formatRelationshipLabel(rel?: string | null): string {
+    if (!rel) return '';
+    return rel.charAt(0).toUpperCase() + rel.slice(1);
+}
+
+function getStatusLabel(status: ReturnType<typeof computeFamilyMemberStatus> | null, t: (k: string) => string): string | null {
+    if (!status) return null;
+    if (status.kind === 'incomplete') return t('family.statusIncompleteShort') || 'Incomplete';
+    if (status.kind === 'needsAttention') return t('family.statusNeedsAttentionShort') || 'Needs attention';
+    if (status.kind === 'stable') return t('family.statusStableShort') || 'Stable';
+    return t(status.labelKey) || status.kind;
+}
+
 interface FamilyListProps {
     members: FamilyMember[] | null;
-    familyConnections: FamilyConnection[];
-    otherConnections: FamilyConnection[];
+    connections: FamilyConnection[];
+    incomingInvites: FamilyInvite[] | null;
+    outgoingInvites: FamilyInvite[] | null;
     isLoading: boolean;
     error: string | null;
     onOpen: (m: FamilyMember) => void;
@@ -431,19 +471,35 @@ interface FamilyListProps {
     atFreeCap: boolean;
 }
 
-function FamilyList({ members, familyConnections, otherConnections, isLoading, error, onOpen, onOpenConnection, onEdit, onDelete, onAdd, atFreeCap }: FamilyListProps) {
+function FamilyList({
+    members,
+    connections: otherConnections,
+    incomingInvites,
+    outgoingInvites,
+    isLoading,
+    error,
+    onOpen,
+    onOpenConnection,
+    onEdit,
+    onDelete,
+    onAdd,
+    atFreeCap,
+}: FamilyListProps) {
     const { t } = useTranslation();
+    const [tab, setTab] = useState<'family' | 'connections'>('family');
 
     const hasMembers = !!members && members.length > 0;
-    const familyLinks = familyConnections ?? [];
-    const otherLinks = otherConnections ?? [];
-    const hasFamilySection = hasMembers || familyLinks.length > 0;
-    const hasOthers = otherLinks.length > 0;
+    const connectionLinks = otherConnections ?? [];
+    const hasFamilySection = hasMembers;
+    const hasOthers = connectionLinks.length > 0;
     const isEmpty = !hasFamilySection && !hasOthers;
+    const pendingInvitesCount = (incomingInvites?.length ?? 0) + (outgoingInvites?.length ?? 0);
+    const familyCount = members?.length ?? 0;
+    const connectionsCount = connectionLinks.length;
 
     if (isLoading && !members) {
         return (
-            <Card variant="default" padding="lg">
+            <Card variant="default" padding="lg" className="bg-[#170D31] border-[rgba(196,181,253,0.11)]">
                 <div className="flex items-center justify-center text-secondary/60">
                     <Star className="w-5 h-5 animate-pulse" />
                 </div>
@@ -453,7 +509,7 @@ function FamilyList({ members, familyConnections, otherConnections, isLoading, e
 
     if (error) {
         return (
-            <Card variant="bordered" padding="md" className="border-red-500/30">
+            <Card variant="bordered" padding="md" className="border-red-500/30 bg-[#170D31]">
                 <div className="flex items-center gap-2 text-sm text-red-500">
                     <AlertCircle className="w-4 h-4" />
                     {error}
@@ -464,15 +520,15 @@ function FamilyList({ members, familyConnections, otherConnections, isLoading, e
 
     if (isEmpty) {
         return (
-            <Card variant="default" padding="lg">
+            <Card variant="default" padding="lg" className="bg-[#170D31] border-[rgba(196,181,253,0.11)]">
                 <div className="text-center py-8">
-                    <div className="inline-flex w-14 h-14 rounded-2xl bg-secondary/10 items-center justify-center text-secondary mb-4">
+                    <div className="inline-flex w-14 h-14 rounded-2xl bg-[#C9972E]/10 items-center justify-center text-[#C9972E] mb-4">
                         <Users className="w-6 h-6" />
                     </div>
-                    <h3 className="text-lg font-headline font-bold text-primary mb-2">
+                    <h3 className="text-lg font-headline font-bold text-[#F4EFE7] mb-2">
                         {t('family.empty') || 'No family members yet'}
                     </h3>
-                    <p className="text-sm text-on-surface-variant/75 mb-5 max-w-md mx-auto">
+                    <p className="text-sm text-[#AFA8C0] mb-5 max-w-md mx-auto">
                         {t('family.emptyDesc') ||
                             'Add a parent, partner, or friend to view their chart and check compatibility.'}
                     </p>
@@ -484,184 +540,652 @@ function FamilyList({ members, familyConnections, otherConnections, isLoading, e
         );
     }
 
-    const familyCount = (members?.length ?? 0) + familyLinks.length;
-
     return (
-        <div className="space-y-8">
-            {/* My Family — manual members + family connections (counts against cap) */}
-            {hasFamilySection && (
-                <section className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-secondary" />
-                        <h2 className="text-[12px] font-bold text-secondary uppercase tracking-widest">
-                            {t('family.myFamily') || 'My Family'}
-                            <span className="ml-2 text-on-surface-variant/40">({familyCount})</span>
-                        </h2>
+        <div className="space-y-6">
+            {/* Tabs placed under the page title, aligned with the content grid. */}
+            <div className="border-b border-[rgba(196,181,253,0.11)] pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                    <div className="min-w-0">
+                        <p className="text-sm text-[#AFA8C0] max-w-2xl leading-relaxed">
+                            {t('family.subtitle') || 'Save birth details, view charts, and check compatibility with loved ones.'}
+                        </p>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {(members ?? []).map((m) => (
-                            <MemberCard key={`m-${m.id}`} member={m} onOpen={() => onOpen(m)} onEdit={() => onEdit(m)} onDelete={() => onDelete(m)} />
-                        ))}
-                        {familyLinks.map((c) => (
-                            <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
-                        ))}
+                    <div className="inline-flex p-1 bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-2xl" role="tablist">
+                        <button
+                            role="tab"
+                            aria-selected={tab === 'family'}
+                            onClick={() => setTab('family')}
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                tab === 'family'
+                                    ? 'border border-[#C9972E] bg-[#C9972E]/10 text-[#C9972E]'
+                                    : 'text-[#AFA8C0] hover:text-[#F4EFE7]'
+                            }`}
+                        >
+                            <Users className="w-3.5 h-3.5" />
+                            {t('family.tabFamily') || 'Family'}
+                            <span className="text-[#AFA8C0]/60 normal-case">({familyCount})</span>
+                        </button>
+                        <button
+                            role="tab"
+                            aria-selected={tab === 'connections'}
+                            onClick={() => setTab('connections')}
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                                tab === 'connections'
+                                    ? 'border border-[#C9972E] bg-[#C9972E]/10 text-[#C9972E]'
+                                    : 'text-[#AFA8C0] hover:text-[#F4EFE7]'
+                            }`}
+                        >
+                            <Link2 className="w-3.5 h-3.5" />
+                            {t('family.tabConnections') || 'Connections'}
+                            <span className="text-[#AFA8C0]/60 normal-case">({connectionsCount})</span>
+                        </button>
                     </div>
-                </section>
+                </div>
+            </div>
+
+            {/* FAMILY TAB */}
+            {tab === 'family' && (
+                hasFamilySection ? (
+                    <section className="space-y-4">
+                        <p className="text-sm text-[#AFA8C0] max-w-2xl">
+                            {t('family.tabFamilyHint') || 'People you share birth details with both ways. View their chart and run compatibility.'}
+                        </p>
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            {(members ?? []).map((m) => (
+                                <MemberCard
+                                    key={`m-${m.source}-${m.id}`}
+                                    member={m}
+                                    onOpen={() => onOpen(m)}
+                                    onEdit={() => onEdit(m)}
+                                    onDelete={() => onDelete(m)}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                ) : (
+                    <TabEmptyState
+                        icon={<Users className="w-6 h-6" />}
+                        title={t('family.tabFamilyEmptyTitle') || 'No family members yet'}
+                        desc={hasOthers
+                            ? (t('family.tabFamilyEmptyWithConnections') || 'Turn on two-way sharing with a connection to add them here, or add a member manually.')
+                            : (t('family.emptyDesc') || 'Add a parent, partner, or friend to view their chart and check compatibility.')}
+                        action={
+                            <Button variant="primary" size="md" onClick={onAdd} leftIcon={<Plus className="w-4 h-4" />} disabled={atFreeCap}>
+                                {t('family.addFirstMember') || 'Add Your First Member'}
+                            </Button>
+                        }
+                    />
+                )
             )}
 
-            {/* Other connections — not yet family (no mutual sharing). Uncapped. */}
-            {hasOthers && (
-                <section className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <Link2 className="w-4 h-4 text-sky-400" />
-                        <h2 className="text-[12px] font-bold text-sky-300 uppercase tracking-widest">
-                            {t('family.connectionsOtherGroup') || 'Other connections'}
-                            <span className="ml-2 text-on-surface-variant/40">({otherLinks.length})</span>
-                        </h2>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {otherLinks.map((c) => (
-                            <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
-                        ))}
-                    </div>
-                </section>
+            {/* CONNECTIONS TAB */}
+            {tab === 'connections' && (
+                hasOthers ? (
+                    <section className="space-y-4">
+                        <p className="text-sm text-[#AFA8C0] max-w-2xl">
+                            {t('family.tabConnectionsHint') || 'People you’re connected with. Enable two-way sharing to move someone into Family and unlock compatibility.'}
+                        </p>
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            {connectionLinks.map((c) => (
+                                <ConnectionCard key={`c-${c.connectionId}`} connection={c} onManage={() => onOpenConnection(c)} />
+                            ))}
+                        </div>
+                    </section>
+                ) : (
+                    <TabEmptyState
+                        icon={<Link2 className="w-6 h-6" />}
+                        title={t('family.tabConnectionsEmptyTitle') || 'No connections yet'}
+                        desc={t('family.tabConnectionsEmptyDesc') || 'Invite someone or accept an invite to start a connection. Family links still appear here too.'}
+                    />
+                )
+            )}
+
+            {/* Lower-page content */}
+            {tab === 'family' && (
+                <LowerPageSuggestions
+                    pendingInvitesCount={pendingInvitesCount}
+                    incomingInvites={incomingInvites}
+                    outgoingInvites={outgoingInvites}
+                    connections={connectionLinks}
+                    members={members}
+                />
             )}
         </div>
     );
 }
 
-function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMember; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
+function TabEmptyState({ icon, title, desc, action }: { icon: React.ReactNode; title: string; desc: string; action?: React.ReactNode }) {
     return (
-        <Card variant="default" padding="md" hoverable>
+        <Card variant="default" padding="lg" className="bg-[#170D31] border-[rgba(196,181,253,0.11)]">
+            <div className="text-center py-8">
+                <div className="inline-flex w-14 h-14 rounded-2xl bg-[#C9972E]/10 items-center justify-center text-[#C9972E] mb-4">
+                    {icon}
+                </div>
+                <h3 className="text-lg font-headline font-bold text-[#F4EFE7] mb-2">{title}</h3>
+                <p className="text-sm text-[#AFA8C0] mb-5 max-w-md mx-auto">{desc}</p>
+                {action}
+            </div>
+        </Card>
+    );
+}
+
+function SuggestedActionCard({
+    icon,
+    title,
+    desc,
+    action,
+    highlight = false,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    desc: string;
+    action?: React.ReactNode;
+    highlight?: boolean;
+}) {
+    return (
+        <Card
+            variant="default"
+            padding="sm"
+            hoverable={!!action}
+            className={`bg-[#170D31] border-[rgba(196,181,253,0.11)] ${highlight ? 'ring-1 ring-[#C9972E]/20' : ''}`}
+        >
             <div className="flex items-start gap-3">
-                {m.avatar ? (
-                    <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
-                        style={{
-                            color: m.avatar.accentColor || 'var(--secondary)',
-                            borderColor: `${m.avatar.accentColor || 'var(--secondary)'}33`,
-                            backgroundColor: `${m.avatar.accentColor || 'var(--secondary)'}11`
-                        }}
-                    >
-                        {React.createElement(getFamilyIcon(m.avatar.iconKey), { className: 'w-5 h-5' })}
-                    </div>
-                ) : (
-                    <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
-                        {m.name.charAt(0).toUpperCase()}
-                    </div>
-                )}
+                <div className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${highlight ? 'bg-[#C9972E]/10 text-[#C9972E]' : 'bg-[rgba(196,181,253,0.08)] text-[#AFA8C0]'}`}>
+                    {icon}
+                </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-headline font-bold text-primary truncate">{m.name}</h3>
-                    <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
-                        {m.relationshipType}
-                    </p>
-                    <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3 h-3 opacity-50" /> {m.dob}
-                        </div>
-                        {m.tob && (
-                            <div className="flex items-center gap-1.5">
-                                <Clock className="w-3 h-3 opacity-50" /> {m.tob}
-                            </div>
-                        )}
-                        {m.pob && (
-                            <div className="flex items-center gap-1.5 truncate">
-                                <MapPin className="w-3 h-3 opacity-50 shrink-0" />
-                                <span className="truncate">{m.pob}</span>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-1 mt-4">
-                        <Button variant="primary" size="sm" onClick={onOpen} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
-                            Open
-                        </Button>
-                        <button
-                            onClick={onEdit}
-                            className="p-2 rounded-xl text-on-surface-variant/75 hover:text-secondary hover:bg-secondary/5 transition-colors"
-                            aria-label="Edit"
-                        >
-                            <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={onDelete}
-                            className="p-2 rounded-xl text-on-surface-variant/75 hover:text-red-500 hover:bg-red-500/5 transition-colors"
-                            aria-label="Remove"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
-                    </div>
+                    <h4 className="text-sm font-headline font-bold text-[#F4EFE7] truncate">{title}</h4>
+                    <p className="text-xs text-[#AFA8C0] mt-0.5 leading-relaxed">{desc}</p>
+                    {action && <div className="mt-2">{action}</div>}
                 </div>
             </div>
         </Card>
     );
 }
 
+function LowerPageSuggestions({
+    pendingInvitesCount,
+    incomingInvites,
+    outgoingInvites,
+    connections,
+    members,
+}: {
+    pendingInvitesCount: number;
+    incomingInvites: FamilyInvite[] | null;
+    outgoingInvites: FamilyInvite[] | null;
+    members: FamilyMember[] | null;
+    connections: FamilyConnection[];
+}) {
+    const { t } = useTranslation();
+    const { success, error: toastError } = useToast();
+    const pendingIncoming = incomingInvites?.filter((i: FamilyInvite) => i.status === 'pending') ?? [];
+    const pendingOutgoing = outgoingInvites?.filter((i: FamilyInvite) => i.status === 'pending') ?? [];
+
+    const handleAccept = async (invite: FamilyInvite) => {
+        const res = await acceptInvite(invite.id);
+        if (res.ok) {
+            success(t('family.inviteStatusAccepted') || 'Invite accepted');
+        } else {
+            toastError(res.error || t('family.inviteAcceptError') || 'Could not accept invite');
+        }
+    };
+
+    const handleRevoke = async (invite: FamilyInvite) => {
+        const res = await revokeInvite(invite.id);
+        if (res.ok) {
+            success(t('family.inviteStatusRevoked') || 'Invite revoked');
+        } else {
+            toastError(res.error || t('family.inviteRevokeError') || 'Could not revoke invite');
+        }
+    };
+
+    if (pendingInvitesCount === 0 && members && members.length >= 3) return null;
+
+    return (
+        <section className="space-y-4 pt-2">
+            <div className="flex items-center gap-2">
+                <div className="h-px flex-1 bg-[rgba(196,181,253,0.08)]" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#AFA8C0]">
+                    {t('family.suggested') || 'Suggested'}
+                </span>
+                <div className="h-px flex-1 bg-[rgba(196,181,253,0.08)]" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {pendingIncoming.length > 0 && (
+                    <SuggestedActionCard
+                        highlight
+                        icon={<Mail className="w-4 h-4" />}
+                        title={t('family.pendingInvitesTitle') || 'Pending invitations'}
+                        desc={t('family.pendingIncomingDesc') || 'You have invites waiting to be accepted.'}
+                        action={
+                            <div className="space-y-2">
+                                {pendingIncoming.slice(0, 2).map((invite) => (
+                                    <div key={invite.id} className="flex items-center justify-between gap-2 rounded-lg bg-[rgba(196,181,253,0.05)] p-2">
+                                        <span className="text-xs text-[#F4EFE7] truncate">{invite.requesterName || invite.requesterEmail}</span>
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            <button
+                                                onClick={() => handleAccept(invite)}
+                                                className="p-1.5 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                                                aria-label={t('family.accept') || 'Accept'}
+                                            >
+                                                <ArrowUpRight className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {pendingIncoming.length > 2 && (
+                                    <a href="/family/invites" className="text-xs font-bold text-[#C9972E] hover:underline">
+                                        {t('family.viewAllInvites') || 'View all invites'}
+                                    </a>
+                                )}
+                            </div>
+                        }
+                    />
+                )}
+
+                {pendingOutgoing.length > 0 && (
+                    <SuggestedActionCard
+                        icon={<Send className="w-4 h-4" />}
+                        title={t('family.outgoingInvitesTitle') || 'Sent invitations'}
+                        desc={t('family.outgoingInvitesDesc') || 'Invites you have already sent.'}
+                        action={
+                            <div className="space-y-2">
+                                {pendingOutgoing.slice(0, 2).map((invite) => (
+                                    <div key={invite.id} className="flex items-center justify-between gap-2 rounded-lg bg-[rgba(196,181,253,0.05)] p-2">
+                                        <span className="text-xs text-[#F4EFE7] truncate">{invite.inviteeName || invite.inviteeEmail}</span>
+                                        <button
+                                            onClick={() => handleRevoke(invite)}
+                                            className="p-1.5 rounded-md text-[#AFA8C0] hover:text-red-400 hover:bg-red-500/10"
+                                            aria-label={t('common.revoke') || 'Revoke'}
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        }
+                    />
+                )}
+
+                {(members?.length ?? 0) < 3 && (
+                    <SuggestedActionCard
+                        icon={<UserPlus className="w-4 h-4" />}
+                        title={t('family.addMoreTitle') || 'Add more family members'}
+                        desc={t('family.addMoreDesc') || 'Build a fuller compatibility picture by adding parents, partner, or close friends.'}
+                        action={
+                            <a
+                                href="/family"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#C9972E]/40 bg-[#170D31] px-2.5 py-1.5 text-xs font-bold text-[#C9972E] hover:bg-[#C9972E]/10 transition-colors"
+                            >
+                                {t('family.addFamilyMember') || 'Add member'}
+                            </a>
+                        }
+                    />
+                )}
+
+                <SuggestedActionCard
+                    icon={<Search className="w-4 h-4" />}
+                    title={t('family.discoverTitle') || 'Find people'}
+                    desc={t('family.discoverDesc') || 'Search for other AstraNavi users to connect with.'}
+                    action={
+                        <a
+                            href="/family/discover"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(196,181,253,0.11)] bg-[rgba(196,181,253,0.05)] px-2.5 py-1.5 text-xs font-bold text-[#AFA8C0] hover:border-[#C9972E]/40 hover:text-[#F4EFE7] transition-colors"
+                        >
+                            {t('family.discoverNavLink') || 'Find people'}
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                        </a>
+                    }
+                />
+
+                {connections.length > 0 && (members?.length ?? 0) < 3 && (
+                    <SuggestedActionCard
+                        icon={<Link2 className="w-4 h-4" />}
+                        title={t('family.turnOnSharingTitle') || 'Turn on sharing'}
+                        desc={t('family.turnOnSharingDesc') || 'Enable two-way sharing with a connection to move them into Family.'}
+                        action={
+                            <a
+                                href="/family?tab=connections"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#C9972E]/40 bg-[#170D31] px-2.5 py-1.5 text-xs font-bold text-[#C9972E] hover:bg-[#C9972E]/10 transition-colors"
+                            >
+                                {t('family.viewConnections') || 'View connections'}
+                            </a>
+                        }
+                    />
+                )}
+            </div>
+        </section>
+    );
+}
+
+function CompactScoreRing({ score, size = 44 }: { score: number; size?: number }) {
+    const radius = 14;
+    const circumference = 2 * Math.PI * radius;
+    const pct = Math.max(0, Math.min(100, score));
+    const offset = circumference - (pct / 100) * circumference;
+    const color = pct >= 70 ? '#3DD6A0' : pct >= 55 ? '#E5A33A' : '#D96B78';
+    return (
+        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+            <svg className="-rotate-90" width={size} height={size} viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r={radius} fill="none" stroke="rgba(196,181,253,0.11)" strokeWidth="3" />
+                <circle
+                    cx="16" cy="16" r={radius}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    className="transition-all duration-700"
+                />
+            </svg>
+            <span className="absolute text-[10px] font-black tabular-nums" style={{ color }}>{score}</span>
+        </div>
+    );
+}
+
+function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMember; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
+    const { t } = useTranslation();
+    const isLinked = m.source === 'linked';
+    const relationshipLabel = formatRelationshipLabel(m.relationshipType) || (t('family.relationshipNotSet') || 'Connection');
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const close = (e: MouseEvent) => {
+            if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+        };
+        document.addEventListener('mousedown', close);
+        return () => document.removeEventListener('mousedown', close);
+    }, [menuOpen]);
+
+    const {
+        data: summary,
+        isLoading: summaryLoading,
+    } = useFamilyCompatibilitySummary(m, 'en');
+    const {
+        data: compat,
+    } = useFamilyCompatibility(m);
+    const {
+        data: reports,
+    } = useFamilyReports(m);
+    const {
+        data: preflight,
+    } = useFamilyCompatibilityPreflight(m);
+
+    const activeScore = compat?.score ?? summary?.score;
+    const score = typeof activeScore === 'number' ? Math.max(0, Math.min(100, Math.round(activeScore))) : null;
+    const status = computeFamilyMemberStatus({ member: m, preflight: preflight ?? null, reports: reports ?? null, band: compat?.band ?? summary?.band ?? null });
+    const lastChecked = compat
+        ? (t('family.compatibilityChecked') || 'Compatibility checked')
+        : status?.kind === 'stable'
+            ? (t('family.compatibilityAvailable') || 'Compatibility available')
+            : null;
+    const birthDetailStatus = isLinked
+        ? null
+        : status?.kind === 'incomplete'
+            ? (t('family.statusIncompleteShort') || 'Birth details incomplete')
+            : (m.dob ? formatDob(m.dob) : (t('family.statusCompleteShort') || 'Birth details saved'));
+
+    return (
+        <div
+            className="bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-[24px] overflow-hidden transition-all duration-300 hover:border-[rgba(196,181,253,0.22)] hover:shadow-lg cursor-pointer"
+            onClick={onOpen}
+        >
+            <div className="flex items-stretch gap-0">
+                {/* Avatar column */}
+                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-center gap-2 border-r border-[rgba(196,181,253,0.08)] p-3">
+                    <div
+                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border"
+                        style={{
+                            color: m.avatar?.accentColor || '#C9972E',
+                            borderColor: `${m.avatar?.accentColor || '#C9972E'}33`,
+                            backgroundColor: `${m.avatar?.accentColor || '#C9972E'}11`,
+                        }}
+                    >
+                        {m.avatar
+                            ? React.createElement(getFamilyIcon(m.avatar.iconKey), { className: 'w-5 h-5 sm:w-6 sm:h-6' })
+                            : <span className="text-lg font-headline font-bold">{m.name.charAt(0).toUpperCase()}</span>
+                        }
+                    </div>
+                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#C9972E] text-center leading-tight">
+                        {relationshipLabel}
+                    </span>
+                </div>
+
+                {/* Centre content */}
+                <div className="flex-1 min-w-0 p-3 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-headline font-bold text-[#F4EFE7] truncate">{m.name}</h3>
+                            {isLinked && (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border bg-[#C9972E]/10 text-[#C9972E] border-[#C9972E]/30 shrink-0">
+                                    <Link2 className="w-2.5 h-2.5" />
+                                    {t('family.connectionKindFamily') || 'Linked'}
+                                </span>
+                            )}
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#AFA8C0]">
+                            {birthDetailStatus && (
+                                <span className="inline-flex items-center gap-1.5">
+                                    {status?.kind === 'incomplete' ? (
+                                        <AlertCircle className="w-3 h-3 text-amber-400" />
+                                    ) : (
+                                        <Calendar className="w-3 h-3 text-[#C9972E]" />
+                                    )}
+                                    {birthDetailStatus}
+                                </span>
+                            )}
+                            {lastChecked && (
+                                <span className="inline-flex items-center gap-1.5">
+                                    <Clock className="w-3 h-3 opacity-60" />
+                                    {lastChecked}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Bottom action row */}
+                    <div className="mt-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={onOpen}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#C9972E]/40 bg-[#170D31] px-2.5 py-1.5 text-xs font-bold text-[#C9972E] hover:bg-[#C9972E]/10 transition-colors"
+                        >
+                            <Eye className="w-3.5 h-3.5" />
+                            {isLinked ? (t('family.manage') || 'Manage') : (t('family.viewProfile') || 'View Profile')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => window.location.href = `/family?member=${m.id}${m.source ? `&source=${m.source}` : ''}&run=1`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(196,181,253,0.11)] bg-[rgba(196,181,253,0.05)] px-2.5 py-1.5 text-xs font-bold text-[#AFA8C0] hover:border-[#C9972E]/40 hover:text-[#F4EFE7] transition-colors"
+                        >
+                            <Activity className="w-3.5 h-3.5" />
+                            {t('family.checkCompatibility') || 'Check Compatibility'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Right column: score + more menu */}
+                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-between p-3 border-l border-[rgba(196,181,253,0.08)]">
+                    <div className="relative">
+                        {score !== null && !summaryLoading ? (
+                            <CompactScoreRing score={score} size={48} />
+                        ) : (
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[rgba(196,181,253,0.11)] bg-[rgba(196,181,253,0.05)] flex items-center justify-center">
+                                <Star className="w-4 h-4 text-[#AFA8C0]/50" />
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-auto relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen((v) => !v)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#AFA8C0] hover:text-[#F4EFE7] hover:bg-[rgba(196,181,253,0.08)] transition-colors"
+                            aria-label="More actions"
+                        >
+                            <MoreVertical className="w-4 h-4" />
+                        </button>
+                        {menuOpen && (
+                            <div className="absolute right-0 bottom-full mb-2 z-20 min-w-[140px] rounded-xl border border-[rgba(196,181,253,0.11)] bg-[#170D31] shadow-xl p-1.5">
+                                {!isLinked && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setMenuOpen(false); onEdit(); }}
+                                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-[#AFA8C0] hover:bg-[rgba(196,181,253,0.08)] hover:text-[#F4EFE7] transition-colors"
+                                        >
+                                            <Pencil className="w-3.5 h-3.5" />
+                                            Edit member
+                                        </button>
+                                        <div className="my-1 h-px bg-[rgba(196,181,253,0.08)]" />
+                                    </>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => { setMenuOpen(false); onDelete(); }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    {isLinked ? 'Disconnect' : 'Remove'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnection; onManage: () => void }) {
     const { t } = useTranslation();
-    const accent = c.avatar?.accentColor || 'var(--secondary)';
+    const accent = c.avatar?.accentColor || '#C9972E';
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const close = (e: MouseEvent) => {
+            if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+        };
+        document.addEventListener('mousedown', close);
+        return () => document.removeEventListener('mousedown', close);
+    }, [menuOpen]);
+
+    const sharingLabel = c.sharingWithThem
+        ? (t('family.connectionSharingOn') || 'Sharing on')
+        : (t('family.connectionSharingOff') || 'Sharing off');
+
     return (
-        <Card variant="default" padding="md" hoverable>
-            <div className="flex items-start gap-3">
-                {c.avatar ? (
+        <div
+            className="bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-[24px] overflow-hidden transition-all duration-300 hover:border-[rgba(196,181,253,0.22)] hover:shadow-lg cursor-pointer"
+            onClick={onManage}
+        >
+            <div className="flex items-stretch gap-0">
+                {/* Avatar column */}
+                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-center gap-2 border-r border-[rgba(196,181,253,0.08)] p-3">
                     <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
+                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border"
                         style={{
                             color: accent,
                             borderColor: `${accent}33`,
                             backgroundColor: `${accent}11`,
                         }}
                     >
-                        {React.createElement(getFamilyIcon(c.avatar.iconKey), { className: 'w-5 h-5' })}
+                        {c.avatar
+                            ? React.createElement(getFamilyIcon(c.avatar.iconKey), { className: 'w-5 h-5 sm:w-6 sm:h-6' })
+                            : <span className="text-lg font-headline font-bold" style={{ color: accent }}>{c.otherName.charAt(0).toUpperCase()}</span>
+                        }
                     </div>
-                ) : (
-                    <div className="w-11 h-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary text-sm font-bold shrink-0">
-                        {c.otherName.charAt(0).toUpperCase()}
-                    </div>
-                )}
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-base font-headline font-bold text-primary truncate">{c.otherName}</h3>
-                        <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
-                            c.isFamily
-                                ? 'bg-secondary/10 text-secondary border-secondary/30'
-                                : 'bg-sky-500/10 text-sky-300 border-sky-500/30'
-                        }`}>
-                            <Link2 className="w-2.5 h-2.5" />
-                            {c.isFamily
-                                ? (t('family.connectionKindFamily') || 'Family')
-                                : (t('family.connectionStatusConnected') || 'Connected')}
-                        </span>
-                    </div>
-                    {c.iSeeThemAs && (
-                        <p className="text-[11px] uppercase tracking-wider text-secondary/80 font-bold mt-0.5">
-                            {c.iSeeThemAs}
-                        </p>
-                    )}
-                    <div className="mt-3 space-y-1 text-[12px] text-on-surface-variant/70">
-                        <div className="flex items-center gap-1.5 truncate">
-                            <Mail className="w-3 h-3 opacity-50 shrink-0" />
-                            <span className="truncate">{c.otherEmail}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <Heart className={`w-3 h-3 ${c.sharingWithThem ? 'text-emerald-400' : 'opacity-40'}`} />
-                            <span className={c.sharingWithThem ? 'text-emerald-400' : 'text-on-surface-variant/70'}>
-                                {c.sharingWithThem
-                                    ? (t('family.connectionSharingOn') || 'Sharing on')
-                                    : (t('family.connectionSharingOff') || 'Sharing off')}
-                            </span>
+                    <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-center leading-tight ${c.isFamily ? 'text-[#C9972E]' : 'text-sky-300'}`}>
+                        {c.isFamily ? (t('family.connectionKindFamily') || 'Family') : (t('family.connectionStatusConnected') || 'Connected')}
+                    </span>
+                </div>
+
+                {/* Centre content */}
+                <div className="flex-1 min-w-0 p-3 flex flex-col justify-between">
+                    <div>
+                        <h3 className="text-base sm:text-lg font-headline font-bold text-[#F4EFE7] truncate">{c.otherName}</h3>
+                        {c.iSeeThemAs && (
+                            <p className="text-xs text-[#C9972E] font-bold uppercase tracking-wider mt-0.5">
+                                {formatRelationshipLabel(c.iSeeThemAs)}
+                            </p>
+                        )}
+                        <div className="mt-2 space-y-1 text-xs text-[#AFA8C0]">
+                            <div className="flex items-center gap-1.5 truncate">
+                                <Mail className="w-3 h-3 opacity-60 shrink-0" />
+                                <span className="truncate">{c.otherEmail}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <Heart className={`w-3 h-3 ${c.sharingWithThem ? 'text-emerald-400' : 'opacity-50'}`} />
+                                <span className={c.sharingWithThem ? 'text-emerald-400' : ''}>{sharingLabel}</span>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1 mt-4">
-                        <Button variant="primary" size="sm" onClick={onManage} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
-                            {t('family.manage') || 'Manage'}
-                        </Button>
+
+                    <div className="mt-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={onManage}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#C9972E]/40 bg-[#170D31] px-2.5 py-1.5 text-xs font-bold text-[#C9972E] hover:bg-[#C9972E]/10 transition-colors"
+                        >
+                            <Eye className="w-3.5 h-3.5" />
+                            {t('family.viewProfile') || 'View Profile'}
+                        </button>
                         {!c.disconnected && (
                             <OpenMessageButton connectionId={c.connectionId} variant="ghost" />
                         )}
                     </div>
                 </div>
+
+                {/* Right column: status + more menu */}
+                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-between p-3 border-l border-[rgba(196,181,253,0.08)]">
+                    <div
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border"
+                        style={{
+                            borderColor: c.sharingWithThem ? 'rgba(61,214,160,0.35)' : 'rgba(196,181,253,0.11)',
+                            backgroundColor: c.sharingWithThem ? 'rgba(61,214,160,0.08)' : 'rgba(196,181,253,0.05)',
+                        }}
+                    >
+                        <Link2 className={`w-4 h-4 sm:w-5 sm:h-5 ${c.sharingWithThem ? 'text-emerald-400' : 'text-[#AFA8C0]'}`} />
+                    </div>
+                    <div className="mt-auto relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen((v) => !v)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#AFA8C0] hover:text-[#F4EFE7] hover:bg-[rgba(196,181,253,0.08)] transition-colors"
+                            aria-label="More actions"
+                        >
+                            <MoreVertical className="w-4 h-4" />
+                        </button>
+                        {menuOpen && (
+                            <div className="absolute right-0 bottom-full mb-2 z-20 min-w-[140px] rounded-xl border border-[rgba(196,181,253,0.11)] bg-[#170D31] shadow-xl p-1.5">
+                                <button
+                                    type="button"
+                                    onClick={() => { setMenuOpen(false); onManage(); }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-[#AFA8C0] hover:bg-[rgba(196,181,253,0.08)] hover:text-[#F4EFE7] transition-colors"
+                                >
+                                    <Settings className="w-3.5 h-3.5" />
+                                    {t('family.manage') || 'Manage'}
+                                </button>
+                                <div className="my-1 h-px bg-[rgba(196,181,253,0.08)]" />
+                                <button
+                                    type="button"
+                                    onClick={() => { setMenuOpen(false); /* disconnect handled inside connection detail */ }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    {t('family.disconnect') || 'Disconnect'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-        </Card>
+        </div>
     );
 }
 
@@ -715,7 +1239,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
     const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(() => {
         if (editing && editing.latitude != null && editing.longitude != null) {
             return {
-                name: editing.pob,
+                name: editing.pob ?? '',
                 lat: editing.latitude,
                 lon: editing.longitude,
                 timezone: '',
@@ -1030,14 +1554,14 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
     const { totalCredits, getFeaturePaywall } = usePaywallContext();
     const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
-    const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member.id);
-    const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member.id);
+    const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member);
+    const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member);
 
     const [lang, setLang] = useState<CompatibilityLang>('en');
-    const { data: summary, isLoading: summaryLoading } = useFamilyCompatibilitySummary(member.id, lang);
+    const { data: summary, isLoading: summaryLoading } = useFamilyCompatibilitySummary(member, lang);
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
-    const { data: reports } = useFamilyReports(member.id);
-    const { fetchPreflight } = useFamilyCompatibilityPreflight(member.id);
+    const { data: reports } = useFamilyReports(member);
+    const { fetchPreflight } = useFamilyCompatibilityPreflight(member);
     const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
     /** When preflight reports insufficient credits, render this paywall modally. */
     const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
@@ -1045,7 +1569,8 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
     const chartRef = useRef<HTMLDivElement | null>(null);
     const reportsRef = useRef<HTMLDivElement | null>(null);
 
-    const creditCost = COMPATIBILITY_CREDIT_COST[member.relationshipType] ?? 5;
+    const effectiveRelationshipType = member.relationshipType ?? 'other';
+    const creditCost = COMPATIBILITY_CREDIT_COST[effectiveRelationshipType] ?? 5;
 
     // Once compat lands (cached or fresh), refresh preflight in the background so
     // we know whether the cached result is stale and whether a refresh CTA applies.
@@ -1064,8 +1589,8 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
     const scrollToReports = () => scrollTo(reportsRef.current);
 
     const alreadyPaidForLang = useMemo(
-        () => compat?.lang === lang && compat?.member_id === member.id,
-        [compat, lang, member.id]
+        () => compat?.lang === lang && (compat?.member_id === member.id || compat?.connection_id === member.connectionId),
+        [compat, lang, member]
     );
 
     const runCompatibility = async () => {
@@ -1194,7 +1719,7 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
         avatar: member.avatar ? { iconKey: member.avatar.iconKey, accentColor: member.avatar.accentColor } : null,
         verified: false,
         hasBirthDetails: true,
-        relationshipLabel: member.relationshipType,
+        relationshipLabel: member.relationshipType ?? undefined,
     };
 
     return (
@@ -1312,7 +1837,7 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                             {t('family.chartTitle') || 'Birth Chart'}
                         </h3>
                         <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                            Free
+                            {t('family.chartFreeBadge') || 'Free Snapshot'}
                         </span>
                     </div>
                     {chartLoading && (
@@ -1590,7 +2115,13 @@ function FamilyConnectionDetail({
         const res = await updateConnection(connection.connectionId, payload);
         if (!res.ok || !res.data) {
             const cap = familyCapDetail(res.raw);
+            const peerCap = familyPeerTierCapDetail(res.raw);
             if (cap) { setCapDialog(cap); return false; }
+            if (peerCap) {
+                // Peer cap isn't an upgrade signal for this user; keep the toggle off.
+                toastError(peerCap.message || "They can't be added as family right now — their list is full.");
+                return false;
+            }
             toastError(parseInviteErrorByStatus(res.status, res.raw, t));
             return false;
         }

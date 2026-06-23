@@ -59,7 +59,8 @@ export async function POST(req: Request) {
         // does not bounce the user back to onboarding.
         if (data.accessToken && user.email) {
             const profileSyncPayload = Object.fromEntries(Object.entries({
-                name: payload.name,
+                firstName: payload.firstName,
+                lastName: payload.lastName,
                 dob: payload.dob,
                 tob: payload.tob,
                 pob: payload.pob || payload.birthPlaceName,

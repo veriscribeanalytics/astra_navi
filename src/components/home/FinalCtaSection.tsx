@@ -38,12 +38,12 @@ export default function FinalCtaSection() {
         {/* 2 Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto relative z-10">
           <Button
-            href="/kundli"
+            href="/login?action=register"
             size="lg"
             rightIcon={<ArrowRight className="w-4 h-4" />}
             className="gold-gradient shadow-2xl px-8 w-full sm:w-auto"
           >
-            Generate Free Kundli
+            Let&apos;s get started
           </Button>
           <Button
             href="/dashboard"

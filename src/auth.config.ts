@@ -10,9 +10,11 @@ const SESSION_COOKIE_NAMES = [
   "__Secure-next-auth.session-token",
 ];
 
-function redirectToLoginAndClearSession(nextUrl: URL) {
+const GOOGLE_EXCHANGE_ERROR = "GoogleExchangeError";
+
+function redirectToLoginAndClearSession(nextUrl: URL, errorCode?: string) {
   const loginUrl = new URL("/login", nextUrl);
-  loginUrl.searchParams.set("error", "SessionExpired");
+  loginUrl.searchParams.set("error", errorCode || "SessionExpired");
   loginUrl.searchParams.set("sessionCleared", "1");
   const response = Response.redirect(loginUrl);
   appendSessionClearCookies(response, nextUrl.hostname);
@@ -60,7 +62,8 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const hasSessionError =
         auth?.user?.error === "TokenReuseError" ||
-        auth?.user?.error === "RefreshAccessTokenError";
+        auth?.user?.error === "RefreshAccessTokenError" ||
+        auth?.user?.error === GOOGLE_EXCHANGE_ERROR;
       const isLoggedIn = !!auth?.user && !hasSessionError;
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isAuthRoute = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
@@ -74,6 +77,9 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/services") ||
         nextUrl.pathname.startsWith("/horoscope") ||
         nextUrl.pathname.startsWith("/intro") ||
+        nextUrl.pathname.startsWith("/privacy") ||
+        nextUrl.pathname.startsWith("/terms") ||
+        nextUrl.pathname.startsWith("/astrologers") ||
         nextUrl.pathname.startsWith("/forgot-password") ||
         nextUrl.pathname.startsWith("/reset-password") ||
         nextUrl.pathname.startsWith("/logout");
@@ -86,7 +92,8 @@ export const authConfig = {
           if (nextUrl.searchParams.get("sessionCleared") === "1") {
             return continueAndClearSession(nextUrl);
           }
-          return redirectToLoginAndClearSession(nextUrl);
+          const code = auth?.user?.error === GOOGLE_EXCHANGE_ERROR ? "GoogleAuthFailed" : "SessionExpired";
+          return redirectToLoginAndClearSession(nextUrl, code);
         }
         // NOTE: we intentionally do NOT auto-redirect logged-in users away
         // from /login. Doing so used to bounce anyone who opened a shared
@@ -100,7 +107,8 @@ export const authConfig = {
       // Session has a fatal error — redirect all non-API pages to login
       // so the poisoned cookie doesn't trap the user in a redirect loop.
       if (hasSessionError && !isApiRoute && !isPublicRoute) {
-        return redirectToLoginAndClearSession(nextUrl);
+        const code = auth?.user?.error === GOOGLE_EXCHANGE_ERROR ? "GoogleAuthFailed" : "SessionExpired";
+        return redirectToLoginAndClearSession(nextUrl, code);
       }
 
       // Protect all other routes except public ones and API routes

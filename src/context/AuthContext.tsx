@@ -12,6 +12,9 @@ import { isProfileComplete, normalizeProfileUser, resolveProfileComplete } from 
 export interface User {
     id?: string;
     email?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    /** Computed display name (firstName + lastName) returned by the backend. */
     name?: string | null;
     dob?: string | null;
     tob?: string | null;
@@ -32,6 +35,8 @@ export interface User {
     chartContext?: string | null;
     tier?: string | null;
     image?: string | null;
+    profileImageUrl?: string | null;
+    chatAvatarImageUrl?: string | null;
     language?: string | null;
     username?: string | null;
     discoverable?: boolean | null;
@@ -63,6 +68,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const SESSION_RECOVERY_URL = '/login?error=SessionExpired&sessionCleared=1';
+const GOOGLE_AUTH_FAILED_URL = '/login?error=GoogleAuthFailed&sessionCleared=1';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data: session, status } = useSession();
@@ -90,7 +96,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const hasSessionError =
         session?.user?.error === "TokenReuseError" ||
-        session?.user?.error === "RefreshAccessTokenError";
+        session?.user?.error === "RefreshAccessTokenError" ||
+        session?.user?.error === "GoogleExchangeError";
     const isLoggedIn = status === 'authenticated' && !hasSessionError;
     const isSessionLoading = status === 'loading';
     const sessionUserFallback: User | null =
@@ -130,6 +137,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     .catch(err => console.warn('[AuthContext] Session clear failed:', err))
                     .finally(() => {
                       signOut({ redirectTo: SESSION_RECOVERY_URL });
+                    });
+                }
+                return;
+            } else if (sessionUser.error === "GoogleExchangeError") {
+                setUser(null);
+                setProfileComplete(false);
+                setProfileFetched(false);
+                fetchInProgressRef.current = false;
+                if (pathname === '/login') return;
+                console.error("[AuthContext] Google OAuth exchange failed. Signing out and redirecting to login.");
+                if (!signOutInitiatedRef.current) {
+                  signOutInitiatedRef.current = true;
+                  fetch('/api/auth/clear-session', { method: 'POST' })
+                    .catch(err => console.warn('[AuthContext] Session clear failed:', err))
+                    .finally(() => {
+                      signOut({ redirectTo: GOOGLE_AUTH_FAILED_URL });
                     });
                 }
                 return;

@@ -76,6 +76,29 @@ const LoginContent = () => {
 
       return; // stop looping - show the form so user can sign in manually
     }
+
+    if (authError === 'GoogleAuthFailed') {
+      if (recoveryStartedRef.current) return;
+      recoveryStartedRef.current = true;
+      window.history.replaceState(null, '', '/login?sessionCleared=1');
+      window.setTimeout(() => showError('Google sign-in failed. Please try again or use email/password.'), 500);
+
+      void (async () => {
+        try {
+          await fetch('/api/auth/clear-session', { method: 'POST', cache: 'no-store' });
+        } catch {
+          // Best effort
+        }
+
+        try {
+          await signOut({ redirect: false, redirectTo: '/login?sessionCleared=1' });
+        } catch {
+          // Keep the user on the stable login form
+        }
+      })();
+
+      return;
+    }
     // Clear the counter once the user lands on a clean login page
     if (!authError) {
       recoveryStartedRef.current = false;
@@ -96,6 +119,7 @@ const LoginContent = () => {
         Configuration: t('login.networkError'),
         SessionRequired: t('auth.errors.session_required'),
         SessionExpired: t('auth.errors.session_expired_error'),
+        GoogleAuthFailed: 'Google sign-in failed. Please try again or use a different method.',
         default: t('auth.errors.signin_error'),
       };
 
@@ -171,7 +195,7 @@ const LoginContent = () => {
 
   // --- Register handler ---
   const handleRegister = async (submitData: {
-    email: string; password: string; name: string; gender: string;
+    email: string; password: string; firstName: string; lastName: string; gender: string;
     phoneNumber: string; maritalStatus: string; occupation: string;
     dob: string; tob: string; pob: string; birthPlaceName: string;
     birthLatitude: number | undefined; birthLongitude: number | undefined;
@@ -216,7 +240,8 @@ const LoginContent = () => {
       setAuthUser(data.user.email, {
         ...profileData,
         id: data.user.id,
-        name: data.user.name || submitData.name,
+        // Prefer the backend's computed name; fall back to local first+last.
+        name: data.user.name || [submitData.firstName, submitData.lastName].filter(Boolean).join(' ').trim() || undefined,
       });
 
       showLoading(t('login.signingYouIn'), 1500);

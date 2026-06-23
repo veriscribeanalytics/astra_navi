@@ -27,7 +27,7 @@ import type {
     FamilyInvite,
     FamilyRelationshipType,
 } from '@/types/family';
-import { parseInviteErrorByStatus, familyCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
+import { parseInviteErrorByStatus, familyCapDetail, familyPeerTierCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { useCountdown } from '@/lib/useCountdown';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 import MakeFamilyDialog from '@/components/family/MakeFamilyDialog';
@@ -163,7 +163,9 @@ const FamilyInvitesClient: React.FC = () => {
         setTogglingConnId(null);
         if (!res.ok) {
             const cap = familyCapDetail(res.raw);
+            const peerCap = familyPeerTierCapDetail(res.raw);
             if (cap) setCapDialog(cap);
+            else if (peerCap) toastError(peerCap.message || "They can't be added as family right now — their list is full.");
             else toastError(parseInviteErrorByStatus(res.status, res.raw, t));
         }
         refetchConnections();

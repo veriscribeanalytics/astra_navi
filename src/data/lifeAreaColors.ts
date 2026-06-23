@@ -18,6 +18,7 @@ export interface SignalBadgeSet {
   label: string;
   main: string;
   bg: string;
+  border: string;
 }
 
 export interface BrandGoldSet {
@@ -40,13 +41,13 @@ type AreaPhasePair = Pick<AreaColorSet, "main" | "glow">;
 // is rating-dependent again: an area's hue shifts as its score moves through the
 // BAD → EXCELLENT bands. See getScorePhase() for the cutoffs.
 export const AREA_PHASE_COLORS: Record<"overall" | ForecastArea, Record<ScorePhase, AreaPhasePair>> = {
-  // Aurora: indigo → violet → cyan → blue
+  // Semantic score colours: green (positive), amber (caution), rose (alert)
   overall: {
-    BAD: { main: "#1E1B4B", glow: "#6366F1" },
-    WEAK: { main: "#3730A3", glow: "#818CF8" },
-    MIXED: { main: "#6D5DF6", glow: "#BDB4FE" },
-    GOOD: { main: "#0891B2", glow: "#67E8F9" },
-    EXCELLENT: { main: "#0284C7", glow: "#BAE6FD" },
+    BAD: { main: "#F05B68", glow: "#F05B68" },
+    WEAK: { main: "#D9A136", glow: "#D9A136" },
+    MIXED: { main: "#D9A136", glow: "#D9A136" },
+    GOOD: { main: "#2FD3A0", glow: "#2FD3A0" },
+    EXCELLENT: { main: "#2FD3A0", glow: "#2FD3A0" },
   },
   // Traffic light
   general: {
@@ -100,47 +101,50 @@ export const AREA_PHASE_COLORS: Record<"overall" | ForecastArea, Record<ScorePha
 
 export const STATUS_COLORS: Record<ScorePhase, StatusColorSet> = {
   BAD: {
-    main: "#EF4444",
-    bg: "rgba(239, 68, 68, 0.14)",
-    border: "rgba(239, 68, 68, 0.28)",
+    main: "#F05B68",
+    bg: "rgba(240, 91, 104, 0.14)",
+    border: "rgba(240, 91, 104, 0.28)",
   },
   WEAK: {
-    main: "#F97316",
-    bg: "rgba(249, 115, 22, 0.14)",
-    border: "rgba(249, 115, 22, 0.28)",
+    main: "#D9A136",
+    bg: "rgba(217, 161, 54, 0.14)",
+    border: "rgba(217, 161, 54, 0.28)",
   },
   MIXED: {
-    main: "#F59E0B",
-    bg: "rgba(245, 158, 11, 0.14)",
-    border: "rgba(245, 158, 11, 0.28)",
+    main: "#D9A136",
+    bg: "rgba(217, 161, 54, 0.14)",
+    border: "rgba(217, 161, 54, 0.28)",
   },
   GOOD: {
-    main: "#22C55E",
-    bg: "rgba(34, 197, 94, 0.14)",
-    border: "rgba(34, 197, 94, 0.28)",
+    main: "#2FD3A0",
+    bg: "rgba(47, 211, 160, 0.14)",
+    border: "rgba(47, 211, 160, 0.28)",
   },
   EXCELLENT: {
-    main: "#14B8A6",
-    bg: "rgba(20, 184, 166, 0.14)",
-    border: "rgba(20, 184, 166, 0.28)",
+    main: "#2FD3A0",
+    bg: "rgba(47, 211, 160, 0.14)",
+    border: "rgba(47, 211, 160, 0.28)",
   },
 };
 
 export const SIGNAL_BADGES: Record<"BEST" | "STABLE" | "WORST", SignalBadgeSet> = {
   BEST: {
     label: "BEST TODAY",
-    main: "#22C55E",
-    bg: "rgba(34, 197, 94, 0.14)",
+    main: "#35CFA0",
+    bg: "rgba(53, 207, 160, 0.14)",
+    border: "rgba(53, 207, 160, 0.28)",
   },
   STABLE: {
     label: "STABLE THIS WEEK",
-    main: "#38BDF8",
-    bg: "rgba(56, 189, 248, 0.14)",
+    main: "#9A72D8",
+    bg: "rgba(154, 114, 216, 0.14)",
+    border: "rgba(154, 114, 216, 0.28)",
   },
   WORST: {
     label: "NEEDS ATTENTION",
-    main: "#EF4444",
-    bg: "rgba(239, 68, 68, 0.14)",
+    main: "#E16272",
+    bg: "rgba(225, 98, 114, 0.14)",
+    border: "rgba(225, 98, 114, 0.28)",
   },
 };
 

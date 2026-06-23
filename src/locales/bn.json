@@ -18,6 +18,8 @@
     "returnHome": "বাড়িতে ফিরুন"
   },
   "nav": {
+    "dailyRewards": "দৈনিক পুরস্কার",
+    "dailyRewardsDesc": "প্রতিদিন বিনামূল্যে ক্রেডিট সংগ্রহ করুন। আপনার স্ট্রিক চালু রাখুন!",
     "myJourney": "আমার যাত্রা",
     "cosmicDashboard": "কসমিক ড্যাশবোর্ড",
     "cosmicDashboardDesc": "আপনার ব্যক্তিগত ওভারভিউ এবং দৈনিক অন্তর্দৃষ্টি।",
@@ -1065,7 +1067,33 @@
     },
     "ariaDay": "{weekday} {date}, স্কোর {score}",
     "todayShort": "আজ",
-    "weekly": "৭ দিন"
+    "weekly": "৭ দিন",
+    "action": {
+      "opportunities": "Weekly Opportunities",
+      "caution": "Caution This Week",
+      "keyInfluence": "Key Planetary Influence",
+      "recommended": "Recommended Action",
+      "askAstrologer": "Ask an AI Astrologer",
+      "askBody": "Need a deeper reading? Ask Navi to interpret this forecast for your chart.",
+      "askExample1": "Why is {area} strong this week?",
+      "askExample2": "What should I avoid before the weekend?",
+      "askExample3": "How do I use the best day productively?",
+      "ctaChat": "Ask Navi",
+      "opportunityBody": "The best window is around {best}. Use it for important decisions, creative launches or relationship conversations.",
+      "cautionBody": "Watch out around {worst}. Postpone risky commitments and give yourself extra space to decide.",
+      "opportunityDefault": "This week holds steady planetary support. Mid-week is especially favourable for focused action.",
+      "cautionDefault": "Avoid rushing big commitments on the lower-scored days. Patience brings better timing.",
+      "recommendedDefault": "Schedule key tasks on the strongest days and keep low-scored days for rest or routine work.",
+      "planetDefault": "Current planetary transits",
+      "influenceDefault": "The active planets are creating a balanced but changeable backdrop. Move with patience and awareness.",
+      "chatPrompt": "Walk me through my {area} forecast for {period} and tell me what to focus on.",
+      "bestHigh": "Monday to mid-week",
+      "bestStable": "mid-week",
+      "bestLow": "any day where the score peaks",
+      "worstHigh": "only brief dips around weekends",
+      "worstStable": "the start and end of the week",
+      "worstLow": "the lowest-scored days"
+    }
   },
   "plans": {
     "title": "আপনার মহাজাগতিক সম্ভাবনা উন্মোচন করুন",
@@ -2093,5 +2121,36 @@
         "description": "একটি প্রো পরিকল্পনার সাথে মূল জীবনের থিমের অন্তর্দৃষ্টি আনলক করুন।"
       }
     }
+  },
+  "rewards": {
+    "title": "দৈনিক পুরস্কার",
+    "subtitle": "প্রতিদিন বিনামূল্যে ক্রেডিট সংগ্রহ করুন — আপনার কসমিক স্ট্রিক চালু রাখুন।",
+    "claimButton": "আজকের পুরস্কার সংগ্রহ করুন",
+    "claimNow": "এখনই সংগ্রহ করুন",
+    "claimedButton": "আজ সংগ্রহ করা হয়েছে",
+    "claimingButton": "সংগ্রহ করা হচ্ছে…",
+    "streakLabel": "দিনের স্ট্রিক",
+    "longestStreakLabel": "দীর্ঘতম স্ট্রিক",
+    "totalClaimsLabel": "মোট সংগ্রহ",
+    "balanceLabel": "ক্রেডিট ব্যালেন্স",
+    "nextRewardLabel": "পরবর্তী পুরস্কার",
+    "nextRewardIn": "পরবর্তী পুরস্কার আসবে",
+    "todayReward": "আজকের পুরস্কার",
+    "creditsLabel": "ক্রেডিট",
+    "dayLabel": "দিন",
+    "bonusLabel": "বোনাস",
+    "weekProgress": "এই সপ্তাহ",
+    "cycleComplete": "৭ম দিনের পর চক্র আবার শুরু হয়",
+    "day7Hint": "মেগা বোনাসের জন্য ৭ম দিনে পৌঁছান",
+    "claimSuccess": "আপনি {credits} ক্রেডিট অর্জন করেছেন — {streak} দিনের স্ট্রিক!",
+    "newBalanceLabel": "নতুন ব্যালেন্স",
+    "claimAlready": "আজ ইতিমধ্যে সংগ্রহ করা হয়েছে। আগামীকাল আবার আসুন!",
+    "claimError": "কিছু একটা ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "loadError": "পুরস্কার লোড করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "retry": "আবার চেষ্টা করুন",
+    "noStreakYet": "আজ সংগ্রহ করে আপনার স্ট্রিক শুরু করুন!",
+    "streakResetNotice": "একদিন বাদ দিলে আপনার স্ট্রিক আবার ১ম দিনে ফিরে যাবে।",
+    "howItWorks": "কীভাবে কাজ করে",
+    "howItWorksDesc": "দিনে একবার সংগ্রহ করুন। প্রতিটি ধারাবাহিক দিন আপনার স্ট্রিক বাড়ায় এবং আরও বড় পুরস্কার আনলক করে — ৭ম দিনই জ্যাকপট। একদিন বাদ দিলে আপনি আবার ১ম দিন থেকে শুরু করবেন। প্রতিদিন মধ্যরাত UTC-তে রিসেট হয়।"
   }
 }

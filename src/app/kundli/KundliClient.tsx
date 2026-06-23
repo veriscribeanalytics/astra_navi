@@ -759,8 +759,11 @@ export default function KundliPage() {
                             className="flex gap-2.5 sm:gap-3 overflow-x-auto scroll-smooth no-scrollbar px-4 sm:px-12 py-3.5"
                         >
                             {data.planets.map(planet => {
-                                const dignity = getDignityStyle(planet.dignity);
                                 const isSelected = selectedPlanet?.planet === planet.planet;
+                                const isRetro = planet.retrograde;
+                                const motionClasses = isRetro
+                                    ? 'text-amber-300 bg-amber-500/10 border-amber-500/20'
+                                    : 'text-[#B1AABE] bg-[rgba(196,181,253,0.10)] border-[rgba(196,181,253,0.20)]';
                                 return (
                                     <motion.button
                                         key={planet.planet}
@@ -773,16 +776,13 @@ export default function KundliPage() {
                                             }`}
                                     >
                                         <motion.div layoutId={`planet-fly-${planet.planet}`}>
-                                            <PlanetIcon planet={planet.planet} size="w-[54px] h-[54px] sm:w-[62px] sm:h-[62px]" />
+                                            <PlanetIcon planet={planet.planet} size="w-[54px] h-[54px] sm:w-[62px] sm:h-[62px]" glow={isSelected} />
                                         </motion.div>
                                         <p className="text-[12px] font-headline font-bold text-foreground group-hover:text-secondary transition-colors leading-none mt-1">
                                             {planet.planet}
                                         </p>
-                                        <span className={`text-[8.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${dignity.bg} ${dignity.text} ${dignity.border}`}>
-                                            {dignity.label}
-                                        </span>
-                                        <span className={`text-[8.5px] font-bold ${planet.retrograde ? 'text-orange-400' : 'invisible'}`}>
-                                            ℞ Retro
+                                        <span className={`text-[8.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${motionClasses}`}>
+                                            {isRetro ? 'RETROGRADE' : 'NORMAL'}
                                         </span>
                                     </motion.button>
                                 );

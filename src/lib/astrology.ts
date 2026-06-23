@@ -62,7 +62,7 @@ export const getDignityStyle = (dignity: string) => {
     if (dignity === 'Moolatrikona' || dignity === 'Great Friend') return { text: 'text-amber-400', bg: 'bg-amber-500/15', border: 'border-amber-500/30', label: 'Moolatrikona', dot: 'bg-amber-400' };
     if (dignity === 'Friendly' || dignity === 'Friend\'s Sign') return { text: 'text-sky-400', bg: 'bg-sky-500/15', border: 'border-sky-500/30', label: 'Friendly', dot: 'bg-sky-400' };
     if (dignity === 'Enemy' || dignity === 'Inimical') return { text: 'text-orange-400', bg: 'bg-orange-500/15', border: 'border-orange-500/30', label: 'Enemy', dot: 'bg-orange-400' };
-    return { text: 'text-foreground/40', bg: 'bg-foreground/5', border: 'border-foreground/10', label: 'Normal', dot: 'bg-foreground/20' };
+    return { text: 'text-[#B1AABE]', bg: 'bg-[rgba(196,181,253,0.10)]', border: 'border-[rgba(196,181,253,0.20)]', label: 'Normal', dot: 'bg-[#B1AABE]' };
 };
 
 export const getRashiData = (sign: string) => {
