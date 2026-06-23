@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -22,23 +22,8 @@ const ASTROLOGERS = [
   { name: 'Rishi', role: 'Deep Chart Sage', avatar: '/images/avatars/RISHI_AVATAR.jpeg', specialty: 'Divisional charts & spiritual path', icon: BookOpen, color: 'from-purple-500/20 to-violet-600/20' },
 ];
 
-const MOBILE_PREVIEWS = [
-  {
-    src: '/images/dashboard-mobile.png',
-    alt: 'AstraNavi mobile dashboard',
-    className: 'object-cover',
-  },
-  {
-    src: '/images/kundli-mobile.png',
-    alt: 'AstraNavi mobile Kundli',
-    className: 'object-cover',
-  },
-  {
-    src: '/images/forecast-desktop.png',
-    alt: 'AstraNavi forecast preview',
-    className: 'object-cover object-center',
-  },
-];
+const PHONE_RATIO = 2.02;
+const BROWSER_RATIO = 2.12;
 
 function clamp(v: number, min: number, max: number) { return Math.min(max, Math.max(min, v)); }
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
@@ -75,7 +60,6 @@ function rectLerp(a: Rect, b: Rect, t: number): Rect {
 export default function ScrollMorphSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const phoneNotchRef = useRef<HTMLDivElement>(null);
   const browserChromeRef = useRef<HTMLDivElement>(null);
   const urlTextRef = useRef<HTMLDivElement>(null);
   const mobileShotRef = useRef<HTMLDivElement>(null);
@@ -83,7 +67,6 @@ export default function ScrollMorphSection() {
   const kundliShotRef = useRef<HTMLImageElement>(null);
   const forecastShotRef = useRef<HTMLImageElement>(null);
   const peekLeftRef = useRef<HTMLDivElement>(null);
-  const peekRightRef = useRef<HTMLDivElement>(null);
   const astrologersGridRef = useRef<HTMLDivElement>(null);
 
   const heroTextRef = useRef<HTMLDivElement>(null);
@@ -94,31 +77,24 @@ export default function ScrollMorphSection() {
 
   const stRef = useRef<ScrollTrigger | null>(null);
   const lastProgressRef = useRef(0);
-  const [mobilePreviewIndex, setMobilePreviewIndex] = useState(0);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setMobilePreviewIndex((current) => (current + 1) % MOBILE_PREVIEWS.length);
-    }, 5000);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
 
   const getRects = useCallback(() => {
     const section = sectionRef.current;
-    if (!section) return { start: { x: 0, y: 0, w: 300, h: 620, r: 40 }, end: { x: 0, y: 0, w: 1100, h: 520, r: 16 } };
+    if (!section) return { start: { x: 0, y: 0, w: 300, h: 606, r: 40 }, end: { x: 0, y: 0, w: 1100, h: 519, r: 16 } };
     const sw = section.clientWidth;
     const sh = section.clientHeight;
     const pad = isMobileLayout() ? 18 : 56;
 
     if (isMobileLayout()) {
-      const startW = clamp(sw * 0.55, 200, 280);
-      const startH = Math.min(sh * 0.42, startW * 2.17);
+      const startW = clamp(sw * 0.58, 216, 286);
+      const startH = Math.min(sh * 0.42, startW * PHONE_RATIO);
+      const startY = clamp(sh * 0.56, pad, sh - pad - startH);
       const endW = Math.min(sw - pad * 2, 720);
-      const endH = Math.min(sh * 0.48, endW * 10 / 16);
+      const endH = Math.min(sh * 0.28, endW / BROWSER_RATIO);
+      const endY = clamp(sh * 0.68, pad, sh - pad - endH);
       return {
-        start: { x: (sw - startW) / 2, y: sh * 0.44, w: startW, h: startH, r: 36 },
-        end: { x: (sw - endW) / 2, y: (sh - endH) / 2, w: endW, h: endH, r: 16 },
+        start: { x: (sw - startW) / 2, y: startY, w: startW, h: startH, r: 30 },
+        end: { x: (sw - endW) / 2, y: endY, w: endW, h: endH, r: 14 },
       };
     }
 
@@ -126,8 +102,10 @@ export default function ScrollMorphSection() {
     const rightAreaX = textWidth + pad;
     const rightAreaW = sw - rightAreaX - pad;
 
-    const startW = clamp(sw * 0.19, 220, 310);
-    const startH = Math.min(sh * 0.72, startW * 2.17);
+    const idealStartW = clamp(sw * 0.23, 260, 365);
+    const maxStartH = sh * 0.82;
+    const startH = Math.min(maxStartH, idealStartW * PHONE_RATIO);
+    const startW = startH < idealStartW * PHONE_RATIO ? startH / PHONE_RATIO : idealStartW;
     const startCX = rightAreaX + rightAreaW / 2;
     const startCY = sh / 2;
     const startX = clamp(startCX - startW / 2, pad, sw - pad - startW);
@@ -135,9 +113,9 @@ export default function ScrollMorphSection() {
 
     const endWMax = Math.min(rightAreaW, 1100);
     let endW = endWMax;
-    let endH = endW * 11 / 16;
+    let endH = endW / BROWSER_RATIO;
     const maxH = sh * 0.84;
-    if (endH > maxH) { endH = maxH; endW = endH * 16 / 11; }
+    if (endH > maxH) { endH = maxH; endW = endH * BROWSER_RATIO; }
     const endX = rightAreaX + (rightAreaW - endW) / 2;
     const endY = (sh - endH) / 2;
 
@@ -183,7 +161,6 @@ export default function ScrollMorphSection() {
     const morph = smoothstep(0.12, 0.28, p);
     const heroOut = smoothstep(0.06, 0.22, p);
     const peekOut = smoothstep(0.06, 0.20, p);
-    const notchOut = smoothstep(0.14, 0.24, p);
     const mobileOut = smoothstep(0.16, 0.30, p);
     const chromeIn = smoothstep(0.16, 0.26, p);
     const dashShotIn = smoothstep(0.22, 0.32, p);
@@ -211,7 +188,7 @@ export default function ScrollMorphSection() {
 
     const set = (el: Element | null, props: gsap.TweenVars) => { if (el) gsap.set(el, props); };
 
-    set(mobileShotRef.current, { autoAlpha: 1 - mobileOut, scale: 1.02 - 0.06 * mobileOut });
+    set(mobileShotRef.current, { autoAlpha: 1 - mobileOut, scale: 1.015 - 0.035 * mobileOut });
     set(dashShotRef.current, { autoAlpha: dashShotIn * (1 - dashShotOut), scale: 1.03 - 0.03 * dashShotIn });
     set(kundliShotRef.current, { autoAlpha: kundliShotIn * (1 - kundliShotOut), scale: 1.03 - 0.03 * kundliShotIn });
     set(forecastShotRef.current, { autoAlpha: forecastShotIn * (1 - forecastShotOut), scale: 1.03 - 0.03 * forecastShotIn });
@@ -234,12 +211,20 @@ export default function ScrollMorphSection() {
       set(astroTextRef.current, { autoAlpha: astroTextIn, left: textX, top: '50%', width: textW, xPercent: 0, yPercent: -50, x: 40 * (1 - astroTextIn), scale: 0.97 + 0.03 * astroTextIn });
     }
 
-    set(phoneNotchRef.current, { autoAlpha: 1 - notchOut });
     set(browserChromeRef.current, { autoAlpha: chromeIn * (1 - browserOut) });
     const peekCX = rect.x + rect.w / 2;
-    const peekCY = rect.y + rect.h * 0.15;
-    set(peekLeftRef.current, { autoAlpha: 0.85 * (1 - peekOut), left: peekCX, top: peekCY, xPercent: -50, yPercent: 0, x: lerp(-95, -130, peekOut), rotate: lerp(-16, -22, peekOut) });
-    set(peekRightRef.current, { autoAlpha: 0.85 * (1 - peekOut), left: peekCX, top: peekCY, xPercent: -50, yPercent: 0, x: lerp(95, 130, peekOut), rotate: lerp(16, 22, peekOut) });
+    const peekCY = rect.y + rect.h * 0.12;
+    set(peekLeftRef.current, {
+      autoAlpha: 0.28 * (1 - peekOut),
+      left: peekCX,
+      top: peekCY,
+      xPercent: -50,
+      yPercent: 0,
+      x: lerp(-86, -118, peekOut),
+      y: lerp(18, 4, peekOut),
+      rotate: lerp(-7, -12, peekOut),
+      scale: 0.98,
+    });
 
     set(astrologersGridRef.current, { autoAlpha: astroGridIn });
 
@@ -272,12 +257,15 @@ export default function ScrollMorphSection() {
 
     const card = cardRef.current;
     if (card) {
-      const borderW = lerp(7, 1, morph);
-      const borderAlpha = lerp(0.8, 0.16, morph);
+      const borderW = lerp(2.5, 1, morph);
+      const borderAlpha = lerp(0.48, 0.16, morph);
       card.style.borderWidth = `${borderW}px`;
-      card.style.borderColor = `rgba(32,24,64,${borderAlpha})`;
-      const bgDark = lerp(0, 0, morph);
-      card.style.backgroundColor = `rgb(${7 + bgDark * 7}, ${5 + bgDark * 7}, ${20 + bgDark * 7})`;
+      card.style.borderColor = `rgba(110,133,118,${borderAlpha})`;
+      const bgDark = lerp(1, 0, morph);
+      card.style.backgroundColor = `rgb(${9 + bgDark * 6}, ${8 + bgDark * 9}, ${22 + bgDark * 8})`;
+      card.style.boxShadow = morph < 0.35
+        ? '0 28px 95px rgba(122, 255, 190, 0.16), 0 16px 70px rgba(231, 176, 68, 0.13), 0 0 0 1px rgba(255,255,255,0.07)'
+        : '0 28px 90px rgba(0,0,0,0.34), 0 0 0 1px rgba(255,255,255,0.05)';
     }
   }, [getRects, applyRect, getTextLeft, getTextWidth]);
 
@@ -334,13 +322,13 @@ export default function ScrollMorphSection() {
         <p className="text-sm sm:text-base md:text-lg text-on-surface-variant/80 max-w-xl leading-relaxed font-body mb-8">
           AI-powered Vedic astrology for daily guidance, Kundli insights, forecasts, and personal questions.
         </p>
-        <div className="hidden lg:flex flex-row items-center gap-4">
+        <div className="hidden lg:flex flex-row items-center gap-4 pointer-events-auto">
           <Button href="/login?action=register" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-8">Let&apos;s get started</Button>
           <Button href="/chat" variant="secondary" size="lg" leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />} className="px-8 border-outline-variant/40 text-primary hover:border-secondary/50">Ask Navi</Button>
         </div>
-        <div className="flex lg:hidden flex-col sm:flex-row items-center gap-3">
-          <Button href="/login?action=register" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-8 w-full sm:w-1/2">Let&apos;s get started</Button>
-          <Button href="/chat" variant="secondary" size="lg" leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />} className="px-8 w-full sm:w-1/2 border-outline-variant/40 text-primary">Ask Navi</Button>
+        <div className="flex lg:hidden flex-row items-center gap-3 pointer-events-auto">
+          <Button href="/login?action=register" size="md" rightIcon={<ArrowRight className="w-4 h-4" />} className="gold-gradient shadow-xl px-5 flex-1">Get started</Button>
+          <Button href="/chat" variant="secondary" size="md" leftIcon={<MessageSquare className="w-4 h-4 text-secondary" />} className="px-5 shrink-0 border-outline-variant/40 text-primary">Ask Navi</Button>
         </div>
       </div>
 
@@ -353,12 +341,12 @@ export default function ScrollMorphSection() {
           </div>
           <ul className="space-y-3 font-body">
             {['Daily cosmic energy score out of 100', 'Detailed breakdown of Career, Finance, Health, and Love', 'Auspicious timing windows (Good Time) and caution windows (Rahu Kaal)', 'Interactive weekly dasha trends graph', 'Quick action buttons to Ask Navi AI questions directly'].map((b, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-on-surface-variant/70">
+              <li key={i} className={`${i > 2 ? 'hidden sm:flex' : 'flex'} items-start gap-2.5 text-xs sm:text-sm text-on-surface-variant/70`}>
                 <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" /><span>{b}</span>
               </li>
             ))}
           </ul>
-          <div className="pt-2"><Button href="/dashboard" rightIcon={<ArrowRight className="w-4 h-4" />}>Explore Your Dashboard</Button></div>
+          <div className="pt-2 pointer-events-auto"><Button href="/dashboard" rightIcon={<ArrowRight className="w-4 h-4" />}>Explore Your Dashboard</Button></div>
         </div>
       </div>
 
@@ -371,12 +359,12 @@ export default function ScrollMorphSection() {
           </div>
           <ul className="space-y-3 font-body">
             {['Full Vedic Janam Kundli / Lagna Chart rendering', 'Comprehensive planetary powers (Shadbala calculations)', 'Varga (Divisional) charts including Navamsha (D9) & Dashamsha (D10)', 'Explanations of houses, signs, and planetary placements', 'Clear insights into your core identity and element distribution'].map((b, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-on-surface-variant/70">
+              <li key={i} className={`${i > 2 ? 'hidden sm:flex' : 'flex'} items-start gap-2.5 text-xs sm:text-sm text-on-surface-variant/70`}>
                 <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" /><span>{b}</span>
               </li>
             ))}
           </ul>
-          <div className="pt-2"><Button href="/login?action=register" rightIcon={<ArrowRight className="w-4 h-4" />}>Let&apos;s get started</Button></div>
+          <div className="pt-2 pointer-events-auto"><Button href="/login?action=register" rightIcon={<ArrowRight className="w-4 h-4" />}>Let&apos;s get started</Button></div>
         </div>
       </div>
 
@@ -389,12 +377,12 @@ export default function ScrollMorphSection() {
           </div>
           <ul className="space-y-3 font-body">
             {['Weekly forecast graph mapping transit energy shifts', 'Life Area tabs for specific, targeted predictions', 'Detailed 7-day breakdown of transits and lunar phases', 'Best day and most challenging day indicators', 'Muhurta timing filters for planning important activities'].map((b, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-on-surface-variant/70">
+              <li key={i} className={`${i > 2 ? 'hidden sm:flex' : 'flex'} items-start gap-2.5 text-xs sm:text-sm text-on-surface-variant/70`}>
                 <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" /><span>{b}</span>
               </li>
             ))}
           </ul>
-          <div className="pt-2"><Button href="/horoscope/forecast" rightIcon={<ArrowRight className="w-4 h-4" />}>View Detailed Forecast</Button></div>
+          <div className="pt-2 pointer-events-auto"><Button href="/horoscope/forecast" rightIcon={<ArrowRight className="w-4 h-4" />}>View Detailed Forecast</Button></div>
         </div>
       </div>
 
@@ -412,33 +400,17 @@ export default function ScrollMorphSection() {
               </li>
             ))}
           </ul>
-          <div className="pt-2"><Button href="/chat" rightIcon={<ArrowRight className="w-4 h-4" />}>Start AI Session</Button></div>
+          <div className="pt-2 pointer-events-auto"><Button href="/chat" rightIcon={<ArrowRight className="w-4 h-4" />}>Start AI Session</Button></div>
         </div>
       </div>
 
       <div ref={peekLeftRef} className="absolute z-[2] pointer-events-none hidden sm:block" style={{ opacity: 0 }}>
-        <div className="w-[130px] sm:w-[170px] lg:w-[200px] rounded-[24px] sm:rounded-[32px] border-[4px] border-surface-variant/80 bg-[#070514] shadow-2xl overflow-hidden aspect-[1170/2532] select-none relative">
-          <div className="absolute top-0 inset-x-0 h-3 bg-[#070514] flex justify-center items-center z-20">
-            <div className="w-8 h-0.5 rounded-full bg-on-surface-variant/20" />
-          </div>
-          <MobilePreviewStack activeIndex={(mobilePreviewIndex + 1) % MOBILE_PREVIEWS.length} className="pt-3" />
+        <div className="w-[160px] sm:w-[210px] lg:w-[245px] rounded-[30px] sm:rounded-[36px] border border-white/10 bg-[#0f1220] shadow-2xl overflow-hidden aspect-[1170/2532] select-none relative">
+          <RearPhonePreview />
         </div>
       </div>
 
-      <div ref={peekRightRef} className="absolute z-[2] pointer-events-none hidden lg:block" style={{ opacity: 0 }}>
-        <div className="w-[130px] sm:w-[170px] lg:w-[200px] rounded-[24px] sm:rounded-[32px] border-[4px] border-surface-variant/80 bg-[#070514] shadow-2xl overflow-hidden aspect-[1170/2532] select-none relative">
-          <div className="absolute top-0 inset-x-0 h-3 bg-[#070514] flex justify-center items-center z-20">
-            <div className="w-8 h-0.5 rounded-full bg-on-surface-variant/20" />
-          </div>
-          <MobilePreviewStack activeIndex={(mobilePreviewIndex + 2) % MOBILE_PREVIEWS.length} className="pt-3" />
-        </div>
-      </div>
-
-      <div ref={cardRef} className="absolute z-[3] overflow-hidden border-[7px] border-surface-variant/80 bg-[#070514] shadow-2xl" style={{ left: 0, top: 0, width: 300, height: 620, borderRadius: 42, willChange: 'left, top, width, height, border-radius, transform' }}>
-        <div ref={phoneNotchRef} className="absolute top-0 inset-x-0 h-4 bg-[#070514] flex justify-center items-center z-20" style={{ opacity: 0 }}>
-          <div className="w-16 h-1 rounded-full bg-on-surface-variant/20" />
-        </div>
-
+      <div ref={cardRef} className="absolute z-[3] overflow-hidden border border-white/10 bg-[#0f1220]" style={{ left: 0, top: 0, width: 300, height: 620, borderRadius: 38, willChange: 'left, top, width, height, border-radius, transform' }}>
         <div ref={browserChromeRef} className="absolute top-0 inset-x-0 z-20 bg-surface-variant/30 border-b border-outline-variant/20 px-4 py-2.5 flex items-center justify-between" style={{ opacity: 0, height: 34 }}>
           <div className="flex gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/40" />
@@ -452,35 +424,51 @@ export default function ScrollMorphSection() {
         </div>
 
         <div ref={mobileShotRef} className="absolute inset-0" style={{ opacity: 0, willChange: 'opacity, transform' }}>
-          <MobilePreviewStack activeIndex={mobilePreviewIndex} />
+          <HeroPhonePreview />
         </div>
-        <img ref={dashShotRef} src="/images/dashboard-desktop.png" alt="AstraNavi Desktop Dashboard" className="absolute left-0 right-0 bottom-0 right-[34px] w-full h-full object-contain bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform' }} />
-        <img ref={kundliShotRef} src="/images/kundli-desktop.png" alt="AstraNavi Kundli Desktop" className="absolute left-0 right-0 bottom-0 right-[34px] w-full h-full object-contain bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform' }} />
-        <img ref={forecastShotRef} src="/images/forecast-desktop.png" alt="AstraNavi Forecast Desktop" className="absolute left-0 top-[34px] right-0 bottom-0 w-full h-full object-contain bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform' }} />
+        <img ref={dashShotRef} src="/images/dashboard-desktop.png" alt="AstraNavi Desktop Dashboard" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-center bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.1) contrast(1.06)' }} />
+        <img ref={kundliShotRef} src="/images/kundli-desktop.png" alt="AstraNavi Kundli Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
+        <img ref={forecastShotRef} src="/images/forecast-desktop.png" alt="AstraNavi Forecast Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
       </div>
     </section>
   );
 }
 
-function MobilePreviewStack({
-  activeIndex,
-  className = '',
-}: {
-  activeIndex: number;
-  className?: string;
-}) {
+function HeroPhonePreview() {
   return (
-    <div className={`absolute inset-0 bg-[#070514] ${className}`}>
-      {MOBILE_PREVIEWS.map((preview, index) => (
-        <img
-          key={preview.src}
-          src={preview.src}
-          alt={preview.alt}
-          className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${preview.className} ${
-            index === activeIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-      ))}
+    <div className="absolute inset-0 bg-[#101620]">
+      <img
+        src="/images/dashboard-mobile.png"
+        alt="AstraNavi mobile dashboard"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{
+          filter: 'brightness(1.22) contrast(1.1) saturate(1.08)',
+          objectPosition: '50% 40%',
+          transform: 'scale(1.08)',
+          transformOrigin: '50% 42%',
+        }}
+      />
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(255,255,255,0.1),transparent_18%,transparent_78%,rgba(0,0,0,0.18))]" />
+      <div className="absolute inset-[1px] rounded-[inherit] pointer-events-none ring-1 ring-white/10" />
+    </div>
+  );
+}
+
+function RearPhonePreview() {
+  return (
+    <div className="absolute inset-0 bg-[#101620]">
+      <img
+        src="/images/kundli-mobile.png"
+        alt="AstraNavi Kundli preview"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{
+          filter: 'brightness(0.92) contrast(1.04) saturate(0.95)',
+          objectPosition: '50% 36%',
+          transform: 'scale(1.07)',
+          transformOrigin: '50% 38%',
+        }}
+      />
+      <div className="absolute inset-0 bg-[#050613]/20" />
     </div>
   );
 }
