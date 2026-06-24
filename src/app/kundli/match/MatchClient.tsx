@@ -141,7 +141,18 @@ export default function MatchClient() {
       setIsLoadingHistory(true);
       const res = await clientFetch('/api/match/history?limit=10');
       const data = await res.json();
-      if (res.ok) setHistory(data.results || []);
+      if (res.ok) {
+        const items: any[] = Array.isArray(data.history) ? data.history : [];
+        setHistory(items.map((h) => ({
+          id: h.id,
+          score: h.score,
+          created_at: h.createdAt,
+          person1_name: h.person1Name,
+          person2_name: h.person2Name,
+          person1_details: h.resultData?.person1_details,
+          person2_details: h.resultData?.person2_details,
+        })));
+      }
     } catch (_err) {
       console.error("Failed to load history:", _err);
     } finally {
@@ -170,10 +181,10 @@ export default function MatchClient() {
       const data = await res.json();
       
       if (res.ok) {
-        const result = data.details || data;
+        const result = data.result || data.details || data;
         setMatchResult(result);
-        setPerson1(data.person1_details || item.person1_details);
-        setPerson2(data.person2_details || item.person2_details);
+        setPerson1(data.person1_details || result?.person1_details || item.person1_details);
+        setPerson2(data.person2_details || result?.person2_details || item.person2_details);
         setPhase('result');
         setActiveTab('match');
       } else {
