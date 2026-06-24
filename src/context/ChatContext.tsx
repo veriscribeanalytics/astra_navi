@@ -15,11 +15,6 @@ import type { FamilyCompatibilityResponse, FamilyRelationshipType } from '@/type
 const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
 const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
-const STREAM_TOKEN_REVEAL_DELAY_MS = 14;
-
-const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
-
-const splitStreamToken = (token: string): string[] => token.match(/\S+\s*|\s+/g) ?? [token];
 
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
@@ -574,14 +569,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   } : m)
                 } : null);
               } else if (typeof data.token === 'string' && data.token.length > 0) {
-                for (const tokenPart of splitStreamToken(data.token)) {
-                  fullText += tokenPart;
-                  setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
-                  await delay(STREAM_TOKEN_REVEAL_DELAY_MS);
-                  if (abortController.signal.aborted) {
-                    streamDone = true;
-                    break;
-                  }
+                // Accumulate tokens silently — the full answer is revealed as a
+                // single complete bubble once the stream finishes, rather than
+                // streamed word-by-word into the UI.
+                fullText += data.token;
+                if (abortController.signal.aborted) {
+                  streamDone = true;
                 }
               }
               currentEventName = '';
@@ -605,46 +598,58 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const localAiMsg = prev.messages.find(m => m.id === persistedAiMsgId || m.id === aiMsgId);
               if (!localAiMsg) return backendChat;
               const backendAiMsg = backendChat.messages.find(m => m.id === persistedAiMsgId) ?? backendChat.messages.find(m => m.type === 'ai' && m.text === localAiMsg.text);
+              // Align backend messages to the local optimistic messages so we
+              // can carry over their stable `clientId`. Keeping the React key
+              // stable prevents the whole conversation from remounting (and
+              // replaying its enter animation / reflowing spacing) when the
+              // post-stream refetch swaps in server-assigned ids.
+              const localById = new Map(prev.messages.map(m => [m.id, m]));
+              const localByText = new Map(prev.messages.map(m => [`${m.type}\u0000${m.text}`, m]));
+              const mergeLocal = (m: ChatMessage): ChatMessage => {
+                const local = localById.get(m.id) ?? localByText.get(`${m.type}\u0000${m.text}`);
+                return local?.clientId && local.clientId !== m.clientId ? { ...m, clientId: local.clientId } : m;
+              };
               if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.pendingActions || localAiMsg.toolLoopExceeded !== undefined || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory || localAiMsg.resolvedActions)) {
                 const merged = backendChat.messages.map(m => {
+                  const aligned = mergeLocal(m);
                   if (m.id === backendAiMsg.id) {
                     return {
-                      ...m,
-                      suggestedQuestions: localAiMsg.suggestedQuestions ?? m.suggestedQuestions,
-                      topic: localAiMsg.topic ?? m.topic,
-                      intent: localAiMsg.intent ?? m.intent,
-                      answerStyle: localAiMsg.answerStyle ?? m.answerStyle,
-                      creditsRemaining: localAiMsg.creditsRemaining ?? m.creditsRemaining,
-                      finishReason: localAiMsg.finishReason ?? m.finishReason,
-                      retryUsed: localAiMsg.retryUsed ?? m.retryUsed,
-                      qualityRewriteUsed: localAiMsg.qualityRewriteUsed ?? m.qualityRewriteUsed,
-                      quality: localAiMsg.quality ?? m.quality,
-                      summaryIncluded: localAiMsg.summaryIncluded ?? m.summaryIncluded,
-                      persona: localAiMsg.persona ?? m.persona,
-                      contextUsed: localAiMsg.contextUsed ?? m.contextUsed,
-                      contextSource: localAiMsg.contextSource ?? m.contextSource,
-                      contextChars: localAiMsg.contextChars ?? m.contextChars,
-                      avatarId: localAiMsg.avatarId ?? m.avatarId,
-                      avatarName: localAiMsg.avatarName ?? m.avatarName,
-                      avatarTitle: localAiMsg.avatarTitle ?? m.avatarTitle,
-                      avatarCreditCost: localAiMsg.avatarCreditCost ?? m.avatarCreditCost,
-                      errorCode: localAiMsg.errorCode ?? m.errorCode,
-                      opener: localAiMsg.opener ?? m.opener,
-                      pendingActions: localAiMsg.pendingActions ?? m.pendingActions,
-                      toolLoopExceeded: localAiMsg.toolLoopExceeded ?? m.toolLoopExceeded,
-                      agentic: localAiMsg.agentic ?? m.agentic,
-                      planSteps: localAiMsg.planSteps ?? m.planSteps,
-                      reflections: localAiMsg.reflections ?? m.reflections,
-                      agentRounds: localAiMsg.agentRounds ?? m.agentRounds,
-                      toolTrajectory: localAiMsg.toolTrajectory ?? m.toolTrajectory,
-                      resolvedActions: localAiMsg.resolvedActions ?? m.resolvedActions,
+                      ...aligned,
+                      suggestedQuestions: localAiMsg.suggestedQuestions ?? aligned.suggestedQuestions,
+                      topic: localAiMsg.topic ?? aligned.topic,
+                      intent: localAiMsg.intent ?? aligned.intent,
+                      answerStyle: localAiMsg.answerStyle ?? aligned.answerStyle,
+                      creditsRemaining: localAiMsg.creditsRemaining ?? aligned.creditsRemaining,
+                      finishReason: localAiMsg.finishReason ?? aligned.finishReason,
+                      retryUsed: localAiMsg.retryUsed ?? aligned.retryUsed,
+                      qualityRewriteUsed: localAiMsg.qualityRewriteUsed ?? aligned.qualityRewriteUsed,
+                      quality: localAiMsg.quality ?? aligned.quality,
+                      summaryIncluded: localAiMsg.summaryIncluded ?? aligned.summaryIncluded,
+                      persona: localAiMsg.persona ?? aligned.persona,
+                      contextUsed: localAiMsg.contextUsed ?? aligned.contextUsed,
+                      contextSource: localAiMsg.contextSource ?? aligned.contextSource,
+                      contextChars: localAiMsg.contextChars ?? aligned.contextChars,
+                      avatarId: localAiMsg.avatarId ?? aligned.avatarId,
+                      avatarName: localAiMsg.avatarName ?? aligned.avatarName,
+                      avatarTitle: localAiMsg.avatarTitle ?? aligned.avatarTitle,
+                      avatarCreditCost: localAiMsg.avatarCreditCost ?? aligned.avatarCreditCost,
+                      errorCode: localAiMsg.errorCode ?? aligned.errorCode,
+                      opener: localAiMsg.opener ?? aligned.opener,
+                      pendingActions: localAiMsg.pendingActions ?? aligned.pendingActions,
+                      toolLoopExceeded: localAiMsg.toolLoopExceeded ?? aligned.toolLoopExceeded,
+                      agentic: localAiMsg.agentic ?? aligned.agentic,
+                      planSteps: localAiMsg.planSteps ?? aligned.planSteps,
+                      reflections: localAiMsg.reflections ?? aligned.reflections,
+                      agentRounds: localAiMsg.agentRounds ?? aligned.agentRounds,
+                      toolTrajectory: localAiMsg.toolTrajectory ?? aligned.toolTrajectory,
+                      resolvedActions: localAiMsg.resolvedActions ?? aligned.resolvedActions,
                     };
                   }
-                  return m;
+                  return aligned;
                 });
                 return { ...backendChat, messages: merged };
               }
-              return backendChat;
+              return { ...backendChat, messages: backendChat.messages.map(mergeLocal) };
             });
           }
         } catch (e) {

@@ -70,6 +70,7 @@ import {
 import { parseKundliStats } from "@/lib/kundliStats";
 import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
 import type { FamilyMember, FamilyConnection } from "@/types/family";
+import { familyRosterLimit } from "@/types/family";
 import FamilyCapDialog from "@/components/family/FamilyCapDialog";
 
 interface ForecastData {
@@ -82,11 +83,6 @@ interface ForecastData {
     trend: string;
   };
 }
-
-type ChatPrompt = {
-  title: string;
-  message: string;
-};
 
 type WeeklyForecastApiDay = {
   date: string;
@@ -824,7 +820,6 @@ export default function DashboardHome() {
   const [allForecastsLoading, setAllForecastsLoading] = useState(false);
   const forecast = allWeeklyForecasts[activeArea];
   const forecastLoading = allForecastsLoading;
-  const [pendingPrompt, setPendingPrompt] = useState<ChatPrompt | null>(null);
   const [isPanchangModalOpen, setIsPanchangModalOpen] = useState(false);
   const [isRahuKaalModalOpen, setIsRahuKaalModalOpen] = useState(false);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
@@ -1037,12 +1032,12 @@ export default function DashboardHome() {
     > = [];
 
     const tierLower = (tier || 'free').toLowerCase();
-    let unlockedLimit = 1;
-    if (tierLower === 'premium') {
-      unlockedLimit = 6;
-    } else if (tierLower === 'pro') {
-      unlockedLimit = 3;
-    }
+    // Dashboard grid shows up to 6 cards. The number that are *unlocked* comes
+    // from the shared familyRosterLimit spec (Free: 1, Pro: 6, Premium:
+    // unlimited → clamped to 6 for the display grid). Any slot beyond the
+    // unlocked limit renders as a locked "add" card driving an upgrade.
+    const rosterLimit = familyRosterLimit(tier);
+    const unlockedLimit = rosterLimit == null ? 6 : Math.min(rosterLimit, 6);
 
     for (let i = 0; i < unlockedLimit; i++) {
       if (i < allItems.length) {
@@ -1228,17 +1223,6 @@ export default function DashboardHome() {
 
     return currentMinutes > endMinutes;
   }, [transits, horoscope]);
-
-  const askInChat = useCallback((title: string, message: string) => {
-    setPendingPrompt({ title, message });
-  }, []);
-
-  const confirmChat = useCallback(() => {
-    if (!pendingPrompt) return;
-    localStorage.setItem("astranavi_pending_message", pendingPrompt.message);
-    setPendingPrompt(null);
-    router.push("/chat");
-  }, [pendingPrompt, router]);
 
   const lifeAreas = useMemo(() => {
     const mapped = AREA_LIST.map((area) => ({
@@ -2389,7 +2373,7 @@ export default function DashboardHome() {
                           return;
                         }
                         setSelectedAvatarId(guide.avatarId);
-                        askInChat(t('chatWithNavi'), `I want to consult with ${guide.name} about my chart.`);
+                        router.push("/chat");
                       }}
                       className={`mt-auto inline-flex w-full max-w-[148px] items-center justify-center gap-1.5 rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
                         isLocked
@@ -2543,59 +2527,6 @@ export default function DashboardHome() {
           <span>{t('newDashboard.privacy.trusted')}</span>
         </div>
       </div>
-
-      <AnimatePresence>
-        {pendingPrompt && (
-          <motion.div
-            className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto p-4 sm:items-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setPendingPrompt(null)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') setPendingPrompt(null);
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="chat-confirm-title"
-          >
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
-            <motion.div
-              initial={{ y: 18, scale: 0.98 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: 12, scale: 0.98 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md rounded-[28px] border border-secondary/30 bg-surface p-6 shadow-2xl"
-            >
-              <button
-                autoFocus
-                onClick={() => setPendingPrompt(null)}
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/8 text-foreground/70 hover:bg-white/12"
-                aria-label="Close chat confirmation"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary">
-                <MessageSquare className="h-6 w-6" />
-              </div>
-              <h2 id="chat-confirm-title" className="font-headline text-2xl font-bold tracking-tight leading-tight">{t('newDashboard.todaysEnergy.askNaviInChat')}</h2>
-              <p className="mt-2 text-sm leading-6 text-foreground/60">{t('newDashboard.todaysEnergy.askNaviConfirmDesc')}</p>
-              <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-variant/[0.035] p-4">
-                <p className="label-secondary">{pendingPrompt.title}</p>
-                <p className="mt-2 text-sm leading-6 text-foreground/82">{pendingPrompt.message}</p>
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <button onClick={() => setPendingPrompt(null)} className="rounded-2xl border border-outline-variant/12 px-4 py-3 text-sm font-bold text-foreground/75 hover:bg-white/8">
-                  {t('newDashboard.todaysEnergy.stayHere')}
-                </button>
-                <button onClick={confirmChat} className="rounded-2xl bg-secondary px-4 py-3 text-sm font-black text-on-primary">
-                  {t('newDashboard.todaysEnergy.openChat')}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {activePaywallData && (
