@@ -27,9 +27,13 @@ export async function POST(req: Request) {
         const rateLimitResult = await checkRateLimit(`login:${ip}`, AUTH_LIMIT_CONFIG);
 
         if (!rateLimitResult.allowed) {
-            const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
-            return NextResponse.json({ 
-                error: `Too many login attempts. Please try again in ${resetInMinutes} minutes.` 
+            const retryAfterSeconds = Math.max(1, Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
+            const resetInMinutes = Math.ceil(retryAfterSeconds / 60);
+            return NextResponse.json({
+                code: "rate_limited",
+                message: `Too many login attempts. Please try again in ${resetInMinutes} minute(s).`,
+                error: "Too many login attempts. Please try again later.",
+                retryAfterSeconds,
             }, { status: 429 });
         }
 

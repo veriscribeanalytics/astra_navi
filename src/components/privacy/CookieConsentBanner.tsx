@@ -70,23 +70,23 @@ const CookieConsentBanner: React.FC = () => {
         aria-label="Cookie consent"
         className="app-cookie-consent safe-area-bottom fixed bottom-0 left-0 right-0 z-[1001] animate-in slide-in-from-bottom duration-500"
       >
-        <div className="max-w-5xl mx-auto p-3 sm:p-4">
-          <div className="bg-surface/98 backdrop-blur-xl border border-secondary/20 rounded-2xl sm:rounded-3xl shadow-2xl shadow-black/40 p-3 sm:p-6 lg:p-7 flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-5 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto p-2 sm:p-3">
+          <div className="bg-surface/98 backdrop-blur-xl border border-secondary/20 rounded-2xl sm:rounded-3xl shadow-2xl shadow-black/40 p-2.5 sm:p-4 xl:p-5 flex flex-col xl:flex-row xl:items-center gap-2 sm:gap-3 relative overflow-hidden">
             {/* Icon + Text */}
-            <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-              <div className="shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center mt-0.5">
-                <Cookie className="w-4 h-4 sm:w-6 sm:h-6 text-secondary" />
+            <div className="flex items-start gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+              <div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center mt-0.5">
+                <Cookie className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-secondary" />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-sm sm:text-base font-headline font-bold text-primary mb-1 sm:mb-1.5 flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-headline font-bold text-primary mb-0.5 sm:mb-1 flex items-center gap-2">
                   <ShieldCheck className="hidden sm:block w-4 h-4 text-secondary shrink-0" />
                   Your Privacy, Your Choice
                 </h2>
-                <p className="text-xs sm:text-sm text-primary/70 leading-relaxed max-w-2xl">
-                  <span className="sm:hidden">
+                <p className="text-xs xl:text-sm text-primary/70 leading-snug xl:leading-relaxed max-w-2xl">
+                  <span className="xl:hidden">
                     We use essential cookies now. Optional cookies help personalize and improve Astra Navi.
                   </span>
-                  <span className="hidden sm:inline">
+                  <span className="hidden xl:inline">
                     Astra Navi uses cookies and similar technologies to provide a
                     secure, personalized Vedic astrology experience. With your
                     consent, we use functional cookies for preferences and
@@ -100,16 +100,16 @@ const CookieConsentBanner: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDetailsOpen((open) => !open)}
-                  className="sm:hidden mt-1.5 inline-flex items-center gap-1 text-[11px] text-secondary font-bold underline underline-offset-2"
+                  className="sm:hidden mt-1 inline-flex items-center gap-1 text-[11px] text-secondary font-bold underline underline-offset-2"
                   aria-expanded={detailsOpen}
                 >
                   {detailsOpen ? 'Hide details' : 'More details'}
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform ${detailsOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                <div className={`sm:hidden grid transition-all duration-200 ${detailsOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className={`sm:hidden grid transition-all duration-200 ${detailsOpen ? 'grid-rows-[1fr] opacity-100 mt-1.5' : 'grid-rows-[0fr] opacity-0'}`}>
                   <div className="overflow-hidden">
-                    <p className="text-[11px] text-primary/55 leading-relaxed">
+                    <p className="text-[11px] text-primary/55 leading-snug">
                       With your consent, we use functional cookies for preferences and optional cookies to improve our service. Your data is protected under India&apos;s DPDP Act, 2023.
                     </p>
                     <div className="flex items-center gap-3 mt-2">
@@ -130,7 +130,7 @@ const CookieConsentBanner: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="hidden sm:flex items-center gap-3 mt-2">
+                <div className="hidden sm:flex items-center gap-3 mt-1">
                   <a
                     href="/privacy"
                     className="text-[11px] sm:text-xs text-secondary hover:text-secondary/80 font-bold transition-colors underline underline-offset-2"
@@ -149,17 +149,17 @@ const CookieConsentBanner: React.FC = () => {
             </div>
 
             {/* Buttons — Accept Essential Only + Accept All as primary CTAs */}
-            <div className="flex flex-row gap-2 lg:gap-3 shrink-0 w-full xl:w-auto xl:max-w-[360px]">
+            <div className="flex flex-row gap-2 xl:gap-3 shrink-0 w-full xl:w-auto xl:max-w-[360px]">
               <button
                 onClick={acceptEssential}
-                className="flex-1 xl:flex-none px-2.5 sm:px-5 py-2.5 sm:py-3 rounded-[16px] sm:rounded-[18px] text-[10px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-primary hover:border-outline-variant/60 transition-all bg-transparent cursor-pointer whitespace-nowrap"
+                className="flex-1 xl:flex-none px-2.5 sm:px-5 py-2 sm:py-2.5 rounded-[16px] sm:rounded-[18px] text-[10px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-primary hover:border-outline-variant/60 transition-all bg-transparent cursor-pointer whitespace-nowrap"
               >
                 Essential Only
               </button>
               <button
                 ref={acceptAllRef}
                 onClick={acceptAll}
-                className="auth-btn-gold !h-auto !w-auto flex-1 xl:flex-none px-2.5 sm:px-5 py-2.5 sm:py-3 !rounded-[16px] sm:!rounded-[18px] !font-bold !font-sans !text-[10px] sm:!text-xs !tracking-wider uppercase flex items-center gap-1.5 justify-center cursor-pointer whitespace-nowrap"
+                className="auth-btn-gold !h-auto !w-auto flex-1 xl:flex-none px-2.5 sm:px-5 py-2 sm:py-2.5 !rounded-[16px] sm:!rounded-[18px] !font-bold !font-sans !text-[10px] sm:!text-xs !tracking-wider uppercase flex items-center gap-1.5 justify-center cursor-pointer whitespace-nowrap"
               >
                 Accept All
                 <ChevronRight className="w-3.5 h-3.5" strokeWidth={2.5} />

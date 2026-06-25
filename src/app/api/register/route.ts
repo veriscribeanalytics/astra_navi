@@ -28,9 +28,13 @@ export async function POST(req: Request) {
         const rateLimitResult = await checkRateLimit(`register:${ip}`, AUTH_LIMIT_CONFIG);
 
         if (!rateLimitResult.allowed) {
-            const resetInMinutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000);
-            return NextResponse.json({ 
-                error: `Too many registration attempts. Please try again in ${resetInMinutes} minutes.` 
+            const retryAfterSeconds = Math.max(1, Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
+            const resetInMinutes = Math.ceil(retryAfterSeconds / 60);
+            return NextResponse.json({
+                code: "rate_limited",
+                message: `Too many registration attempts. Please try again in ${resetInMinutes} minute(s).`,
+                error: "Too many registration attempts. Please try again later.",
+                retryAfterSeconds,
             }, { status: 429 });
         }
 

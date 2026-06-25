@@ -86,7 +86,21 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepError, setStepError] = useState<ParsedAuthError | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  // Rate-limit lockout countdown (seconds remaining). While > 0 the submit and
+  // back buttons stay disabled so the user can't immediately re-fire a request
+  // that would just 429 again. AuthErrorBanner renders the live countdown text.
+  const [lockedRemaining, setLockedRemaining] = useState<number>(0);
   const stepContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (lockedRemaining <= 0) return;
+    const interval = setInterval(() => {
+      setLockedRemaining((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockedRemaining]);
+
+  const isLocked = lockedRemaining > 0;
 
   useEffect(() => {
     if (isSubmitting) return;
@@ -128,6 +142,12 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
       }
       case 1: {
         if (data.firstName.trim() && data.firstName.trim().length < 2) return t('auth.register.validation.firstNameLength');
+        // Phone is optional, but if provided it must be E.164 (e.g. +919876543210)
+        // — matches the backend PhoneStartSchema. A garbage string would otherwise
+        // pass client checks and surface later as a generic backend error.
+        if (data.phoneNumber.trim() && !/^\+[1-9]\d{6,14}$/.test(data.phoneNumber.trim())) {
+          return t('auth.register.validation.phoneInvalid') || 'Enter a valid phone number with country code (e.g. +919876543210).';
+        }
         return null;
       }
       case 2: {
@@ -168,6 +188,10 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
       const res = await onSubmit(submitData);
       if (res && (res.error || res.parsedError)) {
         const parsed = res.parsedError || parseAuthError(res.error);
+        // Engage the submit lockout when the backend throttles registration.
+        if (parsed.code === 'rate_limited' && parsed.retryAfterSeconds) {
+          setLockedRemaining(parsed.retryAfterSeconds);
+        }
         if (parsed.field) {
           if (parsed.field === 'email' || parsed.field === 'password') {
             setStep(0);
@@ -187,6 +211,9 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
       }
     } catch (err: unknown) {
       const parsed = parseAuthError(err);
+      if (parsed.code === 'rate_limited' && parsed.retryAfterSeconds) {
+        setLockedRemaining(parsed.retryAfterSeconds);
+      }
       if (parsed.field) {
         if (parsed.field === 'email' || parsed.field === 'password') {
           setStep(0);
@@ -617,6 +644,16 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
                     {t('login.consentProcessing') || 'I consent to the processing of my personal data, including birth details, for generating Vedic astrological charts, AI-powered readings, and personalized horoscope insights as described in the Privacy Policy. I understand I can withdraw this consent at any time.'}
                   </span>
                 </label>
+
+                {/* Inline hint when Create Account is greyed out because not all
+                    acknowledgements are checked — replaces a silently-disabled
+                    button with an explicit reason the user can act on. */}
+                {(!ageConfirmed || !privacyAccepted || !termsAccepted || !dataProcessingConsent) && !isLocked && (
+                  <p className="text-[10px] text-secondary/80 leading-relaxed font-medium ml-1 flex items-center gap-1.5">
+                    <span aria-hidden="true">↳</span>
+                    {t('auth.register.consentRequired') || 'Please confirm all acknowledgements above to create your account.'}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -629,7 +666,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
           <button
             type="button"
             onClick={() => { setStep((s) => s - 1); setStepError(null); }}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLocked}
             className="h-[48px] sm:h-[52px] 3xl:h-[84px] px-4 sm:px-5 3xl:px-7 rounded-[18px] 3xl:rounded-[26px] flex items-center justify-center border border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] text-[color-mix(in_srgb,var(--on-surface-variant)_55%,transparent)] hover:text-primary hover:border-[color-mix(in_srgb,var(--secondary)_30%,var(--accent)_45%)] transition-all disabled:opacity-50"
           >
             <ArrowLeft size={18} className="3xl:w-6 3xl:h-6" />
@@ -638,7 +675,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
         {step < 3 ? (
           <button
             type="button"
-            disabled={disabled || isSubmitting}
+            disabled={disabled || isSubmitting || isLocked}
             onClick={handleContinue}
             className="auth-btn-gold flex-1 h-[48px] sm:h-[52px] 3xl:h-[84px] !rounded-[18px] 3xl:!rounded-[26px] !text-[16px] sm:!text-[18px] 3xl:!text-[28px]"
           >
@@ -648,7 +685,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
         ) : (
           <button
             type="button"
-            disabled={disabled || isSubmitting || !ageConfirmed || !privacyAccepted || !termsAccepted || !dataProcessingConsent}
+            disabled={disabled || isSubmitting || isLocked || !ageConfirmed || !privacyAccepted || !termsAccepted || !dataProcessingConsent}
             onClick={handleSubmit}
             className="auth-btn-gold flex-1 h-[48px] sm:h-[52px] 3xl:h-[84px] !rounded-[18px] 3xl:!rounded-[26px] !text-[16px] sm:!text-[18px] 3xl:!text-[28px]"
           >
@@ -657,6 +694,10 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
+            ) : isLocked ? (
+              <>
+                {t('login.lockedShort') || 'Locked'} ({Math.floor(lockedRemaining / 60)}:{(lockedRemaining % 60).toString().padStart(2, '0')})
+              </>
             ) : (
               <>
                 {t('auth.register.submit')}

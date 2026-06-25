@@ -163,7 +163,13 @@ const LoginContent = () => {
 
       if (!res.ok) {
         const parsedError = parseAuthError(data);
-        if (parsedError.code === 'account_locked' || (parsedError.message && parsedError.message.toLowerCase().includes('locked'))) {
+        // Engage the lockout countdown for both account lockouts and the
+        // login rate limit (429). Both carry retryAfterSeconds now.
+        if (
+          parsedError.code === 'account_locked' ||
+          parsedError.code === 'rate_limited' ||
+          (parsedError.message && parsedError.message.toLowerCase().includes('locked'))
+        ) {
           const seconds = parsedError.retryAfterSeconds || 15 * 60;
           const lockoutEnd = Date.now() + seconds * 1000;
           setLockedUntil(lockoutEnd);
@@ -180,7 +186,17 @@ const LoginContent = () => {
       });
 
       if (result?.error) {
-        return { parsedError: parseAuthError(result.error) };
+        // Credentials were verified by /api/login, but NextAuth could not
+        // establish the session. `result.error` is a bare provider code
+        // (e.g. "CredentialsSignin") — translate it to an honest message
+        // instead of a generic one so the user knows what to retry.
+        const sessionErrorMap: Record<string, string> = {
+          CredentialsSignin: t('login.invalidCredentials'),
+          Configuration: t('login.networkError'),
+          default: t('auth.errors.signin_error'),
+        };
+        const sessionMsg = sessionErrorMap[result.error] ?? sessionErrorMap.default;
+        return { parsedError: parseAuthError({ message: sessionMsg }) };
       }
 
       showLoading(t('login.signingYouIn'), 1500);
@@ -211,12 +227,18 @@ const LoginContent = () => {
 
       const data = await res.json();
 
-      if (!data?.user?.id || !data?.accessToken) {
-        return { ok: false, data: {}, parsedError: parseAuthError({ message: t('auth.errors.generic') }) };
-      }
-
+      // Error responses (400/409/429/500) must be surfaced first — preserve
+      // the backend's real code/field/message so the banner can route to the
+      // right step and offer the correct CTA. Checking the missing-token guard
+      // before this would mask every error as a generic "something went wrong".
       if (!res.ok) {
         return { ok: false, data: {}, parsedError: parseAuthError(data) };
+      }
+
+      // Success but malformed envelope — backend returned 2xx without the
+      // tokens needed to establish a session. Surface as a recoverable error.
+      if (!data?.user?.id || !data?.accessToken) {
+        return { ok: false, data: {}, parsedError: parseAuthError({ message: t('auth.errors.generic') }) };
       }
 
       success(t('login.accountCreated'));
