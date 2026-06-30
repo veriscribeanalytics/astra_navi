@@ -86,7 +86,8 @@ export default function ExactIntro({ autoComplete = false, onComplete }: ExactIn
     const updateSceneScale = () => {
       const widthScale = window.innerWidth / 1040;
       const heightScale = window.innerHeight / 760;
-      sceneScale = Math.min(1.32, Math.max(0.72, Math.min(widthScale, heightScale)));
+      const minScale = window.innerWidth < 400 ? 0.45 : 0.72;
+      sceneScale = Math.min(1.32, Math.max(minScale, Math.min(widthScale, heightScale)));
       root.style.setProperty('--intro-scene-scale', String(sceneScale));
 
       const solarPlane = select(`.${styles.solarPlane}`)[0] as HTMLElement | undefined;

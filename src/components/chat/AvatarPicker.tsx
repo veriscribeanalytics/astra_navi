@@ -123,7 +123,7 @@ const AvatarPicker = forwardRef<AvatarPickerHandle>(function AvatarPicker(_props
             transition={{ duration: 0.12 }}
             role="listbox"
             aria-label={t('chat.avatarPicker.ariaChooseAvatar')}
-            className="absolute left-0 top-full mt-2 w-[300px] sm:w-[340px] max-h-[min(70vh,520px)] overflow-y-auto bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl shadow-black/30 backdrop-blur-md z-50 p-1.5"
+            className="absolute left-0 top-full mt-2 w-[min(300px,calc(100vw-2rem))] sm:w-[340px] max-h-[min(70vh,520px)] overflow-y-auto bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl shadow-black/30 backdrop-blur-md z-50 p-1.5"
           >
             <div className="px-3 py-2 border-b border-outline-variant/15 mb-1">
               <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">

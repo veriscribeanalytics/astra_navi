@@ -611,11 +611,11 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
                     scorePct !== null ? '#D96B78' : '#C9972E';
 
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
+    <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
       {/* Header Row */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5">
         {/* Left Side: Avatar + Name / Info */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 max-[400px]:justify-center">
           <div className="relative shrink-0">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#20163B] border border-[#C9972E]/25 text-xl font-headline font-bold text-[#C9972E]">
               {initialOf(member.name)}
@@ -636,8 +636,8 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
             <h4 className="truncate font-headline text-base font-bold tracking-tight text-[#F4EFE7]">
               {member.name || "—"}
             </h4>
-            <p className="flex items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5">
-              <span className="capitalize">{member.relationshipType ? formatRelationship(member.relationshipType) : t('family.relationshipNotSet') || 'Connection'}</span>
+            <p className="flex min-w-0 items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5 max-[400px]:justify-center">
+              <span className="truncate capitalize">{member.relationshipType ? formatRelationship(member.relationshipType) : t('family.relationshipNotSet') || 'Connection'}</span>
               {status && (
                 <>
                   <span>•</span>
@@ -652,7 +652,7 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
         {/* Right Side: Circular Match Gauge */}
         {scorePct !== null && (
-          <div className="shrink-0">
+          <div className="shrink-0 max-[400px]:mx-auto">
             <AreaRing score={scorePct} color={ringColor} size={64} label="Match Score">
               <span className="text-xs sm:text-sm font-black leading-none tabular-nums" style={{ color: ringColor }}>
                 {scorePct}
@@ -673,10 +673,10 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
       )}
 
       {/* Footer Buttons */}
-      <div className="flex items-center justify-between gap-3 mt-1.5">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 mt-1.5 max-[400px]:flex-col">
         <button
           onClick={onRunCompatibility}
-          className="flex-1 rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 max-[400px]:w-full rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer min-w-0"
         >
           {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
           {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
@@ -684,7 +684,7 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
         <Link
           href={`/family?member=${member.id}`}
-          className="text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
+          className="max-[400px]:w-full text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0 max-[400px]:shrink max-[400px]:justify-center"
         >
           <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
@@ -724,11 +724,11 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
                          scorePct !== null ? '#D96B78' : '#C9972E';
 
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
+    <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
       {/* Header Row */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-2.5">
         {/* Left Side: Avatar + Name / Info */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 max-[400px]:justify-center">
           <div className="relative shrink-0">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#20163B] border border-[#C9972E]/25 text-xl font-headline font-bold text-[#C9972E]">
               {initialOf(connection.otherName)}
@@ -740,15 +740,15 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
             <h4 className="truncate font-headline text-base font-bold tracking-tight text-[#F4EFE7]">
               {connection.otherName || "—"}
             </h4>
-            <p className="flex items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5">
-              <span className="capitalize">{formatRelationship(connection.iSeeThemAs)}</span>
+            <p className="flex min-w-0 items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5 max-[400px]:justify-center">
+              <span className="truncate capitalize">{formatRelationship(connection.iSeeThemAs)}</span>
             </p>
           </div>
         </div>
 
         {/* Right Side: Circular Match Gauge */}
         {scorePct !== null && (
-          <div className="shrink-0">
+          <div className="shrink-0 max-[400px]:mx-auto">
             <AreaRing score={scorePct} color={ringColor} size={64} label="Match Score">
               <span className="text-xs sm:text-sm font-black leading-none tabular-nums" style={{ color: ringColor }}>
                 {scorePct}
@@ -769,10 +769,10 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
       )}
 
       {/* Footer Buttons */}
-      <div className="flex items-center justify-between gap-3 mt-1.5">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 mt-1.5 max-[400px]:flex-col">
         <button
           onClick={onRunCompatibility}
-          className="flex-1 rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 max-[400px]:w-full rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer min-w-0"
         >
           {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
           {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
@@ -780,7 +780,7 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
 
         <Link
           href="/family"
-          className="text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
+          className="max-[400px]:w-full text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0 max-[400px]:shrink max-[400px]:justify-center"
         >
           <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
@@ -1408,12 +1408,12 @@ export default function DashboardHome() {
     <div className="gpt-dashboard-shell safe-bottom-buffer relative min-h-[calc(100dvh-var(--navbar-height,64px)-100px)] overflow-x-hidden bg-transparent text-foreground">
       {/* Custom local background particles and gradients removed to follow the global layout background */}
 
-      <div className="relative z-10 mx-auto max-w-[1760px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
-        <header className="mb-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_580px] xl:items-center">
+      <div className="relative z-10 mx-auto max-w-[1760px] px-4 py-4 max-[360px]:px-3 sm:px-6 sm:py-6 lg:px-8 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
+        <header className="mb-6 grid gap-5 max-[360px]:gap-3 xl:grid-cols-[minmax(0,1fr)_580px] xl:items-center">
           {/* Column 1: Left Column with 2 Rows */}
           <div className="flex flex-col gap-2 w-full">
             {/* Row 1: Date/Panchang & Career Score */}
-            <div className="flex flex-wrap items-center justify-start gap-x-8 gap-y-2 w-full pb-1">
+            <div className="flex flex-wrap items-center justify-start gap-x-3 gap-y-1 w-full pb-1">
               <div className="flex flex-wrap items-center gap-3 label-sm text-foreground/58">
                 <span aria-hidden="true" className="h-px w-12 bg-secondary/50" />
                 <span>{currentDate}</span>
@@ -1436,7 +1436,7 @@ export default function DashboardHome() {
             {/* Row 2: Greeting */}
             <div className="flex items-center gap-4 w-full">
               <ProfileImageUpload size={52} className="hidden sm:flex" editable={false} />
-              <h1 className="font-headline text-[30px] font-bold leading-tight tracking-tight sm:text-[42px] 3xl:text-[56px]">
+              <h1 className="font-headline text-[30px] font-bold leading-tight tracking-tight break-words max-[360px]:text-[24px] sm:text-[42px] 3xl:text-[56px]">
                 {greeting},{" "}
                 <span style={{ color: TEXT_COLORS.heading }}>
                   {userLoading ? "..." : userName}
@@ -1446,7 +1446,7 @@ export default function DashboardHome() {
           </div>
 
           {/* Column 2: Right Column with Rashis Grid */}
-          <div className="grid grid-cols-3 gap-3 w-full sm:min-w-[360px] xl:max-w-[580px]">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full sm:min-w-[360px] xl:max-w-[580px]">
             {rashiLoading ? (
               [1, 2, 3].map((i) => (
                 <div
@@ -1508,7 +1508,7 @@ export default function DashboardHome() {
                 </div>
                 
                 {/* Lucky items & Mood - smaller than header */}
-                <div className="flex flex-wrap items-center gap-2 text-[13px] font-bold text-[#C8C3D6] justify-center md:justify-end">
+                <div className="flex flex-wrap items-center gap-2 text-[13px] max-[360px]:text-[11px] font-bold text-[#C8C3D6] justify-center md:justify-end">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9972E]/12 bg-[#241744] px-2.5 py-1">
                     <span className="h-2 w-2 rounded-full bg-gradient-to-br from-purple-400 to-purple-700" />
                     {t('newDashboard.cosmicInsight.luckyColor')}: {(horoscope?.lucky?.color || horoscope?.lucky_color) ?? "Deep Purple"}
@@ -1566,9 +1566,9 @@ export default function DashboardHome() {
 
                     {/* Row: Cosmic Tree | Guidance box */}
                     <div className="grid flex-grow gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-stretch">
-                      {/* Cosmic Tree */}
-                      <div className="flex items-center justify-center min-h-[200px]">
-                        <Image src="/images/cosmic-tree.png" alt="" width={280} height={280} unoptimized className="h-auto w-auto max-h-[270px] object-contain" />
+                      {/* Cosmic Tree — desktop only (mobile renders it at the bottom of this section) */}
+                      <div className="hidden lg:flex items-center justify-center min-h-[200px]">
+                        <Image src="/images/cosmic-tree.png" alt="" width={280} height={280} unoptimized className="h-auto w-full max-w-full mx-auto max-h-[270px] object-contain" />
                       </div>
 
                       {/* Guidance bordered box */}
@@ -1615,7 +1615,7 @@ export default function DashboardHome() {
                             localStorage.removeItem("astranavi_pending_message");
                             router.push("/chat");
                           }}
-                          className="mt-auto w-full flex items-center gap-3 rounded-2xl border border-[#C9972E]/25 bg-[#B88924] py-3 px-4 text-left text-[#1A0E32] hover:bg-[#C9972E] transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#C9972E]/50"
+                          className="mt-auto w-full flex items-center gap-3 max-[360px]:gap-2 rounded-2xl border border-[#C9972E]/25 bg-[#B88924] py-3 px-4 max-[360px]:px-3 text-left text-[#1A0E32] hover:bg-[#C9972E] transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#C9972E]/50"
                         >
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1A0E32]/10 text-[#1A0E32]">
                             <Sparkles className="h-5 w-5" />
@@ -1634,7 +1634,7 @@ export default function DashboardHome() {
                 {/* Good Time & Rahu Kaal Cards */}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left">
-                    <div className="flex items-start gap-4 w-full border border-[#C9972E]/15 bg-[#130B29] rounded-2xl p-4">
+                    <div className="flex items-start gap-4 max-[360px]:gap-2 w-full border border-[#C9972E]/15 bg-[#130B29] rounded-2xl p-4">
                       <Sun className="h-8 w-8 shrink-0 text-[#2FD3A0]" />
                       <div className="flex-grow min-w-0">
                         <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#2FD3A0] mb-2">{t('newDashboard.todaysEnergy.goodTime')}</p>
@@ -1659,7 +1659,7 @@ export default function DashboardHome() {
                   </div>
 
                   <div className="rounded-2xl bg-surface-variant/[0.035] py-3 px-4 text-left">
-                    <div className="flex items-start gap-4 w-full border border-[#C9972E]/15 bg-[#130B29] rounded-2xl p-4">
+                    <div className="flex items-start gap-4 max-[360px]:gap-2 w-full border border-[#C9972E]/15 bg-[#130B29] rounded-2xl p-4">
                       <AlertTriangle className="h-8 w-8 shrink-0 fill-[#F05B68]/15 text-[#F05B68]" />
                       <div className="flex-grow min-w-0 ">
                         <p className="text-[12px] font-black uppercase tracking-[0.22em] text-[#F05B68] mb-2">
@@ -1691,6 +1691,11 @@ export default function DashboardHome() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Cosmic Tree — mobile only (desktop shows it beside the Guidance box) */}
+                <div className="flex lg:hidden items-center justify-center min-h-[200px] mt-1">
+                  <Image src="/images/cosmic-tree.png" alt="" width={280} height={280} unoptimized className="h-auto w-full max-w-full mx-auto max-h-[270px] object-contain" />
                 </div>
 
               </div>
@@ -1867,7 +1872,7 @@ export default function DashboardHome() {
                              );
                              router.push("/chat");
                            }}
-                           className="group relative w-full flex flex-col gap-2 rounded-2xl border border-[var(--area-color)]/35 bg-[#21153C] py-3 px-4 text-left transition hover:bg-[var(--area-color)]/12 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--area-color)]/50"
+                            className="group relative w-full flex flex-col gap-2 rounded-2xl border border-[var(--area-color)]/35 bg-[#21153C] py-3 px-4 max-[360px]:px-3 text-left transition hover:bg-[var(--area-color)]/12 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--area-color)]/50"
                            style={{ '--area-color': activeAreaHex } as React.CSSProperties}
                          >
                            <div className="flex items-center justify-between gap-2">
@@ -1891,10 +1896,10 @@ export default function DashboardHome() {
                                </span>
                              </div>
                              <div className="min-w-0">
-                               <h4 className="font-bold text-lg text-[#F4EFE7]">
-                                 Ask me about {activeAreaLabel}
-                               </h4>
-                               <p className="text-[13px] text-[#AFA8C0]">Talk to your personal guide.</p>
+                                <h4 className="font-bold text-lg max-[360px]:text-base text-[#F4EFE7] break-words">
+                                  Ask me about {activeAreaLabel}
+                                </h4>
+                                <p className="text-[13px] max-[360px]:text-xs text-[#AFA8C0]">Talk to your personal guide.</p>
                              </div>
                            </div>
                          </button>
@@ -1963,28 +1968,28 @@ export default function DashboardHome() {
         <div className="grid grid-cols-1 gap-6 min-[1280px]:grid-cols-[3fr_2fr] min-[1280px]:items-stretch">
 
           {/* LEFT — Family Compatibility */}
-          <DarkPanel 
-            className="p-6 flex flex-col gap-4 !bg-[#150B2D]"
+          <DarkPanel
+            className="p-4 sm:p-6 flex flex-col gap-4 !bg-[#150B2D]"
             borderVariant="muted"
           >
             <div className="flex flex-col gap-4 w-full">
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3 max-[400px]:flex-col max-[400px]:items-stretch max-[400px]:gap-3">
+                <div className="flex items-center gap-3 min-w-0 max-[400px]:justify-center">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#C9972E]/10 border border-[#C9972E]/25">
                     <Users className="h-5 w-5 text-[#C9972E]" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 max-[400px]:text-center">
                     <h2 className="font-headline text-xl font-bold leading-tight tracking-tight text-[#F4EFE7]">
-                      <span className="sm:hidden">{t('newDashboard.familyFriends.compatibilityTitleShort') || "Family"}</span>
-                      <span className="hidden sm:inline">{t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}</span>
+                      <span className="md:hidden">{t('newDashboard.familyFriends.compatibilityTitleShort') || "Family"}</span>
+                      <span className="hidden md:inline">{t('newDashboard.familyFriends.compatibilityTitle') || "Your Compatibility with Friends & Family Today"}</span>
                     </h2>
                     <p className="text-[9px] text-[#928BA5] mt-0.5 uppercase tracking-[0.14em] font-bold">
-                      <span className="sm:hidden">{t('newDashboard.familyFriends.compatibilitySubtitleShort') || "Bonds & alignment"}</span>
-                      <span className="hidden sm:inline">{t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}</span>
+                      <span className="md:hidden">{t('newDashboard.familyFriends.compatibilitySubtitleShort') || "Bonds & alignment"}</span>
+                      <span className="hidden md:inline">{t('newDashboard.familyFriends.compatibilitySubtitle') || "Cosmic bonds & energy alignment"}</span>
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 shrink-0 max-[400px]:justify-center">
                   <button
                     onClick={() => {
                       if (isFree && allItems.length >= 1) {
@@ -2110,7 +2115,7 @@ export default function DashboardHome() {
                   </div>
                   <h2 className={DASHBOARD_SECTION_TITLE_CLASS}>{t('newDashboard.chartSnapshot')}</h2>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {[
                     ...(mahadashaSub
                       ? [{ label: t('newDashboard.myChart.mahadasha') || "Major period", sublabel: mahadashaSub, subtext: mahadashaRange, requiresFeature: 'kundli_premium' as PaywallFeatureKey }]
@@ -2306,7 +2311,7 @@ export default function DashboardHome() {
             <Sparkles className="h-4 w-4 text-secondary" />
             <span className="label-secondary">{t('newDashboard.guidanceHub')}</span>
           </div>
-          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-[#F4EFE7] sm:text-[42px] 3xl:text-[56px]">
+          <h2 className="font-headline text-[32px] font-bold leading-tight tracking-tight text-[#F4EFE7] max-[360px]:text-[26px] sm:text-[42px] 3xl:text-[56px]">
             {t('newDashboard.exploreCosmicNetwork')}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-[#AAA3B8]">
@@ -2328,7 +2333,7 @@ export default function DashboardHome() {
                 {t('newDashboard.lifeAreas.viewAll')} <ArrowRight className="inline h-3 w-3" />
               </Link>
             </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {[
                   { name: "Navi", role: t('newDashboard.guides.navi.role'), desc: t('newDashboard.guides.navi.desc'), credits: 1, avatarId: "navi", img: "/images/avatars/NAVI_AVATAR.jpeg" },
                   { name: "Arya", role: t('newDashboard.guides.arya.role'), desc: t('newDashboard.guides.arya.desc'), credits: 2, avatarId: "career_mentor", img: "/images/avatars/ARYA_AVATAR.jpeg" },
@@ -2343,7 +2348,7 @@ export default function DashboardHome() {
                 return (
                   <div key={guide.name} className={`group flex h-full flex-col items-center rounded-[22px] border border-transparent bg-transparent px-3 py-4 text-center transition-all hover:border-[#C9972E]/20 hover:bg-white/[0.025] ${isLocked ? 'opacity-60' : ''}`}>
                     <div className="flex flex-col items-center">
-                      <div className={`relative h-[92px] w-[92px] overflow-hidden rounded-full border-[3px] bg-surface transition-all ${isLocked ? 'border-[#C4B5FD]/20' : 'border-[#C9972E]/50 group-hover:border-[#C9972E]'}`}>
+                      <div className={`relative h-[92px] w-[92px] max-[360px]:h-[72px] max-[360px]:w-[72px] overflow-hidden rounded-full border-[3px] bg-surface transition-all ${isLocked ? 'border-[#C4B5FD]/20' : 'border-[#C9972E]/50 group-hover:border-[#C9972E]'}`}>
                         <Image
                           src={guide.img}
                           alt={guide.name}
@@ -2363,8 +2368,8 @@ export default function DashboardHome() {
                         {guide.credits} {guide.credits === 1 ? 'credit/message' : 'credits/message'}
                       </div>
                     </div>
-                    <h4 className="mb-1 mt-3 font-headline text-base font-bold tracking-tight leading-tight text-[#F4EFE7]">{guide.name}</h4>
-                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.13em] text-[#AFA8C0]">{guide.role}</p>
+                    <h4 className="mb-1 mt-3 font-headline text-base max-[360px]:text-sm font-bold tracking-tight leading-tight text-[#F4EFE7] break-words">{guide.name}</h4>
+                    <p className="mb-2 text-[11px] max-[360px]:text-[10px] font-black uppercase tracking-[0.13em] text-[#AFA8C0]">{guide.role}</p>
                     <p className="mb-3 line-clamp-2 flex-1 text-[11px] leading-relaxed text-[#AAA3B8]">{guide.desc}</p>
                     <button
                       onClick={() => {
@@ -2453,7 +2458,7 @@ export default function DashboardHome() {
                       }
                     }
                   }}
-                  className={`group relative flex flex-col gap-3 rounded-2xl border bg-surface p-5 transition-all cursor-pointer ${
+                  className={`group relative flex flex-col gap-3 rounded-2xl border bg-surface p-5 max-[360px]:p-4 transition-all cursor-pointer ${
                     portal.featured
                       ? 'border-[rgba(196,181,253,0.12)]'
                       : 'border-[rgba(196,181,253,0.10)]'
@@ -2494,8 +2499,8 @@ export default function DashboardHome() {
                     {portal.icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="mb-1.5 font-headline text-base font-bold tracking-tight leading-tight text-[#F4EFE7]">{portal.title}</h4>
-                    <p className="line-clamp-3 text-[11px] leading-relaxed text-[#AAA3B8]">{portal.desc}</p>
+                    <h4 className="mb-1.5 font-headline text-base max-[360px]:text-sm font-bold tracking-tight leading-tight text-[#F4EFE7] break-words">{portal.title}</h4>
+                    <p className="line-clamp-3 text-[11px] max-[360px]:text-[10px] leading-relaxed text-[#AAA3B8]">{portal.desc}</p>
                   </div>
                   <button
                     className={`mt-auto flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${

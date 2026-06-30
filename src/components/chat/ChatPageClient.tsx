@@ -237,7 +237,7 @@ const ChatPageClient: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: idx * 0.08 }}
                       onClick={() => handleQuestionClick(card.question)}
-                      className="group flex items-center gap-3 px-4 py-3 sm:px-4 sm:py-3.5 rounded-2xl bg-surface/80 border border-outline-variant/20 text-left hover:border-secondary/40 hover:bg-surface transition-all"
+                      className="group flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-2xl bg-surface/80 border border-outline-variant/20 text-left hover:border-secondary/40 hover:bg-surface transition-all"
                       aria-label={`Ask: ${card.question}`}
                     >
                       <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-secondary/10 border border-secondary/15 flex items-center justify-center text-secondary shrink-0 group-hover:bg-secondary/15 group-hover:border-secondary/30 transition-colors">

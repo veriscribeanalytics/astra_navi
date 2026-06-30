@@ -399,7 +399,7 @@ const Navbar: React.FC = () => {
                 {/* Left: Logo */}
                 <div className="flex justify-start shrink-0">
                     <Link href="/" aria-label="Astra Navi Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
-                        <Image src="/icons/logo.jpeg" alt="" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
+                        <Image src="/icons/logo.png" alt="" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
                         Astra Navi
                     </Link>
                 </div>
@@ -555,7 +555,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* ===== MOBILE/TABLET NAVBAR (<xl) ===== */}
-            <div className="flex xl:hidden items-center px-4 py-2 w-full relative h-[56px]">
+            <div className="flex xl:hidden items-center px-4 max-[360px]:px-3 py-2 w-full relative h-[56px]">
                 {/* Left Section (33%) */}
                 <div className="flex-[1] flex justify-start items-center gap-2 min-w-0">
                     <button 
@@ -568,33 +568,28 @@ const Navbar: React.FC = () => {
                         <Link
                             href="/plans"
                             aria-label={t('plans.naviCredits')}
-                            className="h-8 min-w-0 max-w-[78px] rounded-xl border border-[var(--tier-color)]/70 bg-[var(--tier-color)]/80 px-2.5 text-white shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                            className="h-8 min-w-0 max-w-[78px] max-[360px]:hidden rounded-xl border border-[var(--tier-color)]/70 bg-[var(--tier-color)]/80 px-2.5 text-white shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
                             style={{ '--tier-color': tierColor } as React.CSSProperties}
                         >
                             <Wallet className="w-3.5 h-3.5 shrink-0" />
                             <span className="text-[11px] font-black tabular-nums truncate">{totalCredits ?? 0}</span>
                         </Link>
                     )}
-                    <div className="max-[479px]:hidden min-[720px]:hidden">
-                        <LanguagePicker />
-                    </div>
                 </div>
 
                 {/* Center Section - Prevent overlap on extra-narrow screens by hiding "Astra Navi" text below 390px */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
                     <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tighter text-primary font-headline">
-                        <Image src="/icons/logo.jpeg" alt="Astra Navi Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
+                        <Image src="/icons/logo.png" alt="Astra Navi Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
                         <span className="whitespace-nowrap hidden min-[390px]:inline">Astra Navi</span>
                     </Link>
                 </div>
 
                 {/* Right Section */}
-                <div className="flex-[1] flex justify-end items-center gap-2.5 sm:gap-3">
-                    <div className="max-[719px]:hidden">
-                        <LanguagePicker />
-                    </div>
+                <div className="flex-[1] flex justify-end items-center gap-2.5 max-[360px]:gap-2 sm:gap-3">
+                    <LanguagePicker />
                     <div className="max-[479px]:hidden">
-                        <ThemeToggle />
+                        <ThemeToggle className="!w-8 !h-8 !rounded-full" />
                     </div>
                     {isLoading ? (
                         <div className="h-8 w-[68px] rounded-xl bg-secondary/5 border border-secondary/10 animate-pulse" aria-hidden="true" />
@@ -609,7 +604,7 @@ const Navbar: React.FC = () => {
                     ) : (
                         <>
                         <MessagesBell buttonClassName="w-8 h-8" />
-                        <NotificationBell />
+                        <NotificationBell buttonClassName="w-8 h-8 rounded-full hover:bg-secondary/10" />
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
                             <button 
                                 className="profile-ring-glow relative w-8 h-8 rounded-full flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-secondary/50 cursor-pointer p-0" 

@@ -16,10 +16,10 @@ export default function AskNaviFab() {
     return (
         <Link
             href="/chat"
-            className="app-ask-navi-fab safe-area-fab fixed z-[1000] xl:hidden flex items-center gap-2 py-3.5 px-5 rounded-full bg-secondary text-on-primary font-semibold text-[15px] shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:scale-95 transition-transform"
+            className="app-ask-navi-fab safe-area-fab fixed z-[1000] xl:hidden flex items-center gap-2 py-3.5 px-5 rounded-full bg-secondary text-on-primary font-semibold text-[15px] shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:scale-95 transition-transform max-w-[calc(100vw-2rem)]"
         >
             <MessageSquare size={18} />
-            {t("dashboard.askNaviFab")}
+            <span className="min-w-0 truncate whitespace-nowrap">{t("dashboard.askNaviFab")}</span>
             <ArrowRight size={16} />
         </Link>
     );

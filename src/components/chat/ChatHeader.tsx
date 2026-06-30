@@ -33,7 +33,7 @@ const ChatHeader: React.FC = () => {
       <div className="chat-header-back-zone">
         <button
           onClick={handleBack}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 bg-secondary/8 text-secondary hover:bg-secondary/15 transition-all"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 sm:px-4 bg-secondary/8 text-secondary hover:bg-secondary/15 transition-all"
           aria-label={t('chat.header.back')}
         >
           <ArrowLeft className="w-4 h-4" />
@@ -43,7 +43,7 @@ const ChatHeader: React.FC = () => {
 
       {/* Main zone — aligned with the main chat column */}
       <div className="chat-header-main-zone">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="chat-header-btn lg:hidden -ml-1 text-foreground/50 hover:text-secondary transition-all"
@@ -53,12 +53,12 @@ const ChatHeader: React.FC = () => {
           </button>
           <AvatarPicker ref={pickerRef} />
           {activeChat?.title && (
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0 max-[360px]:hidden">
               <span className="w-1 h-1 bg-foreground/15 rounded-full" />
               <p className="chat-title-text text-[12px] text-foreground/35 truncate max-w-[35vw] sm:max-w-[180px]">{activeChat.title}</p>
             </div>
           )}
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full ml-1 shrink-0" />
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full ml-1 shrink-0 max-[360px]:hidden" />
           <span className="text-[11px] text-foreground/30 hidden md:inline shrink-0">{t('chat.header.online')}</span>
         </div>
 
