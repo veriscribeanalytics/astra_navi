@@ -581,12 +581,11 @@ const Navbar: React.FC = () => {
                 <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
                     <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tighter text-primary font-headline">
                         <Image src="/icons/logo.png" alt="Astra Navi Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
-                        <span className="whitespace-nowrap hidden min-[390px]:inline">Astra Navi</span>
                     </Link>
                 </div>
 
                 {/* Right Section */}
-                <div className="flex-[1] flex justify-end items-center gap-2.5 max-[360px]:gap-2 sm:gap-3">
+                <div className="flex-[1] flex justify-end items-center gap-1.5 max-[360px]:gap-1 sm:gap-2">
                     <LanguagePicker />
                     <div className="max-[479px]:hidden">
                         <ThemeToggle className="!w-8 !h-8 !rounded-full" />
@@ -603,7 +602,9 @@ const Navbar: React.FC = () => {
                         </Link>
                     ) : (
                         <>
-                        <MessagesBell buttonClassName="w-8 h-8" />
+                        <span className="hidden min-[800px]:flex">
+                            <MessagesBell buttonClassName="w-8 h-8" />
+                        </span>
                         <NotificationBell buttonClassName="w-8 h-8 rounded-full hover:bg-secondary/10" />
                         <div className="relative z-50" ref={mobileUserDropdownRef}>
                             <button 

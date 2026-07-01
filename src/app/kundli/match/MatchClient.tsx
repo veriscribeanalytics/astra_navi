@@ -479,7 +479,7 @@ export default function MatchClient() {
                           </div>
                           <div>
                             <h3 className="text-lg font-headline font-bold text-foreground leading-tight">First Person</h3>
-                            <p className="text-[11px] text-[#AAA3B8] font-bold uppercase tracking-widest">Groom Details</p>
+                            <p className="text-[11px] text-text-muted font-bold uppercase tracking-widest">Groom Details</p>
                           </div>
                         </div>
 
@@ -559,7 +559,7 @@ export default function MatchClient() {
                           </div>
                           <div>
                             <h3 className="text-lg font-headline font-bold text-foreground leading-tight">Second Person</h3>
-                            <p className="text-[11px] text-[#AAA3B8] font-bold uppercase tracking-widest">Bride Details</p>
+                            <p className="text-[11px] text-text-muted font-bold uppercase tracking-widest">Bride Details</p>
                           </div>
                         </div>
 
@@ -621,7 +621,7 @@ export default function MatchClient() {
                             type="button"
                             onClick={() => error("Select from Family is coming soon.")}
                             title="Load a family member's profile"
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-outline-variant/20 text-xs font-bold text-[#AAA3B8] hover:text-foreground hover:border-secondary/40 hover:bg-secondary/5 transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-outline-variant/20 text-xs font-bold text-text-muted hover:text-foreground hover:border-secondary/40 hover:bg-secondary/5 transition-all"
                           >
                             <Users className="w-4 h-4" />
                             Select from Family
@@ -652,7 +652,7 @@ export default function MatchClient() {
                       {isSubmitting && <RotateCcw className="w-4 h-4 animate-spin" />}
                       Calculate Compatibility <Sparkles className="w-4 h-4" />
                     </button>
-                    <p className="text-[11px] text-[#AAA3B8] font-bold uppercase tracking-widest flex items-center gap-2">
+                    <p className="text-[11px] text-text-muted font-bold uppercase tracking-widest flex items-center gap-2">
                       <ShieldCheck size={12} className="text-green-500/60" />
                       Secure & Private Calculation
                     </p>

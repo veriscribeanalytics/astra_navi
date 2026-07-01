@@ -10,14 +10,19 @@ import { useMessagesContext } from '@/context/MessagesContext';
 import { formatChatTimestamp } from '@/lib/datetime';
 import type { MessageThread } from '@/types/messages';
 
-const SENDER_NAME = '#F4EFE7';
-const PREVIEW_TEXT = '#AAA3B8';
-const TIME_STAMP = '#918A9F';
-const SUBTITLE = '#AFA8C0';
-const CARD_BG = '#170D31';
-const CARD_BORDER = 'rgba(196,181,253,0.10)';
+// Colors resolve to CSS variables (defined in globals.css under
+// .messages-page-shell) so dark mode keeps its exact midnight literals while
+// light mode swaps to theme tokens. Gold accents read on both themes.
+const SENDER_NAME = 'var(--msg-sender)';
+const PREVIEW_TEXT = 'var(--msg-preview)';
+const TIME_STAMP = 'var(--msg-time)';
+const SUBTITLE = 'var(--msg-subtitle)';
+const CARD_BG = 'var(--msg-card-bg)';
+const CARD_BORDER = 'var(--msg-card-border)';
 const HOVER_BORDER = 'rgba(201,151,46,0.28)';
-const HOVER_BG = '#1B1136';
+const HOVER_BG = 'var(--msg-hover-bg)';
+const UNREAD_PREVIEW = 'var(--msg-unread-preview)';
+const BADGE_BG = 'var(--msg-badge-bg)';
 const GOLD = '#C9972E';
 const GOLD_MUTED = 'rgba(201,151,46,0.55)';
 
@@ -67,7 +72,7 @@ export default function MessagesClient() {
                     type="button"
                     onClick={() => { void refetch(); void refreshUnread(); }}
                     aria-label="Refresh conversations"
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-transparent text-[#918A9F] hover:text-[#C9972E] hover:bg-[rgba(201,151,46,0.08)] hover:border-[rgba(201,151,46,0.18)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9972E]/40"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-transparent text-[var(--msg-time)] hover:text-[#C9972E] hover:bg-[rgba(201,151,46,0.08)] hover:border-[rgba(201,151,46,0.18)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9972E]/40"
                 >
                     <RotateCcw className="w-4 h-4" />
                 </button>
@@ -163,7 +168,7 @@ function ThreadRow({ thread, onOpen }: { thread: MessageThread; onOpen: () => vo
                         {thread.otherName.charAt(0).toUpperCase() || '?'}
                     </div>
                     {hasUnread && (
-                        <span className="absolute top-0 right-0 block w-2.5 h-2.5 rounded-full bg-[#C9972E] ring-2 ring-[#170D31]" />
+                        <span className="absolute top-0 right-0 block w-2.5 h-2.5 rounded-full bg-[#C9972E] ring-2 ring-[var(--msg-card-bg)]" />
                     )}
                 </div>
 
@@ -177,7 +182,7 @@ function ThreadRow({ thread, onOpen }: { thread: MessageThread; onOpen: () => vo
                             {thread.otherName}
                         </h3>
                         {relationship && (
-                            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0" style={{ backgroundColor: 'rgba(196,181,253,0.12)', color: '#AFA8C0' }}>
+                            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0" style={{ backgroundColor: BADGE_BG, color: SUBTITLE }}>
                                 {relationship}
                             </span>
                         )}
@@ -188,7 +193,7 @@ function ThreadRow({ thread, onOpen }: { thread: MessageThread; onOpen: () => vo
                         )}
                         <p
                             className={`text-[13px] truncate ${hasUnread ? 'font-medium' : ''}`}
-                            style={{ color: hasUnread ? '#E8E3DB' : PREVIEW_TEXT }}
+                            style={{ color: hasUnread ? UNREAD_PREVIEW : PREVIEW_TEXT }}
                         >
                             {previewText}
                         </p>

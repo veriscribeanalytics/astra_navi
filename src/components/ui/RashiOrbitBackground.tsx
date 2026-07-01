@@ -181,30 +181,29 @@ const RashiOrbitBackground = memo(function RashiOrbitBackground({
           z-index: -2;
           pointer-events: none;
         }
+        :global(html:not(.dark)) .rashi-orbit-enhanced::before {
+          background: rgba(42, 26, 74, 0.05);
+        }
         
         :global(.filter-rashi) {
-          filter: brightness(0.5) contrast(1.1) grayscale(0.5) drop-shadow(0 0 2px rgba(200, 136, 10, 0.3));
+          opacity: 0.15;
+          filter:
+            brightness(0.4)
+            contrast(1.1)
+            grayscale(1)
+            drop-shadow(0 0 1px rgba(255, 215, 0, 0.3));
           transition: filter 0.5s ease;
           mix-blend-mode: soft-light;
         }
 
         :global(.dark .filter-rashi) {
           opacity: 0.2;
-          filter: 
-            brightness(0.25) 
-            contrast(1.3) 
-            grayscale(1) 
-            drop-shadow(0 0 1px rgba(255, 215, 0, 0.5)) 
+          filter:
+            brightness(0.25)
+            contrast(1.3)
+            grayscale(1)
+            drop-shadow(0 0 1px rgba(255, 215, 0, 0.5))
             drop-shadow(0 0 3px rgba(255, 215, 0, 0.25));
-        }
-
-        :global(.light .filter-rashi) {
-          opacity: 0.15;
-          filter: 
-            brightness(0.4) 
-            contrast(1.1) 
-            grayscale(1) 
-            drop-shadow(0 0 1px rgba(255, 215, 0, 0.3));
         }
       `}</style>
     </div>

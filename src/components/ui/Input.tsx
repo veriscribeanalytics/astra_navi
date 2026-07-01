@@ -27,7 +27,7 @@ const Input: React.FC<InputProps> = ({ icon, rightElement, label, error, helperT
                 ) : (
                     <label
                         htmlFor={inputId}
-                        className="text-[11px] sm:text-xs uppercase tracking-widest text-[#D8D2E2] font-bold ml-1 font-body block"
+                        className="text-[11px] sm:text-xs uppercase tracking-widest text-foreground font-bold ml-1 font-body block"
                     >
                         {label}
                         {props.required && <span className="text-secondary ml-1">*</span>}
@@ -68,14 +68,14 @@ const Input: React.FC<InputProps> = ({ icon, rightElement, label, error, helperT
                         isCosmic
                             ? `auth-input ${icon ? 'pl-14' : 'px-5'} ${rightElement ? 'pr-14' : ''} ${error ? 'auth-input-error' : ''} ${className}`
                             : `w-full bg-surface border transition-all outline-none
-                               text-[#F1EDF6] placeholder:text-[#888197] font-body
+                               text-foreground placeholder:text-foreground/40 font-body
                                rounded-[20px] sm:rounded-[24px]
                                ${icon ? 'pl-10 sm:pl-12' : 'px-3 sm:px-4'} ${rightElement ? 'pr-10 sm:pr-12' : 'pr-3 sm:pr-4'}
                                py-3 sm:py-3.5 md:py-4
                                text-[15px] sm:text-base
                                 ${error
                                     ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500'
-                                    : 'border-[rgba(196,181,253,0.10)] hover:border-[rgba(196,181,253,0.22)] focus:ring-2 focus:ring-[rgba(201,151,46,0.20)] focus:border-[rgba(201,151,46,0.70)]'
+                                    : 'border-outline-variant/30 hover:border-outline-variant/50 focus:ring-2 focus:ring-[rgba(201,151,46,0.20)] focus:border-secondary/70'
                                 }
                                disabled:opacity-50 disabled:cursor-not-allowed
                                ${className}`
@@ -94,7 +94,7 @@ const Input: React.FC<InputProps> = ({ icon, rightElement, label, error, helperT
                 </p>
             )}
             {helperText && !error && (
-                <p id={`${inputId}-helper`} className="text-xs text-[#AAA3B8] ml-1">
+                                <p id={`${inputId}-helper`} className="text-xs text-text-muted ml-1">
                     {helperText}
                 </p>
             )}

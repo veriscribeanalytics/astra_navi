@@ -9,7 +9,7 @@ import type { ForecastArea } from '@/data/areaThemes';
 type ForecastAlert = string | { simple: string; technical?: string };
 
 interface ForecastActionPanelProps {
-  area: ForecastArea;
+  area: ForecastArea | 'overall';
   colorHex: string;
   best?: string;
   worst?: string;

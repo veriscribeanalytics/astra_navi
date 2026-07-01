@@ -11,7 +11,7 @@ import { getAreaPhaseMain } from '@/data/lifeAreaColors';
 interface MonthlyDayGridProps {
   days: MonthlyDay[];
   colorHex: string;
-  area: ForecastArea;
+  area: ForecastArea | 'overall';
   selectedDate: string | null;
   onSelect: (date: string) => void;
 }

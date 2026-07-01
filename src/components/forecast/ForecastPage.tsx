@@ -8,7 +8,7 @@ import { clientFetch } from '@/lib/apiClient';
 import { usePaywallContext } from '@/context/PaywallContext';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { PaywallData } from '@/types/paywall';
-import { AREA_THEMES, AREA_LIST, ForecastArea } from '@/data/areaThemes';
+import { AREA_THEMES, AREA_LIST, ForecastArea, AreaTheme } from '@/data/areaThemes';
 import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS } from '@/data/lifeAreaColors';
 import Card from '@/components/ui/Card';
 import ForecastChart, { ChartPoint } from './ForecastChart';
@@ -16,13 +16,34 @@ import ForecastActionPanel from './ForecastActionPanel';
 import MonthGrid, { MonthData } from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
 import MonthlyDayGrid from './MonthlyDayGrid';
-import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Sparkles, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Sparkles, Gauge, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { resolveTone } from '@/utils/forecastTones';
 import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse } from '@/types/forecast';
 import { todayISO, currentMonthISO } from '@/utils/forecastError';
 
 type TimeRange = '7d' | 'monthly' | 'yearly';
+
+// "overall" is a combined forecast (backend weighted combine of the six life
+// areas, general counts double). It is served by the same /[area] routes and
+// reuses the same response shape — only the area key differs. It is NOT part of
+// /api/forecast/all/weekly, so it is requested separately here.
+type ForecastAreaWithOverall = ForecastArea | 'overall';
+
+type AreaThemeShape = { color: string; bg: string; hex: string; icon: AreaTheme['icon'] };
+
+const OVERALL_THEME: AreaThemeShape = { color: 'text-[#2FD3A0]', bg: 'bg-[#2FD3A0]/10', hex: '#2FD3A0', icon: Gauge };
+
+// Overall first (combined outlook), then the six life areas.
+const FORECAST_AREA_KEYS: ForecastAreaWithOverall[] = ['overall', ...AREA_LIST];
+const FORECAST_PILLS: { key: ForecastAreaWithOverall; theme: AreaThemeShape }[] = [
+  { key: 'overall', theme: OVERALL_THEME },
+  ...AREA_LIST.map((a) => ({ key: a as ForecastAreaWithOverall, theme: AREA_THEMES[a] })),
+];
+
+function getAreaTheme(area: ForecastAreaWithOverall): AreaThemeShape {
+  return area === 'overall' ? OVERALL_THEME : AREA_THEMES[area];
+}
 
 interface WeeklyResponse extends Omit<WeeklyForecastResponse, 'days'> {
   days: (WeeklyForecastResponse['days'][number] & { is_today?: boolean; personalized_alerts?: (string | { simple: string; technical?: string })[] })[];
@@ -53,16 +74,16 @@ export default function ForecastPage() {
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { t, language } = useTranslation();
 
-  const initialArea: ForecastArea = useMemo(() => {
+  const initialArea: ForecastAreaWithOverall = useMemo(() => {
     const a = searchParams.get('area');
-    return (AREA_LIST as string[]).includes(a || '') ? (a as ForecastArea) : 'general';
+    return (FORECAST_AREA_KEYS as string[]).includes(a || '') ? (a as ForecastAreaWithOverall) : 'general';
   }, [searchParams]);
   const initialRange: TimeRange = useMemo(() => {
     const r = searchParams.get('range');
     return r === 'monthly' || r === 'yearly' ? r : '7d';
   }, [searchParams]);
 
-  const [area, setArea] = useState<ForecastArea>(initialArea);
+  const [area, setArea] = useState<ForecastAreaWithOverall>(initialArea);
   const [range, setRange] = useState<TimeRange>(initialRange);
   const [detailModalData, setDetailModalData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -89,7 +110,7 @@ export default function ForecastPage() {
   // Tracks the in-flight request so a slow earlier response (e.g. after the
   // user switches area/range) can't overwrite a newer selection's data.
   const abortRef = useRef<AbortController | null>(null);
-  const cacheKeyFor = useCallback((a: ForecastArea, r: TimeRange, lang: string, cur: string | null): string => {
+  const cacheKeyFor = useCallback((a: ForecastAreaWithOverall, r: TimeRange, lang: string, cur: string | null): string => {
     return `${a}|${r}|${lang}|${cur || 'default'}`;
   }, []);
 
@@ -197,7 +218,7 @@ export default function ForecastPage() {
     return () => abortRef.current?.abort();
   }, []);
 
-  const theme = AREA_THEMES[area];
+  const theme = getAreaTheme(area);
 
   const { tier, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
   const userTier = (tier || 'free').toLowerCase();
@@ -574,15 +595,14 @@ export default function ForecastPage() {
 
         {/* Area pills */}
         <div className="flex gap-2 overflow-x-auto justify-start md:justify-center scrollbar-hide mb-6 pb-1">
-          {AREA_LIST.map(a => {
-            const th = AREA_THEMES[a];
+          {FORECAST_PILLS.map(({ key: a, theme: th }) => {
             const Icon = th.icon;
             const active = area === a;
             return (
               <button key={a} onClick={() => setArea(a)}
                 className={`flex items-center gap-2 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all shrink-0 cursor-pointer min-h-[46px] ${active ? `${th.bg} ${th.color} border border-current/20` : 'bg-surface border border-white/5 text-foreground/65 hover:text-foreground/95 hover:border-white/15'}`}>
                 <Icon className="w-4 h-4 animate-pulse" />
-                {t(`horoscope.category${a.charAt(0).toUpperCase() + a.slice(1)}`)}
+                {a === 'overall' ? (t('horoscope.categoryOverall') || 'Overall') : t(`horoscope.category${a.charAt(0).toUpperCase() + a.slice(1)}`)}
               </button>
             );
           })}

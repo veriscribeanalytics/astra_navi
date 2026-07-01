@@ -20,7 +20,7 @@ const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep
 export default function MonthGrid({ months, colorHex, area, selectedMonth, onSelect }: {
   months: MonthData[];
   colorHex: string;
-  area: ForecastArea;
+  area: ForecastArea | 'overall';
   selectedMonth: string | null;
   onSelect: (month: string) => void;
 }) {

@@ -57,7 +57,7 @@ function MessagesContent() {
         );
     }
 
-    return <MessagesClient />;
+    return <div className="messages-page-shell"><MessagesClient /></div>;
 }
 
 export default function MessagesPage() {

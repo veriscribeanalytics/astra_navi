@@ -11,7 +11,7 @@ import { getAreaPhaseMain } from '@/data/lifeAreaColors';
 interface MonthlyWeekCardsProps {
   weeks: MonthlyWeek[];
   colorHex: string;
-  area: ForecastArea;
+  area: ForecastArea | 'overall';
   selectedWeekStart: string | null;
   onSelect: (startDate: string) => void;
 }

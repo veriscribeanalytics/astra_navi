@@ -58,7 +58,7 @@ function FamilyContent() {
         );
     }
 
-    return <FamilyClient />;
+    return <div className="family-page-shell"><FamilyClient /></div>;
 }
 
 export default function FamilyPage() {

@@ -2,7 +2,7 @@
   position: relative;
   --logoloop-gap: 32px;
   --logoloop-logoHeight: 28px;
-  --logoloop-fadeColorAuto: #ffffff;
+  --logoloop-fadeColorAuto: var(--background, #faf7f2);
   /* GPU optimization */
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -19,10 +19,10 @@
   padding-bottom: calc(var(--logoloop-logoHeight) * 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .logoloop {
-    --logoloop-fadeColorAuto: #0b0b0b;
-  }
+/* Fade edges should track the app theme (.dark), not the OS scheme, so the
+   marquee mask matches the actual page background in both themes. */
+.dark .logoloop {
+  --logoloop-fadeColorAuto: #0b0b0b;
 }
 
 .logoloop__track {

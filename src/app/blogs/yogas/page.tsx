@@ -321,19 +321,19 @@ export default function YogasPage() {
                                                 {/* Top Metrics Grid */}
                                                 <div className="grid grid-cols-4 gap-8 pt-2">
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Potency</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.yogas.potencyLabel')}</span>
                                                         <p className="text-[14px] font-bold text-foreground/90">{selectedYoga.potency}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Logic</span>
-                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedYoga.logic.split(' ')[0]}</p>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.yogas.logicLabel')}</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90">{selectedYoga.logic}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Classification</span>
-                                                        <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedYoga.classification.split(' ')[0]}</p>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.yogas.classificationLabel')}</span>
+                                                        <p className="text-[14px] font-bold text-foreground/90 uppercase">{selectedYoga.classification}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">Key Planets</span>
+                                                        <span className="text-[10px] opacity-40 uppercase tracking-widest mb-1 block">{t('blogs.yogas.keyPlanetsLabel')}</span>
                                                         <p className="text-[14px] font-bold text-secondary uppercase">{selectedYoga.keyPlanet}</p>
                                                     </div>
                                                 </div>

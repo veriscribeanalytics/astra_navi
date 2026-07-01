@@ -65,7 +65,7 @@ export default function OptimizedBackgrounds() {
       {/* Single Particles instance — color buffer updates in-place on theme change */}
       <div className="fixed inset-0 z-[-5] pointer-events-none">
         <Particles
-          lightParticleColors={["var(--outline-variant)", "var(--accent)", "var(--secondary)"]}
+          lightParticleColors={["var(--secondary)", "var(--flare-violet)", "var(--accent)"]}
           darkParticleColors={["var(--secondary)", "var(--flare-gold)", "var(--foreground)"]}
           darkMode={isDark}
           particleCount={particleCount}

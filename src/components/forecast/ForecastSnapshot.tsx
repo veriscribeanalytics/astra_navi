@@ -35,7 +35,7 @@ interface ForecastSnapshotProps {
     bg: string;
     color: string;
   };
-  area: ForecastArea;
+  area: ForecastArea | 'overall';
   t: (key: string) => string;
 }
 

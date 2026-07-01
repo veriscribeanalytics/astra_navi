@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import CosmicTree from "./CosmicTree";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -210,10 +211,10 @@ function RingScore({ score, size = 132, color }: { score: number; size?: number;
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[42px] 3xl:text-[54px] font-black leading-none tabular-nums" style={{ color }}>
+        <span className="font-black leading-none tabular-nums" style={{ color, fontSize: size * 0.28 }}>
           {score}
         </span>
-        <span className="mt-1 text-sm font-semibold text-foreground/70">/100</span>
+        <span className="font-semibold text-foreground/70" style={{ fontSize: size * 0.1, marginTop: size * 0.02 }}>/100</span>
       </div>
     </div>
   );
@@ -983,11 +984,11 @@ export default function DashboardHome() {
   const userName = user?.name?.trim().split(/\s+/)[0] || user?.email?.split("@")[0] || t("common.user");
   const overallScore = useMemo(() => {
     if (!horoscope) return 0;
+    // score.overall is the backend's authoritative weighted combine
+    // (general counts double). Do NOT average the six areas on the client —
+    // that would diverge from the daily and the /forecast/overall numbers.
     const apiOverall = horoscope.score?.overall ?? horoscope.overall_score;
-    if (typeof apiOverall === "number") return Math.round(apiOverall);
-    const scores = AREA_LIST.map((area) => getAreaScore(horoscope, area));
-    const sum = scores.reduce((acc, val) => acc + val, 0);
-    return Math.round(sum / AREA_LIST.length);
+    return typeof apiOverall === "number" ? Math.round(apiOverall) : 0;
   }, [horoscope]);
   const overallPhaseHex = getAreaPhaseMain("overall", overallScore);
   const overallPhaseGlow = getAreaPhaseGlowColor("overall", overallScore);
@@ -1528,29 +1529,37 @@ export default function DashboardHome() {
 
               {/* Left Side Content */}
               <div className="flex-grow flex flex-col gap-3">
-                {/* Main Row: Today's Energy | (Headline + [Tree | Guidance]) */}
-                <div className="grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-stretch">
-                  {/* Zone 1: Today's Energy */}
-                  <div className="flex flex-col items-center text-center bg-surface-variant/[0.035] py-4 px-4 rounded-2xl h-full justify-center">
-                    <p className="label-secondary">{t('newDashboard.todaysEnergy.title')}</p>
-                    <div className="mt-3">
-                      <RingScore score={overallScore} color={overallPhaseHex} />
-                    </div>
-                    <span
-                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]"
-                      style={{
-                        color: STATUS_COLORS[getScorePhase(overallScore)].main,
-                        backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
-                        borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
-                      }}
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
-                      {scoreBand}
-                    </span>
-                  </div>
+                {/* Headline + [Tree with Score | Guidance] */}
 
-                  {/* Zone 2: Headline (full width) + [ Cosmic Tree | Guidance box ] */}
                   <div className="flex flex-col gap-3">
+
+                    {/* Cosmic Tree with Score Overlay — mobile only (placed before headline) */}
+                    <button
+                      type="button"
+                      onClick={() => router.push("/horoscope/forecast?area=overall")}
+                      aria-label={`${t('newDashboard.todaysEnergy.title')} — overall ${overallScore}. View overall forecast`}
+                      title="View overall forecast"
+                      className="flex lg:hidden items-center justify-center min-h-[240px] relative cursor-pointer group"
+                    >
+                      <CosmicTree className="h-auto w-full max-w-full mx-auto max-h-[300px] object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
+                      <div className="absolute inset-0 flex flex-col items-center pt-[8%] px-[15%]">
+                        <div className="flex flex-col items-center gap-1">
+                          <RingScore score={overallScore} color={overallPhaseHex} size={100} />
+                          <span
+                            className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em]"
+                            style={{
+                              color: STATUS_COLORS[getScorePhase(overallScore)].main,
+                              backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
+                              borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
+                            }}
+                          >
+                            <span className="h-1 w-1 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
+                            {scoreBand}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
                     {/* Headline + Advice — spans full width */}
                     <div className="px-1">
                       <h2 className="font-headline text-xl font-bold leading-tight tracking-tight sm:text-2xl">{headline}</h2>
@@ -1566,10 +1575,32 @@ export default function DashboardHome() {
 
                     {/* Row: Cosmic Tree | Guidance box */}
                     <div className="grid flex-grow gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-stretch">
-                      {/* Cosmic Tree — desktop only (mobile renders it at the bottom of this section) */}
-                      <div className="hidden lg:flex items-center justify-center min-h-[200px]">
-                        <Image src="/images/cosmic-tree.png" alt="" width={280} height={280} unoptimized className="h-auto w-full max-w-full mx-auto max-h-[270px] object-contain" />
-                      </div>
+                      {/* Cosmic Tree with Score Overlay — desktop only (mobile renders it at the bottom of this section) */}
+                      <button
+                        type="button"
+                        onClick={() => router.push("/horoscope/forecast?area=overall")}
+                        aria-label={`${t('newDashboard.todaysEnergy.title')} — overall ${overallScore}. View overall forecast`}
+                        title="View overall forecast"
+                        className="hidden lg:flex items-center justify-center min-h-[200px] relative cursor-pointer group"
+                      >
+                        <CosmicTree className="h-auto w-full max-w-full mx-auto max-h-[270px] object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
+                        <div className="absolute inset-0 flex flex-col items-center pt-[8%] px-[15%]">
+                          <div className="flex flex-col items-center gap-1">
+                            <RingScore score={overallScore} color={overallPhaseHex} size={100} />
+                            <span
+                              className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em]"
+                              style={{
+                                color: STATUS_COLORS[getScorePhase(overallScore)].main,
+                                backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
+                                borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
+                              }}
+                            >
+                              <span className="h-1 w-1 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
+                              {scoreBand}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
 
                       {/* Guidance bordered box */}
                       <div className="flex flex-col gap-3 rounded-2xl border border-purple-400/15 bg-surface-variant/[0.05] p-4 h-full">
@@ -1629,7 +1660,6 @@ export default function DashboardHome() {
                       </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Good Time & Rahu Kaal Cards */}
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -1693,14 +1723,9 @@ export default function DashboardHome() {
                   </div>
                 </div>
 
-                {/* Cosmic Tree — mobile only (desktop shows it beside the Guidance box) */}
-                <div className="flex lg:hidden items-center justify-center min-h-[200px] mt-1">
-                  <Image src="/images/cosmic-tree.png" alt="" width={280} height={280} unoptimized className="h-auto w-full max-w-full mx-auto max-h-[270px] object-contain" />
-                </div>
-
               </div>
-            </div>
-          </DarkPanel>
+              </div>
+            </DarkPanel>
 
             {/* Right Card: Your Life Areas */}
           <DarkPanel
@@ -1969,7 +1994,7 @@ export default function DashboardHome() {
 
           {/* LEFT — Family Compatibility */}
           <DarkPanel
-            className="p-4 sm:p-6 flex flex-col gap-4 !bg-[#150B2D]"
+            className="p-4 sm:p-6 flex flex-col gap-4 !bg-[var(--panel-bg)]"
             borderVariant="muted"
           >
             <div className="flex flex-col gap-4 w-full">
@@ -2104,7 +2129,7 @@ export default function DashboardHome() {
 
           {/* RIGHT — Chart Snapshot (40%) */}
           <DarkPanel 
-            className="p-6 flex flex-col justify-between !bg-[#150B2D]"
+            className="p-6 flex flex-col justify-between !bg-[var(--panel-bg)]"
             borderVariant="muted"
           >
             <div className="flex flex-col gap-4 w-full h-full justify-between">

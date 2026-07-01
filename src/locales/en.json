@@ -73,6 +73,8 @@
     "forecastDesc": "Monthly and yearly astrological predictions.",
     "myFamily": "My Family",
     "myFamilyDesc": "Save loved ones' birth details, view charts, check compatibility.",
+    "messages": "Messages",
+    "messagesDesc": "Private chats with your connections",
     "consultNavi": "Consult Navi",
     "guidedSessions": "Guided Sessions",
     "guidedSessionsDesc": "Step-by-step personalized life readings.",
@@ -97,6 +99,8 @@
     "helpSupport": "Help & Support",
     "helpSupportDesc": "How can we assist you today?",
     "platform": "Platform",
+    "ourServices": "Our Services",
+    "ourServicesDesc": "Explore all of AstraNavi's AI and Vedic services",
     "ourMission": "Our Mission",
     "ourMissionDesc": "Blending Vedic wisdom with Artificial Intelligence.",
     "astrology": "Astrology",
@@ -482,6 +486,7 @@
     "categoryFinance": "Finance",
     "categoryGeneral": "General",
     "categorySpiritual": "Spiritual",
+    "categoryOverall": "Overall",
     "weeklyForecast": "Weekly Forecast",
     "past": "PAST",
     "forecast": "FORECAST",
@@ -2019,7 +2024,11 @@
       "activationPathDesc": "Primarily triggers during major Dasha / Bhukti periods of the involved planets.",
       "yogaAnalysisScan": "Yoga Analysis Scan",
       "discoverCombinations": "Discover hidden combinations in your Kundli",
-      "scanChart": "Scan My Chart"
+      "scanChart": "Scan My Chart",
+      "potencyLabel": "Potency",
+      "logicLabel": "Logic",
+      "classificationLabel": "Classification",
+      "keyPlanetsLabel": "Key Planets"
     },
     "remedies": {
       "title": "Sacred",
