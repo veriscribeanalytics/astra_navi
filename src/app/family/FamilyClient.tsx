@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
     Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
-    Calendar, Clock, MapPin, ChevronRight, Star, AlertCircle, X,
+    Calendar, Clock, Star, AlertCircle,
     Crown, TrendingUp, Sparkles, FileText,
     Mail, Send, Link2, Settings, RefreshCw, Search,
     MoreVertical, Eye, ArrowUpRight, UserPlus, Activity,
@@ -52,11 +52,13 @@ import {
 } from '@/types/family';
 import { parseInviteErrorByStatus, familyCapDetail, familyPeerTierCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { computeFamilyMemberStatus } from '@/lib/familyStatus';
+import { appLangToCompatLang } from '@/lib/compatLang';
 import { useCountdown } from '@/lib/useCountdown';
 import MakeFamilyDialog from '@/components/family/MakeFamilyDialog';
 import OpenMessageButton from '@/components/family/OpenMessageButton';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import FamilyChartView from '@/components/family/FamilyChartView';
+import BondDashboardBody, { memberFromConnection } from '@/components/family/BondDashboardBody';
 import CompatibilityReport, {
     getFamilyIcon,
     formatDob,
@@ -82,12 +84,6 @@ const GENDERS: { value: FamilyGender; label: string }[] = [
     { value: 'male', label: 'Male' },
     { value: 'female', label: 'Female' },
     { value: 'other', label: 'Other' },
-];
-
-const LANGS: { value: CompatibilityLang; label: string }[] = [
-    { value: 'en', label: 'English' },
-    { value: 'hi', label: 'हिन्दी' },
-    { value: 'ko', label: '한국어' },
 ];
 
 /**
@@ -446,14 +442,6 @@ export default function FamilyClient() {
 function formatRelationshipLabel(rel?: string | null): string {
     if (!rel) return '';
     return rel.charAt(0).toUpperCase() + rel.slice(1);
-}
-
-function getStatusLabel(status: ReturnType<typeof computeFamilyMemberStatus> | null, t: (k: string) => string): string | null {
-    if (!status) return null;
-    if (status.kind === 'incomplete') return t('family.statusIncompleteShort') || 'Incomplete';
-    if (status.kind === 'needsAttention') return t('family.statusNeedsAttentionShort') || 'Needs attention';
-    if (status.kind === 'stable') return t('family.statusStableShort') || 'Stable';
-    return t(status.labelKey) || status.kind;
 }
 
 interface FamilyListProps {
@@ -886,8 +874,9 @@ function CompactScoreRing({ score, size = 44 }: { score: number; size?: number }
 }
 
 function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMember; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const isLinked = m.source === 'linked';
+    const compatLang = appLangToCompatLang(language);
     const relationshipLabel = formatRelationshipLabel(m.relationshipType) || (t('family.relationshipNotSet') || 'Connection');
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -904,13 +893,13 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
     const {
         data: summary,
         isLoading: summaryLoading,
-    } = useFamilyCompatibilitySummary(m, 'en');
+    } = useFamilyCompatibilitySummary(m, compatLang);
     const {
         data: compat,
     } = useFamilyCompatibility(m);
     const {
         data: reports,
-    } = useFamilyReports(m);
+    } = useFamilyReports(m, compatLang);
     const {
         data: preflight,
     } = useFamilyCompatibilityPreflight(m);
@@ -1550,17 +1539,23 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
 /* ====================================================================== */
 
 function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: FamilyMember; onEdit: () => void; onBack: () => void; autoRun?: boolean }) {
-    const { t } = useTranslation();
-    const { totalCredits, getFeaturePaywall } = usePaywallContext();
+    const { t, language } = useTranslation();
+    const { totalCredits, getFeaturePaywall, refreshBalance } = usePaywallContext();
     const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
     const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member);
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member);
 
-    const [lang, setLang] = useState<CompatibilityLang>('en');
+    // The compatibility reading language follows the app's UI language so that
+    // changing the app language also re-reads the report in that language. The
+    // per-card language picker can still override this for an individual report.
+    const [lang, setLang] = useState<CompatibilityLang>(() => appLangToCompatLang(language));
+    useEffect(() => {
+        setLang(appLangToCompatLang(language));
+    }, [language]);
     const { data: summary, isLoading: summaryLoading } = useFamilyCompatibilitySummary(member, lang);
     const [confirmingPurchase, setConfirmingPurchase] = useState(false);
-    const { data: reports } = useFamilyReports(member);
+    const { data: reports } = useFamilyReports(member, lang);
     const { fetchPreflight } = useFamilyCompatibilityPreflight(member);
     const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
     /** When preflight reports insufficient credits, render this paywall modally. */
@@ -1588,13 +1583,28 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
     };
     const scrollToReports = () => scrollTo(reportsRef.current);
 
-    const alreadyPaidForLang = useMemo(
-        () => compat?.lang === lang && (compat?.member_id === member.id || compat?.connection_id === member.connectionId),
-        [compat, lang, member]
+    // Payment is keyed per (member) pair, not per language — once a pair has
+    // been paid, any language switch is a free re-translation. `compat` is only
+    // non-null after a successful paid/cache fetch on this pair, so its presence
+    // is the "already paid" signal.
+    const alreadyPaidForPair = useMemo(
+        () => compat != null && (compat.member_id === member.id || compat.connection_id === member.connectionId),
+        [compat, member]
     );
+
+    // Once a pair has been paid, switching language re-fetches the free
+    // translation directly — no paywall/confirm. Skipped until the first paid
+    // result lands, so the very first run still goes through startCompatibility.
+    // The hook's own per-language cache makes repeat switches instant.
+    useEffect(() => {
+        if (!alreadyPaidForPair || !compat) return;
+        if (compat.lang === lang) return;
+        fetchCompatibility(lang);
+    }, [lang, alreadyPaidForPair, compat, fetchCompatibility]);
 
     const runCompatibility = async () => {
         setConfirmingPurchase(false);
+        const wasAlreadyPaid = alreadyPaidForPair;
         const res = await fetchCompatibility(lang);
         if (res.ok) {
             const data = res.data;
@@ -1607,6 +1617,15 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                 } else {
                     info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
                 }
+            } else if (wasAlreadyPaid) {
+                // Free re-translation of an already-paid pair — no credits debited.
+                if (mismatch) {
+                    warning(
+                        `Showing the previously generated ${mismatch.toUpperCase()} analysis — a ${lang.toUpperCase()} translation isn't available yet.`
+                    );
+                } else {
+                    info(`Showing ${lang.toUpperCase()} translation of your previous analysis — no credits charged.`);
+                }
             } else {
                 if (mismatch) {
                     warning(
@@ -1615,6 +1634,7 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                 } else {
                     success(`${creditCost} credits used for compatibility analysis.`);
                 }
+                refreshBalance();
             }
             return;
         }
@@ -1654,8 +1674,9 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
     };
 
     const startCompatibility = async () => {
-        if (alreadyPaidForLang) {
-            // No-op — already shown
+        if (alreadyPaidForPair) {
+            // No-op — already shown. Any language switch is handled by the
+            // free-translation effect above, not this paid trigger.
             return;
         }
         const preflight = await fetchPreflight();
@@ -1694,7 +1715,7 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
         if (!autoRun || autoRunFiredRef.current) return;
         if (compatLoading) return;
         autoRunFiredRef.current = true;
-        if (!alreadyPaidForLang) startCompatibility();
+        if (!alreadyPaidForPair) startCompatibility();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [autoRun]);
 
@@ -1724,6 +1745,9 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
 
     return (
         <div className="space-y-6">
+            {/* ─────────────── Daily Bond Dashboard ─────────────── */}
+            <BondDashboardBody member={member} />
+
             {/* ─────────────── Compatibility report / pre-read CTA ─────────────── */}
             <div ref={compatRef} className="scroll-mt-24">
             {compat ? (
@@ -1737,11 +1761,8 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                     askNaviHref="/chat"
                     onBack={onBack}
                     onEdit={onEdit}
-                    lang={lang}
-                    onLangChange={setLang}
-                    langOptions={LANGS}
                     cached={!!compat.cached}
-                    freeRerun={alreadyPaidForLang && !compat.cached}
+                    freeRerun={alreadyPaidForPair && !compat.cached}
                     rerunLoading={compatLoading}
                     slotBelowActions={
                         preflightData?.staleDataWarning && preflightData?.refresh?.available ? (
@@ -1772,9 +1793,6 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                     creditCost={creditCost}
                     onViewDetailed={startCompatibility}
                     detailedLoading={compatLoading}
-                    lang={lang}
-                    onLangChange={setLang}
-                    langOptions={LANGS}
                 />
             ) : (
                 <Card variant="default" padding="lg">
@@ -1795,23 +1813,8 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                         <>
                             <p className="text-xs text-on-surface-variant/75 mb-4">
                                 {t('family.compatibilityDesc') ||
-                                    'First read charges credits. Repeating the same language is free.'}
+                                    'First read charges credits. Switching language is free.'}
                             </p>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {LANGS.map((l) => (
-                                    <button
-                                        key={l.value}
-                                        onClick={() => setLang(l.value)}
-                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
-                                            lang === l.value
-                                                ? 'bg-secondary text-white border-secondary'
-                                                : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                                        }`}
-                                    >
-                                        {l.label}
-                                    </button>
-                                ))}
-                            </div>
                             <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
                                 Check Compatibility · {creditCost} credits
                             </Button>
@@ -1901,7 +1904,7 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                 message={
                     preflightData?.staleDataWarning
                         ? `Birth details for ${member.name} or your profile have changed since the last analysis. Re-running the compatibility check will generate a new analysis and cost ${preflightData?.creditCost ?? creditCost} credits.`
-                        : `This will charge ${preflightData?.creditCost ?? creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis for ${member.name}. Repeating the same language later is free.`
+                        : `This will charge ${preflightData?.creditCost ?? creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis for ${member.name}. Switching language later is free.`
                 }
                 confirmText={preflightData?.staleDataWarning ? 'Re-run analysis' : `Use ${preflightData?.creditCost ?? creditCost} credits`}
                 cancelText="Cancel"
@@ -2048,10 +2051,10 @@ function FamilyConnectionDetail({
     onDisconnected: () => void;
     onBack: () => void;
 }) {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const { user } = useAuth();
     const { success, error: toastError, info, warning } = useToast();
-    const { totalCredits, getFeaturePaywall } = usePaywallContext();
+    const { totalCredits, getFeaturePaywall, refreshBalance } = usePaywallContext();
     const { data: avatars } = useFamilyAvatars();
     const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
     const { fetchPreflight: fetchConnectionPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
@@ -2064,7 +2067,13 @@ function FamilyConnectionDetail({
     const [savingAvatar, setSavingAvatar] = useState(false);
     const [confirmDisconnect, setConfirmDisconnect] = useState(false);
     const [isDisconnecting, setIsDisconnecting] = useState(false);
-    const [lang, setLang] = useState<CompatibilityLang>('en');
+    // The compatibility reading language follows the app's UI language so that
+    // changing the app language also re-reads the report in that language. The
+    // per-card language picker can still override this for an individual report.
+    const [lang, setLang] = useState<CompatibilityLang>(() => appLangToCompatLang(language));
+    useEffect(() => {
+        setLang(appLangToCompatLang(language));
+    }, [language]);
     const {
         data: summary,
         isLoading: summaryLoading,
@@ -2084,10 +2093,20 @@ function FamilyConnectionDetail({
     /* Become-family flow (pick a label + enable sharing) and its cap dialog. */
     const [makeFamilyOpen, setMakeFamilyOpen] = useState(false);
     const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
-    const alreadyPaidForLang = useMemo(
-        () => compat?.lang === lang,
-        [compat, lang]
+    const alreadyPaidForPair = useMemo(
+        () => compat != null,
+        [compat]
     );
+
+    // Once a pair has been paid, switching language re-fetches the free
+    // translation directly — no paywall/confirm. Skipped until the first paid
+    // result lands, so the very first run still goes through startCompatibility.
+    // The hook's own per-language cache makes repeat switches instant.
+    useEffect(() => {
+        if (!alreadyPaidForPair || !compat) return;
+        if (compat.lang === lang) return;
+        fetchCompatibility(lang);
+    }, [lang, alreadyPaidForPair, compat, fetchCompatibility]);
 
     // Pull preflight in the background once compat lands so we can show the
     // refresh CTA when the cached result is stale.
@@ -2177,12 +2196,17 @@ function FamilyConnectionDetail({
     const runCompatibility = async () => {
         setConfirmingPurchase(false);
         setSharingBlocked(null);
+        const wasAlreadyPaid = alreadyPaidForPair;
         const res = await fetchCompatibility(lang);
         if (res.ok) {
             if (res.data?.cached) {
                 info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
+            } else if (wasAlreadyPaid) {
+                // Free re-translation of an already-paid pair — no credits debited.
+                info(`Showing ${lang.toUpperCase()} translation of your previous analysis — no credits charged.`);
             } else {
                 success(`${creditCost} credits used for compatibility analysis.`);
+                refreshBalance();
             }
             return;
         }
@@ -2206,7 +2230,7 @@ function FamilyConnectionDetail({
     };
 
     const startCompatibility = async () => {
-        if (alreadyPaidForLang) return;
+        if (alreadyPaidForPair) return;
         // Pre-check sharing locally; backend will enforce too but this gives instant feedback.
         const local = deriveLocalBlockedBy(connection);
         if (local) {
@@ -2325,6 +2349,9 @@ function FamilyConnectionDetail({
 
     return (
         <div className="space-y-6">
+            {/* ─────────────── Daily Bond Dashboard ─────────────── */}
+            <BondDashboardBody member={memberFromConnection(connection)} />
+
             {/* Header card */}
             <Card variant="default" padding="lg">
                 <div className="flex items-start gap-4">
@@ -2458,11 +2485,8 @@ function FamilyConnectionDetail({
                     onViewFullReport={() => { window.location.href = '/chat'; }}
                     askNaviHref="/chat"
                     onBack={onBack}
-                    lang={lang}
-                    onLangChange={setLang}
-                    langOptions={LANGS}
                     cached={!!compat.cached}
-                    freeRerun={!!alreadyPaidForLang && !compat.cached}
+                    freeRerun={!!alreadyPaidForPair && !compat.cached}
                     rerunLoading={compatLoading}
                     slotBelowActions={
                         preflightData?.staleDataWarning && preflightData?.refresh?.available ? (
@@ -2493,9 +2517,6 @@ function FamilyConnectionDetail({
                     creditCost={creditCost}
                     onViewDetailed={startCompatibility}
                     detailedLoading={compatLoading}
-                    lang={lang}
-                    onLangChange={setLang}
-                    langOptions={LANGS}
                     slotBelow={sharingGate}
                 />
             ) : (
@@ -2518,25 +2539,8 @@ function FamilyConnectionDetail({
                         <>
                             <p className="text-xs text-on-surface-variant/75 mb-4">
                                 {t('family.compatibilityDesc') ||
-                                    'First read charges credits. Repeating the same language is free.'}
+                                    'First read charges credits. Switching language is free.'}
                             </p>
-
-                            {/* Language picker */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {LANGS.map((l) => (
-                                    <button
-                                        key={l.value}
-                                        onClick={() => setLang(l.value)}
-                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors border ${
-                                            lang === l.value
-                                                ? 'bg-secondary text-white border-secondary'
-                                                : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                                        }`}
-                                    >
-                                        {l.label}
-                                    </button>
-                                ))}
-                            </div>
 
                             {sharingGate}
 
@@ -2677,7 +2681,7 @@ function FamilyConnectionDetail({
                 onClose={() => setConfirmingPurchase(false)}
                 onConfirm={runCompatibility}
                 title={`Use ${creditCost} credits?`}
-                message={`This will charge ${creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis with ${connection.otherName}. Repeating the same language later is free.`}
+                message={`This will charge ${creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis with ${connection.otherName}. Switching language later is free.`}
                 confirmText={`Use ${creditCost} credits`}
                 cancelText={t('common.cancel') || 'Cancel'}
                 variant="warning"

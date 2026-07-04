@@ -78,8 +78,8 @@ export default async function RootLayout({
               <AuthProvider>
                 <NotificationProvider>
                 <MessagesProvider>
+                <PaywallProvider>
                 <ChatProvider>
-                  <PaywallProvider>
                   <ThemeProvider>
                     <CookieConsentProvider>
                       <SkipLink />
@@ -103,8 +103,8 @@ export default async function RootLayout({
                       <MobileScrollDamper />
                     </CookieConsentProvider>
                   </ThemeProvider>
-                  </PaywallProvider>
-                </ChatProvider>
+                  </ChatProvider>
+                </PaywallProvider>
                 </MessagesProvider>
                 </NotificationProvider>
               </AuthProvider>

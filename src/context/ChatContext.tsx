@@ -7,6 +7,7 @@ import { truncateCodePoints } from '@/lib/text';
 import { clientFetch } from '@/lib/apiClient';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/hooks';
+import { usePaywallContext } from '@/context/PaywallContext';
 import { PaywallData } from '@/types/paywall';
 import type { ChatPageContextSource } from '@/lib/schemas';
 import type { ChatAvatar } from '@/types/avatar';
@@ -199,6 +200,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user } = useAuth();
   const { t, language } = useTranslation();
   const { success, error: toastError } = useToast();
+  const { updateCredits } = usePaywallContext();
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -568,6 +570,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     })() : m.errorMessage,
                   } : m)
                 } : null);
+                if (typeof data.creditsRemaining === 'number') {
+                  updateCredits(data.creditsRemaining);
+                }
               } else if (typeof data.token === 'string' && data.token.length > 0) {
                 // Accumulate tokens silently — the full answer is revealed as a
                 // single complete bubble once the stream finishes, rather than
@@ -673,7 +678,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsSending(false);
       setThinkingData(null);
     }
-  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, attachments, selectedAvatarId, setSelectedAvatarId]);
+  }, [activeChatId, loadChats, user, isSending, isGuest, t, toastError, language, attachments, selectedAvatarId, setSelectedAvatarId, updateCredits]);
 
   const createNewChat = useCallback(async (initialMessage?: string, pageContextSource?: ChatPageContextSource) => {
     if (isGuest) return 'guest-session';
@@ -780,6 +785,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           toolTrajectory: Array.isArray(metadata.toolTrajectory) ? metadata.toolTrajectory : m.toolTrajectory,
         } : m),
       } : null);
+      if (typeof metadata.creditsRemaining === 'number') {
+        updateCredits(metadata.creditsRemaining);
+      }
       loadChats();
     } catch (e) {
       console.error('Regenerate message error:', e);
@@ -787,7 +795,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSending(false);
     }
-  }, [activeChatId, isGuest, isSending, language, loadChats, toastError, t, selectedAvatarId]);
+  }, [activeChatId, isGuest, isSending, language, loadChats, toastError, t, selectedAvatarId, updateCredits]);
 
   const retryMessage = useCallback(async (messageId: string) => {
     if (isGuest || isSending) return;

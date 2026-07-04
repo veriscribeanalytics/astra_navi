@@ -70,6 +70,7 @@ import {
 } from "@/hooks/useFamily";
 import { parseKundliStats } from "@/lib/kundliStats";
 import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
+import { appLangToCompatLang } from "@/lib/compatLang";
 import type { FamilyMember, FamilyConnection } from "@/types/family";
 import { familyRosterLimit } from "@/types/family";
 import FamilyCapDialog from "@/components/family/FamilyCapDialog";
@@ -581,10 +582,12 @@ function DashboardAddMemberCard({
 
 /** Dashboard family-member card backed by real member data + compatibility status. */
 function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibilityBlocked }: { member: FamilyMember } & FamilyCardActionProps) {
+  const { language } = useTranslation();
+  const compatLang = appLangToCompatLang(language);
   const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member);
-  const { data: reports } = useFamilyReports(member);
+  const { data: reports } = useFamilyReports(member, compatLang);
   const { data: compat, fetchCompatibility } = useFamilyCompatibility(member);
-  const { data: summary } = useFamilyCompatibilitySummary(member, 'en');
+  const { data: summary } = useFamilyCompatibilitySummary(member, compatLang);
 
   useEffect(() => {
     fetchPreflight();
@@ -592,9 +595,9 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
   useEffect(() => {
     if (preflight?.cachedResultAvailable && !preflight.staleDataWarning) {
-      fetchCompatibility('en');
+      fetchCompatibility(compatLang);
     }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility]);
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, compatLang]);
 
   const activeScore = compat?.score ?? summary?.score;
 
@@ -697,9 +700,11 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 
 /** Dashboard card for a linked connection (another user who shares with you). */
 function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatibilityBlocked }: { connection: FamilyConnection } & FamilyCardActionProps) {
+  const { language } = useTranslation();
+  const compatLang = appLangToCompatLang(language);
   const { data: preflight, fetchPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
   const { data: compat, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
-  const { data: summary } = useFamilyConnectionCompatibilitySummary(connection.connectionId, 'en');
+  const { data: summary } = useFamilyConnectionCompatibilitySummary(connection.connectionId, compatLang);
 
   useEffect(() => {
     if (connection.connectionId) {
@@ -709,9 +714,9 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
 
   useEffect(() => {
     if (preflight?.cachedResultAvailable && !preflight.staleDataWarning && connection.connectionId) {
-      fetchCompatibility('en');
+      fetchCompatibility(compatLang);
     }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, connection.connectionId]);
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, connection.connectionId, compatLang]);
 
   const activeScore = compat?.score ?? summary?.score;
 

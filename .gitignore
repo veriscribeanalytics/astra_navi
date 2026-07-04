@@ -25,6 +25,7 @@ yarn-error.log*
 # temp scripts
 codex-account2.cmd
 out.html
+/scratch/
 
 # next.js
 /.next/

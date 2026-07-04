@@ -8,7 +8,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useTranslation } from '@/hooks';
 import { HeroScore, SubjectPanel, type ReportSubject } from '@/app/family/CompatibilityReport';
-import type { CompatibilityLang, FamilyCompatibilitySummary, FamilyCompatibilityHighlight } from '@/types/family';
+import type { FamilyCompatibilitySummary, FamilyCompatibilityHighlight } from '@/types/family';
 
 export interface CompatibilitySummaryCardProps {
     you: ReportSubject;
@@ -18,9 +18,6 @@ export interface CompatibilitySummaryCardProps {
     creditCost: number;
     onViewDetailed: () => void;
     detailedLoading: boolean;
-    lang: CompatibilityLang;
-    onLangChange: (l: CompatibilityLang) => void;
-    langOptions: { value: CompatibilityLang; label: string }[];
     /** Connection-only chrome (e.g. SHARING_REQUIRED gate). */
     slotBelow?: React.ReactNode;
 }
@@ -64,7 +61,7 @@ function HighlightList({
 
 export default function CompatibilitySummaryCard({
     you, them, summary, creditCost, onViewDetailed, detailedLoading,
-    lang, onLangChange, langOptions, slotBelow,
+    slotBelow,
 }: CompatibilitySummaryCardProps) {
     const { t } = useTranslation();
     const band = summary.band || '';
@@ -130,7 +127,7 @@ export default function CompatibilitySummaryCard({
 
             {slotBelow}
 
-            {/* CTA — view detailed (paid) report + language picker */}
+            {/* CTA — view detailed (paid) report */}
             <div className="mt-4 pt-4 border-t border-outline-variant/15 flex flex-wrap items-end gap-3">
                 <div className="flex flex-col items-start gap-1.5">
                     <Button
@@ -146,24 +143,6 @@ export default function CompatibilitySummaryCard({
                         <Coins className="w-3 h-3" />
                         {(t('family.detailedReportCredits') || 'Detailed report · {n} credits').replace('{n}', String(creditCost))}
                     </span>
-                </div>
-
-                <div className="flex flex-wrap gap-2 items-center sm:ml-auto">
-                    <span className="text-[10px] uppercase tracking-wider text-on-surface-variant/70 font-bold mr-1">{t('family.readIn') || 'Read in'}</span>
-                    {langOptions.map((l) => (
-                        <button
-                            key={l.value}
-                            type="button"
-                            onClick={() => onLangChange(l.value)}
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors border ${
-                                lang === l.value
-                                    ? 'bg-secondary text-white border-secondary'
-                                    : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                            }`}
-                        >
-                            {l.label}
-                        </button>
-                    ))}
                 </div>
             </div>
         </Card>

@@ -30,6 +30,14 @@ interface PaywallContextType {
   getFeaturePaywall: (feature: PaywallFeatureKey) => PaywallData | null;
   /** Force a refresh of the batch check. */
   refresh: () => Promise<void>;
+  /** Re-fetch only the authoritative balance endpoint and update totalCredits
+   *  + balance. Lighter than {@link refresh} — use after a one-off charge whose
+   *  response does not include the new balance (e.g. a compatibility run). */
+  refreshBalance: () => Promise<void>;
+  /** Optimistically set the credit balance from an authoritative inline value
+   *  (e.g. a chat stream's metadata.creditsRemaining) without a refetch. Pass
+   *  null to clear. */
+  updateCredits: (value: number | null) => void;
   /** Monotonic counter bumped on every refresh(). Sibling billing sections
    *  (CurrentPlanSection, CreditHistory) include this in their effect deps so
    *  they refetch together after a purchase, instead of going stale until reload. */
@@ -199,6 +207,32 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setRefreshVersion(v => v + 1);
   }, [doBatchCheck]);
 
+  // Lighter than refresh(): only re-fetches /api/entitlements/balance so the
+  // credit chip updates after a charge that doesn't echo the new balance back
+  // (e.g. a compatibility run). Leaves entitlements/tier/catalog untouched.
+  const refreshBalance = useCallback(async () => {
+    try {
+      const balRes = await clientFetch('/api/entitlements/balance');
+      if (balRes.ok) {
+        const balRaw = await balRes.json();
+        const balData = normalizeBalanceResponse(balRaw);
+        if (balData) {
+          setTotalCredits(balData.credits);
+          setBalance(balData);
+        }
+      }
+    } catch (err) {
+      console.warn('[PaywallContext] refreshBalance failed:', err);
+    }
+  }, []);
+
+  // Apply an authoritative inline balance (e.g. a chat stream's
+  // metadata.creditsRemaining) so the credit chip updates instantly without an
+  // extra network round-trip. The next refresh()/refreshBalance() reconciles.
+  const updateCredits = useCallback((value: number | null) => {
+    setTotalCredits(value);
+  }, []);
+
   const clearActivePaywall = useCallback(() => {
     setActivePaywall(null);
     setPaywall(null);
@@ -226,6 +260,8 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isFeatureBlocked,
       getFeaturePaywall,
       refresh,
+      refreshBalance,
+      updateCredits,
       refreshVersion,
       activePaywall,
       clearActivePaywall,

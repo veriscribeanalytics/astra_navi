@@ -3,17 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-    ArrowLeft, Heart, Coins, RefreshCw, FileText, MessageCircle, Sparkles,
+    ArrowLeft, Heart, Coins, FileText, MessageCircle, Sparkles,
     Sun, Calendar, Compass, CheckCircle2, AlertCircle, TrendingUp, AlertTriangle,
     HandHeart, ArrowRight, ChevronDown, ChevronUp, BadgeCheck,
-    MapPin, Users, Star, Moon, Flower, Activity, Lock,
+    Users, Star, Moon, Flower, Activity, Lock,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useTranslation } from '@/hooks';
 import { bandPalette } from '@/lib/familyStatus';
 import type {
-    CompatibilityLang,
     FamilyCompatibilityResponse,
     FamilyCompatibilityFactor,
     FamilyCompatibilityAdvice,
@@ -101,20 +100,6 @@ function genderSymbol(gender?: string | null): string | null {
     }
 }
 
-/** Maps the overall band to a per-timeframe tone badge (mockup: "Favourable"). */
-function timeframeTone(band: string): { labelKey: string; fallback: string; classes: string } {
-    switch (band) {
-        case 'Excellent':
-        case 'Good':
-            return { labelKey: 'family.timeframeFavourable', fallback: 'Favourable', classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
-        case 'Challenging':
-            return { labelKey: 'family.timeframeCaution', fallback: 'Caution', classes: 'bg-orange-500/10 text-orange-400 border-orange-500/30' };
-        case 'Average':
-        default:
-            return { labelKey: 'family.timeframeMixed', fallback: 'Mixed', classes: 'bg-amber-500/10 text-amber-400 border-amber-500/30' };
-    }
-}
-
 /* ====================================================================== */
 /* Public types                                                           */
 /* ====================================================================== */
@@ -148,11 +133,8 @@ export interface CompatibilityReportProps {
     onBack: () => void;
     /** Optional edit affordance (member view only). */
     onEdit?: () => void;
-    lang: CompatibilityLang;
-    onLangChange: (l: CompatibilityLang) => void;
-    langOptions: { value: CompatibilityLang; label: string }[];
     cached: boolean;
-    /** alreadyPaidForLang && !cached → "Free re-run". */
+    /** alreadyPaidForPair && !cached → "Free re-run" (free re-translation). */
     freeRerun: boolean;
     rerunLoading: boolean;
     /** Connection-only chrome (SHARING_REQUIRED gate, stale-refresh CTA). */
@@ -276,65 +258,32 @@ export function SubjectPanel({ subject, roleLabel, align }: { subject: ReportSub
                 </div>
 
                 {subject.hasBirthDetails ? (
-                    <div className="mt-1 space-y-0.5 text-[12px] text-on-surface-variant/90">
-                        <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                            {symbol && <span className="text-secondary/90 font-bold">{symbol}</span>}
-                            <Calendar className="w-3 h-3 opacity-60 shrink-0" />
-                            <span>{formatDob(subject.dob)}</span>
-                            <span className="opacity-50">·</span>
-                            <span>{formatTob(subject.tob)}</span>
-                        </div>
-                        {subject.pob ? (
-                            <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                                <MapPin className="w-3 h-3 opacity-60 shrink-0" />
-                                <span className="truncate max-w-[200px]">{subject.pob}</span>
-                            </div>
-                        ) : null}
+                    <div className="mt-1 text-[12px] text-on-surface-variant/90">
+                        {symbol && (
+                            <span className="text-secondary/90 font-bold">{symbol}</span>
+                        )}
                     </div>
                 ) : (
                     <div className="mt-1 space-y-1">
                         {subject.relationshipLabel && (
                             <p className="text-[11px] uppercase tracking-wider text-secondary/90 font-bold">{subject.relationshipLabel}</p>
                         )}
-                        {(subject.dob || subject.tob || subject.pob) ? (
-                            <div className="space-y-0.5 text-[12px] text-on-surface-variant/90">
-                                <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                                    {symbol && <span className="text-secondary/90 font-bold">{symbol}</span>}
-                                    <Calendar className="w-3 h-3 opacity-60 shrink-0" />
-                                    <span>{formatDob(subject.dob)}</span>
-                                    <span className="opacity-50">·</span>
-                                    <span>{formatTob(subject.tob)}</span>
-                                </div>
-                                {subject.pob && (
-                                    <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                                        <MapPin className="w-3 h-3 opacity-60 shrink-0" />
-                                        <span className="truncate max-w-[200px]">{subject.pob}</span>
-                                    </div>
-                                )}
-                                <div className={`flex items-center gap-2 pt-0.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-300">
-                                        <AlertCircle className="w-3 h-3" /> Birth details incomplete
-                                    </span>
-                                    <span className="text-[10px] font-bold text-secondary underline decoration-secondary/30 underline-offset-2">
-                                        Add details
-                                    </span>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className={`flex items-center gap-2 pt-0.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-300">
-                                    <AlertCircle className="w-3 h-3" />
-                                    {subject.verified
-                                        ? 'Birth details not shared'
-                                        : 'Birth details incomplete'}
-                                </span>
-                                {!subject.verified && (
-                                    <span className="text-[10px] font-bold text-secondary underline decoration-secondary/30 underline-offset-2">
-                                        Add details
-                                    </span>
-                                )}
-                            </div>
+                        {symbol && (
+                            <p className="text-[12px] text-secondary/90 font-bold">{symbol}</p>
                         )}
+                        <div className={`flex items-center gap-2 pt-0.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-300">
+                                <AlertCircle className="w-3 h-3" />
+                                {subject.verified
+                                    ? 'Birth details not shared'
+                                    : 'Birth details incomplete'}
+                            </span>
+                            {!subject.verified && (
+                                <span className="text-[10px] font-bold text-secondary underline decoration-secondary/30 underline-offset-2">
+                                    Add details
+                                </span>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
@@ -576,8 +525,8 @@ export function FactorsBreakdown({ factors }: { factors: FamilyCompatibilityFact
 /* ====================================================================== */
 
 export default function CompatibilityReport({
-    you, them, data, totalCredits, onRerun, onViewFullReport, askNaviHref, onEdit, onBack,
-    lang, onLangChange, langOptions, cached, freeRerun, rerunLoading, slotBelowActions,
+    you, them, data, totalCredits, onRerun: _onRerun, onViewFullReport: _onViewFullReport, askNaviHref, onEdit, onBack,
+    cached, freeRerun, rerunLoading: _rerunLoading, slotBelowActions,
 }: CompatibilityReportProps) {
     const { t } = useTranslation();
     const band = data.band || '';
@@ -670,29 +619,6 @@ export default function CompatibilityReport({
             {data.factors && data.factors.length > 0 && (
                 <FactorsBreakdown factors={data.factors} />
             )}
-
-            {/* Language picker footer */}
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-                <p className="text-[12px] text-on-surface-variant/80">
-                    {`Reading in ${lang.toUpperCase()}.`}
-                </p>
-                <div className="flex flex-wrap gap-2 items-center">
-                    {langOptions.map((l) => (
-                        <button
-                            key={l.value}
-                            type="button"
-                            onClick={() => onLangChange(l.value)}
-                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors border ${
-                                lang === l.value
-                                    ? 'bg-secondary text-white border-secondary'
-                                    : 'bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10'
-                            }`}
-                        >
-                            {l.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
         </div>
     );
 }

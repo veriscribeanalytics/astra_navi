@@ -63,6 +63,8 @@ export {
     unblockUser,
 } from './useFamily';
 export type { CompatibilityFetchResult, MutationResult, FamilyReport } from './useFamily';
+export { useFamilyDashboard, useFamilyDashboardWeekly, familyAsk } from './useFamilyDashboard';
+export type { FamilyDashboardState, FamilyDashboardWeeklyState, FamilyAskResult } from './useFamilyDashboard';
 export { useAvatarTheme } from './useAvatarTheme';
 export { useDailyHoroscope } from './useDailyHoroscope';
 export { useDailyRewards } from './useDailyRewards';

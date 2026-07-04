@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
-import { COMPATIBILITY_LANGS } from '@/types/family';
+import { FAMILY_DASHBOARD_LANGS } from '@/types/familyDashboard';
 
 /**
- * GET /api/family/members/[id]/compatibility?lang=en|hi|ko
+ * GET /api/family/members/[id]/dashboard/weekly?lang=...
  *
- * First call charges credits per relationship_type. Subsequent calls for the
- * same (member, lang) return cached results free (response.cached === true).
- * Status codes the client must handle:
- *   - 400: user profile incomplete (missing dob/tob/coords/timezone)
- *   - 402: insufficient credits — body is the standard paywall detail
+ * Weekly bond graph (Mon→Sun, today flagged) + summary for a manual member.
+ * Free tier gets the graph + summary but `summary.best_day_note` is stripped;
+ * `paywall` is present only for free. 10/min per viewer rate limit.
  */
 export async function GET(
     req: NextRequest,
@@ -24,11 +22,10 @@ export async function GET(
         const { id } = await params;
         const { searchParams } = new URL(req.url);
         const lang = (searchParams.get('lang') || 'en').toLowerCase();
-
-        const safeLang = (COMPATIBILITY_LANGS as readonly string[]).includes(lang) ? lang : 'en';
+        const safeLang = (FAMILY_DASHBOARD_LANGS as readonly string[]).includes(lang) ? lang : 'en';
 
         const response = await backendFetch(
-            `/api/family/members/${encodeURIComponent(id)}/compatibility?lang=${encodeURIComponent(safeLang)}`,
+            `/api/family/members/${encodeURIComponent(id)}/dashboard/weekly?lang=${encodeURIComponent(safeLang)}`,
             { userEmail: user.email, accessToken }
         );
 
@@ -36,7 +33,12 @@ export async function GET(
 
         if (!response.ok) {
             return NextResponse.json(
-                { error: data.error || data.detail || 'Failed to load compatibility.', ...data },
+                {
+                    error: data.error || data.detail || 'Failed to load weekly bond.',
+                    ...(data.calculation_unavailable ? { calculation_unavailable: true } : {}),
+                    ...(data.message ? { message: data.message } : {}),
+                    ...data,
+                },
                 { status: response.status }
             );
         }
@@ -48,7 +50,7 @@ export async function GET(
             },
         });
     } catch (error) {
-        console.error('[family/members/[id]/compatibility GET] error:', error);
-        return NextResponse.json({ error: 'Failed to load compatibility.' }, { status: 500 });
+        console.error('[family/members/[id]/dashboard/weekly GET] error:', error);
+        return NextResponse.json({ error: 'Failed to load weekly bond.' }, { status: 500 });
     }
 }

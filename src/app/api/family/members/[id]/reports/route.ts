@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext, unauthorizedResponse } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
+import { COMPATIBILITY_LANGS } from '@/types/family';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -14,8 +15,12 @@ export async function GET(req: NextRequest, { params }: Ctx) {
         const { user, accessToken } = authContext;
 
         const { id } = await params;
+        const { searchParams } = new URL(req.url);
+        const lang = (searchParams.get('lang') || '').toLowerCase();
+        const safeLang = (COMPATIBILITY_LANGS as readonly string[]).includes(lang) ? lang : '';
+        const langParam = safeLang ? `?lang=${encodeURIComponent(safeLang)}` : '';
 
-        const response = await backendFetch(`/api/family/members/${encodeURIComponent(id)}/reports`, {
+        const response = await backendFetch(`/api/family/members/${encodeURIComponent(id)}/reports${langParam}`, {
             userEmail: user.email,
             accessToken,
         });

@@ -328,7 +328,7 @@ const LoginContent = () => {
     const path = cb.split('?')[0];
     const map: Record<string, string> = {
       '/chat': t('nav.chatWithNavi'),
-      '/profile': t('nav.userProfile'),
+      '/profile': t('common.userProfile'),
       '/family': t('nav.myFamily'),
       '/kundli': t('nav.myKundli'),
       '/kundli/match': t('nav.chartMatching'),

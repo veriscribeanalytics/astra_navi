@@ -14,6 +14,7 @@ import {
 } from '@/hooks';
 import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from '@/types/family';
 import { computeFamilyMemberStatus, bandPalette } from '@/lib/familyStatus';
+import { appLangToCompatLang } from '@/lib/compatLang';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const formatRelationship = (rel: FamilyMember['relationshipType'] | null | undefined): string =>
@@ -83,9 +84,10 @@ const BondEnergyHint: React.FC<{ label: string }> = ({ label }) => (
 );
 
 const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const compatLang = appLangToCompatLang(language);
   const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member);
-  const { data: reports } = useFamilyReports(member);
+  const { data: reports } = useFamilyReports(member, compatLang);
   const { data: compat, fetchCompatibility } = useFamilyCompatibility(member);
 
   useEffect(() => {
@@ -94,9 +96,9 @@ const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
 
   useEffect(() => {
     if (preflight?.cachedResultAvailable && !preflight.staleDataWarning) {
-      fetchCompatibility('en');
+      fetchCompatibility(compatLang);
     }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility]);
+  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, compatLang]);
 
   const status = computeFamilyMemberStatus({
     member,

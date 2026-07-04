@@ -154,7 +154,13 @@ export function useFamilyMembers() {
 /* Single member chart (free)                                          */
 /* ------------------------------------------------------------------ */
 
-function memberActionTargets(member: FamilyMember | null | undefined) {
+/** Resolve a family member (manual or linked) to the backend base path + id
+ *  that sub-actions (chart, compatibility, dashboard, …) should target. For
+ *  linked members this routes to `/api/family/connections/{connectionId}` so
+ *  the bidirectional-sharing gate applies; for manual members it routes to
+ *  `/api/family/members/{id}`. Exported so the family-dashboard hooks reuse
+ *  the same routing without duplicating the source/id heuristics. */
+export function memberActionTargets(member: FamilyMember | null | undefined) {
     if (!member) return null;
     if (member.source === 'linked') {
         const targetId = member.connectionId ?? member.id;
@@ -884,7 +890,7 @@ export interface FamilyReport {
     createdAt: string;
 }
 
-export function useFamilyReports(member: FamilyMember | null) {
+export function useFamilyReports(member: FamilyMember | null, lang?: CompatibilityLang) {
     const [data, setData] = useState<FamilyReport[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -906,7 +912,11 @@ export function useFamilyReports(member: FamilyMember | null) {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await clientFetch(`${targets.basePath}/${encodeURIComponent(String(targets.id))}/reports`);
+            // Forward ?lang= so the backend returns verdict/factors translated to
+            // the requested language (see backend reports/archive notes). Omitted
+            // when no lang is supplied → backend uses the stored/default language.
+            const langParam = lang ? `?lang=${encodeURIComponent(lang)}` : '';
+            const res = await clientFetch(`${targets.basePath}/${encodeURIComponent(String(targets.id))}/reports${langParam}`);
             const body = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(body.error || body.detail || 'Failed to load reports');
@@ -934,7 +944,7 @@ export function useFamilyReports(member: FamilyMember | null) {
         } finally {
             setIsLoading(false);
         }
-    }, [targets]);
+    }, [targets, lang]);
 
     useEffect(() => {
         fetchReports();

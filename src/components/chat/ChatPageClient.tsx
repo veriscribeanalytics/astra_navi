@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useChat } from '@/context/ChatContext';
@@ -36,13 +36,21 @@ const ChatPageClient: React.FC = () => {
   const router = useRouter();
   const {
     isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
-    activeChat, isLoadingMessages, createNewChat, selectChat, isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
+    activeChat, isLoadingMessages, createNewChat, selectChat, sendMessage, activeChatId,
+    isGuest, isGuestExpired, guestTimeRemaining, enableGuestMode,
     paywall, clearPaywall, selectedAvatarId, avatars, setSelectedAvatarId
     } = useChat();
 
   const currentAvatar = useMemo(() => {
     return avatars.find(a => a.avatarId === selectedAvatarId);
   }, [avatars, selectedAvatarId]);
+
+  // Family "ask" handoff: a pre-seeded chat thread + starter prefill stashed by
+  // the family detail view's "Ask about this relationship" CTA. Rendered below as
+  // a tappable suggestion that sends the prefill via the normal SSE path. The
+  // prefill embeds the member's name, which activates the family chart tools
+  // server-side — no context.source forwarding needed.
+  const [familyPrefill, setFamilyPrefill] = useState<string | null>(null);
 
   useAvatarTheme(selectedAvatarId, currentAvatar);
 
@@ -76,6 +84,24 @@ const ChatPageClient: React.FC = () => {
     }
 
     const chatId = searchParams.get('id');
+
+    // Family "ask" handoff: read the stashed prefill (keyed to chatId) BEFORE the
+    // ?id early-return so it survives the redirect into the pre-seeded thread.
+    try {
+      const stash = sessionStorage.getItem('astranavi_family_prefill');
+      if (stash) {
+        const parsed = JSON.parse(stash) as { chatId?: string; prefill?: string } | null;
+        if (parsed && typeof parsed.prefill === 'string' && parsed.prefill.trim()) {
+          if (!chatId || parsed.chatId === chatId) {
+            setFamilyPrefill(parsed.prefill.trim());
+          }
+        }
+        sessionStorage.removeItem('astranavi_family_prefill');
+      }
+    } catch {
+      /* sessionStorage unavailable / corrupt — non-fatal; chat still opens */
+    }
+
     if (chatId) {
       selectChat(chatId);
       return;
@@ -269,6 +295,22 @@ const ChatPageClient: React.FC = () => {
         ) : (
           <div className="chat-center-column">
             <ChatMessages />
+            {familyPrefill && activeChatId && (
+              <div className="px-3 sm:px-4 pb-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sendMessage(familyPrefill, activeChatId);
+                    setFamilyPrefill(null);
+                  }}
+                  className="ripple-btn suggestion-pill group inline-flex max-w-full items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/[0.08] px-3 py-1.5 text-[12px] font-medium text-secondary hover:bg-secondary/[0.16] hover:border-secondary/50 transition-all"
+                  aria-label={t('chat.familyPrefillAria') || 'Send suggested question about this relationship'}
+                >
+                  <Sparkles className="w-3 h-3 shrink-0 text-secondary" />
+                  <span className="truncate">{familyPrefill}</span>
+                </button>
+              </div>
+            )}
             <ChatInput />
           </div>
         )}
