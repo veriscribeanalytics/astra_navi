@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -17,6 +18,7 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Lock,
 } from 'lucide-react';
 import { useCookieConsent } from '@/context/CookieConsentContext';
 import { useAuth } from '@/context/AuthContext';
@@ -112,228 +114,206 @@ export default function PrivacySettingsPage() {
 
   const needsReconsent = consentedVersion !== PRIVACY_POLICY_VERSION;
 
+  const enabledCount = localPrefs.filter((p) => p.enabled).length;
+
   return (
-    <div className="min-h-screen pt-20 sm:pt-28 pb-12 sm:pb-20 flex flex-col relative z-10 px-4 sm:px-6 max-w-4xl mx-auto space-y-8 scale-content">
-      {/* Back */}
-      <Link
-        href="/profile/security"
-        className="inline-flex items-center gap-2 text-xs sm:text-sm text-secondary hover:text-secondary/80 font-bold transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to Security Settings
-      </Link>
+    <main className="min-h-[calc(100dvh-var(--navbar-height,64px))] pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center relative overflow-x-hidden bg-[var(--bg)] scale-content">
+      {/* Ambient glow */}
+      <div className="absolute top-40 left-1/2 -translate-x-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-secondary/5 blur-[60px] sm:blur-[100px] rounded-full z-0 pointer-events-none" />
 
-      {/* Title */}
-      <section className="text-center space-y-4 max-w-2xl mx-auto">
-        <span className="text-[10px] sm:text-xs font-bold tracking-[0.15em] sm:tracking-[0.2em] text-secondary uppercase bg-secondary/10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full inline-block">
-          Data & Privacy
-        </span>
-        <h1 className="text-3xl sm:text-5xl font-headline font-bold text-primary leading-tight">
-          Privacy Settings
-        </h1>
-        <p className="text-xs sm:text-sm text-primary/50">
-          Manage your data, consent, and privacy preferences
-        </p>
-        {needsReconsent && (
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] font-bold text-amber-400">
-            <AlertTriangle className="w-3 h-3" />
-            Privacy policy updated — review your preferences
-          </div>
-        )}
-      </section>
-
-      {/* 1. Consent Preferences */}
-      <Card variant="bordered" padding="lg" className="border-outline-variant/30 bg-surface/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-            <Cookie className="w-5 h-5 text-secondary" />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-headline font-bold text-primary">
-              Cookie & Tracking Preferences
-            </h2>
-            <p className="text-[11px] text-primary/50">
-              {hasConsented
-                ? `Consent recorded ${consentedAt ? new Date(consentedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''} (v${consentedVersion || '1.0.0'})`
-                : 'Consent not yet provided'}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-2 mb-5">
-          {localPrefs.map((pref) => (
-            <div
-              key={pref.category}
-              className="flex items-center justify-between p-3 rounded-xl bg-background/40 border border-outline-variant/15"
-            >
-              <div>
-                <span className="text-sm font-bold text-primary">{pref.name}</span>
-                <span className="text-xs text-primary/50 ml-2">{pref.required ? '(Required)' : '(Optional)'}</span>
-              </div>
-              <span className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                pref.enabled ? 'text-green-400' : 'text-primary/30'
-              }`}>
-                {pref.enabled ? (
-                  <><CheckCircle className="w-3.5 h-3.5" /> Enabled</>
-                ) : (
-                  <><XCircle className="w-3.5 h-3.5" /> Disabled</>
-                )}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={openPreferences}
-            className="auth-btn-gold px-5 py-2.5 !rounded-[18px] !text-[11px] sm:!text-xs font-bold cursor-pointer flex items-center gap-1.5"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Manage Preferences
-          </button>
-          <button
-            onClick={handleWithdrawConsent}
-            disabled={withdrawing || withdrawSuccess}
-            className="px-5 py-2.5 rounded-[18px] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-red-400 hover:border-red-400/30 transition-all bg-transparent cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-          >
-            {withdrawSuccess ? (
-              <><CheckCircle className="w-3.5 h-3.5 text-green-400" /> Consent Withdrawn</>
-            ) : (
-              <><RefreshCw className={`w-3.5 h-3.5 ${withdrawing ? 'animate-spin' : ''}`} /> Withdraw Consent</>
-            )}
-          </button>
-        </div>
-      </Card>
-
-      {/* 2. Data Portability */}
-      <Card variant="bordered" padding="lg" className="border-outline-variant/30 bg-surface/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-            <Download className="w-5 h-5 text-secondary" />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-headline font-bold text-primary">
-              Download Your Data
-            </h2>
-            <p className="text-[11px] text-primary/50">
-              Right to Data Portability — DPDP Act, 2023 Section 11
-            </p>
-          </div>
-        </div>
-
-        <p className="text-sm text-primary/70 leading-relaxed mb-4">
-          You can download a complete copy of all personal data we hold about you,
-          including profile details, birth chart data, consent records, and activity
-          history. The export is provided in machine-readable JSON format.
-        </p>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={handleExport}
-            disabled={exporting}
-            className="auth-btn-gold px-5 py-2.5 !rounded-[18px] !text-[11px] sm:!text-xs font-bold cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-          >
-            {exporting ? (
-              <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Exporting...</>
-            ) : (
-              <><FileJson className="w-3.5 h-3.5" /> Export My Data (JSON)</>
-            )}
-          </button>
-
-          {exportSuccess && (
-            <span className="text-[11px] font-bold text-green-400 flex items-center gap-1">
-              <CheckCircle className="w-3 h-3" />
-              Downloaded successfully
-            </span>
-          )}
-
-          {exportError && (
-            <span className="text-[11px] font-bold text-red-400 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" />
-              {exportError}
-            </span>
-          )}
-        </div>
-      </Card>
-
-      {/* 3. Account Deletion */}
-      <Card variant="bordered" padding="lg" className="border-outline-variant/30 bg-surface/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <Trash2 className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-headline font-bold text-primary">
-              Delete Account & Data
-            </h2>
-            <p className="text-[11px] text-primary/50">
-              Right to Erasure — DPDP Act, 2023 Section 12
-            </p>
-          </div>
-        </div>
-
-        <p className="text-sm text-primary/70 leading-relaxed mb-4">
-          You have the right to request deletion of all your personal data. This action
-          permanently erases your profile, birth charts, chat history, and all associated
-          data. This cannot be undone.
-        </p>
-
+      <div className="w-full max-w-4xl 2xl:max-w-5xl 3xl:max-w-[1600px] relative z-10 pt-8 sm:pt-12">
+        {/* Back */}
         <Link
           href="/profile/security"
-          className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[18px] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all bg-transparent cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm text-on-surface-variant hover:text-secondary font-bold transition-colors mb-6 sm:mb-8"
         >
-          <Trash2 className="w-3.5 h-3.5" />
-          Go to Account Deletion
+          <ArrowLeft className="w-4 h-4" />
+          Back to Security Settings
         </Link>
-      </Card>
 
-      {/* 4. Legal Links */}
-      <Card variant="bordered" padding="lg" className="border-outline-variant/30 bg-surface/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-secondary" />
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-12">
+          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-surface-variant/50 border border-secondary/20 mb-4 sm:mb-6 cosmic-glow">
+            <Lock className="text-secondary w-7 h-7 sm:w-8 sm:h-8" />
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-headline font-bold text-primary">
-              Legal Documents
-            </h2>
-            <p className="text-[11px] text-primary/50">
-              Our commitments to your privacy
+          <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary mb-3">
+            Privacy &amp; Data
+          </h1>
+          <p className="text-sm font-body text-on-surface-variant max-w-md mx-auto">
+            Manage your consent, download your data, and exercise your rights under the DPDP Act, 2023.
+          </p>
+          {needsReconsent && (
+            <div className="inline-flex items-center gap-2 mt-5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] font-bold text-amber-400">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Privacy policy updated — please review your preferences
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          {/* 1. Consent Preferences */}
+          <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div className="flex items-center gap-2.5">
+                <Cookie className="w-5 h-5 text-secondary shrink-0" />
+                <h2 className="text-lg sm:text-xl font-headline font-bold text-primary">
+                  Cookie &amp; Tracking
+                </h2>
+              </div>
+              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70 bg-surface-variant/40 border border-outline-variant/20 rounded-full px-3 py-1">
+                {enabledCount}/{localPrefs.length} on
+              </span>
+            </div>
+
+            <p className="text-xs text-on-surface-variant mb-5">
+              {hasConsented
+                ? `Consent recorded ${consentedAt ? new Date(consentedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''} · v${consentedVersion || '1.0.0'}`
+                : 'Consent not yet provided.'}
             </p>
+
+            <div className="divide-y divide-outline-variant/10 rounded-2xl bg-surface-variant/25 border border-outline-variant/15 overflow-hidden mb-6">
+              {localPrefs.map((pref) => (
+                <div
+                  key={pref.category}
+                  className="flex items-center justify-between gap-4 px-4 py-3.5"
+                >
+                  <div className="min-w-0">
+                    <span className="text-sm font-bold text-primary">{pref.name}</span>
+                    <span className="text-[11px] text-on-surface-variant/60 ml-2">
+                      {pref.required ? 'Required' : 'Optional'}
+                    </span>
+                  </div>
+                  <span className={`shrink-0 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                    pref.enabled ? 'text-green-400' : 'text-on-surface-variant/40'
+                  }`}>
+                    {pref.enabled ? (
+                      <><CheckCircle className="w-3.5 h-3.5" /> On</>
+                    ) : (
+                      <><XCircle className="w-3.5 h-3.5" /> Off</>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                onClick={openPreferences}
+                className="gold-gradient"
+                leftIcon={<ShieldCheck className="w-4 h-4" />}
+              >
+                Manage Preferences
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleWithdrawConsent}
+                disabled={withdrawing || withdrawSuccess}
+                className="border-outline-variant/40 hover:border-error/40 hover:text-error"
+                leftIcon={
+                  withdrawSuccess
+                    ? <CheckCircle className="w-4 h-4 text-green-400" />
+                    : <RefreshCw className={`w-4 h-4 ${withdrawing ? 'animate-spin' : ''}`} />
+                }
+              >
+                {withdrawSuccess ? 'Consent Withdrawn' : 'Withdraw Consent'}
+              </Button>
+            </div>
+          </Card>
+
+          {/* 2. Data Portability */}
+          <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-outline-variant/20" hoverable={false}>
+            <h2 className="text-lg sm:text-xl font-headline font-bold text-primary mb-1.5 flex items-center gap-2.5">
+              <Download className="w-5 h-5 text-secondary shrink-0" />
+              Download Your Data
+            </h2>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-secondary/70 mb-4">
+              Right to Data Portability · DPDP Act 2023, §11
+            </p>
+
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-5">
+              Download a complete copy of everything we hold about you — profile details,
+              birth chart data, consent records, and activity history — as machine-readable JSON.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                onClick={handleExport}
+                loading={exporting}
+                className="gold-gradient"
+                leftIcon={!exporting ? <FileJson className="w-4 h-4" /> : undefined}
+              >
+                {exporting ? 'Exporting…' : 'Export My Data (JSON)'}
+              </Button>
+
+              {exportSuccess && (
+                <span className="text-[11px] font-bold text-green-400 flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  Downloaded successfully
+                </span>
+              )}
+
+              {exportError && (
+                <span className="text-[11px] font-bold text-error flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {exportError}
+                </span>
+              )}
+            </div>
+          </Card>
+
+          {/* 3. Account Deletion — danger zone */}
+          <Card padding="md" className="!rounded-[32px] sm:!rounded-[40px] border-error/20 bg-error/5" hoverable={false}>
+            <h2 className="text-lg sm:text-xl font-headline font-bold text-error mb-1.5 flex items-center gap-2.5">
+              <Trash2 className="w-5 h-5 shrink-0" />
+              Delete Account &amp; Data
+            </h2>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-error/60 mb-4">
+              Right to Erasure · DPDP Act 2023, §12
+            </p>
+
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-5">
+              Permanently erase your profile, birth charts, chat history, and all associated
+              data. This action cannot be undone.
+            </p>
+
+            <Link
+              href="/profile/security"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider border border-error/30 text-error hover:bg-error/10 hover:border-error/50 transition-all"
+            >
+              <Trash2 className="w-4 h-4" />
+              Go to Account Deletion
+            </Link>
+          </Card>
+
+          {/* 4. Legal Links — subtle footer */}
+          <div className="pt-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-on-surface-variant/50 flex items-center gap-2 mb-4 px-1">
+              <FileText className="w-3.5 h-3.5" />
+              Legal Documents
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { href: '/privacy', label: 'Privacy Policy', icon: ShieldCheck },
+                { href: '/terms', label: 'Terms & Conditions', icon: FileText },
+                { href: '/privacy/subprocessors', label: 'Subprocessors', icon: ExternalLink },
+                { href: '/privacy/grievance', label: 'Submit Grievance', icon: Bell },
+              ].map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="group flex items-center gap-2.5 px-4 py-3 rounded-2xl border border-outline-variant/15 bg-surface-variant/20 text-sm font-bold text-on-surface-variant hover:text-primary hover:border-secondary/30 hover:bg-surface-variant/40 transition-all"
+                >
+                  <Icon className="w-4 h-4 text-secondary/70 group-hover:text-secondary transition-colors shrink-0" />
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/privacy"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[18px] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-primary hover:border-outline-variant/60 transition-all bg-transparent cursor-pointer"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[18px] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-primary hover:border-outline-variant/60 transition-all bg-transparent cursor-pointer"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            Terms & Conditions
-          </Link>
-          <Link
-            href="/privacy/subprocessors"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[18px] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-primary hover:border-outline-variant/60 transition-all bg-transparent cursor-pointer"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            Subprocessors
-          </Link>
-          <Link
-            href="/privacy/grievance"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[18px] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-outline-variant/40 text-primary/60 hover:text-primary hover:border-outline-variant/60 transition-all bg-transparent cursor-pointer"
-          >
-            <Bell className="w-3.5 h-3.5" />
-            Submit Grievance
-          </Link>
-        </div>
-      </Card>
-    </div>
+      </div>
+    </main>
   );
 }

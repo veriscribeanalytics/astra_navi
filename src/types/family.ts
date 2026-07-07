@@ -1,6 +1,13 @@
 /**
  * Family feature types — mirror the backend `/api/family` API contract.
  * See docs in: feat/family-feature (commit 8c88964).
+ *
+ * The old compatibility endpoints (/compatibility, /compatibility/summary,
+ * /compatibility/preflight, /reports) were retired in favour of the daily
+ * bond dashboard (/dashboard, /dashboard/weekly). The compatibility response,
+ * summary, preflight, factor, advice, confidence, and credit-cost types that
+ * mirrored those endpoints are therefore gone — see `familyDashboard.ts` for
+ * the dashboard contract that replaces them.
  */
 
 import type { PaywallData } from '@/types/paywall';
@@ -16,26 +23,6 @@ export type FamilyRelationshipType =
   | 'other';
 
 export type FamilyGender = 'male' | 'female' | 'other';
-
-export type CompatibilityLang = 'en' | 'hi' | 'ko' | 'ta' | 'te' | 'kn' | 'bn' | 'mr' | 'pa';
-
-/** Languages the family compatibility backend currently supports.
- *  Source of truth on backend; mirror this list when surfacing a picker. */
-export const COMPATIBILITY_LANGS: readonly CompatibilityLang[] = [
-  'en', 'hi', 'ko', 'ta', 'te', 'kn', 'bn', 'mr', 'pa',
-] as const;
-
-/** Credit cost per relationship type for compatibility calls. */
-export const COMPATIBILITY_CREDIT_COST: Record<FamilyRelationshipType, number> = {
-  spouse: 10,
-  mother: 5,
-  father: 5,
-  son: 5,
-  daughter: 5,
-  sibling: 3,
-  friend: 2,
-  other: 2,
-};
 
 /** Total roster usage = manual members + active linked connections.
  *  Free: 1, Pro: 6, Premium: unlimited (`null`). Backend is the source of
@@ -62,29 +49,6 @@ export interface FamilyAvatar {
   iconKey: string;
   accentColor: string;
   label: string;
-}
-
-export interface FamilyCompatibilityPreflight {
-  cachedResultAvailable: boolean;
-  staleDataWarning: boolean;
-  creditCost: number;
-  relationshipType: FamilyRelationshipType;
-  /** Authoritative credit balance for this user (backend: available_credits). */
-  availableCredits?: number;
-  /** True when the user can afford `creditCost`. Gate the paid report on this
-   *  (or `cachedResultAvailable`) rather than comparing balances client-side. */
-  sufficient?: boolean;
-  /** Present when `sufficient` is false — render this via PaywallCard instead of
-   *  the confirm dialog. Null/absent when the user can pay or a cache exists. */
-  paywall?: PaywallData | null;
-  /** Optional refresh CTA block. When `staleDataWarning && refresh.available`,
-   *  surface a "Refresh for {creditCost} credits" button next to the cached
-   *  result; tapping it just re-issues the existing compatibility GET. */
-  refresh?: {
-    available: boolean;
-    creditCost: number;
-    wouldUseFresh: boolean;
-  };
 }
 
 /** Server returns numeric id; we keep number | string for flexibility.
@@ -199,128 +163,6 @@ export interface FamilyChart {
 export interface FamilyChartResponse {
   member_id: number;
   chart: FamilyChart;
-}
-
-export type FamilyCompatibilityBand = 'Excellent' | 'Good' | 'Average' | 'Challenging';
-export type FamilyCompatibilityFactorStatus = 'strength' | 'balanced' | 'tension';
-export type FamilyCompatibilityConfidenceLevel = 'high' | 'medium' | 'low';
-export type FamilyCompatibilityDataQuality = 'ok' | 'partial' | 'missing';
-
-export interface FamilyCompatibilityFactor {
-  name: string;
-  label: string;
-  score?: number;
-  score_percent: number;
-  weight?: number;
-  note?: string;
-  /** Tells the UI to surface a "missing data" badge when not 'ok'. */
-  data_quality?: FamilyCompatibilityDataQuality;
-  status: FamilyCompatibilityFactorStatus;
-  summary: string;
-  /** Ashtakoot-only (spouse): raw obtained / max points per koot. */
-  obtained?: number;
-  max?: number;
-  /** Legacy field — older payloads. */
-  key?: string;
-  detail?: string;
-}
-
-export interface FamilyCompatibilityHighlight {
-  factor: string;
-  score: number;
-  text: string;
-}
-
-export interface FamilyCompatibilityAdvice {
-  communication_style: string;
-  best_support_method: string;
-  boundaries_or_cautions: string;
-  next_step: string;
-}
-
-export interface FamilyRelationshipActions {
-  today: string;
-  this_week: string;
-  long_term: string;
-}
-
-export interface FamilyCompatibilityConfidence {
-  level: FamilyCompatibilityConfidenceLevel;
-  label: string;
-  note: string;
-}
-
-export interface FamilyCompatibilityResponse {
-  score: number;
-  band: FamilyCompatibilityBand | string;
-  verdict: string;
-  factors: FamilyCompatibilityFactor[];
-  strengths?: FamilyCompatibilityHighlight[];
-  tension_points?: FamilyCompatibilityHighlight[];
-  advice?: FamilyCompatibilityAdvice;
-  relationship_actions?: FamilyRelationshipActions;
-  confidence?: FamilyCompatibilityConfidence;
-  lang: CompatibilityLang;
-  relationship_type: FamilyRelationshipType;
-  member_id?: number;
-  connection_id?: number;
-  credit_cost: number;
-  cached: boolean;
-}
-
-/** Free compatibility summary — loaded by default, never consumes credits.
- *  Returned by the `…/compatibility/summary` endpoints. The detailed report
- *  ({@link FamilyCompatibilityResponse}) adds factors, advice,
- *  relationship_actions, and confidence on top of this. */
-export interface FamilyCompatibilitySummary {
-  score: number;
-  band: FamilyCompatibilityBand | string;
-  verdict: string;
-  strengths: FamilyCompatibilityHighlight[];
-  tension_points: FamilyCompatibilityHighlight[];
-  relationship_type: FamilyRelationshipType;
-  meta: {
-    lang: CompatibilityLang | string;
-    /** Always 0 for the summary. */
-    credit_cost: 0;
-    cached: boolean;
-    summary: true;
-    member_id?: number;
-    connection_id?: number;
-  };
-}
-
-/** 402 paywall body when the requesting user's own family roster is full. */
-export interface FamilyFreeTierCapError {
-  code: 'FAMILY_FREE_TIER_CAP';
-  detail?: string;
-  error?: string;
-  currentTier?: string;
-  limit?: number;
-  message?: string;
-}
-
-/** 402 body when promoting a connection to family fails because the *other*
- *  person's roster is full. This is not an upgrade signal for the current user —
- *  UI should keep the sharing toggle off and surface a peer-facing message. */
-export interface FamilyPeerTierCapError {
-  code: 'FAMILY_PEER_TIER_CAP';
-  blockedBy: 'them';
-  message?: string;
-}
-
-/** 400 body when the requesting user's own profile is missing birth fields
- *  required to compute synastry against a family member. */
-export interface FamilyMissingBirthDetailsError {
-  error: 'missing_birth_details';
-  missing: string[]; // e.g. ['dob', 'tob', 'pob']
-}
-
-/** 409 body when a compatibility computation is already in progress for this
- *  member+lang and the caller should retry shortly. */
-export interface FamilyReservationPendingError {
-  error: 'reservation_pending';
-  idempotency_key: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -455,7 +297,7 @@ export const FAMILY_INVITE_ERROR_CODES = [
 ] as const;
 export type FamilyInviteErrorCode = typeof FAMILY_INVITE_ERROR_CODES[number];
 
-/** Tells the UI which side(s) need to enable sharing before compatibility
+/** Tells the UI which side(s) need to enable sharing before the dashboard
  *  (or chart) can run on a connection. Backend sets this on every
  *  SHARING_REQUIRED response across connection endpoints. */
 export type FamilySharingBlockedBy = 'you' | 'them' | 'both';
@@ -477,4 +319,3 @@ export interface FamilySharingRequiredError {
   nudgeAction?: FamilySharingNudgeAction;
   message: string;
 }
-

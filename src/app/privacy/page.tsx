@@ -176,7 +176,7 @@ export default function PrivacyPage() {
             If you have any questions, concerns, or grievances regarding this Privacy Policy or your personal data processing, you may reach out to our designated Grievance Officer:
           </p>
           <div className="bg-background/40 p-4 border border-outline-variant/20 rounded-xl space-y-1.5 text-xs sm:text-sm text-primary/80">
-            <p><strong>Grievance Officer:</strong> Data Protection Officer</p>
+            <p><strong>Grievance Officer:</strong> {process.env.NEXT_PUBLIC_DPDP_GRIEVANCE_OFFICER_NAME || 'Data Protection Officer'}</p>
             <p><strong>Address/Jurisdiction:</strong> Gurugram, Haryana, India</p>
             <p><strong>Email:</strong> <a href="mailto:contact@veriscribeanalytics.com" className="text-secondary hover:underline font-bold">contact@veriscribeanalytics.com</a></p>
           </div>

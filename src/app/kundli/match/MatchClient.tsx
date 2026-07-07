@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import LocationSearch, { type LocationResult } from '@/components/ui/LocationSearch';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
+import { isUnder18 } from '@/utils/age';
 import { 
   Heart, Sparkles, ArrowLeftRight, 
   RotateCcw, ShieldCheck, ChevronRight, Lock,
@@ -278,6 +279,12 @@ export default function MatchClient() {
   const handleMatch = async () => {
     if (!person1.name || !person1.dob || !person1.place || !person2.name || !person2.dob || !person2.place) {
       error("Please fill all celestial coordinates for both seekers.");
+      return;
+    }
+
+    // DPDP §9: adults-only service — block compatibility matching involving a minor.
+    if (isUnder18(person1.dob) || isUnder18(person2.dob)) {
+      error("Compatibility matching is for adults (18+) only.");
       return;
     }
 

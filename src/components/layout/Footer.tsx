@@ -60,7 +60,7 @@ const Footer = () => {
                             <span>{t('footer.careers')}</span>
                             <ComingSoonBadge t={t} />
                         </li>
-                        <li><Link className="hover:text-secondary transition-colors" href="/support">{t('footer.contactSupport')}</Link></li>
+                        <li><Link className="hover:text-secondary transition-colors" href="/privacy/grievance">{t('footer.contactSupport')}</Link></li>
                     </ul>
                 </div>
 

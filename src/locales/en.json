@@ -96,6 +96,8 @@
     "planetaryYogas": "Planetary Yogas",
     "planetaryYogasDesc": "Powerful combinations that define your potential.",
     "community": "Community",
+    "communityHub": "Community Hub",
+    "communityHubDesc": "Connect with fellow seekers — circles, discussions, and events.",
     "naviAiModels": "Navi AI Models",
     "naviAiModelsDesc": "Domain-specific Vedic intelligence agents.",
     "helpSupport": "Help & Support",
@@ -120,6 +122,21 @@
     "getStarted": "GET STARTED",
     "dailyRewards": "Daily Rewards",
     "dailyRewardsDesc": "Claim free credits every day. Keep your streak alive!"
+  },
+  "community": {
+    "comingSoon": "Coming Soon",
+    "title": "The AstraNavi Community",
+    "subtitle": "A gathering place for seekers of Vedic wisdom is taking shape. Join circles, share insights, and grow alongside a constellation of kindred souls.",
+    "feature1Title": "Cosmic Circles",
+    "feature1Desc": "Find your people — small groups organized by nakshatra, life theme, and shared intent.",
+    "feature2Title": "Guided Discussions",
+    "feature2Desc": "Ask questions, share readings, and learn from a community steeped in Jyotish.",
+    "feature3Title": "Live Events",
+    "feature3Desc": "Transit rituals, Q&A sessions, and celebrations timed to the celestial calendar.",
+    "notifyTitle": "Be the first to know",
+    "notifyDesc": "Sign in to your celestial account and we'll invite you the moment the community opens.",
+    "cta": "Join the waitlist",
+    "ctaSignedIn": "Explore AstraNavi"
   },
   "footer": {
     "tagline": "Preserving the mathematical precision of Jyotish Shastra for the modern individual.",
@@ -545,6 +562,9 @@
     "consentPrivacy": "I have read and understood the",
     "consentTerms": "I agree to the",
     "consentProcessing": "I consent to the processing of my personal data, including birth details, for generating Vedic astrological charts, AI-powered readings, and personalized horoscope insights as described in the Privacy Policy. I understand I can withdraw this consent at any time.",
+    "consentGooglePart1": "I am 18 or older and I agree to the",
+    "consentGooglePart2": "and",
+    "consentGooglePart3": ", and consent to the processing of my personal data, including birth details, for generating Vedic astrological charts and readings.",
     "mustBe18": "You must be 18 or older to use Astra Navi.",
     "alreadySignedIn": "You're already signed in",
     "goToDashboard": "Go to Dashboard",
@@ -1772,7 +1792,8 @@
       "prefNotifications": "Enable notifications",
       "continue": "Continue",
       "submit": "Create Account",
-      "consentRequired": "Please confirm all acknowledgements above to create your account."
+      "consentRequired": "Please confirm all acknowledgements above to create your account.",
+      "consentRequiredGoogle": "Please confirm the acknowledgement above to continue with Google."
     },
     "errorBanner": {
       "dismiss": "Dismiss error"

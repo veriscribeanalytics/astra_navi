@@ -91,25 +91,6 @@ function BondRing({ score, color }: { score: number; color: string }) {
     );
 }
 
-function CompactRing({ score, color, size = 92 }: { score: number; color: string; size?: number }) {
-    const radius = 38;
-    const circumference = 2 * Math.PI * radius;
-    const pct = Math.max(0, Math.min(100, score));
-    const offset = circumference - (pct / 100) * circumference;
-    return (
-        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-            <svg role="img" aria-label={`Compatibility ${score} out of 100`} className="h-full w-full -rotate-90" viewBox="0 0 96 96">
-                <circle cx="48" cy="48" r={radius} fill="none" stroke="var(--outline-variant)" strokeOpacity="0.12" strokeWidth="7" />
-                <circle cx="48" cy="48" r={radius} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} className="transition-all duration-700" />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-black leading-none tabular-nums" style={{ color, fontSize: size * 0.3 }}>{score}</span>
-                <span className="text-[13px] font-bold text-foreground/50">/100</span>
-            </div>
-        </div>
-    );
-}
-
 /* ------------------------------------------------------------------ */
 /* Section shell                                                        */
 /* ------------------------------------------------------------------ */
@@ -125,7 +106,7 @@ function SectionShell({
     icon?: React.ReactNode;
     right?: React.ReactNode;
     children: React.ReactNode;
-    /** Visual hierarchy: hero = strongest, medium = areas/weekly, low = compat. */
+    /** Visual hierarchy: hero = strongest, medium = areas/weekly, low = supporting tiles. */
     emphasis?: 'hero' | 'medium' | 'low';
 }) {
     const ring =
@@ -243,9 +224,6 @@ function HeroBondCard({
     t: (k: string) => string;
 }) {
     const accent = familyDashboardBandHex(data.bond.band_key);
-    const compat = data.compatibility;
-    const delta = typeof compat?.score === 'number' ? data.bond.score - compat.score : null;
-    const baselineScore = typeof compat?.score === 'number' ? compat.score : null;
 
     const pairLeft = data.user;
     const pairRight = data.member;
@@ -261,7 +239,7 @@ function HeroBondCard({
             right={
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-[13px] font-bold uppercase tracking-wider text-secondary">
-                        {compat?.relationship_label || cap(data.member.relationship_type)}
+                        {cap(data.member.relationship_type)}
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[13px] font-black uppercase tracking-wider" style={{ color: accent, background: `${accent}1a`, border: `1px solid ${accent}40` }}>
                         {data.bond.band}
@@ -270,7 +248,7 @@ function HeroBondCard({
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,30fr)_minmax(0,70fr)] gap-6 lg:gap-8">
-                {/* LEFT ~30% — score + pair + compact baseline */}
+                {/* LEFT ~30% — score + pair */}
                 <div className="flex flex-col items-center text-center gap-4">
                     <BondRing score={data.bond.score} color={accent} />
                     <div className="flex items-center justify-center gap-3">
@@ -290,20 +268,6 @@ function HeroBondCard({
                             </div>
                         </div>
                     </div>
-
-                    {/* Compact baseline delta — replaces the long bar */}
-                    {delta !== null && (
-                        <div className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                            <p className="text-[15px] font-bold" style={{ color: delta >= 0 ? '#3DD6A0' : '#E0795A' }}>
-                                {delta >= 0
-                                    ? (t('familyDashboard.deltaAbove') || '{n} points above your permanent compatibility').replace('{n}', String(Math.abs(delta)))
-                                    : (t('familyDashboard.deltaBelow') || '{n} points below your permanent compatibility').replace('{n}', String(Math.abs(delta)))}
-                            </p>
-                            {baselineScore !== null && (
-                                <p className="mt-0.5 text-[13px] text-foreground/50">{t('familyDashboard.baselineLabel') || 'Baseline'}: {baselineScore}</p>
-                            )}
-                        </div>
-                    )}
 
                     {/* Panchang line */}
                     <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-foreground/55">
@@ -609,58 +573,6 @@ function WeeklyBondSection({
 }
 
 /* ------------------------------------------------------------------ */
-/* Compatibility Summary — compact 3-column                             */
-/* ------------------------------------------------------------------ */
-
-function CompatibilitySection({ data, t }: { data: FamilyDashboardResponse; t: (k: string) => string }) {
-    const compat = data.compatibility;
-    const accent = familyDashboardBandHex(data.bond.band_key);
-    return (
-        <SectionShell
-            title={t('familyDashboard.compatTitle') || 'Compatibility Summary'}
-            icon={<Heart className="w-5 h-5" />}
-            emphasis="low"
-            right={
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-[13px] font-bold uppercase tracking-wider text-secondary">
-                    {compat.relationship_label}
-                </span>
-            }
-        >
-            <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-5 md:gap-8">
-                {/* Left — permanent baseline ring */}
-                <div className="flex flex-col items-center text-center gap-2 md:flex-row md:text-left md:gap-4 justify-self-center md:justify-self-start">
-                    <CompactRing score={compat.score} color={accent} />
-                    <div className="flex flex-col gap-0.5">
-                        <span className="text-[16px] font-headline font-bold" style={{ color: accent }}>{compat.band}</span>
-                        <span className="text-[13px] text-foreground/55">{t('familyDashboard.compatCaption') || 'Your long-term compatibility'}</span>
-                        <span className="text-[13px] text-foreground/40">{t('familyDashboard.compatBaselineHint') || 'Permanent baseline — today’s bond is separate'}</span>
-                    </div>
-                </div>
-                {/* Middle — strength */}
-                <CompatPillar label={t('familyDashboard.compatStrength') || 'Main Strength'} value={compat.main_strength} icon={<TrendingUp className="w-4 h-4 text-emerald-400" />} />
-                {/* Right — tension */}
-                <CompatPillar label={t('familyDashboard.compatTension') || 'Main Tension'} value={compat.main_tension} icon={<ShieldAlert className="w-4 h-4 text-orange-400" />} />
-            </div>
-
-            <div className="mt-5 flex justify-end">
-                <Link href={`/family?member=${data.member.relationship_type ? '' : ''}`} className="inline-flex items-center gap-1.5 rounded-xl border border-secondary/40 bg-secondary/10 px-4 py-2 text-[13px] font-bold uppercase tracking-wider text-secondary hover:bg-secondary/20 transition-colors">
-                    {t('familyDashboard.viewDetailed') || 'View Detailed Compatibility'}<ArrowRight className="h-4 w-4" />
-                </Link>
-            </div>
-        </SectionShell>
-    );
-}
-
-function CompatPillar({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
-    return (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 flex flex-col gap-1.5">
-            <span className="text-[13px] font-bold uppercase tracking-wider text-foreground/55 flex items-center gap-1.5">{icon}{label}</span>
-            <p className="text-[15px] leading-relaxed text-foreground/85">{value}</p>
-        </div>
-    );
-}
-
-/* ------------------------------------------------------------------ */
 /* Empty / degraded / sharing states                                    */
 /* ------------------------------------------------------------------ */
 
@@ -793,9 +705,6 @@ export default function BondDashboardBody({ member }: { member: FamilyMember }) 
 
                     {/* Your Bond This Week (smaller chart) */}
                     <WeeklyBondSection weekly={weekly.data} loading={weekly.isLoading} degraded={weekly.degraded} paywall={weekly.paywall ?? paywall} t={t} locale={locale} />
-
-                    {/* Compatibility Summary (compact, lower emphasis) */}
-                    <CompatibilitySection data={data} t={t} />
 
                     {/* Ask Navi — gold primary CTA only */}
                     <button

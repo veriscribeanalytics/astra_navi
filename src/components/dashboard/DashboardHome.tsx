@@ -60,17 +60,12 @@ import DailyHoroscopeCardSkeleton from "@/components/dashboard/DailyHoroscopeCar
 import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
 import {
   useFamilyMembers,
-  useFamilyCompatibilityPreflight,
-  useFamilyReports,
-  useFamilyCompatibility,
-  useFamilyCompatibilitySummary,
-  useFamilyConnectionCompatibility,
-  useFamilyConnectionCompatibilitySummary,
-  useFamilyConnectionCompatibilityPreflight,
 } from "@/hooks/useFamily";
+import { useFamilyDashboard } from "@/hooks/useFamilyDashboard";
+import { memberFromConnection } from "@/components/family/BondDashboardBody";
+import { familyDashboardBandHex } from "@/types/familyDashboard";
 import { parseKundliStats } from "@/lib/kundliStats";
-import { computeFamilyMemberStatus, bandPalette } from "@/lib/familyStatus";
-import { appLangToCompatLang } from "@/lib/compatLang";
+import { computeFamilyMemberStatus } from "@/lib/familyStatus";
 import type { FamilyMember, FamilyConnection } from "@/types/family";
 import { familyRosterLimit } from "@/types/family";
 import FamilyCapDialog from "@/components/family/FamilyCapDialog";
@@ -449,8 +444,6 @@ const getPlanetImage = (name?: string | null): string => {
 
 interface FamilyCardActionProps {
   t: (key: string) => string;
-  onRunCompatibility: () => void;
-  isCompatibilityBlocked: boolean;
 }
 
 function DashboardAddMemberCard({
@@ -580,39 +573,20 @@ function DashboardAddMemberCard({
   );
 }
 
-/** Dashboard family-member card backed by real member data + compatibility status. */
-function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibilityBlocked }: { member: FamilyMember } & FamilyCardActionProps) {
+/** Dashboard family-member card backed by real member data + the daily bond dashboard. */
+function DashboardFamilyMemberCard({ member, t }: { member: FamilyMember } & FamilyCardActionProps) {
   const { language } = useTranslation();
-  const compatLang = appLangToCompatLang(language);
-  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member);
-  const { data: reports } = useFamilyReports(member, compatLang);
-  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member);
-  const { data: summary } = useFamilyCompatibilitySummary(member, compatLang);
+  // Daily bond dashboard drives the card preview (free teaser — zero credits).
+  const { data: dashboard, isLoading } = useFamilyDashboard(member, language);
 
-  useEffect(() => {
-    fetchPreflight();
-  }, [fetchPreflight]);
+  const status = computeFamilyMemberStatus({ member, dashboard: dashboard ?? null });
 
-  useEffect(() => {
-    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning) {
-      fetchCompatibility(compatLang);
-    }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, compatLang]);
-
-  const activeScore = compat?.score ?? summary?.score;
-
-  const status = computeFamilyMemberStatus({
-    member,
-    preflight,
-    reports,
-    band: compat?.band ?? summary?.band ?? null,
-  });
-
-  const hasScore = typeof activeScore === "number";
-  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
-  const ringColor = scorePct !== null && scorePct >= 70 ? '#3DD6A0' :
-                    scorePct !== null && scorePct >= 55 ? '#E5A33A' :
-                    scorePct !== null ? '#D96B78' : '#C9972E';
+  const rawScore = dashboard?.bond?.score;
+  const hasScore = typeof rawScore === "number";
+  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(rawScore!))) : null;
+  const bandKey = dashboard?.bond?.band_key;
+  const ringColor = bandKey ? familyDashboardBandHex(bandKey) : '#C9972E';
+  const verdict = dashboard?.guidance?.summary;
 
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
@@ -654,10 +628,10 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
           </div>
         </div>
 
-        {/* Right Side: Circular Match Gauge */}
+        {/* Right Side: Circular Bond Gauge */}
         {scorePct !== null && (
           <div className="shrink-0 max-[400px]:mx-auto">
-            <AreaRing score={scorePct} color={ringColor} size={64} label="Match Score">
+            <AreaRing score={scorePct} color={ringColor} size={64} label="Bond Score">
               <span className="text-xs sm:text-sm font-black leading-none tabular-nums" style={{ color: ringColor }}>
                 {scorePct}
               </span>
@@ -667,29 +641,26 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
       </div>
 
       {/* Middle Row: Teaser / Description Box */}
-      {scorePct !== null && (
+      {scorePct !== null && verdict && (
         <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] text-left">
           <Sparkles className="h-4 w-4 text-[#C9972E] shrink-0 mt-0.5 animate-pulse" />
-          <p className="text-xs text-[#C8C3D6] leading-relaxed">
-            {compat?.relationship_actions?.today || compat?.verdict || summary?.verdict || t('dashboard.familyNoVerdict') || "Steady bond today. Good energy for conversations and shared decisions."}
-          </p>
+          <p className="text-xs text-[#C8C3D6] leading-relaxed">{verdict}</p>
+        </div>
+      )}
+      {scorePct === null && isLoading && (
+        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] text-left">
+          <Sparkles className="h-4 w-4 text-[#C9972E] shrink-0 mt-0.5 animate-pulse" />
+          <p className="text-xs text-[#C8C3D6] leading-relaxed">{t('dashboard.familyNoVerdict') || "Reading today's bond…"}</p>
         </div>
       )}
 
-      {/* Footer Buttons */}
+      {/* Footer Button */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 mt-1.5 max-[400px]:flex-col">
-        <button
-          onClick={onRunCompatibility}
+        <Link
+          href={`/family?member=${member.id}${member.source ? `&source=${member.source}` : ''}`}
           className="flex-1 max-[400px]:w-full rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer min-w-0"
         >
-          {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
-          {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
-        </button>
-
-        <Link
-          href={`/family?member=${member.id}`}
-          className="max-[400px]:w-full text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0 max-[400px]:shrink max-[400px]:justify-center"
-        >
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
           <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
         </Link>
@@ -699,35 +670,22 @@ function DashboardFamilyMemberCard({ member, t, onRunCompatibility, isCompatibil
 }
 
 /** Dashboard card for a linked connection (another user who shares with you). */
-function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatibilityBlocked }: { connection: FamilyConnection } & FamilyCardActionProps) {
+function DashboardConnectionCard({ connection, t }: { connection: FamilyConnection } & FamilyCardActionProps) {
   const { language } = useTranslation();
-  const compatLang = appLangToCompatLang(language);
-  const { data: preflight, fetchPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
-  const { data: compat, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
-  const { data: summary } = useFamilyConnectionCompatibilitySummary(connection.connectionId, compatLang);
+  // Daily bond dashboard drives the card preview (free teaser — zero credits).
+  // memberFromConnection routes the dashboard hook to /connections/{id}/dashboard.
+  const member = memberFromConnection(connection);
+  const { data: dashboard, isLoading } = useFamilyDashboard(member, language);
 
-  useEffect(() => {
-    if (connection.connectionId) {
-      fetchPreflight();
-    }
-  }, [connection.connectionId, fetchPreflight]);
+  const status = computeFamilyMemberStatus({ member, dashboard: dashboard ?? null });
 
-  useEffect(() => {
-    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning && connection.connectionId) {
-      fetchCompatibility(compatLang);
-    }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, connection.connectionId, compatLang]);
-
-  const activeScore = compat?.score ?? summary?.score;
-
-  const hasScore = typeof activeScore === "number";
-  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(activeScore!))) : null;
-  const ringColor = scorePct !== null && scorePct >= 70 ? '#3DD6A0' :
-                    scorePct !== null && scorePct >= 55 ? '#E5A33A' :
-                    scorePct !== null ? '#D96B78' : '#C9972E';
-  const statusDotColor = scorePct !== null && scorePct >= 70 ? '#3DD6A0' :
-                         scorePct !== null && scorePct >= 55 ? '#E5A33A' :
-                         scorePct !== null ? '#D96B78' : '#C9972E';
+  const rawScore = dashboard?.bond?.score;
+  const hasScore = typeof rawScore === "number";
+  const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(rawScore!))) : null;
+  const bandKey = dashboard?.bond?.band_key;
+  const ringColor = bandKey ? familyDashboardBandHex(bandKey) : '#C9972E';
+  const statusDotColor = bandKey ? familyDashboardBandHex(bandKey) : '#C9972E';
+  const verdict = dashboard?.guidance?.summary;
 
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
@@ -748,14 +706,22 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
             </h4>
             <p className="flex min-w-0 items-center gap-1.5 text-[10px] font-bold text-[#928BA5] mt-0.5 max-[400px]:justify-center">
               <span className="truncate capitalize">{formatRelationship(connection.iSeeThemAs)}</span>
+              {status && (
+                <>
+                  <span>•</span>
+                  <span className={status.classes.split(' ').filter(c => !c.startsWith('bg-') && !c.startsWith('border-')).join(' ')}>
+                    {t(status.labelKey)}
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
 
-        {/* Right Side: Circular Match Gauge */}
+        {/* Right Side: Circular Bond Gauge */}
         {scorePct !== null && (
           <div className="shrink-0 max-[400px]:mx-auto">
-            <AreaRing score={scorePct} color={ringColor} size={64} label="Match Score">
+            <AreaRing score={scorePct} color={ringColor} size={64} label="Bond Score">
               <span className="text-xs sm:text-sm font-black leading-none tabular-nums" style={{ color: ringColor }}>
                 {scorePct}
               </span>
@@ -765,29 +731,26 @@ function DashboardConnectionCard({ connection, t, onRunCompatibility, isCompatib
       </div>
 
       {/* Middle Row: Teaser / Description Box */}
-      {scorePct !== null && (
+      {scorePct !== null && verdict && (
         <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] text-left">
           <Sparkles className="h-4 w-4 text-[#C9972E] shrink-0 mt-0.5 animate-pulse" />
-          <p className="text-xs text-[#C8C3D6] leading-relaxed">
-            {compat?.relationship_actions?.today || compat?.verdict || summary?.verdict || t('dashboard.familyNoVerdict') || "Steady bond today. Good energy for conversations and shared decisions."}
-          </p>
+          <p className="text-xs text-[#C8C3D6] leading-relaxed">{verdict}</p>
+        </div>
+      )}
+      {scorePct === null && isLoading && (
+        <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-[#F4EFE7]/8 bg-[#20163B] text-left">
+          <Sparkles className="h-4 w-4 text-[#C9972E] shrink-0 mt-0.5 animate-pulse" />
+          <p className="text-xs text-[#C8C3D6] leading-relaxed">{t('dashboard.familyNoVerdict') || "Reading today's bond…"}</p>
         </div>
       )}
 
-      {/* Footer Buttons */}
+      {/* Footer Button */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 mt-1.5 max-[400px]:flex-col">
-        <button
-          onClick={onRunCompatibility}
-          className="flex-1 max-[400px]:w-full rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer min-w-0"
-        >
-          {isCompatibilityBlocked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <Sparkles className="h-3.5 w-3.5 shrink-0" />}
-          {t('dashboard.familyRunCompatibility') || "Run Compatibility"}
-        </button>
-
         <Link
           href="/family"
-          className="max-[400px]:w-full text-[#928BA5] hover:text-[#C9972E] font-bold uppercase tracking-wider text-[10px] py-2.5 px-2 flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0 max-[400px]:shrink max-[400px]:justify-center"
+          className="flex-1 max-[400px]:w-full rounded-xl bg-gradient-to-r from-[#C9972E] to-[#A57E23] hover:from-[#B58A2B] hover:to-[#96731F] text-white border border-[#C9972E]/30 shadow-md transition-all font-bold uppercase tracking-wider text-[10px] py-2.5 px-3 flex items-center justify-center gap-1.5 cursor-pointer min-w-0"
         >
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
           <span>{t('dashboard.familyViewBond') || "View Bond"}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
         </Link>
@@ -2066,33 +2029,19 @@ export default function DashboardHome() {
                   <>
                     {slots.map((slot, index) => {
                       if (slot.type === 'member') {
-                        const blocked = isFeatureBlocked('family_compatibility');
                         return (
                           <DashboardFamilyMemberCard
                             key={`m-${slot.source}-${slot.id}`}
                             member={slot.data}
                             t={t}
-                            isCompatibilityBlocked={blocked}
-                            onRunCompatibility={() => {
-                              const pw = getFeaturePaywall('family_compatibility');
-                              if (blocked && pw) { setActivePaywallData(pw); return; }
-                              router.push(`/family?member=${slot.id}&source=${slot.source}&run=1`);
-                            }}
                           />
                         );
                       } else if (slot.type === 'connection') {
-                        const blocked = isFeatureBlocked('family_compatibility');
                         return (
                           <DashboardConnectionCard
                             key={`c-${slot.id}`}
                             connection={slot.data}
                             t={t}
-                            isCompatibilityBlocked={blocked}
-                            onRunCompatibility={() => {
-                              const pw = getFeaturePaywall('family_compatibility');
-                              if (blocked && pw) { setActivePaywallData(pw); return; }
-                              router.push('/family');
-                            }}
                           />
                         );
                       } else {

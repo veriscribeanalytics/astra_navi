@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Plus, Users, ChevronRight, Link2, Sparkles, ArrowRight, Lock } from 'lucide-react';
 import {
   useFamilyMembers,
   useFamilyConnections,
-  useFamilyCompatibilityPreflight,
-  useFamilyReports,
-  useFamilyCompatibility,
   useTranslation,
   usePaywallContext,
 } from '@/hooks';
-import type { FamilyMember, FamilyConnection, FamilyCompatibilityBand } from '@/types/family';
+import { useFamilyDashboard } from '@/hooks/useFamilyDashboard';
+import type { FamilyMember, FamilyConnection } from '@/types/family';
 import { computeFamilyMemberStatus, bandPalette } from '@/lib/familyStatus';
-import { appLangToCompatLang } from '@/lib/compatLang';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
 
 const formatRelationship = (rel: FamilyMember['relationshipType'] | null | undefined): string =>
@@ -25,19 +22,11 @@ const initialOf = (name: string): string => {
   return trimmed ? trimmed[0].toUpperCase() : '?';
 };
 
-const bandBarClass = (band?: string | null): string => {
-  switch (band) {
-    case 'Excellent':
-      return 'bg-gradient-to-r from-emerald-400 via-emerald-400 to-teal-300 shadow-[0_0_12px_rgba(52,211,153,0.55)]';
-    case 'Good':
-      return 'bg-gradient-to-r from-secondary via-secondary to-amber-300 shadow-[0_0_12px_rgba(212,175,55,0.55)]';
-    case 'Average':
-      return 'bg-gradient-to-r from-amber-400 to-yellow-300 shadow-[0_0_10px_rgba(251,191,36,0.5)]';
-    case 'Challenging':
-      return 'bg-gradient-to-r from-orange-400 to-red-400 shadow-[0_0_10px_rgba(251,146,60,0.5)]';
-    default:
-      return 'bg-gradient-to-r from-secondary to-amber-300 shadow-[0_0_10px_rgba(212,175,55,0.45)]';
-  }
+/** Bar fill keyed off the dashboard `band_key` — reuses the canonical band
+ *  palette so there's a single band → colour source (no duplicate map). */
+const bandBarClass = (bandKey?: string | null): string => {
+  const palette = bandPalette(bandKey);
+  return `${palette.bg} ${palette.text}`;
 };
 
 const BondEnergyBar: React.FC<{ score?: number | null; band?: string | null }> = ({ score, band }) => {
@@ -85,29 +74,12 @@ const BondEnergyHint: React.FC<{ label: string }> = ({ label }) => (
 
 const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
   const { t, language } = useTranslation();
-  const compatLang = appLangToCompatLang(language);
-  const { data: preflight, fetchPreflight } = useFamilyCompatibilityPreflight(member);
-  const { data: reports } = useFamilyReports(member, compatLang);
-  const { data: compat, fetchCompatibility } = useFamilyCompatibility(member);
+  // Daily bond dashboard drives the card preview (free teaser — zero credits).
+  const { data: dashboard, isLoading } = useFamilyDashboard(member, language);
 
-  useEffect(() => {
-    fetchPreflight();
-  }, [fetchPreflight]);
+  const status = computeFamilyMemberStatus({ member, dashboard: dashboard ?? null });
 
-  useEffect(() => {
-    if (preflight?.cachedResultAvailable && !preflight.staleDataWarning) {
-      fetchCompatibility(compatLang);
-    }
-  }, [preflight?.cachedResultAvailable, preflight?.staleDataWarning, fetchCompatibility, compatLang]);
-
-  const status = computeFamilyMemberStatus({
-    member,
-    preflight,
-    reports,
-    band: (compat?.band as FamilyCompatibilityBand | undefined) ?? null,
-  });
-
-  const hasCompat = typeof compat?.score === 'number';
+  const hasBond = typeof dashboard?.bond?.score === 'number';
 
   return (
     <Link
@@ -137,12 +109,12 @@ const FamilyMemberCard: React.FC<{ member: FamilyMember }> = ({ member }) => {
       </div>
 
       <div className="flex-1 min-h-[58px] mb-4">
-        {hasCompat ? (
-          <BondEnergyBar score={compat?.score} band={compat?.band} />
+        {hasBond ? (
+          <BondEnergyBar score={dashboard?.bond?.score} band={dashboard?.bond?.band_key} />
         ) : status?.kind === 'incomplete' ? (
           <BondEnergyHint label={t('dashboard.familyStatusIncomplete')} />
         ) : (
-          <BondEnergyHint label={t('dashboard.familyRunCompatibility')} />
+          <BondEnergyHint label={isLoading ? (t('dashboard.familyCompatibilityPending') || 'Reading today’s bond…') : (t('dashboard.familyRunCompatibility') || 'View bond')} />
         )}
       </div>
 

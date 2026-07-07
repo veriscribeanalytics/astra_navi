@@ -74,6 +74,10 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
+  // DPDP §6 — Google sign-up must capture affirmative consent before the OAuth
+  // handshake (the email path uses the four checkboxes above; the social path
+  // skips Steps 1-3, so it needs its own single combined consent here).
+  const [googleConsent, setGoogleConsent] = useState(false);
   const [data, setData] = useState<RegisterData>({
     email: '', password: '', confirmPassword: '', firstName: '', lastName: '', gender: '',
     phoneNumber: '', maritalStatus: '', occupation: '',
@@ -716,7 +720,34 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
               {t('auth.method.orContinueWith')}
             </span>
           </div>
-          {socialAuth}
+          {/* DPDP §6 — affirmative consent before the Google OAuth handshake.
+              The button is disabled until this is ticked, so no personal data
+              is shared with Google / collected without opt-in consent. */}
+          <label className="flex items-start gap-3 cursor-pointer select-none mb-3">
+            <input
+              id="consent-google"
+              type="checkbox"
+              checked={googleConsent}
+              onChange={(e) => setGoogleConsent(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-[color-mix(in_srgb,var(--secondary)_18%,var(--accent)_30%)] bg-[color-mix(in_srgb,var(--surface-variant)_55%,#0e0a20)] text-secondary focus:ring-secondary/30 focus:ring-2 focus:ring-offset-0 accent-secondary cursor-pointer shrink-0"
+            />
+            <span className="text-xs text-[color-mix(in_srgb,var(--on-surface-variant)_75%,transparent)] leading-relaxed font-medium font-body">
+              {t('login.consentGooglePart1')}{' '}
+              <Link href="/privacy" target="_blank" className="text-secondary hover:underline font-semibold">{t('footer.privacyPolicy')}</Link>
+              {' '}{t('login.consentGooglePart2')}{' '}
+              <Link href="/terms" target="_blank" className="text-secondary hover:underline font-semibold">{t('footer.terms')}</Link>
+              {t('login.consentGooglePart3')}
+            </span>
+          </label>
+          {React.isValidElement(socialAuth)
+            ? React.cloneElement(socialAuth as React.ReactElement<{ disabled?: boolean }>, { disabled: !googleConsent })
+            : socialAuth}
+          {!googleConsent && (
+            <p className="text-[10px] text-secondary/80 leading-relaxed font-medium ml-1 mt-2 flex items-center gap-1.5">
+              <span aria-hidden="true">↳</span>
+              {t('auth.register.consentRequiredGoogle')}
+            </p>
+          )}
         </>
       )}
     </div>

@@ -285,6 +285,18 @@ export default function ProfileSettingsPage() {
                         showLoading("", 0);
                         return;
                     }
+                    // DPDP §9 age gate — backend rejects under-18 DOB (403). The
+                    // code lives at data.detail.code (FastAPI) or data.code (flat),
+                    // so check both. Surface it against the dob field, not a toast.
+                    const ageCode = (data.detail?.code ?? data.code);
+                    if (response.status === 403 && ageCode === 'underage_registration_blocked') {
+                        const msg = data.detail?.error ?? data.error
+                            ?? t('login.mustBe18') ?? 'You must be 18 or older to use Astra Navi.';
+                        setErrors((prev) => ({ ...prev, dob: msg }));
+                        setTouched((prev) => ({ ...prev, dob: true }));
+                        showLoading("", 0);
+                        return;
+                    }
                     throw new Error(data.error || t('profile.page.errors.updateFailed'));
                 }
 

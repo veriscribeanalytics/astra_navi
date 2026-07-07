@@ -37,18 +37,14 @@ export { useSwipeDrawer } from './useSwipeDrawer';
 export {
     useFamilyMembers,
     useFamilyChart,
-    useFamilyCompatibility,
     createFamilyMember,
     updateFamilyMember,
     deleteFamilyMember,
     useFamilyAvatars,
-    useFamilyCompatibilityPreflight,
-    useFamilyReports,
     useIncomingInvites,
     useOutgoingInvites,
     useFamilyConnections,
     useFamilyFamilyConnections,
-    useFamilyConnectionCompatibility,
     sendInvite,
     acceptInvite,
     declineInvite,
@@ -62,7 +58,7 @@ export {
     blockUser,
     unblockUser,
 } from './useFamily';
-export type { CompatibilityFetchResult, MutationResult, FamilyReport } from './useFamily';
+export type { MutationResult } from './useFamily';
 export { useFamilyDashboard, useFamilyDashboardWeekly, familyAsk } from './useFamilyDashboard';
 export type { FamilyDashboardState, FamilyDashboardWeeklyState, FamilyAskResult } from './useFamilyDashboard';
 export { useAvatarTheme } from './useAvatarTheme';

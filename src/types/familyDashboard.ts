@@ -3,9 +3,10 @@
  * contract documented in the Family Dashboard Frontend Integration Notes.
  *
  * The dashboard is a per-member / per-connection *daily* "bond" view: today's
- * bond score, guidance, chips, time triggers, relationship areas, a weekly
- * graph, and the permanent compatibility baseline. It is gated by the same
- * `full_daily_horoscope` Pro+ feature key as the personal daily horoscope.
+ * bond score, guidance, chips, time triggers, relationship areas, and a weekly
+ * graph. It is gated by the same `full_daily_horoscope` Pro+ feature key as
+ * the personal daily horoscope. (The permanent compatibility baseline that
+ * used to ride alongside is gone — `bond.score` is now the only headline.)
  *
  * Notable contract rules baked into these types:
  *  - All six relationship-area `value`s are "higher = better" (harmony), even
@@ -17,7 +18,7 @@
  *    city; surface a caveat so users who've moved aren't confused.
  *  - The `paywall` field is present only for free-tier viewers who aren't
  *    accessible — render a soft upgrade overlay while keeping the teaser
- *    (bond / band / compatibility / areas_summary / guidance.summary) visible.
+ *    (bond / band / areas_summary / guidance.summary) visible.
  */
 
 import type { PaywallData } from '@/types/paywall';
@@ -187,7 +188,15 @@ export interface FamilyDashboardAreasSummary {
   stable: FamilyDashboardAreaSummaryItem;
 }
 
-/** The permanent baseline compatibility card — always present. */
+/** The permanent baseline compatibility card.
+ *
+ * @deprecated The dashboard payload no longer carries a `compatibility` object
+ *  — the backend retired the second "permanent compatibility" number/dial. The
+ *  field is kept on the response type as optional for backward-compat with any
+ *  cached/legacy payloads, but the UI must NOT render a permanent-compat
+ *  number, dial, or "view full report" link from it. Treat `bond.score` +
+ *  `bond.band` as the only headline.
+ */
 export interface FamilyDashboardCompatibility {
   score: number;
   band: string;
@@ -215,7 +224,9 @@ export interface FamilyDashboardResponse {
   time_triggers?: FamilyDashboardTimeTriggers;
   relationship_areas?: FamilyDashboardRelationshipAreas;
   areas_summary: FamilyDashboardAreasSummary;
-  compatibility: FamilyDashboardCompatibility;
+  /** @deprecated Removed from the payload — do not render a permanent-compat
+   *  card. Kept optional for legacy/cached responses only. */
+  compatibility?: FamilyDashboardCompatibility;
   ui_state: FamilyDashboardUiState;
   system: FamilyDashboardSystem;
   paywall?: PaywallData;

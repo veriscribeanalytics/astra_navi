@@ -86,7 +86,7 @@ export default function GrievancePage() {
           the following officer is designated to address any concerns regarding your personal data:
         </p>
         <div className="bg-background/40 p-4 sm:p-5 border border-outline-variant/20 rounded-2xl space-y-2 text-sm text-primary/80">
-          <p><strong>Name:</strong> Data Protection Officer</p>
+          <p><strong>Name:</strong> {process.env.NEXT_PUBLIC_DPDP_GRIEVANCE_OFFICER_NAME || 'Data Protection Officer'}</p>
           <p><strong>Entity:</strong> Veriscribe Analytics & AI Pvt. Ltd.</p>
           <p><strong>Address:</strong> Gurugram, Haryana, India</p>
           <p>

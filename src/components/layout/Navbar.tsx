@@ -15,7 +15,7 @@ import { useToast, useTranslation } from "@/hooks";
 import {
     User, LogOut, Menu, X, ChevronDown, Sparkles,
     BookOpen, MessageSquare, Heart, Compass, LayoutDashboard,
-    Gem, ShieldQuestion, Brain, Globe, Wallet, TrendingUp, Users, MessageCircle, Gift
+    Gem, ShieldQuestion, Globe, Wallet, TrendingUp, Users, MessageCircle, Gift
 } from "lucide-react";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { getTierLabel } from "@/types/billing";
@@ -130,15 +130,15 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                 id: "community",
                 label: t('nav.community'),
                 items: [
-                    { 
-                        label: t('nav.naviAiModels'), 
-                        href: "/chat", 
-                        icon: <Brain className="w-4 h-4" />,
-                        desc: t('nav.naviAiModelsDesc')
+                    {
+                        label: t('nav.communityHub'),
+                        href: "/community",
+                        icon: <Users className="w-4 h-4" />,
+                        desc: t('nav.communityHubDesc')
                     },
-                    { 
-                        label: t('nav.helpSupport'), 
-                        href: "/support", 
+                    {
+                        label: t('nav.helpSupport'),
+                        href: "/support",
                         icon: <ShieldQuestion className="w-4 h-4" />,
                         desc: t('nav.helpSupportDesc')
                     },
@@ -159,11 +159,17 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                     icon: <Compass className="w-4 h-4" />,
                     desc: t('nav.cosmicDashboardDesc')
                 },
-                { 
-                    label: t('nav.ourMission'), 
-                    href: "/about", 
+                {
+                    label: t('nav.ourMission'),
+                    href: "/about",
                     icon: <User className="w-4 h-4" />,
                     desc: t('nav.ourMissionDesc')
+                },
+                {
+                    label: t('nav.communityHub'),
+                    href: "/community",
+                    icon: <Users className="w-4 h-4" />,
+                    desc: t('nav.communityHubDesc')
                 },
             ]
         },

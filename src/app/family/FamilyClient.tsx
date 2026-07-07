@@ -3,10 +3,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-    Users, Plus, Pencil, Trash2, Heart, BookOpen, Coins,
+    Users, Plus, Pencil, Trash2, Heart, BookOpen,
     Calendar, Clock, Star, AlertCircle,
-    Crown, TrendingUp, Sparkles, FileText,
-    Mail, Send, Link2, Settings, RefreshCw, Search,
+    Crown, Sparkles, FileText,
+    Mail, Send, Link2, Settings, Search,
     MoreVertical, Eye, ArrowUpRight, UserPlus, Activity,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -15,7 +15,6 @@ import Input from '@/components/ui/Input';
 import LocationSearch, { LocationResult } from '@/components/ui/LocationSearch';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useTranslation, useToast, usePaywallContext } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
 import {
     useFamilyMembers,
     createFamilyMember,
@@ -23,14 +22,7 @@ import {
     deleteFamilyMember,
     useFamilyAvatars,
     useFamilyChart,
-    useFamilyCompatibility,
-    useFamilyCompatibilityPreflight,
-    useFamilyConnectionCompatibilityPreflight,
-    useFamilyConnectionCompatibilitySummary,
-    useFamilyReports,
     useFamilyConnections,
-    useFamilyConnectionCompatibility,
-    useFamilyCompatibilitySummary,
     useIncomingInvites,
     useOutgoingInvites,
     sendInvite,
@@ -39,35 +31,26 @@ import {
     updateConnection,
     deleteConnection,
 } from '@/hooks/useFamily';
+import { useFamilyDashboard } from '@/hooks/useFamilyDashboard';
 import {
     type FamilyMember,
     type FamilyConnection,
     type FamilyRelationshipType,
     type FamilyGender,
-    type CompatibilityLang,
-    type FamilyCompatibilityPreflight,
     type FamilyInvite,
-    COMPATIBILITY_CREDIT_COST,
     familyRosterLimit,
 } from '@/types/family';
 import { parseInviteErrorByStatus, familyCapDetail, familyPeerTierCapDetail, cooldownRetryAfter, type FamilyCapDetail } from '@/lib/familyInviteErrors';
 import { computeFamilyMemberStatus } from '@/lib/familyStatus';
-import { appLangToCompatLang } from '@/lib/compatLang';
+import { getFamilyIcon, formatDob } from '@/lib/familyDisplay';
 import { useCountdown } from '@/lib/useCountdown';
 import MakeFamilyDialog from '@/components/family/MakeFamilyDialog';
 import OpenMessageButton from '@/components/family/OpenMessageButton';
 import { tzOffsetHoursAt } from '@/lib/tzOffset';
+import { isUnder18 } from '@/utils/age';
 import FamilyChartView from '@/components/family/FamilyChartView';
 import BondDashboardBody, { memberFromConnection } from '@/components/family/BondDashboardBody';
-import CompatibilityReport, {
-    getFamilyIcon,
-    formatDob,
-    type ReportSubject,
-} from '@/app/family/CompatibilityReport';
-import CompatibilitySummaryCard from '@/app/family/CompatibilitySummaryCard';
 import FamilyCapDialog from '@/components/family/FamilyCapDialog';
-import PaywallCard from '@/components/paywall/PaywallCard';
-import type { PaywallData } from '@/types/paywall';
 
 const RELATIONSHIP_TYPES: { value: FamilyRelationshipType; label: string }[] = [
     { value: 'mother', label: 'Mother' },
@@ -85,49 +68,6 @@ const GENDERS: { value: FamilyGender; label: string }[] = [
     { value: 'female', label: 'Female' },
     { value: 'other', label: 'Other' },
 ];
-
-/**
- * Returns the *actual* script of the response when it doesn't match the
- * requested language (e.g. user asked for "hi" but the backend returned
- * Latin-script English). Returns null when the response matches expectation.
- */
-function detectLanguageMismatch(
-    requested: CompatibilityLang,
-    data: { verdict?: string; lang?: string } | null | undefined
-): CompatibilityLang | null {
-    if (!data) return null;
-    const text = `${data.verdict ?? ''}`.slice(0, 400);
-    if (!text.trim()) return null;
-    const hasDevanagari = /[ऀ-ॿ]/.test(text);
-    const hasHangul = /[가-힯]/.test(text);
-    const hasLatin = /[A-Za-z]/.test(text);
-
-    let actual: CompatibilityLang | null = null;
-    if (hasDevanagari) actual = 'hi';
-    else if (hasHangul) actual = 'ko';
-    else if (hasLatin) actual = 'en';
-
-    if (!actual || actual === requested) return null;
-    return actual;
-}
-
-/** Format an ISO date string safely. Returns null when the value is missing or unparseable. */
-function formatReportDate(value: string | null | undefined): string {
-    if (!value) return '—';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-/** Derive which side is blocking a connection's compatibility purely from the
- *  client-side connection record. Used for instant feedback before the backend
- *  responds; backend response is authoritative when available. */
-function deriveLocalBlockedBy(c: FamilyConnection): 'you' | 'them' | 'both' | null {
-    if (!c.sharingWithThem && !c.theyShareWithMe) return 'both';
-    if (!c.sharingWithThem) return 'you';
-    if (!c.theyShareWithMe) return 'them';
-    return null;
-}
 
 /* ====================================================================== */
 /* MAIN CLIENT                                                            */
@@ -162,10 +102,7 @@ export default function FamilyClient() {
     const searchParams = useSearchParams();
     const memberIdParam = searchParams?.get('member');
     const sourceParam = searchParams?.get('source') as FamilyMember['source'] | null;
-    const autoRunParam = searchParams?.get('run') === '1';
     const autoOpenedRef = useRef(false);
-    // Captured at open time so navigating back and re-opening doesn't re-trigger a run.
-    const [autoRunMember, setAutoRunMember] = useState(false);
 
     useEffect(() => {
         if (autoOpenedRef.current) return;
@@ -185,10 +122,9 @@ export default function FamilyClient() {
             return;
         }
         setDetailMember(found);
-        setAutoRunMember(autoRunParam);
         setView('detail');
         autoOpenedRef.current = true;
-    }, [memberIdParam, sourceParam, members, allConnections, autoRunParam]);
+    }, [memberIdParam, sourceParam, members, allConnections]);
 
     // /api/family/members now returns manual entries + linked connections where
     // both sides share. The array length itself is the roster count.
@@ -226,7 +162,6 @@ export default function FamilyClient() {
             }
         }
         setDetailMember(m);
-        setAutoRunMember(false);
         setView('detail');
     };
 
@@ -388,7 +323,7 @@ export default function FamilyClient() {
                 )}
 
                 {view === 'detail' && detailMember && (
-                    <FamilyMemberDetail member={detailMember} onEdit={() => openEdit(detailMember)} onBack={backToList} autoRun={autoRunMember} />
+                    <FamilyMemberDetail member={detailMember} onEdit={() => openEdit(detailMember)} onBack={backToList} />
                 )}
 
                 {view === 'connectionDetail' && detailConnection && (
@@ -876,7 +811,6 @@ function CompactScoreRing({ score, size = 44 }: { score: number; size?: number }
 function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMember; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
     const { t, language } = useTranslation();
     const isLinked = m.source === 'linked';
-    const compatLang = appLangToCompatLang(language);
     const relationshipLabel = formatRelationshipLabel(m.relationshipType) || (t('family.relationshipNotSet') || 'Connection');
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -890,28 +824,14 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
         return () => document.removeEventListener('mousedown', close);
     }, [menuOpen]);
 
-    const {
-        data: summary,
-        isLoading: summaryLoading,
-    } = useFamilyCompatibilitySummary(m, compatLang);
-    const {
-        data: compat,
-    } = useFamilyCompatibility(m);
-    const {
-        data: reports,
-    } = useFamilyReports(m, compatLang);
-    const {
-        data: preflight,
-    } = useFamilyCompatibilityPreflight(m);
+    // Daily bond dashboard drives the card preview (free teaser — zero credits,
+    // server-cached 1h). Replaces the old free /compatibility/summary fetch.
+    const { data: dashboard, isLoading: bondLoading } = useFamilyDashboard(m, language);
 
-    const activeScore = compat?.score ?? summary?.score;
-    const score = typeof activeScore === 'number' ? Math.max(0, Math.min(100, Math.round(activeScore))) : null;
-    const status = computeFamilyMemberStatus({ member: m, preflight: preflight ?? null, reports: reports ?? null, band: compat?.band ?? summary?.band ?? null });
-    const lastChecked = compat
-        ? (t('family.compatibilityChecked') || 'Compatibility checked')
-        : status?.kind === 'stable'
-            ? (t('family.compatibilityAvailable') || 'Compatibility available')
-            : null;
+    const rawScore = dashboard?.bond?.score;
+    const score = typeof rawScore === 'number' ? Math.max(0, Math.min(100, Math.round(rawScore))) : null;
+    const status = computeFamilyMemberStatus({ member: m, dashboard: dashboard ?? null });
+    const verdict = dashboard?.guidance?.summary ?? null;
     const birthDetailStatus = isLinked
         ? null
         : status?.kind === 'incomplete'
@@ -967,10 +887,10 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
                                     {birthDetailStatus}
                                 </span>
                             )}
-                            {lastChecked && (
+                            {verdict && (
                                 <span className="inline-flex items-center gap-1.5">
                                     <Clock className="w-3 h-3 opacity-60" />
-                                    {lastChecked}
+                                    {verdict}
                                 </span>
                             )}
                         </div>
@@ -988,11 +908,11 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
                         </button>
                         <button
                             type="button"
-                            onClick={() => window.location.href = `/family?member=${m.id}${m.source ? `&source=${m.source}` : ''}&run=1`}
+                            onClick={onOpen}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(196,181,253,0.11)] bg-[rgba(196,181,253,0.05)] px-2.5 py-1.5 text-xs font-bold text-[#AFA8C0] hover:border-[#C9972E]/40 hover:text-[#F4EFE7] transition-colors"
                         >
                             <Activity className="w-3.5 h-3.5" />
-                            {t('family.checkCompatibility') || 'Check Compatibility'}
+                            {t('family.viewBond') || 'View Bond'}
                         </button>
                     </div>
                 </div>
@@ -1000,7 +920,7 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
                 {/* Right column: score + more menu */}
                 <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-between p-3 border-l border-[rgba(196,181,253,0.08)]">
                     <div className="relative">
-                        {score !== null && !summaryLoading ? (
+                        {score !== null && !bondLoading ? (
                             <CompactScoreRing score={score} size={48} />
                         ) : (
                             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[rgba(196,181,253,0.11)] bg-[rgba(196,181,253,0.05)] flex items-center justify-center">
@@ -1247,6 +1167,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
         const e: Record<string, string> = {};
         if (!state.name.trim()) e.name = 'Name is required';
         if (!state.dob) e.dob = 'Date of birth is required';
+        else if (isUnder18(state.dob)) e.dob = "Astra Navi is for adults (18+). You can't add a minor's birth details.";
         if (!state.tob) e.tob = 'Time of birth is required';
         if (!state.pob.trim()) e.pob = 'Place of birth is required';
         if (state.latitude === null || state.longitude === null) {
@@ -1509,7 +1430,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                             className="mt-1 accent-secondary"
                         />
                         <span className="text-xs text-on-surface-variant/80 leading-relaxed">
-                            I confirm that I have obtained explicit permission from this person to store and process their birth details on Astra Navi for Vedic astrological chart generation, compatibility analysis, and AI-powered readings. Their data will be protected under India&apos;s{' '}
+                            I confirm that this person is 18 years of age or older and that I have obtained their explicit permission to store and process their birth details on Astra Navi for Vedic astrological chart generation, compatibility analysis, and AI-powered readings. Their data will be protected under India&apos;s{' '}
                             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
                                 DPDP Act, 2023
                             </a>
@@ -1538,298 +1459,35 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
 /* DETAIL — chart + compatibility                                         */
 /* ====================================================================== */
 
-function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: FamilyMember; onEdit: () => void; onBack: () => void; autoRun?: boolean }) {
-    const { t, language } = useTranslation();
-    const { totalCredits, getFeaturePaywall, refreshBalance } = usePaywallContext();
-    const { user } = useAuth();
-    const { success, error: toastError, info, warning } = useToast();
+function FamilyMemberDetail({ member, onEdit, onBack }: { member: FamilyMember; onEdit: () => void; onBack: () => void }) {
+    const { t } = useTranslation();
     const { data: chart, isLoading: chartLoading, error: chartError } = useFamilyChart(member);
-    const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyCompatibility(member);
-
-    // The compatibility reading language follows the app's UI language so that
-    // changing the app language also re-reads the report in that language. The
-    // per-card language picker can still override this for an individual report.
-    const [lang, setLang] = useState<CompatibilityLang>(() => appLangToCompatLang(language));
-    useEffect(() => {
-        setLang(appLangToCompatLang(language));
-    }, [language]);
-    const { data: summary, isLoading: summaryLoading } = useFamilyCompatibilitySummary(member, lang);
-    const [confirmingPurchase, setConfirmingPurchase] = useState(false);
-    const { data: reports } = useFamilyReports(member, lang);
-    const { fetchPreflight } = useFamilyCompatibilityPreflight(member);
-    const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
-    /** When preflight reports insufficient credits, render this paywall modally. */
-    const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
-    const compatRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<HTMLDivElement | null>(null);
-    const reportsRef = useRef<HTMLDivElement | null>(null);
-
-    const effectiveRelationshipType = member.relationshipType ?? 'other';
-    const creditCost = COMPATIBILITY_CREDIT_COST[effectiveRelationshipType] ?? 5;
-
-    // Once compat lands (cached or fresh), refresh preflight in the background so
-    // we know whether the cached result is stale and whether a refresh CTA applies.
-    useEffect(() => {
-        if (!compat) return;
-        let cancelled = false;
-        fetchPreflight().then((pf) => {
-            if (!cancelled) setPreflightData(pf);
-        });
-        return () => { cancelled = true; };
-    }, [compat, fetchPreflight]);
-
-    const scrollTo = (el: HTMLElement | null) => {
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-    const scrollToReports = () => scrollTo(reportsRef.current);
-
-    // Payment is keyed per (member) pair, not per language — once a pair has
-    // been paid, any language switch is a free re-translation. `compat` is only
-    // non-null after a successful paid/cache fetch on this pair, so its presence
-    // is the "already paid" signal.
-    const alreadyPaidForPair = useMemo(
-        () => compat != null && (compat.member_id === member.id || compat.connection_id === member.connectionId),
-        [compat, member]
-    );
-
-    // Once a pair has been paid, switching language re-fetches the free
-    // translation directly — no paywall/confirm. Skipped until the first paid
-    // result lands, so the very first run still goes through startCompatibility.
-    // The hook's own per-language cache makes repeat switches instant.
-    useEffect(() => {
-        if (!alreadyPaidForPair || !compat) return;
-        if (compat.lang === lang) return;
-        fetchCompatibility(lang);
-    }, [lang, alreadyPaidForPair, compat, fetchCompatibility]);
-
-    const runCompatibility = async () => {
-        setConfirmingPurchase(false);
-        const wasAlreadyPaid = alreadyPaidForPair;
-        const res = await fetchCompatibility(lang);
-        if (res.ok) {
-            const data = res.data;
-            const mismatch = detectLanguageMismatch(lang, data);
-            if (data?.cached) {
-                if (mismatch) {
-                    warning(
-                        `Showing the previously generated ${mismatch.toUpperCase()} analysis — a ${lang.toUpperCase()} translation isn't available yet.`
-                    );
-                } else {
-                    info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
-                }
-            } else if (wasAlreadyPaid) {
-                // Free re-translation of an already-paid pair — no credits debited.
-                if (mismatch) {
-                    warning(
-                        `Showing the previously generated ${mismatch.toUpperCase()} analysis — a ${lang.toUpperCase()} translation isn't available yet.`
-                    );
-                } else {
-                    info(`Showing ${lang.toUpperCase()} translation of your previous analysis — no credits charged.`);
-                }
-            } else {
-                if (mismatch) {
-                    warning(
-                        `Charged ${creditCost} credits, but the response came back in ${mismatch.toUpperCase()} instead of ${lang.toUpperCase()}.`
-                    );
-                } else {
-                    success(`${creditCost} credits used for compatibility analysis.`);
-                }
-                refreshBalance();
-            }
-            return;
-        }
-        // Error cases
-        if (res.status === 400 && res.missingBirthFields && res.missingBirthFields.length > 0) {
-            const fieldLabels: Record<string, string> = {
-                dob: 'date of birth',
-                tob: 'time of birth',
-                pob: 'place of birth',
-                latitude: 'birth coordinates',
-                longitude: 'birth coordinates',
-                timezone_offset: 'timezone',
-                timezoneOffset: 'timezone',
-            };
-            const missing = Array.from(new Set(res.missingBirthFields.map((f) => fieldLabels[f] ?? f)));
-            toastError(
-                `Complete your profile first — missing ${missing.join(', ')}. Open Profile to add them.`
-            );
-            return;
-        }
-        if (res.status === 400) {
-            toastError(
-                res.error ||
-                    'Your profile is missing birth date, time, coordinates, or timezone. Update your profile to enable compatibility.'
-            );
-            return;
-        }
-        if (res.status === 409 && res.stillComputing) {
-            info('Still computing your compatibility — please try again in a few seconds.');
-            return;
-        }
-        if (res.status === 402) {
-            toastError(`Insufficient credits. You need ${creditCost} credits to run this analysis.`);
-            return;
-        }
-        toastError(res.error || 'Compatibility request failed.');
-    };
-
-    const startCompatibility = async () => {
-        if (alreadyPaidForPair) {
-            // No-op — already shown. Any language switch is handled by the
-            // free-translation effect above, not this paid trigger.
-            return;
-        }
-        const preflight = await fetchPreflight();
-        if (!preflight) {
-            // Preflight unavailable — fall back to the confirm dialog; the backend
-            // still enforces credits and returns 402 if short.
-            setPreflightData(null);
-            setConfirmingPurchase(true);
-            return;
-        }
-        setPreflightData(preflight);
-        if (preflight.cachedResultAvailable) {
-            // Cached result exists — open the paid endpoint without a new charge.
-            await runCompatibility();
-            return;
-        }
-        // sufficient === false → show the paywall instead of the confirm dialog.
-        if (preflight.sufficient === false) {
-            const paywall = preflight.paywall ?? getFeaturePaywall('family_compatibility');
-            if (paywall) {
-                setActivePaywall(paywall);
-                return;
-            }
-            // No paywall payload to show — fall through to the confirm dialog,
-            // where the insufficient-credit hint and a 402 on confirm still apply.
-        }
-        setConfirmingPurchase(true);
-    };
-
-    // Auto-start a run when arriving via the dashboard "Run Compatibility" button
-    // (/family?member=<id>&run=1). Fires once; "View Bond" / manual Open won't set
-    // autoRun, so this stays inert there. Skips if a result for this language is
-    // already on screen.
-    const autoRunFiredRef = useRef(false);
-    useEffect(() => {
-        if (!autoRun || autoRunFiredRef.current) return;
-        if (compatLoading) return;
-        autoRunFiredRef.current = true;
-        if (!alreadyPaidForPair) startCompatibility();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [autoRun]);
-
-    const youSubject: ReportSubject = {
-        name: user?.name || (t('family.youLabel') || 'You'),
-        initial: (user?.name || 'Y').charAt(0).toUpperCase(),
-        gender: user?.gender,
-        dob: user?.dob,
-        tob: user?.tob,
-        pob: user?.pob || user?.birthPlaceName,
-        verified: false,
-        hasBirthDetails: !!(user?.dob && user?.tob && (user?.pob || user?.birthPlaceName)),
-    };
-
-    const themSubject: ReportSubject = {
-        name: member.name,
-        initial: member.name.charAt(0).toUpperCase() || '?',
-        gender: member.gender,
-        dob: member.dob,
-        tob: member.tob,
-        pob: member.pob,
-        avatar: member.avatar ? { iconKey: member.avatar.iconKey, accentColor: member.avatar.accentColor } : null,
-        verified: false,
-        hasBirthDetails: true,
-        relationshipLabel: member.relationshipType ?? undefined,
-    };
 
     return (
         <div className="space-y-6">
+            {/* Header — Back + Edit (the old CompatibilityReport used to host these). */}
+            <div className="flex items-center justify-between gap-3">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-secondary hover:text-primary transition-colors"
+                >
+                    <ArrowUpRight className="w-3.5 h-3.5 rotate-[-135deg]" />
+                    {t('family.backToList') || 'Back'}
+                </button>
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-secondary/30 bg-secondary/5 px-2.5 py-1.5 text-xs font-bold text-secondary hover:bg-secondary/10 transition-colors"
+                >
+                    <Pencil className="w-3.5 h-3.5" />
+                    {t('family.editMember') || 'Edit'}
+                </button>
+            </div>
+
             {/* ─────────────── Daily Bond Dashboard ─────────────── */}
             <BondDashboardBody member={member} />
-
-            {/* ─────────────── Compatibility report / pre-read CTA ─────────────── */}
-            <div ref={compatRef} className="scroll-mt-24">
-            {compat ? (
-                <CompatibilityReport
-                    you={youSubject}
-                    them={themSubject}
-                    data={compat}
-                    totalCredits={totalCredits}
-                    onRerun={startCompatibility}
-                    onViewFullReport={scrollToReports}
-                    askNaviHref="/chat"
-                    onBack={onBack}
-                    onEdit={onEdit}
-                    cached={!!compat.cached}
-                    freeRerun={alreadyPaidForPair && !compat.cached}
-                    rerunLoading={compatLoading}
-                    slotBelowActions={
-                        preflightData?.staleDataWarning && preflightData?.refresh?.available ? (
-                            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-between gap-3 flex-wrap">
-                                <p className="text-[12px] text-amber-300">
-                                    {t('family.compatibilityStaleHint') ||
-                                        'Birth details changed since this reading. Refresh for an updated analysis.'}
-                                </p>
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={runCompatibility}
-                                    loading={compatLoading}
-                                    leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
-                                >
-                                    {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
-                                        .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
-                                </Button>
-                            </div>
-                        ) : null
-                    }
-                />
-            ) : summary ? (
-                <CompatibilitySummaryCard
-                    you={youSubject}
-                    them={themSubject}
-                    summary={summary}
-                    creditCost={creditCost}
-                    onViewDetailed={startCompatibility}
-                    detailedLoading={compatLoading}
-                />
-            ) : (
-                <Card variant="default" padding="lg">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Heart className="w-4 h-4 text-secondary" />
-                        <h3 className="text-sm font-headline font-bold text-primary">
-                            {t('family.compatibility') || 'Compatibility'}
-                        </h3>
-                        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/85 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
-                            <Coins className="w-3 h-3" /> {creditCost} credits
-                        </span>
-                    </div>
-                    {summaryLoading || compatLoading ? (
-                        <div className="text-secondary/60 text-sm flex items-center gap-2">
-                            <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
-                        </div>
-                    ) : (
-                        <>
-                            <p className="text-xs text-on-surface-variant/75 mb-4">
-                                {t('family.compatibilityDesc') ||
-                                    'First read charges credits. Switching language is free.'}
-                            </p>
-                            <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
-                                Check Compatibility · {creditCost} credits
-                            </Button>
-                            {totalCredits != null && totalCredits < creditCost && (
-                                <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
-                                    <AlertCircle className="w-3.5 h-3.5" />
-                                    You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
-                                    <a href="/plans" className="font-bold underline">Top up</a>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </Card>
-            )}
-            </div>
 
             {/* ─────────────── Chart ─────────────── */}
             <div ref={chartRef} className="scroll-mt-24">
@@ -1858,67 +1516,6 @@ function FamilyMemberDetail({ member, onEdit, onBack, autoRun }: { member: Famil
                     )}
                 </Card>
             </div>
-
-            {/* ─────────────── Reports ─────────────── */}
-            {reports && reports.length > 0 && (
-                <div ref={reportsRef} className="scroll-mt-24">
-                    <Card variant="default" padding="lg">
-                        <div className="flex items-center gap-2 mb-3">
-                            <TrendingUp className="w-4 h-4 text-secondary" />
-                            <h3 className="text-sm font-headline font-bold text-primary">
-                                Saved Reports
-                            </h3>
-                        </div>
-                        <div className="space-y-2">
-                            {reports.map((report) => (
-                                <div key={report.id} className="flex items-center justify-between p-3 rounded-2xl border border-outline-variant/15 bg-secondary/5 hover:bg-secondary/10 transition-colors">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                        <FileText className="w-4 h-4 text-secondary shrink-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-bold text-primary truncate">{report.title}</p>
-                                            <p className="text-[10px] text-on-surface-variant/70">
-                                                {formatReportDate(report.createdAt)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <a
-                                        href={`/api/family/reports/${report.id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-[10px] font-bold uppercase tracking-wider text-secondary hover:underline shrink-0"
-                                    >
-                                        Download
-                                    </a>
-                                </div>
-                            ))}
-                        </div>
-                    </Card>
-                </div>
-            )}
-
-            <ConfirmDialog
-                isOpen={confirmingPurchase}
-                onClose={() => setConfirmingPurchase(false)}
-                onConfirm={runCompatibility}
-                title={preflightData?.staleDataWarning ? 'Re-run compatibility analysis?' : `Use ${preflightData?.creditCost ?? creditCost} credits?`}
-                message={
-                    preflightData?.staleDataWarning
-                        ? `Birth details for ${member.name} or your profile have changed since the last analysis. Re-running the compatibility check will generate a new analysis and cost ${preflightData?.creditCost ?? creditCost} credits.`
-                        : `This will charge ${preflightData?.creditCost ?? creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis for ${member.name}. Switching language later is free.`
-                }
-                confirmText={preflightData?.staleDataWarning ? 'Re-run analysis' : `Use ${preflightData?.creditCost ?? creditCost} credits`}
-                cancelText="Cancel"
-                variant="warning"
-                isLoading={compatLoading}
-            />
-
-            {activePaywall && (
-                <PaywallCard
-                    paywall={activePaywall}
-                    variant="modal"
-                    onClose={() => setActivePaywall(null)}
-                />
-            )}
         </div>
     );
 }
@@ -2051,15 +1648,9 @@ function FamilyConnectionDetail({
     onDisconnected: () => void;
     onBack: () => void;
 }) {
-    const { t, language } = useTranslation();
-    const { user } = useAuth();
-    const { success, error: toastError, info, warning } = useToast();
-    const { totalCredits, getFeaturePaywall, refreshBalance } = usePaywallContext();
+    const { t } = useTranslation();
+    const { success, error: toastError } = useToast();
     const { data: avatars } = useFamilyAvatars();
-    const { data: compat, isLoading: compatLoading, fetchCompatibility } = useFamilyConnectionCompatibility(connection.connectionId);
-    const { fetchPreflight: fetchConnectionPreflight } = useFamilyConnectionCompatibilityPreflight(connection.connectionId);
-    const [preflightData, setPreflightData] = useState<FamilyCompatibilityPreflight | null>(null);
-    const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
 
     const [notes, setNotes] = useState(connection.myNotes ?? '');
     const [savingNotes, setSavingNotes] = useState(false);
@@ -2067,68 +1658,11 @@ function FamilyConnectionDetail({
     const [savingAvatar, setSavingAvatar] = useState(false);
     const [confirmDisconnect, setConfirmDisconnect] = useState(false);
     const [isDisconnecting, setIsDisconnecting] = useState(false);
-    // The compatibility reading language follows the app's UI language so that
-    // changing the app language also re-reads the report in that language. The
-    // per-card language picker can still override this for an individual report.
-    const [lang, setLang] = useState<CompatibilityLang>(() => appLangToCompatLang(language));
-    useEffect(() => {
-        setLang(appLangToCompatLang(language));
-    }, [language]);
-    const {
-        data: summary,
-        isLoading: summaryLoading,
-        sharingRequired: summarySharingRequired,
-        blockedBy: summaryBlockedBy,
-        nudgeAction: summaryNudge,
-    } = useFamilyConnectionCompatibilitySummary(connection.connectionId, lang);
-    const [confirmingPurchase, setConfirmingPurchase] = useState(false);
-    /** Replaces the previous sharingRequired boolean — captures who's blocking
-     *  and (optionally) the email to nudge when blocked by them. */
-    const [sharingBlocked, setSharingBlocked] = useState<
-        { blockedBy: 'you' | 'them' | 'both'; nudgeEmail?: string } | null
-    >(null);
 
     const accent = connection.avatar?.accentColor || 'var(--secondary)';
-    const creditCost = (connection.iSeeThemAs ? COMPATIBILITY_CREDIT_COST[connection.iSeeThemAs] : undefined) ?? 5;
     /* Become-family flow (pick a label + enable sharing) and its cap dialog. */
     const [makeFamilyOpen, setMakeFamilyOpen] = useState(false);
     const [capDialog, setCapDialog] = useState<FamilyCapDetail | null>(null);
-    const alreadyPaidForPair = useMemo(
-        () => compat != null,
-        [compat]
-    );
-
-    // Once a pair has been paid, switching language re-fetches the free
-    // translation directly — no paywall/confirm. Skipped until the first paid
-    // result lands, so the very first run still goes through startCompatibility.
-    // The hook's own per-language cache makes repeat switches instant.
-    useEffect(() => {
-        if (!alreadyPaidForPair || !compat) return;
-        if (compat.lang === lang) return;
-        fetchCompatibility(lang);
-    }, [lang, alreadyPaidForPair, compat, fetchCompatibility]);
-
-    // Pull preflight in the background once compat lands so we can show the
-    // refresh CTA when the cached result is stale.
-    useEffect(() => {
-        if (!compat) return;
-        let cancelled = false;
-        fetchConnectionPreflight().then((pf) => {
-            if (!cancelled) setPreflightData(pf);
-        });
-        return () => { cancelled = true; };
-    }, [compat, fetchConnectionPreflight]);
-
-    // The free summary auto-loads and returns SHARING_REQUIRED when sharing isn't
-    // mutual — surface the inline gate proactively (no paid attempt needed).
-    useEffect(() => {
-        if (summarySharingRequired) {
-            setSharingBlocked({
-                blockedBy: summaryBlockedBy ?? deriveLocalBlockedBy(connection) ?? 'both',
-                nudgeEmail: summaryNudge?.target_email ?? connection.otherEmail,
-            });
-        }
-    }, [summarySharingRequired, summaryBlockedBy, summaryNudge, connection]);
 
     const persist = async (payload: Parameters<typeof updateConnection>[1]) => {
         const res = await updateConnection(connection.connectionId, payload);
@@ -2162,8 +1696,6 @@ function FamilyConnectionDetail({
             success(!connection.sharingWithThem
                 ? (t('family.connectionSharingOn') || 'Sharing on')
                 : (t('family.connectionSharingOff') || 'Sharing off'));
-            // Clear inline gating so user can retry compat now.
-            if (!connection.sharingWithThem) setSharingBlocked(null);
         }
     };
 
@@ -2193,162 +1725,20 @@ function FamilyConnectionDetail({
         onDisconnected();
     };
 
-    const runCompatibility = async () => {
-        setConfirmingPurchase(false);
-        setSharingBlocked(null);
-        const wasAlreadyPaid = alreadyPaidForPair;
-        const res = await fetchCompatibility(lang);
-        if (res.ok) {
-            if (res.data?.cached) {
-                info(`Showing cached ${lang.toUpperCase()} result — no credits charged.`);
-            } else if (wasAlreadyPaid) {
-                // Free re-translation of an already-paid pair — no credits debited.
-                info(`Showing ${lang.toUpperCase()} translation of your previous analysis — no credits charged.`);
-            } else {
-                success(`${creditCost} credits used for compatibility analysis.`);
-                refreshBalance();
-            }
-            return;
-        }
-        if (res.sharingRequired) {
-            setSharingBlocked({
-                blockedBy: res.blockedBy ?? deriveLocalBlockedBy(connection) ?? 'both',
-                nudgeEmail: res.nudgeAction?.target_email ?? connection.otherEmail,
-            });
-            warning(t('family.sharingRequired') || 'Sharing required on both sides before compatibility can be computed.');
-            return;
-        }
-        if (res.status === 402) {
-            toastError(`Insufficient credits. You need ${creditCost} credits to run this analysis.`);
-            return;
-        }
-        if (res.status === 409 && res.stillComputing) {
-            info('Still computing — please try again in a few seconds.');
-            return;
-        }
-        toastError(res.error || 'Compatibility request failed.');
-    };
-
-    const startCompatibility = async () => {
-        if (alreadyPaidForPair) return;
-        // Pre-check sharing locally; backend will enforce too but this gives instant feedback.
-        const local = deriveLocalBlockedBy(connection);
-        if (local) {
-            setSharingBlocked({ blockedBy: local, nudgeEmail: connection.otherEmail });
-            return;
-        }
-        const preflight = await fetchConnectionPreflight();
-        if (!preflight) {
-            setPreflightData(null);
-            setConfirmingPurchase(true);
-            return;
-        }
-        setPreflightData(preflight);
-        if (preflight.cachedResultAvailable) {
-            await runCompatibility();
-            return;
-        }
-        if (preflight.sufficient === false) {
-            const paywall = preflight.paywall ?? getFeaturePaywall('family_compatibility');
-            if (paywall) {
-                setActivePaywall(paywall);
-                return;
-            }
-        }
-        setConfirmingPurchase(true);
-    };
-
     const notesDirty = (notes ?? '') !== (connection.myNotes ?? '');
-
-    const youSubject: ReportSubject = {
-        name: user?.name || (t('family.youLabel') || 'You'),
-        initial: (user?.name || 'Y').charAt(0).toUpperCase(),
-        gender: user?.gender,
-        dob: user?.dob,
-        tob: user?.tob,
-        pob: user?.pob || user?.birthPlaceName,
-        verified: false,
-        hasBirthDetails: !!(user?.dob && user?.tob && (user?.pob || user?.birthPlaceName)),
-    };
-
-    // Linked connections never expose the other person's birth details to the
-    // client (synastry is computed server-side), so the THEM panel degrades to a
-    // name + relationship label. The score itself is still valid.
-    const themSubject: ReportSubject = {
-        name: connection.otherName,
-        initial: connection.otherName.charAt(0).toUpperCase() || '?',
-        avatar: connection.avatar ? { iconKey: connection.avatar.iconKey, accentColor: connection.avatar.accentColor } : null,
-        verified: true,
-        hasBirthDetails: false,
-        relationshipLabel: connection.iSeeThemAs
-            ? (t('family.connectionISeeThemAs') || 'You see them as {label}').replace('{label}', connection.iSeeThemAs)
-            : undefined,
-    };
-
-    /* SHARING_REQUIRED inline gate — branches on which side is blocking. Shared
-     * between the summary card (slotBelow) and the no-summary fallback. */
-    const sharingGate = sharingBlocked ? (
-        <div className="mb-4 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/5">
-            <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-bold text-amber-300">
-                        {sharingBlocked.blockedBy === 'you'
-                            ? (t('family.sharingBlockedYou') || 'Enable sharing to unlock compatibility.')
-                            : sharingBlocked.blockedBy === 'them'
-                                ? (t('family.sharingBlockedThem') || 'Waiting for {name} to enable sharing.')
-                                    .replace('{name}', connection.otherName)
-                                : (t('family.sharingBlockedBoth') || 'Both of you need to enable sharing before compatibility can be computed.')}
-                    </p>
-                    {sharingBlocked.blockedBy === 'you' && (
-                        <div className="mt-3">
-                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
-                                {(t('family.sharingBlockedYouHint') ||
-                                    'Turn on sharing with {name} below to compute synastry.')
-                                    .replace('{name}', connection.otherName)}
-                            </p>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={toggleShare}
-                                loading={togglingShare}
-                                leftIcon={<Heart className="w-3.5 h-3.5" />}
-                            >
-                                {t('family.sharingEnable') || 'Enable sharing'}
-                            </Button>
-                        </div>
-                    )}
-                    {sharingBlocked.blockedBy === 'them' && (
-                        <div className="mt-3 text-[11px] text-on-surface-variant/80 leading-relaxed">
-                            {(t('family.sharingBlockedThemHint') ||
-                                'Ask them to enable sharing in their family settings. You can reach them at {email}.')
-                                .replace('{email}', sharingBlocked.nudgeEmail ?? connection.otherEmail)}
-                        </div>
-                    )}
-                    {sharingBlocked.blockedBy === 'both' && (
-                        <div className="mt-3">
-                            <p className="text-[11px] text-on-surface-variant/75 mb-2">
-                                {t('family.sharingBlockedBothHint') ||
-                                    'Start by turning on your side, then ask them to enable sharing too.'}
-                            </p>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={toggleShare}
-                                loading={togglingShare}
-                                leftIcon={<Heart className="w-3.5 h-3.5" />}
-                            >
-                                {t('family.sharingEnableMine') || 'Enable my side'}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    ) : null;
 
     return (
         <div className="space-y-6">
+            {/* Header — Back (the old CompatibilityReport used to host this). */}
+            <button
+                type="button"
+                onClick={onBack}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-secondary hover:text-primary transition-colors"
+            >
+                <ArrowUpRight className="w-3.5 h-3.5 rotate-[-135deg]" />
+                {t('family.backToList') || 'Back'}
+            </button>
+
             {/* ─────────────── Daily Bond Dashboard ─────────────── */}
             <BondDashboardBody member={memberFromConnection(connection)} />
 
@@ -2474,102 +1864,6 @@ function FamilyConnectionDetail({
                 </div>
             </Card>
 
-            {/* Compatibility */}
-            {compat ? (
-                <CompatibilityReport
-                    you={youSubject}
-                    them={themSubject}
-                    data={compat}
-                    totalCredits={totalCredits}
-                    onRerun={startCompatibility}
-                    onViewFullReport={() => { window.location.href = '/chat'; }}
-                    askNaviHref="/chat"
-                    onBack={onBack}
-                    cached={!!compat.cached}
-                    freeRerun={!!alreadyPaidForPair && !compat.cached}
-                    rerunLoading={compatLoading}
-                    slotBelowActions={
-                        preflightData?.staleDataWarning && preflightData?.refresh?.available ? (
-                            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-between gap-3 flex-wrap">
-                                <p className="text-[12px] text-amber-300">
-                                    {t('family.compatibilityStaleHint') ||
-                                        'Birth details changed since this reading. Refresh for an updated analysis.'}
-                                </p>
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={runCompatibility}
-                                    loading={compatLoading}
-                                    leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
-                                >
-                                    {(t('family.compatibilityRefreshCta') || 'Refresh for {n} credits')
-                                        .replace('{n}', String(preflightData.refresh.creditCost ?? creditCost))}
-                                </Button>
-                            </div>
-                        ) : null
-                    }
-                />
-            ) : summary ? (
-                <CompatibilitySummaryCard
-                    you={youSubject}
-                    them={themSubject}
-                    summary={summary}
-                    creditCost={creditCost}
-                    onViewDetailed={startCompatibility}
-                    detailedLoading={compatLoading}
-                    slotBelow={sharingGate}
-                />
-            ) : (
-                <Card variant="default" padding="lg">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Heart className="w-4 h-4 text-secondary" />
-                        <h3 className="text-sm font-headline font-bold text-primary">
-                            {t('family.compatibility') || 'Compatibility'}
-                        </h3>
-                        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary/80 bg-secondary/10 border border-secondary/20 rounded-full px-2 py-0.5">
-                            <Coins className="w-3 h-3" /> {creditCost} credits
-                        </span>
-                    </div>
-
-                    {summaryLoading && !sharingBlocked ? (
-                        <div className="text-secondary/60 text-sm flex items-center gap-2">
-                            <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
-                        </div>
-                    ) : (
-                        <>
-                            <p className="text-xs text-on-surface-variant/75 mb-4">
-                                {t('family.compatibilityDesc') ||
-                                    'First read charges credits. Switching language is free.'}
-                            </p>
-
-                            {sharingGate}
-
-                            {!compatLoading && (
-                                <Button variant="primary" onClick={startCompatibility} leftIcon={<Heart className="w-4 h-4" />}>
-                                    Check Compatibility · {creditCost} credits
-                                </Button>
-                            )}
-
-                            {compatLoading && (
-                                <div className="text-secondary/60 text-sm flex items-center gap-2">
-                                    <Star className="w-4 h-4 animate-pulse" /> Analyzing synastry…
-                                </div>
-                            )}
-
-                            {totalCredits != null && totalCredits < creditCost && (
-                                <div className="mt-3 text-[11px] text-amber-500 flex items-center gap-1.5">
-                                    <AlertCircle className="w-3.5 h-3.5" />
-                                    You have {totalCredits} credits — {creditCost - totalCredits} short.{' '}
-                                    <a href="/plans" className="font-bold underline">
-                                        Top up
-                                    </a>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </Card>
-            )}
-
             {/* Avatar picker */}
             {avatars && avatars.length > 0 && (
                 <Card variant="default" padding="lg">
@@ -2676,26 +1970,6 @@ function FamilyConnectionDetail({
                 isLoading={isDisconnecting}
             />
 
-            <ConfirmDialog
-                isOpen={confirmingPurchase}
-                onClose={() => setConfirmingPurchase(false)}
-                onConfirm={runCompatibility}
-                title={`Use ${creditCost} credits?`}
-                message={`This will charge ${creditCost} credits to generate the ${lang.toUpperCase()} compatibility analysis with ${connection.otherName}. Switching language later is free.`}
-                confirmText={`Use ${creditCost} credits`}
-                cancelText={t('common.cancel') || 'Cancel'}
-                variant="warning"
-                isLoading={compatLoading}
-            />
-
-            {activePaywall && (
-                <PaywallCard
-                    paywall={activePaywall}
-                    variant="modal"
-                    onClose={() => setActivePaywall(null)}
-                />
-            )}
-
             {makeFamilyOpen && (
                 <MakeFamilyDialog
                     open={true}
@@ -2703,7 +1977,6 @@ function FamilyConnectionDetail({
                     onClose={() => setMakeFamilyOpen(false)}
                     onUpdated={(updated) => {
                         onUpdated(updated);
-                        setSharingBlocked(null);
                     }}
                     onFreeTierCap={(detail) => setCapDialog(detail)}
                 />

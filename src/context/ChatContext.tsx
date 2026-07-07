@@ -11,7 +11,6 @@ import { usePaywallContext } from '@/context/PaywallContext';
 import { PaywallData } from '@/types/paywall';
 import type { ChatPageContextSource } from '@/lib/schemas';
 import type { ChatAvatar } from '@/types/avatar';
-import type { FamilyCompatibilityResponse, FamilyRelationshipType } from '@/types/family';
 
 const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
@@ -35,31 +34,6 @@ export interface FileAttachment {
   size: number;
   url?: string;
   preview?: string;
-}
-
-export interface PendingChatAction {
-  type: 'run_compatibility';
-  memberId: number;
-  source?: 'manual' | 'linked' | string;
-  memberName: string;
-  relationshipType: FamilyRelationshipType | string;
-  creditCost: number;
-  /** Present when the proposal is for a linked-family connection rather than
-   *  a manually-added member. Backend may send it instead of (or alongside)
-   *  `memberId`; when set we hit /connections/{id}/compatibility. */
-  connectionId?: number;
-}
-
-export const getPendingActionKey = (action: Pick<PendingChatAction, 'memberId' | 'source' | 'connectionId'>): string => {
-  const isLinked = action.source === 'linked' || action.connectionId !== undefined;
-  const id = isLinked ? (action.connectionId ?? action.memberId) : action.memberId;
-  return `${isLinked ? 'linked' : 'manual'}:${id}`;
-};
-
-export interface ResolvedChatAction {
-  status: 'running' | 'done' | 'error';
-  result?: FamilyCompatibilityResponse;
-  errorMessage?: string;
 }
 
 export interface ChatMessage {
@@ -99,8 +73,6 @@ export interface ChatMessage {
   avatarName?: string;
   avatarTitle?: string;
   avatarCreditCost?: number;
-  /** AI proposals the user can approve inline (e.g. paid compatibility run). */
-  pendingActions?: PendingChatAction[];
   /** Backend signals the tool-use loop got stuck — UI shows fallback copy. */
   toolLoopExceeded?: boolean;
   /** Templated narrated opener (SSE `opener` event, complex questions only).
@@ -112,8 +84,6 @@ export interface ChatMessage {
   reflections?: { round: number; grounded?: boolean; complete?: boolean; missing?: string[]; confidence?: number }[];
   agentRounds?: number;
   toolTrajectory?: { name: string; args?: Record<string, unknown>; ok?: boolean; error?: string | null; ms?: number }[];
-  /** Local-only: per-pendingAction state once the user has tapped approve. */
-  resolvedActions?: Record<string, ResolvedChatAction>;
   createdAt: string;
 }
 
@@ -191,7 +161,6 @@ interface ChatContextType {
   selectedAvatarId: string;
   setSelectedAvatarId: (avatarId: string) => void;
   isLoadingAvatars: boolean;
-  resolvePendingAction: (messageId: string, action: PendingChatAction) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -553,7 +522,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     avatarName: data.avatarName ?? m.avatarName,
                     avatarTitle: data.avatarTitle ?? m.avatarTitle,
                     avatarCreditCost: data.avatarCreditCost ?? m.avatarCreditCost,
-                    pendingActions: Array.isArray(data.pendingActions) ? data.pendingActions : m.pendingActions,
                     toolLoopExceeded: typeof data.toolLoopExceeded === 'boolean' ? data.toolLoopExceeded : m.toolLoopExceeded,
                     agentic: typeof data.agentic === 'boolean' ? data.agentic : m.agentic,
                     planSteps: Array.isArray(data.planSteps) ? data.planSteps : m.planSteps,
@@ -614,7 +582,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const local = localById.get(m.id) ?? localByText.get(`${m.type}\u0000${m.text}`);
                 return local?.clientId && local.clientId !== m.clientId ? { ...m, clientId: local.clientId } : m;
               };
-              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.pendingActions || localAiMsg.toolLoopExceeded !== undefined || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory || localAiMsg.resolvedActions)) {
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.toolLoopExceeded !== undefined || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory)) {
                 const merged = backendChat.messages.map(m => {
                   const aligned = mergeLocal(m);
                   if (m.id === backendAiMsg.id) {
@@ -640,14 +608,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       avatarCreditCost: localAiMsg.avatarCreditCost ?? aligned.avatarCreditCost,
                       errorCode: localAiMsg.errorCode ?? aligned.errorCode,
                       opener: localAiMsg.opener ?? aligned.opener,
-                      pendingActions: localAiMsg.pendingActions ?? aligned.pendingActions,
                       toolLoopExceeded: localAiMsg.toolLoopExceeded ?? aligned.toolLoopExceeded,
                       agentic: localAiMsg.agentic ?? aligned.agentic,
                       planSteps: localAiMsg.planSteps ?? aligned.planSteps,
                       reflections: localAiMsg.reflections ?? aligned.reflections,
                       agentRounds: localAiMsg.agentRounds ?? aligned.agentRounds,
                       toolTrajectory: localAiMsg.toolTrajectory ?? aligned.toolTrajectory,
-                      resolvedActions: localAiMsg.resolvedActions ?? aligned.resolvedActions,
                     };
                   }
                   return aligned;
@@ -743,7 +709,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatarIdForRegen = target?.avatarId ?? selectedAvatarId ?? undefined;
       return {
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null, opener: undefined, pendingActions: undefined, toolLoopExceeded: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined, resolvedActions: undefined } : m),
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null, opener: undefined, toolLoopExceeded: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined } : m),
       };
     });
 
@@ -776,7 +742,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           summaryIncluded: metadata.summaryIncluded ?? m.summaryIncluded,
           persona: metadata.persona ?? m.persona,
           errorCode: metadata.errorCode ?? m.errorCode,
-          pendingActions: Array.isArray(metadata.pendingActions) ? metadata.pendingActions : m.pendingActions,
           toolLoopExceeded: typeof metadata.toolLoopExceeded === 'boolean' ? metadata.toolLoopExceeded : m.toolLoopExceeded,
           agentic: typeof metadata.agentic === 'boolean' ? metadata.agentic : m.agentic,
           planSteps: Array.isArray(metadata.planSteps) ? metadata.planSteps : m.planSteps,
@@ -962,66 +927,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  // ── Resolve a pendingAction the AI proposed ──
-  // Right now only `run_compatibility` exists. Backend sends `source` from the
-  // agentic tool list; linked entries use memberId as the connection id.
-  // 402s route through the same paywall surface as the chat-send endpoint so
-  // the UX feels consistent (PaywallCard pops on either flow).
-  const resolvePendingAction = useCallback(async (messageId: string, action: PendingChatAction) => {
-    const isLinked = action.source === 'linked' || action.connectionId !== undefined;
-    const targetId = isLinked ? (action.connectionId ?? action.memberId) : action.memberId;
-    const actionKey = getPendingActionKey(action);
-
-    const setActionState = (next: ResolvedChatAction) => {
-      setActiveChat(prev => prev ? {
-        ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? {
-          ...m,
-          resolvedActions: { ...(m.resolvedActions ?? {}), [actionKey]: next },
-        } : m),
-      } : null);
-    };
-
-    setActionState({ status: 'running' });
-
-    try {
-      const url = isLinked
-        ? `/api/family/connections/${encodeURIComponent(String(targetId))}/compatibility?lang=${encodeURIComponent(language)}`
-        : `/api/family/members/${encodeURIComponent(String(action.memberId))}/compatibility?lang=${encodeURIComponent(language)}`;
-      const res = await clientFetch(url);
-      const body = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        setActionState({ status: 'done', result: body as FamilyCompatibilityResponse });
-        return;
-      }
-
-      if (res.status === 402) {
-        const paywallData = body.paywall || body.detail?.paywall || body;
-        setPaywall(paywallData as PaywallData);
-        setActionState({ status: 'error', errorMessage: t('chat.pendingActionError') });
-        return;
-      }
-
-      // SHARING_REQUIRED on linked compat — surface inline as an error
-      // (the linked detail view is where users actually fix this).
-      const code = (body?.code ?? body?.detail?.code) as string | undefined;
-      if (code === 'SHARING_REQUIRED') {
-        setActionState({
-          status: 'error',
-          errorMessage: t('family.sharingRequired') || 'Sharing required on both sides before compatibility can be computed.',
-        });
-        return;
-      }
-
-      const msg = body.error || body.detail || t('chat.pendingActionError');
-      setActionState({ status: 'error', errorMessage: msg });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : t('chat.pendingActionError');
-      setActionState({ status: 'error', errorMessage: msg });
-    }
-  }, [language, t]);
-
   // Load initial chats
   useEffect(() => {
     if (!initialLoadDone.current && user?.id && !isGuest) {
@@ -1047,7 +952,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       paywall, clearPaywall,
       thinkingData,
       avatars, selectedAvatarId, setSelectedAvatarId, isLoadingAvatars,
-      resolvePendingAction
     }}>
       {children}
     </ChatContext.Provider>
