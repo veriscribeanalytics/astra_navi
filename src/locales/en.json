@@ -2696,8 +2696,15 @@
     "retry": "Retry",
     "noStreakYet": "Start your streak by claiming today!",
     "streakResetNotice": "Miss a day and your streak resets to Day 1.",
-    "howItWorks": "How it works",
-    "howItWorksDesc": "Claim once a day. Each consecutive day grows your streak and unlocks bigger rewards — Day 7 is the jackpot. Miss a day and you restart at Day 1. Resets at midnight UTC."
+    "howItWorks": "How rewards work",
+    "howItWorksDesc": "Claim once a day. Each consecutive day grows your streak and unlocks bigger rewards — Day 7 is the jackpot. Miss a day and you restart at Day 1. Resets at midnight UTC.",
+    "todayClaimedTitle": "Today's reward claimed",
+    "streakActive": "Your {days}-day streak is active.",
+    "creditsClaimed": "+{credits} credits claimed",
+    "nextClaimIn": "Next claim in",
+    "dayOfSeven": "Day {day} of {total}",
+    "journeyTitle": "Your 7-Day Journey",
+    "journeyHint": "Complete all 7 days to unlock the {credits}-credit bonus."
   },
   "rewardsModal": {
     "viewFullPage": "View full rewards page"

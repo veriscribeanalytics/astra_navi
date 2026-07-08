@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import CosmicTree from "./CosmicTree";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -184,13 +183,35 @@ function formatRahuKaal(transits: ReturnType<typeof useTransitsToday>["data"], h
   return `${rk.start} - ${rk.end}`;
 }
 
-function RingScore({ score, size = 132, color }: { score: number; size?: number; color: string }) {
+function RingScore({ score, size = 132, color, className }: { score: number; size?: number; color: string; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Track the actual rendered size so the inner number/label text scales with
+  // the (possibly responsive) circle — the SVG itself already scales via its
+  // viewBox, but the absolutely-positioned text uses pixel font sizes.
+  const [px, setPx] = useState(size);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const w = entry.contentRect.width;
+        if (w > 0) setPx(w);
+      }
+    });
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
+
   const radius = 43;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div
+      ref={containerRef}
+      className={className ? `relative shrink-0 aspect-square ${className}` : "relative shrink-0 aspect-square"}
+      style={className ? undefined : { width: size, height: size }}
+    >
       <svg role="img" aria-label={`Overall score: ${score} out of 100`} className="h-full w-full -rotate-90" viewBox="0 0 110 110">
         <circle cx="55" cy="55" r={radius} fill="none" stroke="var(--outline-variant)" strokeOpacity="0.08" strokeWidth="8" />
         <circle
@@ -207,10 +228,10 @@ function RingScore({ score, size = 132, color }: { score: number; size?: number;
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-black leading-none tabular-nums" style={{ color, fontSize: size * 0.28 }}>
+        <span className="font-black leading-none tabular-nums" style={{ color, fontSize: px * 0.28 }}>
           {score}
         </span>
-        <span className="font-semibold text-foreground/70" style={{ fontSize: size * 0.1, marginTop: size * 0.02 }}>/100</span>
+        <span className="font-semibold text-foreground/70" style={{ fontSize: px * 0.1, marginTop: px * 0.02 }}>/100</span>
       </div>
     </div>
   );
@@ -1501,31 +1522,26 @@ export default function DashboardHome() {
 
                   <div className="flex flex-col gap-3">
 
-                    {/* Cosmic Tree with Score Overlay — mobile only (placed before headline) */}
+                    {/* Overall Score — mobile only (placed before headline) */}
                     <button
                       type="button"
                       onClick={() => router.push("/horoscope/forecast?area=overall")}
                       aria-label={`${t('newDashboard.todaysEnergy.title')} — overall ${overallScore}. View overall forecast`}
                       title="View overall forecast"
-                      className="flex lg:hidden items-center justify-center min-h-[240px] relative cursor-pointer group"
+                      className="flex lg:hidden flex-col items-center justify-center gap-3 py-4 cursor-pointer group"
                     >
-                      <CosmicTree className="h-auto w-full max-w-full mx-auto max-h-[300px] object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
-                      <div className="absolute inset-0 flex flex-col items-center pt-[8%] px-[15%]">
-                        <div className="flex flex-col items-center gap-1">
-                          <RingScore score={overallScore} color={overallPhaseHex} size={100} />
-                          <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em]"
-                            style={{
-                              color: STATUS_COLORS[getScorePhase(overallScore)].main,
-                              backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
-                              borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
-                            }}
-                          >
-                            <span className="h-1 w-1 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
-                            {scoreBand}
-                          </span>
-                        </div>
-                      </div>
+                      <RingScore score={overallScore} color={overallPhaseHex} size={120} className="w-[min(54vw,160px)]" />
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em]"
+                        style={{
+                          color: STATUS_COLORS[getScorePhase(overallScore)].main,
+                          backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
+                          borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
+                        }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
+                        {scoreBand}
+                      </span>
                     </button>
 
                     {/* Headline + Advice — spans full width */}
@@ -1543,31 +1559,31 @@ export default function DashboardHome() {
 
                     {/* Row: Cosmic Tree | Guidance box */}
                     <div className="grid flex-grow gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-stretch">
-                      {/* Cosmic Tree with Score Overlay — desktop only (mobile renders it at the bottom of this section) */}
+                      {/* Overall Score — desktop only (mobile renders it at the top of this section) */}
                       <button
                         type="button"
                         onClick={() => router.push("/horoscope/forecast?area=overall")}
                         aria-label={`${t('newDashboard.todaysEnergy.title')} — overall ${overallScore}. View overall forecast`}
                         title="View overall forecast"
-                        className="hidden lg:flex items-center justify-center min-h-[200px] relative cursor-pointer group"
+                        className="hidden lg:flex flex-col items-center justify-center gap-3 h-full cursor-pointer group"
                       >
-                        <CosmicTree className="h-auto w-full max-w-full mx-auto max-h-[270px] object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
-                        <div className="absolute inset-0 flex flex-col items-center pt-[8%] px-[15%]">
-                          <div className="flex flex-col items-center gap-1">
-                            <RingScore score={overallScore} color={overallPhaseHex} size={100} />
-                            <span
-                              className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em]"
-                              style={{
-                                color: STATUS_COLORS[getScorePhase(overallScore)].main,
-                                backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
-                                borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
-                              }}
-                            >
-                              <span className="h-1 w-1 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
-                              {scoreBand}
-                            </span>
-                          </div>
-                        </div>
+                        <RingScore
+                          score={overallScore}
+                          color={overallPhaseHex}
+                          size={150}
+                          className="w-full max-w-[200px] xl:max-w-[225px] 2xl:max-w-[255px] min-[1920px]:max-w-[290px]"
+                        />
+                        <span
+                          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] xl:text-xs font-black uppercase tracking-[0.16em]"
+                          style={{
+                            color: STATUS_COLORS[getScorePhase(overallScore)].main,
+                            backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].bg,
+                            borderColor: STATUS_COLORS[getScorePhase(overallScore)].border,
+                          }}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[getScorePhase(overallScore)].main }} />
+                          {scoreBand}
+                        </span>
                       </button>
 
                       {/* Guidance bordered box */}
