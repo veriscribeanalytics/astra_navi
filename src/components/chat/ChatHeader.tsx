@@ -3,11 +3,16 @@
 import React, { useRef } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { useRouter } from 'next/navigation';
-import { Info, History, X, ArrowLeft } from 'lucide-react';
+import { Info, History, X, ArrowLeft, Headphones } from 'lucide-react';
 import { useTranslation } from '@/hooks';
 import AvatarPicker, { type AvatarPickerHandle } from './AvatarPicker';
 
-const ChatHeader: React.FC = () => {
+interface ChatHeaderProps {
+  conversationActive?: boolean;
+  onToggleConversation?: () => void;
+}
+
+const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationActive, onToggleConversation }) => {
   const { t } = useTranslation();
   const { activeChat, setIsMobileMenuOpen, setIsRightPanelOpen, isMobileMenuOpen, isRightPanelOpen } = useChat();
   const router = useRouter();
@@ -64,6 +69,21 @@ const ChatHeader: React.FC = () => {
 
         <div className="flex items-center gap-1.5">
 
+          {onToggleConversation && (
+            <button
+              onClick={onToggleConversation}
+              className={`chat-header-btn transition-colors rounded-lg ${
+                conversationActive
+                  ? 'text-secondary bg-secondary/10'
+                  : 'text-foreground/40 hover:text-secondary'
+              }`}
+              aria-label={t('chat.header.voiceMode')}
+              title={t('chat.header.voiceMode')}
+              aria-pressed={conversationActive}
+            >
+              <Headphones className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={() => setIsRightPanelOpen(true)}
             className="chat-header-btn text-foreground/40 hover:text-secondary transition-colors rounded-lg"

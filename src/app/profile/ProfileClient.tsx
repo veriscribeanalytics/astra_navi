@@ -70,6 +70,7 @@ export default function ProfileSettingsPage() {
     const saveAttemptRef = useRef(0);
     const [errors, setErrors] = useState({
         firstName: '',
+        lastName: '',
         dob: '',
         tob: '',
         pob: '',
@@ -77,6 +78,7 @@ export default function ProfileSettingsPage() {
     });
     const [touched, setTouched] = useState({
         firstName: false,
+        lastName: false,
         dob: false,
         tob: false,
         pob: false,
@@ -126,15 +128,15 @@ export default function ProfileSettingsPage() {
             setSelectedLocation(null);
         }
 
-        setErrors({ firstName: '', dob: '', tob: '', pob: '', phoneNumber: '' });
-        setTouched({ firstName: false, dob: false, tob: false, pob: false, phoneNumber: false });
+        setErrors({ firstName: '', lastName: '', dob: '', tob: '', pob: '', phoneNumber: '' });
+        setTouched({ firstName: false, lastName: false, dob: false, tob: false, pob: false, phoneNumber: false });
     }, [user, contextLanguage, hasChanges]);
 
     // --- Compute onboarding steps: all 4 with per-step status for visual checklist ---
     const onboardingSteps = useMemo(() => {
         const hasLocation = !!user?.pob && typeof user?.birthLatitude === 'number' && typeof user?.birthLongitude === 'number' && !!user?.birthTimezoneName;
         return [
-            { id: 'name' as const,   label: t('profile.onboarding.steps.name.label'),               hint: t('profile.onboarding.steps.name.hint'),                     complete: !!user?.firstName },
+            { id: 'name' as const,   label: t('profile.onboarding.steps.name.label'),               hint: t('profile.onboarding.steps.name.hint'),                     complete: !!(user?.firstName && user?.lastName) },
             { id: 'dob'  as const,   label: t('profile.onboarding.steps.dob.label'),           hint: t('profile.onboarding.steps.dob.hint'),       complete: !!user?.dob },
             { id: 'tob'  as const,   label: t('profile.onboarding.steps.tob.label'),           hint: t('profile.onboarding.steps.tob.hint'),      complete: !!user?.tob },
             { id: 'pob'  as const,   label: t('profile.onboarding.steps.pob.label'), hint: t('profile.onboarding.steps.pob.hint'), complete: hasLocation },
@@ -156,6 +158,16 @@ export default function ProfileSettingsPage() {
                     error = t('profile.fields.errors.firstNameTooShort');
                 } else if (value.trim().length > 50) {
                     error = t('profile.fields.errors.firstNameTooLong');
+                }
+                break;
+            case 'lastName':
+                if (!value.trim()) {
+                    break;
+                }
+                if (value.trim().length < 2) {
+                    error = t('profile.fields.errors.lastNameTooShort');
+                } else if (value.trim().length > 50) {
+                    error = t('profile.fields.errors.lastNameTooLong');
                 }
                 break;
             case 'dob':
@@ -190,16 +202,20 @@ export default function ProfileSettingsPage() {
     const validateForm = () => {
         const newErrors = {
             firstName: validateField('firstName', formData.firstName),
+            lastName: validateField('lastName', formData.lastName),
             dob: validateField('dob', formData.dob),
             tob: '',
             pob: validateField('pob', formData.pob),
             phoneNumber: ''
         };
 
-        // In onboarding mode, firstName/dob/tob/pob are all required,
+        // First and last name are always required to save a complete profile.
+        if (!formData.firstName.trim()) newErrors.firstName = t('profile.fields.errors.firstNameRequired');
+        if (!formData.lastName.trim()) newErrors.lastName = t('profile.fields.errors.lastNameRequired');
+
+        // In onboarding mode, dob/tob/pob are also required,
         // and structured birth location (latitude/longitude/timezone) is also required
         if (isOnboarding) {
-            if (!formData.firstName.trim()) newErrors.firstName = t('profile.fields.errors.firstNameRequired');
             if (!formData.dob) newErrors.dob = t('profile.fields.errors.dobRequired');
             if (!formData.tob) newErrors.tob = t('profile.fields.errors.tobRequired');
             if (!formData.pob.trim()) newErrors.pob = t('profile.fields.errors.pobRequired');
@@ -212,7 +228,7 @@ export default function ProfileSettingsPage() {
         }
 
         setErrors(newErrors);
-        setTouched({ firstName: true, dob: true, tob: true, pob: true, phoneNumber: true });
+        setTouched({ firstName: true, lastName: true, dob: true, tob: true, pob: true, phoneNumber: true });
         return !Object.values(newErrors).some(e => e !== '');
     };
 
@@ -474,8 +490,8 @@ export default function ProfileSettingsPage() {
             } else {
                 setSelectedLocation(null);
             }
-            setErrors({ firstName: '', dob: '', tob: '', pob: '', phoneNumber: '' });
-            setTouched({ firstName: false, dob: false, tob: false, pob: false, phoneNumber: false });
+            setErrors({ firstName: '', lastName: '', dob: '', tob: '', pob: '', phoneNumber: '' });
+            setTouched({ firstName: false, lastName: false, dob: false, tob: false, pob: false, phoneNumber: false });
             setHasChanges(false);
         }
     };
@@ -653,8 +669,21 @@ export default function ProfileSettingsPage() {
                                     label={t('profile.fields.lastName')}
                                     placeholder={t('profile.fields.lastNamePlaceholder')}
                                     type="text"
+                                    icon={<User className="w-4 h-4" />}
                                     value={formData.lastName}
-                                    onChange={(e) => updateFormData({ lastName: e.target.value })}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        updateFormData({ lastName: value });
+                                        if (touched.lastName) {
+                                            setErrors({...errors, lastName: validateField('lastName', value)});
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        setTouched({...touched, lastName: true});
+                                        setErrors({...errors, lastName: validateField('lastName', formData.lastName)});
+                                    }}
+                                    error={touched.lastName ? errors.lastName : ''}
+                                    required
                                 />
                             </div>
                         </div>

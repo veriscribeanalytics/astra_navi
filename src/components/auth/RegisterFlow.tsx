@@ -748,6 +748,13 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
               {t('auth.register.consentRequiredGoogle')}
             </p>
           )}
+          <p className="text-[9px] text-primary/25 leading-relaxed text-center max-w-[280px] mx-auto mt-2">
+            When you sign in with Google, Astra Navi receives your name and email address.
+            See our{' '}
+            <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
+              Privacy Policy
+            </Link>.
+          </p>
         </>
       )}
     </div>

@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "தேடல் ஫ளன்களிலிருந்து உங்கள் சரியான பிறப்பு இடத்தைத் தேர்ந்தெடுக்கவும்",
         "firstNameTooShort": "முதல் பெயர் குறைந்தது 2 எழுத்துக்கள் இருக்க வேண்டும்",
         "firstNameTooLong": "முதல் பெயர் மிகவும் நீளமாக உள்ளது",
-        "firstNameRequired": "முதல் பெயர் தேவை"
+        "firstNameRequired": "முதல் பெயர் தேவை",
+        "lastNameTooShort": "கடைசிப் பெயர் குறைந்தது 2 எழுத்துக்கள் இருக்க வேண்டும்",
+        "lastNameTooLong": "கடைசிப் பெயர் மிகவும் நீளமாக உள்ளது",
+        "lastNameRequired": "கடைசிப் பெயர் தேவை"
       },
       "firstName": "முதல் பெயர்",
       "firstNamePlaceholder": "முதல் பெயர்",

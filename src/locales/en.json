@@ -829,6 +829,19 @@
     "regenerate": "Regenerate",
     "speak": "Speak",
     "stop": "Stop",
+    "conversation": {
+      "tapToSpeak": "Tap to speak",
+      "listening": "Listening…",
+      "tapToStop": "Tap to cancel",
+      "thinking": "Navi is thinking…",
+      "speaking": "Navi is speaking…",
+      "talkToInterrupt": "Just start talking to interrupt",
+      "tapToInterrupt": "Tap mic to talk",
+      "autoListen": "Speak when Navi finishes",
+      "notSupported": "Voice mode isn't supported in this browser.",
+      "exit": "Exit voice mode",
+      "micError": "Microphone access is needed for voice mode."
+    },
     "dashaNow": "NOW",
     "newMessage": "New",
     "newMessages": "new",
@@ -915,7 +928,8 @@
       "online": "Online",
       "viewChartContext": "View chart context",
       "closeChat": "Close chat",
-      "back": "Back"
+      "back": "Back",
+      "voiceMode": "Voice mode"
     },
     "feedback": {
       "ratingLabels": {
@@ -1433,6 +1447,7 @@
     "accept": "Accept",
     "viewAllInvites": "View all invites",
     "viewProfile": "View Profile",
+    "viewBond": "View Bond",
     "checkCompatibility": "Check Compatibility",
     "disconnect": "Disconnect",
     "chartFreeBadge": "Free Snapshot",
@@ -1675,6 +1690,9 @@
       "subtitle": "Mars Compatibility Check",
       "severity": "Severity",
       "verdictLabel": "Compatibility Verdict",
+      "compatible": "Compatible",
+      "needsAttention": "Needs attention",
+      "important": "Important",
       "severityLevels": {
         "none": "none",
         "low": "low",
@@ -2203,6 +2221,9 @@
         "firstNameTooShort": "First name must be at least 2 characters",
         "firstNameTooLong": "First name is too long",
         "firstNameRequired": "First name is required",
+        "lastNameTooShort": "Last name must be at least 2 characters",
+        "lastNameTooLong": "Last name is too long",
+        "lastNameRequired": "Last name is required",
         "dobInFuture": "Birth date cannot be in the future",
         "dobInvalid": "Please enter a valid birth date",
         "pobInvalid": "Please enter a valid place",
@@ -2530,9 +2551,9 @@
         }
       }
     },
-    "guidanceHub": "Your Guidance Hub",
-    "exploreCosmicNetwork": "Explore Your Cosmic Network",
-    "cosmicNetworkDesc": "Connect with expert guides, explore your chart, understand your bonds, and access powerful astrological tools.",
+    "guidanceHub": "Your Astrology Hub",
+    "exploreCosmicNetwork": "Ask AI Jyotish, check Kundli, and get daily guidance",
+    "cosmicNetworkDesc": "Simple astrology tools for your daily life, relationships, career, and timing.",
     "meetYourAiAstrologers": "Meet Your AI Astrologers",
     "guides": {
       "navi": {

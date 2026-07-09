@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "ਖੋਜ ਨਤੀਜਿਆਂ ਵਿੱਚੋਂ ਆਪਣਾ ਸਹੀ ਜਨਮ ਸਥਾਨ ਚੁਣੋ",
         "firstNameTooShort": "ਪਹਿਲਾ ਨਾਮ ਘੱਟੋ-ਘੱਟ 2 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ",
         "firstNameTooLong": "ਪਹਿਲਾ ਨਾਮ ਬਹੁਤ ਲੰਬਾ ਹੈ",
-        "firstNameRequired": "ਪਹਿਲਾ ਨਾਮ ਲੋੜੀਂਦਾ ਹੈ"
+        "firstNameRequired": "ਪਹਿਲਾ ਨਾਮ ਲੋੜੀਂਦਾ ਹੈ",
+        "lastNameTooShort": "ਉਪਨਾਮ ਘੱਟੋ-ਘੱਟ 2 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ",
+        "lastNameTooLong": "ਉਪਨਾਮ ਬਹੁਤ ਲੰਬਾ ਹੈ",
+        "lastNameRequired": "ਉਪਨਾਮ ਲੋੜੀਂਦਾ ਹੈ"
       },
       "firstName": "ਪਹਿਲਾ ਨਾਮ",
       "firstNamePlaceholder": "ਪਹਿਲਾ ਨਾਮ",

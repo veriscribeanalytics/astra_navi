@@ -2,21 +2,27 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowRight, MessageSquare } from 'lucide-react';
+import { ArrowRight, MessageSquare, Coins } from 'lucide-react';
+import { useChat } from '@/context/ChatContext';
+import { getAvatarTheme } from '@/utils/avatarStyle';
 
 /**
- * Connect with Verified Astrologers — horizontally-scrollable expert cards.
- * EN-only copy; avatars are initials on a theme gradient (no image assets).
- * "Chat Now" + "View All" route to the existing auth / astrologers flow.
+ * Meet your AI Astrologers — the Astra guide bots.
+ * EN-only copy; avatars use the local /images/avatars/*.jpeg assets.
+ * "Chat Now" selects the guide avatar and routes to /chat (same flow the
+ * dashboard uses); "View All Guides" also routes to /chat.
  */
 
-const EXPERTS = [
-    { name: 'Dr. Arvind Sharma', specialty: 'Vedic Astrology Expert', exp: '15+ Yrs Exp', initials: 'AS' },
-    { name: 'Meera Iyer', specialty: 'Relationship Specialist', exp: '12+ Yrs Exp', initials: 'MI' },
-    { name: 'Kartik Rao', specialty: 'Career & Finance Expert', exp: '10+ Yrs Exp', initials: 'KR' },
-    { name: 'Vandana Joshi', specialty: 'Vastu & Remedies Expert', exp: '8+ Yrs Exp', initials: 'VJ' },
-    { name: 'Sanjay Rathore', specialty: 'KP Astrology Expert', exp: '20+ Yrs Exp', initials: 'SR' },
+const GUIDES = [
+    { avatarId: 'navi', name: 'Navi', role: 'General Vedic Guide', desc: 'Balanced Vedic guidance for love, work, timing & life.', credits: 1, img: '/images/avatars/NAVI_AVATAR.jpeg' },
+    { avatarId: 'career_mentor', name: 'Arya', role: 'Career Mentor', desc: 'Guidance for jobs, skills, promotion & work decisions.', credits: 2, img: '/images/avatars/ARYA_AVATAR.jpeg' },
+    { avatarId: 'relationship_guide', name: 'Meera', role: 'Relationship Guide', desc: 'Insights for love, marriage, compatibility & emotions.', credits: 2, img: '/images/avatars/MEERA_AVATAR.jpeg' },
+    { avatarId: 'spiritual_guide', name: 'Anand', role: 'Health Advisor', desc: 'Understand vitality, well-being & health patterns.', credits: 2, img: '/images/avatars/ANAND_AVATAR.jpeg' },
+    { avatarId: 'finance_mentor', name: 'Vidya', role: 'Financial Astrologer', desc: 'Wealth, investments & financial stability insights.', credits: 2, img: '/images/avatars/VIDYA_AVATAR.jpeg' },
+    { avatarId: 'astro_sage', name: 'Rishi', role: 'Deep Chart Sage', desc: 'Advanced chart synthesis for deep spiritual insights.', credits: 3, img: '/images/avatars/RISHI_AVATAR.jpeg' },
 ];
 
 const containerVariants = {
@@ -34,6 +40,14 @@ const itemVariants = {
 };
 
 export default function AstrologersSection() {
+    const router = useRouter();
+    const { setSelectedAvatarId } = useChat();
+
+    const handleChat = (avatarId: string) => {
+        setSelectedAvatarId(avatarId);
+        router.push('/chat');
+    };
+
     return (
         <motion.section
             initial="hidden"
@@ -45,52 +59,67 @@ export default function AstrologersSection() {
             <div className="flex items-end justify-between mb-8 sm:mb-12 gap-4">
                 <div>
                     <div className="text-[10px] sm:text-[11px] text-secondary font-bold tracking-[0.22em] uppercase mb-3">
-                        Verified Experts
+                        AI Astrologers
                     </div>
                     <h2 className="text-2xl sm:text-4xl font-bold font-headline text-primary">
-                        Connect with Verified <span className="text-secondary italic">Astrologers</span>
+                        Chat with Your AI <span className="text-secondary italic">Astrologers</span>
                     </h2>
                 </div>
                 <Link
-                    href="/astrologers"
+                    href="/chat"
                     className="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-secondary uppercase tracking-[0.15em] hover:translate-x-1 transition-transform shrink-0 mb-1"
                 >
-                    View All Experts <ArrowRight className="w-3.5 h-3.5" />
+                    View All Guides <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
-                {EXPERTS.map((e) => (
-                    <motion.div
-                        key={e.name}
-                        variants={itemVariants}
-                        whileHover={{ y: -6 }}
-                        className="group rounded-[22px] border border-outline-variant/30 bg-surface p-4 sm:p-5 flex flex-col items-center text-center hover:border-secondary/45 transition-colors duration-300"
-                    >
-                        <div className="relative mb-3">
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-white text-lg font-bold shadow-md">
-                                {e.initials}
-                            </div>
-                            <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-surface" />
-                        </div>
-                        <h3 className="text-sm font-bold text-primary leading-tight">{e.name}</h3>
-                        <p className="text-[10px] text-on-surface-variant/60 mt-1 mb-2 leading-tight">{e.specialty}</p>
-                        <div className="flex items-center justify-center text-[10px] font-bold text-on-surface-variant/60 mb-4">
-                            <span>{e.exp}</span>
-                        </div>
-                        <Link
-                            href="/login"
-                            className="mt-auto w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/5 px-3 py-2 text-[11px] font-bold text-secondary uppercase tracking-wider hover:bg-secondary/10 transition-colors"
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
+                {GUIDES.map((g) => {
+                    const theme = getAvatarTheme(g.avatarId);
+                    return (
+                        <motion.div
+                            key={g.avatarId}
+                            variants={itemVariants}
+                            whileHover={{ y: -6 }}
+                            className="group rounded-[22px] border border-outline-variant/30 bg-surface p-4 sm:p-5 flex flex-col items-center text-center hover:border-secondary/45 transition-colors duration-300"
                         >
-                            <MessageSquare className="w-3.5 h-3.5" /> Chat Now
-                        </Link>
-                    </motion.div>
-                ))}
+                            <div className="relative mb-2">
+                                <div
+                                    className="relative w-16 h-16 rounded-full overflow-hidden border-[3px] shadow-md"
+                                    style={{ borderColor: theme.secondary }}
+                                >
+                                    <Image
+                                        src={g.img}
+                                        alt={g.name}
+                                        fill
+                                        sizes="64px"
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-surface" />
+                            </div>
+                            <div className="inline-flex items-center gap-1 rounded-full border border-secondary/30 bg-secondary/5 px-2 py-0.5 text-[9px] font-bold text-secondary mb-2">
+                                <Coins className="w-2.5 h-2.5" />
+                                {g.credits} {g.credits === 1 ? 'credit/msg' : 'credits/msg'}
+                            </div>
+                            <h3 className="text-sm font-bold text-primary leading-tight">{g.name}</h3>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant/70 mt-1 mb-2 leading-tight">{g.role}</p>
+                            <p className="text-[10px] text-on-surface-variant/60 mb-4 leading-relaxed line-clamp-2">{g.desc}</p>
+                            <button
+                                type="button"
+                                onClick={() => handleChat(g.avatarId)}
+                                className="mt-auto w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/5 px-3 py-2 text-[11px] font-bold text-secondary uppercase tracking-wider hover:bg-secondary/10 transition-colors"
+                            >
+                                <MessageSquare className="w-3.5 h-3.5" /> Chat Now
+                            </button>
+                        </motion.div>
+                    );
+                })}
             </div>
 
             <div className="flex sm:hidden justify-center mt-8">
-                <Link href="/astrologers" className="inline-flex items-center gap-1.5 text-[11px] font-bold text-secondary uppercase tracking-[0.15em]">
-                    View All Experts <ArrowRight className="w-3.5 h-3.5" />
+                <Link href="/chat" className="inline-flex items-center gap-1.5 text-[11px] font-bold text-secondary uppercase tracking-[0.15em]">
+                    View All Guides <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
             </div>
         </motion.section>

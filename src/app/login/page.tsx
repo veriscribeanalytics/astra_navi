@@ -505,13 +505,6 @@ const LoginContent = () => {
                     </div>
                     <div className="space-y-2">
                       <GoogleSignInButton callbackUrl={getCallbackUrl()} onError={(m) => showError(m)} />
-                      <p className="text-[9px] text-primary/25 leading-relaxed text-center max-w-[280px] mx-auto">
-                        When you sign in with Google, Astra Navi receives your name and email address.
-                        See our{' '}
-                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
-                          Privacy Policy
-                        </a>.
-                      </p>
                     </div>
                   </>
                 ) : (
@@ -542,20 +535,22 @@ const LoginContent = () => {
                 </div>
               </AuthFormCard>
 
-              {/* Secure connection — below card */}
-              <div className="auth-secure-text flex-col gap-1.5">
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck size={12} />
-                  <span>{t('login.yourDataIsPrivate')}</span>
+              {/* Secure connection — below card (registration only) */}
+              {isRegister && (
+                <div className="auth-secure-text flex-col gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck size={12} />
+                    <span>{t('login.yourDataIsPrivate')}</span>
+                  </div>
+                  <p className="text-[10px] text-primary/30 leading-relaxed max-w-[340px] text-center">
+                    By signing in, you acknowledge Astra Navi&apos;s{' '}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/60 hover:text-secondary underline underline-offset-2 transition-colors">
+                      Privacy Policy
+                    </a>
+                    {' '}under India&apos;s DPDP Act, 2023. Your data is protected and never sold.
+                  </p>
                 </div>
-                <p className="text-[10px] text-primary/30 leading-relaxed max-w-[340px] text-center">
-                  By signing in, you acknowledge Astra Navi&apos;s{' '}
-                  <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/60 hover:text-secondary underline underline-offset-2 transition-colors">
-                    Privacy Policy
-                  </a>
-                  {' '}under India&apos;s DPDP Act, 2023. Your data is protected and never sold.
-                </p>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "검색 결과에서 정확한 출생지를 선택하십시오.",
         "firstNameTooShort": "이름은 최소 2자 이상이어야 합니다",
         "firstNameTooLong": "이름이 너무 깁니다",
-        "firstNameRequired": "이름은 필수 항목입니다"
+        "firstNameRequired": "이름은 필수 항목입니다",
+        "lastNameTooShort": "성은 최소 2자 이상이어야 합니다",
+        "lastNameTooLong": "성이 너무 깁니다",
+        "lastNameRequired": "성은 필수 항목입니다"
       },
       "firstName": "이름",
       "firstNamePlaceholder": "이름",

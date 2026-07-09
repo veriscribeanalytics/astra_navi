@@ -157,7 +157,7 @@ export default function LocationSearch({
                 </label>
             )}
             <div className="relative">
-                <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-secondary/60">
+                <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-secondary/70">
                     <MapPin className="w-4 h-4" />
                 </div>
                 <input
@@ -177,19 +177,19 @@ export default function LocationSearch({
                     aria-autocomplete="list"
                     aria-controls={listboxId}
                     aria-invalid={error ? 'true' : 'false'}
-                    className={`w-full bg-surface border transition-all outline-none text-foreground placeholder:text-foreground/40 font-body rounded-[20px] sm:rounded-[24px] pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-3.5 md:py-4 text-[15px] sm:text-base ${
+                    className={`w-full bg-surface border transition-all outline-none text-foreground placeholder:text-foreground/55 font-body rounded-[20px] sm:rounded-[24px] pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-3.5 md:py-4 text-[15px] sm:text-base ${
                         error
                             ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500'
                             : selected
-                                ? 'border-secondary/70 focus:ring-2 focus:ring-[rgba(201,151,46,0.20)] focus:border-secondary/70'
-                                : 'border-outline-variant/30 hover:border-outline-variant/50 focus:ring-2 focus:ring-[rgba(201,151,46,0.20)] focus:border-secondary/70'
+                                ? 'border-secondary/70 focus:ring-2 focus:ring-[rgba(201,151,46,0.30)] focus:border-secondary/70'
+                                : 'border-outline-variant/45 hover:border-outline-variant/65 focus:ring-2 focus:ring-[rgba(201,151,46,0.30)] focus:border-secondary/70'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                 />
                 {query && !disabled && (
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/30 hover:text-secondary transition-colors"
+                        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-secondary transition-colors"
                     >
                         <X className="w-4 h-4" />
                     </button>
@@ -239,10 +239,14 @@ export default function LocationSearch({
 
             {/* Confirmed location badge */}
             {selected && !error && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/10 border border-secondary/20 text-[11px] text-secondary font-bold">
-                    <Check className="w-3.5 h-3.5" />
-                    <span className="truncate">{selected.name}</span>
-                    <span className="text-secondary/60">({selected.lat.toFixed(2)}°, {selected.lon.toFixed(2)}°) · {selected.timezone}</span>
+                <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-secondary/10 border border-secondary/20">
+                    <Check className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                        <p className="text-[12px] text-secondary font-bold truncate leading-tight">{selected.name}</p>
+                        <p className="text-[10px] text-secondary/55 font-medium truncate tabular-nums">
+                            {selected.lat.toFixed(2)}&deg;, {selected.lon.toFixed(2)}&deg; &middot; {selected.timezone}
+                        </p>
+                    </div>
                 </div>
             )}
 

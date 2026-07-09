@@ -45,6 +45,7 @@ export function isProfileComplete(user?: ProfileLike | null): boolean {
   const normalized = normalizeProfileUser(user);
   return Boolean(
     (normalized.firstName || normalized.name) &&
+      normalized.lastName &&
       normalized.dob &&
       normalized.tob &&
       normalized.pob &&

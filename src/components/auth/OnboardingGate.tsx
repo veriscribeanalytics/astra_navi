@@ -53,6 +53,8 @@ const OnboardingGate: React.FC = () => {
   const redirectedRef = useRef(false);
 
   const profileCompleteFromFields = isProfileComplete({
+    firstName: user?.firstName,
+    lastName: user?.lastName,
     name: user?.name,
     dob: user?.dob,
     tob: user?.tob,

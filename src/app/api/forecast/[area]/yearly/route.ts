@@ -33,10 +33,7 @@ export async function GET(
         const data = await response.json();
 
         if (!response.ok) {
-            return NextResponse.json(
-                { error: data.error || data.detail || `${area} yearly forecast failed.` },
-                { status: response.status }
-            );
+            return NextResponse.json(data, { status: response.status });
         }
 
         return NextResponse.json(data, {

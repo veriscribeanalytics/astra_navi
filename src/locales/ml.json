@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "ദയവായി തിരയൽ ഫലങ്ങളിൽ നിന്ന് നിങ്ങളുടെ കൃത്യമായ ജന്മ സ്ഥാനം തെരഞ്ഞെടുക്കുക",
         "firstNameTooShort": "ആദ്യ നാമത്തിന് കുറഞ്ഞത് 2 അക്ഷരങ്ങളുടെ നീളമുണ്ടായിരിക്കണം",
         "firstNameTooLong": "ആദ്യ നാമം വളരെ വലുതാണ്",
-        "firstNameRequired": "ആദ്യ നാമം ആവശ്യമാണ്"
+        "firstNameRequired": "ആദ്യ നാമം ആവശ്യമാണ്",
+        "lastNameTooShort": "അവസാന നാമത്തിന് കുറഞ്ഞത് 2 അക്ഷരങ്ങളുടെ നീളമുണ്ടായിരിക്കണം",
+        "lastNameTooLong": "അവസാന നാമം വളരെ വലുതാണ്",
+        "lastNameRequired": "അവസാന നാമം ആവശ്യമാണ്"
       },
       "firstName": "ആദ്യ നാമം",
       "firstNamePlaceholder": "ആദ്യ നാമം",

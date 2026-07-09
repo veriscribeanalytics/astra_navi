@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "অনুগ্রহ করে অনুসন্ধান ফলাফল থেকে আপনার সঠিক জন্মস্থান নির্বাচন করুন",
         "firstNameTooShort": "প্রথম নাম অবশ্যই অন্তত ২ অক্ষরের হতে হবে",
         "firstNameTooLong": "প্রথম নাম অনেক দীর্ঘ",
-        "firstNameRequired": "প্রথম নাম আবশ্যক"
+        "firstNameRequired": "প্রথম নাম আবশ্যক",
+        "lastNameTooShort": "পদবি অবশ্যই অন্তত 2 অক্ষরের হতে হবে",
+        "lastNameTooLong": "পদবি অনেক দীর্ঘ",
+        "lastNameRequired": "পদবি আবশ্যক"
       },
       "firstName": "প্রথম নাম",
       "firstNamePlaceholder": "প্রথম নাম",

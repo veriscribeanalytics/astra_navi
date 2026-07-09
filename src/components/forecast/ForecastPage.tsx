@@ -94,6 +94,7 @@ export default function ForecastPage() {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   // Shared by 7d (weekly days) and monthly (every day in the month).
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [yearlyPaywall, setYearlyPaywall] = useState<PaywallData | null>(null);
 
   // Pagination cursor state: date (for weekly) or month (for monthly)
   const [cursor, setCursor] = useState<string | null>(null);
@@ -103,6 +104,7 @@ export default function ForecastPage() {
   // Reset pagination cursor when changing range or area
   useEffect(() => {
     setCursor(null);
+    setYearlyPaywall(null);
   }, [area, range]);
 
   // Cache by `${area}|${range}|${lang}|${cursor}`. Distinct keys for 7d (weekly), monthly, and yearly.
@@ -187,9 +189,17 @@ export default function ForecastPage() {
       } else {
         const res = await clientFetch(`/api/forecast/${area}/yearly?lang=${language}`, { signal: controller.signal });
         if (controller.signal.aborted) return;
+        if (res.status === 402) {
+          const ed = await res.json().catch(() => ({}));
+          setYearlyPaywall((ed?.paywall as PaywallData) || null);
+          setYearlyData(null);
+          setError(false);
+          return;
+        }
         if (res.ok) {
           const data: YearlyResponse = await res.json();
           setYearlyData(data);
+          setYearlyPaywall(null);
           const current = data.months?.find(m => m.is_current);
           setSelectedMonth(current?.month || data.months?.[0]?.month || null);
           cacheRef.current.set(key, { kind: 'yearly', data, timestamp: Date.now() });
@@ -401,9 +411,9 @@ export default function ForecastPage() {
       isSoft: true,
       title: isYearly ? "Yearly Forecast is Premium" : "Unlock Personal Forecasts",
       description: isYearly
-        ? "Access 12-month Vedic forecast tracking planetary periods (Dasha) and transits for your chart. Only for Pro users."
+        ? "Access 12-month Vedic forecast tracking planetary periods (Dasha) and transits for your chart. Only for Premium users."
         : "Get personalized daily, weekly, and monthly Vedic forecasts mapped to your planetary periods and houses.",
-      badge: isYearly ? "Pro" : "Premium",
+      badge: isYearly ? "Premium" : "Pro",
       icon: "🔒",
       suggestedProducts: [
         {
@@ -571,10 +581,6 @@ export default function ForecastPage() {
         {/* Header */}
         <div className="mb-3 flex flex-col items-center text-center">
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20">
-              <TrendingUp className="w-3.5 h-3.5 text-secondary animate-pulse" />
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em]">{t('forecast.title')}</span>
-            </div>
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-headline font-black tracking-tight text-foreground">{t('forecast.heading')}</h1>
           </div>
         </div>
@@ -636,6 +642,12 @@ export default function ForecastPage() {
                 ))}
               </div>
             </Card>
+          </div>
+        ) : (range === 'yearly' && yearlyPaywall && !yearlyData) ? (
+          <div className="flex justify-center py-8">
+            <div className="w-full max-w-md">
+              <PaywallCard paywall={yearlyPaywall} variant="inline" />
+            </div>
           </div>
         ) : (error && !isBlocked) ? (
           <Card padding="lg" className="border-white/5 bg-surface flex flex-col items-center justify-center text-center gap-4 py-16 sm:py-24">

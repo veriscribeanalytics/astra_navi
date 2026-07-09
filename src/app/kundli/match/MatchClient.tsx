@@ -15,15 +15,14 @@ import { tzOffsetHoursAt } from '@/lib/tzOffset';
 import { isUnder18 } from '@/utils/age';
 import { 
   Heart, Sparkles, ArrowLeftRight, 
-  RotateCcw, ShieldCheck, ChevronRight, Lock,
-  Users
+  RotateCcw, ChevronRight, Lock,
+  MessageCircle, Info, Search, Trash2
 } from 'lucide-react';
 
 // Components
 import MatchScoreRing from '@/components/match/MatchScoreRing';
 import KootCard from '@/components/match/KootCard';
 import MangalDoshaPanel from '@/components/match/MangalDoshaPanel';
-import PersonCard from '@/components/match/PersonCard';
 import AdditionalDoshas from '@/components/match/AdditionalDoshas';
 
 interface PersonDetails {
@@ -53,12 +52,21 @@ interface MangalDoshaDetail {
   description: string;
   type?: string;
   is_cancelled?: boolean;
+  // Moon-sign details (sourced from the backend's groom/bride_details) so the
+  // PersonCard spread ({...mangal_dosha.person1}) can render rashi/nakshatra.
+  rashi?: string;
+  rashiEn?: string;
+  nakshatra?: string;
+  pada?: number | string;
 }
 
 interface MatchResult {
   id?: string;
   ashtakoot: {
     total_score: number;
+    max_score?: number;
+    percentage?: number;
+    verdict?: string;
     koots: KootResult[];
   };
   tier: {
@@ -94,6 +102,211 @@ interface HistoryItem {
 
 type DoshaSeverity = 'none' | 'low' | 'medium' | 'high';
 
+// Maps the backend's native severity strings to a numeric score that feeds the
+// existing render's score-threshold severity computation (lines below) so the
+// correct tier badge is shown without altering the render code.
+const SEVERITY_SCORE: Record<string, number> = {
+  none: 0, mild: 10, moderate: 50, high: 80,
+};
+
+/**
+ * Normalizes the backend `/api/match` result shape into the `MatchResult`
+ * shape this component's render code expects.
+ *
+ * The backend returns `groom_details`/`bride_details` (moon sign + nakshatra),
+ * `mangal_dosha.{person1,person2,compatible,note}` and an `additional` object,
+ * whereas the render reads `mangal_dosha.{person1.is_present,is_cancelled,...}`,
+ * `conclusion`, `is_compatible` and an `additional_doshas` array. This adapter
+ * bridges that gap so saved (history) AND fresh results render identically.
+ */
+type BackendPersonDosha = {
+  has_dosha?: boolean;
+  is_present?: boolean;
+  severity?: string;
+  cancellations?: string[];
+};
+
+type BackendMoonDetails = {
+  name?: string;
+  moon_sign?: string;
+  nakshatra?: string;
+  pada?: number | string;
+};
+
+type BackendAdditionalDosha = { present?: boolean; compatible?: boolean; detail?: string };
+
+type BackendMatchResult = {
+  id?: string;
+  ashtakoot?: MatchResult['ashtakoot'];
+  tier?: MatchResult['tier'];
+  summary?: string;
+  mangal_dosha?: {
+    person1?: BackendPersonDosha;
+    person2?: BackendPersonDosha;
+    note?: string;
+    conclusion?: string;
+    compatible?: boolean;
+    is_compatible?: boolean;
+  };
+  groom_details?: BackendMoonDetails;
+  bride_details?: BackendMoonDetails;
+  additional?: Record<string, BackendAdditionalDosha>;
+};
+
+function normalizeMatchResult(raw: BackendMatchResult | null | undefined): MatchResult {
+  const md = raw?.mangal_dosha || {};
+  const groom = raw?.groom_details || {};
+  const bride = raw?.bride_details || {};
+  const additional = raw?.additional || {};
+
+  const buildPersonDosha = (
+    p: BackendPersonDosha | undefined,
+    moon: BackendMoonDetails,
+  ): MangalDoshaDetail => ({
+    is_present: !!(p?.has_dosha ?? p?.is_present),
+    score: SEVERITY_SCORE[String(p?.severity || 'none').toLowerCase()] ?? 0,
+    description:
+      Array.isArray(p?.cancellations) && p.cancellations.length
+        ? p.cancellations.join(', ')
+        : (md.note || ''),
+    type: p?.severity,
+    is_cancelled: Array.isArray(p?.cancellations) && p.cancellations.length > 0,
+    rashi: moon?.moon_sign,
+    rashiEn: moon?.moon_sign,
+    nakshatra: moon?.nakshatra,
+    pada: moon?.pada,
+  });
+
+  const additional_doshas: MatchResult['additional_doshas'] = [];
+  if (additional && typeof additional === 'object') {
+    if (additional.rajju_dosha) {
+      additional_doshas.push({
+        name: 'Rajju Dosha',
+        is_present: !!additional.rajju_dosha.present,
+        description: additional.rajju_dosha.detail || '',
+      });
+    }
+    if (additional.vedha_dosha) {
+      additional_doshas.push({
+        name: 'Vedha Dosha',
+        is_present: !!additional.vedha_dosha.present,
+        description: additional.vedha_dosha.detail || '',
+      });
+    }
+    if (additional.stree_deergha) {
+      additional_doshas.push({
+        name: 'Stree Deergha',
+        is_present: !additional.stree_deergha.compatible,
+        description: additional.stree_deergha.detail || '',
+      });
+    }
+  }
+
+  return {
+    id: raw?.id,
+    ashtakoot: raw?.ashtakoot || { total_score: 0, koots: [] },
+    tier: raw?.tier || { tier: '', color: '', emoji: '', label: '' },
+    summary: raw?.summary || '',
+    mangal_dosha: {
+      person1: buildPersonDosha(md.person1, groom),
+      person2: buildPersonDosha(md.person2, bride),
+      conclusion: md.note || md.conclusion || '',
+      is_compatible: md.compatible ?? md.is_compatible ?? true,
+    },
+    additional_doshas,
+  };
+}
+
+const KOOT_LABELS: Record<string, { label: string; icon: string }> = {
+  'Varna': { label: 'Spiritual Alignment', icon: '🌟' },
+  'Vashya': { label: 'Mutual Attraction', icon: '🧲' },
+  'Tara': { label: 'Star Harmony', icon: '💫' },
+  'Yoni': { label: 'Physical Chemistry', icon: '🔥' },
+  'Graha Maitri': { label: 'Mental Connection', icon: '🧠' },
+  'Gana': { label: 'Temperament Match', icon: '⭐' },
+  'Bhakoot': { label: 'Emotional Bond', icon: '💕' },
+  'Nadi': { label: 'Health Compatibility', icon: '🏥' },
+};
+
+type KootSummary = { label: string; sanskrit: string; obtained: number; max: number };
+
+/**
+ * Splits the 8 koot results into "strengths" (highest score ratios) and
+ * "concerns" (lowest score ratios) so the user immediately sees what is
+ * working and what needs attention — before drilling into the detail cards.
+ */
+function getStrengthsAndConcerns(koots: KootResult[]): { strengths: KootSummary[]; concerns: KootSummary[] } {
+  const ranked = [...koots]
+    .map((k) => {
+      const ratio = k.max > 0 ? k.obtained / k.max : 0;
+      const human = KOOT_LABELS[k.name] || { label: k.name, icon: '✨' };
+      return {
+        label: human.label,
+        sanskrit: k.name,
+        obtained: k.obtained,
+        max: k.max,
+        ratio,
+      };
+    })
+    .sort((a, b) => b.ratio - a.ratio);
+
+  // Strengths: ratio >= 0.7. Concerns: ratio < 0.5.
+  const strengths = ranked.filter((k) => k.ratio >= 0.7).slice(0, 4);
+  const concerns = ranked.filter((k) => k.ratio < 0.5).slice(0, 4).reverse();
+
+  return {
+    strengths: strengths.map(({ ratio: _r, ...rest }) => rest),
+    concerns: concerns.map(({ ratio: _r, ...rest }) => rest),
+  };
+}
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * Builds a single human-readable result line from the computed strengths and
+ * concerns. Replaces the backend's metric-heavy "With X out of Y points (Z%),
+ * this is a ... match" summary with something an Indian family can read aloud.
+ */
+function buildHumanSummary(koots: KootResult[]): string {
+  const { strengths, concerns } = getStrengthsAndConcerns(koots);
+  const sLabels = strengths.slice(0, 2).map((s) => s.label.toLowerCase());
+  const cLabels = concerns.slice(0, 2).map((s) => s.label.toLowerCase());
+  let out = '';
+  if (sLabels.length) {
+    out += `${cap(sLabels[0])}${sLabels[1] ? ` and ${sLabels[1]}` : ''} look strong. `;
+  }
+  if (cLabels.length) {
+    out += `${cap(cLabels[0])}${cLabels[1] ? ' and ' + cLabels[1] : ''} need understanding and communication.`;
+  }
+  return out.trim();
+}
+
+function getMatchVerdict(score: number) {
+  if (score >= 30) return { label: 'Strong Match', tone: 'emerald' as const };
+  if (score >= 24) return { label: 'Good Match', tone: 'green' as const };
+  if (score >= 18) return { label: 'Average Match', tone: 'amber' as const };
+  return { label: 'Needs Attention', tone: 'red' as const };
+}
+
+const VERDICT_TONES: Record<'emerald' | 'green' | 'amber' | 'red', { pill: string; bar: string }> = {
+  emerald: { pill: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25', bar: 'bg-emerald-500/70' },
+  green:   { pill: 'bg-green-500/10 text-green-300 border-green-500/25',     bar: 'bg-green-500/70' },
+  amber:   { pill: 'bg-amber-500/10 text-amber-300 border-amber-500/25',     bar: 'bg-amber-500/70' },
+  red:     { pill: 'bg-red-500/10 text-red-300 border-red-500/25',           bar: 'bg-red-500/70' },
+};
+
+const titleCaseName = (name: string) =>
+  (name || '').trim().replace(/\s+/g, ' ')
+    .split(' ')
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w))
+    .join(' ');
+
+const formatHistoryDate = (iso: string) => {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
 export default function MatchClient() {
   const { user, isLoggedIn } = useAuth();
   const { error, success, ToastContainer } = useToast();
@@ -108,6 +321,22 @@ export default function MatchClient() {
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [historySort, setHistorySort] = useState<'recent' | 'highest'>('recent');
+  const [historySearch, setHistorySearch] = useState('');
+
+  const visibleHistory = useMemo(() => {
+    const q = historySearch.trim().toLowerCase();
+    const filtered = history.filter((it) =>
+      !q ||
+      (it.person1_name || '').toLowerCase().includes(q) ||
+      (it.person2_name || '').toLowerCase().includes(q),
+    );
+    return [...filtered].sort((a, b) =>
+      historySort === 'highest'
+        ? b.score - a.score
+        : new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+  }, [history, historySearch, historySort]);
 
   const loadingMessages = useMemo(() => [
     "Analyzing profiles...",
@@ -143,7 +372,11 @@ export default function MatchClient() {
       const res = await clientFetch('/api/match/history?limit=10');
       const data = await res.json();
       if (res.ok) {
-        const items: any[] = Array.isArray(data.history) ? data.history : [];
+        const items: {
+          id: string; score: number; createdAt: string;
+          person1Name: string; person2Name: string;
+          resultData?: { person1_details?: PersonDetails; person2_details?: PersonDetails };
+        }[] = Array.isArray(data.history) ? data.history : [];
         setHistory(items.map((h) => ({
           id: h.id,
           score: h.score,
@@ -182,10 +415,26 @@ export default function MatchClient() {
       const data = await res.json();
       
       if (res.ok) {
-        const result = data.result || data.details || data;
-        setMatchResult(result);
-        setPerson1(data.person1_details || result?.person1_details || item.person1_details);
-        setPerson2(data.person2_details || result?.person2_details || item.person2_details);
+        // GET /api/match/{id} returns { id, result: <saved details> }.
+        const raw = data.result || data.details || data;
+        setMatchResult(normalizeMatchResult(raw));
+
+        // The saved result stores moon/rashi info under groom/bride_details and
+        // has no person1_details/person2_details. Reconstruct PersonDetails from
+        // the saved names (falling back to the history-list names) so the result
+        // render — which reads person1.name / person2.name directly — never
+        // receives undefined (which previously crashed the page).
+        const groom = raw?.groom_details || {};
+        const bride = raw?.bride_details || {};
+        setPerson1((prev) => ({
+          ...prev,
+          name: item.person1_name || groom.name || prev.name,
+        }));
+        setPerson2((prev) => ({
+          ...prev,
+          name: item.person2_name || bride.name || prev.name,
+        }));
+
         setPhase('result');
         setActiveTab('match');
       } else {
@@ -355,7 +604,7 @@ export default function MatchClient() {
         throw new Error(data.error || 'The stars are temporarily misaligned.');
       }
 
-      setMatchResult(data);
+      setMatchResult(normalizeMatchResult(data));
       setPhase('result');
       success("Analysis complete!");
     } catch (err: unknown) {
@@ -372,19 +621,7 @@ export default function MatchClient() {
     setMatchResult(null);
   };
 
-  const getKootHumanLabel = (name: string) => {
-    const labels: Record<string, { label: string; icon: string }> = {
-      'Varna': { label: 'Spiritual Alignment', icon: '🌟' },
-      'Vashya': { label: 'Mutual Attraction', icon: '🧲' },
-      'Tara': { label: 'Star Harmony', icon: '💫' },
-      'Yoni': { label: 'Physical Chemistry', icon: '🔥' },
-      'Graha Maitri': { label: 'Mental Connection', icon: '🧠' },
-      'Gana': { label: 'Temperament Match', icon: '⭐' },
-      'Bhakoot': { label: 'Emotional Bond', icon: '💕' },
-      'Nadi': { label: 'Health Compatibility', icon: '🏥' },
-    };
-    return labels[name] || { label: name, icon: '✨' };
-  };
+  const getKootHumanLabel = (name: string) => KOOT_LABELS[name] || { label: name, icon: '✨' };
 
   const TabBar = () => (
     <div className="flex justify-center mb-2">
@@ -456,24 +693,26 @@ export default function MatchClient() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-8"
+                  className="space-y-6"
                 >
-                  {/* Header Section */}
-                  <div className="text-center space-y-2 max-w-2xl mx-auto">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-bold uppercase tracking-widest">
-                      <Heart size={14} className="fill-current" />
-                      Ashtakoot Milan
+                  {/* Header + Toggle */}
+                  <div className="space-y-4">
+                    <div className="text-center space-y-2 max-w-2xl mx-auto">
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-bold uppercase tracking-widest">
+                        <Heart size={14} className="fill-current" />
+                        Ashtakoot Milan
+                      </div>
+                      <h1 className="text-4xl sm:text-5xl font-headline font-bold text-foreground tracking-tight">
+                        Relationship Analysis
+                      </h1>
+                      <p className="text-foreground/60 leading-relaxed font-body">
+                        Discover your compatibility through the 36-point Vedic matching system.
+                        Enter both birth details to get a detailed relationship analysis.
+                      </p>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-headline font-bold text-foreground tracking-tight">
-                      Relationship Analysis
-                    </h1>
-                    <p className="text-foreground/60 leading-relaxed font-body">
-                      Discover your spiritual and personal compatibility using the ancient 36-point Vedic system.
-                      Enter the birth details of both individuals to begin.
-                    </p>
-                  </div>
 
-                  <TabBar />
+                    <TabBar />
+                  </div>
 
                   {/* Forms Section */}
                   <div className="relative">
@@ -552,9 +791,9 @@ export default function MatchClient() {
                           type="button"
                           onClick={handleSwap}
                           title="Swap people"
-                          className="w-10 h-10 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-[rgba(201,151,46,0.50)] hover:bg-[rgba(201,151,46,0.15)] hover:shadow-lg transition-all group active:scale-95"
+                          className="w-11 h-11 rounded-full bg-surface border border-secondary/25 shadow-[0_4px_16px_rgba(0,0,0,0.3),0_0_0_4px_rgba(201,151,46,0.05)] flex items-center justify-center hover:border-secondary/60 hover:bg-secondary/10 hover:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_0_18px_rgba(201,151,46,0.28)] transition-all group active:scale-95"
                         >
-                          <ArrowLeftRight className="text-foreground/60 group-hover:text-secondary transition-colors" size={22} />
+                          <ArrowLeftRight className="text-foreground/70 group-hover:text-secondary transition-colors" size={22} />
                         </button>
                       </div>
 
@@ -624,15 +863,6 @@ export default function MatchClient() {
                               if (!stillMatches) setConfirmedLocationP2(null);
                             }}
                           />
-                          <button
-                            type="button"
-                            onClick={() => error("Select from Family is coming soon.")}
-                            title="Load a family member's profile"
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-outline-variant/20 text-xs font-bold text-text-muted hover:text-foreground hover:border-secondary/40 hover:bg-secondary/5 transition-all"
-                          >
-                            <Users className="w-4 h-4" />
-                            Select from Family
-                          </button>
                         </div>
                       </Card>
                     </div>
@@ -642,27 +872,23 @@ export default function MatchClient() {
                         type="button"
                         onClick={handleSwap}
                         title="Swap people"
-                        className="w-10 h-10 rounded-full bg-surface border border-outline-variant/30 flex items-center justify-center hover:border-[rgba(201,151,46,0.50)] hover:bg-[rgba(201,151,46,0.15)] hover:shadow-lg transition-all group active:scale-95"
+                        className="w-11 h-11 rounded-full bg-surface border border-secondary/25 shadow-[0_4px_16px_rgba(0,0,0,0.3),0_0_0_4px_rgba(201,151,46,0.05)] flex items-center justify-center hover:border-secondary/60 hover:bg-secondary/10 hover:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_0_18px_rgba(201,151,46,0.28)] transition-all group active:scale-95"
                       >
-                        <ArrowLeftRight className="text-foreground/60 group-hover:text-secondary transition-colors" size={22} />
+                        <ArrowLeftRight className="text-foreground/70 group-hover:text-secondary transition-colors" size={22} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-4">
+                  <div className="flex flex-col items-center gap-2.5 pt-1">
                     <button
                       type="button"
                       onClick={handleMatch}
                       disabled={isSubmitting}
-                      className="inline-flex items-center justify-center gap-2 px-12 py-5 rounded-2xl bg-gradient-to-br from-[#C9972E] via-[#D8AD43] to-[#C9972E] text-[#170C2D] shadow-lg shadow-[rgba(201,151,46,0.16)] hover:shadow-[rgba(201,151,46,0.24)] hover:via-[#D8AD43] active:scale-95 transition-all text-[14px] uppercase tracking-[0.2em] font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                      className="inline-flex items-center justify-center gap-2 px-12 py-4 rounded-2xl bg-gradient-to-br from-[#C9972E] via-[#D8AD43] to-[#C9972E] text-[#170C2D] shadow-lg shadow-[rgba(201,151,46,0.16)] hover:shadow-[rgba(201,151,46,0.24)] hover:via-[#D8AD43] active:scale-95 transition-all text-[14px] uppercase tracking-[0.2em] font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                     >
                       {isSubmitting && <RotateCcw className="w-4 h-4 animate-spin" />}
                       Calculate Compatibility <Sparkles className="w-4 h-4" />
                     </button>
-                    <p className="text-[11px] text-text-muted font-bold uppercase tracking-widest flex items-center gap-2">
-                      <ShieldCheck size={12} className="text-green-500/60" />
-                      Secure & Private Calculation
-                    </p>
                   </div>
                 </motion.div>
               )}
@@ -713,49 +939,145 @@ export default function MatchClient() {
                   animate={{ opacity: 1, scale: 1 }} 
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="space-y-10"
+                  className="space-y-8"
                 >
-                  <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-surface/20 rounded-[40px] border border-outline-variant/10 p-8 sm:p-12 relative overflow-hidden">
-                    <MatchScoreRing score={matchResult.ashtakoot?.total_score || 0} tier={matchResult.tier} />
-                    <div className="flex-1 space-y-6 text-center md:text-left">
-                        <div className="space-y-2">
-                          <h2 className="text-3xl font-headline font-bold text-foreground">Compatibility Result</h2>
-                          <p className="text-foreground/60 leading-relaxed font-body">{matchResult.summary}</p>
+                  {/* ── Hero Result Card ── */}
+                  <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8 bg-surface/60 rounded-[32px] border border-outline-variant/10 p-5 sm:p-6 relative overflow-hidden">
+                    <MatchScoreRing
+                      score={matchResult.ashtakoot?.total_score || 0}
+                      maxScore={matchResult.ashtakoot?.max_score || 36}
+                      percentage={matchResult.ashtakoot?.percentage}
+                      tier={matchResult.tier}
+                    />
+                    <div className="flex-1 w-full space-y-3 text-center md:text-left">
+                      <h2 className="text-2xl sm:text-3xl font-headline font-bold text-foreground leading-snug">
+                        This is a{/^[aeiou]/i.test(matchResult.tier?.label || '') ? 'n' : ''}{' '}
+                        {(matchResult.tier?.label || 'match').toLowerCase()} match with{' '}
+                        {matchResult.ashtakoot?.total_score || 0}/36 points.
+                      </h2>
+                      <p className="text-foreground/60 leading-relaxed font-body text-sm sm:text-base">
+                        {buildHumanSummary(matchResult.ashtakoot?.koots || []) || matchResult.summary}
+                      </p>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-2 sm:gap-3 pt-1">
+                        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface border border-outline-variant/15">
+                          <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-wider shrink-0">
+                            {person1.gender === 'female' ? 'Bride' : 'Groom'}:
+                          </span>
+                          <span className="text-sm font-headline font-bold text-foreground truncate max-w-[160px]">
+                            {person1.name || '—'}
+                          </span>
+                          {matchResult.mangal_dosha?.person1?.rashi && (
+                            <span className="text-[11px] text-secondary/80 font-bold shrink-0">· {matchResult.mangal_dosha.person1.rashi}</span>
+                          )}
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <PersonCard name={person1.name} gender={person1.gender} {...matchResult.mangal_dosha?.person1} />
-                          <PersonCard name={person2.name} gender={person2.gender} {...matchResult.mangal_dosha?.person2} />
+                        <Heart size={14} className="text-pink-500/50 shrink-0 hidden sm:block self-center" />
+                        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface border border-outline-variant/15">
+                          <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-wider shrink-0">
+                            {person2.gender === 'female' ? 'Bride' : 'Groom'}:
+                          </span>
+                          <span className="text-sm font-headline font-bold text-foreground truncate max-w-[160px]">
+                            {person2.name || '—'}
+                          </span>
+                          {matchResult.mangal_dosha?.person2?.rashi && (
+                            <span className="text-[11px] text-secondary/80 font-bold shrink-0">· {matchResult.mangal_dosha.person2.rashi}</span>
+                          )}
                         </div>
+                      </div>
+                      <div className="flex justify-center md:justify-start pt-2">
+                        <Button href="/chat" variant="secondary" size="md" className="rounded-2xl" leftIcon={<MessageCircle className="w-4 h-4" />}>
+                          Ask AI About This Match
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {matchResult.ashtakoot?.koots?.map((koot: KootResult, idx: number) => {
-                      const humanLabel = getKootHumanLabel(koot.name);
-                      return (
-                        <KootCard 
-                          key={idx}
-                          name={`${humanLabel.icon} ${humanLabel.label}`}
-                          sanskritName={koot.name}
-                          meaning={koot.description}
-                          obtained={koot.obtained}
-                          max={koot.max}
-                          detail={koot.detail}
-                          delay={idx * 0.05}
-                        />
-                      );
-                    })}
+                  {/* ── Quick Summary: Strengths vs Needs Attention ── */}
+                  {(() => {
+                    const { strengths, concerns } = getStrengthsAndConcerns(matchResult.ashtakoot?.koots || []);
+                    if (!strengths.length && !concerns.length) return null;
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="rounded-2xl border border-green-500/15 bg-surface/55 p-5">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                            <h3 className="text-xs font-bold text-green-500 uppercase tracking-widest">Strengths</h3>
+                          </div>
+                          {strengths.length > 0 ? (
+                            <ul className="space-y-2">
+                              {strengths.map((s) => (
+                                <li key={s.sanskrit} className="flex items-center justify-between">
+                                  <span className="text-sm text-foreground/75 font-medium">{s.label}</span>
+                                  <span className="text-xs font-bold text-green-500/80">{s.obtained}/{s.max}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-foreground/40 italic">No standout strong areas.</p>
+                          )}
+                        </div>
+                        <div className="rounded-2xl border border-amber-500/15 bg-surface/55 p-5">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest">Needs Attention</h3>
+                          </div>
+                          {concerns.length > 0 ? (
+                            <ul className="space-y-2">
+                              {concerns.map((s) => (
+                                <li key={s.sanskrit} className="flex items-center justify-between">
+                                  <span className="text-sm text-foreground/75 font-medium">{s.label}</span>
+                                  <span className="text-xs font-bold text-amber-500/80">{s.obtained}/{s.max}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-foreground/40 italic">No major concern areas.</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* ── Compatibility Breakdown ── */}
+                  <div>
+                    <div className="mb-4">
+                      <h3 className="text-sm font-headline font-bold text-foreground/70 uppercase tracking-[0.18em] text-left">
+                        Compatibility Breakdown
+                      </h3>
+                      <p className="text-[11px] text-foreground/35 font-medium mt-1 text-left">
+                        Detailed score across 8 matching factors
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {matchResult.ashtakoot?.koots?.map((koot: KootResult, idx: number) => {
+                        const humanLabel = getKootHumanLabel(koot.name);
+                        return (
+                          <KootCard 
+                            key={idx}
+                            name={humanLabel.label}
+                            sanskritName={koot.name}
+                            meaning={koot.description}
+                            obtained={koot.obtained}
+                            max={koot.max}
+                            detail={koot.detail}
+                            delay={idx * 0.05}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Dosha Analysis Section */}
                   <div className="space-y-6">
-                     <div className="flex items-center gap-3">
-                        <div className="h-px flex-1 bg-outline-variant/20"></div>
-                        <h3 className="text-[11px] font-bold text-foreground/40 uppercase tracking-[0.3em]">Dosha Analysis</h3>
-                        <div className="h-px flex-1 bg-outline-variant/20"></div>
+                     <div>
+                       <h3 className="text-sm font-headline font-bold text-foreground/70 uppercase tracking-[0.18em] text-left">
+                         Dosha Analysis
+                       </h3>
+                       <p className="text-[11px] text-foreground/35 font-medium mt-1 text-left">
+                         Mangal Dosha and supplemental Vedic risk checks
+                       </p>
                      </div>
                      
-                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <MangalDoshaPanel 
                           person1={{ 
                             name: person1.name, 
@@ -785,10 +1107,42 @@ export default function MatchClient() {
                      </div>
                   </div>
 
-                  <div className="flex justify-center pt-10 border-t border-outline-variant/10">
-                      <Button onClick={resetMatch} variant="secondary" size="lg" className="rounded-2xl px-10">
-                        <RotateCcw className="mr-2 w-4 h-4" /> Match Again
-                      </Button>
+                  {/* Final Note */}
+                  {(() => {
+                    const concerns: string[] = [];
+                    if (matchResult.mangal_dosha && !matchResult.mangal_dosha.is_compatible) concerns.push('Mangal Dosha');
+                    (matchResult.additional_doshas || []).forEach((d) => { if (d.is_present) concerns.push(d.name); });
+
+                    const tierLabel = (matchResult.tier?.label || 'match').toLowerCase();
+                    const noteText = concerns.length
+                      ? `The 36-point score is ${tierLabel}, but ${concerns.join(' and ')} ${concerns.length > 1 ? 'should be' : 'should be'} reviewed carefully before making a final marriage decision.`
+                      : `The 36-point score is ${tierLabel}, and no major dosha concerns were found. The match is well-supported across the Ashtakoot system.`;
+
+                    return (
+                      <div className={`flex items-start gap-3 p-4 rounded-2xl border ${
+                        concerns.length ? 'border-amber-500/20 bg-amber-500/[0.04]' : 'border-green-500/20 bg-green-500/[0.04]'
+                      }`}>
+                        <Info size={16} className={`shrink-0 mt-0.5 ${concerns.length ? 'text-amber-500' : 'text-green-500'}`} />
+                        <div>
+                          <h4 className={`text-[11px] font-bold uppercase tracking-widest mb-1 ${concerns.length ? 'text-amber-500' : 'text-green-500'}`}>
+                            Final Note
+                          </h4>
+                          <p className="text-[13px] text-foreground/75 leading-relaxed font-body">
+                            {noteText}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* End-of-flow CTAs */}
+                  <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                    <Button href="/chat" variant="primary" size="lg" className="rounded-2xl px-8" leftIcon={<MessageCircle className="w-4 h-4" />}>
+                      Ask AI About This Match
+                    </Button>
+                    <Button onClick={resetMatch} variant="secondary" size="lg" className="rounded-2xl px-8" leftIcon={<RotateCcw className="w-4 h-4" />}>
+                      Match Again
+                    </Button>
                   </div>
                 </motion.div>
               )}
@@ -797,44 +1151,117 @@ export default function MatchClient() {
         ) : (
           <motion.div key="history-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
             <TabBar />
-            <div className="text-center space-y-2 mb-8">
+            <div className="text-center space-y-2 mb-6">
                <h2 className="text-3xl font-headline font-bold text-foreground">Match History</h2>
                <p className="text-foreground/40 text-sm">Your previously computed matches are saved for your review.</p>
             </div>
+
             {isLoadingHistory ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-32 bg-surface/30 rounded-[24px] animate-pulse border border-outline-variant/10" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-28 bg-surface/30 rounded-[22px] animate-pulse border border-outline-variant/10" />
                 ))}
               </div>
             ) : history.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {history.map((item) => (
-                  <Card key={item.id} className="!rounded-[24px] border-outline-variant/10 bg-surface/20 hover:border-secondary/30 transition-all p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.score >= 25 ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
-                          Score: {item.score}/36
+              <>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="relative flex-1 sm:max-w-xs">
+                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={historySearch}
+                      onChange={(e) => setHistorySearch(e.target.value)}
+                      placeholder="Search by name..."
+                      className="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-surface/60 border border-outline-variant/15 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-secondary/40 transition-colors"
+                    />
+                  </div>
+                  <div className="inline-flex p-1 bg-surface/60 border border-outline-variant/15 rounded-2xl self-start sm:self-auto">
+                    {([['recent', 'Recent'], ['highest', 'Highest Score']] as const).map(([key, label]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setHistorySort(key)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                          historySort === key ? 'bg-secondary/15 text-secondary' : 'text-foreground/40 hover:text-foreground'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {visibleHistory.length === 0 ? (
+                  <div className="text-center py-16 bg-surface/10 rounded-[32px] border border-dashed border-outline-variant/20">
+                    <p className="text-foreground/40 font-medium">No matches found for &quot;{historySearch}&quot;.</p>
+                    <Button variant="ghost" onClick={() => setHistorySearch('')} className="mt-4 text-secondary">Clear search</Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {visibleHistory.map((item) => {
+                      const verdict = getMatchVerdict(item.score);
+                      const tone = VERDICT_TONES[verdict.tone];
+                      const label1 = item.person1_details?.gender === 'female' ? 'Bride' : 'Groom';
+                      const label2 = item.person2_details?.gender === 'male' ? 'Groom' : 'Bride';
+                      return (
+                        <div
+                          key={item.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => viewHistoryItem(item)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); viewHistoryItem(item); } }}
+                          className="group relative rounded-[22px] bg-surface/40 border border-outline-variant/10 hover:border-secondary/30 hover:bg-surface/60 hover:-translate-y-[2px] transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+                        >
+                          <span className={`absolute left-0 top-0 bottom-0 w-[3px] ${tone.bar}`} aria-hidden="true" />
+                          <div className="p-4 sm:p-5 pl-5 sm:pl-6">
+                            <div className="flex items-center justify-between gap-2 mb-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className={`inline-flex items-baseline gap-0.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${tone.pill}`}>
+                                  <span className="text-sm font-headline tabular-nums">{item.score}</span>
+                                  <span className="opacity-60">/36</span>
+                                </span>
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${tone.pill}`}>
+                                  {verdict.label}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <span className="text-[11px] text-foreground/40 font-medium tabular-nums">{formatHistoryDate(item.created_at)}</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); deleteHistoryItem(item.id); }}
+                                  title="Remove from history"
+                                  className="text-foreground/25 hover:text-red-400 hover:bg-red-500/10 transition-colors p-1.5 rounded-lg"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <div className="flex-1 min-w-0 text-left">
+                                <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest mb-0.5">{label1}</p>
+                                <p className="font-headline font-bold text-foreground text-base sm:text-lg leading-tight truncate">{titleCaseName(item.person1_name) || '—'}</p>
+                              </div>
+                              <Heart size={16} className="text-pink-500/45 shrink-0 fill-pink-500/10" />
+                              <div className="flex-1 min-w-0 text-right">
+                                <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest mb-0.5">{label2}</p>
+                                <p className="font-headline font-bold text-foreground text-base sm:text-lg leading-tight truncate">{titleCaseName(item.person2_name) || '—'}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-end mt-3 pt-3 border-t border-outline-variant/10">
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-secondary/80 group-hover:text-secondary transition-colors">
+                                View Analysis
+                                <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <span className="text-[10px] text-foreground/20 font-bold uppercase">{new Date(item.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <button onClick={() => deleteHistoryItem(item.id)} className="text-foreground/20 hover:text-red-400 transition-colors p-1"><RotateCcw size={14} className="rotate-45" /></button>
-                    </div>
-                    <div className="flex items-center gap-4 mb-5">
-                       <div className="flex-1 text-center">
-                          <p className="text-xs text-foreground/40 uppercase font-bold tracking-widest mb-1">Groom</p>
-                          <p className="font-headline font-bold text-foreground truncate">{item.person1_name}</p>
-                       </div>
-                       <Heart size={16} className="text-pink-500/40" />
-                       <div className="flex-1 text-center">
-                          <p className="text-xs text-foreground/40 uppercase font-bold tracking-widest mb-1">Bride</p>
-                          <p className="font-headline font-bold text-foreground truncate">{item.person2_name}</p>
-                       </div>
-                    </div>
-                    <Button fullWidth variant="secondary" size="sm" onClick={() => viewHistoryItem(item)} className="rounded-xl">View Full Analysis <ChevronRight size={14} className="ml-1" /></Button>
-                  </Card>
-                ))}
-              </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-20 bg-surface/10 rounded-[40px] border border-dashed border-outline-variant/20">
                 <p className="text-foreground/40 font-medium">No saved history found.</p>

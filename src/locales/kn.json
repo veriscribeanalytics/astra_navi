@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಿಂದ ನಿಮ್ಮ ನಿಖರವಾದ ಜನ್ಮ ಸ್ಥಳವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
         "firstNameTooShort": "ಮೊದಲ ಹೆಸರು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
         "firstNameTooLong": "ಮೊದಲ ಹೆಸರು ತುಂಬಾ ಉದ್ದವಾಗಿದೆ",
-        "firstNameRequired": "ಮೊದಲ ಹೆಸರು ಅಗತ್ಯವಿದೆ"
+        "firstNameRequired": "ಮೊದಲ ಹೆಸರು ಅಗತ್ಯವಿದೆ",
+        "lastNameTooShort": "ಕೊನೆಯ ಹೆಸರು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
+        "lastNameTooLong": "ಕೊನೆಯ ಹೆಸರು ತುಂಬಾ ಉದ್ದವಾಗಿದೆ",
+        "lastNameRequired": "ಕೊನೆಯ ಹೆಸರು ಅಗತ್ಯವಿದೆ"
       },
       "firstName": "ಮೊದಲ ಹೆಸರು",
       "firstNamePlaceholder": "ಮೊದಲ ಹೆಸರು",

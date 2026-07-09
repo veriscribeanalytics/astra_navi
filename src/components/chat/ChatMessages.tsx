@@ -10,7 +10,7 @@ import { useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
-import { useToast, useTranslation } from '@/hooks';
+import { useToast, useTranslation, useVoiceSettings } from '@/hooks';
 import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp } from 'lucide-react';
 import { getAvatarIcon, getAvatarAccent, getAvatarImage } from '@/utils/avatarStyle';
 
@@ -240,6 +240,7 @@ const ChatMessages: React.FC = () => {
   const { activeChat, isLoadingMessages, isSending, isFinalizing, createNewChat, rateMessage, regenerateMessage, retryMessage, sendMessage, activeChatId, editMessage, deleteMessage, togglePin, avatars } = useChat();
   const { success: toastSuccess, info: toastInfo } = useToast();
   const { t } = useTranslation();
+  const { resolveVoice, langCode } = useVoiceSettings();
   const scrollRef = useRef<HTMLDivElement>(null);
   const editAreaRef = useRef<HTMLTextAreaElement>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -501,6 +502,10 @@ const ChatMessages: React.FC = () => {
           }
           const cleanText = text.replace(/<[^>]*>/g, '');
           const utterance = new SpeechSynthesisUtterance(cleanText);
+          utterance.lang = langCode;
+          const voice = resolveVoice();
+          if (voice) utterance.voice = voice;
+          utterance.rate = 0.95;
           utterance.onend = () => setSpeakingId(null);
           utterance.onerror = () => setSpeakingId(null);
           window.speechSynthesis.cancel();

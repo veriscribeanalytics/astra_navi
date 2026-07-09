@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "कृपया शोध परिणामांमधून आपल्या अचूक जन्मस्थान निवडा",
         "firstNameTooShort": "पहिले नाव किमान २ अक्षरांचे असणे आवश्यक आहे",
         "firstNameTooLong": "पहिले नाव खूप मोठे आहे",
-        "firstNameRequired": "पहिले नाव आवश्यक आहे"
+        "firstNameRequired": "पहिले नाव आवश्यक आहे",
+        "lastNameTooShort": "आडनाव किमान 2 अक्षरांचे असणे आवश्यक आहे",
+        "lastNameTooLong": "आडनाव खूप मोठे आहे",
+        "lastNameRequired": "आडनाव आवश्यक आहे"
       },
       "firstName": "पहिले नाव",
       "firstNamePlaceholder": "पहिले नाव",

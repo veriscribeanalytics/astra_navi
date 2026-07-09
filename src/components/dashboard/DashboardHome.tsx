@@ -2512,20 +2512,6 @@ export default function DashboardHome() {
             })}
           </div>
         </DarkPanel>
-
-        {/* Privacy Footer */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-center text-[11px] text-foreground/30">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="h-4 w-4" />
-            <span>{t('newDashboard.privacy.protected')}</span>
-          </div>
-          <span>•</span>
-          <span>{t('newDashboard.privacy.secure')}</span>
-          <span>•</span>
-          <span>{t('newDashboard.privacy.encrypted')}</span>
-          <span>•</span>
-          <span>{t('newDashboard.privacy.trusted')}</span>
-        </div>
       </div>
 
       <AnimatePresence>

@@ -840,7 +840,7 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
 
     return (
         <div
-            className="bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-[24px] overflow-hidden transition-all duration-300 hover:border-[rgba(196,181,253,0.22)] hover:shadow-lg cursor-pointer"
+            className="bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-[24px] transition-all duration-300 hover:border-[rgba(196,181,253,0.22)] hover:shadow-lg cursor-pointer"
             onClick={onOpen}
         >
             <div className="flex items-stretch gap-0">
@@ -990,7 +990,7 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
 
     return (
         <div
-            className="bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-[24px] overflow-hidden transition-all duration-300 hover:border-[rgba(196,181,253,0.22)] hover:shadow-lg cursor-pointer"
+            className="bg-[#170D31] border border-[rgba(196,181,253,0.11)] rounded-[24px] transition-all duration-300 hover:border-[rgba(196,181,253,0.22)] hover:shadow-lg cursor-pointer"
             onClick={onManage}
         >
             <div className="flex items-stretch gap-0">

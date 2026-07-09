@@ -2061,7 +2061,10 @@
         "pobSelectRequired": "దయచేసి శోధన ఫలితాల నుండి మీ నిర్దిష్ట జన్మ స్థానం ఎంచుకోండి",
         "firstNameTooShort": "మొదటి పేరు కనీసం 2 అక్షరాలు ఉండాలి",
         "firstNameTooLong": "మొదటి పేరు చాలా పొడవుగా ఉంది",
-        "firstNameRequired": "మొదటి పేరు అవసరం"
+        "firstNameRequired": "మొదటి పేరు అవసరం",
+        "lastNameTooShort": "ఇంటి పేరు కనీసం 2 అక్షరాలు ఉండాలి",
+        "lastNameTooLong": "ఇంటి పేరు చాలా పొడవుగా ఉంది",
+        "lastNameRequired": "ఇంటి పేరు అవసరం"
       },
       "firstName": "మొదటి పేరు",
       "firstNamePlaceholder": "మొదటి పేరు",

@@ -799,6 +799,19 @@
     "regenerate": "पुनः उत्पन्न",
     "speak": "बोलें",
     "stop": "रोकें",
+    "conversation": {
+      "tapToSpeak": "बोलने के लिए टैप करें",
+      "listening": "सुन रहा हूँ…",
+      "tapToStop": "रद्द करने के लिए टैप करें",
+      "thinking": "नवी सोच रहा है…",
+      "speaking": "नवी बोल रहा है…",
+      "talkToInterrupt": "बाधा डालने के लिए बस बोलना शुरू करें",
+      "tapToInterrupt": "बोलने के लिए माइक टैप करें",
+      "autoListen": "नवी के खत्म होने पर बोलें",
+      "notSupported": "इस ब्राउज़र में वॉइस मोड समर्थित नहीं है।",
+      "exit": "वॉइस मोड से बाहर",
+      "micError": "वॉइस मोड के लिए माइक्रोफ़ोन एक्सेस चाहिए।"
+    },
     "dashaNow": "अभी",
     "newMessage": "नया",
     "newMessages": "नए",
@@ -885,7 +898,8 @@
       "online": "ऑनलाइन",
       "viewChartContext": "चार्ट संदर्भ देखें",
       "closeChat": "चैट बंद करें",
-      "back": "पीछे"
+      "back": "पीछे",
+      "voiceMode": "वॉइस मोड"
     },
     "feedback": {
       "ratingLabels": {
@@ -2100,7 +2114,10 @@
         "pobSelectRequired": "कृपया खोज परिणामों से अपने सटीक जन्म स्थान को चुनें",
         "firstNameTooShort": "पहला नाम कम से कम 2 अक्षरों का होना चाहिए",
         "firstNameTooLong": "पहला नाम बहुत लंबा है",
-        "firstNameRequired": "पहला नाम आवश्यक है"
+        "firstNameRequired": "पहला नाम आवश्यक है",
+        "lastNameTooShort": "उपनाम कम से कम 2 अक्षरों का होना चाहिए",
+        "lastNameTooLong": "उपनाम बहुत लंबा है",
+        "lastNameRequired": "उपनाम आवश्यक है"
       },
       "firstName": "पहला नाम",
       "firstNamePlaceholder": "पहला नाम",
