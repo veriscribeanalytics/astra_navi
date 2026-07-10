@@ -75,3 +75,5 @@ export { useVoiceSettings, detectLangFromText, resolveLangAndVoiceForText } from
 export type { VoiceSettings } from './useVoiceSettings';
 export { useConversationMode } from './useConversationMode';
 export type { ConversationMode as ConversationModeState, ConversationPhase } from './useConversationMode';
+export { useDictation } from './useDictation';
+export type { DictationMode } from './useDictation';

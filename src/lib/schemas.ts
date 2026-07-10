@@ -156,9 +156,14 @@ export const RegenerateMessageSchema = z.object({
 
 export const RateMessageSchema = z.object({
   messageId: z.string().uuid("Invalid message reference"),
-  rating: z.number().int().min(1).max(5),
-  feedbackTags: z.array(z.string()).optional().default([]),
+  thumb: z.union([z.literal(1), z.literal(-1)]).nullable().optional(),
+  feedbackTags: z.array(z.string()).max(10).optional(),
   feedbackComment: z.string().max(500).optional().or(emptyToUndefined),
+});
+
+export const ReportMessageSchema = z.object({
+  reason: z.enum(["inaccurate", "harmful", "offensive", "other"]),
+  details: z.string().max(1000).optional().or(emptyToUndefined),
 });
 
 // --- HOROSCOPE ---

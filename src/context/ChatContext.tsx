@@ -42,7 +42,8 @@ export interface ChatMessage {
   type: 'system' | 'ai' | 'user';
   text: string;
   attachments?: FileAttachment[];
-  rating?: number | null;
+  /** Thumbs signal on AI messages. 1 = up, -1 = down, null = none. */
+  thumb?: 1 | -1 | null;
   feedbackTags?: string[];
   feedbackComment?: string;
   insights?: { label: string; value: string }[];
@@ -92,7 +93,6 @@ export interface Chat {
   userEmail: string;
   title: string;
   messages: ChatMessage[];
-  averageRating: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -102,7 +102,6 @@ export interface ChatSummary {
   title: string;
   updatedAt: string;
   createdAt: string;
-  averageRating: number | null;
 }
 
 export interface ThinkingData {
@@ -137,7 +136,8 @@ interface ChatContextType {
   selectChat: (chatId: string) => Promise<void>;
   createNewChat: (initialMessage?: string, pageContextSource?: ChatPageContextSource) => Promise<string | null>;
   sendMessage: (text: string, overrideChatId?: string, pageContextSource?: ChatPageContextSource) => Promise<void>;
-  rateMessage: (messageId: string, rating: number, feedbackTags?: string[], feedbackComment?: string) => Promise<void>;
+  rateMessage: (messageId: string, opts: { thumb?: 1 | -1 | null; feedbackTags?: string[]; feedbackComment?: string }) => Promise<void>;
+  reportMessage: (messageId: string, reason: 'inaccurate' | 'harmful' | 'offensive' | 'other', details?: string) => Promise<void>;
   regenerateMessage: (messageId: string) => Promise<void>;
   retryMessage: (messageId: string) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
@@ -247,7 +247,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         text: t('chat.guestWelcome'),
         createdAt: now
       }],
-      averageRating: null,
       createdAt: now,
       updatedAt: now
     };
@@ -680,7 +679,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         avatarTitle: guide?.title,
         createdAt: now
       }],
-      averageRating: null,
       createdAt: now,
       updatedAt: now
     };
@@ -690,19 +688,79 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return tempId;
   }, [user, sendMessage, isGuest, t, selectedAvatarId, avatars]);
 
-  const rateMessage = useCallback(async (messageId: string, rating: number, tags?: string[], comment?: string) => {
+  const rateMessage = useCallback(async (
+    messageId: string,
+    opts: { thumb?: 1 | -1 | null; feedbackTags?: string[]; feedbackComment?: string },
+  ) => {
     if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
+    const { thumb, feedbackTags, feedbackComment } = opts;
+    const hasThumb = 'thumb' in opts;
+
+    // Optimistically reflect the thumb so the buttons toggle instantly.
+    // Snapshot the prior value (from the current render) so we can revert on failure.
+    const prevMsg = activeChat?.messages.find(m => m.id === messageId);
+    const prevSnapshot = prevMsg ? { thumb: prevMsg.thumb } : null;
+    setActiveChat(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        messages: prev.messages.map(m => {
+          if (m.id !== messageId) return m;
+          return {
+            ...m,
+            ...(hasThumb ? { thumb: thumb ?? null } : {}),
+          };
+        }),
+      };
+    });
+
     try {
-      const res = await clientFetch(`/api/chat/${activeChatId}/rate`, { 
-        method: 'PUT', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ messageId, rating, feedbackTags: tags, feedbackComment: comment }) 
+      const res = await clientFetch(`/api/chat/${activeChatId}/rate`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messageId,
+          ...(hasThumb ? { thumb: thumb ?? null } : {}),
+          ...(feedbackTags ? { feedbackTags } : {}),
+          ...(feedbackComment ? { feedbackComment } : {}),
+        }),
       });
       if (!res.ok) throw new Error('Rating failed');
-      success(t('chat.ratingSuccess'));
+      // Thumb toggles are confirmed by the instant visual state change — no toast.
     } catch (e) {
       console.error('Rate message error:', e);
+      if (prevSnapshot) {
+        const snap = prevSnapshot;
+        setActiveChat(prev => prev ? {
+          ...prev,
+          messages: prev.messages.map(m => m.id === messageId ? { ...m, thumb: snap.thumb } : m),
+        } : null);
+      }
       toastError(t('chat.ratingError'));
+    }
+  }, [activeChat, activeChatId, isGuest, toastError, t]);
+
+  const reportMessage = useCallback(async (
+    messageId: string,
+    reason: 'inaccurate' | 'harmful' | 'offensive' | 'other',
+    details?: string,
+  ) => {
+    if (isGuest || !activeChatId || activeChatId.startsWith('temp-')) return;
+    try {
+      const res = await clientFetch(`/api/chat/${activeChatId}/message/${messageId}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, ...(details ? { details } : {}) }),
+      });
+      if (res.status === 429) {
+        toastError(t('chat.reportRateLimited'));
+        return;
+      }
+      if (!res.ok) throw new Error('Report failed');
+      success(t('chat.reportSuccess'));
+    } catch (e) {
+      console.error('Report message error:', e);
+      toastError(t('chat.reportError'));
     }
   }, [activeChatId, isGuest, success, toastError, t]);
 
@@ -720,7 +778,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatarIdForRegen = target?.avatarId ?? selectedAvatarId ?? undefined;
       return {
         ...prev,
-        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', rating: null, opener: undefined, toolLoopExceeded: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined } : m),
+        messages: prev.messages.map(m => m.id === messageId ? { ...m, text: '', thumb: null, feedbackTags: [], feedbackComment: '', opener: undefined, toolLoopExceeded: undefined, planSteps: undefined, reflections: undefined, agentRounds: undefined, toolTrajectory: undefined, agentic: undefined } : m),
       };
     });
 
@@ -957,7 +1015,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <ChatContext.Provider value={{
       chats, activeChat, activeChatId, isLoadingChats, isLoadingMessages, isSending, isFinalizing, hasMoreChats,
       isGuest, guestTimeRemaining, isGuestExpired, enableGuestMode,
-      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, regenerateMessage, retryMessage, deleteChat, resetChat,
+      loadChats, loadMoreChats, selectChat, createNewChat, sendMessage, rateMessage, reportMessage, regenerateMessage, retryMessage, deleteChat, resetChat,
       editMessage, deleteMessage, togglePin,
       inputText, setInputText, attachments, addAttachment, removeAttachment, isMobileMenuOpen, setIsMobileMenuOpen, isRightPanelOpen, setIsRightPanelOpen,
       paywall, clearPaywall,

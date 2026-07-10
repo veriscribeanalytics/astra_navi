@@ -3,15 +3,14 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import DOMPurify from 'isomorphic-dompurify';
-import { parseMarkdown, autoFormatAstrology } from '@/utils/markdownParser';
+import { parseMarkdown, autoFormatAstrology, cleanTextForSpeech } from '@/utils/markdownParser';
 import Card from '@/components/ui/Card';
-import RatingMeter from '@/components/ui/RatingMeter';
 import { useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
-import FeedbackModal from './FeedbackModal';
+import ReportModal from './ReportModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
 import { useToast, useTranslation, useVoiceSettings, resolveLangAndVoiceForText } from '@/hooks';
-import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp } from 'lucide-react';
+import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp, ThumbsUp, ThumbsDown, Flag } from 'lucide-react';
 import { getAvatarIcon, getAvatarAccent, getAvatarImage, getAvatarTheme } from '@/utils/avatarStyle';
 
 const sanitizedHtmlCache = new Map<string, string>();
@@ -237,7 +236,7 @@ const ThinkingIndicator: React.FC = () => {
 
 const ChatMessages: React.FC = () => {
   const { user } = useAuth();
-  const { activeChat, isLoadingMessages, isSending, isFinalizing, createNewChat, rateMessage, regenerateMessage, retryMessage, sendMessage, activeChatId, editMessage, deleteMessage, togglePin, avatars } = useChat();
+  const { activeChat, isLoadingMessages, isSending, isFinalizing, createNewChat, rateMessage, reportMessage, regenerateMessage, retryMessage, sendMessage, activeChatId, editMessage, deleteMessage, togglePin, avatars } = useChat();
   const { success: toastSuccess, info: toastInfo } = useToast();
   const { t } = useTranslation();
   const { langCode, voices, selectedVoiceURI } = useVoiceSettings();
@@ -247,10 +246,9 @@ const ChatMessages: React.FC = () => {
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [newMsgCount, setNewMsgCount] = useState(0);
   const prevMsgLengthRef = useRef(0);
-  const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean; messageId: string; initialRating: number }>({
+  const [reportModal, setReportModal] = useState<{ isOpen: boolean; messageId: string }>({
     isOpen: false,
     messageId: '',
-    initialRating: 0
   });
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
@@ -313,16 +311,15 @@ const ChatMessages: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [showSearch, searchQuery, activeChat, searchMatchIdx, totalMatches, setSearchQuery, navigateSearch]);
 
-  const handleRateAction = (messageId: string, rating: number) => {
-    if (rating < 5) {
-      setFeedbackModal({ isOpen: true, messageId, initialRating: rating });
-    } else {
-      rateMessage(messageId, rating);
-    }
+  const handleThumb = (messageId: string, current: 1 | -1 | null | undefined, next: 1 | -1) => {
+    haptic(true);
+    // Clicking the already-active thumb clears it (toggle off).
+    rateMessage(messageId, { thumb: current === next ? null : next });
   };
 
-  const handleFeedbackSubmit = (rating: number, tags: string[], comment: string) => {
-    rateMessage(feedbackModal.messageId, rating, tags, comment);
+  const handleReportSubmit = (reason: 'inaccurate' | 'harmful' | 'offensive' | 'other', details: string) => {
+    if (!reportModal.messageId) return;
+    reportMessage(reportModal.messageId, reason, details || undefined);
   };
 
   const handleEditSave = async (messageId: string) => {
@@ -511,7 +508,7 @@ const ChatMessages: React.FC = () => {
             toastInfo(t('chat.speechStopped'));
             return;
           }
-          const cleanText = text.replace(/<[^>]*>/g, '');
+          const cleanText = cleanTextForSpeech(text);
           const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(cleanText, langCode, voices, selectedVoiceURI);
           const utterance = new SpeechSynthesisUtterance(cleanText);
           utterance.lang = detectedLangCode;
@@ -746,11 +743,24 @@ const ChatMessages: React.FC = () => {
 
               {isAi && msg.id && !isFinalizing && (
                 <div className="flex items-center gap-1.5 sm:gap-3 mt-1 ml-10 opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200 msg-action-row">
-                  <RatingMeter
-                    rating={msg.rating}
-                    onRate={(rating) => handleRateAction(msg.id, rating)}
-                    size="sm"
-                  />
+                  <button
+                    onClick={() => handleThumb(msg.id, msg.thumb, 1)}
+                    className={`msg-action-btn ripple-btn ${msg.thumb === 1 ? 'text-secondary' : 'text-on-surface-variant/30 hover:text-on-surface-variant'}`}
+                    title={t('chat.thumbUp')}
+                    aria-label={t('chat.thumbUp')}
+                    aria-pressed={msg.thumb === 1}
+                  >
+                    <ThumbsUp className={`w-3.5 h-3.5 ${msg.thumb === 1 ? 'fill-current' : ''}`} />
+                  </button>
+                  <button
+                    onClick={() => handleThumb(msg.id, msg.thumb, -1)}
+                    className={`msg-action-btn ripple-btn ${msg.thumb === -1 ? 'text-secondary' : 'text-on-surface-variant/30 hover:text-on-surface-variant'}`}
+                    title={t('chat.thumbDown')}
+                    aria-label={t('chat.thumbDown')}
+                    aria-pressed={msg.thumb === -1}
+                  >
+                    <ThumbsDown className={`w-3.5 h-3.5 ${msg.thumb === -1 ? 'fill-current' : ''}`} />
+                  </button>
                   <div className="w-[1px] h-3 bg-outline-variant/30" />
 <button
                     onClick={() => handleSpeak(mainText)}
@@ -792,6 +802,14 @@ const ChatMessages: React.FC = () => {
                       <RefreshCw className="w-3.5 h-3.5" />
                     </button>
                   )}
+                  <button
+                    onClick={() => { haptic(); setReportModal({ isOpen: true, messageId: msg.id }); }}
+                    className="msg-action-btn ripple-btn text-on-surface-variant/30 hover:text-red-400"
+                    title={t('chat.report')}
+                    aria-label={t('chat.report')}
+                  >
+                    <Flag className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
@@ -997,12 +1015,10 @@ aria-label={t('chat.editMessage')}
         </div>
       </div>
 
-      <FeedbackModal
-        isOpen={feedbackModal.isOpen}
-        onClose={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
-        messageId={feedbackModal.messageId}
-        initialRating={feedbackModal.initialRating}
-        onSubmit={handleFeedbackSubmit}
+      <ReportModal
+        isOpen={reportModal.isOpen}
+        onClose={() => setReportModal({ isOpen: false, messageId: '' })}
+        onSubmit={handleReportSubmit}
       />
 
       <AnimatePresence>

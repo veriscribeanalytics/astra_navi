@@ -3,8 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { useTranslation, useIsMobile, useResponsive } from '@/hooks';
+import type { DictationMode } from '@/hooks';
 import {
-    ArrowUp, Mic,
+    ArrowUp, Mic, Square, Volume2,
     Eye, EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -53,7 +54,7 @@ const AVATAR_PLACEHOLDERS_SHORT: Record<string, string> = {
   finance_mentor: "Ask Vidya…",
 };
 
-const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice }) => {
+const ChatInput: React.FC<{ dictation: DictationMode }> = ({ dictation }) => {
   const {
     inputText, setInputText, sendMessage,
     isSending, activeChatId, createNewChat,
@@ -125,18 +126,21 @@ const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice
   }, [inputText.length, currentPlaceholders]);
 
   const handleSend = () => {
-    if (!inputText.trim() || isSending || isOverLimit) return;
-    
+    let text = inputText;
+    if (dictation.isListening) text = dictation.stopListening();
+    text = text.trim();
+    if (!text || isSending || text.length > MAX_CHARS) return;
+    dictation.prepareSend();
     if (activeChatId) {
-      sendMessage(inputText.trim());
+      sendMessage(text);
     } else {
-      createNewChat(inputText.trim());
+      createNewChat(text);
     }
     setInputText('');
   };
 
-  const inputRef = useRef(inputText);
-  useEffect(() => { inputRef.current = inputText; }, [inputText]);
+  const handleSendRef = useRef(handleSend);
+  useEffect(() => { handleSendRef.current = handleSend; });
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -144,6 +148,7 @@ const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice
       handleSend();
     }
     if (e.key === 'Escape') {
+      if (dictation.isListening) dictation.stopListening();
       setInputText('');
       textareaRef.current?.focus();
     }
@@ -153,18 +158,12 @@ const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
-        if (!inputRef.current.trim() || isSending) return;
-        if (activeChatId) {
-          sendMessage(inputRef.current.trim());
-        } else {
-          createNewChat(inputRef.current.trim());
-        }
-        setInputText('');
+        handleSendRef.current();
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [isSending, activeChatId, sendMessage, createNewChat, setInputText]);
+  }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -186,10 +185,20 @@ const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice
           </div>
         )}
         <div className="flex items-end gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2.5 sm:py-3">
-          {onActivateVoice && (
+          {dictation.isSpeaking ? (
             <button
-              onClick={onActivateVoice}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors text-foreground/40 hover:text-secondary hover:bg-secondary/10"
+              onClick={dictation.stopSpeaking}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors text-secondary bg-secondary/10 hover:bg-secondary/20"
+              title={t('chat.stop')}
+              aria-label={t('chat.stop')}
+            >
+              <Volume2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 animate-pulse" />
+            </button>
+          ) : !dictation.isListening && (
+            <button
+              onClick={dictation.startListening}
+              disabled={!dictation.micSupported}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors text-foreground/40 hover:text-secondary hover:bg-secondary/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
               title={t('chat.header.voiceMode')}
               aria-label={t('chat.header.voiceMode')}
             >
@@ -199,14 +208,15 @@ const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice
           <textarea
             ref={textareaRef}
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => dictation.onManualInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            readOnly={dictation.isListening}
             placeholder={inputText.length > 0 ? '' : activePlaceholder}
             className="w-full bg-transparent border-none outline-none text-[14px] sm:text-[15px] 3xl:text-[17px] font-medium text-foreground placeholder:text-foreground/30 resize-none py-1.5 px-1 max-h-[150px] min-h-[38px] sm:min-h-0 no-scrollbar"
             rows={1}
           />
 
-          {inputText.length > 0 && (
+          {inputText.length > 0 && !dictation.isListening && !dictation.isSpeaking && (
             <button
               onClick={() => setShowPreview(prev => !prev)}
               className={`chat-preview-toggle-mobile w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors text-foreground/40 hover:text-secondary hover:bg-secondary/10`}
@@ -215,6 +225,29 @@ const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice
               {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           )}
+
+          <AnimatePresence>
+            {dictation.isListening && (
+              <motion.button
+                key="stop-listening"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                onClick={dictation.stopListening}
+                className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all bg-red-500 text-white shadow-md shadow-red-500/30 hover:bg-red-600 active:scale-95"
+                title={t('chat.stop')}
+                aria-label={t('chat.conversation.listening')}
+              >
+                <motion.span
+                  className="absolute inset-0 rounded-xl border-2 border-red-500/60"
+                  initial={{ scale: 1, opacity: 0.6 }}
+                  animate={{ scale: 1.3, opacity: 0 }}
+                  transition={{ duration: 1.1, repeat: Infinity, ease: 'easeOut' }}
+                />
+                <Square className="w-4 h-4 fill-current relative" />
+              </motion.button>
+            )}
+          </AnimatePresence>
 
           <button
             onClick={handleSend}

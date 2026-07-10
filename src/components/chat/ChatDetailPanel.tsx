@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useChat } from '@/context/ChatContext';
-import { X, Lock, Star, Pencil, Sparkles, MessageSquare, User, Hash, BookOpen } from 'lucide-react';
+import { X, Lock, Pencil, MessageSquare, User, Hash, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import KundliSvg from '@/components/ui/astrology/KundliSvg';
 import { useFocusTrap, useTranslation, useChatSummary } from '@/hooks';
@@ -100,31 +100,6 @@ const ChatDetailPanel: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {activeChat && (
-        <div className="mt-8 border-t border-outline-variant/10 pt-5">
-          <p className="mb-4 text-[12px] font-bold text-secondary uppercase tracking-[0.18em]">{t('chat.detail.chatRating')}</p>
-          {activeChat.averageRating != null ? (
-            <div className="flex items-center justify-center gap-1">
-              {Array(Math.floor(activeChat.averageRating)).fill(0).map((_, i) => (
-                <Star key={i} size={12} className="fill-secondary text-secondary" />
-              ))}
-              {activeChat.averageRating - Math.floor(activeChat.averageRating) >= 0.5 && (
-                <Star size={12} className="fill-secondary/50 text-secondary" />
-              )}
-              {Array(5 - Math.ceil(activeChat.averageRating)).fill(0).map((_, i) => (
-                <Star key={i} size={12} className="text-foreground/10 fill-transparent" />
-              ))}
-              <span className="text-[10px] text-foreground/30 ml-1">{activeChat.averageRating.toFixed(1)}/5</span>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-outline-variant/10 bg-background/20 px-4 py-5 text-center">
-              <Sparkles className="h-4 w-4 text-secondary/50" />
-              <p className="text-[12px] text-foreground/30">{t('chat.detail.rateResponsesToSeeAverage')}</p>
-            </div>
-          )}
-        </div>
-      )}
 
       {activeChat && activeChat.messages.length > 1 && (
         <div className="mt-6 border-t border-outline-variant/10 pt-5">

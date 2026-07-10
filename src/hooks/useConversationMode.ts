@@ -5,6 +5,7 @@ import { useChat } from '@/context/ChatContext';
 import type { ChatMessage } from '@/context/ChatContext';
 import { useTranslation } from './useTranslation';
 import { useVoiceSettings, isSpeechSupported, loadSpeechVoices, resolveLangAndVoiceForText } from './useVoiceSettings';
+import { cleanTextForSpeech } from '@/utils/markdownParser';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 
 export type ConversationPhase = 'idle' | 'listening' | 'processing' | 'speaking';
@@ -70,6 +71,7 @@ export function useConversationMode(): ConversationMode {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionRunningRef = useRef(false);
   const finalTranscriptRef = useRef('');
+  const committedIdxRef = useRef(0);
   const awaitingResponseRef = useRef(false);
   const pendingInterruptRef = useRef(false);
   const prevSendingRef = useRef(false);
@@ -200,7 +202,7 @@ export function useConversationMode(): ConversationMode {
       }
       window.speechSynthesis.cancel();
       const textToSpeak = [msg.opener, msg.text].filter(Boolean).join('\n\n');
-      const clean = textToSpeak.replace(/<[^>]*>/g, '').trim();
+      const clean = cleanTextForSpeech(textToSpeak);
       speakingTextRef.current = clean;
       if (!clean) {
         startListeningRef.current();
@@ -244,6 +246,7 @@ export function useConversationMode(): ConversationMode {
       setMicSupported(false);
       return;
     }
+    committedIdxRef.current = 0;
     const recognition = new Ctor();
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -252,10 +255,17 @@ export function useConversationMode(): ConversationMode {
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let finalText = '';
       let interimText = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      // Mobile browsers re-emit the full results array with resultIndex = 0,
+      // which duplicates already-final transcripts if we rely on
+      // event.resultIndex. Track the last committed final index ourselves.
+      for (let i = committedIdxRef.current; i < event.results.length; i++) {
         const result = event.results[i];
-        if (result.isFinal) finalText += result[0].transcript;
-        else interimText += result[0].transcript;
+        if (result.isFinal) {
+          finalText += result[0].transcript;
+          committedIdxRef.current = i + 1;
+        } else {
+          interimText += result[0].transcript;
+        }
       }
 
       const anySpeech = (finalText + interimText).trim().length > 0;
@@ -320,6 +330,7 @@ export function useConversationMode(): ConversationMode {
 
     recognition.onend = () => {
       recognitionRunningRef.current = false;
+      committedIdxRef.current = 0;
       if (!isActiveRef.current) return;
       if (phaseRef.current === 'idle') return;
       // Fallback commit if the browser emitted finals then stopped before our
@@ -411,6 +422,7 @@ export function useConversationMode(): ConversationMode {
     awaitingResponseRef.current = false;
     pendingInterruptRef.current = false;
     finalTranscriptRef.current = '';
+    committedIdxRef.current = 0;
     setPartialTranscript('');
     // Auto-start listening so the user can speak right away.
     setTimeout(() => startListeningRef.current(), 120);
@@ -424,6 +436,7 @@ export function useConversationMode(): ConversationMode {
     clearCommitTimer();
     clearSilenceTimer();
     finalTranscriptRef.current = '';
+    committedIdxRef.current = 0;
     awaitingResponseRef.current = false;
     pendingInterruptRef.current = false;
     setPartialTranscript('');

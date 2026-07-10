@@ -158,3 +158,57 @@ export function stripMarkdown(text: string): string {
 
   return plain;
 }
+
+/**
+ * Clean text for text-to-speech: strip HTML, code blocks, markdown formatting,
+ * table pipes, and links so the synthesizer reads natural speech instead of
+ * trying to pronounce raw syntax symbols like `**`, `#`, `|`, `?`, etc.
+ */
+export function cleanTextForSpeech(text: string): string {
+  if (!text) return '';
+
+  let clean = text;
+
+  // Remove fenced code blocks (```...```)
+  clean = clean.replace(/```[\s\S]*?```/g, ' ');
+
+  // Remove inline code (`code`)
+  clean = clean.replace(/`([^`]+)`/g, '$1');
+
+  // Remove markdown links — keep the link text, drop the URL
+  clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+  // Remove HTML tags
+  clean = clean.replace(/<[^>]*>/g, ' ');
+
+  // Remove bold/italic markers
+  clean = clean.replace(/\*\*(.+?)\*\*/g, '$1');
+  clean = clean.replace(/__(.+?)__/g, '$1');
+  clean = clean.replace(/(?<!\w)\*(.+?)\*(?!\w)/g, '$1');
+  clean = clean.replace(/(?<!\w)_(.+?)_(?!\w)/g, '$1');
+
+  // Remove header markers
+  clean = clean.replace(/^#{1,6}\s+/gm, '');
+
+  // Remove list markers (-, *, 1.)
+  clean = clean.replace(/^[\-\*]\s+/gm, '');
+  clean = clean.replace(/^\d+\.\s+/gm, '');
+
+  // Remove blockquote markers
+  clean = clean.replace(/^>\s+/gm, '');
+
+  // Remove horizontal rules
+  clean = clean.replace(/^(---|\*\*\*)$/gm, '');
+
+  // Remove markdown table pipes and separator rows (---|---)
+  clean = clean.replace(/^\s*\|?[\s:|-]+\|?\s*$/gm, ' ');
+  clean = clean.replace(/\|/g, ' ');
+
+  // Remove standalone special symbols the synthesizer may try to pronounce
+  clean = clean.replace(/[|•▪◦‣⁃]/g, ' ');
+
+  // Collapse multiple whitespace / newlines into single spaces
+  clean = clean.replace(/\s+/g, ' ').trim();
+
+  return clean;
+}

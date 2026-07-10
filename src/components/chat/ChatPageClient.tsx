@@ -9,10 +9,9 @@ import ChatHeader from '@/components/chat/ChatHeader';
 import ChatMessages from '@/components/chat/ChatMessages';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatDetailPanel from '@/components/chat/ChatDetailPanel';
-import ConversationModeBar from '@/components/chat/ConversationModeBar';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import { Sparkles, Sun, Briefcase, Orbit, Heart, Compass, Star, Gem, ChevronRight } from 'lucide-react';
-import { useTranslation, useTransitsToday, useSwipeDrawer, useAvatarTheme, useConversationMode } from '@/hooks';
+import { useTranslation, useTransitsToday, useSwipeDrawer, useAvatarTheme, useDictation } from '@/hooks';
 
 import { useAuth } from '@/context/AuthContext';
 import { getAvatarStarterCards, type StarterIconKey } from '@/utils/personalizedQuestions';
@@ -46,13 +45,8 @@ const ChatPageClient: React.FC = () => {
     return avatars.find(a => a.avatarId === selectedAvatarId);
   }, [avatars, selectedAvatarId]);
 
-  const conversation = useConversationMode();
+  const dictation = useDictation();
 
-  // Family "ask" handoff: a pre-seeded chat thread + starter prefill stashed by
-  // the family detail view's "Ask about this relationship" CTA. Rendered below as
-  // a tappable suggestion that sends the prefill via the normal SSE path. The
-  // prefill embeds the member's name, which activates the family chart tools
-  // server-side — no context.source forwarding needed.
   const [familyPrefill, setFamilyPrefill] = useState<string | null>(null);
 
   useAvatarTheme(selectedAvatarId, currentAvatar);
@@ -288,7 +282,7 @@ const ChatPageClient: React.FC = () => {
             </div>
 
             <div className="chat-empty-footer">
-              {conversation.isActive ? <ConversationModeBar conversation={conversation} /> : <ChatInput onActivateVoice={conversation.activate} />}
+              <ChatInput dictation={dictation} />
               <div className="flex items-center justify-center gap-1.5 mt-2 text-foreground/30 text-[11px]">
                 <span>{t('chat.empty.dataPrivate', { agent: currentAvatar?.name ?? 'Navi' })}</span>
               </div>
@@ -313,7 +307,7 @@ const ChatPageClient: React.FC = () => {
                 </button>
               </div>
             )}
-            {conversation.isActive ? <ConversationModeBar conversation={conversation} /> : <ChatInput onActivateVoice={conversation.activate} />}
+            <ChatInput dictation={dictation} />
           </div>
         )}
         </div>

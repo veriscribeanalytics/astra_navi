@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button';
 import { useChat, ChatSummary } from '@/context/ChatContext';
 import { 
     MoreVertical, Trash2, 
-    AlertTriangle, X, MessageSquare, Plus, Lock, Search, Star
+    AlertTriangle, X, MessageSquare, Plus, Lock, Search
 } from 'lucide-react';
 import { formatChatTimestamp } from '@/lib/datetime';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -191,12 +191,6 @@ const ChatSidebar: React.FC = () => {
                                   {chat.title}
                                 </p>
                                 <div className="flex items-center gap-1 shrink-0">
-                                  {typeof chat.averageRating === 'number' && chat.averageRating > 0 && (
-                                    <span className="flex items-center gap-0.5 text-[10px] text-secondary/60">
-                                      <Star className="w-2.5 h-2.5 fill-current" />
-                                      {chat.averageRating.toFixed(1)}
-                                    </span>
-                                  )}
                                   <span className={`text-[11px] ${isActive ? 'text-secondary/50' : 'text-foreground/40'}`}>{formatChatDate(chat.updatedAt || chat.createdAt, t)}</span>
                                   <button
                                     onClick={(e) => {
