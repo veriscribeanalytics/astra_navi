@@ -2,12 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/context/ChatContext';
-import { LOCALE_BY_LANGUAGE } from '@/locales';
 import { useTranslation, useIsMobile, useResponsive } from '@/hooks';
 import {
-    Mic, MicOff,
-    ArrowUp,
-    Paperclip, X, Image, FileText, Eye, EyeOff
+    ArrowUp, Mic,
+    Eye, EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -55,53 +53,25 @@ const AVATAR_PLACEHOLDERS_SHORT: Record<string, string> = {
   finance_mentor: "Ask Vidya…",
 };
 
-interface SpeechRecognitionEvent extends Event {
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-}
-
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: SpeechRecognitionErrorEvent) => void;
-  onend: () => void;
-  start: () => void;
-  stop: () => void;
-}
-
-const ChatInput: React.FC = () => {
+const ChatInput: React.FC<{ onActivateVoice?: () => void }> = ({ onActivateVoice }) => {
   const {
     inputText, setInputText, sendMessage,
     isSending, activeChatId, createNewChat,
-    attachments, addAttachment, removeAttachment,
     selectedAvatarId
   } = useChat();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { width: viewportWidth } = useResponsive();
   const isNarrowViewport = viewportWidth > 0 && viewportWidth <= 480;
   
-  const [isListening, setIsListening] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(true);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [isDragOver, setIsDragOver] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const MAX_CHARS = 3000;
-  const MAX_ATTACHMENTS = 5;
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
   const charCount = inputText.length;
   const isOverLimit = charCount > MAX_CHARS;
-  const showCharCount = charCount > MAX_CHARS * 0.8;
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -136,41 +106,6 @@ const ChatInput: React.FC = () => {
     };
   }, [isMobile]);
 
-  const handleFileSelect = (files: FileList | null) => {
-    if (!files) return;
-    for (const file of Array.from(files)) {
-      if (attachments.length >= MAX_ATTACHMENTS) break;
-      if (file.size > MAX_FILE_SIZE) continue;
-      if (!file.type.startsWith('image/') && !file.type.startsWith('application/pdf')) continue;
-      addAttachment(file);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-    handleFileSelect(e.dataTransfer.files);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
   const currentPlaceholders = AVATAR_PLACEHOLDERS[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS.navi;
   const shortPlaceholder = AVATAR_PLACEHOLDERS_SHORT[selectedAvatarId ?? 'navi'] ?? AVATAR_PLACEHOLDERS_SHORT.navi;
   const activePlaceholder = isNarrowViewport
@@ -188,58 +123,6 @@ const ChatInput: React.FC = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, [inputText.length, currentPlaceholders]);
-
-  useEffect(() => {
-    const win = window as unknown as { SpeechRecognition?: new() => SpeechRecognition; webkitSpeechRecognition?: new() => SpeechRecognition };
-    const WindowSpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
-    if (WindowSpeechRecognition) {
-      recognitionRef.current = new WindowSpeechRecognition();
-      const recognition = recognitionRef.current;
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = LOCALE_BY_LANGUAGE[language] || 'en-US';
-
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        setInputText(prev => {
-          const newText = prev ? `${prev} ${transcript}` : transcript;
-          return newText.slice(0, MAX_CHARS);
-        });
-        setIsListening(false);
-      };
-
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        if (event.error === 'not-allowed') {
-          console.warn('Microphone permission denied.');
-        } else if (event.error !== 'no-speech') {
-          console.warn(`Voice input error: ${event.error}`);
-        }
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-    } else {
-      setSpeechSupported(false);
-    }
-  }, [setInputText]);
-
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (err) {
-        console.error("Speech recognition error:", err);
-      }
-    }
-  };
 
   const handleSend = () => {
     if (!inputText.trim() || isSending || isOverLimit) return;
@@ -292,44 +175,7 @@ const ChatInput: React.FC = () => {
 
   return (
     <div ref={containerRef} className="w-full px-2 sm:px-5 3xl:px-6 pb-[calc(0.5rem+env(safe-area-inset-bottom)+var(--keyboard-height,0px))] sm:pb-4 relative z-20 shrink-0"
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
     >
-      {isDragOver && (
-        <div className="absolute inset-0 z-50 bg-secondary/10 border-2 border-secondary rounded-2xl flex items-center justify-center backdrop-blur-sm">
-          <div className="text-center">
-            <Paperclip className="w-8 h-8 text-secondary mx-auto mb-2" />
-            <p className="text-sm font-semibold text-secondary">{t('chat.input.dropFiles')}</p>
-            <p className="text-xs text-on-surface-variant/50">Images & PDFs only</p>
-          </div>
-        </div>
-      )}
-
-      {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 px-3 sm:px-5 pb-2">
-          {attachments.map((att) => (
-            <div key={att.id} className="relative group flex items-center gap-2 px-3 py-2 bg-surface border border-outline-variant/30 rounded-xl text-[12px] max-w-[180px]">
-              {att.type.startsWith('image/') && att.preview ? (
-                <img src={att.preview} alt={att.name} className="w-8 h-8 rounded object-cover shrink-0" />
-              ) : att.type.startsWith('image/') ? (
-                <Image className="w-4 h-4 text-secondary shrink-0" />
-              ) : (
-                <FileText className="w-4 h-4 text-red-400 shrink-0" />
-              )}
-              <span className="truncate text-on-surface-variant">{att.name}</span>
-              <span className="text-on-surface-variant/30 shrink-0">{formatFileSize(att.size)}</span>
-              <button
-                onClick={() => removeAttachment(att.id)}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-surface border border-outline-variant rounded-full flex items-center justify-center text-on-surface-variant/50 hover:text-red-400 hover:border-red-400/30 transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className="chat-input-container relative flex flex-col overflow-hidden transition-all">
         {showPreview && inputText.length > 0 && (
           <div className="px-4 py-3 border-b border-outline-variant/15 max-h-[150px] overflow-y-auto text-[15px] text-foreground">
@@ -340,6 +186,16 @@ const ChatInput: React.FC = () => {
           </div>
         )}
         <div className="flex items-end gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2.5 sm:py-3">
+          {onActivateVoice && (
+            <button
+              onClick={onActivateVoice}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors text-foreground/40 hover:text-secondary hover:bg-secondary/10"
+              title={t('chat.header.voiceMode')}
+              aria-label={t('chat.header.voiceMode')}
+            >
+              <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            </button>
+          )}
           <textarea
             ref={textareaRef}
             value={inputText}
@@ -381,64 +237,6 @@ const ChatInput: React.FC = () => {
               )}
             </AnimatePresence>
           </button>
-        </div>
-
-        {/* Bottom Toolbar: Attach, Voice, Char Count */}
-        <div className="flex flex-row items-center justify-between px-2.5 sm:px-3.5 py-1.5 sm:py-2 border-t border-outline-variant/15 bg-background/50 gap-2">
-          {/* Left tools: Paperclip, Voice */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*,.pdf"
-              className="hidden"
-              onChange={(e) => { handleFileSelect(e.target.files); e.target.value = ''; }}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={attachments.length >= MAX_ATTACHMENTS}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                attachments.length >= MAX_ATTACHMENTS
-                ? 'text-foreground/15 cursor-not-allowed'
-                : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
-              }`}
-              title={t('chat.input.attachFile')}
-            >
-              <Paperclip className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-            </button>
-
-            <button
-              onClick={toggleListening}
-              disabled={!speechSupported}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                !speechSupported
-                ? 'text-foreground/15 cursor-not-allowed'
-                : isListening 
-                ? 'bg-red-500/20 text-red-500 animate-pulse'
-                : 'text-foreground/40 hover:text-secondary hover:bg-secondary/10'
-              }`}
-              title={!speechSupported ? "Voice input not supported" : isListening ? "Stop listening" : "Voice input"}
-            >
-              {!speechSupported ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : isListening ? <MicOff className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <Mic className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
-            </button>
-          </div>
-
-          {/* Right/Center: character count */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[11px] 3xl:text-[13px] text-foreground/25 hidden md:inline ml-1">
-              {t('chat.input.naviUsesChart')}{' '}
-              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
-                (DPDP-compliant AI processing)
-              </a>
-            </span>
-            
-            {showCharCount && (
-              <p className={`text-[11px] 3xl:text-[13px] font-bold ${isOverLimit ? 'text-red-500' : 'text-foreground/30'} ml-2`}>
-                {charCount}/{MAX_CHARS}
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </div>

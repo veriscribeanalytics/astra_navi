@@ -187,9 +187,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [thinkingData, setThinkingData] = useState<ThinkingData | null>(null);
   const [avatars, setAvatars] = useState<ChatAvatar[]>([]);
   const [isLoadingAvatars, setIsLoadingAvatars] = useState(false);
-  const [selectedAvatarId, setSelectedAvatarIdState] = useState<string>(readStoredAvatar);
+  const [selectedAvatarId, setSelectedAvatarIdState] = useState<string>(DEFAULT_AVATAR_ID);
   const initialLoadDone = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Hydrate the persisted avatar choice AFTER mount so the server and client
+  // render the same initial value (DEFAULT_AVATAR_ID). Reading localStorage in
+  // the useState initializer causes a hydration mismatch because the server
+  // always returns the default while the client returns the stored value.
+  useEffect(() => {
+    const stored = readStoredAvatar();
+    if (stored !== DEFAULT_AVATAR_ID) {
+      setSelectedAvatarIdState(stored);
+    }
+  }, []);
 
   const setSelectedAvatarId = useCallback((avatarId: string) => {
     setSelectedAvatarIdState(avatarId);

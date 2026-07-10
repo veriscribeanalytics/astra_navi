@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useChat } from '@/context/ChatContext';
 import type { ChatMessage } from '@/context/ChatContext';
 import { useTranslation } from './useTranslation';
-import { useVoiceSettings, isSpeechSupported, loadSpeechVoices, pickVoiceForLang } from './useVoiceSettings';
+import { useVoiceSettings, isSpeechSupported, loadSpeechVoices, resolveLangAndVoiceForText } from './useVoiceSettings';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 
 export type ConversationPhase = 'idle' | 'listening' | 'processing' | 'speaking';
@@ -58,7 +58,7 @@ function normalize(s: string): string {
 export function useConversationMode(): ConversationMode {
   const { sendMessage, createNewChat, isSending, activeChat, activeChatId } = useChat();
   const { language } = useTranslation();
-  const { resolveVoice, langCode } = useVoiceSettings();
+  const { voices, selectedVoiceURI, langCode } = useVoiceSettings();
 
   const [isActive, setIsActive] = useState(false);
   const [phase, setPhase] = useState<ConversationPhase>('idle');
@@ -207,18 +207,18 @@ export function useConversationMode(): ConversationMode {
         return;
       }
       const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = langCode;
       await loadSpeechVoices();
       if (phaseRef.current !== 'processing') {
         // user interrupted (by voice or tap) while voices were loading
         if (phaseRef.current === 'idle') return;
         return;
       }
-      let voice = resolveVoice();
-      if (!voice) {
-        const allVoices = await loadSpeechVoices();
-        voice = pickVoiceForLang(allVoices, langCode);
+      let availableVoices = voices;
+      if (!availableVoices.length) {
+        availableVoices = await loadSpeechVoices();
       }
+      const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI);
+      utterance.lang = detectedLangCode;
       if (voice) utterance.voice = voice;
       utterance.rate = 0.95;
       utterance.onend = () => {

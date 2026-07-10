@@ -3,16 +3,11 @@
 import React, { useRef } from 'react';
 import { useChat } from '@/context/ChatContext';
 import { useRouter } from 'next/navigation';
-import { Info, History, X, ArrowLeft, Headphones } from 'lucide-react';
+import { Info, History, X, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks';
 import AvatarPicker, { type AvatarPickerHandle } from './AvatarPicker';
 
-interface ChatHeaderProps {
-  conversationActive?: boolean;
-  onToggleConversation?: () => void;
-}
-
-const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationActive, onToggleConversation }) => {
+const ChatHeader: React.FC = () => {
   const { t } = useTranslation();
   const { activeChat, setIsMobileMenuOpen, setIsRightPanelOpen, isMobileMenuOpen, isRightPanelOpen } = useChat();
   const router = useRouter();
@@ -36,11 +31,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationActive, onToggleCon
 
       {/* Back zone — same width as the sidebar on desktop */}
       <div className="chat-header-back-zone">
-        <button
-          onClick={handleBack}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 sm:px-4 bg-secondary/8 text-secondary hover:bg-secondary/15 transition-all"
-          aria-label={t('chat.header.back')}
-        >
+          <button
+            onClick={handleBack}
+            className="flex-1 hidden lg:inline-flex items-center justify-center gap-1.5 px-2 sm:px-4 bg-secondary/8 text-secondary hover:bg-secondary/15 transition-all"
+            aria-label={t('chat.header.back')}
+          >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-[13px] font-semibold hidden sm:inline">{t('chat.header.back')}</span>
         </button>
@@ -58,32 +53,16 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationActive, onToggleCon
           </button>
           <AvatarPicker ref={pickerRef} />
           {activeChat?.title && (
-            <div className="flex items-center gap-1.5 min-w-0 max-[360px]:hidden">
+            <div className="hidden lg:flex items-center gap-1.5 min-w-0">
               <span className="w-1 h-1 bg-foreground/15 rounded-full" />
               <p className="chat-title-text text-[12px] text-foreground/35 truncate max-w-[35vw] sm:max-w-[180px]">{activeChat.title}</p>
             </div>
           )}
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full ml-1 shrink-0 max-[360px]:hidden" />
-          <span className="text-[11px] text-foreground/30 hidden md:inline shrink-0">{t('chat.header.online')}</span>
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full ml-1 shrink-0 hidden lg:block" />
+          <span className="text-[11px] text-foreground/30 hidden lg:inline shrink-0">{t('chat.header.online')}</span>
         </div>
 
         <div className="flex items-center gap-1.5">
-
-          {onToggleConversation && (
-            <button
-              onClick={onToggleConversation}
-              className={`chat-header-btn transition-colors rounded-lg ${
-                conversationActive
-                  ? 'text-secondary bg-secondary/10'
-                  : 'text-foreground/40 hover:text-secondary'
-              }`}
-              aria-label={t('chat.header.voiceMode')}
-              title={t('chat.header.voiceMode')}
-              aria-pressed={conversationActive}
-            >
-              <Headphones className="w-4 h-4" />
-            </button>
-          )}
           <button
             onClick={() => setIsRightPanelOpen(true)}
             className="chat-header-btn text-foreground/40 hover:text-secondary transition-colors rounded-lg"

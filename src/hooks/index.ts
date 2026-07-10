@@ -71,7 +71,7 @@ export { useThreads } from './useThreads';
 export type { UseThreadsResult } from './useThreads';
 export { useThreadMessages } from './useThreadMessages';
 export type { UseThreadMessagesResult, OptimisticMessage, SendResult } from './useThreadMessages';
-export { useVoiceSettings } from './useVoiceSettings';
+export { useVoiceSettings, detectLangFromText, resolveLangAndVoiceForText } from './useVoiceSettings';
 export type { VoiceSettings } from './useVoiceSettings';
 export { useConversationMode } from './useConversationMode';
 export type { ConversationMode as ConversationModeState, ConversationPhase } from './useConversationMode';

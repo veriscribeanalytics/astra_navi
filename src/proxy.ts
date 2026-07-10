@@ -14,7 +14,8 @@ export const config = {
      * - icons (public icons)
      * - images (public images)
      * - logo.jpeg (root assets)
+     * - manifest.webmanifest, robots.txt, sitemap*.xml (Next.js metadata routes)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|icons|images|logo.jpeg|logo1.jpeg).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icons|images|logo.jpeg|logo1.jpeg|manifest.webmanifest|robots.txt|sitemap.xml|sitemap-0.xml).*)',
   ],
 };

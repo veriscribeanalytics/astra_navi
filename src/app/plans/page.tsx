@@ -1,7 +1,8 @@
 import React, { Suspense } from 'react';
 import PlansClient from './PlansClient';
+import type { Metadata } from 'next';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Premium Plans | AstraNavi',
   description: 'Unlock deeper astrological insights, premium features, and Navi credits with our Vedic AI plans.',
 };

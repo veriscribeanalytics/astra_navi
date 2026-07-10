@@ -1,4 +1,10 @@
 import WorkInProgress from '@/components/WorkInProgress';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Shop | AstraNavi',
+  robots: { index: false, follow: false },
+};
 
 export default function ShopPage() {
     return (

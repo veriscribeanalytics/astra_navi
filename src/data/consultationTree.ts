@@ -59,10 +59,10 @@ export function getAgeGroup(age: number): { key: string; label: string; lifeStag
   return { key: "70+", label: "70+", lifeStage: "Elder Wisdom" };
 }
 
-export const TONE_OPTIONS: { key: ResponseTone; label: string; emoji: string }[] = [
-  { key: 'warm', label: 'Warm', emoji: '☀️' },
-  { key: 'emotional', label: 'Emotional', emoji: '💗' },
-  { key: 'realistic', label: 'Realistic', emoji: '⚡' },
-  { key: 'short', label: 'Short', emoji: '✂️' },
-  { key: 'detailed', label: 'Detailed', emoji: '📖' },
+export const TONE_OPTIONS: { key: ResponseTone; label: string; emoji: string; desc: string }[] = [
+  { key: 'warm', label: 'Warm', emoji: '☀️', desc: 'Encouraging and supportive' },
+  { key: 'emotional', label: 'Emotional', emoji: '💗', desc: 'Gentle and empathetic' },
+  { key: 'realistic', label: 'Realistic', emoji: '⚡', desc: 'Direct and grounded' },
+  { key: 'short', label: 'Short', emoji: '✂️', desc: 'Just the essentials' },
+  { key: 'detailed', label: 'Detailed', emoji: '📖', desc: 'In-depth analysis' },
 ];

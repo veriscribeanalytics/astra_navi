@@ -58,7 +58,7 @@ function ConsultContent() {
     }
 
     return (
-        <div className="h-[calc(100vh-70px)] bg-[var(--bg)] pt-2 overflow-hidden px-4 sm:px-6 lg:px-8">
+        <div className="h-[calc(100vh-70px)] bg-[var(--bg)] pt-2 overflow-hidden">
             <ConsultClient />
         </div>
     );

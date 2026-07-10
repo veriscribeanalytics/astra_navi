@@ -10,9 +10,9 @@ import { useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import FeedbackModal from './FeedbackModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
-import { useToast, useTranslation, useVoiceSettings } from '@/hooks';
+import { useToast, useTranslation, useVoiceSettings, resolveLangAndVoiceForText } from '@/hooks';
 import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp } from 'lucide-react';
-import { getAvatarIcon, getAvatarAccent, getAvatarImage } from '@/utils/avatarStyle';
+import { getAvatarIcon, getAvatarAccent, getAvatarImage, getAvatarTheme } from '@/utils/avatarStyle';
 
 const sanitizedHtmlCache = new Map<string, string>();
 
@@ -240,7 +240,7 @@ const ChatMessages: React.FC = () => {
   const { activeChat, isLoadingMessages, isSending, isFinalizing, createNewChat, rateMessage, regenerateMessage, retryMessage, sendMessage, activeChatId, editMessage, deleteMessage, togglePin, avatars } = useChat();
   const { success: toastSuccess, info: toastInfo } = useToast();
   const { t } = useTranslation();
-  const { resolveVoice, langCode } = useVoiceSettings();
+  const { langCode, voices, selectedVoiceURI } = useVoiceSettings();
   const scrollRef = useRef<HTMLDivElement>(null);
   const editAreaRef = useRef<HTMLTextAreaElement>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -388,6 +388,17 @@ const ChatMessages: React.FC = () => {
   const userInitial = user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U';
   const messages = activeChat?.messages || [];
 
+  const getMsgThemeStyle = (avatarId?: string | null): React.CSSProperties => {
+    const id = avatarId && avatarId !== 'navi' ? avatarId : 'navi';
+    const catalogEntry = avatars.find(a => a.avatarId === id);
+    const theme = getAvatarTheme(id, catalogEntry);
+    return {
+      '--secondary': theme.secondary,
+      '--glow-color': theme.glowColor,
+      '--flare-gold': theme.flareGold,
+    } as React.CSSProperties;
+  };
+
   const getSmartSuggestions = (msg: typeof messages[0]): string[] => {
     if (!msg) return quickReplyOptions.slice(0, 3);
     const topic = msg.topic || 'general';
@@ -501,9 +512,9 @@ const ChatMessages: React.FC = () => {
             return;
           }
           const cleanText = text.replace(/<[^>]*>/g, '');
+          const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(cleanText, langCode, voices, selectedVoiceURI);
           const utterance = new SpeechSynthesisUtterance(cleanText);
-          utterance.lang = langCode;
-          const voice = resolveVoice();
+          utterance.lang = detectedLangCode;
           if (voice) utterance.voice = voice;
           utterance.rate = 0.95;
           utterance.onend = () => setSpeakingId(null);
@@ -527,6 +538,7 @@ const ChatMessages: React.FC = () => {
               key={msg.clientId || msg.id || i}
               id={`msg-${msg.id}`}
               className={`group/msg relative${isSearchMatch ? ' ring-1 ring-secondary/10 rounded-lg' : ''}${isCurrentSearchMatch ? ' ring-2 ring-secondary/30' : ''}`}
+              style={getMsgThemeStyle(msg.avatarId)}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: "easeOut", delay: Math.min(i * 0.05, 0.3) }}
@@ -535,7 +547,7 @@ const ChatMessages: React.FC = () => {
                 <div className="msg-pin-badge"><Pin className="w-2.5 h-2.5" /></div>
               )}
               <div className="flex gap-3 items-start">
-                <div className={`ai-avatar overflow-hidden ${msg.avatarId && msg.avatarId !== 'navi' ? getAvatarAccent(msg.avatarId) : ''}`}>
+                <div className="ai-avatar overflow-hidden">
                   {getAvatarImage(msg.avatarId) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

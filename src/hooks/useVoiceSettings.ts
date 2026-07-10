@@ -50,6 +50,87 @@ export function pickVoiceForLang(
   return preferred || exact || sameLang[0];
 }
 
+// Unicode script ranges for every language the app speaks. Each supported
+// language (except English) uses a distinct script, so the dominant script in
+// a piece of text reliably identifies the spoken language regardless of the
+// profile/UI language setting.
+const SCRIPT_RANGES: Array<{ code: string; ranges: Array<[number, number]> }> = [
+  { code: 'en', ranges: [[0x0041, 0x005a], [0x0061, 0x007a], [0x00c0, 0x024f]] }, // Latin
+  { code: 'hi', ranges: [[0x0900, 0x097f]] }, // Devanagari (Hindi & Marathi)
+  { code: 'bn', ranges: [[0x0980, 0x09ff]] }, // Bengali
+  { code: 'pa', ranges: [[0x0a00, 0x0a7f]] }, // Gurmukhi (Punjabi)
+  { code: 'gu', ranges: [[0x0a80, 0x0aff]] }, // Gujarati
+  { code: 'ta', ranges: [[0x0b80, 0x0bff]] }, // Tamil
+  { code: 'te', ranges: [[0x0c00, 0x0c7f]] }, // Telugu
+  { code: 'kn', ranges: [[0x0c80, 0x0cff]] }, // Kannada
+  { code: 'ml', ranges: [[0x0d00, 0x0d7f]] }, // Malayalam
+  { code: 'ko', ranges: [[0xac00, 0xd7af], [0x1100, 0x11ff], [0x3130, 0x318f]] }, // Hangul
+];
+
+/**
+ * Detect the spoken language of `text` from its Unicode script and return the
+ * matching full locale code (e.g. "hi-IN"). Falls back to `fallbackLangCode`
+ * (the profile/UI language) when the text carries no letter signal (only
+ * digits/punctuation/whitespace).
+ *
+ * Devanagari is shared by Hindi and Marathi: when it is the dominant script,
+ * the profile language is honored if it is Marathi, otherwise Hindi is used.
+ */
+export function detectLangFromText(text: string, fallbackLangCode: string): string {
+  if (!text) return fallbackLangCode;
+  const counts: Record<string, number> = {};
+  for (const ch of text) {
+    const code = ch.codePointAt(0);
+    if (code === undefined) continue;
+    for (const { code: lang, ranges } of SCRIPT_RANGES) {
+      for (const [start, end] of ranges) {
+        if (code >= start && code <= end) {
+          counts[lang] = (counts[lang] || 0) + 1;
+          break;
+        }
+      }
+    }
+  }
+  let best: string | null = null;
+  let bestCount = 0;
+  for (const [lang, count] of Object.entries(counts)) {
+    if (count > bestCount) {
+      best = lang;
+      bestCount = count;
+    }
+  }
+  if (!best || bestCount === 0) return fallbackLangCode;
+  if (best === 'hi') {
+    const fallbackPrefix = fallbackLangCode.toLowerCase().split('-')[0];
+    if (fallbackPrefix === 'mr') return 'mr-IN';
+  }
+  return LOCALE_BY_LANGUAGE[best] || fallbackLangCode;
+}
+
+/**
+ * Resolve the locale code and best matching voice for the given text, based on
+ * the text's own script rather than the profile language. The user's manually
+ * selected voice is honored only when it matches the detected language; a
+ * mismatched selection (e.g. a Hindi voice chosen for English text) is ignored
+ * so the text is pronounced correctly.
+ */
+export function resolveLangAndVoiceForText(
+  text: string,
+  fallbackLangCode: string,
+  voices: SpeechSynthesisVoice[],
+  selectedVoiceURI: string | null
+): { langCode: string; voice: SpeechSynthesisVoice | null } {
+  const detectedLangCode = detectLangFromText(text, fallbackLangCode);
+  const prefix = detectedLangCode.toLowerCase().split('-')[0];
+  if (selectedVoiceURI) {
+    const explicit = voices.find((v) => v.voiceURI === selectedVoiceURI);
+    if (explicit && explicit.lang.toLowerCase().startsWith(prefix)) {
+      return { langCode: detectedLangCode, voice: explicit };
+    }
+  }
+  return { langCode: detectedLangCode, voice: pickVoiceForLang(voices, detectedLangCode) };
+}
+
 const SAMPLE_TEXT: Record<string, string> = {
   en: 'Hello, this is Navi. I can read your messages aloud.',
   hi: 'नमस्ते, मैं नवी हूँ। मैं आपके संदेश पढ़कर सुना सकती हूँ।',

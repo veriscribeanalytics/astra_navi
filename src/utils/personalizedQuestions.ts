@@ -186,7 +186,7 @@ export interface StarterCard {
 
 export const getAvatarStarterCards = (avatarId: string, t: (key: string) => string): StarterCard[] => {
   const iconsByAvatar: Record<string, StarterIconKey[]> = {
-    navi: ['sun', 'briefcase', 'orbit', 'heart'],
+    navi: ['heart', 'briefcase', 'orbit', 'sun'],
     career_mentor: ['compass', 'briefcase', 'star', 'gem'],
     relationship_guide: ['heart', 'sparkles', 'orbit', 'star'],
     spiritual_guide: ['sparkles', 'gem', 'compass', 'orbit'],

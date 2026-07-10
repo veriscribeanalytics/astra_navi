@@ -1722,15 +1722,25 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   position: relative;
   padding: 8px 10px;
   border-radius: 10px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--secondary) 15%, transparent), color-mix(in srgb, var(--secondary) 8%, transparent));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--secondary) 15%, transparent), color-mix(in srgb, var(--secondary) 5%, transparent));
   border: 1px solid color-mix(in srgb, var(--secondary) 22%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--secondary) 50%, transparent);
   color: var(--secondary);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   width: 100%;
   text-align: left;
+}
+.sidebar-chat-active::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: var(--secondary);
 }
 .sidebar-chat-item {
   position: relative;
@@ -1832,7 +1842,7 @@ html:has(.chat-layout) body {
   overflow: hidden;
   min-height: 0;
   position: relative;
-  z-index: 1;
+  z-index: auto;
 }
 
 .chat-layout::before {
@@ -1869,7 +1879,7 @@ html:has(.chat-layout) body {
   .chat-left-sidebar {
     display: flex !important;
     position: fixed !important;
-    top: var(--chat-header-height, 52px);
+    top: 0;
     bottom: 0;
     z-index: 999 !important;
     transform: none !important;
@@ -2042,7 +2052,7 @@ html:has(.chat-layout) body {
   grid-column: 3;
   grid-row: 1;
   position: fixed !important;
-  top: var(--chat-header-height, 52px);
+  top: 0;
   bottom: 0;
   right: 0; width: min(92vw, 400px);
   z-index: 999 !important;

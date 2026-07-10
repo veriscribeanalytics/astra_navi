@@ -1012,7 +1012,7 @@
       "headingLead": "What would you like to understand",
       "headingAccent": "today?",
       "subtitle": "Ask about your chart, timing, relationships, career, or today's planetary energy.",
-      "dataPrivate": "Your data is private and secure"
+      "dataPrivate": "{agent} can make mistakes"
     },
     "messages": {
       "scrollToLatest": "Scroll to latest message"
@@ -1020,9 +1020,9 @@
     "starterCards": {
       "navi": [
         {
-          "title": "Today's Energy",
-          "description": "What does today's planetary alignment mean for me?",
-          "question": "What does today's planetary alignment mean for me?"
+          "title": "Relationships",
+          "description": "What should I understand about love right now?",
+          "question": "What should I understand about love right now?"
         },
         {
           "title": "Career Timing",
@@ -1035,9 +1035,9 @@
           "question": "What is my current life lesson?"
         },
         {
-          "title": "Relationships",
-          "description": "What should I understand about love right now?",
-          "question": "What should I understand about love right now?"
+          "title": "Today's Energy",
+          "description": "What does today's planetary alignment mean for me?",
+          "question": "What does today's planetary alignment mean for me?"
         }
       ],
       "career_mentor": [
