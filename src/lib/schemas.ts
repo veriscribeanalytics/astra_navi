@@ -247,3 +247,15 @@ export const EmailOtpVerifySchema = z.object({
   email: z.string().email("Invalid email address"),
   code: z.string().regex(/^\d{6}$/, "Verification code must be exactly 6 digits"),
 });
+
+// --- VOICE (TTS) ---
+
+export const VoiceTtsSchema = z.object({
+  text: z.string().min(1, "Nothing to speak").max(5000, "Text exceeds speech capacity"),
+  // BCP-47 locale ("hi-IN") or short code ("hi"); backend normalises and falls
+  // back to en-IN for anything it doesn't recognise.
+  lang: z.string().min(2).max(10),
+  // Optional allowlisted voice name; backend ignores unknown values and uses the
+  // curated default for the locale. Normally omitted.
+  voice: z.string().min(1).max(64).nullable().optional(),
+});

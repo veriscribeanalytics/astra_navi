@@ -6,7 +6,6 @@ import { useScrollDetection } from '@/hooks/useScrollDetection';
 import { useMounted } from '@/hooks/useMounted';
 import { useTheme } from '@/hooks/useTheme';
 import Particles from './Particles';
-import SunFlares from './SunFlares';
 
 /**
  * Optimized background manager
@@ -57,9 +56,6 @@ export default function OptimizedBackgrounds() {
 
   return (
     <div className={`transition-opacity duration-700 ${visualOpacity} pointer-events-none fixed inset-0 z-[-10]`}>
-      {/* SunFlares - Always visible, lightweight */}
-      {/* <SunFlares /> */}
-
       {/* Rashi Orbit Background removed as requested */}
 
       {/* Single Particles instance — color buffer updates in-place on theme change */}

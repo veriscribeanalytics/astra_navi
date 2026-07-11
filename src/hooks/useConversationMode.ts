@@ -57,7 +57,7 @@ function normalize(s: string): string {
 }
 
 export function useConversationMode(): ConversationMode {
-  const { sendMessage, createNewChat, isSending, activeChat, activeChatId } = useChat();
+  const { sendMessage, createNewChat, isSending, activeChat, activeChatId, paywall, isGuest } = useChat();
   const { language } = useTranslation();
   const { voices, selectedVoiceURI, langCode } = useVoiceSettings();
 
@@ -78,10 +78,16 @@ export function useConversationMode(): ConversationMode {
   const lastSpeechAtRef = useRef(0);
   const speakingTextRef = useRef('');
   const activeChatRef = useRef(activeChat);
+  const prevAiIdRef = useRef<string | null>(null);
+  const blockedRef = useRef(false);
+  const restartAttemptsRef = useRef(0);
+  const ttsWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ttsKeepaliveRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const commitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => { activeChatRef.current = activeChat; }, [activeChat]);
   useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
+  useEffect(() => { blockedRef.current = !!paywall || isGuest; }, [paywall, isGuest]);
 
   const setPhaseSync = useCallback((p: ConversationPhase) => {
     phaseRef.current = p;
@@ -94,6 +100,11 @@ export function useConversationMode(): ConversationMode {
 
   const clearSilenceTimer = useCallback(() => {
     if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+  }, []);
+
+  const clearTtsTimers = useCallback(() => {
+    if (ttsWatchdogRef.current) { clearTimeout(ttsWatchdogRef.current); ttsWatchdogRef.current = null; }
+    if (ttsKeepaliveRef.current) { clearInterval(ttsKeepaliveRef.current); ttsKeepaliveRef.current = null; }
   }, []);
 
   const sendRef = useRef<(text: string) => void>(() => {});
@@ -121,6 +132,10 @@ export function useConversationMode(): ConversationMode {
       if (isSending) return;
       clearCommitTimer();
       clearSilenceTimer();
+      // Baseline the latest AI message so the response watcher only speaks a
+      // genuinely new reply (not a stale one left by a blocked/errored send).
+      const msgs = activeChatRef.current?.messages ?? [];
+      prevAiIdRef.current = [...msgs].reverse().find(m => m.type === 'ai')?.id ?? null;
       setPhaseSync('processing');
       awaitingResponseRef.current = true;
       if (activeChatId) {
@@ -149,6 +164,8 @@ export function useConversationMode(): ConversationMode {
     goIdleRef.current = () => {
       clearCommitTimer();
       clearSilenceTimer();
+      clearTtsTimers();
+      if (isSpeechSupported()) window.speechSynthesis.cancel();
       finalTranscriptRef.current = '';
       setPartialTranscript('');
       setPhaseSync('idle');
@@ -171,6 +188,7 @@ export function useConversationMode(): ConversationMode {
   useEffect(() => {
     bargeInRef.current = () => {
       if (isSpeechSupported()) window.speechSynthesis.cancel();
+      clearTtsTimers();
       pendingInterruptRef.current = false;
       finalTranscriptRef.current = '';
       setPartialTranscript('');
@@ -182,6 +200,10 @@ export function useConversationMode(): ConversationMode {
 
   useEffect(() => {
     commitSendRef.current = () => {
+      // Only the listening phase may commit. The commit timer and the onend
+      // fallback both call this; once the first transitions us out of listening,
+      // a second call is a no-op rather than a spurious goIdle mid-processing.
+      if (phaseRef.current !== 'listening') return;
       const text = finalTranscriptRef.current.trim();
       finalTranscriptRef.current = '';
       setPartialTranscript('');
@@ -200,6 +222,7 @@ export function useConversationMode(): ConversationMode {
         startListeningRef.current();
         return;
       }
+      clearTtsTimers();
       window.speechSynthesis.cancel();
       const textToSpeak = [msg.opener, msg.text].filter(Boolean).join('\n\n');
       const clean = cleanTextForSpeech(textToSpeak);
@@ -223,18 +246,26 @@ export function useConversationMode(): ConversationMode {
       utterance.lang = detectedLangCode;
       if (voice) utterance.voice = voice;
       utterance.rate = 0.95;
-      utterance.onend = () => {
+      const finish = () => {
+        clearTtsTimers();
         if (phaseRef.current === 'speaking') {
           startListeningRef.current(); // auto-listen after Navi finishes
         }
       };
-      utterance.onerror = () => {
-        if (phaseRef.current === 'speaking') {
-          startListeningRef.current();
-        }
-      };
+      utterance.onend = finish;
+      utterance.onerror = finish;
       setPhaseSync('speaking');
       ensureRunningRef.current(); // keep recognition live for voice barge-in
+      // Chrome pauses long utterances (~15s) and never fires onend; resume() on
+      // an interval keeps it alive, and a watchdog recovers to listening if the
+      // engine drops the utterance silently, so the machine never hangs on
+      // 'speaking'.
+      ttsKeepaliveRef.current = setInterval(() => {
+        if (window.speechSynthesis.speaking) window.speechSynthesis.resume();
+        else clearTtsTimers();
+      }, 10000);
+      const watchdogMs = Math.max(15000, clean.length * 90);
+      ttsWatchdogRef.current = setTimeout(finish, watchdogMs);
       window.speechSynthesis.speak(utterance);
     };
   });
@@ -274,6 +305,7 @@ export function useConversationMode(): ConversationMode {
 
       const anySpeech = (finalText + interimText).trim().length > 0;
       if (anySpeech && phaseRef.current === 'listening') {
+        restartAttemptsRef.current = 0; // healthy session — reset restart backoff
         lastSpeechAtRef.current = Date.now();
         clearSilenceTimer();
         silenceTimerRef.current = setTimeout(() => {
@@ -329,6 +361,13 @@ export function useConversationMode(): ConversationMode {
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         setMicSupported(false);
+        return;
+      }
+      // Persistent recoverable errors (network, audio-capture) would otherwise
+      // let onend hammer start() in a tight loop. Count them so the backoff in
+      // onend can grow the retry delay; a clean session resets the counter.
+      if (event.error === 'network' || event.error === 'audio-capture') {
+        restartAttemptsRef.current += 1;
       }
     };
 
@@ -344,8 +383,17 @@ export function useConversationMode(): ConversationMode {
         return;
       }
       // Restart to keep monitoring (barge-in during processing/speaking, or
-      // continued listening).
-      setTimeout(() => ensureRunningRef.current(), 150);
+      // continued listening). Back off on repeated failures so a persistent
+      // error (e.g. no network) doesn't spin start() at full speed. Give up
+      // after several attempts and return to idle.
+      const attempts = restartAttemptsRef.current;
+      if (attempts >= 5) {
+        restartAttemptsRef.current = 0;
+        goIdleRef.current();
+        return;
+      }
+      const delay = Math.min(150 * 2 ** attempts, 4000);
+      setTimeout(() => ensureRunningRef.current(), delay);
     };
 
     recognitionRef.current = recognition;
@@ -395,9 +443,15 @@ export function useConversationMode(): ConversationMode {
       }
       if (awaitingResponseRef.current) {
         awaitingResponseRef.current = false;
+        // Blocked send (paywall/guest): don't speak the block notice and don't
+        // reopen the mic into a wall — return to idle and let the UI surface it.
+        if (blockedRef.current) {
+          goIdleRef.current();
+          return;
+        }
         const msgs = activeChatRef.current?.messages ?? [];
         const lastAi = [...msgs].reverse().find(m => m.type === 'ai');
-        if (lastAi && lastAi.text && !lastAi.error) {
+        if (lastAi && lastAi.id !== prevAiIdRef.current && lastAi.text && !lastAi.error) {
           speakRef.current(lastAi);
         } else {
           startListeningRef.current();
@@ -439,14 +493,16 @@ export function useConversationMode(): ConversationMode {
     if (isSpeechSupported()) window.speechSynthesis.cancel();
     clearCommitTimer();
     clearSilenceTimer();
+    clearTtsTimers();
     finalTranscriptRef.current = '';
     committedIdxRef.current = 0;
     awaitingResponseRef.current = false;
     pendingInterruptRef.current = false;
+    restartAttemptsRef.current = 0;
     setPartialTranscript('');
     setPhaseSync('idle');
     setIsActive(false);
-  }, [setPhaseSync, clearCommitTimer, clearSilenceTimer]);
+  }, [setPhaseSync, clearCommitTimer, clearSilenceTimer, clearTtsTimers]);
 
   // Tear down TTS / recognition when the component unmounts.
   useEffect(() => {
@@ -456,6 +512,8 @@ export function useConversationMode(): ConversationMode {
       if (isSpeechSupported()) window.speechSynthesis.cancel();
       if (commitTimerRef.current) clearTimeout(commitTimerRef.current);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (ttsWatchdogRef.current) clearTimeout(ttsWatchdogRef.current);
+      if (ttsKeepaliveRef.current) clearInterval(ttsKeepaliveRef.current);
     };
   }, []);
 

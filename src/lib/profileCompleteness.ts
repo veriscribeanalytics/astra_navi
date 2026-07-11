@@ -3,6 +3,8 @@ export interface ProfileLike {
   email?: string | null;
   firstName?: string | null;
   lastName?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   name?: string | null;
   username?: string | null;
   discoverable?: boolean | null;
@@ -26,8 +28,13 @@ export interface ProfileLike {
 }
 
 export function normalizeProfileUser<T extends ProfileLike>(user: T): T {
+  const firstName = user.firstName ?? user.first_name ?? null;
+  const lastName = user.lastName ?? user.last_name ?? null;
   return {
     ...user,
+    firstName,
+    lastName,
+    name: user.name ?? ([firstName, lastName].filter(Boolean).join(' ') || null),
     birthPlaceName: user.birthPlaceName ?? user.birth_place_name ?? user.pob ?? '',
     birthLatitude: user.birthLatitude ?? user.birth_latitude ?? undefined,
     birthLongitude: user.birthLongitude ?? user.birth_longitude ?? undefined,

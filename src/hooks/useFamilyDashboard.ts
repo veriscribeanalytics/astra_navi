@@ -17,6 +17,53 @@ import {
 /* Shared routing + state shapes                                        */
 /* ------------------------------------------------------------------ */
 
+/** Module-level response cache + in-flight dedupe, shared across every hook
+ *  instance. Without this the cache lived on each hook's useRef, so two cards
+ *  rendering the same member — plus React StrictMode's dev double-invoke and any
+ *  remount — each fired a real network call. Keyed by the same
+ *  `${source}:${id}:${day}:${lang}` string the hooks already compute, so a new
+ *  day or language is a fresh fetch while a re-render/remount is free.
+ *
+ *  We cache the parsed `{ ok, status, body }` (not the interpreted state) so the
+ *  daily and weekly hooks keep their own paywall/sharing/degraded logic. The
+ *  in-flight map collapses concurrent callers onto one promise; the result map
+ *  persists for the session (the backend caches per-key for 1h anyway). */
+type SharedFetch = { ok: boolean; status: number; body: Record<string, unknown> };
+const sharedResultCache = new Map<string, SharedFetch>();
+const sharedInFlight = new Map<string, Promise<SharedFetch>>();
+
+async function fetchDashboardShared(key: string, url: string): Promise<SharedFetch> {
+    const cached = sharedResultCache.get(key);
+    if (cached) return cached;
+
+    const inFlight = sharedInFlight.get(key);
+    if (inFlight) return inFlight;
+
+    const promise = (async (): Promise<SharedFetch> => {
+        const res = await clientFetch(url);
+        const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+        const result: SharedFetch = { ok: res.ok, status: res.status, body };
+        // Only cache successful bodies for the session. Errors (sharing gate,
+        // paywall, degraded transit calc, transient 5xx) must stay retryable on
+        // the next mount/refetch rather than sticking.
+        if (res.ok) sharedResultCache.set(key, result);
+        return result;
+    })().finally(() => {
+        sharedInFlight.delete(key);
+    });
+
+    sharedInFlight.set(key, promise);
+    return promise;
+}
+
+/** Drop a member's cached daily+weekly dashboard so an explicit refetch() hits
+ *  the network again (e.g. after the sharing state or profile changes). */
+function invalidateDashboardKey(keyPrefix: string) {
+    for (const k of sharedResultCache.keys()) {
+        if (k.startsWith(keyPrefix)) sharedResultCache.delete(k);
+    }
+}
+
 /** The base path + target id for a member's dashboard endpoints, memoized on
  *  the member's stable identity primitives (same pattern as useFamily's other
  *  hooks) so re-renders don't invalidate downstream effects. */
@@ -86,11 +133,15 @@ export function useFamilyDashboard(member: FamilyMember | null, lang: string): F
     const [degraded, setDegraded] = useState(false);
     const [paywall, setPaywall] = useState<PaywallData | null>(null);
     const [sharingRequired, setSharingRequired] = useState(false);
-    const cacheRef = useRef<Map<string, FamilyDashboardResponse>>(new Map());
+    const mountedRef = useRef(true);
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => { mountedRef.current = false; };
+    }, []);
 
     const targets = useDashboardTargets(member);
 
-    const fetchDashboard = useCallback(async () => {
+    const fetchDashboard = useCallback(async (force = false) => {
         if (!targets) {
             setData(null);
             setError(null);
@@ -101,15 +152,8 @@ export function useFamilyDashboard(member: FamilyMember | null, lang: string): F
         }
         const day = todayISO();
         const key = `${targets.cachePrefix}:${day}:${lang}`;
-        const cached = cacheRef.current.get(key);
-        if (cached) {
-            setData(cached);
-            setError(null);
-            setDegraded(false);
-            setPaywall(cached.paywall ?? null);
-            setSharingRequired(false);
-            return;
-        }
+        // Explicit refetch() drops the shared cache entry so we re-hit the network.
+        if (force) invalidateDashboardKey(`${targets.cachePrefix}:`);
         setIsLoading(true);
         setError(null);
         setDegraded(false);
@@ -117,17 +161,16 @@ export function useFamilyDashboard(member: FamilyMember | null, lang: string): F
         setSharingRequired(false);
         try {
             const url = `${targets.basePath}/${encodeURIComponent(String(targets.id))}/dashboard?lang=${encodeURIComponent(lang)}`;
-            const res = await clientFetch(url);
-            const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+            const { ok, status, body } = await fetchDashboardShared(key, url);
+            if (!mountedRef.current) return;
 
-            if (res.ok) {
+            if (ok) {
                 if (isFamilyDashboardDegraded(body)) {
                     setDegraded(true);
                     setData(null);
                     return;
                 }
                 const result = body as unknown as FamilyDashboardResponse;
-                cacheRef.current.set(key, result);
                 setData(result);
                 setPaywall(result.paywall ?? null);
                 return;
@@ -142,7 +185,7 @@ export function useFamilyDashboard(member: FamilyMember | null, lang: string): F
             }
 
             // 402 paywall (defensive — the soft paywall is normally a 200 body field).
-            if (res.status === 402 && body?.paywall) {
+            if (status === 402 && body?.paywall) {
                 setPaywall(body.paywall as PaywallData);
                 setData(null);
                 return;
@@ -154,11 +197,12 @@ export function useFamilyDashboard(member: FamilyMember | null, lang: string): F
                 return;
             }
 
-            setError((body.error || body.detail || `Failed (${res.status})`) as string);
+            setError((body.error || body.detail || `Failed (${status})`) as string);
         } catch (err) {
+            if (!mountedRef.current) return;
             setError(err instanceof Error ? err.message : 'Failed to load family dashboard');
         } finally {
-            setIsLoading(false);
+            if (mountedRef.current) setIsLoading(false);
         }
     }, [targets, lang]);
 
@@ -166,7 +210,7 @@ export function useFamilyDashboard(member: FamilyMember | null, lang: string): F
         fetchDashboard();
     }, [fetchDashboard]);
 
-    return { data, isLoading, error, degraded, paywall, sharingRequired, refetch: fetchDashboard };
+    return { data, isLoading, error, degraded, paywall, sharingRequired, refetch: () => fetchDashboard(true) };
 }
 
 /* ------------------------------------------------------------------ */
@@ -185,11 +229,15 @@ export function useFamilyDashboardWeekly(member: FamilyMember | null, lang: stri
     const [degraded, setDegraded] = useState(false);
     const [paywall, setPaywall] = useState<PaywallData | null>(null);
     const [sharingRequired, setSharingRequired] = useState(false);
-    const cacheRef = useRef<Map<string, FamilyDashboardWeeklyResponse>>(new Map());
+    const mountedRef = useRef(true);
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => { mountedRef.current = false; };
+    }, []);
 
     const targets = useDashboardTargets(member);
 
-    const fetchWeekly = useCallback(async () => {
+    const fetchWeekly = useCallback(async (force = false) => {
         if (!targets) {
             setData(null);
             setError(null);
@@ -199,16 +247,10 @@ export function useFamilyDashboardWeekly(member: FamilyMember | null, lang: stri
             return;
         }
         const day = todayISO();
-        const key = `${targets.cachePrefix}:${day}:${lang}`;
-        const cached = cacheRef.current.get(key);
-        if (cached) {
-            setData(cached);
-            setError(null);
-            setDegraded(false);
-            setPaywall(cached.paywall ?? null);
-            setSharingRequired(false);
-            return;
-        }
+        // Distinct ":weekly" namespace so the weekly response never collides with
+        // the daily one (both share the module-level cache).
+        const key = `${targets.cachePrefix}:weekly:${day}:${lang}`;
+        if (force) invalidateDashboardKey(`${targets.cachePrefix}:weekly:`);
         setIsLoading(true);
         setError(null);
         setDegraded(false);
@@ -216,17 +258,16 @@ export function useFamilyDashboardWeekly(member: FamilyMember | null, lang: stri
         setSharingRequired(false);
         try {
             const url = `${targets.basePath}/${encodeURIComponent(String(targets.id))}/dashboard/weekly?lang=${encodeURIComponent(lang)}`;
-            const res = await clientFetch(url);
-            const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+            const { ok, status, body } = await fetchDashboardShared(key, url);
+            if (!mountedRef.current) return;
 
-            if (res.ok) {
+            if (ok) {
                 if (isFamilyDashboardDegraded(body)) {
                     setDegraded(true);
                     setData(null);
                     return;
                 }
                 const result = body as unknown as FamilyDashboardWeeklyResponse;
-                cacheRef.current.set(key, result);
                 setData(result);
                 setPaywall(result.paywall ?? null);
                 return;
@@ -239,7 +280,7 @@ export function useFamilyDashboardWeekly(member: FamilyMember | null, lang: stri
                 return;
             }
 
-            if (res.status === 402 && body?.paywall) {
+            if (status === 402 && body?.paywall) {
                 setPaywall(body.paywall as PaywallData);
                 setData(null);
                 return;
@@ -251,11 +292,12 @@ export function useFamilyDashboardWeekly(member: FamilyMember | null, lang: stri
                 return;
             }
 
-            setError((body.error || body.detail || `Failed (${res.status})`) as string);
+            setError((body.error || body.detail || `Failed (${status})`) as string);
         } catch (err) {
+            if (!mountedRef.current) return;
             setError(err instanceof Error ? err.message : 'Failed to load weekly bond');
         } finally {
-            setIsLoading(false);
+            if (mountedRef.current) setIsLoading(false);
         }
     }, [targets, lang]);
 
@@ -263,7 +305,7 @@ export function useFamilyDashboardWeekly(member: FamilyMember | null, lang: stri
         fetchWeekly();
     }, [fetchWeekly]);
 
-    return { data, isLoading, error, degraded, paywall, sharingRequired, refetch: fetchWeekly };
+    return { data, isLoading, error, degraded, paywall, sharingRequired, refetch: () => fetchWeekly(true) };
 }
 
 /* ------------------------------------------------------------------ */

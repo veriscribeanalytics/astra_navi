@@ -3,27 +3,76 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { authConfig } from "@/auth.config";
 import { JWT } from "next-auth/jwt";
+import {
+  getCachedRotation,
+  setCachedRotation,
+  acquireRefreshLock,
+  releaseRefreshLock,
+  waitForRotation,
+} from "./refreshCache";
 
 const refreshPromises = new Map<string, Promise<JWT>>();
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   const tokenKey = (token.refreshToken as string) || (token.sub as string) || 'default';
-  
+
   // Deduplicate concurrent refresh attempts with the SAME old refresh token.
   // If a refresh is already in-flight, return the shared promise.
   // If a refresh SUCCEEDED recently, the cached (resolved) promise prevents
   // sending the already-revoked old refresh token a second time.
+  //
+  // NOTE: this Map only coordinates within ONE process. The Redis layer below
+  // (refreshCache) extends the same guarantee ACROSS instances/tabs, which is
+  // what actually prevents the "same T1 sent twice ~5s apart" reuse logout.
   if (refreshPromises.has(tokenKey)) {
     return refreshPromises.get(tokenKey)!;
   }
 
+  const oldRefreshToken = token.refreshToken as string;
+
   const promise = (async () => {
     let refreshFailed = false;
+    let lockAcquired = false;
     try {
+      // (1) Cross-instance short-circuit: another instance may have already
+      // rotated THIS token seconds ago. Reuse its result instead of resending
+      // the now-revoked token.
+      if (oldRefreshToken) {
+        const preCached = await getCachedRotation(oldRefreshToken);
+        if (preCached) {
+          console.warn("[Auth] Reusing cross-instance cached rotation; skipping backend refresh.");
+          return {
+            ...token,
+            accessToken: preCached.accessToken,
+            refreshToken: preCached.refreshToken,
+            accessTokenExpires: preCached.accessTokenExpires,
+          };
+        }
+
+        // (2) Become the single rotator for this token. If we lose the lock,
+        // wait for the winner to publish the rotated pair.
+        lockAcquired = await acquireRefreshLock(oldRefreshToken);
+        if (!lockAcquired) {
+          const waited = await waitForRotation(oldRefreshToken);
+          if (waited) {
+            console.warn("[Auth] Lost refresh lock; reusing winner's rotated pair.");
+            return {
+              ...token,
+              accessToken: waited.accessToken,
+              refreshToken: waited.refreshToken,
+              accessTokenExpires: waited.accessTokenExpires,
+            };
+          }
+          // Winner never published (crash/Redis hiccup) — fall through and try
+          // ourselves. Backend reuse detection remains the final backstop.
+          console.warn("[Auth] Lock winner never published; attempting own refresh.");
+        }
+      }
+
       const backendUrl = process.env.AI_BACKEND_URL;
       const response = await fetch(`${backendUrl}/api/auth/refresh`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "X-API-Key": process.env.AI_BACKEND_API_KEY || '',
         },
@@ -38,34 +87,69 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         throw { ...refreshedTokens, status: response.status };
       }
 
-      const expiresIn = (typeof refreshedTokens.expiresIn === 'number' && refreshedTokens.expiresIn > 0) 
-        ? refreshedTokens.expiresIn 
+      const expiresIn = (typeof refreshedTokens.expiresIn === 'number' && refreshedTokens.expiresIn > 0)
+        ? refreshedTokens.expiresIn
         : 3600;
-      
+
+      const accessTokenExpires = Date.now() + expiresIn * 1000;
+
+      // Publish for concurrent/straggling callers still holding oldRefreshToken.
+      if (oldRefreshToken) {
+        await setCachedRotation(oldRefreshToken, {
+          accessToken: refreshedTokens.accessToken,
+          refreshToken: refreshedTokens.refreshToken,
+          accessTokenExpires,
+        });
+      }
+
       return {
         ...token,
         accessToken: refreshedTokens.accessToken,
         refreshToken: refreshedTokens.refreshToken,
-        accessTokenExpires: Date.now() + expiresIn * 1000,
+        accessTokenExpires,
       };
     } catch (error: unknown) {
       refreshFailed = true;
       console.error("[Auth] RefreshAccessToken error:", error);
-      
+
       const err = error as Record<string, unknown>;
       const errorCode = err?.code || (err?.error as Record<string, unknown>)?.code;
-      const isFatal = ["token_reuse_detected", "token_expired", "token_invalid"].includes(errorCode as string) || 
-                      err?.error === "Token reuse detected" || 
-                      err?.detail === "Token reuse detected" || 
+      const isFatal = ["token_reuse_detected", "token_expired", "token_invalid"].includes(errorCode as string) ||
+                      err?.error === "Token reuse detected" ||
+                      err?.detail === "Token reuse detected" ||
                       err?.message === "Token reuse detected" ||
                       err?.status === 401 ||
                       err?.status === 429;
+
+      // Reuse-recovery: a 401/"reuse detected" most often means a PEER instance
+      // rotated this exact token microseconds before us (the cross-instance race
+      // this whole module fights). Before nuking the session, check once more
+      // whether that peer published its rotated pair — if so, adopt it and turn
+      // a would-be forced-logout into a successful refresh.
+      if (isFatal && oldRefreshToken) {
+        const peerRotation = await getCachedRotation(oldRefreshToken);
+        if (peerRotation) {
+          console.warn("[Auth] Backend reported reuse, but a peer rotation was cached — recovering with it.");
+          refreshFailed = false;
+          return {
+            ...token,
+            accessToken: peerRotation.accessToken,
+            refreshToken: peerRotation.refreshToken,
+            accessTokenExpires: peerRotation.accessTokenExpires,
+          };
+        }
+      }
 
       return {
         ...token,
         error: isFatal ? "TokenReuseError" : "RefreshAccessTokenError",
       };
     } finally {
+      // Release the cross-instance lock (no-op if we never held it) so we don't
+      // wait out its TTL. Publishing happened before this on the success path.
+      if (lockAcquired && oldRefreshToken) {
+        await releaseRefreshLock(oldRefreshToken);
+      }
       if (refreshFailed) {
         // FAILURE: delete immediately so a future JWT callback can retry.
         refreshPromises.delete(tokenKey);

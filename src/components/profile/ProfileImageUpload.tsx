@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
-import Image from 'next/image';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera, Loader2, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/hooks';
@@ -25,8 +24,18 @@ export default function ProfileImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Signed GCS URLs (~15 min) can 403 after expiry; track a failed src so we
+  // degrade to the initials instead of the broken-image glyph, and re-sign once.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const refreshAttemptedRef = useRef(false);
 
   const profileImageUrl = previewUrl || user?.profileImageUrl;
+
+  useEffect(() => {
+    setFailedUrl(null);
+    refreshAttemptedRef.current = false;
+  }, [profileImageUrl]);
+
   const displayName = user?.name || user?.email || '';
   const initial = displayName ? displayName[0].toUpperCase() : 'U';
 
@@ -72,14 +81,22 @@ export default function ProfileImageUpload({
         role={editable ? 'button' : 'img'}
         aria-label={editable ? 'Change profile image' : 'Profile image'}
       >
-        {profileImageUrl ? (
-          <Image
+        {profileImageUrl && failedUrl !== profileImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={profileImageUrl}
             alt={displayName}
             width={size}
             height={size}
             className="w-full h-full object-cover"
-            unoptimized
+            onError={() => {
+              setFailedUrl(profileImageUrl);
+              // Only re-sign the persisted URL, not a local blob/preview.
+              if (!previewUrl && !refreshAttemptedRef.current) {
+                refreshAttemptedRef.current = true;
+                void refreshProfile();
+              }
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center font-headline font-bold text-secondary" style={{ fontSize: size * 0.4 }}>

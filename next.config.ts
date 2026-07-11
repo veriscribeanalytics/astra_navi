@@ -21,6 +21,11 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://api.veriscribeanalytics.com https://lh3.googleusercontent.com https://checkout.razorpay.com https://storage.googleapis.com https://*.storage.googleapis.com",
+  // Cloud TTS plays MP3 through an <audio> element fed a blob: URL. Without an
+  // explicit media-src this falls back to default-src 'self', which blocks the
+  // blob and forces the browser-speechSynthesis fallback (wrong voice for the
+  // language). blob: covers the fetched-MP3 object URL.
+  "media-src 'self' blob: https://api.veriscribeanalytics.com",
   `connect-src 'self' https://api.veriscribeanalytics.com https://api.razorpay.com https://accounts.google.com https://storage.googleapis.com https://*.storage.googleapis.com${devConnectSrc}`,
   "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://accounts.google.com",
 ].join("; ");

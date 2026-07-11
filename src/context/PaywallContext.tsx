@@ -75,9 +75,18 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [activePaywall, setActivePaywall] = useState<PaywallData | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const hasFetchedRef = useRef(false);
+  // Synchronous concurrency guard. The effect below can fire several times
+  // before the first batch completes (auth state settling + a slow backend —
+  // /entitlements/* is 3 sequential calls). hasFetchedRef is only flipped after
+  // all awaits resolve, so it can't dedupe concurrent runs; this ref, set before
+  // the first await, ensures only one batch is in flight at a time.
+  const inFlightRef = useRef(false);
 
   // Batch check on dashboard load when user is authenticated
   const doBatchCheck = useCallback(async () => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    try {
     if (!isLoggedIn) {
       setIsLoading(true);
       try {
@@ -161,6 +170,9 @@ export const PaywallProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('[PaywallContext] Batch check failed:', err);
     } finally {
       setIsLoading(false);
+    }
+    } finally {
+      inFlightRef.current = false;
     }
   }, [isLoggedIn, checkAllFeatures]);
 

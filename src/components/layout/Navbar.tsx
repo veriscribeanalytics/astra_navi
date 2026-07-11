@@ -10,6 +10,7 @@ import LanguagePicker from "../ui/LanguagePicker";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import NotificationBell from "./NotificationBell";
 import MessagesBell from "./MessagesBell";
+import ProfileAvatar from "../ui/ProfileAvatar";
 import { useAuth } from "@/context/AuthContext";
 import { useToast, useTranslation } from "@/hooks";
 import {
@@ -528,11 +529,12 @@ const Navbar: React.FC = () => {
                                 aria-label="User menu"
                             >
                                 <div className="profile-comet-dot absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-surface shadow-sm shadow-emerald-500/20" aria-hidden="true"></div>
-                                {user?.profileImageUrl ? (
-                                    <Image src={user.profileImageUrl} alt={user?.name || 'User'} width={36} height={36} className="w-full h-full object-cover rounded-full" unoptimized />
-                                ) : (
-                                    <div className="profile-avatar-content text-secondary font-black text-sm uppercase">{(user?.name?.[0] || user?.email?.[0] || 'S').toUpperCase()}</div>
-                                )}
+                                <ProfileAvatar
+                                    size={36}
+                                    imgClassName="w-full h-full object-cover rounded-full"
+                                    fallbackClassName="profile-avatar-content text-secondary font-black text-sm uppercase"
+                                    defaultInitial="S"
+                                />
                             </button>
                             {isUserDropdownOpen && (
                                 <div role="menu" aria-label={t('nav.account')} className="absolute top-[calc(100%+8px)] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
@@ -620,11 +622,11 @@ const Navbar: React.FC = () => {
                                 aria-expanded={isUserDropdownOpen}
                             >
                                 <div className="profile-comet-dot absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-surface shadow-sm shadow-emerald-500/20" aria-hidden="true"></div>
-                                {user?.profileImageUrl ? (
-                                    <Image src={user.profileImageUrl} alt={user?.name || 'User'} width={32} height={32} className="w-full h-full object-cover rounded-full" unoptimized />
-                                ) : (
-                                    <div className="profile-avatar-content text-secondary font-black text-[10px] uppercase">{(user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}</div>
-                                )}
+                                <ProfileAvatar
+                                    size={32}
+                                    imgClassName="w-full h-full object-cover rounded-full"
+                                    fallbackClassName="profile-avatar-content text-secondary font-black text-[10px] uppercase"
+                                />
                             </button>
                             {isUserDropdownOpen && (
                                 <div role="menu" aria-label={t('nav.account')} className="absolute top-[56px] right-0 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 duration-200">
