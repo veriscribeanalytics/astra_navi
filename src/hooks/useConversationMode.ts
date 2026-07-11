@@ -264,7 +264,11 @@ export function useConversationMode(): ConversationMode {
           finalText += result[0].transcript;
           committedIdxRef.current = i + 1;
         } else {
-          interimText += result[0].transcript;
+          // Mobile Chrome pushes each growing interim snapshot as a NEW array
+          // entry instead of updating in place; accumulating (+=) would repeat
+          // every stale prefix. The trailing interim is the most complete
+          // snapshot of the current utterance, so replace rather than append.
+          interimText = result[0].transcript;
         }
       }
 

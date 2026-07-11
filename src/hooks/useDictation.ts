@@ -128,7 +128,12 @@ export function useDictation(): DictationMode {
           finalText += result[0].transcript;
           committedIdxRef.current = i + 1;
         } else {
-          interimText += result[0].transcript;
+          // Mobile Chrome pushes each growing interim snapshot as a NEW array
+          // entry instead of updating in place, so accumulating (+=) here
+          // concatenates every stale prefix ("hello hello aapko hello aapko
+          // kya ..."). The trailing interim is always the most complete
+          // snapshot of the current utterance, so replace rather than append.
+          interimText = result[0].transcript;
         }
       }
       if (finalText) {
