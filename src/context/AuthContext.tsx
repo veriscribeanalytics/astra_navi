@@ -8,6 +8,7 @@ import { clientFetch, resetAuthGrace } from '@/lib/apiClient';
 import { useTranslation } from '@/hooks';
 import { LanguageCode, locales } from '@/locales';
 import { isProfileComplete, normalizeProfileUser, resolveProfileComplete } from '@/lib/profileCompleteness';
+import { isPublicRoute } from '@/lib/publicRoutes';
 
 export interface User {
     id?: string;
@@ -130,6 +131,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // If we're already on the login page, the login page's own handler
                 // will clear the session. Don't compete with it.
                 if (pathname === '/login') return;
+                // Public/legal pages (privacy, terms, etc.) must stay viewable even
+                // with a poisoned session. Render soft-logged-out instead of hard-
+                // bouncing the user to the session-expired login wall.
+                if (isPublicRoute(pathname)) {
+                    console.warn("[AuthContext] Token reuse detected on a public route. Rendering logged-out; not redirecting.");
+                    return;
+                }
                 console.error("[AuthContext] Token reuse detected in session. Signing out immediately.");
                 if (!signOutInitiatedRef.current) {
                   signOutInitiatedRef.current = true;
@@ -146,6 +154,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setProfileFetched(false);
                 fetchInProgressRef.current = false;
                 if (pathname === '/login') return;
+                if (isPublicRoute(pathname)) {
+                    console.warn("[AuthContext] Google OAuth exchange failed on a public route. Rendering logged-out; not redirecting.");
+                    return;
+                }
                 console.error("[AuthContext] Google OAuth exchange failed. Signing out and redirecting to login.");
                 if (!signOutInitiatedRef.current) {
                   signOutInitiatedRef.current = true;

@@ -178,9 +178,6 @@ export function useMicStream(options: UseMicStreamOptions): MicStream {
       } catch {
         return;
       }
-      // TEMP DIAGNOSTIC — remove after the transcript-drop bug is fixed.
-      // Shows every raw STT message so we can see whether `final` events fire.
-      console.log('[voice-stt]', msg.type, JSON.stringify(msg.text));
       if (msg.type === 'interim') optsRef.current.onInterim(msg.text ?? '');
       else if (msg.type === 'final') optsRef.current.onFinal(msg.text ?? '');
       else if (msg.type === 'error') {

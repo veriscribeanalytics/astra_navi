@@ -1,5 +1,6 @@
 import { getSession, signOut } from "next-auth/react";
 import type { Session } from "next-auth";
+import { isPublicRoute } from "./publicRoutes";
 
 let sessionRefreshPromise: Promise<Session | null> | null = null;
 
@@ -87,6 +88,17 @@ async function performSignOut(callbackUrl: string, errorMessage: string): Promis
   throw new Error(errorMessage);
 }
 
+/**
+ * True when the browser is currently on a public/auth-optional route. On those
+ * pages a persistent 401 must NOT trigger a global sign-out redirect — the user
+ * is entitled to view the page (e.g. the privacy policy) regardless of session
+ * state. We return the 401 to the caller instead, which handles it gracefully.
+ */
+function isOnPublicRoute(): boolean {
+  if (typeof window === "undefined") return false;
+  return isPublicRoute(window.location.pathname);
+}
+
 export async function clientFetch(input: RequestInfo | URL, init?: RequestInit & { _retry?: boolean }) {
   const body = init?.body;
   
@@ -113,11 +125,21 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
           // Still 401 after grace retry — fall through to sign out
         }
       }
+      if (isOnPublicRoute()) {
+        console.warn("[clientFetch] No session and 401 on a public route. Returning 401 to caller instead of signing out.");
+        return response;
+      }
       await performSignOut(SESSION_RECOVERY_URL, "Session expired. Please log in again.");
     }
-    
+
     // Session exists at this point — check for refresh errors
     if (session?.user?.error === "RefreshAccessTokenError" || session?.user?.error === "TokenReuseError" || session?.user?.error === "GoogleExchangeError") {
+      // On a public/legal page, don't hijack the user with a sign-out redirect —
+      // let them keep reading. Hand the 401 back to the caller to handle softly.
+      if (isOnPublicRoute()) {
+        console.warn("[clientFetch] Fatal session error on a public route. Returning 401 to caller instead of signing out.");
+        return response;
+      }
       console.error("[clientFetch] Refresh failed with fatal error. Signing out immediately.");
       const callbackUrl = session?.user?.error === "GoogleExchangeError"
         ? "/login?error=GoogleAuthFailed&sessionCleared=1"
@@ -143,6 +165,10 @@ export async function clientFetch(input: RequestInfo | URL, init?: RequestInit &
     response = await fetch(retryRequest, retryInit);
     
     if (response.status === 401) {
+       if (isOnPublicRoute()) {
+         console.warn("[clientFetch] Retry still 401 on a public route. Returning 401 to caller instead of signing out.");
+         return response;
+       }
        console.error("[clientFetch] Retry also failed with 401. Tokens are out of sync. Forcing logout.");
        await performSignOut(SESSION_RECOVERY_URL, "Session expired. Please log in again.");
     }

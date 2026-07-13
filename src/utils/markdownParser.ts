@@ -35,13 +35,15 @@ export function parseMarkdown(text: string): string {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="md-link">${linkText}${icon}</a>`;
   });
 
-  html = html.replace(/\n/g, '<br>');
-
   html = html.replace(/^[\-\*]\s+(.+)$/gm, '<li class="md-li">$1</li>');
   html = html.replace(/(<li[^>]*>.*<\/li>\s*(?:<br>)?)+/g, '<ul class="md-ul">$&</ul>');
 
   html = html.replace(/^\d+\.\s+(.+)$/gm, '<li class="md-li-ordered">$1</li>');
   html = html.replace(/(<li[^>]*class="md-li-ordered"[^>]*>.*<\/li>\s*(?:<br>)?)+/g, '<ol class="md-ol">$&</ol>');
+
+  // Drop inter-item newlines now, while list items are still real `<li>` rows,
+  // so the trailing \n-><br> pass doesn't add blank lines between/after them.
+  html = html.replace(/(<\/li>)\s*\n+\s*(?=<li|<\/[uo]l>)/g, '$1');
 
   html = html.replace(/^###\s+(.+)$/gm, '<h3 class="md-h3">$1</h3>');
   html = html.replace(/^##\s+(.+)$/gm, '<h2 class="md-h2">$1</h2>');
@@ -50,6 +52,10 @@ export function parseMarkdown(text: string): string {
   html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="md-blockquote">$1</blockquote>');
 
   html = html.replace(/^(---|\*\*\*)$/gm, '<hr class="md-hr">');
+
+  // Soft line breaks become <br> last, after lists/headings have been parsed
+  // off the original newlines.
+  html = html.replace(/\n/g, '<br>');
 
   return html;
 }

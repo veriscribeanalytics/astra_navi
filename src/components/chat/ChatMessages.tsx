@@ -82,12 +82,14 @@ const haptic = (light?: boolean) => {
   }
 };
 
-/** Split an assistant answer into stacked bubbles: blank lines and bold
- *  numbered lead-ins (`**1) Title**`) start a new bubble; a trailing
- *  closing-question line becomes its own bubble. Fenced code blocks are
- *  never split. Stable under append-only streaming text. */
+/** Split an assistant answer into stacked bubbles. A blank line (`\n\n+`) is
+ *  the only box boundary — language-neutral, so it works for Kannada/Hindi/
+ *  Korean identically. Single `\n` inside a box is a soft break. Lists stay
+ *  together (their items are single-`\n` separated). `## ` headings land in
+ *  their own box because the backend always follows them with `\n\n`. Fenced
+ *  code blocks are never split (their internal blank lines are preserved). */
 function splitIntoBubbles(text: string): string[] {
-  if (!text.trim()) return [];
+  if (!text || !text.trim()) return [];
   const blocks: string[] = [];
   let cur: string[] = [];
   let inFence = false;
@@ -98,21 +100,10 @@ function splitIntoBubbles(text: string): string[] {
   };
   for (const line of text.split('\n')) {
     if (/^\s*```/.test(line)) inFence = !inFence;
-    if (!inFence) {
-      if (!line.trim()) { flush(); continue; }
-      if (/^\s*\*\*\s*\d+[).:]/.test(line)) flush();
-    }
+    if (!inFence && !line.trim()) { flush(); continue; }
     cur.push(line);
   }
   flush();
-  if (blocks.length === 0) return [text.trim()];
-  // Detach a trailing closing question that wasn't blank-line separated.
-  const last = blocks[blocks.length - 1];
-  const lastLines = last.split('\n');
-  if (lastLines.length > 1 && lastLines[lastLines.length - 1].trim().endsWith('?')) {
-    blocks[blocks.length - 1] = lastLines.slice(0, -1).join('\n').trim();
-    blocks.push(lastLines[lastLines.length - 1].trim());
-  }
   return blocks;
 }
 
@@ -527,6 +518,7 @@ const ChatMessages: React.FC = () => {
         const isStreamingAi = isAi && isSending && isLastAiMsg && mainText.length > 0 && !msg.error;
 
         if (isAi) {
+          const boxes = splitIntoBubbles(mainText);
           const isSearchMatch = searchMatches.some(m => m.msgId === msg.id);
           const isCurrentSearchMatch = searchMatches[searchMatchIdx]?.msgId === msg.id;
 
@@ -618,8 +610,9 @@ const ChatMessages: React.FC = () => {
                     </details>
                   )}
 
-                  {mainText.trim() && (
+                  {boxes.map((box, bIdx) => (
                     <motion.div
+                      key={bIdx}
                       className="ai-bubble-container"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -627,7 +620,7 @@ const ChatMessages: React.FC = () => {
                     >
                       <div
                         className="ai-message-content text-on-surface-variant text-[15px] sm:text-[16px] leading-[1.8] max-w-[65ch]"
-                        dangerouslySetInnerHTML={{ __html: getSanitizedHtml(msg.id, mainText) }}
+                        dangerouslySetInnerHTML={{ __html: getSanitizedHtml(`${msg.id}:b${bIdx}`, box) }}
                         onClick={(e) => {
                           const btn = (e.target as Element).closest('[data-action="copy-code"]');
                           if (!btn) return;
@@ -639,11 +632,11 @@ const ChatMessages: React.FC = () => {
                           }
                         }}
                       />
-                      {isStreamingAi && (
+                      {isStreamingAi && bIdx === boxes.length - 1 && (
                         <span className="typing-cursor inline-block w-[2px] h-[1em] bg-secondary/70 ml-0.5 rounded-sm align-text-bottom" />
                       )}
                     </motion.div>
-                  )}
+                  ))}
 
 {msg.error && (
                     <div className={`flex items-center gap-2 mt-3 p-3 rounded-xl border ${msg.errorCode === 'llm_unavailable' ? 'bg-amber-500/8 border-amber-500/15' : msg.errorCode === 'capacity' ? 'bg-orange-500/8 border-orange-500/15' : 'bg-red-500/8 border-red-500/15'}`}>

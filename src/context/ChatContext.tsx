@@ -439,6 +439,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let currentEventName = '';
       let streamDone = false;
       let persistedAiMsgId: string | null = null;
+      let canonicalText: string | null = null;
 
       if (reader) {
         while (!streamDone) {
@@ -450,7 +451,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const { done, value } = await reader.read();
           if (abortController.signal.aborted) break;
           if (done) {
-            setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
+            setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: canonicalText ?? fullText } : m) } : null);
             setThinkingData(null);
             break;
           }
@@ -469,7 +470,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!trimmed.startsWith('data: ')) continue;
             const dataStr = trimmed.slice(6);
             if (dataStr === '[DONE]') {
-              setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: fullText } : m) } : null);
+              setActiveChat(prev => prev ? { ...prev, messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? { ...m, text: canonicalText ?? fullText } : m) } : null);
               setThinkingData(null);
               streamDone = true;
               break;
@@ -508,12 +509,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (typeof data.aiMessageId === 'string' && data.aiMessageId) {
                   persistedAiMsgId = data.aiMessageId;
                 }
+                // Canonical final text from the backend — commit this instead
+                // of the accumulated tokens so live render == persisted history.
+                if (typeof data.content === 'string' && data.content) {
+                  canonicalText = data.content;
+                }
                 const errorCode = data.errorCode as string | undefined;
                 setActiveChat(prev => prev ? {
                   ...prev,
                   messages: prev.messages.map(m => (m.id === aiMsgId || m.id === persistedAiMsgId) ? {
                     ...m,
                     id: persistedAiMsgId ?? m.id,
+                    text: canonicalText ?? m.text,
                     suggestedQuestions: data.suggestedQuestions ?? m.suggestedQuestions,
                     topic: data.topic ?? m.topic,
                     intent: data.intent ?? m.intent,

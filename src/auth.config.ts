@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import { NextResponse } from "next/server";
+import { isPublicRoute as isPublicRouteFn } from "@/lib/publicRoutes";
 
 const SESSION_COOKIE_CHUNK_LIMIT = 20;
 
@@ -67,22 +68,7 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user && !hasSessionError;
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isAuthRoute = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
-      const isPublicRoute =
-        nextUrl.pathname === "/" ||
-        nextUrl.pathname.startsWith("/blogs") ||
-        nextUrl.pathname.startsWith("/about") ||
-        nextUrl.pathname.startsWith("/support") ||
-        nextUrl.pathname.startsWith("/careers") ||
-        nextUrl.pathname.startsWith("/plans") ||
-        nextUrl.pathname.startsWith("/services") ||
-        nextUrl.pathname.startsWith("/horoscope") ||
-        nextUrl.pathname.startsWith("/intro") ||
-        nextUrl.pathname.startsWith("/privacy") ||
-        nextUrl.pathname.startsWith("/terms") ||
-        nextUrl.pathname.startsWith("/astrologers") ||
-        nextUrl.pathname.startsWith("/forgot-password") ||
-        nextUrl.pathname.startsWith("/reset-password") ||
-        nextUrl.pathname.startsWith("/logout");
+      const isPublicRoute = isPublicRouteFn(nextUrl.pathname);
 
       // Allow auth routes (login/register).  If the session has an error,
       // treat the user as not logged in so they stay on /login instead of
