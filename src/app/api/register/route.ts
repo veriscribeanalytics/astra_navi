@@ -3,6 +3,8 @@ import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
 import { RegisterSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
 import { normalizeProfileUser, resolveProfileComplete } from '@/lib/profileCompleteness';
+import { createSessionNonce } from '@/lib/sessionNonce';
+import { getClientIp } from '@/lib/request';
 
 /**
  * Registration API Route (Proxy Mode)
@@ -23,8 +25,8 @@ export async function POST(req: Request) {
         }
         const payload = validation.data;
 
-        // 2. Rate limiting (Upstash Redis)
-        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+        // 2. Rate limiting (Upstash Redis) — fails closed on Redis error.
+        const ip = getClientIp(req);
         const rateLimitResult = await checkRateLimit(`register:${ip}`, AUTH_LIMIT_CONFIG);
 
         if (!rateLimitResult.allowed) {
@@ -100,7 +102,12 @@ export async function POST(req: Request) {
                         });
                         profileComplete = resolveProfileComplete(profileData.profileComplete ?? data.profileComplete, user);
                     } else {
-                        console.warn('[Register] Profile sync after registration failed:', profileResponse.status, profileData);
+                        // Log only the status + a non-secret code/message; never the
+                        // backend profile body (may contain PII/tokens).
+                        console.warn('[Register] Profile sync after registration failed:', profileResponse.status, {
+                            code: profileData?.code || profileData?.error || null,
+                            message: profileData?.message || null,
+                        });
                     }
                 } catch (syncError) {
                     console.warn('[Register] Profile sync after registration failed:', syncError);
@@ -108,12 +115,31 @@ export async function POST(req: Request) {
             }
         }
 
+        // Mint a single-use session-creation nonce. The browser receives ONLY
+        // { nonce, user, profileComplete } — never the tokens — and hands the
+        // nonce to signIn('credentials'), which consumeSessionNonce() redeems
+        // server-side. This closes the bypass where client-submitted tokens /
+        // identity were adopted verbatim.
+        const expiresIn =
+          (typeof data.expiresIn === 'number' && data.expiresIn > 0)
+            ? data.expiresIn
+            : 3600;
+        const nonce = await createSessionNonce({
+          id: user.id,
+          email: user.email ?? null,
+          name: user.name ?? '',
+          image: user.image ?? null,
+          phoneNumber: user.phoneNumber ?? null,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          expiresIn,
+          profileComplete,
+        });
+
         return NextResponse.json({
             message: "Your account has been created.",
+            nonce,
             user,
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
-            expiresIn: data.expiresIn,
             profileComplete
         }, { status: 201 });
 

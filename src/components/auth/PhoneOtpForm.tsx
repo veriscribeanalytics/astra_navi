@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Phone, KeyRound, ArrowRight, ArrowLeft } from 'lucide-react';
+import { KeyRound, ArrowRight, ArrowLeft } from 'lucide-react';
 import PhoneInput from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
 import 'react-phone-number-input/style.css';
@@ -101,7 +101,7 @@ const PhoneOtpForm: React.FC<PhoneOtpFormProps> = ({ onVerified, disabled = fals
     }
     setIsSubmitting(true);
     try {
-      const expiresIn = await sendOtp(phone.trim());
+      const _expiresIn = await sendOtp(phone.trim());
       setStep('otp');
       setResendIn(RESEND_COOLDOWN_SECONDS);
     } catch (err) {

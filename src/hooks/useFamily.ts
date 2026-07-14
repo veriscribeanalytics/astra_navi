@@ -183,7 +183,7 @@ export function useFamilyChart(member: FamilyMember | null) {
     // `targets` and cause infinite fetch loops (e.g. reports/preflight).
     const targets = useMemo(
         () => memberActionTargets(member),
-        [member?.source, member?.id, member?.connectionId],
+        [member],
     );
 
     const fetchChart = useCallback(async () => {

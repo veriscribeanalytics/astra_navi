@@ -25,8 +25,7 @@ import { CookieConsentProvider } from "@/context/CookieConsentContext";
 import CookieConsentBanner from "@/components/privacy/CookieConsentBanner";
 import MobileScrollDamper from "@/components/ui/MobileScrollDamper";
 import DailyRewardModal from "@/components/rewards/DailyRewardModal";
-import SessionIntroGate from "@/components/home/cosmic-intro/SessionIntroGate";
-import { INTRO_SEEN_KEY } from "@/components/home/cosmic-intro/assets";
+import HomepageIntro from "@/components/home/cosmic-intro/HomepageIntro";
 
 const SITE_URL = "https://astranavi.com";
 
@@ -97,9 +96,14 @@ export default async function RootLayout({
       
     >
       <head>
+        {/* Pre-hydration guard: add `intro-pending` ONLY on the homepage, so the
+            first-session cosmic intro can hide app chrome while it plays without
+            blanking /login, /forgot-password, /reset-password, /logout, /privacy,
+            /terms, or any deep link. The homepage intro gate removes the class on
+            hydration; if JS/hydration fails the gate's fallback clears it. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `if(location.pathname!="/intro"&&!document.cookie.split(";").some(function(c){return c.trim()===${JSON.stringify(`${INTRO_SEEN_KEY}=1`)}})){document.documentElement.classList.add("intro-pending")}`,
+            __html: `if(location.pathname==="/"){document.documentElement.classList.add("intro-pending")}`,
           }}
         />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -128,7 +132,7 @@ export default async function RootLayout({
                       </Suspense>
 
                       <OptimizedBackgrounds />
-                      <SessionIntroGate />
+                      <HomepageIntro />
                       <Toaster />
                       <DailyRewardModal />
 

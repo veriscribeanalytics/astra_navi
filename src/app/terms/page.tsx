@@ -28,7 +28,7 @@ export default function TermsPage() {
         {/* Intro */}
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Welcome to Astra Navi, operated by <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> ("we", "us", or "our"). These Terms & Conditions govern your access to and use of our website, mobile application, AI chat services, and premium astrological offerings (collectively, the "Service").
+            Welcome to Astra Navi, operated by <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). These Terms & Conditions govern your access to and use of our website, mobile application, AI chat services, and premium astrological offerings (collectively, the &quot;Service&quot;).
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             By registering for an account or using any part of the Service, you represent that you are at least 18 years of age and agree to be bound by these Terms. If you do not agree to these terms, please do not use the Service.
@@ -109,7 +109,7 @@ export default function TermsPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">7. Modifications to Terms</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.
+            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days&apos; notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.
           </p>
         </div>
 

@@ -18,7 +18,9 @@
     "returnHome": "வீட்டிற்குத் திரும்பவும்",
     "cancel": "ரத்துசெய்",
     "save": "சேமி",
-    "saved": "சேமிக்கப்பட்டது"
+    "saved": "சேமிக்கப்பட்டது",
+    "close": "மூடு",
+    "revoke": "திரும்பப் பெறு"
   },
   "nav": {
     "dailyRewards": "தினசரி வெகுமதிகள்",
@@ -74,7 +76,13 @@
     "logoutConfirmMessage": "உங்கள் கணக்கிலிருந்து வெளியேற்றப்படுவீர்கள், முகப்புப் பக்கத்திற்கு திருப்பி அனுப்பப்படுவீர்கள்.",
     "signOut": "வெளியேறு",
     "account": "கணக்கு",
-    "getStarted": "தொடங்குங்கள்"
+    "getStarted": "தொடங்குங்கள்",
+    "communityHub": "சமூக மையம்",
+    "communityHubDesc": "சக தேடலாளர்களுடன் இணைக்கவும் — வட்டங்கள், விவாதங்கள், நிகழ்வுகள்.",
+    "messages": "செய்திகள்",
+    "messagesDesc": "உங்கள் இணைப்புகளுடன் தனியார் அரட்டைகள்",
+    "ourServices": "எங்கள் சேவைகள்",
+    "ourServicesDesc": "AstraNavi-ன் அனைத்து AI & வேதச் சேவைகளையும் ஆராயவும்"
   },
   "footer": {
     "tagline": "நவீன மனதிற்கான ஜோதிட சாஸ்திரத்தின் கணித துல்லியத்தை பாதுகாத்தல்.",
@@ -399,7 +407,8 @@
     "familyStatusNew": "புதியது",
     "familyInviteBanner": "உங்களுக்கு {count} குடும்ப அழைப்பு காத்திருக்கிறது",
     "familyInviteBannerPlural": "உங்களுக்கு {count} குடும்ப அழைப்புகள் காத்திருக்கின்றன",
-    "familyInviteReview": "மதிப்பாய்வு"
+    "familyInviteReview": "மதிப்பாய்வு",
+    "familyNoVerdict": "இன்று நிலையான உறவு. உரையாடலுக்கும் பகிரப்பட்ட முடிவுகளுக்கும் நல்ல ஆற்றல்."
   },
   "horoscope": {
     "yourDayToday": "இன்று உங்கள் நாள்",
@@ -457,7 +466,7 @@
     "inscribeIdentity": "உங்கள் அடையாளத்தைப் பதிவு செய்யவும்",
     "signIn": "உள்நுழைக",
     "joinCelestialJourney": "வானியல் பயணத்தில் சேருங்கள்.",
-    "welcomeBack": "Welcome back",
+    "welcomeBack": "AstraNavi-க்கு மீண்டும் வரவேற்கிறோம்.",
     "fullName": "முழு பெயர்",
     "dob": "பிறந்த தேதி",
     "tob": "பிறந்த நேரம்",
@@ -505,7 +514,10 @@
     "consentTerms": "நான் ஒப்புக்கொள்கிறேன்",
     "consentProcessing": "தனியுரிமைக் கொள்கையில் விவரிக்கப்பட்டுள்ளபடி வேத ஜோதிட விளக்கப்படங்கள், AI-இயங்கும் வாசிப்புகள் மற்றும் தனிப்பயனாக்கப்பட்ட ஜாதக நுண்ணறிவுகளை உருவாக்குவதற்காக, பிறப்பு விவரங்கள் உட்பட எனது தனிப்பட்ட தரவைச் செயலாக்க நான் ஒப்புக்கொள்கிறேன். எந்த நேரத்திலும் இந்த ஒப்புதலை நான் திரும்பப் பெறலாம் என்பதை நான் புரிந்துகொள்கிறேன்.",
     "mustBe18": "Astra Navi-ஐப் பயன்படுத்த நீங்கள் 18 வயது அல்லது அதற்கு மேற்பட்டவராக இருக்க வேண்டும்.",
-    "lockedShort": "பூட்டப்பட்டது"
+    "lockedShort": "பூட்டப்பட்டது",
+    "consentGooglePart1": "நான் 18 வயது அல்லது அதற்கு மேற்பட்டவன்/ளி மற்றும் நான் ஒப்புக்கொள்கிறேன்",
+    "consentGooglePart2": "மற்றும்",
+    "consentGooglePart3": ", மேலும் வேத ஜோதிடச் சார்ட்டுகள் & வாசிப்புகளை உருவாக்க என் பிறந்த விவரங்கள் உட்பட என் தனிப்பட்ட தரவைச் செயலாக்கத்திற்கு ஒப்புதல் அளிக்கிறேன்."
   },
   "about": {
     "theTradition": "பாரம்பரியம்",
@@ -846,7 +858,8 @@
       "online": "ஆன்லைன்",
       "viewChartContext": "ஜாதகச் சூழலைக் காண்",
       "closeChat": "அரட்டையை மூடு",
-      "back": "பின்"
+      "back": "பின்",
+      "voiceMode": "வாய்ஸ் முறை"
     },
     "feedback": {
       "ratingLabels": {
@@ -1083,7 +1096,34 @@
     "pendingRunCompatCost": "{cost} கிரெடிட்கள்",
     "pendingActionRunning": "இயங்குகிறது…",
     "pendingActionError": "முடிக்க முடியவில்லை — தயவுசெய்து பின்னர் மீண்டும் முயற்சிக்கவும்.",
-    "familyPrefillAria": "Send suggested question about this relationship"
+    "familyPrefillAria": "இந்த உறவு பற்றிய பரிந்துரைக்கப்பட்ட கேள்வியை அனுப்பு",
+    "conversation": {
+      "autoListen": "Navi பேசி முடிக்கும்போது பேசுங்கள்",
+      "exit": "வாய்ஸ் முறையிலிருந்து வெளியேறு",
+      "listening": "கேட்டுக்கொண்டிருக்கிறது…",
+      "micError": "வாய்ஸ் முறைக்கு மைக்ரோஃபோன் அணுகல் தேவை.",
+      "notSupported": "இந்த உலாவியில் வாய்ஸ் முறை ஆதரிக்கப்படவில்லை.",
+      "speaking": "Navi பேசுகிறது…",
+      "talkToInterrupt": "குறுக்கிட இப்போதே பேசத் தொடங்குங்கள்",
+      "tapToInterrupt": "பேச மைக்கைத் தட்டவும்",
+      "tapToSpeak": "பேசத் தட்டவும்",
+      "tapToStop": "ரத்துசெய்யத் தட்டவும்",
+      "thinking": "Navi சிந்திக்கிறது…"
+    },
+    "report": "புகாரளி",
+    "reportCancel": "ரத்துசெய்",
+    "reportDetailsPlaceholder": "கூடுதல் விவரங்களைச் சேர்க்கவும் (விருப்பத்தேர்வு)",
+    "reportError": "புகாரைச் சமர்ப்பிக்க முடியவில்லை. மீண்டும் முயலவும்.",
+    "reportRateLimited": "நீங்கள் சமீபத்தில் பல புகார்களை அளித்துள்ளீர்கள். பிறகு மீண்டும் முயலவும்.",
+    "reportReasonHarmful": "தீங்கு விளைவிக்கும் ஆலோசனை",
+    "reportReasonInaccurate": "தவறானது / பிழையானது",
+    "reportReasonOffensive": "வன்முறை உள்ளடக்கம்",
+    "reportReasonOther": "வேறு ஏதேனும்",
+    "reportSubmit": "புகாரைச் சமர்ப்பிக்கவும்",
+    "reportSuccess": "புகாருக்கு நன்றி. நாங்கள் பார்க்கிறோம்.",
+    "reportTitle": "இந்தப் பதிலைப் புகாரளிக்கவும்",
+    "thumbDown": "மோசமான பதில்",
+    "thumbUp": "நல்ல பதில்"
   },
   "healthForecast": {
     "title": "சுகாதார கணிப்பு",
@@ -1531,7 +1571,47 @@
       "spouse": "துணைவர்",
       "friend": "நண்பர்",
       "other": "மற்றவை"
-    }
+    },
+    "accept": "ஏற்கவும்",
+    "addMoreDesc": "பெற்றோர், வாழ்க்கைத் துணை அல்லது நெருங்கிய நண்பர்களைச் சேர்த்து முழுமையான பொருத்தப் படத்தை உருவாக்கவும்.",
+    "addMoreTitle": "மேலும் குடும்ப உறுப்பினர்களைச் சேர்க்கவும்",
+    "chartFreeBadge": "இலவசப் பார்வை",
+    "checkCompatibility": "பொருத்தத்தை சரிபார்",
+    "compatibilityAvailable": "பொருத்தம் கிடைக்கிறது",
+    "compatibilityChecked": "பொருத்தம் சரிபார்க்கப்பட்டது",
+    "detailedReportCredits": "விரிவான அறிக்கை · {n} கிரெடிட்கள்",
+    "disconnect": "தொடர்புத் துண்டி",
+    "discoverDesc": "இணைப்பதற்காக மற்ற AstraNavi பயனர்களைத் தேடவும்.",
+    "discoverTitle": "மக்களைக் கண்டறி",
+    "inviteAcceptError": "அழைப்பை ஏற்க முடியவில்லை",
+    "inviteRevokeError": "அழைப்பைத் திரும்பப் பெற முடியவில்லை",
+    "inviteShort": "அழை",
+    "noStrengths": "முக்கிய பலங்கள் எதுவும் சிறப்பிக்கப்படவில்லை.",
+    "noTensions": "முக்கிய பதற்றப் புள்ளிகள் எதுவும் சிறப்பிக்கப்படவில்லை.",
+    "outgoingInvitesDesc": "நீங்கள் ஏற்கனவே அனுப்பிய அழைப்புகள்.",
+    "outgoingInvitesTitle": "அனுப்பப்பட்ட அழைப்புகள்",
+    "pendingIncomingDesc": "ஏற்க காத்திருக்கும் அழைப்புகள் உங்களிடம் உள்ளன.",
+    "pendingInvitesTitle": "நிலுவையிலுள்ள அழைப்புகள்",
+    "relationshipNotSet": "இணைப்பு",
+    "sharingBlockedBoth": "பொருத்தம் கணக்கிடப்படுவதற்கு முன் இருவருமே பகிர்வை இயக்க வேண்டும்.",
+    "sharingBlockedBothHint": "முதலில் உங்கள் பக்கத்தை இயக்குங்கள், பிறகு அவர்களையும் பகிர்வை இயக்கச் சொல்லுங்கள்.",
+    "sharingBlockedThem": "{name} பகிர்வை இயக்க காத்திருக்கிறோம்.",
+    "sharingBlockedThemHint": "அவர்களின் குடும்ப அமைப்புகளில் பகிர்வை இயக்கச் சொல்லுங்கள். அவர்களை {email} இல் தொடர்புகொள்ளலாம்.",
+    "sharingBlockedYou": "பொருத்தத்தை அன்லாக் செய்ய பகிர்வை இயக்கவும்.",
+    "sharingBlockedYouHint": "சினாஸ்ட்ரி கணக்கிட கீழே {name} உடன் பகிர்வை இயக்கவும்.",
+    "sharingEnable": "பகிர்வை இயக்கு",
+    "sharingEnableMine": "என் பக்கத்தை இயக்கு",
+    "statusCompleteShort": "முழு",
+    "statusIncompleteShort": "முழுமையடையாத",
+    "statusNeedsAttentionShort": "கவனம் தேவை",
+    "statusStableShort": "நிலையான",
+    "suggested": "பரிந்துரைக்கப்பட்டது",
+    "turnOnSharingDesc": "ஒரு இணைப்புடன் இருதிசை பகிர்வை இயக்கி அவர்களைக் குடும்பத்திற்குள் கொண்டுவாருங்கள்.",
+    "turnOnSharingTitle": "பகிர்வை இயக்கு",
+    "viewAllInvites": "அனைத்து அழைப்புகளையும் பார்க்கவும்",
+    "viewBond": "உறவைப் பார்க்கவும்",
+    "viewConnections": "இணைப்புகளைப் பார்க்கவும்",
+    "viewProfile": "சுயவிவரம் பார்க்கவும்"
   },
   "match": {
     "mangal": {
@@ -1547,7 +1627,10 @@
         "low": "குறைவு",
         "medium": "நடுத்தரம்",
         "high": "அதிகம்"
-      }
+      },
+      "compatible": "பொருந்தக்கூடியது",
+      "important": "முக்கியம்",
+      "needsAttention": "கவனம் தேவை"
     },
     "additional": {
       "title": "கூடுதல் சோதனைகள்",
@@ -1659,7 +1742,8 @@
       "firstNamePlaceholder": "முதல் பெயர்",
       "lastNameLabel": "கடைசி பெயர்",
       "lastNamePlaceholder": "கடைசி பெயர்",
-      "consentRequired": "உங்கள் கணக்கை உருவாக்க மேலே உள்ள அனைத்து ஒப்புதல்களையும் உறுதிப்படுத்தவும்."
+      "consentRequired": "உங்கள் கணக்கை உருவாக்க மேலே உள்ள அனைத்து ஒப்புதல்களையும் உறுதிப்படுத்தவும்.",
+      "consentRequiredGoogle": "Google மூலம் தொடர, மேற்கொண்டுள்ள ஒப்புதலை உறுதிப்படுத்தவும்."
     },
     "errorBanner": {
       "dismiss": "பிழையை நீக்கு"
@@ -1704,7 +1788,8 @@
       "submit": "கடவுச்சொல்லை மீட்டமை",
       "successTitle": "கடவுச்சொல் மீட்டமைப்பு வெற்றி",
       "successSubtitle": "உங்கள் கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது.",
-      "proceedToLogin": "உள்நுழைவுக்குச் செல்லவும்"
+      "proceedToLogin": "உள்நுழைவுக்குச் செல்லவும்",
+      "success": "கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது."
     },
     "passwordReset": {
       "title": "கடவுச்சொல்லை மீட்டமைக்கவும்",
@@ -1756,7 +1841,10 @@
       "resendCode": "குறியீட்டை மீண்டும் அனுப்பு",
       "otpExpired": "குறியீடு காலாவதியானது — மீண்டும் அனுப்பு",
       "otpIncorrect": "தவறான குறியீடு",
-      "otpLocked": "பல தவறான முயற்சிகள். புதிய குறியீட்டைக் கோரவும்."
+      "otpLocked": "பல தவறான முயற்சிகள். புதிய குறியீட்டைக் கோரவும்.",
+      "codeSentTo": "ஒரு குறியீட்டை நாங்கள் அனுப்பியுள்ளோம்",
+      "invalidOtp": "சரியான 6 இலக்கக் குறியீட்டை உள்ளிடவும்.",
+      "invalidPhone": "நாட்டுக் குறியீட்டுடன் சரியான தொலைபேசி எண்ணை உள்ளிடவும் (எ.கா. +919876543210)."
     },
     "email": {
       "emailLabel": "மின்னஞ்சல் முகவரி",
@@ -1769,7 +1857,10 @@
       "resendCode": "குறியீட்டை மீண்டும் அனுப்பு",
       "otpExpired": "குறியீடு காலாவதியானது — மீண்டும் அனுப்பு",
       "otpIncorrect": "தவறான குறியீடு",
-      "otpLocked": "பல தவறான முயற்சிகள். புதிய குறியீட்டைக் கோரவும்."
+      "otpLocked": "பல தவறான முயற்சிகள். புதிய குறியீட்டைக் கோரவும்.",
+      "codeSentTo": "ஒரு குறியீட்டை நாங்கள் அனுப்பியுள்ளோம்",
+      "invalidEmail": "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.",
+      "invalidOtp": "6 இலக்கக் குறியீட்டை உள்ளிடவும்."
     }
   },
   "home": {
@@ -1954,7 +2045,11 @@
       "activationPathDesc": "முதன்மையாக ஈடுபட்ட கிரகங்களின் முக்கிய தசை / புக்தி காலங்களில் தூண்டப்படுகிறது.",
       "yogaAnalysisScan": "யோக பகுப்பாய்வு ஸ்கேன்",
       "discoverCombinations": "உங்கள் குண்டலியில் மறைந்த கூட்டுக்களைக் கண்டுபிடிக்கவும்",
-      "scanChart": "என் ராசி குறிப்பை ஸ்கேன் செய்யவும்"
+      "scanChart": "என் ராசி குறிப்பை ஸ்கேன் செய்யவும்",
+      "classificationLabel": "வகைப்பாடு",
+      "keyPlanetsLabel": "முக்கிய கிரகங்கள்",
+      "logicLabel": "தர்க்கம்",
+      "potencyLabel": "வலிமை"
     },
     "remedies": {
       "title": "புனித",
@@ -2177,7 +2272,12 @@
       "blockedEmpty": "நீங்கள் யாரையும் தடுக்கவில்லை.",
       "unblock": "தடுத்ததை நீக்கு",
       "unblocking": "தடுத்தது நீக்கப்படுகிறது…"
-    }
+    },
+    "basicInfo": {
+      "language": "மொழி"
+    },
+    "imageUploadFailed": "சுயவிவரப் படத்தைப் பதிவேற்ற முடியவில்லை",
+    "imageUploadSuccess": "சுயவிவரப் படம் புதுப்பிக்கப்பட்டது"
   },
   "support": {
     "title": "ஆதரவைத் தொடர்புகொள்ளவும்",
@@ -2550,7 +2650,14 @@
     "noStreakYet": "இன்றே பெற்று உங்கள் தொடர்ச்சியைத் தொடங்குங்கள்!",
     "streakResetNotice": "ஒரு நாள் தவறவிட்டால் உங்கள் தொடர்ச்சி நாள் 1-க்கு மீட்டமைக்கப்படும்.",
     "howItWorks": "இது எப்படி வேலை செய்கிறது",
-    "howItWorksDesc": "ஒரு நாளைக்கு ஒருமுறை பெறுங்கள். தொடர்ச்சியான ஒவ்வொரு நாளும் உங்கள் தொடர்ச்சியை வளர்த்து, பெரிய வெகுமதிகளைத் திறக்கிறது — நாள் 7 மிகப்பெரிய பரிசு. ஒரு நாள் தவறவிட்டால் நாள் 1-இல் இருந்து மீண்டும் தொடங்குவீர்கள். நள்ளிரவு UTC-இல் மீட்டமைக்கப்படும்."
+    "howItWorksDesc": "ஒரு நாளைக்கு ஒருமுறை பெறுங்கள். தொடர்ச்சியான ஒவ்வொரு நாளும் உங்கள் தொடர்ச்சியை வளர்த்து, பெரிய வெகுமதிகளைத் திறக்கிறது — நாள் 7 மிகப்பெரிய பரிசு. ஒரு நாள் தவறவிட்டால் நாள் 1-இல் இருந்து மீண்டும் தொடங்குவீர்கள். நள்ளிரவு UTC-இல் மீட்டமைக்கப்படும்.",
+    "creditsClaimed": "+{credits} கிரெடிட்கள் பெறப்பட்டன",
+    "dayOfSeven": "{total}-இல் நாள் {day}",
+    "journeyHint": "{credits}-கிரெடிட் போனஸை அன்லாக் செய்ய அனைத்து 7 நாட்களையும் முடிக்கவும்.",
+    "journeyTitle": "உங்கள் 7-நாள் பயணம்",
+    "nextClaimIn": "அடுத்த கோரிக்கை",
+    "streakActive": "உங்கள் {days}-நாள் தொடர்ச்சி செயலில் உள்ளது.",
+    "todayClaimedTitle": "இன்றைய வெகுமதி பெறப்பட்டது"
   },
   "errors": {
     "generic": "ஏதோ தவறு நடந்துவிட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
@@ -2623,71 +2730,101 @@
     "viewFullPage": "முழு வெகுமதி பக்கத்தைக் காண்க"
   },
   "familyDashboard": {
-    "title": "Your Bond Dashboard",
-    "subtitle": "Daily relationship forecast",
-    "backToFamily": "Back to Family",
-    "yourBondToday": "Your Bond Today",
-    "todayLabel": "Today",
-    "todayVsBaseline": "Today vs. your permanent baseline",
-    "baselineLabel": "Baseline",
-    "baselineHint": "Your permanent compatibility",
-    "guidanceTitle": "Today's Relationship Guidance",
-    "guidanceBestFor": "Best for",
-    "guidanceAvoid": "Avoid",
-    "guidanceApproach": "Approach",
-    "guidanceUnlock": "Unlock best-for, avoid & approach guidance with Pro",
-    "chipsTitle": "Today's Bond Themes",
-    "chipsUnlock": "Unlock bond theme, communication & shared mood with Pro",
-    "timeTitle": "Connection Windows",
-    "timeGoodTitle": "Good Connection Window",
-    "timeAlertTitle": "Relationship Alert",
-    "timeNone": "No notable window today.",
-    "timeLord": "Lord",
-    "timeUnlock": "Unlock good-connection & alert time windows with Pro",
-    "horaSunrise": "Vedic Hora (sunrise)",
-    "horaFixed": "Fixed time",
-    "areasTitle": "Relationship Areas at a Glance",
-    "areasStrongest": "Strongest",
-    "areasNeedsCare": "Needs care",
-    "areasStable": "Stable",
-    "areasHarmony": "harmony",
-    "areasRisk": "risk",
-    "areasUnlock": "Unlock all six relationship areas with Pro",
-    "areasUnlockSub": "Communication, emotional bond, trust, support, cooperation & conflict sensitivity — with daily insights.",
+    "title": "உங்கள் உறவு டாஷ்போர்டு",
+    "subtitle": "தினசரி உறவு முன்னறிவிப்பு",
+    "backToFamily": "குடும்பத்திற்குத் திரும்பு",
+    "yourBondToday": "இன்று உங்கள் உறவு",
+    "todayLabel": "இன்று",
+    "todayVsBaseline": "இன்று vs உங்கள் நிரந்தர அடிப்படை அளவு",
+    "baselineLabel": "அடிப்படை அளவு",
+    "baselineHint": "உங்கள் நிரந்தர பொருத்தம்",
+    "guidanceTitle": "இன்றைய உறவு வழிகாட்டி",
+    "guidanceBestFor": "இதற்குச் சிறந்தது",
+    "guidanceAvoid": "தவிர்க்கவும்",
+    "guidanceApproach": "அணுகுமுறை",
+    "guidanceUnlock": "Pro மூலம் சிறந்தது-எதற்கு, தவிர்ப்பது & அணுகுமுறை வழிகாட்டியை அன்லாக் செய்யவும்",
+    "chipsTitle": "இன்றைய பிணைப்புத் தீம்கள்",
+    "chipsUnlock": "Pro மூலம் பிணைப்புத் தீம், தொடர்பு & பகிரப்பட்ட மனநிலையை அன்லாக் செய்யவும்",
+    "timeTitle": "இணைப்புச் சாளரங்கள்",
+    "timeGoodTitle": "நல்ல இணைப்புச் சாளரம்",
+    "timeAlertTitle": "உறவு எச்சரிக்கை",
+    "timeNone": "இன்று குறிப்பிடத்தக்க சாளரம் இல்லை.",
+    "timeLord": "அதிபதி",
+    "timeUnlock": "Pro மூலம் நல்ல-இணைப்பு & எச்சரிக்கை நேரச் சாளரங்களை அன்லாக் செய்யவும்",
+    "horaSunrise": "வேதிக ஹோரா (சூரிய உதயம்)",
+    "horaFixed": "நிலையான நேரம்",
+    "areasTitle": "ஒரு பார்வையில் உறவுத் துறைகள்",
+    "areasStrongest": "வலிமை மிகுந்த",
+    "areasNeedsCare": "கவனம் தேவை",
+    "areasStable": "மிகவும் சமநிலை",
+    "areasHarmony": "இசைவு",
+    "areasRisk": "ஆபத்து",
+    "areasUnlock": "Pro மூலம் அனைத்து ஆறு உறவுத் துறைகளையும் அன்லாக் செய்யவும்",
+    "areasUnlockSub": "தொடர்பு, உணர்ச்சிப் பிணைப்பு, நம்பிக்கை, ஆதரவு, ஒத்துழைப்பு & முரண்பாட்டு உணர்திறன் — தினசரி நுண்ணறிவுடன்.",
     "areas": {
-      "communication": "Communication",
-      "emotional_bond": "Emotional Bond",
-      "trust": "Trust",
-      "support": "Support",
-      "cooperation": "Cooperation",
-      "conflict_sensitivity": "Conflict Sensitivity"
+      "communication": "தொடர்பு",
+      "emotional_bond": "உணர்ச்சிப் பிணைப்பு",
+      "trust": "நம்பிக்கை",
+      "support": "ஆதரவு",
+      "cooperation": "ஒத்துழைப்பு",
+      "conflict_sensitivity": "முரண்பாட்டு உணர்திறன்",
+      "conflict_handling": "முரண்பாட்டைக் கையாளுதல்"
     },
-    "weeklyTitle": "Your Bond This Week",
-    "weeklyBest": "Best day",
-    "weeklyWorst": "Toughest day",
-    "weeklyAverage": "Average",
-    "weeklyTrend": "Trend",
-    "weeklyNoteUnlock": "Unlock the best-day guidance note with Pro.",
-    "compatTitle": "Compatibility Summary",
-    "compatStrength": "Main strength",
-    "compatTension": "Main tension",
-    "locationBirth": "based on your birth location",
-    "locationFixed": "based on a default location",
-    "degradedTitle": "Bond reading unavailable",
-    "degradedBody": "Transit calculation is temporarily unavailable. Please try again later.",
-    "degradedRetry": "Try again",
-    "sharingTitle": "Sharing required",
-    "sharingBody": "Enable two-way sharing with this connection to view their bond dashboard.",
-    "sharingManage": "Manage connection",
-    "noMembers": "You haven't added any family members yet",
-    "noMemberHint": "Add a family member or invite a connection to view your daily bond dashboard.",
-    "addMember": "Add a member",
-    "unnamed": "Unnamed",
-    "hardGateTitle": "Unlock the full bond dashboard",
-    "hardGateBody": "Upgrade to Pro to reveal bond themes, time windows, all six relationship areas, and the weekly best-day note.",
-    "askCta": "Ask about this relationship",
-    "askCtaSub": "Open a guided chat about your bond with the family chart tools ready.",
-    "askCtaBtn": "Ask",
-    "askError": "Could not start the conversation."
+    "weeklyTitle": "இந்த வாரம் உங்கள் உறவு",
+    "weeklyBest": "சிறந்த நாள்",
+    "weeklyWorst": "கடினமான நாள்",
+    "weeklyAverage": "சராசரி",
+    "weeklyTrend": "போக்கு",
+    "weeklyNoteUnlock": "Pro மூலம் சிறந்த-நாள் வழிகாட்டி குறிப்பை அன்லாக் செய்யவும்.",
+    "compatTitle": "பொருத்தச் சுருக்கம்",
+    "compatStrength": "முக்கிய பலம்",
+    "compatTension": "முக்கிய பதற்றம்",
+    "locationBirth": "உங்கள் பிறந்த இடத்தின் அடிப்படையில்",
+    "locationFixed": "ஒரு இயல்புநிலை இடத்தின் அடிப்படையில்",
+    "degradedTitle": "உறவு வாசிப்பு கிடைக்கவில்லை",
+    "degradedBody": "பரிவர்த்தனைக் கணக்கீடு தற்காலிகமாக கிடைக்கவில்லை. பிறகு மீண்டும் முயலவும்.",
+    "degradedRetry": "மீண்டும் முயலவும்",
+    "sharingTitle": "பகிர்வு தேவை",
+    "sharingBody": "அவர்களின் உறவு டாஷ்போர்டைப் பார்க்க இந்த இணைப்புடன் இருதிசை பகிர்வை இயக்கவும்.",
+    "sharingManage": "இணைப்பை நிர்வகி",
+    "noMembers": "நீங்கள் இதுவரை எந்தக் குடும்ப உறுப்பினரையும் சேர்க்கவில்லை",
+    "noMemberHint": "உங்கள் தினசரி உறவு டாஷ்போர்டைப் பார்க்க ஒரு குடும்ப உறுப்பினரைச் சேர்க்கவும் அல்லது இணைப்பை அழைக்கவும்.",
+    "addMember": "ஓர் உறுப்பினரைச் சேர்க்கவும்",
+    "unnamed": "பெயரிடப்படாத",
+    "hardGateTitle": "முழு உறவு டாஷ்போர்டை அன்லாக் செய்யவும்",
+    "hardGateBody": "பிணைப்புத் தீம்கள், நேரச் சாளரங்கள், அனைத்து ஆறு உறவுத் துறைகள் மற்றும் வாராந்திர சிறந்த-நாள் குறிப்பை வெளிப்படுத்த Pro-க்கு மேம்படுத்தவும்.",
+    "askCta": "இந்த உறவு பற்றி கேளுங்கள்",
+    "askCtaSub": "குடும்பச் சார்ட் கருவிகளை தயாராக வைத்து உங்கள் உறவு குறித்த வழிகாட்டப்பட்ட அரட்டையைத் திறக்கவும்.",
+    "askCtaBtn": "கேளுங்கள்",
+    "askError": "உரையாடலைத் தொடங்க முடியவில்லை.",
+    "compatBaselineHint": "நீண்டகால உறவு அடிப்படை அளவு",
+    "compatCaption": "உங்கள் நிரந்தர பொருத்தம்",
+    "deltaAbove": "உங்கள் நிரந்தர அடிப்படை அளவை விட {n} புள்ளிகள் மேலே",
+    "deltaBelow": "உங்கள் நிரந்தர அடிப்படை அளவை விட {n} புள்ளிகள் கீழே",
+    "horaSunriseHint": "உங்கள் சேமித்த பிறந்த இடத்தில் சூரிய உதயம் & அஸ்தமனம் கொண்டு கணக்கிடப்பட்டது.",
+    "riskLabel": "ஆபத்து",
+    "stableWeek": "நிலையான வாரம் — உங்கள் உறவு தொடர்ந்து ஆதரவாகவே உள்ளது.",
+    "timeAlertNone": "இன்று பெரிய உறவு எச்சரிக்கை இல்லை",
+    "timeGoodNone": "இன்று குறிப்பிடத்தக்க இணைப்புச் சாளரம் இல்லை.",
+    "toneBalanced": "சமநிலை",
+    "toneFavorable": "சாதகமான",
+    "toneNeedsCare": "கவனம் தேவை",
+    "toneSensitive": "உணர்வுபூர்வமான",
+    "viewDetailed": "விரிவான பொருத்தத்தைப் பார்க்கவும்"
+  },
+  "community": {
+    "comingSoon": "விரைவில்",
+    "cta": "காத்திருப்புப் பட்டியலில் சேரவும்",
+    "ctaSignedIn": "AstraNavi-ஐ ஆராயவும்",
+    "feature1Desc": "உங்கள் மக்களைக் கண்டறியுங்கள் — நட்சத்திரம், வாழ்க்கைக் கருப்பொருள் மற்றும் பகிரப்பட்ட நோக்கத்தால் ஒருங்கிணைக்கப்பட்ட சிறு குழுக்கள்.",
+    "feature1Title": "அண்ட வட்டங்கள்",
+    "feature2Desc": "ஜோதிடத்தில் தேர்ச்சிபெற்ற சமூகத்திடம் கேள்விகள் கேடுங்கள், வாசிப்புகளைப் பகிருங்கள், கற்றுக்கொள்ளுங்கள்.",
+    "feature2Title": "வழிகாட்டப்பட்ட விவாதங்கள்",
+    "feature3Desc": "வானியல் நாட்காட்டிக்கு ஏற்ப நேரமாக அமைக்கப்பட்ட பரிவர்த்தனைச் சடங்குகள், கேள்வி-பதில் அமர்வுகள், கொண்டாட்டங்கள்.",
+    "feature3Title": "நேரடி நிகழ்வுகள்",
+    "notifyDesc": "உங்கள் வானியல் கணக்கில் உள்நுழையுங்கள்; சமூகம் திறக்கும் அந்தத் தருணத்தில் நாங்கள் உங்களை அழைப்போம்.",
+    "notifyTitle": "முதலில் அறிந்துகொள்பவராகுங்கள்",
+    "subtitle": "வேத ஞானத்தை நாடுபவர்களுக்கான ஒரு சந்திப்பிடம் உருவாகிவருகிறது. வட்டங்களில் சேருங்கள், நுண்ணறிவுகளைப் பகிருங்கள், ஒத்த ஆன்மாக்களின் ஒரு நட்சத்திரக்கூட்டத்துடன் வளருங்கள்.",
+    "title": "AstraNavi சமூகம்"
   }
 }

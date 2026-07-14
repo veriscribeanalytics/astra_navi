@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
 import { PasswordResetStartSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
+import { getClientIp } from '@/lib/request';
 
 /**
  * Start password reset OTP flow.
@@ -21,8 +22,8 @@ export async function POST(req: Request) {
         }
         const { email } = validation.data;
 
-        // 2. Rate limiting by IP
-        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+        // 2. Rate limiting by IP — fails closed on Redis error.
+        const ip = getClientIp(req);
         const rateLimitResult = await checkRateLimit(`pw-reset-start:${ip}`, AUTH_LIMIT_CONFIG);
 
         if (!rateLimitResult.allowed) {

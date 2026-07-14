@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Sparkles } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useTranslation } from '@/hooks';
 
 interface InsightData {

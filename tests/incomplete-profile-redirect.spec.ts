@@ -27,11 +27,20 @@ test.describe('Incomplete Profile Redirect', () => {
 
   test('stays on dashboard when fields are complete even if backend flag is stale false', async ({ page, context }) => {
     await mockAllApis(page);
+    // Simulate "fields are complete even though the backend profileComplete flag
+    // is stale-false": the client's field-based fallback (isProfileComplete) must
+    // rescue the user and NOT redirect to onboarding. Real registration always
+    // sends split firstName/lastName (see /api/register profile-sync payload), and
+    // isProfileComplete requires lastName — it does NOT infer it from splitting
+    // `name`. So the fixture must supply the split fields the way the real flow
+    // does; otherwise it does not actually model a complete profile.
     await mockSession(page, context, { id: 'u3', email: 'stale@t.com', name: 'Stale Flag' });
     await mockProfileApi(page, {
       id: 'u3',
       email: 'stale@t.com',
       name: 'Stale Flag',
+      firstName: 'Stale',
+      lastName: 'Flag',
       dob: '1990-01-15',
       tob: '06:30',
       pob: 'Mumbai',

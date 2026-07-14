@@ -13,13 +13,13 @@ import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS } from '@/data/l
 import Card from '@/components/ui/Card';
 import ForecastChart, { ChartPoint } from './ForecastChart';
 import ForecastActionPanel from './ForecastActionPanel';
-import MonthGrid, { MonthData } from './MonthGrid';
+import MonthGrid from './MonthGrid';
 import ForecastInsight from './ForecastInsight';
 import MonthlyDayGrid from './MonthlyDayGrid';
 import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Sparkles, Gauge, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { resolveTone } from '@/utils/forecastTones';
-import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse } from '@/types/forecast';
+import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse, ForecastAlert, ForecastTransits } from '@/types/forecast';
 import { todayISO, currentMonthISO } from '@/utils/forecastError';
 
 type TimeRange = '7d' | 'monthly' | 'yearly';
@@ -41,10 +41,6 @@ const FORECAST_PILLS: { key: ForecastAreaWithOverall; theme: AreaThemeShape }[] 
   ...AREA_LIST.map((a) => ({ key: a as ForecastAreaWithOverall, theme: AREA_THEMES[a] })),
 ];
 
-function getAreaTheme(area: ForecastAreaWithOverall): AreaThemeShape {
-  return area === 'overall' ? OVERALL_THEME : AREA_THEMES[area];
-}
-
 interface WeeklyResponse extends Omit<WeeklyForecastResponse, 'days'> {
   days: (WeeklyForecastResponse['days'][number] & { is_today?: boolean; personalized_alerts?: (string | { simple: string; technical?: string })[] })[];
   summary: { best_day: string; worst_day: string; average_score: number; trend: string };
@@ -56,6 +52,36 @@ interface MonthlyResponse extends MonthlyForecastResponse {
 
 interface YearlyResponse extends YearlyForecastResponse {
   summary: { best_month: string; worst_month: string; average_score: number; trend: string };
+}
+
+/** Optional day-enrichment fields the backend appends to weekly days but which
+ *  are not part of the generated WeeklyDay type. Kept loose so the detail modal
+ *  + insight panel can surface them when present without `any` casts. */
+interface WeeklyDayEnrichment {
+  mood?: string | { value: string; type: string };
+  lucky_color?: string;
+  lucky_number?: number;
+  dominant_planet_meaning?: string;
+  personalized_alerts?: ForecastAlert[];
+}
+
+type WeeklyDayWithEnrichment = WeeklyForecastResponse['days'][number] & WeeklyDayEnrichment;
+
+/** Shape of the data handed to ForecastInsight via the detail modal. Mirrors
+ *  ForecastInsight's InsightData (month XOR date, score, text, …). */
+interface ForecastDetailData {
+  month?: string;
+  date?: string;
+  score: number;
+  text: string;
+  dominant_planet?: string;
+  dominant_planet_meaning?: string;
+  alerts?: ForecastAlert[];
+  transits?: ForecastTransits;
+  mood?: WeeklyDayEnrichment['mood'];
+  lucky_color?: string;
+  lucky_number?: number;
+  weekday?: string;
 }
 
 type CacheEntry =
@@ -85,7 +111,7 @@ export default function ForecastPage() {
 
   const [area, setArea] = useState<ForecastAreaWithOverall>(initialArea);
   const [range, setRange] = useState<TimeRange>(initialRange);
-  const [detailModalData, setDetailModalData] = useState<any | null>(null);
+  const [detailModalData, setDetailModalData] = useState<ForecastDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [yearlyData, setYearlyData] = useState<YearlyResponse | null>(null);
@@ -228,8 +254,6 @@ export default function ForecastPage() {
     return () => abortRef.current?.abort();
   }, []);
 
-  const theme = getAreaTheme(area);
-
   const { tier, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
   const userTier = (tier || 'free').toLowerCase();
   const isFree = userTier === 'free';
@@ -344,19 +368,19 @@ export default function ForecastPage() {
 
   const openDayDetailModal = useCallback((dayDate: string) => {
     if (range === '7d' && activeWeekly?.days) {
-      const day = activeWeekly.days.find(d => d.date === dayDate);
+      const day = activeWeekly.days.find(d => d.date === dayDate) as WeeklyDayWithEnrichment | undefined;
       if (day) {
         setDetailModalData({
           date: day.date,
           score: day.score,
           text: day.text,
           dominant_planet: day.dominant_planet,
-          alerts: (day.alerts || day.personalized_alerts) as any,
-          transits: day.transits as any,
-          mood: (day as any).mood,
-          lucky_color: (day as any).lucky_color,
-          lucky_number: (day as any).lucky_number,
-          dominant_planet_meaning: (day as any).dominant_planet_meaning,
+          alerts: day.alerts || day.personalized_alerts,
+          transits: day.transits,
+          mood: day.mood,
+          lucky_color: day.lucky_color,
+          lucky_number: day.lucky_number,
+          dominant_planet_meaning: day.dominant_planet_meaning,
           weekday: day.weekday,
         });
       }
@@ -368,8 +392,8 @@ export default function ForecastPage() {
           score: day.score,
           text: day.text || '',
           dominant_planet: undefined,
-          alerts: day.alerts as any,
-          transits: day.transits as any,
+          alerts: day.alerts,
+          transits: day.transits,
         });
       }
     }
@@ -384,8 +408,8 @@ export default function ForecastPage() {
           score: month.score,
           text: month.text || '',
           dominant_planet: undefined,
-          alerts: month.alerts as any,
-          transits: month.transits as any,
+          alerts: month.alerts,
+          transits: month.transits,
         });
       }
     }
@@ -484,7 +508,7 @@ export default function ForecastPage() {
 
   const insightData = useMemo(() => {
     if (range === '7d' && activeWeekly?.days && selectedDay) {
-      const day = activeWeekly.days.find(d => d.date === selectedDay);
+      const day = activeWeekly.days.find(d => d.date === selectedDay) as WeeklyDayWithEnrichment | undefined;
       if (!day) return null;
       return {
         date: day.date,
@@ -493,10 +517,10 @@ export default function ForecastPage() {
         dominant_planet: day.dominant_planet,
         alerts: (day.alerts || day.personalized_alerts) as (string | { simple: string; technical?: string })[],
         transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined,
-        mood: (day as any).mood,
-        lucky_color: (day as any).lucky_color,
-        lucky_number: (day as any).lucky_number,
-        dominant_planet_meaning: (day as any).dominant_planet_meaning,
+        mood: day.mood,
+        lucky_color: day.lucky_color,
+        lucky_number: day.lucky_number,
+        dominant_planet_meaning: day.dominant_planet_meaning,
         weekday: day.weekday,
       };
     }
@@ -1051,7 +1075,7 @@ export default function ForecastPage() {
                   worst={(summary as WeeklyResponse['summary'])?.worst_day}
                   average={summary?.average_score}
                   dominantPlanet={insightData?.dominant_planet}
-                  dominantPlanetMeaning={(insightData as any)?.dominant_planet_meaning}
+                  dominantPlanetMeaning={(insightData as ForecastDetailData | null | undefined)?.dominant_planet_meaning}
                   alerts={insightData?.alerts}
                   actionText={activeOverview?.text}
                   periodLabel={activePeriodLabel || ''}

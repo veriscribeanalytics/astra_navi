@@ -28,6 +28,11 @@ test('free users can see life-area scores while insights and forecasts stay payw
     birthLongitude: 77.2090,
     birthTimezoneName: 'Asia/Kolkata',
   }, true);
+  // Register mockPaywallApi LAST: Playwright dispatches the LAST matching
+  // route (later registrations override earlier ones for overlapping URL
+  // patterns), so these specific paywall routes must come AFTER mockAllApis's
+  // `**/api/**` catch-all — otherwise the catch-all shadows them and the
+  // blocked `full_daily_horoscope` state never takes effect.
   await mockPaywallApi(page, {
     tier: 'free',
     totalCredits: 0,

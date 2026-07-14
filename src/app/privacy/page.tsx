@@ -29,7 +29,7 @@ export default function PrivacyPage() {
         {/* Intro */}
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Welcome to Astra Navi. Your privacy is of paramount importance to us. This Privacy Policy explains how <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> ("we", "us", or "our") collects, uses, discloses, and safeguards your personal data when you use our services, in strict compliance with the <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong> of India and other global standards.
+            Welcome to Astra Navi. Your privacy is of paramount importance to us. This Privacy Policy explains how <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, discloses, and safeguards your personal data when you use our services, in strict compliance with the <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong> of India and other global standards.
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             Please read this policy carefully. By registering for or using Astra Navi, you provide your explicit, unambiguous, and revocable consent to the collection and processing of your personal data as described herein.
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">3. Legal Basis for Processing & Consent</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Under India's DPDP Act 2023, the sole legal basis for processing your personal data is your <strong>freely given, specific, informed, unconditional, and unambiguous consent</strong>. You confirm this consent by checking our consent box during signup.
+            Under India&apos;s DPDP Act 2023, the sole legal basis for processing your personal data is your <strong>freely given, specific, informed, unconditional, and unambiguous consent</strong>. You confirm this consent by checking our consent box during signup.
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             <strong>Right to Withdraw Consent:</strong> You have the right to withdraw your consent at any time. Withdrawal of consent will not affect the lawfulness of processing based on consent before its withdrawal. To withdraw your consent, you may delete your account.
@@ -119,15 +119,15 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
             <li><strong>Right to Access & Summary:</strong> Access details of the personal data we hold about you.</li>
             <li><strong>Right to Correction & Update:</strong> Modify your personal profile or astrological configurations.</li>
-            <li><strong>Right to Erasure (Right to be Forgotten):</strong> You have the right to have all your personal data deleted from our systems. You can trigger this instantly by navigating to your <Link href="/profile/security" className="text-secondary hover:underline font-bold">Profile Security (Danger Zone)</Link> and selecting "Delete Account".</li>
+            <li><strong>Right to Erasure (Right to be Forgotten):</strong> You have the right to have all your personal data deleted from our systems. You can trigger this instantly by navigating to your <Link href="/profile/security" className="text-secondary hover:underline font-bold">Profile Security (Danger Zone)</Link> and selecting &quot;Delete Account&quot;.</li>
           </ul>
         </div>
 
         {/* 6. Children's Data */}
         <div className="space-y-4">
-          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">6. Children's Data (18+ Age Restriction)</h2>
+          <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">6. Children&apos;s Data (18+ Age Restriction)</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            In compliance with DPDP rules governing children's data, Astra Navi does not offer services to, or knowingly collect personal data from, individuals under the age of 18. An age validation gate is active during registration. If we learn we have collected data from a child under 18 without parental consent, we will delete it immediately.
+            In compliance with DPDP rules governing children&apos;s data, Astra Navi does not offer services to, or knowingly collect personal data from, individuals under the age of 18. An age validation gate is active during registration. If we learn we have collected data from a child under 18 without parental consent, we will delete it immediately.
           </p>
         </div>
 

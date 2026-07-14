@@ -4,9 +4,9 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { RazorpayCheckoutHandler } from '@/components/billing/RazorpayCheckoutHandler';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, ArrowRight, Clock, Shield, Star, FlaskConical, Compass, Wallet, Calendar, X, Check, CheckCircle, Info, Lock } from 'lucide-react';
+import { ArrowRight, FlaskConical, Compass, X, Check, CheckCircle } from 'lucide-react';
 import MockCheckoutModal from '@/components/billing/MockCheckoutModal';
-import { CatalogProduct, BalanceResponse, CatalogResponse, CatalogSubscription, CatalogCreditPack, CatalogOneTimeReport, normalizeCatalogResponse, normalizeHistoryResponse, CreditHistoryResponse, getTierLabel } from '@/types/billing';
+import { CatalogProduct, BalanceResponse, CatalogResponse, CatalogSubscription, CatalogCreditPack, CatalogOneTimeReport, normalizeCatalogResponse, normalizeHistoryResponse, CreditHistoryResponse } from '@/types/billing';
 import { useAuth } from '@/context/AuthContext';
 import { usePaywallContext } from '@/context/PaywallContext';
 import { useTranslation } from '@/hooks';
@@ -108,16 +108,35 @@ function getProductColorTheme(color: string | null | undefined) {
   };
 }
 
+/** A subscription plan row rendered in the pricing grid. Built locally from
+ *  defaults and optionally overlaid with a catalog product of the same tier. */
+interface SubscriptionPlan {
+  productId: string;
+  tier: string;
+  nameEn: string;
+  priceInr: number;
+  credits: number;
+  isRecommended: boolean;
+  bullets: string[];
+  catalogProduct: CatalogSubscription | null;
+}
+
+/** A plan opened in the details overlay: the plan plus its expanded feature
+ *  list looked up from detailedFeaturesMap. */
+interface DetailsProduct extends SubscriptionPlan {
+  detailedFeatures: string[];
+}
+
 export default function PlansClient() {
   const { isLoggedIn, user } = useAuth();
   const { tier, totalCredits, balance, isLoading: paywallLoading, refresh: refreshPaywall, refreshVersion, getTierColor } = usePaywallContext();
-  const { t, language } = useTranslation();
+  const { language } = useTranslation();
   const searchParams = useSearchParams();
 
   // Redesign local states
   const [activeTab, setActiveTab] = useState<'pricing' | 'history'>('pricing');
   const [reportsExpanded, setReportsExpanded] = useState(false);
-  const [detailsProduct, setDetailsProduct] = useState<any | null>(null);
+  const [detailsProduct, setDetailsProduct] = useState<DetailsProduct | null>(null);
 
   const [catalog, setCatalog] = useState<CatalogResponse | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -188,7 +207,7 @@ export default function PlansClient() {
       {
         name: user?.name,
         email: user?.email,
-        phoneNumber: (user as any)?.phoneNumber || '',
+        phoneNumber: user?.phoneNumber || '',
       },
       language || 'en',
       async () => { await refreshPaywall(); }
@@ -211,10 +230,10 @@ export default function PlansClient() {
     return 'Free Plan';
   };
 
-  const effectiveBalance: BalanceResponse | null = balance || (isLoggedIn ? {
+  const effectiveBalance: BalanceResponse | null = useMemo(() => balance || (isLoggedIn ? {
     credits: totalCredits ?? 0,
     tier: tier || user?.tier || 'free',
-  } : null);
+  } : null), [balance, isLoggedIn, totalCredits, tier, user?.tier]);
 
   const balanceLoading = isLoggedIn && paywallLoading && !balance;
 
@@ -339,9 +358,9 @@ export default function PlansClient() {
 
     // Desktop: normal order (Free -> Pro -> Premium)
     return mapped;
-  }, [catalog, catalogLoading, isMobile, currentPlanTier, isTestMode]);
+  }, [catalog, isMobile, currentPlanTier, isTestMode]);
 
-  const handleSelectSubscription = (plan: any) => {
+  const handleSelectSubscription = (plan: SubscriptionPlan) => {
     if (plan.tier === 'free') {
       alert("Free plan is the default. To downgrade or manage subscription, please contact support or use the management portal.");
       return;
@@ -364,7 +383,7 @@ export default function PlansClient() {
     }
   };
 
-  const openDetails = (plan: any) => {
+  const openDetails = (plan: SubscriptionPlan) => {
     setDetailsProduct({
       ...plan,
       detailedFeatures: detailedFeaturesMap[plan.tier] || []
@@ -379,11 +398,11 @@ export default function PlansClient() {
       month: 'short',
       year: 'numeric'
     });
-  }, [effectiveBalance?.nextRenewalAt]);
+  }, [effectiveBalance]);
 
   const planNameStr = useMemo(() => {
     return getPlanName(effectiveBalance?.tier || 'free');
-  }, [effectiveBalance?.tier]);
+  }, [effectiveBalance]);
 
   const filteredHistoryEntries = useMemo(() => {
     if (!history) return [];

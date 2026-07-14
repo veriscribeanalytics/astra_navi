@@ -10,6 +10,8 @@ import {
   releaseRefreshLock,
   waitForRotation,
 } from "./refreshCache";
+import { consumeSessionNonce } from "./sessionNonce";
+import { isRefreshFailureFatal } from "./refreshError";
 
 const refreshPromises = new Map<string, Promise<JWT>>();
 
@@ -112,14 +114,11 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       refreshFailed = true;
       console.error("[Auth] RefreshAccessToken error:", error);
 
-      const err = error as Record<string, unknown>;
-      const errorCode = err?.code || (err?.error as Record<string, unknown>)?.code;
-      const isFatal = ["token_reuse_detected", "token_expired", "token_invalid"].includes(errorCode as string) ||
-                      err?.error === "Token reuse detected" ||
-                      err?.detail === "Token reuse detected" ||
-                      err?.message === "Token reuse detected" ||
-                      err?.status === 401 ||
-                      err?.status === 429;
+      // FATAL = the refresh token is revoked/expired/reused; the session is
+      // unrecoverable and must be torn down. A 429 (Too Many Requests) is NOT
+      // fatal — the backend temporarily throttled us, the token is still valid,
+      // and the user should NOT be signed out. See isRefreshFailureFatal().
+      const isFatal = isRefreshFailureFatal(error);
 
       // Reuse-recovery: a 401/"reuse detected" most often means a PEER instance
       // rotated this exact token microseconds before us (the cross-instance race
@@ -175,104 +174,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       name: "credentials",
+      // The only credential the browser ever submits now is a single-use nonce
+      // minted by a server-side BFF route (/api/register or /api/login), which
+      // is the ONLY path that talks to the backend and obtains real tokens.
+      // `authorize()` consumes the nonce from Redis and adopts the server-fetched
+      // identity — it never trusts browser-supplied id/email/tokens. That closes
+      // the prior bypass where `isRegistration: "true"` made the provider adopt
+      // an attacker-forged identity verbatim.
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        isRegistration: { type: "hidden" },
-        id: { type: "hidden" },
-        name: { type: "hidden" },
-        phoneNumber: { type: "hidden" },
-        accessToken: { type: "hidden" },
-        refreshToken: { type: "hidden" },
-        expiresIn: { type: "hidden" },
+        sessionNonce: { type: "text" },
       },
-async authorize(credentials) {
-         if (credentials?.isRegistration === "true") {
-            const regExpiresIn = (typeof credentials.expiresIn === 'number' && credentials.expiresIn > 0)
-              ? credentials.expiresIn
-              : (typeof credentials.expiresIn === 'string' && parseInt(credentials.expiresIn) > 0)
-                ? parseInt(credentials.expiresIn)
-                : 3600;
-            return {
-               id: credentials.id as string,
-               email: credentials.email as string | null | undefined,
-               phoneNumber: credentials.phoneNumber as string | null | undefined,
-               name: credentials.name as string,
-               accessToken: credentials.accessToken as string,
-               refreshToken: credentials.refreshToken as string,
-               accessTokenExpires: Date.now() + regExpiresIn * 1000,
-            };
-        }
+      async authorize(credentials) {
+        const nonce = typeof credentials?.sessionNonce === 'string' ? credentials.sessionNonce : '';
+        if (!nonce) return null;
 
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        // consumeSessionNonce returns the stored payload AND deletes the key, so
+        // the nonce is single-use. A forged or replayed nonce yields null → the
+        // sign-in fails. Redis failure also fails closed (returns null) — never
+        // trusting client identity.
+        const payload = await consumeSessionNonce(nonce);
+        if (!payload) return null;
 
-        try {
-            // Call backend login endpoint (PostgreSQL)
-            const backendUrl = process.env.AI_BACKEND_URL;
-            
-            if (!backendUrl) {
-              console.error("[Auth] AI_BACKEND_URL is not configured");
-              throw new Error("NetworkError");
-            }
+        const expiresIn =
+          typeof payload.expiresIn === 'number' && payload.expiresIn > 0
+            ? payload.expiresIn
+            : 3600;
 
-            let res: Response;
-            try {
-              res = await fetch(`${backendUrl}/api/login`, {
-                method: 'POST',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'X-API-Key': process.env.AI_BACKEND_API_KEY || '',
-                },
-                body: JSON.stringify({
-                  email: credentials.email,
-                  password: credentials.password,
-                }),
-              });
-            } catch (fetchError: unknown) {
-              // Network-level error: ECONNREFUSED, ENOTFOUND, timeout, etc.
-              const err = fetchError instanceof Error ? fetchError : new Error(String(fetchError));
-              console.error("[Auth] Backend unreachable:", err.message);
-              throw new Error("NetworkError");
-            }
-            
-            const contentType = res.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                const text = await res.text();
-                console.error("[Auth] Non-JSON response from backend:", text);
-                throw new Error("ServerError");
-            }
-
-            const data = await res.json();
-            
-            if (!res.ok) {
-                console.error("[Auth] Login failed:", data.error || res.statusText);
-                // Return error message for display
-                throw new Error(data.error || "Invalid credentials.");
-            }
-            
-            // Guard: if expiresIn is missing or invalid, default to 1 hour
-            const expiresIn = (typeof data.expiresIn === 'number' && data.expiresIn > 0) 
-              ? data.expiresIn 
-              : 3600; // default 1 hour
-            
-            // Return user object + tokens for JWT session
-            return {
-              id: data.user.id,
-              email: data.user.email,
-              name: data.user.name,
-              image: data.user.image,
-              accessToken: data.accessToken,
-              refreshToken: data.refreshToken,
-              accessTokenExpires: Date.now() + expiresIn * 1000,
-            };
-        } catch (error: unknown) {
-            console.error("[Auth] Authorize error:", error);
-            // Re-throw to pass the error message to the client
-            if (error instanceof Error) throw error;
-            throw new Error(String(error));
-        }
+        return {
+          id: payload.id,
+          email: payload.email,
+          name: payload.name,
+          image: payload.image ?? null,
+          phoneNumber: payload.phoneNumber ?? null,
+          accessToken: payload.accessToken,
+          refreshToken: payload.refreshToken,
+          accessTokenExpires: Date.now() + expiresIn * 1000,
+        };
       },
     }),
     Google({
@@ -316,11 +253,12 @@ async authorize(credentials) {
           const data = await res.json();
 
           if (!res.ok) {
+            // Log only non-secret diagnostic fields — never JSON.stringify the
+            // full backend body, which can contain access/refresh tokens.
             console.error('[Auth] Google OAuth backend exchange failed:', {
               status: res.status,
               statusText: res.statusText,
               error: data.error || data.detail || data.message || null,
-              fullResponse: JSON.stringify(data),
             });
             return { ...token, error: 'GoogleExchangeError' };
           }
@@ -330,7 +268,6 @@ async authorize(credentials) {
               hasUser: !!data?.user,
               hasUserId: !!data?.user?.id,
               hasAccessToken: !!data?.accessToken,
-              fullResponse: JSON.stringify(data),
             });
             return { ...token, error: 'GoogleExchangeError' };
           }
@@ -411,27 +348,42 @@ async authorize(credentials) {
             + "Persisting error so client can sign out.");
           return refreshed;
         }
-        // RefreshAccessTokenError is TRANSIENT (network issue, etc.).
-        // Persist the error so the middleware (auth.config.ts) can detect
-        // and redirect the user to /login before the page loads.  Extend
-        // expiry by 60s so the current response still has a usable token.
-        console.error("[Auth] JWT callback: Refresh failed with:", refreshed.error,
-          "— Persisting error in JWT cookie. Extending token by 60s to serve current request.");
+        // RefreshAccessTokenError is TRANSIENT (network issue, 429 backend
+        // rate-limit, 5xx, etc.). The token is still valid — we just couldn't
+        // rotate it THIS time. Do NOT persist an `error` field: the middleware
+        // gate treats any token.error as a session error and would redirect a
+        // perfectly valid user to /login. Instead, extend the current token's
+        // expiry by a short grace window so this request is served, and let the
+        // NEXT request retry the refresh. (Bumping expiry rather than clearing
+        // the error avoids a logout storm on a flaky backend / a 429 that would
+        // otherwise have signed the user out the moment refresh was throttled.)
+        console.error("[Auth] JWT callback: Refresh failed transiently with:",
+          refreshed.error, "— extending token by 60s grace; will retry next request.");
         return {
           ...token,
-          error: "RefreshAccessTokenError",
-          accessTokenExpires: Date.now() + 60 * 1000, // 60s grace
+          accessTokenExpires: Date.now() + 60 * 1000, // 60s grace, no error flag
         };
       }
-      
+
       return refreshed;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        (session.user as any).email = token.email;
-        session.user.phoneNumber = token.phoneNumber;
-        session.user.error = token.error;
+        // Cast to the augmented Session.user shape (see types/next-auth.d.ts) so
+        // the optional/nullable email + phoneNumber fields accept token values
+        // without resorting to `any`. DefaultSession declares email as a
+        // required string; our augmentation widens it, and this cast names that.
+        const u = session.user as {
+          id: string;
+          email?: string | null;
+          phoneNumber?: string | null;
+          error?: string;
+          profileComplete?: boolean;
+        };
+        u.id = token.id;
+        u.email = token.email ?? null;
+        u.phoneNumber = token.phoneNumber ?? null;
+        u.error = token.error;
         // Only present for OAuth sign-ins — used as an initial onboarding hint.
         if (typeof token.profileComplete === 'boolean') {
           session.user.profileComplete = token.profileComplete;

@@ -178,11 +178,13 @@ const LoginContent = () => {
         return { parsedError };
       }
 
-      // If credentials check succeeded, proceed with NextAuth signIn to establish the session.
+      // /api/login verified the credentials AND minted a single-use nonce
+      // carrying the backend tokens (server-side). signIn redeems that nonce;
+      // it no longer re-submits email/password to the backend, so there is a
+      // single rate-limited backend call and the browser never sees tokens.
       const result = await signIn('credentials', {
         redirect: false,
-        email: formData.email,
-        password: formData.password,
+        sessionNonce: data.nonce,
       });
 
       if (result?.error) {
@@ -236,22 +238,18 @@ const LoginContent = () => {
       }
 
       // Success but malformed envelope — backend returned 2xx without the
-      // tokens needed to establish a session. Surface as a recoverable error.
-      if (!data?.user?.id || !data?.accessToken) {
+      // nonce needed to establish a session. Surface as a recoverable error.
+      if (!data?.user?.id || !data?.nonce) {
         return { ok: false, data: {}, parsedError: parseAuthError({ message: t('auth.errors.generic') }) };
       }
 
       success(t('login.accountCreated'));
 
+      // Redeem the single-use nonce minted by /api/register. The browser never
+      // holds the access/refresh tokens — signIn consumes the nonce server-side.
       const result = await signIn('credentials', {
         redirect: false,
-        isRegistration: 'true',
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.name,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        expiresIn: (typeof data.expiresIn === 'number' && data.expiresIn > 0) ? String(data.expiresIn) : '3600',
+        sessionNonce: data.nonce,
       });
 
       if (result?.error) {

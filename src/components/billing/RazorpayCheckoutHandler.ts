@@ -1,6 +1,42 @@
-import { CheckoutHandler, CheckoutResult } from './MockCheckoutModal';
+import { CheckoutHandler, CheckoutResult, PrecreatedOrder } from './MockCheckoutModal';
 import { CatalogProduct } from '@/types/billing';
 import { clientFetch } from '@/lib/apiClient';
+
+/** Minimal shape of the global `window.Razorpay` constructor exposed by the
+ *  Razorpay checkout SDK (checkout.razorpay.com/v1/checkout.js). We model only
+ *  the surface this handler touches so we can drop the `any` window cast. */
+interface RazorpayOptions {
+  key: unknown;
+  amount: unknown;
+  currency: unknown;
+  name: string;
+  description?: string;
+  order_id: unknown;
+  prefill: { name: string; email: string; contact: string };
+  theme: { color: string };
+  handler: (response: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => void | Promise<void>;
+  modal: { ondismiss: () => void };
+}
+
+interface RazorpayInstance {
+  on(event: 'payment.failed', handler: (resp: { error: { code?: string; description?: string; step?: string; reason?: string } }) => void): void;
+  open(): void;
+}
+
+interface RazorpayConstructor {
+  new (options: RazorpayOptions): RazorpayInstance;
+}
+
+interface RazorpayWindow extends Window {
+  Razorpay?: RazorpayConstructor;
+}
+
+/** Shape of the payment.failed payload Razorpay emits via `rzp.on(...)`. */
+type RazorpayPaymentFailure = { error: { code?: string; description?: string; step?: string; reason?: string } };
 
 /**
  * Dynamically loads the Razorpay checkout script if it is not already present in the document.
@@ -12,7 +48,7 @@ const loadRazorpayScript = (): Promise<boolean> => {
       return;
     }
     // If Razorpay object is already loaded globally
-    if ((window as any).Razorpay) {
+    if ((window as RazorpayWindow).Razorpay) {
       resolve(true);
       return;
     }
@@ -36,10 +72,10 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
   constructor(
     private user: { name?: string | null; email?: string | null; phoneNumber?: string | null } | null,
     private language: string,
-    private onPaymentSuccess: (verifyResponse: any) => Promise<void> | void
+    private onPaymentSuccess: (verifyResponse: unknown) => Promise<void> | void
   ) {}
 
-  async precreateOrder(product: CatalogProduct): Promise<any> {
+  async precreateOrder(product: CatalogProduct): Promise<PrecreatedOrder> {
     // 1. Load the Razorpay checkout script in the background
     loadRazorpayScript();
 
@@ -57,8 +93,8 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
     return orderData;
   }
 
-  async initiateCheckout(product: CatalogProduct, precreatedOrderData?: any): Promise<CheckoutResult> {
-    const RazorpayObj = (window as any).Razorpay;
+  async initiateCheckout(product: CatalogProduct, precreatedOrderData?: PrecreatedOrder): Promise<CheckoutResult> {
+    const RazorpayObj = (window as RazorpayWindow).Razorpay;
     
     // If script is already loaded and order is precreated, execute completely synchronously
     // to bypass mobile browser popup blockers.
@@ -86,17 +122,17 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
           body: JSON.stringify({ product_id: product.productId }),
         });
 
-        orderData = await createRes.json();
+        orderData = (await createRes.json()) as PrecreatedOrder;
         if (!createRes.ok) {
           return {
             success: false,
-            error: orderData.error || 'Failed to create order on the payment server.',
+            error: (typeof orderData?.error === 'string' ? orderData.error : '') || 'Failed to create order on the payment server.',
           };
         }
       }
 
       return new Promise<CheckoutResult>((resolve) => {
-        this.openRazorpayModal((window as any).Razorpay, orderData, product, resolve);
+        this.openRazorpayModal((window as RazorpayWindow).Razorpay as RazorpayConstructor, orderData as PrecreatedOrder, product, resolve);
       });
     } catch (err) {
       return {
@@ -107,17 +143,17 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
   }
 
   private openRazorpayModal(
-    RazorpayClass: any,
-    orderData: any,
+    RazorpayClass: RazorpayConstructor,
+    orderData: PrecreatedOrder,
     product: CatalogProduct,
     resolve: (res: CheckoutResult) => void
   ) {
-    const options = {
+    const options: RazorpayOptions = {
       key: orderData.key_id,
       amount: orderData.amount,
       currency: orderData.currency,
       name: 'Astra Navi',
-      description: orderData.product_name || product.nameEn,
+      description: (orderData.product_name as string | undefined) || product.nameEn,
       order_id: orderData.order_id,
       prefill: {
         name: this.user?.name || '',
@@ -179,7 +215,7 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
 
     const rzp = new RazorpayClass(options);
 
-    rzp.on('payment.failed', (resp: any) => {
+    rzp.on('payment.failed', (resp: RazorpayPaymentFailure) => {
       console.error('[RazorpayCheckoutHandler] Transaction failed inside modal:', resp.error);
     });
 

@@ -66,6 +66,22 @@ interface AuthContextType {
     refreshProfile: () => Promise<void>;
 }
 
+/**
+ * Shape of `session.user` as consumed in this provider. next-auth augments
+ * the Session type (see src/types/next-auth.d.ts), but the augmented type
+ * intersects with next-auth's own `User` which does not declare `name`/`image`.
+ * We model the fields we actually read here so we can avoid `any` casts.
+ */
+interface SessionUser {
+    id: string;
+    email?: string | null;
+    phoneNumber?: string | null;
+    name?: string | null;
+    image?: string | null;
+    error?: string;
+    profileComplete?: boolean;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const SESSION_RECOVERY_URL = '/login?error=SessionExpired&sessionCleared=1';
@@ -91,9 +107,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // unnecessary re-fetches).
     const { syncLanguageFromProfile, language: contextLanguage } = useTranslation();
     const syncLangRef = useRef(syncLanguageFromProfile);
-    syncLangRef.current = syncLanguageFromProfile;
     const contextLanguageRef = useRef(contextLanguage);
-    contextLanguageRef.current = contextLanguage;
+    // Keep the refs in sync with the latest values from useTranslation without
+    // reading/writing them during render (which the react-hooks/refs rule
+    // forbids). They are read inside the main session/profile effect below,
+    // so we update them in an effect rather than adding them to that effect's
+    // dependency array (which would cause unnecessary re-fetches).
+    useEffect(() => {
+        syncLangRef.current = syncLanguageFromProfile;
+        contextLanguageRef.current = contextLanguage;
+    }, [syncLanguageFromProfile, contextLanguage]);
 
     const hasSessionError =
         session?.user?.error === "TokenReuseError" ||
@@ -103,26 +126,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isSessionLoading = status === 'loading';
     const sessionUserFallback: User | null =
         isLoggedIn && session?.user?.id
-            ? {
-                id: session.user.id,
-                email: session.user.email ?? null,
-                phoneNumber: session.user.phoneNumber ?? null,
-                name: (session.user as any).name || undefined,
-                image: (session.user as any).image ?? null,
-            }
+            ? (() => {
+                const su = session.user as SessionUser;
+                return {
+                    id: su.id,
+                    email: su.email ?? null,
+                    phoneNumber: su.phoneNumber ?? null,
+                    name: su.name || undefined,
+                    image: su.image ?? null,
+                };
+            })()
             : null;
     const effectiveUser = user ?? sessionUserFallback;
     // OAuth-only onboarding hint (Google etc.). Live profile data overrides it.
-    const needsOnboardingHint = isLoggedIn && (session?.user as any)?.profileComplete === false;
+    const needsOnboardingHint = isLoggedIn && (session?.user as SessionUser | undefined)?.profileComplete === false;
 
     useEffect(() => {
         if (session?.user) {
-            const sessionUser = session.user as any;
+            const sessionUser = session.user as SessionUser;
             
 // Handle NextAuth refresh errors.
-            // TokenReuseError and RefreshAccessTokenError are now persisted in the
-            // JWT cookie by the JWT callback so the middleware (auth.config.ts) can
+            // TokenReuseError and GoogleExchangeError are persisted in the JWT
+            // cookie by the JWT callback so the middleware (auth.config.ts) can
             // detect them and redirect to /login before the page loads.
+            // RefreshAccessTokenError is handled as TRANSIENT on the server now
+            // (the JWT callback no longer persists it — it bumps the token's
+            // expiry by 60s and retries on the next request instead), so this
+            // branch is defensive: if the flag ever does appear, we do NOT sign
+            // out — we clear local state and let the next session poll retry.
             if (sessionUser.error === "TokenReuseError") {
                 setUser(null);
                 setProfileComplete(false);

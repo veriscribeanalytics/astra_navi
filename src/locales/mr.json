@@ -18,7 +18,9 @@
     "returnHome": "घरी परत या",
     "cancel": "रद्द करा",
     "save": "जतन करा",
-    "saved": "जतन केले"
+    "saved": "जतन केले",
+    "close": "बंद करा",
+    "revoke": "रद्द करा"
   },
   "nav": {
     "dailyRewards": "दैनंदिन बक्षिसे",
@@ -74,7 +76,13 @@
     "logoutConfirmMessage": "तुम्हाला तुमच्या खात्यातून साइन आउट केले जाईल आणि मुख्यपृष्ठावर पुनर्निर्देशित केले जाईल.",
     "signOut": "साइन आउट",
     "account": "खाते",
-    "getStarted": "सुरुवात करा"
+    "getStarted": "सुरुवात करा",
+    "communityHub": "समुदाय हब",
+    "communityHubDesc": "सहसाधकांशी जोडा — मंडळे, चर्चा आणि कार्यक्रम.",
+    "messages": "संदेश",
+    "messagesDesc": "तुमच्या संपर्कांसोबत खाजगी चॅट",
+    "ourServices": "आमच्या सेवा",
+    "ourServicesDesc": "AstraNavi च्या सर्व AI आणि वैदिक सेवा एक्सप्लोर करा"
   },
   "footer": {
     "tagline": "आधुनिक मनासाठी ज्योतिषशास्त्राची गणितीय अचूकता जतन करणे.",
@@ -399,7 +407,8 @@
     "familyStatusNew": "नवीन",
     "familyInviteBanner": "तुमच्याकडे {count} कौटुंबिक आमंत्रण प्रलंबित आहे",
     "familyInviteBannerPlural": "तुमच्याकडे {count} कौटुंबिक आमंत्रणे प्रलंबित आहेत",
-    "familyInviteReview": "पुनरावलोकन"
+    "familyInviteReview": "पुनरावलोकन",
+    "familyNoVerdict": "आज स्थिर नाते. संभाषण आणि सामायिक निर्णयांसाठी चांगली ऊर्जा."
   },
   "horoscope": {
     "yourDayToday": "आजचा तुमचा दिवस",
@@ -457,7 +466,7 @@
     "inscribeIdentity": "तुमची ओळख नोंदवा",
     "signIn": "साइन इन करा",
     "joinCelestialJourney": "खगोलीय प्रवासात सामील व्हा.",
-    "welcomeBack": "Welcome back",
+    "welcomeBack": "AstraNavi वर परत स्वागत आहे.",
     "fullName": "पूर्ण नाव",
     "dob": "जन्मतारीख",
     "tob": "जन्म वेळ",
@@ -505,7 +514,10 @@
     "consentTerms": "मी सहमत आहे: ",
     "consentProcessing": "मी गोपनीयता धोरणामध्ये वर्णन केल्यानुसार वैदिक ज्योतिषीय चार्ट, AI-चालित वाचन आणि वैयक्तिकृत राशीभविष्य अंतर्दृष्टी तयार करण्यासाठी जन्माच्या तपशीलांसह माझ्या वैयक्तिक डेटाच्या प्रक्रियेस संमती देतो. मी समजतो की मी ही संमती कधीही मागे घेऊ शकतो.",
     "mustBe18": "Astra Navi वापरण्यासाठी तुमचे वय १८ किंवा त्याहून अधिक असणे आवश्यक आहे.",
-    "lockedShort": "लॉक केलेले"
+    "lockedShort": "लॉक केलेले",
+    "consentGooglePart1": "मी 18 वर्षे किंवा त्यापेक्षा जास्त वयाचा आहे आणि मी सहमत आहे",
+    "consentGooglePart2": "आणि",
+    "consentGooglePart3": ", यासोबत, आणि वैदिक ज्योतिषीय चार्ट आणि रीडिंग तयार करण्यासाठी माझे जन्म तपशील वगैरे माझ्या वैयक्तिक डेटाच्या प्रक्रियेस मंजूरी देतो."
   },
   "about": {
     "theTradition": "परंपरा",
@@ -846,7 +858,8 @@
       "online": "ऑनलाइन",
       "viewChartContext": "कुंडली संदर्भ पहा",
       "closeChat": "चॅट बंद करा",
-      "back": "मागे"
+      "back": "मागे",
+      "voiceMode": "व्हॉइस मोड"
     },
     "feedback": {
       "ratingLabels": {
@@ -1083,7 +1096,34 @@
     "pendingRunCompatCost": "{cost} क्रेडिट्स",
     "pendingActionRunning": "चालू आहे…",
     "pendingActionError": "पूर्ण होऊ शकले नाही — कृपया नंतर पुन्हा प्रयत्न करा.",
-    "familyPrefillAria": "Send suggested question about this relationship"
+    "familyPrefillAria": "या नात्याबद्दल सुचवलेला प्रश्न पाठवा",
+    "conversation": {
+      "autoListen": "Navi बोलणे संपवल्यावर तुम्ही बोला",
+      "exit": "व्हॉइस मोडमधून बाहेर पडा",
+      "listening": "ऐकत आहे…",
+      "micError": "व्हॉइस मोडसाठी मायक्रोफोन प्रवेश आवश्यक आहे.",
+      "notSupported": "या ब्राउझरमध्ये व्हॉइस मोड समर्थित नाही.",
+      "speaking": "Navi बोलत आहे…",
+      "talkToInterrupt": "मध्ये बोलण्यासाठी आताच बोलायला सुरुवात करा",
+      "tapToInterrupt": "बोलण्यासाठी मायक टॅप करा",
+      "tapToSpeak": "बोलण्यासाठी टॅप करा",
+      "tapToStop": "रद्द करण्यासाठी टॅप करा",
+      "thinking": "Navi विचार करत आहे…"
+    },
+    "report": "तक्रार करा",
+    "reportCancel": "रद्द करा",
+    "reportDetailsPlaceholder": "कोणतेही तपशील जोडा (पर्यायी)",
+    "reportError": "तक्रार सादर करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
+    "reportRateLimited": "तुम्ही अलीकडे खूप तक्रारी केल्या आहेत. कृपया नंतर पुन्हा प्रयत्न करा.",
+    "reportReasonHarmful": "हानिकारक सल्ला",
+    "reportReasonInaccurate": "चुकीचे / अयोग्य",
+    "reportReasonOffensive": "आक्षेपार्ह मजकूर",
+    "reportReasonOther": "इतर काही",
+    "reportSubmit": "तक्रार सादर करा",
+    "reportSuccess": "तक्रारीबद्दल धन्यवाद. आम्ही पाहू.",
+    "reportTitle": "हे उत्तर तक्रार करा",
+    "thumbDown": "वाईट उत्तर",
+    "thumbUp": "चांगले उत्तर"
   },
   "healthForecast": {
     "title": "आरोग्य अंदाज",
@@ -1531,7 +1571,47 @@
       "spouse": "जोडीदार",
       "friend": "मित्र",
       "other": "इतर"
-    }
+    },
+    "accept": "स्वीकारा",
+    "addMoreDesc": "आई-वडील, जीवनसाथी किंवा जवळच्या मित्रांना जोडून अधिक पूर्ण सुसंगतता चित्र तयार करा.",
+    "addMoreTitle": "आणखी कुटुंब सदस्य जोडा",
+    "chartFreeBadge": "विनामूल्य स्नॅपशॉट",
+    "checkCompatibility": "सुसंगतता तपासा",
+    "compatibilityAvailable": "सुसंगतता उपलब्ध",
+    "compatibilityChecked": "सुसंगतता तपासली",
+    "detailedReportCredits": "तपशीलवार अहवाल · {n} क्रेडिट",
+    "disconnect": "संपर्क तोडा",
+    "discoverDesc": "जोडण्यासाठी इतर AstraNavi वापरकर्त्यांना शोधा.",
+    "discoverTitle": "लोक शोधा",
+    "inviteAcceptError": "आमंत्रण स्वीकारता आले नाही",
+    "inviteRevokeError": "आमंत्रण रद्द करता आले नाही",
+    "inviteShort": "आमंत्रण",
+    "noStrengths": "कोणताही मोठा बलस्थान ठळक करण्यात आला नाही.",
+    "noTensions": "कोणताही मोठा ताण बिंदू ठळक करण्यात आला नाही.",
+    "outgoingInvitesDesc": "तुम्ही आधीच पाठवलेली आमंत्रणे.",
+    "outgoingInvitesTitle": "पाठवलेली आमंत्रणे",
+    "pendingIncomingDesc": "स्वीकारण्याची वाट पाहत आमंत्रणे तुमच्याकडे आहेत.",
+    "pendingInvitesTitle": "प्रलंबित आमंत्रणे",
+    "relationshipNotSet": "संपर्क",
+    "sharingBlockedBoth": "सुसंगतता मोजण्यापूर्वी तुम्हा दोघांनीही शेअरिंग सक्षम करणे आवश्यक आहे.",
+    "sharingBlockedBothHint": "आधी तुमची बाजू चालू करा, नंतर त्यांनाही शेअरिंग सक्षम करण्यास सांगा.",
+    "sharingBlockedThem": "{name} यांना शेअरिंग सक्षम करण्याची वाट पाहत आहे.",
+    "sharingBlockedThemHint": "त्यांना त्यांच्या कुटुंब सेटिंग्जमध्ये शेअरिंग सक्षम करण्यास सांगा. त्यांना {email} वर संपर्क करू शकता.",
+    "sharingBlockedYou": "सुसंगतता अनलॉक करण्यासाठी शेअरिंग सक्षम करा.",
+    "sharingBlockedYouHint": "सिनास्ट्री मोजण्यासाठी खालील {name} सोबत शेअरिंग चालू करा.",
+    "sharingEnable": "शेअरिंग सक्षम करा",
+    "sharingEnableMine": "माझी बाजू सक्षम करा",
+    "statusCompleteShort": "पूर्ण",
+    "statusIncompleteShort": "अपूर्ण",
+    "statusNeedsAttentionShort": "लक्ष द्या",
+    "statusStableShort": "स्थिर",
+    "suggested": "सुचवलेले",
+    "turnOnSharingDesc": "एका संपर्कासोबत द्विमार्गी शेअरिंग सक्षम करून त्यांना कुटुंबात आणा.",
+    "turnOnSharingTitle": "शेअरिंग चालू करा",
+    "viewAllInvites": "सर्व आमंत्रणे पहा",
+    "viewBond": "नाते पहा",
+    "viewConnections": "संपर्क पहा",
+    "viewProfile": "प्रोफाइल पहा"
   },
   "match": {
     "mangal": {
@@ -1547,7 +1627,10 @@
         "low": "कमी",
         "medium": "मध्यम",
         "high": "उच्च"
-      }
+      },
+      "compatible": "सुसंगत",
+      "important": "महत्त्वाचे",
+      "needsAttention": "लक्ष द्या"
     },
     "additional": {
       "title": "अतिरिक्त तपासण्या",
@@ -1659,7 +1742,8 @@
       "firstNamePlaceholder": "पहिले नाव",
       "lastNameLabel": "आडनाव",
       "lastNamePlaceholder": "आडनाव",
-      "consentRequired": "तुमचे खाते तयार करण्यासाठी कृपया वरील सर्व मान्यतांची पुष्टी करा."
+      "consentRequired": "तुमचे खाते तयार करण्यासाठी कृपया वरील सर्व मान्यतांची पुष्टी करा.",
+      "consentRequiredGoogle": "Google मार्फत सुरू ठेवण्यासाठी कृपया वरील मान्यतेची पुष्टी करा."
     },
     "errorBanner": {
       "dismiss": "त्रुटी रद्द करा"
@@ -1704,7 +1788,8 @@
       "submit": "पासवर्ड रीसेट करा",
       "successTitle": "पासवर्ड रीसेट यशस्वी",
       "successSubtitle": "तुमचा पासवर्ड यशस्वीरित्या रीसेट करण्यात आला आहे.",
-      "proceedToLogin": "लॉगिनवर जा"
+      "proceedToLogin": "लॉगिनवर जा",
+      "success": "पासवर्ड यशस्वीरित्या रीसेट करण्यात आला."
     },
     "passwordReset": {
       "title": "पासवर्ड रिसेट करा",
@@ -1756,7 +1841,10 @@
       "resendCode": "कोड पुन्हा पाठवा",
       "otpExpired": "कोड संपला — पुन्हा पाठवा",
       "otpIncorrect": "चुकीचा कोड",
-      "otpLocked": "अनेक चुकीचे प्रयत्न. नवीन कोड विनंती करा."
+      "otpLocked": "अनेक चुकीचे प्रयत्न. नवीन कोड विनंती करा.",
+      "codeSentTo": "आम्ही एक कोड पाठवला आहे",
+      "invalidOtp": "कृपया वैध 6-अंकी कोड टाका.",
+      "invalidPhone": "कृपया देश कोडसह वैध फोन नंबर टाका (उदा. +919876543210)."
     },
     "email": {
       "emailLabel": "ईमेल पत्ता",
@@ -1769,7 +1857,10 @@
       "resendCode": "कोड पुन्हा पाठवा",
       "otpExpired": "कोड संपला — पुन्हा पाठवा",
       "otpIncorrect": "चुकीचा कोड",
-      "otpLocked": "अनेक चुकीचे प्रयत्न. नवीन कोड विनंती करा."
+      "otpLocked": "अनेक चुकीचे प्रयत्न. नवीन कोड विनंती करा.",
+      "codeSentTo": "आम्ही एक कोड पाठवला आहे",
+      "invalidEmail": "कृपया एक वैध ईमेल पत्ता टाका.",
+      "invalidOtp": "6-अंकी कोड टाका."
     }
   },
   "home": {
@@ -1954,7 +2045,11 @@
       "activationPathDesc": "मुख्यतः संबंधित ग्रहांच्या प्रमुख दशा / भुक्ति अवधीत ट्रिगर होते.",
       "yogaAnalysisScan": "योग विश्लेषण स्कॅन",
       "discoverCombinations": "आपल्या कुंडलीमधील लपलेले संयोजन शोधा",
-      "scanChart": "माझी कुंडली स्कॅन करा"
+      "scanChart": "माझी कुंडली स्कॅन करा",
+      "classificationLabel": "वर्गीकरण",
+      "keyPlanetsLabel": "मुख्य ग्रह",
+      "logicLabel": "तर्क",
+      "potencyLabel": "शक्ती"
     },
     "remedies": {
       "title": "पवित्र",
@@ -2177,7 +2272,12 @@
       "blockedEmpty": "तुम्ही कोणालाही ब्लॉक केलेले नाही.",
       "unblock": "अनब्लॉक करा",
       "unblocking": "अनब्लॉक करत आहे…"
-    }
+    },
+    "basicInfo": {
+      "language": "भाषा"
+    },
+    "imageUploadFailed": "प्रोफाइल चित्र अपलोड करण्यात अयशस्वी",
+    "imageUploadSuccess": "प्रोफाइल चित्र अद्ययावत केले"
   },
   "support": {
     "title": "समर्थन संपर्क करा",
@@ -2550,7 +2650,14 @@
     "noStreakYet": "आज बक्षीस मिळवून तुमची मालिका सुरू करा!",
     "streakResetNotice": "एक दिवस चुकल्यास तुमची मालिका दिवस १ वर परत येते.",
     "howItWorks": "हे कसे चालते",
-    "howItWorksDesc": "दिवसातून एकदा बक्षीस मिळवा. प्रत्येक सलग दिवस तुमची मालिका वाढवतो आणि मोठी बक्षिसे उघडतो — दिवस ७ म्हणजे जॅकपॉट. एक दिवस चुकल्यास तुम्ही दिवस १ पासून पुन्हा सुरू कराल. मध्यरात्री UTC वाजता पुन्हा सेट होते."
+    "howItWorksDesc": "दिवसातून एकदा बक्षीस मिळवा. प्रत्येक सलग दिवस तुमची मालिका वाढवतो आणि मोठी बक्षिसे उघडतो — दिवस ७ म्हणजे जॅकपॉट. एक दिवस चुकल्यास तुम्ही दिवस १ पासून पुन्हा सुरू कराल. मध्यरात्री UTC वाजता पुन्हा सेट होते.",
+    "creditsClaimed": "+{credits} क्रेडिट्स मिळवले",
+    "dayOfSeven": "{total} पैकी दिवस {day}",
+    "journeyHint": "{credits}-क्रेडिट बोनस अनलॉक करण्यासाठी सर्व 7 दिवस पूर्ण करा.",
+    "journeyTitle": "तुमची 7-दिवसीय यात्रा",
+    "nextClaimIn": "पुढील क्लेम",
+    "streakActive": "तुमची {days}-दिवसांची स्ट्रीक सक्रिय आहे.",
+    "todayClaimedTitle": "आजचे बक्षीस मिळवले"
   },
   "errors": {
     "generic": "काहीतरी चुकले. कृपया पुन्हा प्रयत्न करा.",
@@ -2623,71 +2730,101 @@
     "viewFullPage": "पूर्ण रिवॉर्ड्स पेज पहा"
   },
   "familyDashboard": {
-    "title": "Your Bond Dashboard",
-    "subtitle": "Daily relationship forecast",
-    "backToFamily": "Back to Family",
-    "yourBondToday": "Your Bond Today",
-    "todayLabel": "Today",
-    "todayVsBaseline": "Today vs. your permanent baseline",
-    "baselineLabel": "Baseline",
-    "baselineHint": "Your permanent compatibility",
-    "guidanceTitle": "Today's Relationship Guidance",
-    "guidanceBestFor": "Best for",
-    "guidanceAvoid": "Avoid",
-    "guidanceApproach": "Approach",
-    "guidanceUnlock": "Unlock best-for, avoid & approach guidance with Pro",
-    "chipsTitle": "Today's Bond Themes",
-    "chipsUnlock": "Unlock bond theme, communication & shared mood with Pro",
-    "timeTitle": "Connection Windows",
-    "timeGoodTitle": "Good Connection Window",
-    "timeAlertTitle": "Relationship Alert",
-    "timeNone": "No notable window today.",
-    "timeLord": "Lord",
-    "timeUnlock": "Unlock good-connection & alert time windows with Pro",
-    "horaSunrise": "Vedic Hora (sunrise)",
-    "horaFixed": "Fixed time",
-    "areasTitle": "Relationship Areas at a Glance",
-    "areasStrongest": "Strongest",
-    "areasNeedsCare": "Needs care",
-    "areasStable": "Stable",
-    "areasHarmony": "harmony",
-    "areasRisk": "risk",
-    "areasUnlock": "Unlock all six relationship areas with Pro",
-    "areasUnlockSub": "Communication, emotional bond, trust, support, cooperation & conflict sensitivity — with daily insights.",
+    "title": "तुमचा बंध डॅशबोर्ड",
+    "subtitle": "दैनंदिन नाते अंदाज",
+    "backToFamily": "कुटुंबाकडे परत जा",
+    "yourBondToday": "आजचे तुमचे बंध",
+    "todayLabel": "आज",
+    "todayVsBaseline": "आज vs तुमची कायम आधार रेषा",
+    "baselineLabel": "आधार रेषा",
+    "baselineHint": "तुमची कायमची सुसंगतता",
+    "guidanceTitle": "आजचे नाते मार्गदर्शन",
+    "guidanceBestFor": "यासाठी सर्वोत्तम",
+    "guidanceAvoid": "टाळा",
+    "guidanceApproach": "दृष्टिकोन",
+    "guidanceUnlock": "Pro मार्फत सर्वोत्तम-कशासाठी, टाळणे आणि दृष्टिकोन मार्गदर्शन अनलॉक करा",
+    "chipsTitle": "आजचे बंध थीम्स",
+    "chipsUnlock": "Pro मार्फत बंध थीम, संवाद आणि सामायिक मूड अनलॉक करा",
+    "timeTitle": "संपर्क विंडो",
+    "timeGoodTitle": "चांगली संपर्क विंडो",
+    "timeAlertTitle": "नाते सूचना",
+    "timeNone": "आज उल्लेखनीय विंडो नाही.",
+    "timeLord": "अधिपती",
+    "timeUnlock": "Pro मार्फत चांगल्या-संपर्क आणि सूचना वेळ विंडो अनलॉक करा",
+    "horaSunrise": "वैदिक होरा (सूर्योदय)",
+    "horaFixed": "निश्चित वेळ",
+    "areasTitle": "एका नजरेत नात्याचे क्षेत्र",
+    "areasStrongest": "सर्वात मजबूत",
+    "areasNeedsCare": "काळजी घ्या",
+    "areasStable": "सर्वात संतुलित",
+    "areasHarmony": "सामंजस्य",
+    "areasRisk": "जोखीम",
+    "areasUnlock": "Pro मार्फत सर्व सहा नात्याची क्षेत्रे अनलॉक करा",
+    "areasUnlockSub": "संवाद, भावनिक बंध, विश्वास, आधार, सहकार्य आणि संघर्ष संवेदनशीलता — दैनंदिन अंतर्दृष्टीसह.",
     "areas": {
-      "communication": "Communication",
-      "emotional_bond": "Emotional Bond",
-      "trust": "Trust",
-      "support": "Support",
-      "cooperation": "Cooperation",
-      "conflict_sensitivity": "Conflict Sensitivity"
+      "communication": "संवाद",
+      "emotional_bond": "भावनिक बंध",
+      "trust": "विश्वास",
+      "support": "आधार",
+      "cooperation": "सहकार्य",
+      "conflict_sensitivity": "संघर्ष संवेदनशीलता",
+      "conflict_handling": "संघर्ष व्यवस्थापन"
     },
-    "weeklyTitle": "Your Bond This Week",
-    "weeklyBest": "Best day",
-    "weeklyWorst": "Toughest day",
-    "weeklyAverage": "Average",
-    "weeklyTrend": "Trend",
-    "weeklyNoteUnlock": "Unlock the best-day guidance note with Pro.",
-    "compatTitle": "Compatibility Summary",
-    "compatStrength": "Main strength",
-    "compatTension": "Main tension",
-    "locationBirth": "based on your birth location",
-    "locationFixed": "based on a default location",
-    "degradedTitle": "Bond reading unavailable",
-    "degradedBody": "Transit calculation is temporarily unavailable. Please try again later.",
-    "degradedRetry": "Try again",
-    "sharingTitle": "Sharing required",
-    "sharingBody": "Enable two-way sharing with this connection to view their bond dashboard.",
-    "sharingManage": "Manage connection",
-    "noMembers": "You haven't added any family members yet",
-    "noMemberHint": "Add a family member or invite a connection to view your daily bond dashboard.",
-    "addMember": "Add a member",
-    "unnamed": "Unnamed",
-    "hardGateTitle": "Unlock the full bond dashboard",
-    "hardGateBody": "Upgrade to Pro to reveal bond themes, time windows, all six relationship areas, and the weekly best-day note.",
-    "askCta": "Ask about this relationship",
-    "askCtaSub": "Open a guided chat about your bond with the family chart tools ready.",
-    "askCtaBtn": "Ask",
-    "askError": "Could not start the conversation."
+    "weeklyTitle": "या आठवड्यात तुमचे बंध",
+    "weeklyBest": "सर्वोत्तम दिवस",
+    "weeklyWorst": "सर्वात कठीण दिवस",
+    "weeklyAverage": "सरासरी",
+    "weeklyTrend": "वृत्ती",
+    "weeklyNoteUnlock": "Pro मार्फत सर्वोत्तम-दिवस मार्गदर्शन नोट अनलॉक करा.",
+    "compatTitle": "सुसंगतता सारांश",
+    "compatStrength": "मुख्य बल",
+    "compatTension": "मुख्य ताण",
+    "locationBirth": "तुमच्या जन्मस्थानावर आधारित",
+    "locationFixed": "एका डिफॉल्ट स्थानावर आधारित",
+    "degradedTitle": "बंध रीडिंग उपलब्ध नाही",
+    "degradedBody": "ट्रान्झिट गणना तात्पुरती उपलब्ध नाही. कृपया नंतर पुन्हा प्रयत्न करा.",
+    "degradedRetry": "पुन्हा प्रयत्न करा",
+    "sharingTitle": "शेअरिंग आवश्यक",
+    "sharingBody": "त्यांचा बंध डॅशबोर्ड पाहण्यासाठी या संपर्कासोबत द्विमार्गी शेअरिंग सक्षम करा.",
+    "sharingManage": "संपर्क व्यवस्थापित करा",
+    "noMembers": "तुम्ही अद्याप कोणतेही कुटुंब सदस्य जोडले नाहीत",
+    "noMemberHint": "तुमचा दैनंदिन बंध डॅशबोर्ड पाहण्यासाठी एक कुटुंब सदस्य जोडा किंवा संपर्कास आमंत्रित करा.",
+    "addMember": "एक सदस्य जोडा",
+    "unnamed": "निनावी",
+    "hardGateTitle": "संपूर्ण बंध डॅशबोर्ड अनलॉक करा",
+    "hardGateBody": "बंध थीम्स, वेळ विंडो, सर्व सहा नात्याची क्षेत्रे आणि साप्ताहिक सर्वोत्तम-दिवस नोट उघडण्यासाठी Pro मध्ये अपग्रेड करा.",
+    "askCta": "या नात्याबद्दल विचारा",
+    "askCtaSub": "कुटुंब चार्ट साधने तयार ठेवून तुमच्या नात्याविषयी मार्गदर्शित चॅट उघडा.",
+    "askCtaBtn": "विचारा",
+    "askError": "संभाषण सुरू करता आले नाही.",
+    "compatBaselineHint": "दीर्घकालीन नात्याची आधार रेषा",
+    "compatCaption": "तुमची कायमची सुसंगतता",
+    "deltaAbove": "तुमच्या कायम आधार रेषेपेक्षा {n} गुण वर",
+    "deltaBelow": "तुमच्या कायम आधार रेषेपेक्षा {n} गुण खाली",
+    "horaSunriseHint": "तुमच्या जतन केलेल्या जन्मस्थानी सूर्योदय आणि सूर्यास्त वापरून मोजले.",
+    "riskLabel": "जोखीम",
+    "stableWeek": "स्थिर आठवडा — तुमचे नाते सातत्याने सहाय्यक राहते.",
+    "timeAlertNone": "आज कोणताही मोठा नाते सूचना नाही",
+    "timeGoodNone": "आज उल्लेखनीय संपर्क विंडो नाही.",
+    "toneBalanced": "संतुलित",
+    "toneFavorable": "अनुकूल",
+    "toneNeedsCare": "काळजी घ्या",
+    "toneSensitive": "संवेदनशील",
+    "viewDetailed": "तपशीलवार सुसंगतता पहा"
+  },
+  "community": {
+    "comingSoon": "लवकरच",
+    "cta": "वेटिंग लिस्टमध्ये सामील व्हा",
+    "ctaSignedIn": "AstraNavi एक्सप्लोर करा",
+    "feature1Desc": "तुमचे लोक शोधा — नक्षत्र, जीवन थीम आणि सामायिक हेतूनुसार संघटित लहान गट.",
+    "feature1Title": "वैश्विक मंडळे",
+    "feature2Desc": "ज्योतिषात तज्ज्ञ समुदायाकडून प्रश्न विचारा, रीडिंग शेअर करा आणि शिका.",
+    "feature2Title": "मार्गदर्शित चर्चा",
+    "feature3Desc": "आकाशीय कॅलेंडरनुसार वेळेत ट्रान्झिट विधी, प्रश्न-उत्तर सत्रे आणि उत्सव.",
+    "feature3Title": "थेट कार्यक्रम",
+    "notifyDesc": "तुमच्या आकाशीय खात्यात साइन इन करा; समुदाय उघडण्याच्या क्षणी आम्ही तुम्हाला आमंत्रित करू.",
+    "notifyTitle": "प्रथम जाणून घ्या",
+    "subtitle": "वैदिक ज्ञानाच्या साधकांसाठी एक मिलनभूमी घडत आहे. मंडळांमध्ये सामील व्हा, अंतर्दृष्टी शेअर करा आणि एकसमान आत्म्यांच्या एका तारामंडळासोबत वाढा.",
+    "title": "AstraNavi समुदाय"
   }
 }

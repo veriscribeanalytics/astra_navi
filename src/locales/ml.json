@@ -18,7 +18,9 @@
     "returnHome": "വീട്ടിലേക്ക് മടങ്ങുക",
     "cancel": "റദ്ദാക്കുക",
     "save": "സേവ് ചെയ്യുക",
-    "saved": "സേവ് ചെയ്തു"
+    "saved": "സേവ് ചെയ്തു",
+    "close": "അടയ്ക്കുക",
+    "revoke": "പിൻവലിക്കുക"
   },
   "nav": {
     "dailyRewards": "ദൈനംദിന സമ്മാനങ്ങൾ",
@@ -74,7 +76,13 @@
     "logoutConfirmMessage": "നിങ്ങളെ നിങ്ങളുടെ അക്കൗണ്ടിൽ നിന്ന് സൈൻ ഔട്ട് ചെയ്ത് ഹോംപേജിലേക്ക് മടക്കിക്കൊണ്ടുപോകും.",
     "signOut": "സൈൻ ഔട്ട്",
     "account": "അക്കൗണ്ട്",
-    "getStarted": "തുടങ്ങുക"
+    "getStarted": "തുടങ്ങുക",
+    "communityHub": "സമൂഹ ഹബ്",
+    "communityHubDesc": "സഹ അന്വേഷകരുമായി ബന്ധിപ്പിക്കുക — വൃത്തങ്ങൾ, ചർച്ചകൾ, ഇവന്റുകൾ.",
+    "messages": "സന്ദേശങ്ങൾ",
+    "messagesDesc": "നിങ്ങളുടെ കണക്ഷനുകളുമായി സ്വകാര്യ ചാറ്റുകൾ",
+    "ourServices": "ഞങ്ങളുടെ സേവനങ്ങൾ",
+    "ourServicesDesc": "AstraNavi-യുടെ എല്ലാ AI & വൈദിക സേവനങ്ങളും പര്യവേക്ഷണം ചെയ്യുക"
   },
   "footer": {
     "tagline": "ആധുനിക മനസ്സിനായി ജ്യോതിഷ ശാസ്ത്രത്തിൻ്റെ ഗണിതശാസ്ത്രപരമായ കൃത്യത സംരക്ഷിക്കുന്നു.",
@@ -399,7 +407,8 @@
     "familyStatusNew": "പുതിയത്",
     "familyInviteBanner": "നിങ്ങൾക്ക് {count} കുടുംബ ക്ഷണം ലഭിക്കാനുണ്ട്",
     "familyInviteBannerPlural": "നിങ്ങൾക്ക് {count} കുടുംബ ക്ഷണങ്ങൾ ലഭിക്കാനുണ്ട്",
-    "familyInviteReview": "അവലോകനം ചെയ്യുക"
+    "familyInviteReview": "അവലോകനം ചെയ്യുക",
+    "familyNoVerdict": "ഇന്ന് സ്ഥിരമായ ബന്ധം. സംഭാഷണത്തിനും പങ്കിട്ട തീരുമാനങ്ങൾക്കും നല്ല ഊർജ്ജം."
   },
   "horoscope": {
     "yourDayToday": "ഇന്ന് നിങ്ങളുടെ ദിവസം",
@@ -457,7 +466,7 @@
     "inscribeIdentity": "നിങ്ങളുടെ വ്യക്തിത്വം രേഖപ്പെടുത്തുക",
     "signIn": "സൈൻ ഇൻ ചെയ്യുക",
     "joinCelestialJourney": "ജ്യോതിശാസ്ത്ര യാത്രയിൽ ചേരുക.",
-    "welcomeBack": "Welcome back",
+    "welcomeBack": "AstraNavi-ലേക്ക് വീണ്ടും സ്വാഗതം.",
     "fullName": "മുഴുവൻ പേര്",
     "dob": "ജനനത്തീയതി",
     "tob": "ജനിച്ച സമയം",
@@ -505,7 +514,10 @@
     "consentTerms": "ഞാൻ ഇതിനോട് യോജിക്കുന്നു:",
     "consentProcessing": "Privacy Policy-ൽ വിവരിച്ചിരിക്കുന്നതുപോലെ വൈദിക ജാതക ചാർട്ടുകൾ, AI-അധിഷ്ഠിത റീഡിംഗുകൾ, വ്യക്തിഗതമാക്കിയ രാശിഫല വിവരങ്ങൾ എന്നിവ സൃഷ്ടിക്കുന്നതിനായി എൻ്റെ ജനനവിവരങ്ങൾ ഉൾപ്പെടെയുള്ള വ്യക്തിഗത ഡാറ്റ പ്രോസസ്സ് ചെയ്യുന്നതിന് ഞാൻ സമ്മതിക്കുന്നു. എനിക്ക് എപ്പോൾ വേണമെങ്കിലും ഈ സമ്മതം പിൻവലിക്കാൻ കഴിയുമെന്ന് ഞാൻ മനസ്സിലാക്കുന്നു.",
     "mustBe18": "Astra Navi ഉപയോഗിക്കാൻ നിങ്ങൾക്ക് 18 വയസോ അതിൽ കൂടുതലോ പ്രായമുണ്ടായിരിക്കണം.",
-    "lockedShort": "ലോക്ക് ചെയ്തത്"
+    "lockedShort": "ലോക്ക് ചെയ്തത്",
+    "consentGooglePart1": "ഞാൻ 18 വയസ്സോ അതിൽ കൂടുതലോ പ്രായമുള്ളവനും സമ്മതിക്കുന്നവനുമാണ്",
+    "consentGooglePart2": "ഒപ്പം",
+    "consentGooglePart3": ", കൂടി, വൈദിക ജ്യോതിഷ ചാർട്ടുകളും വായനകളും തയ്യാറാക്കാൻ എന്റെ ജനന വിശദാംശങ്ങൾ ഉൾപ്പെടെ എന്റെ വ്യക്തിഗത ഡാറ്റ പ്രോസസ്സിംഗിന് സമ്മതം നൽകുന്നു."
   },
   "about": {
     "theTradition": "പാരമ്പര്യം",
@@ -846,7 +858,8 @@
       "online": "ഓൺലൈൻ",
       "viewChartContext": "ജാതക വിവരങ്ങൾ കാണുക",
       "closeChat": "ചാറ്റ് അവസാനിപ്പിക്കുക",
-      "back": "പിന്നോട്ട്"
+      "back": "പിന്നോട്ട്",
+      "voiceMode": "വോയ്സ് മോഡ്"
     },
     "feedback": {
       "ratingLabels": {
@@ -1083,7 +1096,34 @@
     "pendingRunCompatCost": "{cost} ക്രെഡിറ്റുകൾ",
     "pendingActionRunning": "പ്രവർത്തിക്കുന്നു…",
     "pendingActionError": "പൂർത്തിയാക്കാൻ കഴിഞ്ഞില്ല — ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
-    "familyPrefillAria": "Send suggested question about this relationship"
+    "familyPrefillAria": "ഈ ബന്ധത്തെക്കുറിച്ച് നിർദ്ദേശിക്കപ്പെട്ട ചോദ്യം അയക്കുക",
+    "conversation": {
+      "autoListen": "Navi സംസാരിച്ചു തീർക്കുമ്പോൾ നിങ്ങൾ സംസാരിക്കുക",
+      "exit": "വോയ്സ് മോഡിൽ നിന്ന് പുറത്തുകടക്കുക",
+      "listening": "കേൾക്കുന്നു…",
+      "micError": "വോയ്സ് മോഡിന് മൈക്രോഫോൺ ആക്സസ് ആവശ്യമാണ്.",
+      "notSupported": "ഈ ബ്രൗസറിൽ വോയ്സ് മോഡ് പിന്തുണയ്ക്കുന്നില്ല.",
+      "speaking": "Navi സംസാരിക്കുന്നു…",
+      "talkToInterrupt": "തടസമില്ലാക്കാൻ ഇപ്പോൾ തന്നെ സംസാരിക്കാൻ തുടങ്ങുക",
+      "tapToInterrupt": "സംസാരിക്കാൻ മൈക് ടാപ്പ് ചെയ്യുക",
+      "tapToSpeak": "സംസാരിക്കാൻ ടാപ്പ് ചെയ്യുക",
+      "tapToStop": "റദ്ദാക്കാൻ ടാപ്പ് ചെയ്യുക",
+      "thinking": "Navi ചിന്തിക്കുന്നു…"
+    },
+    "report": "റിപ്പോർട്ട് ചെയ്യുക",
+    "reportCancel": "റദ്ദാക്കുക",
+    "reportDetailsPlaceholder": "എന്തെങ്കിലും വിശദാംശങ്ങൾ ചേർക്കുക (ഓപ്ഷണൽ)",
+    "reportError": "റിപ്പോർട്ട് സമർപ്പിക്കാനായില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+    "reportRateLimited": "നിങ്ങൾ അടുത്തിടെ ധാരാളം റിപ്പോർട്ടുകൾ നൽകി. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
+    "reportReasonHarmful": "ഹാനികരമായ ഉപദേശം",
+    "reportReasonInaccurate": "തെറ്റായത് / അസാധുവായത്",
+    "reportReasonOffensive": "അപലപനീയമായ ഉള്ളടക്കം",
+    "reportReasonOther": "മറ്റെന്തെങ്കിലും",
+    "reportSubmit": "റിപ്പോർട്ട് സമർപ്പിക്കുക",
+    "reportSuccess": "റിപ്പോർട്ടിന് നന്ദി. ഞങ്ങൾ നോക്കാം.",
+    "reportTitle": "ഈ മറുപടി റിപ്പോർട്ട് ചെയ്യുക",
+    "thumbDown": "മോശമായ മറുപടി",
+    "thumbUp": "നല്ല മറുപടി"
   },
   "healthForecast": {
     "title": "ആരോഗ്യ പ്രവചനം",
@@ -1531,7 +1571,47 @@
       "spouse": "പങ്കാളി",
       "friend": "സുഹൃത്ത്",
       "other": "മറ്റുള്ളവ"
-    }
+    },
+    "accept": "സ്വീകരിക്കുക",
+    "addMoreDesc": "മാതാപിതാക്കൾ, ജീവിതപങ്കാളി അല്ലെങ്കിൽ അടുത്ത സുഹൃത്തുക്കളെ ചേർത്ത് പൂർണ്ണമായ പൊരുത്ത ചിത്രം നിർമ്മിക്കുക.",
+    "addMoreTitle": "കൂടുതൽ കുടുംബാംഗങ്ങളെ ചേർക്കുക",
+    "chartFreeBadge": "സൗജന്യ സ്നാപ്പ്ഷോട്ട്",
+    "checkCompatibility": "പൊരുത്തം പരിശോധിക്കുക",
+    "compatibilityAvailable": "പൊരുത്തം ലഭ്യം",
+    "compatibilityChecked": "പൊരുത്തം പരിശോധിച്ചു",
+    "detailedReportCredits": "വിശദമായ റിപ്പോർട്ട് · {n} ക്രെഡിറ്റുകൾ",
+    "disconnect": "കണക്ഷൻ വിഛ്ഛിന്നിപ്പിക്കുക",
+    "discoverDesc": "ബന്ധിപ്പിക്കാൻ മറ്റ് AstraNavi ഉപയോക്താക്കളെ തിരയുക.",
+    "discoverTitle": "ആളുകളെ കണ്ടെത്തുക",
+    "inviteAcceptError": "ക്ഷണം സ്വീകരിക്കാൻ കഴിഞ്ഞില്ല",
+    "inviteRevokeError": "ക്ഷണം പിൻവലിക്കാൻ കഴിഞ്ഞില്ല",
+    "inviteShort": "ക്ഷണിക്കുക",
+    "noStrengths": "പ്രധാന ശക്തികൾ ഒന്നും എടുത്തുകാണിച്ചിട്ടില്ല.",
+    "noTensions": "പ്രധാന പിരിമുറുക്ക ബിന്ദുക്കൾ എടുത്തുകാണിച്ചിട്ടില്ല.",
+    "outgoingInvitesDesc": "നിങ്ങൾ ഇതിനകം അയച്ച ക്ഷണങ്ങൾ.",
+    "outgoingInvitesTitle": "അയച്ച ക്ഷണങ്ങൾ",
+    "pendingIncomingDesc": "സ്വീകരിക്കാൻ കാത്തിരിക്കുന്ന ക്ഷണങ്ങൾ നിങ്ങളുടെ കയ്യിലുണ്ട്.",
+    "pendingInvitesTitle": "നിലവിലുള്ള ക്ഷണങ്ങൾ",
+    "relationshipNotSet": "കണക്ഷൻ",
+    "sharingBlockedBoth": "പൊരുത്തം കണക്കാക്കുന്നതിന് മുമ്പ് നിങ്ങൾ ഇരുവരും ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കണം.",
+    "sharingBlockedBothHint": "ആദ്യം നിങ്ങളുടെ വശം ഓൺ ചെയ്യുക, പിന്നെ അവരോടും ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കാൻ പറയുക.",
+    "sharingBlockedThem": "{name} ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കാൻ കാത്തിരിക്കുന്നു.",
+    "sharingBlockedThemHint": "അവരോട് അവരുടെ കുടുംബ സെറ്റിംഗുകളിൽ ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കാൻ പറയുക. അവരെ {email}-ൽ ബന്ധപ്പെടാം.",
+    "sharingBlockedYou": "പൊരുത്തം അൺലോക്ക് ചെയ്യാൻ ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കുക.",
+    "sharingBlockedYouHint": "സിനാസ്ട്രി കണക്കാക്കാൻ താഴെ {name}-ന് ഷെയറിംഗ് ഓൺ ചെയ്യുക.",
+    "sharingEnable": "ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കുക",
+    "sharingEnableMine": "എന്റെ വശം പ്രവർത്തനക്ഷമമാക്കുക",
+    "statusCompleteShort": "പൂർണ്ണം",
+    "statusIncompleteShort": "പൂർണ്ണമല്ലാത്ത",
+    "statusNeedsAttentionShort": "ശ്രദ്ധ ആവശ്യം",
+    "statusStableShort": "സ്ഥിരം",
+    "suggested": "നിർദ്ദേശിക്കപ്പെട്ടത്",
+    "turnOnSharingDesc": "ഒരു കണക്ഷനുമായി ദ്വിമുഖ ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കി അവരെ കുടുംബത്തിലേക്ക് കൊണ്ടുവരിക.",
+    "turnOnSharingTitle": "ഷെയറിംഗ് ഓൺ ചെയ്യുക",
+    "viewAllInvites": "എല്ലാ ക്ഷണങ്ങളും കാണുക",
+    "viewBond": "ബന്ധം കാണുക",
+    "viewConnections": "കണക്ഷനുകൾ കാണുക",
+    "viewProfile": "പ്രൊഫൈൽ കാണുക"
   },
   "match": {
     "mangal": {
@@ -1547,7 +1627,10 @@
         "low": "കുറഞ്ഞത്",
         "medium": "മിതമായത്",
         "high": "കൂടിയത്"
-      }
+      },
+      "compatible": "പൊരുത്തപ്പെടുന്ന",
+      "important": "പ്രധാനം",
+      "needsAttention": "ശ്രദ്ധ ആവശ്യം"
     },
     "additional": {
       "title": "അധിക പരിശോധനകൾ",
@@ -1659,7 +1742,8 @@
       "firstNamePlaceholder": "ആദ്യ നാമം",
       "lastNameLabel": "അവസാന നാമം",
       "lastNamePlaceholder": "അവസാന നാമം",
-      "consentRequired": "അക്കൗണ്ട് സൃഷ്ടിക്കുന്നതിന് ദയവായി മുകളിലുള്ള എല്ലാ കാര്യങ്ങളും സ്ഥിരീകരിക്കുക."
+      "consentRequired": "അക്കൗണ്ട് സൃഷ്ടിക്കുന്നതിന് ദയവായി മുകളിലുള്ള എല്ലാ കാര്യങ്ങളും സ്ഥിരീകരിക്കുക.",
+      "consentRequiredGoogle": "Google വഴി തുടരാൻ ദയവായി മുകളിലുള്ള അംഗീകാരം ഉറപ്പിക്കുക."
     },
     "errorBanner": {
       "dismiss": "പിശക് നീക്കുക"
@@ -1704,7 +1788,8 @@
       "submit": "പാസ്‌വേഡ് റീസെറ്റ് ചെയ്യുക",
       "successTitle": "പാസ്‌വേഡ് റീസെറ്റ് വിജയകരം",
       "successSubtitle": "നിങ്ങളുടെ പാസ്‌വേഡ് വിജയകരമായി റീസെറ്റ് ചെയ്‌തു.",
-      "proceedToLogin": "ലോഗിനിലേക്ക് പോകുക"
+      "proceedToLogin": "ലോഗിനിലേക്ക് പോകുക",
+      "success": "പാസ്‌വേഡ് വിജയകരമായി പുനഃസജ്ജമാക്കി."
     },
     "passwordReset": {
       "title": "പാസ്‌വേഡ് റീസെറ്റ് ചെയ്യുക",
@@ -1756,7 +1841,10 @@
       "resendCode": "കോഡ് വീണ്ടും അയയ്ക്കുക",
       "otpExpired": "കോഡ് കാലഹരണപ്പെട്ടു — വീണ്ടും അയയ്ക്കുക",
       "otpIncorrect": "തെറ്റായ കോഡ്",
-      "otpLocked": "പല തെറ്റായ ശ്രമങ്ങൾ. പുതിയ കോഡ് ആവശ്യപ്പെടുക."
+      "otpLocked": "പല തെറ്റായ ശ്രമങ്ങൾ. പുതിയ കോഡ് ആവശ്യപ്പെടുക.",
+      "codeSentTo": "ഞങ്ങൾ ഒരു കോഡ് അയച്ചു",
+      "invalidOtp": "ദയവായി സാധുവായ 6-അക്ക കോഡ് നൽകുക.",
+      "invalidPhone": "ദയവായി രാജ്യ കോഡ് ഉൾപ്പെടെ സാധുവായ ഫോൺ നമ്പർ നൽകുക (ഉദാ. +919876543210)."
     },
     "email": {
       "emailLabel": "ഇമെയിൽ വിലാസം",
@@ -1769,7 +1857,10 @@
       "resendCode": "കോഡ് വീണ്ടും അയയ്ക്കുക",
       "otpExpired": "കോഡ് കാലഹരണപ്പെട്ടു — വീണ്ടും അയയ്ക്കുക",
       "otpIncorrect": "തെറ്റായ കോഡ്",
-      "otpLocked": "പല തെറ്റായ ശ്രമങ്ങൾ. പുതിയ കോഡ് ആവശ്യപ്പെടുക."
+      "otpLocked": "പല തെറ്റായ ശ്രമങ്ങൾ. പുതിയ കോഡ് ആവശ്യപ്പെടുക.",
+      "codeSentTo": "ഞങ്ങൾ ഒരു കോഡ് അയച്ചു",
+      "invalidEmail": "ദയവായി സാധുവായ ഇമെയിൽ വിലാസം നൽകുക.",
+      "invalidOtp": "6-അക്ക കോഡ് നൽകുക."
     }
   },
   "home": {
@@ -1954,7 +2045,11 @@
       "activationPathDesc": "പ്രധാനമായും ഉൾപ്പെട്ട ഗ്രഹങ്ങളുടെ പ്രധാന ദശ / ഭുക്തി കാലയളവിൽ ട്രിഗർ ചെയ്യപ്പെടുന്നു.",
       "yogaAnalysisScan": "യോഗ വിശകലന സ്കാൻ",
       "discoverCombinations": "നിങ്ങളുടെ കുണ്ഡലിയിലെ മറഞ്ഞിരിക്കുന്ന ഗ്രഹസംയോജനങ്ങൾ കണ്ടെത്തുക",
-      "scanChart": "എന്റെ കുണ്ഡലി സ്കാൻ ചെയ്യുക"
+      "scanChart": "എന്റെ കുണ്ഡലി സ്കാൻ ചെയ്യുക",
+      "classificationLabel": "വർഗ്ഗീകരണം",
+      "keyPlanetsLabel": "പ്രധാന ഗ്രഹങ്ങൾ",
+      "logicLabel": "യുക്തി",
+      "potencyLabel": "ശക്തി"
     },
     "remedies": {
       "title": "ശുദ്ധ",
@@ -2177,7 +2272,12 @@
       "blockedEmpty": "നിങ്ങൾ ആരെയും തടഞ്ഞിട്ടില്ല.",
       "unblock": "ബ്ലോക്ക് ഒഴിവാക്കുക",
       "unblocking": "ബ്ലോക്ക് ഒഴിവാക്കുന്നു…"
-    }
+    },
+    "basicInfo": {
+      "language": "ഭാഷ"
+    },
+    "imageUploadFailed": "പ്രൊഫൈൽ ചിത്രം അപ്ലോഡ് ചെയ്യാൻ പരാജയപ്പെട്ടു",
+    "imageUploadSuccess": "പ്രൊഫൈൽ ചിത്രം പുതുക്കി"
   },
   "support": {
     "title": "സപ്പോർട്ട് സമീപിക്കുക",
@@ -2550,7 +2650,14 @@
     "noStreakYet": "ഇന്ന് നേടിക്കൊണ്ട് നിങ്ങളുടെ സ്ട്രീക്ക് ആരംഭിക്കൂ!",
     "streakResetNotice": "ഒരു ദിവസം നഷ്ടമായാൽ നിങ്ങളുടെ സ്ട്രീക്ക് ദിവസം 1-ലേക്ക് പുനഃസജ്ജമാകും.",
     "howItWorks": "ഇത് എങ്ങനെ പ്രവർത്തിക്കുന്നു",
-    "howItWorksDesc": "ദിവസത്തിൽ ഒരിക്കൽ നേടൂ. തുടർച്ചയായ ഓരോ ദിവസവും നിങ്ങളുടെ സ്ട്രീക്ക് വളർത്തുകയും വലിയ സമ്മാനങ്ങൾ തുറക്കുകയും ചെയ്യും — ദിവസം 7 ആണ് ജാക്ക്പോട്ട്. ഒരു ദിവസം നഷ്ടമായാൽ ദിവസം 1-ൽ നിന്ന് വീണ്ടും തുടങ്ങണം. അർധരാത്രി UTC-യിൽ പുനഃസജ്ജമാകും."
+    "howItWorksDesc": "ദിവസത്തിൽ ഒരിക്കൽ നേടൂ. തുടർച്ചയായ ഓരോ ദിവസവും നിങ്ങളുടെ സ്ട്രീക്ക് വളർത്തുകയും വലിയ സമ്മാനങ്ങൾ തുറക്കുകയും ചെയ്യും — ദിവസം 7 ആണ് ജാക്ക്പോട്ട്. ഒരു ദിവസം നഷ്ടമായാൽ ദിവസം 1-ൽ നിന്ന് വീണ്ടും തുടങ്ങണം. അർധരാത്രി UTC-യിൽ പുനഃസജ്ജമാകും.",
+    "creditsClaimed": "+{credits} ക്രെഡിറ്റുകൾ നേടി",
+    "dayOfSeven": "{total}-ൽ ദിവസം {day}",
+    "journeyHint": "{credits}-ക്രെഡിറ്റ് ബോണസ് അൺലോക്ക് ചെയ്യാൻ എല്ലാ 7 ദിവസവും പൂർത്തിയാക്കുക.",
+    "journeyTitle": "നിങ്ങളുടെ 7-ദിവസ യാത്ര",
+    "nextClaimIn": "അടുത്ത ക്ലെയിം",
+    "streakActive": "നിങ്ങളുടെ {days}-ദിവസ സ്ട്രീക്ക് സജീവമാണ്.",
+    "todayClaimedTitle": "ഇന്നത്തെ സമ്മാനം നേടി"
   },
   "errors": {
     "generic": "എന്തോ തകരാർ സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
@@ -2623,71 +2730,101 @@
     "viewFullPage": "സമ്മാനങ്ങളുടെ മുഴുവൻ പേജ് കാണുക"
   },
   "familyDashboard": {
-    "title": "Your Bond Dashboard",
-    "subtitle": "Daily relationship forecast",
-    "backToFamily": "Back to Family",
-    "yourBondToday": "Your Bond Today",
-    "todayLabel": "Today",
-    "todayVsBaseline": "Today vs. your permanent baseline",
-    "baselineLabel": "Baseline",
-    "baselineHint": "Your permanent compatibility",
-    "guidanceTitle": "Today's Relationship Guidance",
-    "guidanceBestFor": "Best for",
-    "guidanceAvoid": "Avoid",
-    "guidanceApproach": "Approach",
-    "guidanceUnlock": "Unlock best-for, avoid & approach guidance with Pro",
-    "chipsTitle": "Today's Bond Themes",
-    "chipsUnlock": "Unlock bond theme, communication & shared mood with Pro",
-    "timeTitle": "Connection Windows",
-    "timeGoodTitle": "Good Connection Window",
-    "timeAlertTitle": "Relationship Alert",
-    "timeNone": "No notable window today.",
-    "timeLord": "Lord",
-    "timeUnlock": "Unlock good-connection & alert time windows with Pro",
-    "horaSunrise": "Vedic Hora (sunrise)",
-    "horaFixed": "Fixed time",
-    "areasTitle": "Relationship Areas at a Glance",
-    "areasStrongest": "Strongest",
-    "areasNeedsCare": "Needs care",
-    "areasStable": "Stable",
-    "areasHarmony": "harmony",
-    "areasRisk": "risk",
-    "areasUnlock": "Unlock all six relationship areas with Pro",
-    "areasUnlockSub": "Communication, emotional bond, trust, support, cooperation & conflict sensitivity — with daily insights.",
+    "title": "നിങ്ങളുടെ ബന്ധ ഡാഷ്ബോർഡ്",
+    "subtitle": "ദൈനംദിന ബന്ധ പ്രവചനം",
+    "backToFamily": "കുടുംബത്തിലേക്ക് തിരികെ",
+    "yourBondToday": "ഇന്നത്തെ നിങ്ങളുടെ ബന്ധം",
+    "todayLabel": "ഇന്ന്",
+    "todayVsBaseline": "ഇന്ന് vs നിങ്ങളുടെ സ്ഥിര അടിസ്ഥാന രേഖ",
+    "baselineLabel": "അടിസ്ഥാന രേഖ",
+    "baselineHint": "നിങ്ങളുടെ സ്ഥിര പൊരുത്തം",
+    "guidanceTitle": "ഇന്നത്തെ ബന്ധ മാർഗ്ഗനിർദ്ദേശം",
+    "guidanceBestFor": "ഇതിന് ഏറ്റവും അനുയോജ്യം",
+    "guidanceAvoid": "ഒഴിവാക്കുക",
+    "guidanceApproach": "സമീപനം",
+    "guidanceUnlock": "Pro വഴി ഏറ്റവും-അനുയോജ്യം, ഒഴിവാക്കൽ & സമീപന മാർഗ്ഗനിർദ്ദേശം അൺലോക്ക് ചെയ്യുക",
+    "chipsTitle": "ഇന്നത്തെ ബന്ധ തീമുകൾ",
+    "chipsUnlock": "Pro വഴി ബന്ധ തീം, ആശയവിനിമയം & പങ്കിട്ട മനോഭാവം അൺലോക്ക് ചെയ്യുക",
+    "timeTitle": "കണക്ഷൻ വിൻഡോകൾ",
+    "timeGoodTitle": "നല്ല കണക്ഷൻ വിൻഡോ",
+    "timeAlertTitle": "ബന്ധ മുന്നറിയിപ്പ്",
+    "timeNone": "ഇന്ന് ശ്രദ്ധേയമായ വിൻഡോ ഇല്ല.",
+    "timeLord": "അധിപൻ",
+    "timeUnlock": "Pro വഴി നല്ല-കണക്ഷൻ & മുന്നറിയിപ്പ് സമയ വിൻഡോകൾ അൺലോക്ക് ചെയ്യുക",
+    "horaSunrise": "വൈദിക ഹോര (സൂര്യോദയം)",
+    "horaFixed": "നിശ്ചിത സമയം",
+    "areasTitle": "ഒരു നോട്ടത്തിൽ ബന്ധ മേഖലകൾ",
+    "areasStrongest": "ഏറ്റവും ശക്തമായ",
+    "areasNeedsCare": "ശ്രദ്ധ ആവശ്യം",
+    "areasStable": "ഏറ്റവും സന്തുലിതം",
+    "areasHarmony": "സാമരസ്യം",
+    "areasRisk": "അപകടം",
+    "areasUnlock": "Pro വഴി ആറു ബന്ധ മേഖലകളും അൺലോക്ക് ചെയ്യുക",
+    "areasUnlockSub": "ആശയവിനിമയം, വൈകാരിക ബന്ധം, വിശ്വാസം, പിന്തുണ, സഹകരണം & പോരാട്ട സംവേദനക്ഷമത — ദൈനംദിന ഉൾക്കാഴ്ചകളോടെ.",
     "areas": {
-      "communication": "Communication",
-      "emotional_bond": "Emotional Bond",
-      "trust": "Trust",
-      "support": "Support",
-      "cooperation": "Cooperation",
-      "conflict_sensitivity": "Conflict Sensitivity"
+      "communication": "ആശയവിനിമയം",
+      "emotional_bond": "വൈകാരിക ബന്ധം",
+      "trust": "വിശ്വാസം",
+      "support": "പിന്തുണ",
+      "cooperation": "സഹകരണം",
+      "conflict_sensitivity": "പോരാട്ട സംവേദനക്ഷമത",
+      "conflict_handling": "പോരാട്ട കൈകാര്യം ചെയ്യൽ"
     },
-    "weeklyTitle": "Your Bond This Week",
-    "weeklyBest": "Best day",
-    "weeklyWorst": "Toughest day",
-    "weeklyAverage": "Average",
-    "weeklyTrend": "Trend",
-    "weeklyNoteUnlock": "Unlock the best-day guidance note with Pro.",
-    "compatTitle": "Compatibility Summary",
-    "compatStrength": "Main strength",
-    "compatTension": "Main tension",
-    "locationBirth": "based on your birth location",
-    "locationFixed": "based on a default location",
-    "degradedTitle": "Bond reading unavailable",
-    "degradedBody": "Transit calculation is temporarily unavailable. Please try again later.",
-    "degradedRetry": "Try again",
-    "sharingTitle": "Sharing required",
-    "sharingBody": "Enable two-way sharing with this connection to view their bond dashboard.",
-    "sharingManage": "Manage connection",
-    "noMembers": "You haven't added any family members yet",
-    "noMemberHint": "Add a family member or invite a connection to view your daily bond dashboard.",
-    "addMember": "Add a member",
-    "unnamed": "Unnamed",
-    "hardGateTitle": "Unlock the full bond dashboard",
-    "hardGateBody": "Upgrade to Pro to reveal bond themes, time windows, all six relationship areas, and the weekly best-day note.",
-    "askCta": "Ask about this relationship",
-    "askCtaSub": "Open a guided chat about your bond with the family chart tools ready.",
-    "askCtaBtn": "Ask",
-    "askError": "Could not start the conversation."
+    "weeklyTitle": "ഈ ആഴ്ച നിങ്ങളുടെ ബന്ധം",
+    "weeklyBest": "മികച്ച ദിവസം",
+    "weeklyWorst": "ഏറ്റവും ബുദ്ധിമുട്ടുള്ള ദിവസം",
+    "weeklyAverage": "ശരാശരി",
+    "weeklyTrend": "പ്രവണത",
+    "weeklyNoteUnlock": "Pro വഴി മികച്ച-ദിവസ മാർഗ്ഗനിർദ്ദേശ കുറിപ്പ് അൺലോക്ക് ചെയ്യുക.",
+    "compatTitle": "പൊരുത്ത സംഗ്രഹം",
+    "compatStrength": "പ്രധാന ശക്തി",
+    "compatTension": "പ്രധാന പിരിമുറുക്കം",
+    "locationBirth": "നിങ്ങളുടെ ജനന സ്ഥലത്തെ അടിസ്ഥാനമാക്കി",
+    "locationFixed": "ഒരു ഡിഫോൾട്ട് സ്ഥലത്തെ അടിസ്ഥാനമാക്കി",
+    "degradedTitle": "ബന്ധ വായന ലഭ്യമല്ല",
+    "degradedBody": "ട്രാൻസിറ്റ് കണക്കുകൂട്ടൽ താൽക്കാലികമായി ലഭ്യമല്ല. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
+    "degradedRetry": "വീണ്ടും ശ്രമിക്കുക",
+    "sharingTitle": "ഷെയറിംഗ് ആവശ്യം",
+    "sharingBody": "അവരുടെ ബന്ധ ഡാഷ്ബോർഡ് കാണാൻ ഈ കണക്ഷനുമായി ദ്വിമുഖ ഷെയറിംഗ് പ്രവർത്തനക്ഷമമാക്കുക.",
+    "sharingManage": "കണക്ഷൻ കൈകാര്യം ചെയ്യുക",
+    "noMembers": "നിങ്ങൾ ഇതുവരെ കുടുംബാംഗങ്ങളെ ചേർത്തിട്ടില്ല",
+    "noMemberHint": "നിങ്ങളുടെ ദൈനംദിന ബന്ധ ഡാഷ്ബോർഡ് കാണാൻ ഒരു കുടുംബാംഗത്തെ ചേർക്കുക അല്ലെങ്കിൽ കണക്ഷനെ ക്ഷണിക്കുക.",
+    "addMember": "ഒരു അംഗത്തെ ചേർക്കുക",
+    "unnamed": "പേരില്ലാത്ത",
+    "hardGateTitle": "പൂർണ്ണ ബന്ധ ഡാഷ്ബോർഡ് അൺലോക്ക് ചെയ്യുക",
+    "hardGateBody": "ബന്ധ തീമുകൾ, സമയ വിൻഡോകൾ, ആറു ബന്ധ മേഖലകൾ, പ്രതിവാര മികച്ച-ദിവസ കുറിപ്പ് വെളിപ്പെടുത്താൻ Pro-ലേക്ക് അപ്ഗ്രേഡ് ചെയ്യുക.",
+    "askCta": "ഈ ബന്ധത്തെക്കുറിച്ച് ചോദിക്കുക",
+    "askCtaSub": "കുടുംബ ചാർട്ട് ഉപകരണങ്ങൾ സജ്ജമാക്കി നിങ്ങളുടെ ബന്ധത്തെക്കുറിച്ച് നയിക്കപ്പെടുന്ന ചാറ്റ് തുറക്കുക.",
+    "askCtaBtn": "ചോദിക്കുക",
+    "askError": "സംഭാഷണം ആരംഭിക്കാൻ കഴിഞ്ഞില്ല.",
+    "compatBaselineHint": "ദീർഘകാല ബന്ധ അടിസ്ഥാന രേഖ",
+    "compatCaption": "നിങ്ങളുടെ സ്ഥിര പൊരുത്തം",
+    "deltaAbove": "നിങ്ങളുടെ സ്ഥിര അടിസ്ഥാന രേഖയേക്കാൾ {n} പോയിന്റുകൾ മുകളിൽ",
+    "deltaBelow": "നിങ്ങളുടെ സ്ഥിര അടിസ്ഥാന രേഖയേക്കാൾ {n} പോയിന്റുകൾ താഴെ",
+    "horaSunriseHint": "നിങ്ങളുടെ സൂക്ഷിച്ച ജനന സ്ഥലത്ത് സൂര്യോദയവും സൂര്യാസ്തമനവും ഉപയോഗിച്ച് കണക്കാക്കി.",
+    "riskLabel": "അപകടം",
+    "stableWeek": "സ്ഥിര ആഴ്ച — നിങ്ങളുടെ ബന്ധം തുടർച്ചയായി പിന്തുണയായി തുടരുന്നു.",
+    "timeAlertNone": "ഇന്ന് പ്രധാന ബന്ധ മുന്നറിയിപ്പ് ഇല്ല",
+    "timeGoodNone": "ഇന്ന് ശ്രദ്ധേയമായ കണക്ഷൻ വിൻഡോ ഇല്ല.",
+    "toneBalanced": "സന്തുലിതം",
+    "toneFavorable": "അനുകൂലം",
+    "toneNeedsCare": "ശ്രദ്ധ ആവശ്യം",
+    "toneSensitive": "സംവേദനക്ഷമം",
+    "viewDetailed": "വിശദമായ പൊരുത്തം കാണുക"
+  },
+  "community": {
+    "comingSoon": "ഉടൻ",
+    "cta": "കാത്തിരിപ്പ് ലിസ്റ്റിൽ ചേരുക",
+    "ctaSignedIn": "AstraNavi പര്യവേക്ഷണം ചെയ്യുക",
+    "feature1Desc": "നിങ്ങളുടെ ആളുകളെ കണ്ടെത്തുക — നക്ഷത്രം, ജീവിത തീം, പങ്കിട്ട ലക്ഷ്യം അനുസരിച്ച് ക്രമീകരിച്ച ചെറിയ ഗ്രൂപ്പുകൾ.",
+    "feature1Title": "പ്രപഞ്ച വൃത്തങ്ങൾ",
+    "feature2Desc": "ജ്യോതിഷത്തിൽ പ്രാവീണ്യമുള്ള സമൂഹത്തിൽ നിന്ന് ചോദ്യങ്ങൾ ചോദിക്കുക, വായനകൾ പങ്കിടുക, പഠിക്കുക.",
+    "feature2Title": "നയിക്കപ്പെടുന്ന ചർച്ചകൾ",
+    "feature3Desc": "ആകാശ കലണ്ടറിനനുസരിച്ച് സമയത്ത് ട്രാൻസിറ്റ് ചടങ്ങുകൾ, ചോദ്യ-ഉത്തര സെഷനുകൾ, ആഘോഷങ്ങൾ.",
+    "feature3Title": "തത്സമയ ഇവന്റുകൾ",
+    "notifyDesc": "നിങ്ങളുടെ ആകാശ അക്കൗണ്ടിൽ സൈൻ ഇൻ ചെയ്യുക; സമൂഹം തുറക്കുന്ന നിമിഷം ഞങ്ങൾ നിങ്ങളെ ക്ഷണിക്കും.",
+    "notifyTitle": "ആദ്യം അറിയുന്നവരാവുക",
+    "subtitle": "വൈദിക ജ്ഞാനം അന്വേഷിക്കുന്നവർക്കായി ഒരു സമാഗമ സ്ഥലം രൂപപ്പെടുന്നു. വൃത്തങ്ങളിൽ ചേരുക, ഉൾക്കാഴ്ചകൾ പങ്കിടുക, സമാന ആത്മാക്കളുടെ ഒരു നക്ഷത്രപുഞ്ജത്തോടൊപ്പം വളരുക.",
+    "title": "AstraNavi സമൂഹം"
   }
 }

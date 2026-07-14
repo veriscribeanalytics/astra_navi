@@ -18,7 +18,9 @@
     "returnHome": "홈으로 돌아가기",
     "cancel": "취소",
     "save": "저장",
-    "saved": "저장됨"
+    "saved": "저장됨",
+    "close": "닫기",
+    "revoke": "취소"
   },
   "nav": {
     "dailyRewards": "일일 보상",
@@ -74,7 +76,13 @@
     "logoutConfirmMessage": "계정에서 로그아웃되며 홈페이지로 이동됩니다.",
     "signOut": "로그아웃",
     "account": "계정",
-    "getStarted": "시작하기"
+    "getStarted": "시작하기",
+    "communityHub": "커뮤니티 허브",
+    "communityHubDesc": "동료 탐구자들과 연결하세요 — 서클, 토론, 이벤트.",
+    "messages": "메시지",
+    "messagesDesc": "연결 대상과의 비공개 채팅",
+    "ourServices": "서비스",
+    "ourServicesDesc": "AstraNavi의 모든 AI 및 베다 서비스 탐색"
   },
   "footer": {
     "tagline": "현대인을 위한 조티시 샤스트라의 수학적 정밀성 보존.",
@@ -399,7 +407,8 @@
     "familyStatusNew": "새로운",
     "familyInviteBanner": "{count}개의 가족 초대가 대기 중입니다",
     "familyInviteBannerPlural": "{count}개의 가족 초대가 대기 중입니다",
-    "familyInviteReview": "검토"
+    "familyInviteReview": "검토",
+    "familyNoVerdict": "오늘 안정적인 관계. 대화와 공유 결정에 좋은 에너지입니다."
   },
   "horoscope": {
     "yourDayToday": "오늘 당신의 하루",
@@ -457,7 +466,7 @@
     "inscribeIdentity": "신원 새기기",
     "signIn": "로그인",
     "joinCelestialJourney": "천체의 여정에 합류하세요.",
-    "welcomeBack": "Welcome back",
+    "welcomeBack": "AstraNavi에 오신 것을 다시 환영합니다.",
     "fullName": "성명",
     "dob": "생년월일",
     "tob": "태어난 시간",
@@ -505,7 +514,10 @@
     "consentTerms": "본인은 다음에 동의합니다: ",
     "consentProcessing": "본인은 개인정보 처리방침에 기술된 대로 베다 점성술 차트 생성, AI 기반 리딩 및 맞춤형 운세 인사이트 제공을 위해 출생 세부 정보를 포함한 개인 정보의 처리에 동의합니다. 본인은 이 동의를 언제든지 철회할 수 있음을 이해합니다.",
     "mustBe18": "Astra Navi를 사용하려면 18세 이상이어야 합니다.",
-    "lockedShort": "잠김"
+    "lockedShort": "잠김",
+    "consentGooglePart1": "본인은 18세 이상이며 동의합니다",
+    "consentGooglePart2": "및",
+    "consentGooglePart3": ", 에, 그리고 베다 점성술 차트와 리딩을 생성하기 위한 본인의 출생 정보를 포함한 개인정보 처리에 동의합니다."
   },
   "about": {
     "theTradition": "전통",
@@ -846,7 +858,8 @@
       "online": "온라인",
       "viewChartContext": "차트 정보 보기",
       "closeChat": "채팅 닫기",
-      "back": "뒤로"
+      "back": "뒤로",
+      "voiceMode": "음성 모드"
     },
     "feedback": {
       "ratingLabels": {
@@ -1083,7 +1096,34 @@
     "pendingRunCompatCost": "{cost} 크레딧",
     "pendingActionRunning": "실행 중…",
     "pendingActionError": "완료할 수 없습니다 — 나중에 다시 시도해 주세요.",
-    "familyPrefillAria": "Send suggested question about this relationship"
+    "familyPrefillAria": "이 관계에 대해 추천된 질문 보내기",
+    "conversation": {
+      "autoListen": "Navi가 말을 마치면 말하세요",
+      "exit": "음성 모드 종료",
+      "listening": "듣는 중…",
+      "micError": "음성 모드에는 마이크 접근 권한이 필요합니다.",
+      "notSupported": "이 브라우저에서는 음성 모드가 지원되지 않습니다.",
+      "speaking": "Navi가 말하는 중…",
+      "talkToInterrupt": "말을 끊으려면 지금 바로 말씀하세요",
+      "tapToInterrupt": "말하려면 마이크를 탭하세요",
+      "tapToSpeak": "말하려면 탭하세요",
+      "tapToStop": "취소하려면 탭하세요",
+      "thinking": "Navi가 생각하는 중…"
+    },
+    "report": "신고",
+    "reportCancel": "취소",
+    "reportDetailsPlaceholder": "세부 정보를 추가하세요(선택)",
+    "reportError": "신고를 제출할 수 없습니다. 다시 시도해 주세요.",
+    "reportRateLimited": "최근 신고를 너무 많이 하셨습니다. 잠시 후 다시 시도해 주세요.",
+    "reportReasonHarmful": "유해한 조언",
+    "reportReasonInaccurate": "부정확함 / 틀림",
+    "reportReasonOffensive": " 불쾌한 내용",
+    "reportReasonOther": "기타",
+    "reportSubmit": "신고 제출",
+    "reportSuccess": "신고해 주셔서 감사합니다. 확인해 보겠습니다.",
+    "reportTitle": "이 응답 신고하기",
+    "thumbDown": "나쁜 응답",
+    "thumbUp": "좋은 응답"
   },
   "healthForecast": {
     "title": "건강 예측",
@@ -1531,7 +1571,47 @@
       "spouse": "배우자",
       "friend": "친구",
       "other": "기타"
-    }
+    },
+    "accept": "수락",
+    "addMoreDesc": "부모, 배우자 또는 친한 친구를 추가해 더 완전한 궁합 그림을 그려보세요.",
+    "addMoreTitle": "가족 구성원 더 추가",
+    "chartFreeBadge": "무료 스냅샷",
+    "checkCompatibility": "궁합 확인",
+    "compatibilityAvailable": "궁합 사용 가능",
+    "compatibilityChecked": "궁합 확인됨",
+    "detailedReportCredits": "상세 보고서 · 크레딧 {n}개",
+    "disconnect": "연결 해제",
+    "discoverDesc": "연결할 다른 AstraNavi 사용자를 찾아보세요.",
+    "discoverTitle": "사람 찾기",
+    "inviteAcceptError": "초대를 수락할 수 없습니다",
+    "inviteRevokeError": "초대를 취소할 수 없습니다",
+    "inviteShort": "초대",
+    "noStrengths": "강조된 주요 강점이 없습니다.",
+    "noTensions": "강조된 주요 긴장 지점이 없습니다.",
+    "outgoingInvitesDesc": "이미 보낸 초대입니다.",
+    "outgoingInvitesTitle": "보낸 초대",
+    "pendingIncomingDesc": "수락을 기다리는 초대가 있습니다.",
+    "pendingInvitesTitle": "대기 중인 초대",
+    "relationshipNotSet": "연결",
+    "sharingBlockedBoth": "궁합을 계산하려면 두 분 모두 공유를 활성화해야 합니다.",
+    "sharingBlockedBothHint": "먼저 내 쪽을 켜고, 상대에게도 공유를 활성화해 달라고 요청하세요.",
+    "sharingBlockedThem": "{name}님이 공유를 활성화하기를 기다리는 중입니다.",
+    "sharingBlockedThemHint": "상대의 가족 설정에서 공유를 활성화해 달라고 하세요. {email}로 연락할 수 있습니다.",
+    "sharingBlockedYou": "궁합 잠금 해제를 위해 공유를 활성화하세요.",
+    "sharingBlockedYouHint": "시나스트리 계산을 위해 아래에서 {name}님과 공유를 켜세요.",
+    "sharingEnable": "공유 활성화",
+    "sharingEnableMine": "내 쪽 활성화",
+    "statusCompleteShort": "완료",
+    "statusIncompleteShort": "미완료",
+    "statusNeedsAttentionShort": "주의 필요",
+    "statusStableShort": "안정",
+    "suggested": "추천",
+    "turnOnSharingDesc": "연결 대상과 양방향 공유를 활성화해 가족으로 옮기세요.",
+    "turnOnSharingTitle": "공유 켜기",
+    "viewAllInvites": "모든 초대 보기",
+    "viewBond": "유대 보기",
+    "viewConnections": "연결 보기",
+    "viewProfile": "프로필 보기"
   },
   "match": {
     "mangal": {
@@ -1547,7 +1627,10 @@
         "low": "낮음",
         "medium": "보통",
         "high": "높음"
-      }
+      },
+      "compatible": "궁합 양호",
+      "important": "중요",
+      "needsAttention": "주의 필요"
     },
     "additional": {
       "title": "추가 검증",
@@ -1659,7 +1742,8 @@
       "firstNamePlaceholder": "이름",
       "lastNameLabel": "성",
       "lastNamePlaceholder": "성",
-      "consentRequired": "계정을 생성하려면 위의 모든 승인 사항을 확인해 주세요."
+      "consentRequired": "계정을 생성하려면 위의 모든 승인 사항을 확인해 주세요.",
+      "consentRequiredGoogle": "Google로 계속하려면 위의 확인 사항에 동의해 주세요."
     },
     "errorBanner": {
       "dismiss": "오류 닫기"
@@ -1704,7 +1788,8 @@
       "submit": "비밀번호 재설정",
       "successTitle": "비밀번호 재설정 완료",
       "successSubtitle": "비밀번호가 성공적으로 재설정되었습니다.",
-      "proceedToLogin": "로그인으로 이동"
+      "proceedToLogin": "로그인으로 이동",
+      "success": "비밀번호가 성공적으로 재설정되었습니다."
     },
     "passwordReset": {
       "title": "비밀번호 재설정",
@@ -1756,7 +1841,10 @@
       "resendCode": "인증번호 재전송",
       "otpExpired": "인증번호 만료 — 재전송",
       "otpIncorrect": "잘못된 인증번호",
-      "otpLocked": "잘못된 시도가 너무 많습니다. 새 코드를 요청하세요."
+      "otpLocked": "잘못된 시도가 너무 많습니다. 새 코드를 요청하세요.",
+      "codeSentTo": "인증 코드를 보냈습니다",
+      "invalidOtp": "올바른 6자리 코드를 입력해 주세요.",
+      "invalidPhone": "국가 코드가 포함된 올바른 전화번호를 입력해 주세요 (예: +919876543210)."
     },
     "email": {
       "emailLabel": "이메일 주소",
@@ -1769,7 +1857,10 @@
       "resendCode": "인증번호 재전송",
       "otpExpired": "인증번호 만료 — 재전송",
       "otpIncorrect": "잘못된 인증번호",
-      "otpLocked": "잘못된 시도가 너무 많습니다. 새 코드를 요청하세요."
+      "otpLocked": "잘못된 시도가 너무 많습니다. 새 코드를 요청하세요.",
+      "codeSentTo": "인증 코드를 보냈습니다",
+      "invalidEmail": "올바른 이메일 주소를 입력해 주세요.",
+      "invalidOtp": "6자리 코드를 입력하세요."
     }
   },
   "home": {
@@ -1954,7 +2045,11 @@
       "activationPathDesc": "주로 관련 행성의 주요 다샤 / 부크티 기간 동안 촉발됩니다.",
       "yogaAnalysisScan": "요가 분석 스캔",
       "discoverCombinations": "당신의 쿤달리에서 숨겨진 조합 발견하기",
-      "scanChart": "내 차트 스캔하기"
+      "scanChart": "내 차트 스캔하기",
+      "classificationLabel": "분류",
+      "keyPlanetsLabel": "주요 행성",
+      "logicLabel": "논리",
+      "potencyLabel": "강도"
     },
     "remedies": {
       "title": "신성한",
@@ -2177,7 +2272,12 @@
       "blockedEmpty": "차단한 사용자가 없습니다.",
       "unblock": "차단 해제",
       "unblocking": "차단 해제 중…"
-    }
+    },
+    "basicInfo": {
+      "language": "언어"
+    },
+    "imageUploadFailed": "프로필 이미지 업로드 실패",
+    "imageUploadSuccess": "프로필 이미지가 업데이트되었습니다"
   },
   "support": {
     "title": "지원팀에 문의",
@@ -2550,7 +2650,14 @@
     "noStreakYet": "오늘 보상을 받고 연속 기록을 시작하세요!",
     "streakResetNotice": "하루라도 놓치면 연속 기록이 1일차로 초기화됩니다.",
     "howItWorks": "이용 방법",
-    "howItWorksDesc": "하루에 한 번 받으세요. 연속으로 받을수록 연속 기록이 늘어나고 더 큰 보상이 열립니다 — 7일차는 잭팟입니다. 하루라도 놓치면 1일차부터 다시 시작합니다. 매일 UTC 자정에 초기화됩니다."
+    "howItWorksDesc": "하루에 한 번 받으세요. 연속으로 받을수록 연속 기록이 늘어나고 더 큰 보상이 열립니다 — 7일차는 잭팟입니다. 하루라도 놓치면 1일차부터 다시 시작합니다. 매일 UTC 자정에 초기화됩니다.",
+    "creditsClaimed": "+{credits} 크레딧 수령",
+    "dayOfSeven": "{total}일 중 {day}일차",
+    "journeyHint": "{credits}크레딧 보너스 잠금 해제를 위해 7일을 모두 완료하세요.",
+    "journeyTitle": "7일 여정",
+    "nextClaimIn": "다음 수령",
+    "streakActive": "{days}일 연속 기록이 활성 상태입니다.",
+    "todayClaimedTitle": "오늘의 보상 수령됨"
   },
   "errors": {
     "generic": "문제가 발생했습니다. 다시 시도해 주세요.",
@@ -2623,71 +2730,101 @@
     "viewFullPage": "전체 보상 페이지 보기"
   },
   "familyDashboard": {
-    "title": "Your Bond Dashboard",
-    "subtitle": "Daily relationship forecast",
-    "backToFamily": "Back to Family",
-    "yourBondToday": "Your Bond Today",
-    "todayLabel": "Today",
-    "todayVsBaseline": "Today vs. your permanent baseline",
-    "baselineLabel": "Baseline",
-    "baselineHint": "Your permanent compatibility",
-    "guidanceTitle": "Today's Relationship Guidance",
-    "guidanceBestFor": "Best for",
-    "guidanceAvoid": "Avoid",
-    "guidanceApproach": "Approach",
-    "guidanceUnlock": "Unlock best-for, avoid & approach guidance with Pro",
-    "chipsTitle": "Today's Bond Themes",
-    "chipsUnlock": "Unlock bond theme, communication & shared mood with Pro",
-    "timeTitle": "Connection Windows",
-    "timeGoodTitle": "Good Connection Window",
-    "timeAlertTitle": "Relationship Alert",
-    "timeNone": "No notable window today.",
-    "timeLord": "Lord",
-    "timeUnlock": "Unlock good-connection & alert time windows with Pro",
-    "horaSunrise": "Vedic Hora (sunrise)",
-    "horaFixed": "Fixed time",
-    "areasTitle": "Relationship Areas at a Glance",
-    "areasStrongest": "Strongest",
-    "areasNeedsCare": "Needs care",
-    "areasStable": "Stable",
-    "areasHarmony": "harmony",
-    "areasRisk": "risk",
-    "areasUnlock": "Unlock all six relationship areas with Pro",
-    "areasUnlockSub": "Communication, emotional bond, trust, support, cooperation & conflict sensitivity — with daily insights.",
+    "title": "유대 대시보드",
+    "subtitle": "일일 관계 예측",
+    "backToFamily": "가족으로 돌아가기",
+    "yourBondToday": "오늘의 유대",
+    "todayLabel": "오늘",
+    "todayVsBaseline": "오늘 vs 영구 기준선",
+    "baselineLabel": "기준선",
+    "baselineHint": "영구적인 궁합",
+    "guidanceTitle": "오늘의 관계 안내",
+    "guidanceBestFor": "가장 적합",
+    "guidanceAvoid": "피하기",
+    "guidanceApproach": "접근",
+    "guidanceUnlock": "Pro로 가장 적합, 피하기 및 접근 안내 잠금 해제",
+    "chipsTitle": "오늘의 유대 테마",
+    "chipsUnlock": "Pro로 유대 테마, 의사소통 및 공유 기분 잠금 해제",
+    "timeTitle": "연결 창",
+    "timeGoodTitle": "좋은 연결 창",
+    "timeAlertTitle": "관계 경고",
+    "timeNone": "오늘 주목할 창이 없습니다.",
+    "timeLord": "지배자",
+    "timeUnlock": "Pro로 좋은-연결 및 경고 시간 창 잠금 해제",
+    "horaSunrise": "베다 호라(일출)",
+    "horaFixed": "고정 시간",
+    "areasTitle": "한눈에 보는 관계 영역",
+    "areasStrongest": "가장 강한",
+    "areasNeedsCare": "주의 필요",
+    "areasStable": "가장 균형 잡힌",
+    "areasHarmony": "조화",
+    "areasRisk": "위험",
+    "areasUnlock": "Pro로 모든 여섯 관계 영역 잠금 해제",
+    "areasUnlockSub": "의사소통, 정서적 유대, 신뢰, 지원, 협력 및 갈등 민감성 — 매일의 통찰과 함께.",
     "areas": {
-      "communication": "Communication",
-      "emotional_bond": "Emotional Bond",
-      "trust": "Trust",
-      "support": "Support",
-      "cooperation": "Cooperation",
-      "conflict_sensitivity": "Conflict Sensitivity"
+      "communication": "의사소통",
+      "emotional_bond": "정서적 유대",
+      "trust": "신뢰",
+      "support": "지원",
+      "cooperation": "협력",
+      "conflict_sensitivity": "갈등 민감성",
+      "conflict_handling": "갈등 처리"
     },
-    "weeklyTitle": "Your Bond This Week",
-    "weeklyBest": "Best day",
-    "weeklyWorst": "Toughest day",
-    "weeklyAverage": "Average",
-    "weeklyTrend": "Trend",
-    "weeklyNoteUnlock": "Unlock the best-day guidance note with Pro.",
-    "compatTitle": "Compatibility Summary",
-    "compatStrength": "Main strength",
-    "compatTension": "Main tension",
-    "locationBirth": "based on your birth location",
-    "locationFixed": "based on a default location",
-    "degradedTitle": "Bond reading unavailable",
-    "degradedBody": "Transit calculation is temporarily unavailable. Please try again later.",
-    "degradedRetry": "Try again",
-    "sharingTitle": "Sharing required",
-    "sharingBody": "Enable two-way sharing with this connection to view their bond dashboard.",
-    "sharingManage": "Manage connection",
-    "noMembers": "You haven't added any family members yet",
-    "noMemberHint": "Add a family member or invite a connection to view your daily bond dashboard.",
-    "addMember": "Add a member",
-    "unnamed": "Unnamed",
-    "hardGateTitle": "Unlock the full bond dashboard",
-    "hardGateBody": "Upgrade to Pro to reveal bond themes, time windows, all six relationship areas, and the weekly best-day note.",
-    "askCta": "Ask about this relationship",
-    "askCtaSub": "Open a guided chat about your bond with the family chart tools ready.",
-    "askCtaBtn": "Ask",
-    "askError": "Could not start the conversation."
+    "weeklyTitle": "이번 주 유대",
+    "weeklyBest": "최고의 날",
+    "weeklyWorst": "가장 힘든 날",
+    "weeklyAverage": "평균",
+    "weeklyTrend": "추세",
+    "weeklyNoteUnlock": "Pro로 최적-날짜 안내 메모 잠금 해제.",
+    "compatTitle": "궁합 요약",
+    "compatStrength": "주요 강점",
+    "compatTension": "주요 긴장",
+    "locationBirth": "출생지 기준",
+    "locationFixed": "기본 위치 기준",
+    "degradedTitle": "유대 읽기를 사용할 수 없습니다",
+    "degradedBody": "트랜짓 계산을 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    "degradedRetry": "다시 시도",
+    "sharingTitle": "공유 필요",
+    "sharingBody": "상대의 유대 대시보드를 보려면 이 연결과 양방향 공유를 활성화하세요.",
+    "sharingManage": "연결 관리",
+    "noMembers": "아직 가족 구성원을 추가하지 않았습니다",
+    "noMemberHint": "일일 유대 대시보드를 보려면 가족 구성원을 추가하거나 연결을 초대하세요.",
+    "addMember": "구성원 추가",
+    "unnamed": "이름 없음",
+    "hardGateTitle": "전체 유대 대시보드 잠금 해제",
+    "hardGateBody": "유대 테마, 시간 창, 모든 여섯 관계 영역 및 주간 최적-날짜 메모를 공개하려면 Pro로 업그레이드하세요.",
+    "askCta": "이 관계에 대해 물어보기",
+    "askCtaSub": "가족 차트 도구를 준비한 채 관계에 대한 안내 채팅을 여세요.",
+    "askCtaBtn": "물어보기",
+    "askError": "대화를 시작할 수 없습니다.",
+    "compatBaselineHint": "장기적 관계 기준선",
+    "compatCaption": "영구적인 궁합",
+    "deltaAbove": "영구 기준선보다 {n}점 위",
+    "deltaBelow": "영구 기준선보다 {n}점 아래",
+    "horaSunriseHint": "저장된 출생지의 일출과 일몰을 사용해 계산됩니다.",
+    "riskLabel": "위험",
+    "stableWeek": "안정적인 주 — 유대가 일관되게 도움이 됩니다.",
+    "timeAlertNone": "오늘 주요 관계 경고 없음",
+    "timeGoodNone": "오늘 두드러진 연결 창이 없습니다.",
+    "toneBalanced": "균형",
+    "toneFavorable": "유리",
+    "toneNeedsCare": "주의 필요",
+    "toneSensitive": "민감",
+    "viewDetailed": "상세 궁합 보기"
+  },
+  "community": {
+    "comingSoon": "곧 출시",
+    "cta": "대기자 명단 참여",
+    "ctaSignedIn": "AstraNavi 탐색",
+    "feature1Desc": "나의 사람들을 찾아보세요 — 나크샤트라, 삶의 주제, 공유된 의도에 따라 구성된 소규모 모임.",
+    "feature1Title": "우주 서클",
+    "feature2Desc": "죠티시에 깊이 뿌리내린 커뮤니티에서 질문하고, 리딩을 나누고, 배우세요.",
+    "feature2Title": "진행되는 토론",
+    "feature3Desc": "천체 달력에 맞춰 진행되는 트랜짓 의식, Q&A 세션, 축하 행사.",
+    "feature3Title": "라이브 이벤트",
+    "notifyDesc": "천문 계정에 로그인하세요. 커뮤니티가 열리는 순간 초대해 드립니다.",
+    "notifyTitle": "가장 먼저 알아보세요",
+    "subtitle": "베다 지식을 찾는 이들을 위한 만남의 장이 만들어지고 있습니다. 서클에 참여하고, 통찰을 나누며, 같은 뜻을 품은 영혼들의 별자리와 함께 성장하세요.",
+    "title": "AstraNavi 커뮤니티"
   }
 }

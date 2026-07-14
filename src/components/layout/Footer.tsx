@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import Input from '../ui/Input';
 import { useTranslation } from '@/hooks';
@@ -17,9 +18,11 @@ const Footer = () => {
 
     return (
         <footer className="safe-area-footer relative isolate w-full overflow-hidden min-h-[560px]">
-            <img
+            <Image
                 src="/images/footer.png"
                 alt=""
+                fill
+                sizes="100vw"
                 className="absolute inset-0 z-0 h-full w-full object-cover object-[center_bottom]"
             />
             <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background/80 via-background/40 to-background/85 pointer-events-none" />

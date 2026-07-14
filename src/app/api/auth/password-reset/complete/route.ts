@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
 import { PasswordResetCompleteSchema } from '@/lib/schemas';
 import { backendFetch } from '@/lib/backendClient';
+import { getClientIp } from '@/lib/request';
 
 /**
  * Complete password reset — submit new password with resetToken.
@@ -23,8 +24,8 @@ export async function POST(req: Request) {
         }
         const { resetToken, password } = validation.data;
 
-        // 2. Rate limiting by IP
-        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+        // 2. Rate limiting by IP — fails closed on Redis error.
+        const ip = getClientIp(req);
         const rateLimitResult = await checkRateLimit(`pw-reset-complete:${ip}`, AUTH_LIMIT_CONFIG);
 
         if (!rateLimitResult.allowed) {

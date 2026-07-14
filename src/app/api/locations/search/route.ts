@@ -21,7 +21,11 @@ export async function GET(req: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('[Locations API] Backend returned', response.status, ':', errorData);
+      // Log only status + a non-secret code/message, never the backend body.
+      console.error('[Locations API] Backend returned', response.status, ':', {
+        code: errorData?.code || null,
+        message: errorData?.error || errorData?.detail || null,
+      });
       return NextResponse.json({ error: errorData.error || errorData.detail || 'Location search failed.' }, { status: response.status });
     }
 

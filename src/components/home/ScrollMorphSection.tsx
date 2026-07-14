@@ -5,22 +5,11 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   Sparkles, ArrowRight, MessageSquare,
-  CheckCircle2, Star, GraduationCap,
-  Heart, HeartPulse, Coins, BookOpen,
-  Bot, Compass
+  CheckCircle2
 } from 'lucide-react';
 import Button from '../ui/Button';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const ASTROLOGERS = [
-  { name: 'Navi', role: 'General Vedic Guide', avatar: '/images/avatars/NAVI_AVATAR.jpeg', specialty: 'Birth chart & daily guidance', icon: Star, color: 'from-amber-500/20 to-yellow-600/20' },
-  { name: 'Arya', role: 'Career Mentor', avatar: '/images/avatars/ARYA_AVATAR.jpeg', specialty: 'Dasha timings & career choices', icon: GraduationCap, color: 'from-blue-500/20 to-indigo-600/20' },
-  { name: 'Meera', role: 'Relationship Guide', avatar: '/images/avatars/MEERA_AVATAR.jpeg', specialty: 'Guna matching & love transits', icon: Heart, color: 'from-rose-500/20 to-pink-600/20' },
-  { name: 'Anand', role: 'Health Advisor', avatar: '/images/avatars/ANAND_AVATAR.jpeg', specialty: 'Ayurvedic balance & wellness timings', icon: HeartPulse, color: 'from-emerald-500/20 to-teal-600/20' },
-  { name: 'Vidya', role: 'Financial Astrologer', avatar: '/images/avatars/VIDYA_AVATAR.jpeg', specialty: 'Wealth yogas & transit windows', icon: Coins, color: 'from-amber-600/20 to-orange-700/20' },
-  { name: 'Rishi', role: 'Deep Chart Sage', avatar: '/images/avatars/RISHI_AVATAR.jpeg', specialty: 'Divisional charts & spiritual path', icon: BookOpen, color: 'from-purple-500/20 to-violet-600/20' },
-];
 
 const PHONE_RATIO = 2.02;
 const BROWSER_RATIO = 2.12;
@@ -426,8 +415,14 @@ export default function ScrollMorphSection() {
         <div ref={mobileShotRef} className="absolute inset-0" style={{ opacity: 0, willChange: 'opacity, transform' }}>
           <HeroPhonePreview />
         </div>
+        {/* Morph-animated desktop screenshot: a GSAP ref with custom absolute
+            insets and opacity/scale/filter transitions. next/image `fill` would
+            re-apply conflicting positioning and wrap the element, so keep <img>. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img ref={dashShotRef} src="/images/dashboard-desktop.png" alt="AstraNavi Desktop Dashboard" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-center bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.1) contrast(1.06)' }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img ref={kundliShotRef} src="/images/kundli-desktop.png" alt="AstraNavi Kundli Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img ref={forecastShotRef} src="/images/forecast-desktop.png" alt="AstraNavi Forecast Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
       </div>
     </section>
@@ -437,6 +432,9 @@ export default function ScrollMorphSection() {
 function HeroPhonePreview() {
   return (
     <div className="absolute inset-0 bg-[#101620]">
+      {/* GSAP-morphed phone screenshot with custom scale/objectPosition/filter
+          via inline style; next/image `fill` would override the positioning, so keep <img>. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/dashboard-mobile.png"
         alt="AstraNavi mobile dashboard"
@@ -457,6 +455,9 @@ function HeroPhonePreview() {
 function RearPhonePreview() {
   return (
     <div className="absolute inset-0 bg-[#101620]">
+      {/* GSAP-morphed phone screenshot with custom scale/objectPosition/filter
+          via inline style; next/image `fill` would override the positioning, so keep <img>. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/kundli-mobile.png"
         alt="AstraNavi Kundli preview"

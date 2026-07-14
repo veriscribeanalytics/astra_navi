@@ -20,15 +20,20 @@ import { useTranslation, useFocusTrap } from '@/hooks';
 //
 // Until a handler is provided, the modal stays in "coming soon" mode.
 
+/** Opaque backend order data returned by precreateOrder and passed through to
+ *  initiateCheckout. Kept opaque since each payment provider shapes its own
+ *  create-order response; consumers index it by provider-specific keys. */
+export type PrecreatedOrder = Record<string, unknown>;
+
 export interface CheckoutHandler {
   /** Unique identifier for the payment provider. */
   providerId: string;
   /** Display name for the provider (e.g. "Razorpay", "App Store"). */
   providerName: string;
   /** Pre-create the order if possible. */
-  precreateOrder?: (product: CatalogProduct) => Promise<any>;
+  precreateOrder?: (product: CatalogProduct) => Promise<PrecreatedOrder>;
   /** Initiate checkout for the given product. Returns a promise that resolves on success. */
-  initiateCheckout: (product: CatalogProduct, precreatedOrderData?: any) => Promise<CheckoutResult>;
+  initiateCheckout: (product: CatalogProduct, precreatedOrderData?: PrecreatedOrder) => Promise<CheckoutResult>;
 }
 
 export interface CheckoutResult {
@@ -65,7 +70,7 @@ export default function MockCheckoutModal({
   const [checkoutSuccess, setCheckoutSuccess] = React.useState(false);
 
   // Precreated order state (to avoid mobile popup blocking due to async delay)
-  const [precreatedOrder, setPrecreatedOrder] = React.useState<any>(null);
+  const [precreatedOrder, setPrecreatedOrder] = React.useState<PrecreatedOrder | null>(null);
   const [precreateLoading, setPrecreateLoading] = React.useState(false);
 
   const dialogRef = useFocusTrap<HTMLDivElement>(isOpen);
@@ -79,7 +84,7 @@ export default function MockCheckoutModal({
       setPrecreatedOrder(null);
 
       // Pre-load Razorpay script in background as soon as modal opens
-      if (typeof window !== 'undefined' && !(window as any).Razorpay) {
+      if (typeof window !== 'undefined' && !(window as { Razorpay?: unknown }).Razorpay) {
         const scriptId = 'razorpay-checkout-script';
         if (!document.getElementById(scriptId)) {
           const script = document.createElement('script');
@@ -148,7 +153,7 @@ export default function MockCheckoutModal({
 
     try {
       // Pass the precreated order details so initiateCheckout can open the Razorpay iframe synchronously
-      const result = await checkoutHandler.initiateCheckout(product, precreatedOrder);
+      const result = await checkoutHandler.initiateCheckout(product, precreatedOrder ?? undefined);
       if (result.success) {
         setCheckoutSuccess(true);
         // Auto-close after a brief success display

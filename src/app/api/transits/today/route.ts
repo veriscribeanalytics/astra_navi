@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthContext, unauthorizedResponse } from '@/lib/session';
+import { getAuthContext } from '@/lib/session';
 import { backendFetch } from '@/lib/backendClient';
 
 export async function GET(req: NextRequest) {

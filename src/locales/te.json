@@ -18,7 +18,9 @@
     "returnHome": "ఇంటికి తిరిగి రండి",
     "cancel": "రద్దు చేయి",
     "save": "సేవ్ చేయి",
-    "saved": "సేవ్ చేయబడింది"
+    "saved": "సేవ్ చేయబడింది",
+    "close": "మూసివేయి",
+    "revoke": "ఉపసంహరించు"
   },
   "nav": {
     "dailyRewards": "రోజువారీ బహుమతులు",
@@ -74,7 +76,13 @@
     "logoutConfirmMessage": "మీరు మీ ఖాతా నుండి సైన్ అవుట్ చేయబడతారు మరియు హోమ్ పేజీకి మళ్లించబడతారు.",
     "signOut": "సైన్ అవుట్",
     "account": "ఖాతా",
-    "getStarted": "ప్రారంభించండి"
+    "getStarted": "ప్రారంభించండి",
+    "communityHub": "సంఘ కేంద్రం",
+    "communityHubDesc": "తోటి అన్వేషకులతో అనుసంధానించు — వృత్తాలు, చర్చలు, కార్యక్రమాలు.",
+    "messages": "సందేశాలు",
+    "messagesDesc": "మీ కనెక్షన్‌లతో వ్యక్తిగత చాట్‌లు",
+    "ourServices": "మా సేవలు",
+    "ourServicesDesc": "AstraNavi యొక్క అన్ని AI & వేదిక సేవలను అన్వేషించండి"
   },
   "footer": {
     "tagline": "ఆధునిక మనస్సుకు జ్యోతిష్య శాస్త్రం యొక్క గణిత ఖచ్చితత్వాన్ని సంరక్షించడం.",
@@ -399,7 +407,8 @@
     "familyStatusNew": "కొత్తది",
     "familyInviteBanner": "మీకు {count} కుటుంబ ఆహ్వానం పెండింగ్‌లో ఉంది",
     "familyInviteBannerPlural": "మీకు {count} కుటుంబ ఆహ్వానాలు పెండింగ్‌లో ఉన్నాయి",
-    "familyInviteReview": "സమీక్షించండి"
+    "familyInviteReview": "സమీక్షించండి",
+    "familyNoVerdict": "నేటికి స్థిరమైన బంధం. సంభాషణలకు, పంచుకున్న నిర్ణయాలకు మంచి శక్తి."
   },
   "horoscope": {
     "yourDayToday": "ఈ రోజు మీ రోజు",
@@ -457,7 +466,7 @@
     "inscribeIdentity": "మీ గుర్తింపును నమోదు చేయండి",
     "signIn": "సైన్ ఇన్ చేయండి",
     "joinCelestialJourney": "ఖగోళ ప్రయాణంలో చేరండి.",
-    "welcomeBack": "Welcome back",
+    "welcomeBack": "AstraNavi-కి తిరిగి స్వాగతం.",
     "fullName": "పూర్తి పేరు",
     "dob": "పుట్టిన తేదీ",
     "tob": "పుట్టిన సమయం",
@@ -505,7 +514,10 @@
     "consentTerms": "నేను అంగీకరిస్తున్నాను:",
     "consentProcessing": "గోప్యతా విధానంలో వివరించిన విధంగా వేద జ్యోతిష్య చార్ట్‌లు, AI-ఆధారిత పఠనాలు మరియు వ్యక్తిగతీకరించిన జాతక అంతర్దృష్టులను రూపొందించడానికి జనన వివరాలతో సహా నా వ్యక్తిగత డేటాను ప్రాసెస్ చేయడానికి నేను అంగీకరిస్తున్నాను. నేను ఎప్పుడైనా ఈ సమ్మతిని ఉపసంహరించుకోవచ్చని నేను అర్థం చేసుకున్నాను.",
     "mustBe18": "Astra Naviని ఉపయోగించడానికి మీకు 18 ఏళ్లు లేదా అంతకంటే ఎక్కువ ఉండాలి.",
-    "lockedShort": "లాక్ చేయబడింది"
+    "lockedShort": "లాక్ చేయబడింది",
+    "consentGooglePart1": "నేను 18 సంవత్సరం లేదా అంతకంటే ఎక్కువ వయస్కుడిని మరియు నేను అంగీకరిస్తున్నాను",
+    "consentGooglePart2": "మరియు",
+    "consentGooglePart3": ", కూడా, మరియు వైదిక జ్యోతిష చార్టులు & రీడింగ్‌లను రూపొందించడానికి నా జనన వివరాలతో సహా నా వ్యక్తిగత డేటా ప్రాసెసింగ్‌కు అంగీకరిస్తున్నాను."
   },
   "about": {
     "theTradition": "సంప్రదాయం",
@@ -846,7 +858,8 @@
       "online": "ఆన్‌లైన్",
       "viewChartContext": "జాతక సందర్భం చూడండి",
       "closeChat": "చాట్‌ను ముగించు",
-      "back": "వెనుకకు"
+      "back": "వెనుకకు",
+      "voiceMode": "వాయిస్ మోడ్"
     },
     "feedback": {
       "ratingLabels": {
@@ -1083,7 +1096,34 @@
     "pendingRunCompatCost": "{cost} క్రెడిట్లు",
     "pendingActionRunning": "రన్ అవుతోంది…",
     "pendingActionError": "పూర్తి చేయలేకపోయాము — దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.",
-    "familyPrefillAria": "Send suggested question about this relationship"
+    "familyPrefillAria": "ఈ సంబంధం గురించి సూచించబడిన ప్రశ్నను పంపండి",
+    "conversation": {
+      "autoListen": "Navi మాట్లాడటం ముగించినప్పుడు మీరు మాట్లాడండి",
+      "exit": "వాయిస్ మోడ్ నుండి నిష్క్రమించు",
+      "listening": "వింటోంది…",
+      "micError": "వాయిస్ మోడ్‌కు మైక్రోఫోన్ యాక్సెస్ అవసరం.",
+      "notSupported": "ఈ బ్రౌజర్‌లో వాయిస్ మోడ్ మద్దతు లేదు.",
+      "speaking": "Navi మాట్లాడుతోంది…",
+      "talkToInterrupt": "మధ్యలో ఆపడానికి ఇప్పుడే మాట్లాడటం మొదలుపెట్టండి",
+      "tapToInterrupt": "మాట్లాడటానికి మైక్‌ను నొక్కండి",
+      "tapToSpeak": "మాట్లాడటానికి నొక్కండి",
+      "tapToStop": "రద్దు చేయడానికి నొక్కండి",
+      "thinking": "Navi ఆలోచిస్తోంది…"
+    },
+    "report": "నివేదిక",
+    "reportCancel": "రద్దుచేయి",
+    "reportDetailsPlaceholder": "ఏవైనా వివరాలను జోడించండి (ఐచ్ఛికం)",
+    "reportError": "నివేదికను సమర్పించలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    "reportRateLimited": "మీరు ఇటీవల చాలా నివేదికలు ఇచ్చారు. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.",
+    "reportReasonHarmful": "హానికరమైన సలహా",
+    "reportReasonInaccurate": "సరైనది కాదు / తప్పు",
+    "reportReasonOffensive": "అభ్యంతరకరమైన విషయం",
+    "reportReasonOther": "ఇంకేదైనా",
+    "reportSubmit": "నివేదికను సమర్పించండి",
+    "reportSuccess": "నివేదికకు ధన్యవాదాలు. మేము చూస్తాము.",
+    "reportTitle": "ఈ స్పందనను నివేదించండి",
+    "thumbDown": "చెడు స్పందన",
+    "thumbUp": "మంచి స్పందన"
   },
   "healthForecast": {
     "title": "ఆరోగ్య అంచనా",
@@ -1531,7 +1571,47 @@
       "spouse": "జీవితభాగస్వామి",
       "friend": "స్నేహితుడు",
       "other": "ఇతర"
-    }
+    },
+    "accept": "అంగీకరించు",
+    "addMoreDesc": "తల్లిదండ్రులు, జీవిత భాగస్వామి లేదా సన్నిహిత మిత్రులను జోడించి పూర్తి అనుకూలత చిత్రాన్ని నిర్మించండి.",
+    "addMoreTitle": "మరిన్ని కుటుంబ సభ్యులను జోడించండి",
+    "chartFreeBadge": "ఉచిత స్నాప్‌షాట్",
+    "checkCompatibility": "అనుకూలత తనిఖీ",
+    "compatibilityAvailable": "అనుకూలత అందుబాటులో ఉంది",
+    "compatibilityChecked": "అనుకూలత తనిఖీ చేయబడింది",
+    "detailedReportCredits": "వివరణాత్మక నివేదిక · {n} క్రెడిట్‌లు",
+    "disconnect": "సంబంధం తెంచు",
+    "discoverDesc": "కనెక్ట్ కావడానికి ఇతర AstraNavi వినియోగదారులను వెతకండి.",
+    "discoverTitle": "వ్యక్తులను కనుగొనండి",
+    "inviteAcceptError": "ఆహ్వానాన్ని అంగీకరించలేకపోయాము",
+    "inviteRevokeError": "ఆహ్వానాన్ని ఉపసంహరించలేకపోయాము",
+    "inviteShort": "ఆహ్వానించు",
+    "noStrengths": "ఎటువంటి ప్రధాన బలాలు హైలైట్ చేయబడలేదు.",
+    "noTensions": "ఎటువంటి ప్రధాన ఒత్తిడి బిందువులు హైలైట్ చేయబడలేదు.",
+    "outgoingInvitesDesc": "మీరు ఇప్పటికే పంపిన ఆహ్వానాలు.",
+    "outgoingInvitesTitle": "పంపిన ఆహ్వానాలు",
+    "pendingIncomingDesc": "అంగీకరించడానికి వేచి ఉన్న ఆహ్వానాలు మీ దగ్గర ఉన్నాయి.",
+    "pendingInvitesTitle": "పెండింగ్ ఆహ్వానాలు",
+    "relationshipNotSet": "కనెక్షన్",
+    "sharingBlockedBoth": "అనుకూలత లెక్కించడానికి ముందు మీ ఇద్దరూ షేరింగ్‌ను ప్రారంభించాలి.",
+    "sharingBlockedBothHint": "ముందుగా మీ వైపు ఆన్ చేయండి, తర్వాత వారిని కూడా షేరింగ్ ప్రారంభించమని అడగండి.",
+    "sharingBlockedThem": "{name} షేరింగ్ ప్రారంభించడానికి వేచి ఉంది.",
+    "sharingBlockedThemHint": "వారి కుటుంబ సెట్టింగుల్లో షేరింగ్ ప్రారంభించమని వారిని అడగండి. వారిని {email} వద్ద సంప్రదించవచ్చు.",
+    "sharingBlockedYou": "అనుకూలతను అన్‌లాక్ చేయడానికి షేరింగ్ ప్రారంభించండి.",
+    "sharingBlockedYouHint": "సినాస్ట్రీ లెక్కించడానికి కింద {name}తో షేరింగ్ ఆన్ చేయండి.",
+    "sharingEnable": "షేరింగ్ ప్రారంభించు",
+    "sharingEnableMine": "నా వైపు ప్రారంభించు",
+    "statusCompleteShort": "పూర్తి",
+    "statusIncompleteShort": "అసంపూర్తి",
+    "statusNeedsAttentionShort": "శ్రద్ధ అవసరం",
+    "statusStableShort": "స్థిరం",
+    "suggested": "సూచించబడింది",
+    "turnOnSharingDesc": "ఒక కనెక్షన్‌తో ద్విముఖ షేరింగ్ ప్రారంభించి వారిని కుటుంబంలోకి తీసుకురండి.",
+    "turnOnSharingTitle": "షేరింగ్ ఆన్ చేయండి",
+    "viewAllInvites": "అన్ని ఆహ్వానాలు చూడండి",
+    "viewBond": "బంధం చూడండి",
+    "viewConnections": "కనెక్షన్‌లు చూడండి",
+    "viewProfile": "ప్రొఫైల్ చూడండి"
   },
   "match": {
     "mangal": {
@@ -1547,7 +1627,10 @@
         "low": "తక్కువ",
         "medium": "మధ్యస్థం",
         "high": "ఎక్కువ"
-      }
+      },
+      "compatible": "అనుకూలమైనది",
+      "important": "ముఖ్యమైనది",
+      "needsAttention": "శ్రద్ధ అవసరం"
     },
     "additional": {
       "title": "అదనపు తనిఖీలు",
@@ -1659,7 +1742,8 @@
       "firstNamePlaceholder": "మొదటి పేరు",
       "lastNameLabel": "చివరి పేరు",
       "lastNamePlaceholder": "చివరి పేరు",
-      "consentRequired": "దయచేసి మీ ఖాతాను సృష్టించడానికి పైన పేర్కొన్న అన్ని అంగీకారాలను ధృవీకరించండి."
+      "consentRequired": "దయచేసి మీ ఖాతాను సృష్టించడానికి పైన పేర్కొన్న అన్ని అంగీకారాలను ధృవీకరించండి.",
+      "consentRequiredGoogle": "Google ద్వారా కొనసాగడానికి దయచేసి పైన ఉన్న అంగీకారాన్ని నిర్ధారించండి."
     },
     "errorBanner": {
       "dismiss": "లోపాన్ని తీసివేయి"
@@ -1704,7 +1788,8 @@
       "submit": "పాస్‌వర్డ్ రీసెట్ చేయండి",
       "successTitle": "పాస్‌వర్డ్ రీసెట్ విజయవంతమైంది",
       "successSubtitle": "మీ పాస్‌వర్డ్ విజయవంతంగా రీసెట్ చేయబడింది.",
-      "proceedToLogin": "లాగిన్‌కి వెళ్ళండి"
+      "proceedToLogin": "లాగిన్‌కి వెళ్ళండి",
+      "success": "పాస్‌వర్డ్ విజయవంతంగా రీసెట్ చేయబడింది."
     },
     "passwordReset": {
       "title": "పాస్‌వర్డ్‌ను రీసెట్ చేయి",
@@ -1756,7 +1841,10 @@
       "resendCode": "కోడ్ మళ్ళీ పంపండి",
       "otpExpired": "కోడ్ గడువు ముగిసింది — మళ్ళీ పంపు",
       "otpIncorrect": "తప్పు కోడ్",
-      "otpLocked": "చాలా తప్పుడు ప్రయత్నాలు. కొత్త కోడ్‌ను అభ్యర్థించండి."
+      "otpLocked": "చాలా తప్పుడు ప్రయత్నాలు. కొత్త కోడ్‌ను అభ్యర్థించండి.",
+      "codeSentTo": "మేము ఒక కోడ్‌ను పంపాము",
+      "invalidOtp": "దయచేసి సరైన 6 అంకెల కోడ్‌ను నమోదు చేయండి.",
+      "invalidPhone": "దయచేసి దేశ కోడ్‌తో సహా సరైన ఫోన్ నంబర్‌ను నమోదు చేయండి (ఉదా. +919876543210)."
     },
     "email": {
       "emailLabel": "ఇమెయిల్ చిరునామా",
@@ -1769,7 +1857,10 @@
       "resendCode": "కోడ్ మళ్ళీ పంపండి",
       "otpExpired": "కోడ్ గడువు ముగిసింది — మళ్ళీ పంపు",
       "otpIncorrect": "తప్పు కోడ్",
-      "otpLocked": "చాలా తప్పుడు ప్రయత్నాలు. కొత్త కోడ్‌ను అభ్యర్థించండి."
+      "otpLocked": "చాలా తప్పుడు ప్రయత్నాలు. కొత్త కోడ్‌ను అభ్యర్థించండి.",
+      "codeSentTo": "మేము ఒక కోడ్‌ను పంపాము",
+      "invalidEmail": "దయచేసి సరైన ఈమెయిల్ చిరునామాను నమోదు చేయండి.",
+      "invalidOtp": "6 అంకెల కోడ్‌ను నమోదు చేయండి."
     }
   },
   "home": {
@@ -1954,7 +2045,11 @@
       "activationPathDesc": "ప్రధానంగా సంబంధిత గ్రహల ప్రధాన దశ / భుక్తి కాలాలలో ట్రిగర్ చేస్తుంది.",
       "yogaAnalysisScan": "యోగ విశ్లేషణ స్కాన్",
       "discoverCombinations": "మీ కుండలిలో దాచిన సంయోగాలను కనుగొనండి",
-      "scanChart": "నా చార్ట్ స్కాన్ చేయండి"
+      "scanChart": "నా చార్ట్ స్కాన్ చేయండి",
+      "classificationLabel": "వర్గీకరణ",
+      "keyPlanetsLabel": "ముఖ్య గ్రహాలు",
+      "logicLabel": "తర్కం",
+      "potencyLabel": "శక్తి"
     },
     "remedies": {
       "title": "పవిత్ర",
@@ -2177,7 +2272,12 @@
       "blockedEmpty": "మీరు ఎవరినీ బ్లాక్ చేయలేదు.",
       "unblock": "అన్‌బ్లాక్ చేయి",
       "unblocking": "అన్‌బ్లాక్ చేస్తోంది…"
-    }
+    },
+    "basicInfo": {
+      "language": "భాష"
+    },
+    "imageUploadFailed": "ప్రొఫైల్ చిత్రాన్ని అప్‌లోడ్ చేయడం విఫలమైంది",
+    "imageUploadSuccess": "ప్రొఫైల్ చిత్రం నవీకరించబడింది"
   },
   "support": {
     "title": "సపోర్టు కోసం సంప్రదించండి",
@@ -2550,7 +2650,14 @@
     "noStreakYet": "నేడు పొందడం ద్వారా మీ వరుసను ప్రారంభించండి!",
     "streakResetNotice": "ఒక రోజు తప్పిపోతే మీ వరుస 1వ రోజుకు మళ్లీ మొదలవుతుంది.",
     "howItWorks": "ఇది ఎలా పనిచేస్తుంది",
-    "howItWorksDesc": "రోజుకు ఒకసారి పొందండి. ప్రతి వరుస రోజు మీ వరుసను పెంచుతుంది మరియు పెద్ద బహుమతులను అందిస్తుంది — 7వ రోజు జాక్‌పాట్. ఒక రోజు తప్పిపోతే 1వ రోజు నుండి మళ్లీ మొదలవుతుంది. UTC అర్ధరాత్రి మళ్లీ మొదలవుతుంది."
+    "howItWorksDesc": "రోజుకు ఒకసారి పొందండి. ప్రతి వరుస రోజు మీ వరుసను పెంచుతుంది మరియు పెద్ద బహుమతులను అందిస్తుంది — 7వ రోజు జాక్‌పాట్. ఒక రోజు తప్పిపోతే 1వ రోజు నుండి మళ్లీ మొదలవుతుంది. UTC అర్ధరాత్రి మళ్లీ మొదలవుతుంది.",
+    "creditsClaimed": "+{credits} క్రెడిట్‌లు పొందబడ్డాయి",
+    "dayOfSeven": "{total}లో రోజు {day}",
+    "journeyHint": "{credits}-క్రెడిట్ బోనస్‌ను అన్‌లాక్ చేయడానికి అన్ని 7 రోజులను పూర్తి చేయండి.",
+    "journeyTitle": "మీ 7-రోజుల ప్రయాణం",
+    "nextClaimIn": "తదుపరి క్లెయిమ్",
+    "streakActive": "మీ {days}-రోజుల స్ట్రీక్ క్రియాశీలంగా ఉంది.",
+    "todayClaimedTitle": "నేటి బహుమతి పొందబడింది"
   },
   "errors": {
     "generic": "ఏదో పొరపాటు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
@@ -2623,71 +2730,101 @@
     "viewFullPage": "పూర్తి బహుమతుల పేజీని వీక్షించండి"
   },
   "familyDashboard": {
-    "title": "Your Bond Dashboard",
-    "subtitle": "Daily relationship forecast",
-    "backToFamily": "Back to Family",
-    "yourBondToday": "Your Bond Today",
-    "todayLabel": "Today",
-    "todayVsBaseline": "Today vs. your permanent baseline",
-    "baselineLabel": "Baseline",
-    "baselineHint": "Your permanent compatibility",
-    "guidanceTitle": "Today's Relationship Guidance",
-    "guidanceBestFor": "Best for",
-    "guidanceAvoid": "Avoid",
-    "guidanceApproach": "Approach",
-    "guidanceUnlock": "Unlock best-for, avoid & approach guidance with Pro",
-    "chipsTitle": "Today's Bond Themes",
-    "chipsUnlock": "Unlock bond theme, communication & shared mood with Pro",
-    "timeTitle": "Connection Windows",
-    "timeGoodTitle": "Good Connection Window",
-    "timeAlertTitle": "Relationship Alert",
-    "timeNone": "No notable window today.",
-    "timeLord": "Lord",
-    "timeUnlock": "Unlock good-connection & alert time windows with Pro",
-    "horaSunrise": "Vedic Hora (sunrise)",
-    "horaFixed": "Fixed time",
-    "areasTitle": "Relationship Areas at a Glance",
-    "areasStrongest": "Strongest",
-    "areasNeedsCare": "Needs care",
-    "areasStable": "Stable",
-    "areasHarmony": "harmony",
-    "areasRisk": "risk",
-    "areasUnlock": "Unlock all six relationship areas with Pro",
-    "areasUnlockSub": "Communication, emotional bond, trust, support, cooperation & conflict sensitivity — with daily insights.",
+    "title": "మీ బంధ డాష్‌బోర్డ్",
+    "subtitle": "దైనందిన సంబంధ సూచన",
+    "backToFamily": "కుటుంబానికి తిరిగి వెళ్ళు",
+    "yourBondToday": "నేటి మీ బంధం",
+    "todayLabel": "నేడు",
+    "todayVsBaseline": "నేడు vs మీ శాశ్వత బేస్‌లైన్",
+    "baselineLabel": "బేస్‌లైన్",
+    "baselineHint": "మీ శాశ్వత అనుకూలత",
+    "guidanceTitle": "నేటి సంబంధ మార్గదర్శకత్వం",
+    "guidanceBestFor": "దీనికి ఉత్తమం",
+    "guidanceAvoid": "నివారించండి",
+    "guidanceApproach": "విధానం",
+    "guidanceUnlock": "Pro తో ఉత్తమ-ఎందుకు, నివారణ & విధాన మార్గదర్శకత్వాన్ని అన్‌లాక్ చేయండి",
+    "chipsTitle": "నేటి బంధ థీమ్‌లు",
+    "chipsUnlock": "Pro తో బంధ థీమ్, సంవాదం & పంచుకున్న మూడ్‌ను అన్‌లాక్ చేయండి",
+    "timeTitle": "కనెక్షన్ విండోలు",
+    "timeGoodTitle": "మంచి కనెక్షన్ విండో",
+    "timeAlertTitle": "సంబంధ హెచ్చరిక",
+    "timeNone": "నేడు గమనించదగ్గ విండో లేదు.",
+    "timeLord": "అధిపతి",
+    "timeUnlock": "Pro తో మంచి-కనెక్షన్ & హెచ్చరిక సమయ విండోలను అన్‌లాక్ చేయండి",
+    "horaSunrise": "వైదిక హోర (సూర్యోదయం)",
+    "horaFixed": "నిశ్చిత సమయం",
+    "areasTitle": "ఒక్ చూపులో సంబంధ రంగాలు",
+    "areasStrongest": "అత్యంత బలం",
+    "areasNeedsCare": "శ్రద్ధ అవసరం",
+    "areasStable": "అత్యధిక సమతుల్యం",
+    "areasHarmony": "సామరస్యం",
+    "areasRisk": "ప్రమాదం",
+    "areasUnlock": "Pro తో అన్ని ఆరు సంబంధ రంగాలను అన్‌లాక్ చేయండి",
+    "areasUnlockSub": "సంవాదం, భావోద్వేగ బంధం, నమ్మకం, మద్దతు, సహకారం & ఘర్షణ సున్నితత్వం — దైనందిన అంతర్దృష్టులతో.",
     "areas": {
-      "communication": "Communication",
-      "emotional_bond": "Emotional Bond",
-      "trust": "Trust",
-      "support": "Support",
-      "cooperation": "Cooperation",
-      "conflict_sensitivity": "Conflict Sensitivity"
+      "communication": "సంవాదం",
+      "emotional_bond": "భావోద్వేగ బంధం",
+      "trust": "నమ్మకం",
+      "support": "మద్దతు",
+      "cooperation": "సహకారం",
+      "conflict_sensitivity": "ఘర్షణ సున్నితత్వం",
+      "conflict_handling": "ఘర్షణ నిర్వహణ"
     },
-    "weeklyTitle": "Your Bond This Week",
-    "weeklyBest": "Best day",
-    "weeklyWorst": "Toughest day",
-    "weeklyAverage": "Average",
-    "weeklyTrend": "Trend",
-    "weeklyNoteUnlock": "Unlock the best-day guidance note with Pro.",
-    "compatTitle": "Compatibility Summary",
-    "compatStrength": "Main strength",
-    "compatTension": "Main tension",
-    "locationBirth": "based on your birth location",
-    "locationFixed": "based on a default location",
-    "degradedTitle": "Bond reading unavailable",
-    "degradedBody": "Transit calculation is temporarily unavailable. Please try again later.",
-    "degradedRetry": "Try again",
-    "sharingTitle": "Sharing required",
-    "sharingBody": "Enable two-way sharing with this connection to view their bond dashboard.",
-    "sharingManage": "Manage connection",
-    "noMembers": "You haven't added any family members yet",
-    "noMemberHint": "Add a family member or invite a connection to view your daily bond dashboard.",
-    "addMember": "Add a member",
-    "unnamed": "Unnamed",
-    "hardGateTitle": "Unlock the full bond dashboard",
-    "hardGateBody": "Upgrade to Pro to reveal bond themes, time windows, all six relationship areas, and the weekly best-day note.",
-    "askCta": "Ask about this relationship",
-    "askCtaSub": "Open a guided chat about your bond with the family chart tools ready.",
-    "askCtaBtn": "Ask",
-    "askError": "Could not start the conversation."
+    "weeklyTitle": "ఈ వారం మీ బంధం",
+    "weeklyBest": "ఉత్తమ రోజు",
+    "weeklyWorst": "కఠినమైన రోజు",
+    "weeklyAverage": "సగటు",
+    "weeklyTrend": "ధోరణి",
+    "weeklyNoteUnlock": "Pro తో ఉత్తమ-రోజు మార్గదర్శక గమనికను అన్‌లాక్ చేయండి.",
+    "compatTitle": "అనుకూలత సారాంశం",
+    "compatStrength": "ప్రధాన బలం",
+    "compatTension": "ప్రధాన ఒత్తిడి",
+    "locationBirth": "మీ జన్మ స్థలం ఆధారంగా",
+    "locationFixed": "ఒక డిఫాల్ట్ స్థలం ఆధారంగా",
+    "degradedTitle": "బంధ రీడింగ్ అందుబాటులో లేదు",
+    "degradedBody": "ట్రాన్సిట్ లెక్కింపు తాత్కాలికంగా అందుబాటులో లేదు. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.",
+    "degradedRetry": "మళ్లీ ప్రయత్నించండి",
+    "sharingTitle": "షేరింగ్ అవసరం",
+    "sharingBody": "వారి బంధ డాష్‌బోర్డ్‌ను చూడటానికి ఈ కనెక్షన్‌తో ద్విముఖ షేరింగ్ ప్రారంభించండి.",
+    "sharingManage": "కనెక్షన్ నిర్వహించు",
+    "noMembers": "మీరు ఇంకా ఎటువంటి కుటుంబ సభ్యులను జోడించలేదు",
+    "noMemberHint": "మీ దైనందిన బంధ డాష్‌బోర్డ్‌ను చూడటానికి ఒక కుటుంబ సభ్యుడిని జోడించండి లేదా కనెక్షన్‌ను ఆహ్వానించండి.",
+    "addMember": "ఒక సభ్యుడిని జోడించండి",
+    "unnamed": "పేరులేని",
+    "hardGateTitle": "పూర్తి బంధ డాష్‌బోర్డ్‌ను అన్‌లాక్ చేయండి",
+    "hardGateBody": "బంధ థీమ్‌లు, సమయ విండోలు, అన్ని ఆరు సంబంధ రంగాలు, వారపు ఉత్తమ-రోజు గమనికను బహిర్గతం చేయడానికి Pro కి అప్‌గ్రేడ్ చేయండి.",
+    "askCta": "ఈ సంబంధం గురించి అడగండి",
+    "askCtaSub": "కుటుంబ చార్ట్ సాధనాలను సిద్ధంగా ఉంచి మీ బంధం గురించి మార్గదర్శక చాట్‌ను తెరవండి.",
+    "askCtaBtn": "అడగండి",
+    "askError": "సంభాషణను ప్రారంభించలేకపోయాము.",
+    "compatBaselineHint": "దీర్ఘకాలిక సంబంధ బేస్‌లైన్",
+    "compatCaption": "మీ శాశ్వత అనుకూలత",
+    "deltaAbove": "మీ శాశ్వత బేస్‌లైన్‌కు {n} పాయింట్లు పైన",
+    "deltaBelow": "మీ శాశ్వత బేస్‌లైన్‌కు {n} పాయింట్లు కింద",
+    "horaSunriseHint": "మీ సేవ్ చేసిన జన్మ స్థలం వద్ద సూర్యోదయం & అస్తమయం ఉపయోగించి లెక్కించబడింది.",
+    "riskLabel": "ప్రమాదం",
+    "stableWeek": "స్థిరమైన వారం — మీ బంధం నిరంతరం మద్దతుగానే ఉంటుంది.",
+    "timeAlertNone": "నేడు పెద్ద సంబంధ హెచ్చరిక లేదు",
+    "timeGoodNone": "నేడు ప్రత్యేకమైన కనెక్షన్ విండో లేదు.",
+    "toneBalanced": "సమతుల్యం",
+    "toneFavorable": "అనుకూలం",
+    "toneNeedsCare": "శ్రద్ధ అవసరం",
+    "toneSensitive": "సున్నితం",
+    "viewDetailed": "వివరణాత్మక అనుకూలత చూడండి"
+  },
+  "community": {
+    "comingSoon": "త్వరలో",
+    "cta": "వెయిట్‌లిస్ట్‌లో చేరండి",
+    "ctaSignedIn": "AstraNavi అన్వేషించండి",
+    "feature1Desc": "మీ వ్యక్తులను కనుగొనండి — నక్షత్రం, జీవిత ఇతివృత్తం, పంచుకున్న ఉద్దేశం ఆధారంగా ఏర్పాటైన చిన్న సమూహాలు.",
+    "feature1Title": "విశ్వ వృత్తాలు",
+    "feature2Desc": "జ్యోతిష్యంలో నిష్ణాతులైన సమాజం నుండి ప్రశ్నలు అడగండి, రీడింగ్‌లను పంచుకోండి, నేర్చుకోండి.",
+    "feature2Title": "మార్గదర్శక చర్చలు",
+    "feature3Desc": "ఖగోళ క్యాలెండర్‌కు అనుగుణంగా సమయంలో నిర్వహించబడే ట్రాన్సిట్ ఆచారాలు, ప్రశ్న-సమాధాన సెషన్‌లు, వేడుకలు.",
+    "feature3Title": "ప్రత్యక్ష కార్యక్రమాలు",
+    "notifyDesc": "మీ ఖగోళ ఖాతాలో సైన్ ఇన్ అవ్వండి; సమాజం తెరుచుకునే క్షణంలో మేము మిమ్మల్ని ఆహ్వానిస్తాము.",
+    "notifyTitle": "మొదట తెలుసుకునేవారు అవ్వండి",
+    "subtitle": "వేద జ్ఞానం కోరుకునేవారికి ఒక సమావేశ స్థలం రూపుదిద్దుకుంటోంది. వృత్తాల్లో చేరండి, అంతర్దృష్టులను పంచుకోండి, ఒకే మనస్తత్వం గల ఆత్మల నక్షత్రమండలంతో పెరిగేండి.",
+    "title": "AstraNavi సంఘం"
   }
 }

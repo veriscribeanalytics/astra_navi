@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+# Cancel in-progress runs for the same ref when a new commit lands.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: install → audit → lint → typecheck → build → e2e
+    runs-on: ubuntu-latest
+
+    env:
+      # NextAuth requires a secret to build/start. CI uses a throwaway value;
+      # the real secret is provisioned in deployment, not in CI.
+      AUTH_SECRET: ci-throwaway-auth-secret-not-for-production-0123456789abcdef
+      # Upstash Redis is needed by the session-nonce + rate-limiter code paths.
+      # Use a free-tier-compatible throwaway instance via env when available;
+      # when absent, the routes that need Redis will fail-closed at runtime,
+      # which Playwright mocks anyway (auth tests mock /api/login etc.).
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+      AI_BACKEND_URL: ${{ secrets.AI_BACKEND_URL }}
+      AI_BACKEND_API_KEY: ${{ secrets.AI_BACKEND_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # isomorphic-dompurify requires node ^20.19 || ^22.13 || >=24.
+          # Pin to a 22 LTS line that satisfies it and the engines field.
+          node-version: '22.13'
+          cache: 'npm'
+
+      - name: Clean install (deploy artifact)
+        run: npm ci
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev
+        # A non-zero audit should fail the gate. If a benign/unexploitable
+        # advisory must be acknowledged temporarily, override it here rather
+        # than weakening this step.
+
+      - name: Lint
+        run: npx eslint .
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E (against compiled production server)
+        env:
+          # Force Playwright to start its OWN production server (webServer
+          # command below) and never reuse a stray local one, so runs are
+          # hermetic. The CI flag already sets reuseExistingServer:false in
+          # playwright.config.ts, but we also override the webServer command
+          # to `next start` (production build) rather than `next dev`.
+          CI: 'true'
+        run: npx playwright test

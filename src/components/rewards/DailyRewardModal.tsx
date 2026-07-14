@@ -32,7 +32,7 @@ const DailyRewardModal: React.FC = () => {
     const { t } = useTranslation();
     const toast = useToast();
     const { isLoggedIn, isLoading: authLoading } = useAuth();
-    const { totalCredits, refresh: refreshPaywall } = usePaywallContext();
+    const { refresh: refreshPaywall } = usePaywallContext();
     const { refreshUnread } = useNotificationContext();
     const reduce = useReducedMotion();
 
@@ -41,7 +41,6 @@ const DailyRewardModal: React.FC = () => {
         isLoading,
         isClaiming,
         claimReward,
-        refetch,
     } = useDailyRewards();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -129,7 +128,6 @@ const DailyRewardModal: React.FC = () => {
 
     // Determine streak position
     const currentStreak = status?.currentStreak ?? 0;
-    const lastClaimDate = status?.lastClaimDate;
 
     // Map each calendar day to its reward state
     const dayStates = useMemo(() => {

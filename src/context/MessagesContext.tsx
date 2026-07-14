@@ -41,7 +41,11 @@ export const MessagesProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [unreadTotal, setUnreadTotal] = useState(0);
     const inFlightRef = useRef(false);
     const isLoggedInRef = useRef(isLoggedIn);
-    isLoggedInRef.current = isLoggedIn;
+    // Keep the ref in sync with the latest login state inside an effect (not
+    // during render), so the stable refreshUnread callback can read it.
+    useEffect(() => {
+        isLoggedInRef.current = isLoggedIn;
+    }, [isLoggedIn]);
 
     const refreshUnread = useCallback(async () => {
         if (!isLoggedInRef.current || inFlightRef.current) return;

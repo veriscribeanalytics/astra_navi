@@ -41,7 +41,9 @@ export function useDailyHoroscope({ sign, isGeneral }: Options = {}) {
   const [profileLocationRequired, setProfileLocationRequired] = useState(false);
   const lastUrlRef = useRef('');
   // Daypart in effect at the last successful fetch; drives boundary refetch.
-  const daypartRef = useRef(istDaypartKey(Date.now()));
+  // Initialized lazily — the mount fetchData() sets it before the boundary
+  // timer can read it, so we avoid calling Date.now() during render (impure).
+  const daypartRef = useRef('');
 
   const fetchData = useCallback(async (force = false) => {
     const params = new URLSearchParams();

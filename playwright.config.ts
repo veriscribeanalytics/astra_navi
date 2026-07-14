@@ -18,7 +18,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    // In CI, test against the COMPILED production server (`next start`), not
+    // `next dev`, so the e2e gate exercises the actual deploy artifact. Locally
+    // (non-CI) keep `next dev` for the faster feedback loop.
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

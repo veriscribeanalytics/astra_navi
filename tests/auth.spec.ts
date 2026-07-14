@@ -18,18 +18,32 @@ test.describe('Login Page', () => {
   });
 
   test('toggle between sign-in and register via button', async ({ page }) => {
+    // Pre-seed cookie consent so the global CookieConsentBanner (a fixed
+    // role="dialog" that slides up after a 5s delay on first visit) doesn't
+    // appear and intercept clicks on the form. A returning visitor would
+    // already have consented.
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        'astra_navi_cookie_consent',
+        JSON.stringify({ preferences: [{ category: 'essential', enabled: true, required: true }], consentedAt: new Date().toISOString(), consentedVersion: '2.0.0' })
+      );
+    });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/login');
-    // Verify toggle button exists with "Don't have" text
-    const toggleBtn = page.locator('button').filter({ hasText: /Don'?t have/ }).first();
+    // The account toggle is a "Create Account" button inside the footer line
+    // ("Don't have an account? [Create Account]"). The i18n refactor moved the
+    // "Don't have..." text into a sibling <p> node, so the button itself only
+    // contains the "Create Account" label.
+    const toggleBtn = page.getByRole('button', { name: /Create Account/i }).first();
     await expect(toggleBtn).toBeVisible();
     // Scroll into view to ensure the click lands on the element (not clipped by overflow)
     await toggleBtn.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
     await toggleBtn.click();
     await page.waitForTimeout(400);
-    // After toggle, the form should change — the "Forgot Password?" link (only in SignInForm) should be gone
-    await expect(page.getByText('Forgot Password?')).not.toBeVisible({ timeout: 5000 });
+    // After toggle, the form should change — the "Forgot password?" link
+    // (only rendered by SignInForm) should be gone.
+    await expect(page.getByRole('button', { name: /Forgot password/i })).not.toBeVisible({ timeout: 5000 });
   });
 
   test('mobile layout does not overflow horizontally', async ({ page }) => {
@@ -122,13 +136,15 @@ test.describe('Forgot Password Page', () => {
   test('renders email form and send reset link button', async ({ page }) => {
     await page.goto('/forgot-password');
     await expect(page.locator('label:has-text("Email")').first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /Send Reset Link/i })).toBeVisible();
+    // The reset-start button is labeled "Send Code" after the i18n refactor
+    // (was "Send Reset Link"). Back-to-login is still "Back to Login".
+    await expect(page.getByRole('button', { name: /Send Code/i })).toBeVisible();
     await expect(page.getByText('Back to Login')).toBeVisible();
   });
 
   test('submit button is disabled when email is empty', async ({ page }) => {
     await page.goto('/forgot-password');
-    const button = page.getByRole('button', { name: /Send Reset Link/i });
+    const button = page.getByRole('button', { name: /Send Code/i });
     await expect(button).toBeDisabled();
   });
 });
@@ -167,8 +183,12 @@ test.describe('Logout Flow', () => {
     await expect(signOutBtn).toBeVisible({ timeout: 3000 });
     await signOutBtn.click();
 
-    // ConfirmDialog opens
-    const dialog = page.getByRole('dialog');
+    // ConfirmDialog opens. Scope to the logout dialog by its accessible name
+    // (title "Sign out of AstraNavi?") — a global CookieConsentBanner
+    // (role="dialog", aria-label "Cookie consent") can also be present on a
+    // fresh session after its delay, which would otherwise cause a strict-mode
+    // violation on a bare getByRole('dialog').
+    const dialog = page.getByRole('dialog', { name: /Sign out of AstraNavi/i });
     await expect(dialog).toBeVisible({ timeout: 3000 });
     await expect(dialog.getByText(/Sign out of AstraNavi/i)).toBeVisible();
 
@@ -198,16 +218,27 @@ test.describe('Mobile Auth Layout', () => {
   });
 
   test('register toggle visible on mobile', async ({ page }) => {
+    // Pre-seed cookie consent so the global CookieConsentBanner doesn't slide
+    // up and intercept the toggle click on mobile (a returning visitor would
+    // already have consented).
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        'astra_navi_cookie_consent',
+        JSON.stringify({ preferences: [{ category: 'essential', enabled: true, required: true }], consentedAt: new Date().toISOString(), consentedVersion: '2.0.0' })
+      );
+    });
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/login');
-    const toggleBtn = page.locator('button').filter({ hasText: /Don'?t have/ }).first();
+    // The toggle button is labeled "Create Account" (the "Don't have an
+    // account?" prefix now lives in a sibling <p>, not inside the button).
+    const toggleBtn = page.getByRole('button', { name: /Create Account/i }).first();
     await expect(toggleBtn).toBeVisible();
     await toggleBtn.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
     await toggleBtn.click();
     await page.waitForTimeout(400);
-    // "Forgot Password?" should disappear after toggle (only present in sign-in)
-    await expect(page.getByText('Forgot Password?')).not.toBeVisible({ timeout: 5000 });
+    // "Forgot password?" should disappear after toggle (only present in sign-in)
+    await expect(page.getByRole('button', { name: /Forgot password/i })).not.toBeVisible({ timeout: 5000 });
   });
 
   test('forgot password page is centered on mobile', async ({ page }) => {
@@ -260,8 +291,9 @@ test.describe('Backend Auth Error Handling & Localization', () => {
     await page.locator('input[type="password"]').first().fill('wrong-pass');
     await page.getByRole('button', { name: /Sign In/i }).click();
 
-    // Verify field-level error message is shown inline under the password input
-    const inlineError = page.locator('p.text-red-500');
+    // Verify field-level error message is shown inline under the password input.
+    // SignInForm renders field errors as <p class="text-[10px] text-red-400 ...">.
+    const inlineError = page.locator('p.text-red-400');
     await expect(inlineError).toBeVisible({ timeout: 5000 });
     await expect(inlineError).toContainText(/Incorrect password|wrong/i);
   });

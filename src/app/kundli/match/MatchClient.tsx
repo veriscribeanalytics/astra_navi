@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/context/AuthContext';
 import { clientFetch } from '@/lib/apiClient';
@@ -307,6 +307,38 @@ const formatHistoryDate = (iso: string) => {
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+/** Match/History tab switcher. Declared at module scope (not inside MatchClient)
+ *  so the React Compiler doesn't treat it as a component recreated on every
+ *  render (which would reset its state and skip optimization). */
+const TabBar = ({ activeTab, onTabChange }: { activeTab: 'match' | 'history'; onTabChange: (tab: 'match' | 'history') => void }) => (
+  <div className="flex justify-center mb-2">
+    <div className="inline-flex p-1 bg-surface border border-outline-variant/10 rounded-2xl">
+      <button
+        type="button"
+        onClick={() => onTabChange('match')}
+        className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+          activeTab === 'match'
+            ? 'bg-secondary text-white shadow-lg'
+            : 'text-foreground/40 hover:text-foreground'
+        }`}
+      >
+        New Match
+      </button>
+      <button
+        type="button"
+        onClick={() => onTabChange('history')}
+        className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+          activeTab === 'history'
+            ? 'bg-secondary text-white shadow-lg'
+            : 'text-foreground/40 hover:text-foreground'
+        }`}
+      >
+        History
+      </button>
+    </div>
+  </div>
+);
+
 export default function MatchClient() {
   const { user, isLoggedIn } = useAuth();
   const { error, success, ToastContainer } = useToast();
@@ -359,14 +391,7 @@ export default function MatchClient() {
     return () => clearInterval(interval);
   }, [phase, loadingMessages]);
 
-  // Fetch history when tab changes
-  useEffect(() => {
-    if (activeTab === 'history' && isLoggedIn) {
-      loadHistory();
-    }
-  }, [activeTab, isLoggedIn]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       setIsLoadingHistory(true);
       const res = await clientFetch('/api/match/history?limit=10');
@@ -392,7 +417,14 @@ export default function MatchClient() {
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, []);
+
+  // Fetch history when tab changes
+  useEffect(() => {
+    if (activeTab === 'history' && isLoggedIn) {
+      loadHistory();
+    }
+  }, [activeTab, isLoggedIn, loadHistory]);
 
   const deleteHistoryItem = async (id: string) => {
     try {
@@ -623,35 +655,6 @@ export default function MatchClient() {
 
   const getKootHumanLabel = (name: string) => KOOT_LABELS[name] || { label: name, icon: '✨' };
 
-  const TabBar = () => (
-    <div className="flex justify-center mb-2">
-      <div className="inline-flex p-1 bg-surface border border-outline-variant/10 rounded-2xl">
-        <button
-          type="button"
-          onClick={() => setActiveTab('match')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'match'
-              ? 'bg-secondary text-white shadow-lg'
-              : 'text-foreground/40 hover:text-foreground'
-          }`}
-        >
-          New Match
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('history')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'history'
-              ? 'bg-secondary text-white shadow-lg'
-              : 'text-foreground/40 hover:text-foreground'
-          }`}
-        >
-          History
-        </button>
-      </div>
-    </div>
-  );
-
   if (!isLoggedIn) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
@@ -711,7 +714,7 @@ export default function MatchClient() {
                       </p>
                     </div>
 
-                    <TabBar />
+                    <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
                   </div>
 
                   {/* Forms Section */}
@@ -1150,7 +1153,7 @@ export default function MatchClient() {
           </motion.div>
         ) : (
           <motion.div key="history-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-            <TabBar />
+            <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="text-center space-y-2 mb-6">
                <h2 className="text-3xl font-headline font-bold text-foreground">Match History</h2>
                <p className="text-foreground/40 text-sm">Your previously computed matches are saved for your review.</p>

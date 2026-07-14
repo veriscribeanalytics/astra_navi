@@ -25,7 +25,12 @@ export async function GET(req: Request) {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-            console.error(`[Profile API] Backend returned ${response.status}:`, errorData);
+            // Log only status + a non-secret code/message; the backend profile
+            // error body may contain PII and must not be logged verbatim.
+            console.error(`[Profile API] Backend returned ${response.status}:`, {
+                code: errorData?.code || null,
+                message: errorData?.error || errorData?.detail || null,
+            });
             return NextResponse.json({ error: errorData.error || errorData.detail || "Failed to fetch profile." }, { status: response.status });
         }
 

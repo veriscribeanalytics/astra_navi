@@ -206,8 +206,10 @@ export async function mockPaywallApi(page: Page, overrides: MockPaywallOverrides
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(batchResponse) });
   });
 
-  // Single-feature check endpoint — returns PaywallCheck shape
-  await page.route('**/api/entitlements/paywall**', async (route) => {
+  // Single-feature check endpoint — returns PaywallCheck shape.
+  // Pattern requires the `?feature=` query so it does NOT shadow the batch
+  // endpoint `/api/entitlements/paywall/features` (which has no query).
+  await page.route('**/api/entitlements/paywall?feature=*', async (route) => {
     const url = route.request().url();
     const featureMatch = url.match(/feature=([^&]+)/);
     const featureKey = featureMatch ? featureMatch[1] : 'chat_message';

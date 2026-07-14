@@ -132,7 +132,7 @@ export const getStarterCards = (ageBracket: AgeBracket): Array<{title: string; d
   return cardsByAge[ageBracket];
 };
 
-export const getAvatarQuestions = (avatarId: string, ageBracket: AgeBracket): string[] => {
+export const getAvatarQuestions = (avatarId: string, _ageBracket: AgeBracket): string[] => {
   const avatarQuestionsMap: Record<string, string[]> = {
     navi: [
       "What does today's planetary alignment mean for me?",

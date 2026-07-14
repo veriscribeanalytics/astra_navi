@@ -36,7 +36,7 @@ import { ConsentPreference, PRIVACY_POLICY_VERSION } from '@/types/consent';
  */
 
 export default function PrivacySettingsPage() {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const {
     preferences,
     hasConsented,
@@ -44,7 +44,7 @@ export default function PrivacySettingsPage() {
     consentedVersion,
     openPreferences,
     resetConsent,
-    isCategoryEnabled,
+    isCategoryEnabled: _isCategoryEnabled,
   } = useCookieConsent();
 
   const [exporting, setExporting] = useState(false);

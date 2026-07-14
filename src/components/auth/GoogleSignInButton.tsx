@@ -28,7 +28,7 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     try {
       await signIn('google', { callbackUrl, redirect: true });
       // signIn with redirect:true navigates away — no need to reset isLoading
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsLoading(false);
       onError?.(
         err instanceof Error

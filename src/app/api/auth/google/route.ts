@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit, AUTH_LIMIT_CONFIG } from '@/middleware/rateLimit';
 import { backendFetch } from '@/lib/backendClient';
+import { getClientIp } from '@/lib/request';
 
 /**
  * Google Auth API Proxy Route
@@ -18,8 +19,8 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // Rate limiting (Upstash Redis)
-        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+        // Rate limiting (Upstash Redis) — fails closed on Redis error.
+        const ip = getClientIp(req);
         const rateLimitResult = await checkRateLimit(`google_auth:${ip}`, AUTH_LIMIT_CONFIG);
 
         if (!rateLimitResult.allowed) {

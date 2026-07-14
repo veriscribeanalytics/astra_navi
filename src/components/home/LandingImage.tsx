@@ -60,6 +60,10 @@ export default function LandingImage({
 
   if (imageExists && !hasError) {
     return (
+      // src is a dynamic runtime path with unknown intrinsic dimensions, and the
+      // component relies on a manual `new Image()` preload for existence detection;
+      // converting to next/image would break that flow, so keep a raw <img>.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={alt}

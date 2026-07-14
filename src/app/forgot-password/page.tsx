@@ -34,7 +34,7 @@ const OTP_ERROR_CODES: Record<string, string> = {
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const { success, error: showError, ToastContainer } = useToast();
+  const { success, error: _showError, ToastContainer } = useToast();
   const { t } = useTranslation();
 
   // --- Step state ---

@@ -12,7 +12,7 @@ import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
 import { useToast, useTranslation, useVoiceSettings, resolveLangAndVoiceForText } from '@/hooks';
 import { isSpeechSupported } from '@/hooks/useVoiceSettings';
 import { speakViaCloud, type SpeakHandle } from '@/utils/cloudTts';
-import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp, ThumbsUp, ThumbsDown, Flag } from 'lucide-react';
+import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image as ImageIcon, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp, ThumbsUp, ThumbsDown, Flag } from 'lucide-react';
 import { getAvatarIcon, getAvatarAccent, getAvatarImage, getAvatarTheme } from '@/utils/avatarStyle';
 
 const sanitizedHtmlCache = new Map<string, string>();
@@ -921,9 +921,12 @@ const ChatMessages: React.FC = () => {
                       <div key={att.id} className="flex items-center gap-1.5 px-2 py-1 bg-secondary/10 rounded-lg text-[12px]">
                         {att.type.startsWith('image/') ? (
                           att.preview ? (
+                            // att.preview is a runtime blob/data URL for an uploaded
+                            // attachment; next/image cannot optimize it reliably, so keep a raw <img>.
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={att.preview} alt={att.name} className="w-6 h-6 rounded object-cover" />
                           ) : (
-                            <Image className="w-3.5 h-3.5 text-secondary" />
+                            <ImageIcon className="w-3.5 h-3.5 text-secondary" />
                           )
                         ) : (
                           <FileText className="w-3.5 h-3.5 text-red-400" />

@@ -5,13 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   Ban,
-  Bell,
   Calendar,
-  Check,
   ChevronRight,
   Coins,
   Flower2,
@@ -29,7 +26,6 @@ import {
   Sun,
   Target,
   Users,
-  Wallet,
   X,
   Zap,
 } from "lucide-react";
@@ -37,7 +33,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
 import { usePaywallContext } from "@/context/PaywallContext";
 import { useChat } from "@/context/ChatContext";
-import { getTierLabel } from "@/types/billing";
 import PaywallCard from "@/components/paywall/PaywallCard";
 import LockedPreview from "@/components/paywall/LockedPreview";
 import type { PaywallFeatureKey, PaywallData } from "@/types/paywall";
@@ -47,7 +42,7 @@ import { LOCALE_BY_LANGUAGE } from "@/locales";
 import { clientFetch } from "@/lib/apiClient";
 import { getRashiData } from "@/lib/astrology";
 import { AREA_LIST, AREA_THEMES, ForecastArea } from "@/data/areaThemes";
-import { getAreaPhaseMain, getAreaPhaseGlowColor, STATUS_COLORS, SIGNAL_BADGES, BRAND_GOLD, TEXT_COLORS, getScorePhase } from "@/data/lifeAreaColors";
+import { getAreaPhaseMain, STATUS_COLORS, SIGNAL_BADGES, BRAND_GOLD, TEXT_COLORS, getScorePhase } from "@/data/lifeAreaColors";
 import { PORTAL_COLORS } from "@/data/portalColors";
 
 import type { ForecastDay } from "@/components/dashboard/MiniChart";
@@ -97,15 +92,6 @@ const areaLabelFallback: Record<ForecastArea, string> = {
   health: "Health",
   general: "General",
   spiritual: "Spiritual",
-};
-
-const areaDescriptions: Record<ForecastArea, string> = {
-  love: "Strong connections and understanding.",
-  career: "Good progress and recognition.",
-  finance: "Stable flows, avoid impulsive spending.",
-  health: "Focus on balance and consistent routines.",
-  general: "Positive momentum in your overall journey.",
-  spiritual: "Inner growth and clarity are strong.",
 };
 
 const DASHBOARD_SECTION_TITLE_CLASS = "font-headline text-xl font-bold leading-tight tracking-tight text-foreground";
@@ -792,11 +778,11 @@ export default function DashboardHome() {
   );
   const greeting = t(useGreeting());
   const { user, refreshProfile, isLoading: userLoading } = useAuth();
-  const { tier, totalCredits, isLoaded: paywallLoaded, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
+  const { tier, isLoaded: paywallLoaded, isFeatureBlocked, getFeaturePaywall } = usePaywallContext();
   const isFree = useMemo(() => (tier || 'free').toLowerCase() === 'free', [tier]);
   const [activePaywallData, setActivePaywallData] = useState<PaywallData | null>(null);
   const { data: horoscope, isLoading: horoscopeLoading, profileLocationRequired } = useDailyHoroscope();
-  const { data: transits, isLoading: transitsLoading } = useTransitsToday();
+  const { data: transits } = useTransitsToday();
   const { setSelectedAvatarId, avatars } = useChat();
   const [activeArea, setActiveArea] = useState<ForecastArea>("career");
   const [allWeeklyForecasts, setAllWeeklyForecasts] = useState<Record<ForecastArea, ForecastData | null>>({
@@ -980,7 +966,6 @@ export default function DashboardHome() {
     return typeof apiOverall === "number" ? Math.round(apiOverall) : 0;
   }, [horoscope]);
   const overallPhaseHex = getAreaPhaseMain("overall", overallScore);
-  const overallPhaseGlow = getAreaPhaseGlowColor("overall", overallScore);
   // Sample-only week for the locked weekly-chart paywall preview (never shown to
   // paid users or as real data — see buildSampleWeek).
   const sampleWeek = useMemo(() => buildSampleWeek(), []);
@@ -1161,12 +1146,6 @@ export default function DashboardHome() {
         };
     }
   }, [activeArea, avatars, activeAreaLabel]);
-  const bestDay = useMemo(() => {
-    const day = forecast?.days?.reduce<ForecastDay | null>((best, item) => (!best || item.score > best.score ? item : best), null);
-    if (!day) return "Thu 74";
-    const label = new Date(day.date + "T00:00:00").toLocaleDateString(LOCALE_BY_LANGUAGE[language] || "en-IN", { weekday: "short" });
-    return `${label} ${day.score}`;
-  }, [forecast, language]);
 
   const activeTrigger = useMemo(() => {
     if (!horoscope?.time_triggers || horoscope.time_triggers.length === 0) return null;
@@ -2151,9 +2130,11 @@ export default function DashboardHome() {
                         {isBlocked ? (
                           <>
                             <div className="pointer-events-none flex w-full items-center gap-3 blur-[4px]" aria-hidden="true">
-                              <img
+                              <Image
                                 src={idx === 0 ? "/icons/planets/saturn.png" : "/icons/planets/moon.png"}
                                 alt=""
+                                width={64}
+                                height={64}
                                 className="h-16 w-16 shrink-0 object-contain opacity-70"
                               />
                               <div className="min-w-0">
@@ -2171,9 +2152,11 @@ export default function DashboardHome() {
                         ) : (
                           <>
                             <div className="relative shrink-0">
-                              <img
+                              <Image
                                 src={planetImg}
                                 alt={item.sublabel || "Planet"}
+                                width={64}
+                                height={64}
                                 className="h-16 w-16 object-contain"
                               />
                             </div>

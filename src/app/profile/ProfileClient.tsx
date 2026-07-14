@@ -15,11 +15,11 @@ import { useToast, useTranslation } from '@/hooks';
 import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
 import { LanguageCode } from '@/locales';
 import { clientFetch } from '@/lib/apiClient';
-import { 
+import {
     User, Calendar, Clock,
     Save, ArrowLeft, RotateCcw, Sparkles,
     Globe, Bell, Phone, Mail, CheckCircle2,
-    ArrowRight, Circle, Wallet
+    ArrowRight, Wallet
 } from 'lucide-react';
 
 const VALID_GENDERS = new Set(["male", "female", "other", "Not Specified"]);

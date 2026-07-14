@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  LayoutDashboard, Compass, Bot, 
+import {
+  LayoutDashboard,
   ArrowRight, Sparkles, Users, MessageSquare, Heart
 } from 'lucide-react';
 import Button from '../ui/Button';

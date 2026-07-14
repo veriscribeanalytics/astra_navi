@@ -10,8 +10,6 @@
  * the dashboard contract that replaces them.
  */
 
-import type { PaywallData } from '@/types/paywall';
-
 export type FamilyRelationshipType =
   | 'mother'
   | 'father'

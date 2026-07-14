@@ -27,7 +27,6 @@ export async function GET(
     });
 
     const data = await response.json();
-    console.log('[GET /api/chat/:chatId] Backend status:', response.status, 'Data keys:', Object.keys(data), 'Has chat?', !!data.chat, 'Has messages?', !!data.chat?.messages?.length);
 
     if (!response.ok) {
       return NextResponse.json({ error: data.error || data.detail || 'Failed to load conversation' }, { status: response.status });

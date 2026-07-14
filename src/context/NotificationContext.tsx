@@ -31,7 +31,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Prevents overlapping polls and lets the interval read fresh auth state.
     const inFlightRef = useRef(false);
     const isLoggedInRef = useRef(isLoggedIn);
-    isLoggedInRef.current = isLoggedIn;
+    // Keep the ref in sync inside an effect (not during render) so the stable
+    // refreshUnread callback can read the latest login state.
+    useEffect(() => {
+        isLoggedInRef.current = isLoggedIn;
+    }, [isLoggedIn]);
 
     const refreshUnread = useCallback(async () => {
         if (!isLoggedInRef.current || inFlightRef.current) return;
