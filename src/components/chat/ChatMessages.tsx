@@ -10,6 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 import ReportModal from './ReportModal';
 import { formatRelativeTime, formatDisplayDateTime } from '@/lib/datetime';
 import { useToast, useTranslation, useVoiceSettings, resolveLangAndVoiceForText } from '@/hooks';
+import { isSpeechSupported } from '@/hooks/useVoiceSettings';
+import { speakViaCloud, type SpeakHandle } from '@/utils/cloudTts';
 import { Volume2, Copy, ChevronRight, RefreshCw, Check, AlertCircle, ArrowDown, Image, FileText, Pencil, Trash2, Pin, PinOff, Search, X, ChevronUp, ThumbsUp, ThumbsDown, Flag } from 'lucide-react';
 import { getAvatarIcon, getAvatarAccent, getAvatarImage, getAvatarTheme } from '@/utils/avatarStyle';
 
@@ -243,6 +245,7 @@ const ChatMessages: React.FC = () => {
   });
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const speakHandleRef = useRef<SpeakHandle | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -364,6 +367,16 @@ const ChatMessages: React.FC = () => {
   useEffect(() => {
     sanitizedHtmlCache.clear();
   }, [activeChatId]);
+
+  // Stop any in-flight speech when the message list unmounts (chat closed /
+  // navigated away). Without this, cloud <audio> keeps playing after the
+  // bubbles that launched it are gone.
+  useEffect(() => {
+    return () => {
+      if (speakHandleRef.current) { speakHandleRef.current.stop(); speakHandleRef.current = null; }
+      if (isSpeechSupported()) window.speechSynthesis.cancel();
+    };
+  }, []);
 
   if (!activeChat && !isLoadingMessages) {
     return null;
@@ -494,23 +507,36 @@ const ChatMessages: React.FC = () => {
 
         const handleSpeak = (text: string) => {
           if (isSpeaking) {
-            window.speechSynthesis.cancel();
+            if (speakHandleRef.current) { speakHandleRef.current.stop(); speakHandleRef.current = null; }
+            if (isSpeechSupported()) window.speechSynthesis.cancel();
             setSpeakingId(null);
             toastInfo(t('chat.speechStopped'));
             return;
           }
           const cleanText = cleanTextForSpeech(text);
           const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(cleanText, langCode, voices, selectedVoiceURI);
-          const utterance = new SpeechSynthesisUtterance(cleanText);
-          utterance.lang = detectedLangCode;
-          if (voice) utterance.voice = voice;
-          utterance.rate = 0.95;
-          utterance.onend = () => setSpeakingId(null);
-          utterance.onerror = () => setSpeakingId(null);
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.speak(utterance);
+
+          // Browser fallback for when cloud TTS (backend MP3) is unreachable.
+          const speakViaBrowser = () => {
+            if (!isSpeechSupported()) { setSpeakingId(null); return; }
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = detectedLangCode;
+            if (voice) utterance.voice = voice;
+            utterance.rate = 0.95;
+            utterance.onend = () => setSpeakingId(null);
+            utterance.onerror = () => setSpeakingId(null);
+            window.speechSynthesis.speak(utterance);
+          };
+
+          if (speakHandleRef.current) { speakHandleRef.current.stop(); speakHandleRef.current = null; }
+          if (isSpeechSupported()) window.speechSynthesis.cancel();
           setSpeakingId(msg.id);
           toastInfo(t('chat.speaking'));
+          speakHandleRef.current = speakViaCloud(cleanText, detectedLangCode, {
+            onEnd: () => { if (speakHandleRef.current) speakHandleRef.current = null; setSpeakingId(null); },
+            onError: () => { speakHandleRef.current = null; speakViaBrowser(); },
+          });
         };
 
         if (isAi && !msg.text && !msg.opener && isSending) return null;

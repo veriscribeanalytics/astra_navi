@@ -31,16 +31,6 @@ export interface SpeakOptions {
 export function speakViaCloud(text: string, lang: string, opts: SpeakOptions = {}): SpeakHandle {
   const { onStart, onEnd, onError, rate = 0.95 } = opts;
 
-  // TEMP DIAGNOSTIC — remove after the Marathi-voice-on-English-text bug is
-  // settled. Reveals exactly what the frontend sends to /api/voice/tts:
-  //   • script = "latin"      → the spoken content is English. If lang=mr-IN,
-  //     the CONTENT is the bug (an English AI reply / string), not the voice.
-  //   • script = "devanagari" → content is Hindi/Marathi as expected.
-  const hasDeva = /[ऀ-ॿ]/.test(text);
-  const hasLatin = /[A-Za-z]/.test(text);
-  console.log('[voice-tts] lang=%s script=%s len=%d text=%o', lang,
-    hasDeva ? 'devanagari' : (hasLatin ? 'latin' : 'other'), text.length, text.slice(0, 120));
-
   let cancelled = false;
   let audio: HTMLAudioElement | null = null;
   let objectUrl: string | null = null;

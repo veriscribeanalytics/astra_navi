@@ -6,6 +6,7 @@ import type { ChatMessage } from '@/context/ChatContext';
 import { useTranslation } from './useTranslation';
 import { useVoiceSettings, isSpeechSupported, loadSpeechVoices, resolveLangAndVoiceForText } from './useVoiceSettings';
 import { cleanTextForSpeech } from '@/utils/markdownParser';
+import { speakViaCloud, type SpeakHandle } from '@/utils/cloudTts';
 import { LOCALE_BY_LANGUAGE } from '@/locales';
 
 export type ConversationPhase = 'idle' | 'listening' | 'processing' | 'speaking';
@@ -83,6 +84,7 @@ export function useConversationMode(): ConversationMode {
   const restartAttemptsRef = useRef(0);
   const ttsWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ttsKeepaliveRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cloudTtsHandleRef = useRef<SpeakHandle | null>(null);
   const commitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => { activeChatRef.current = activeChat; }, [activeChat]);
@@ -106,6 +108,13 @@ export function useConversationMode(): ConversationMode {
     if (ttsWatchdogRef.current) { clearTimeout(ttsWatchdogRef.current); ttsWatchdogRef.current = null; }
     if (ttsKeepaliveRef.current) { clearInterval(ttsKeepaliveRef.current); ttsKeepaliveRef.current = null; }
   }, []);
+
+  // Halt any in-flight speech from either engine (cloud <audio> or browser TTS).
+  const stopAllSpeech = useCallback(() => {
+    if (cloudTtsHandleRef.current) { cloudTtsHandleRef.current.stop(); cloudTtsHandleRef.current = null; }
+    if (isSpeechSupported()) window.speechSynthesis.cancel();
+    clearTtsTimers();
+  }, [clearTtsTimers]);
 
   const sendRef = useRef<(text: string) => void>(() => {});
   const ensureRunningRef = useRef<() => void>(() => {});
@@ -162,13 +171,14 @@ export function useConversationMode(): ConversationMode {
 
   useEffect(() => {
     goIdleRef.current = () => {
+      // Drop out of 'speaking' BEFORE stopping speech so a synchronous cloud
+      // onEnd from .stop() is a no-op rather than restarting listening.
+      setPhaseSync('idle');
+      stopAllSpeech();
       clearCommitTimer();
       clearSilenceTimer();
-      clearTtsTimers();
-      if (isSpeechSupported()) window.speechSynthesis.cancel();
       finalTranscriptRef.current = '';
       setPartialTranscript('');
-      setPhaseSync('idle');
       if (recognitionRunningRef.current) {
         try { recognitionRef.current?.stop(); } catch { /* noop */ }
       }
@@ -187,12 +197,11 @@ export function useConversationMode(): ConversationMode {
 
   useEffect(() => {
     bargeInRef.current = () => {
-      if (isSpeechSupported()) window.speechSynthesis.cancel();
-      clearTtsTimers();
+      setPhaseSync('listening');
+      stopAllSpeech();
       pendingInterruptRef.current = false;
       finalTranscriptRef.current = '';
       setPartialTranscript('');
-      setPhaseSync('listening');
       armSilenceTimer();
       ensureRunningRef.current();
     };
@@ -218,12 +227,6 @@ export function useConversationMode(): ConversationMode {
 
   useEffect(() => {
     speakRef.current = async (msg: ChatMessage) => {
-      if (!isSpeechSupported()) {
-        startListeningRef.current();
-        return;
-      }
-      clearTtsTimers();
-      window.speechSynthesis.cancel();
       const textToSpeak = [msg.opener, msg.text].filter(Boolean).join('\n\n');
       const clean = cleanTextForSpeech(textToSpeak);
       speakingTextRef.current = clean;
@@ -231,42 +234,54 @@ export function useConversationMode(): ConversationMode {
         startListeningRef.current();
         return;
       }
-      const utterance = new SpeechSynthesisUtterance(clean);
-      await loadSpeechVoices();
-      if (phaseRef.current !== 'processing') {
-        // user interrupted (by voice or tap) while voices were loading
-        if (phaseRef.current === 'idle') return;
-        return;
-      }
-      let availableVoices = voices;
-      if (!availableVoices.length) {
-        availableVoices = await loadSpeechVoices();
-      }
-      const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI);
-      utterance.lang = detectedLangCode;
-      if (voice) utterance.voice = voice;
-      utterance.rate = 0.95;
+      stopAllSpeech();
+      setPhaseSync('speaking');
+      ensureRunningRef.current(); // keep recognition live for voice barge-in
+
+      // Resume listening once speech finishes naturally. If the user barged
+      // in (voice/tap), phase is no longer 'speaking' by the time this fires,
+      // so the no-op guard prevents a spurious listen restart.
       const finish = () => {
         clearTtsTimers();
         if (phaseRef.current === 'speaking') {
-          startListeningRef.current(); // auto-listen after Navi finishes
+          startListeningRef.current();
         }
       };
-      utterance.onend = finish;
-      utterance.onerror = finish;
-      setPhaseSync('speaking');
-      ensureRunningRef.current(); // keep recognition live for voice barge-in
-      // Chrome pauses long utterances (~15s) and never fires onend; resume() on
-      // an interval keeps it alive, and a watchdog recovers to listening if the
-      // engine drops the utterance silently, so the machine never hangs on
-      // 'speaking'.
-      ttsKeepaliveRef.current = setInterval(() => {
-        if (window.speechSynthesis.speaking) window.speechSynthesis.resume();
-        else clearTtsTimers();
-      }, 10000);
-      const watchdogMs = Math.max(15000, clean.length * 90);
-      ttsWatchdogRef.current = setTimeout(finish, watchdogMs);
-      window.speechSynthesis.speak(utterance);
+
+      // Browser fallback for when cloud TTS (backend MP3) is unreachable. The
+      // keepalive/watchdog only apply here — Chrome's ~15s utterance-pause bug
+      // does not affect the cloud <audio> path.
+      const speakViaBrowser = async () => {
+        if (!isSpeechSupported()) { finish(); return; }
+        await loadSpeechVoices();
+        if (phaseRef.current !== 'speaking') return; // user interrupted while voices loaded
+        let availableVoices = voices;
+        if (!availableVoices.length) {
+          availableVoices = await loadSpeechVoices();
+        }
+        if (phaseRef.current !== 'speaking') return;
+        const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI);
+        const utterance = new SpeechSynthesisUtterance(clean);
+        utterance.lang = detectedLangCode;
+        if (voice) utterance.voice = voice;
+        utterance.rate = 0.95;
+        utterance.onend = finish;
+        utterance.onerror = finish;
+        window.speechSynthesis.cancel();
+        ttsKeepaliveRef.current = setInterval(() => {
+          if (window.speechSynthesis.speaking) window.speechSynthesis.resume();
+          else clearTtsTimers();
+        }, 10000);
+        const watchdogMs = Math.max(15000, clean.length * 90);
+        ttsWatchdogRef.current = setTimeout(finish, watchdogMs);
+        window.speechSynthesis.speak(utterance);
+      };
+
+      const { langCode: detectedLangCode } = resolveLangAndVoiceForText(clean, langCode, voices, selectedVoiceURI);
+      cloudTtsHandleRef.current = speakViaCloud(clean, detectedLangCode, {
+        onEnd: () => { cloudTtsHandleRef.current = null; finish(); },
+        onError: () => { cloudTtsHandleRef.current = null; void speakViaBrowser(); },
+      });
     };
   });
 
@@ -490,10 +505,9 @@ export function useConversationMode(): ConversationMode {
     if (recognitionRunningRef.current) {
       try { recognitionRef.current?.stop(); } catch { /* noop */ }
     }
-    if (isSpeechSupported()) window.speechSynthesis.cancel();
+    stopAllSpeech();
     clearCommitTimer();
     clearSilenceTimer();
-    clearTtsTimers();
     finalTranscriptRef.current = '';
     committedIdxRef.current = 0;
     awaitingResponseRef.current = false;
@@ -502,13 +516,14 @@ export function useConversationMode(): ConversationMode {
     setPartialTranscript('');
     setPhaseSync('idle');
     setIsActive(false);
-  }, [setPhaseSync, clearCommitTimer, clearSilenceTimer, clearTtsTimers]);
+  }, [setPhaseSync, stopAllSpeech, clearCommitTimer, clearSilenceTimer]);
 
   // Tear down TTS / recognition when the component unmounts.
   useEffect(() => {
     return () => {
       isActiveRef.current = false;
       try { recognitionRef.current?.stop(); } catch { /* noop */ }
+      if (cloudTtsHandleRef.current) { cloudTtsHandleRef.current.stop(); cloudTtsHandleRef.current = null; }
       if (isSpeechSupported()) window.speechSynthesis.cancel();
       if (commitTimerRef.current) clearTimeout(commitTimerRef.current);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
