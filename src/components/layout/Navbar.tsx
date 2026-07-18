@@ -230,7 +230,7 @@ const getNavSections = (isLoggedIn: boolean, t: (key: string) => string) => {
                     label: t('nav.ourServices') || "Our Services",
                     href: "/services",
                     icon: <Compass className="w-4 h-4" />,
-                    desc: t('nav.ourServicesDesc') || "Explore all of AstraNavi's AI and Vedic services"
+                    desc: t('nav.ourServicesDesc') || "Explore all of AstraMitra's AI and Vedic services"
                 },
                 { 
                     label: t('nav.astraNaviPremium'), 
@@ -405,9 +405,9 @@ const Navbar: React.FC = () => {
             <div className="hidden xl:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 w-full mx-auto max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px]">
                 {/* Left: Logo */}
                 <div className="flex justify-start shrink-0">
-                    <Link href="/" aria-label="Astra Navi Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
+                    <Link href="/" aria-label="Astra Mitra Home" className="flex shrink-0 items-center justify-center text-lg lg:text-xl font-bold tracking-tighter text-primary font-headline whitespace-nowrap">
                         <Image src="/icons/logo.png" alt="" height={26} width={26} style={{ width: "auto", height: "auto" }} className="object-contain mr-2.5 rounded-lg shadow-sm shadow-secondary/10" priority />
-                        Astra Navi
+                        Astra Mitra
                     </Link>
                 </div>
 
@@ -585,10 +585,10 @@ const Navbar: React.FC = () => {
                     )}
                 </div>
 
-                {/* Center Section - Prevent overlap on extra-narrow screens by hiding "Astra Navi" text below 390px */}
+                {/* Center Section - Prevent overlap on extra-narrow screens by hiding "Astra Mitra" text below 390px */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-auto">
                     <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tighter text-primary font-headline">
-                        <Image src="/icons/logo.png" alt="Astra Navi Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
+                        <Image src="/icons/logo.png" alt="Astra Mitra Logo" height={24} width={24} style={{ width: "auto", height: "auto" }} className="object-contain rounded-md" priority />
                     </Link>
                 </div>
 

@@ -2,7 +2,7 @@ import WorkInProgress from '@/components/WorkInProgress';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shop | AstraNavi',
+  title: 'Shop | AstraMitra',
   robots: { index: false, follow: false },
 };
 

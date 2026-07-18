@@ -29,10 +29,10 @@ export default function PrivacyPage() {
         {/* Intro */}
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Welcome to Astra Navi. Your privacy is of paramount importance to us. This Privacy Policy explains how <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, discloses, and safeguards your personal data when you use our services, in strict compliance with the <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong> of India and other global standards.
+            Welcome to Astra Mitra. Your privacy is of paramount importance to us. This Privacy Policy explains how <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, discloses, and safeguards your personal data when you use our services, in strict compliance with the <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong> of India and other global standards.
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Please read this policy carefully. By registering for or using Astra Navi, you provide your explicit, unambiguous, and revocable consent to the collection and processing of your personal data as described herein.
+            Please read this policy carefully. By registering for or using Astra Mitra, you provide your explicit, unambiguous, and revocable consent to the collection and processing of your personal data as described herein.
           </p>
         </div>
 
@@ -93,13 +93,13 @@ export default function PrivacyPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">4a. Cookies & Local Storage</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Astra Navi uses cookies and browser local storage for essential platform functionality. We do not use third-party tracking cookies or advertising networks. Here is exactly what is stored on your device:
+            Astra Mitra uses cookies and browser local storage for essential platform functionality. We do not use third-party tracking cookies or advertising networks. Here is exactly what is stored on your device:
           </p>
           <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
             <li><strong>Session Cookie (auth.js.session-token):</strong> Maintains your secure login session. Expires after 30 days of inactivity. Essential.</li>
             <li><strong>Theme Cookie:</strong> Remembers your light/dark mode preference. Purely functional.</li>
             <li><strong>Language Cookie (NEXT_LOCALE):</strong> Remembers your preferred language. Purely functional.</li>
-            <li><strong>Consent Cookie (astra_navi_cookie_consent):</strong> Records your cookie and privacy preferences. Essential for DPDP compliance.</li>
+            <li><strong>Consent Cookie (astra_mitra_cookie_consent):</strong> Records your cookie and privacy preferences. Essential for DPDP compliance.</li>
             <li><strong>Local Storage:</strong> Stores UI state such as chat avatar selection, pending messages, and toast notifications. No personal data is persisted here beyond your session.</li>
           </ul>
           <p className="text-sm text-primary/60 leading-relaxed">
@@ -127,7 +127,7 @@ export default function PrivacyPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">6. Children&apos;s Data (18+ Age Restriction)</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            In compliance with DPDP rules governing children&apos;s data, Astra Navi does not offer services to, or knowingly collect personal data from, individuals under the age of 18. An age validation gate is active during registration. If we learn we have collected data from a child under 18 without parental consent, we will delete it immediately.
+            In compliance with DPDP rules governing children&apos;s data, Astra Mitra does not offer services to, or knowingly collect personal data from, individuals under the age of 18. An age validation gate is active during registration. If we learn we have collected data from a child under 18 without parental consent, we will delete it immediately.
           </p>
         </div>
 
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">7a. Data Breach Response Commitment</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            In the event of a personal data breach, Astra Navi is committed to the following response timeline, in compliance with the DPDP Rules, 2025 (Rule 7) and CERT-In guidelines:
+            In the event of a personal data breach, Astra Mitra is committed to the following response timeline, in compliance with the DPDP Rules, 2025 (Rule 7) and CERT-In guidelines:
           </p>
           <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
             <li><strong>Immediate Intimation:</strong> The Data Protection Board of India (DPBI) will be notified immediately upon becoming aware of a breach.</li>

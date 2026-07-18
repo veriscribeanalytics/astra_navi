@@ -1,7 +1,7 @@
 import 'server-only';
 
 /**
- * AstraNavi Backend API Client
+ * AstraMitra Backend API Client
  * 
  * Thin wrapper for fetch that handles service authentication 
  * when calling the FastAPI backend.

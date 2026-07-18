@@ -31,7 +31,7 @@ const LABELS: Array<[number, string]> = [
   [2.4, '2.4s - solar system compresses'], [3, '3.0s - rashi wheel forms from center'],
   [3.5, '3.5s - rashi icons reveal'], [4.5, '4.5s - rashi wheel dissolves'],
   [5, '5.0s - light pillar'], [5.5, '5.5s - icon forms, no text'],
-  [7, '7.0s - tagline appears'], [7.5, '7.5s - AstraNavi appears once'], [8, '8.0s - final hold'],
+  [7, '7.0s - tagline appears'], [7.5, '7.5s - AstraMitra appears once'], [8, '8.0s - final hold'],
 ];
 
 interface ExactIntroProps {
@@ -345,7 +345,7 @@ export default function ExactIntro({ autoComplete = false, onComplete }: ExactIn
         <span className={styles.taglineLine}>Finally Understood.</span>
       </section>
       <section data-brand className={`${styles.copy} ${styles.brand}`}>
-        <div className={styles.brandName}>AstraNavi</div>
+        <div className={styles.brandName}>AstraMitra</div>
         <div className={styles.brandSub}>Navigate. Understand. <span>Align.</span></div>
       </section>
 

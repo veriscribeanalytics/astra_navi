@@ -124,7 +124,7 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .custo
   }
 }
 
-/* --- AstraNavi Component Design System --- */
+/* --- AstraMitra Component Design System --- */
 
 /* Fluid Card & Page Padding */
 .fluid-padding-card {
@@ -1358,7 +1358,7 @@ button, [type='button'], [type='reset'], [type='submit'], [role='button'], a {
   font-family: 'Courier New', Consolas, monospace;
 }
 
-/* Highlight.js Theme (AstraNavi Custom — Gold/Amber) */
+/* Highlight.js Theme (AstraMitra Custom — Gold/Amber) */
 .ai-message-content .hljs { color: var(--on-surface-variant); background: transparent; }
 .ai-message-content .hljs-keyword,
 .ai-message-content .hljs-selector-tag { color: var(--secondary); font-weight: 600; }

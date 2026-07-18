@@ -541,7 +541,7 @@ const LoginContent = () => {
                     <span>{t('login.yourDataIsPrivate')}</span>
                   </div>
                   <p className="text-[10px] text-primary/30 leading-relaxed max-w-[340px] text-center">
-                    By signing in, you acknowledge Astra Navi&apos;s{' '}
+                    By signing in, you acknowledge Astra Mitra&apos;s{' '}
                     <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/60 hover:text-secondary underline underline-offset-2 transition-colors">
                       Privacy Policy
                     </a>

@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('AstraNavi Smoke Tests', () => {
+test.describe('AstraMitra Smoke Tests', () => {
   test('Homepage loads correctly', async ({ page }) => {
     // Simulate a RETURNING visitor: the first-session cosmic intro
     // (HomepageIntro, scoped to "/") hides the navbar for ~4s on a fresh
-    // visit. Setting the intro-seen cookie (astranavi_intro_seen_v3) before
+    // visit. Setting the intro-seen cookie (astramitra_intro_seen_v3) before
     // navigating skips the intro so the navbar is immediately visible.
-    await page.context().addCookies([{ name: 'astranavi_intro_seen_v3', value: '1', domain: 'localhost', path: '/', sameSite: 'Lax' }]);
+    await page.context().addCookies([{ name: 'astramitra_intro_seen_v3', value: '1', domain: 'localhost', path: '/', sameSite: 'Lax' }]);
     await page.goto('/');
 
     // Check title
-    await expect(page).toHaveTitle(/AstraNavi/);
+    await expect(page).toHaveTitle(/AstraMitra/);
 
     // Check navbar
     const nav = page.locator('nav').first();
@@ -23,7 +23,7 @@ test.describe('AstraNavi Smoke Tests', () => {
 
   test('Navigation to about page works', async ({ page }) => {
     await page.goto('/about');
-    await expect(page).toHaveTitle(/AstraNavi/);
+    await expect(page).toHaveTitle(/AstraMitra/);
   });
   
   test('Navigation to chat works', async ({ page }) => {

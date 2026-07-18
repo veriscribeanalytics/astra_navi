@@ -593,7 +593,7 @@ function DashboardFamilyMemberCard({ member, t }: { member: FamilyMember } & Fam
   const scorePct = hasScore ? Math.max(0, Math.min(100, Math.round(rawScore!))) : null;
   const bandKey = dashboard?.bond?.band_key;
   const ringColor = bandKey ? familyDashboardBandHex(bandKey) : '#C9972E';
-  const verdict = dashboard?.guidance?.summary;
+  const verdict = dashboard?.today_message;
 
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
@@ -692,7 +692,7 @@ function DashboardConnectionCard({ connection, t }: { connection: FamilyConnecti
   const bandKey = dashboard?.bond?.band_key;
   const ringColor = bandKey ? familyDashboardBandHex(bandKey) : '#C9972E';
   const statusDotColor = bandKey ? familyDashboardBandHex(bandKey) : '#C9972E';
-  const verdict = dashboard?.guidance?.summary;
+  const verdict = dashboard?.today_message;
 
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-[28px] border border-[#F4EFE7]/8 bg-[#180F32]">
@@ -861,7 +861,7 @@ export default function DashboardHome() {
     // Per-user, per-lang, per-day key so a refresh restores instantly without
     // refetching (the 6-area data used to vanish on reload and re-fan-out 6
     // requests, tripping the per-user rate limit → 429s).
-    const cacheKey = `astranavi_weekly_forecasts:${user?.email || "anon"}:${language}:${date}`;
+    const cacheKey = `astramitra_weekly_forecasts:${user?.email || "anon"}:${language}:${date}`;
     const WEEKLY_CACHE_TTL = 10 * 60 * 1000;
 
     try {
@@ -1606,7 +1606,7 @@ export default function DashboardHome() {
                               setActivePaywallData(getFeaturePaywall('chat_message')!);
                               return;
                             }
-                            localStorage.removeItem("astranavi_pending_message");
+                            localStorage.removeItem("astramitra_pending_message");
                             router.push("/chat");
                           }}
                           className="mt-auto w-full flex items-center gap-3 max-[360px]:gap-2 rounded-2xl border border-[#C9972E]/25 bg-[#B88924] py-3 px-4 max-[360px]:px-3 text-left text-[#1A0E32] hover:bg-[#C9972E] transition duration-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#C9972E]/50"
@@ -1855,7 +1855,7 @@ export default function DashboardHome() {
                              }
                              setSelectedAvatarId(activeAvatar.avatarId);
                              localStorage.setItem(
-                               "astranavi_pending_message",
+                               "astramitra_pending_message",
                                `I want to consult with ${activeAvatar.name} about my ${activeAreaLabel.toLowerCase()} area.`
                              );
                              router.push("/chat");

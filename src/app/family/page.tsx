@@ -33,7 +33,7 @@ function FamilyContent() {
                 features={[
                     {
                         title: 'Save up to 3 free members',
-                        desc: 'Mother, father, spouse, sibling, child, friend — keep their birth details safely on AstraNavi.',
+                        desc: 'Mother, father, spouse, sibling, child, friend — keep their birth details safely on AstraMitra.',
                         icon: <Users className="w-5 h-5" />,
                     },
                     {

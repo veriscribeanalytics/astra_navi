@@ -25,7 +25,7 @@ function MatchContent() {
             <PublicFeatureLanding 
                 title="Kundli Matching — 36 Guna Vedic Compatibility"
                 subtitle="Ashtakoota Milan"
-                description="Go beyond generic zodiac compatibility. AstraNavi uses the classical 36-point Ashtakoota system to analyze the spiritual, emotional, and biological synchronization between two charts."
+                description="Go beyond generic zodiac compatibility. AstraMitra uses the classical 36-point Ashtakoota system to analyze the spiritual, emotional, and biological synchronization between two charts."
                 hook="Vedic compatibility analysis examines 8 critical dimensions — from Nadi (genetic health) to Bhakoot (emotional harmony). A score above 18 is traditionally considered favorable for a lasting partnership."
                 icon={<Heart className="w-4 h-4" />}
                 ctaLabel="Check Compatibility"

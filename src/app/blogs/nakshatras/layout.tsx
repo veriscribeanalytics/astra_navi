@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Nakshatras | AstraNavi Blog",
+  title: "Nakshatras | AstraMitra Blog",
   description:
     "Deep dive into the 27 Nakshatras (lunar mansions) of Vedic astrology — their symbolism, ruling deities, and how they refine personality and compatibility predictions.",
   openGraph: {
-    title: "Nakshatras | AstraNavi Blog",
+    title: "Nakshatras | AstraMitra Blog",
     description:
       "Deep dive into the 27 Nakshatras (lunar mansions) of Vedic astrology — their symbolism, ruling deities, and how they refine personality and compatibility predictions.",
   },

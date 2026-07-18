@@ -25,7 +25,7 @@ function MessagesContent() {
             <PublicFeatureLanding
                 title="Messages — Talk to Your Connections"
                 subtitle="Private 1:1 chat with the people you're connected to"
-                description="Message anyone you've connected with on AstraNavi. Conversations stay private between the two of you, separate from your Navi AI chats."
+                description="Message anyone you've connected with on AstraMitra. Conversations stay private between the two of you, separate from your Navi AI chats."
                 hook="Astrology is best explored together. Compare charts, plan around transits, and stay close to the people whose cosmic journeys are tied to yours."
                 icon={<MessageCircle className="w-4 h-4" />}
                 ctaLabel="Open Messages"

@@ -3,7 +3,7 @@
  * contract documented in the Family Dashboard Frontend Integration Notes.
  *
  * The dashboard is a per-member / per-connection *daily* "bond" view: today's
- * bond score, guidance, chips, time triggers, relationship areas, and a weekly
+ * bond score, today_message, time triggers, relationship areas, and a weekly
  * graph. It is gated by the same `full_daily_horoscope` Pro+ feature key as
  * the personal daily horoscope. (The permanent compatibility baseline that
  * used to ride alongside is gone — `bond.score` is now the only headline.)
@@ -18,7 +18,7 @@
  *    city; surface a caveat so users who've moved aren't confused.
  *  - The `paywall` field is present only for free-tier viewers who aren't
  *    accessible — render a soft upgrade overlay while keeping the teaser
- *    (bond / band / areas_summary / guidance.summary) visible.
+ *    (bond / band / today_message / guidance.summary / areas_summary) visible.
  */
 
 import type { PaywallData } from '@/types/paywall';
@@ -100,12 +100,6 @@ export interface FamilyDashboardBond {
   band_key: FamilyDashboardBandKey;
 }
 
-export interface FamilyDashboardChip {
-  key: string;
-  label: string;
-  value: string;
-}
-
 export interface FamilyDashboardGuidance {
   /** Always present (free teaser). */
   summary: string;
@@ -113,6 +107,21 @@ export interface FamilyDashboardGuidance {
   best_for?: string;
   avoid?: string;
   approach?: string;
+}
+
+/** Server-resolved, localized dashboard section *headings* — the plain-language
+ *  question each card answers (e.g. "How are we today?"). Render as-is: already
+ *  translated to the viewer's language; do NOT re-localize client-side (see the
+ *  Family Dashboard Frontend Notes §2/§7). The fixed key names
+ *  (`today` / `advice` / `insights`) are stable identifiers even though their
+ *  *values* are localized strings. */
+export interface FamilyDashboardSections {
+  /** Hero card subtitle — "How are we today?". */
+  today: string;
+  /** Today-message / advice row — "What should I do today?". */
+  advice: string;
+  /** Relationship-areas card subtitle — "What's affecting our relationship?". */
+  insights: string;
 }
 
 /** A single Hora time window. `start`/`end` are "HH:MM"; `"HH:MM (+1)"`
@@ -211,16 +220,27 @@ export interface FamilyDashboardSystem {
   language: string;
 }
 
-/** Daily dashboard response. Pro+ fields (`chips`, `time_triggers`,
- *  `relationship_areas`, and the Pro+ `guidance.*` sub-fields) are absent for
- *  free-tier viewers; `paywall` is present only when free & not accessible. */
+/** Daily dashboard response. Pro+ fields (`guidance.best_for` / `avoid` /
+ *  `approach`, `time_triggers`, `relationship_areas`) are absent for free-tier
+ *  viewers; `paywall` is present only when free & not accessible. `today_message`
+ *  and `guidance.summary` are the always-present localized teasers (free tier
+ *  keeps both). `today_message` is a top-level field — sibling of `bond`, not
+ *  nested under it. */
 export interface FamilyDashboardResponse {
   user: FamilyDashboardUser;
   member: FamilyDashboardMember;
   meta: FamilyDashboardMeta;
   bond: FamilyDashboardBond;
-  chips?: FamilyDashboardChip[];
+  /** One localized, band-keyed sentence — always present (free teaser).
+   *  Render as-is; already translated server-side. Top-level field
+   *  (sibling of `bond`, not nested under it). */
+  today_message: string;
   guidance: FamilyDashboardGuidance;
+  /** Server-resolved, localized section headings (see
+   *  {@link FamilyDashboardSections}). Render as-is; already translated
+   *  server-side. Optional only for legacy/cached payloads that predate the
+   *  field — fall back to the client-side `t()` keys when absent. */
+  sections?: FamilyDashboardSections;
   time_triggers?: FamilyDashboardTimeTriggers;
   relationship_areas?: FamilyDashboardRelationshipAreas;
   areas_summary: FamilyDashboardAreasSummary;
@@ -243,6 +263,14 @@ export interface FamilyDashboardWeeklyDay {
   band_key: FamilyDashboardBandKey;
 }
 
+/** Server-resolved, localized heading for the weekly outlook card. Same rules
+ *  as {@link FamilyDashboardSections}: render as-is (already translated), the
+ *  `weekly` key name is the stable identifier, its value is localized. */
+export interface FamilyDashboardWeeklySections {
+  /** Weekly card subtitle — "What should I expect this week?". */
+  weekly: string;
+}
+
 export interface FamilyDashboardWeeklySummary {
   best_day: string;
   worst_day: string;
@@ -260,6 +288,10 @@ export interface FamilyDashboardWeeklyResponse {
   today: string;
   days: FamilyDashboardWeeklyDay[];
   summary: FamilyDashboardWeeklySummary;
+  /** Server-resolved, localized weekly heading (see
+   *  {@link FamilyDashboardWeeklySections}). Optional only for legacy/cached
+   *  payloads; fall back to the client-side `t()` key when absent. */
+  sections?: FamilyDashboardWeeklySections;
   paywall?: PaywallData;
   lang: string;
 }

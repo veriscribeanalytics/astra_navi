@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '404 - Page Not Found | AstraNavi',
+  title: '404 - Page Not Found | AstraMitra',
 };
 
 export default function NotFound() {

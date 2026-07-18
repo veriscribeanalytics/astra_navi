@@ -750,7 +750,7 @@ function LowerPageSuggestions({
                 <SuggestedActionCard
                     icon={<Search className="w-4 h-4" />}
                     title={t('family.discoverTitle') || 'Find people'}
-                    desc={t('family.discoverDesc') || 'Search for other AstraNavi users to connect with.'}
+                    desc={t('family.discoverDesc') || 'Search for other AstraMitra users to connect with.'}
                     action={
                         <a
                             href="/family/discover"
@@ -831,7 +831,7 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
     const rawScore = dashboard?.bond?.score;
     const score = typeof rawScore === 'number' ? Math.max(0, Math.min(100, Math.round(rawScore))) : null;
     const status = computeFamilyMemberStatus({ member: m, dashboard: dashboard ?? null });
-    const verdict = dashboard?.guidance?.summary ?? null;
+    const verdict = dashboard?.today_message ?? null;
     const birthDetailStatus = isLinked
         ? null
         : status?.kind === 'incomplete'
@@ -845,7 +845,7 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
         >
             <div className="flex items-stretch gap-0">
                 {/* Avatar column */}
-                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-center gap-2 border-r border-[rgba(196,181,253,0.08)] p-3">
+                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-center gap-2 border-r border-[rgba(196,181,253,0.08)] p-3 overflow-hidden">
                     <div
                         className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border"
                         style={{
@@ -859,7 +859,7 @@ function MemberCard({ member: m, onOpen, onEdit, onDelete }: { member: FamilyMem
                             : <span className="text-lg font-headline font-bold">{m.name.charAt(0).toUpperCase()}</span>
                         }
                     </div>
-                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#C9972E] text-center leading-tight">
+                    <span className="w-full break-words text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#C9972E] text-center leading-tight">
                         {relationshipLabel}
                     </span>
                 </div>
@@ -995,7 +995,7 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
         >
             <div className="flex items-stretch gap-0">
                 {/* Avatar column */}
-                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-center gap-2 border-r border-[rgba(196,181,253,0.08)] p-3">
+                <div className="shrink-0 w-[72px] sm:w-20 flex flex-col items-center justify-center gap-2 border-r border-[rgba(196,181,253,0.08)] p-3 overflow-hidden">
                     <div
                         className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border"
                         style={{
@@ -1009,7 +1009,7 @@ function ConnectionCard({ connection: c, onManage }: { connection: FamilyConnect
                             : <span className="text-lg font-headline font-bold" style={{ color: accent }}>{c.otherName.charAt(0).toUpperCase()}</span>
                         }
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-center leading-tight ${c.isFamily ? 'text-[#C9972E]' : 'text-sky-300'}`}>
+                    <span className={`w-full break-words text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-center leading-tight ${c.isFamily ? 'text-[#C9972E]' : 'text-sky-300'}`}>
                         {c.isFamily ? (t('family.connectionKindFamily') || 'Family') : (t('family.connectionStatusConnected') || 'Connected')}
                     </span>
                 </div>
@@ -1167,7 +1167,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
         const e: Record<string, string> = {};
         if (!state.name.trim()) e.name = 'Name is required';
         if (!state.dob) e.dob = 'Date of birth is required';
-        else if (isUnder18(state.dob)) e.dob = "Astra Navi is for adults (18+). You can't add a minor's birth details.";
+        else if (isUnder18(state.dob)) e.dob = "Astra Mitra is for adults (18+). You can't add a minor's birth details.";
         if (!state.tob) e.tob = 'Time of birth is required';
         if (!state.pob.trim()) e.pob = 'Place of birth is required';
         if (state.latitude === null || state.longitude === null) {
@@ -1430,7 +1430,7 @@ function FamilyMemberForm({ editing, onSaved, onCancel, onFreeTierCap }: FormPro
                             className="mt-1 accent-secondary"
                         />
                         <span className="text-xs text-on-surface-variant/80 leading-relaxed">
-                            I confirm that this person is 18 years of age or older and that I have obtained their explicit permission to store and process their birth details on Astra Navi for Vedic astrological chart generation, compatibility analysis, and AI-powered readings. Their data will be protected under India&apos;s{' '}
+                            I confirm that this person is 18 years of age or older and that I have obtained their explicit permission to store and process their birth details on Astra Mitra for Vedic astrological chart generation, compatibility analysis, and AI-powered readings. Their data will be protected under India&apos;s{' '}
                             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
                                 DPDP Act, 2023
                             </a>
@@ -1571,7 +1571,7 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                     </h2>
                     <p className="text-xs text-on-surface-variant/75">
                         {t('family.inviteFormDesc') ||
-                            "Send a link to someone with an AstraNavi account. They'll see the invite next time they sign in."}
+                            "Send a link to someone with an AstraMitra account. They'll see the invite next time they sign in."}
                     </p>
                 </div>
 
@@ -1596,7 +1596,7 @@ function FamilyInviteForm({ onCancel, onSent }: { onCancel: () => void; onSent: 
                         onChange={(e) => setMessage(e.target.value)}
                         rows={3}
                         maxLength={500}
-                        placeholder="Hey, let's stay connected on AstraNavi…"
+                        placeholder="Hey, let's stay connected on AstraMitra…"
                         className="w-full bg-surface border border-outline-variant/30 hover:border-secondary/30 focus:ring-2 focus:ring-secondary/30 focus:border-secondary outline-none transition-all rounded-[20px] sm:rounded-[24px] px-3 sm:px-4 py-3 text-sm text-primary placeholder:text-primary/40 resize-none"
                     />
                 </div>

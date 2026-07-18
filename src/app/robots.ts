@@ -20,6 +20,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://astranavi.com/sitemap.xml',
+    sitemap: 'https://astramitra.com/sitemap.xml',
   };
 }

@@ -15,13 +15,13 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({ title, subtitle, showLogo = tru
           <div className="flex flex-col items-center gap-2">
             <Image
               src="/icons/logo.jpeg"
-              alt="AstraNavi"
+              alt="AstraMitra"
               width={40}
               height={40}
               style={{ width: 'auto', height: 'auto' }}
               className="rounded-xl shadow-lg"
             />
-            <h2 className="text-lg font-headline font-bold text-primary">AstraNavi</h2>
+            <h2 className="text-lg font-headline font-bold text-primary">AstraMitra</h2>
           </div>
         </div>
       )}

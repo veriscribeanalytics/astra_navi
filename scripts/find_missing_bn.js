@@ -66,8 +66,8 @@ for (const key of enKeys) {
       ) {
         continue;
       }
-      // Also ignore if the English value is "Navi" or "AstraNavi" verbatim
-      if (enVal === 'Navi' || enVal === 'AstraNavi') {
+      // Also ignore if the English value is "Navi" or "AstraMitra" verbatim
+      if (enVal === 'Navi' || enVal === 'AstraMitra') {
         continue;
       }
       untranslated.push({ key, enVal, bnVal });

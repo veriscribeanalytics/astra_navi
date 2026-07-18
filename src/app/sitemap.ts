@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://astranavi.com';
+  const baseUrl = 'https://astramitra.com';
 
   const staticLastMod = '2025-07-01';
   const blogLastMod = '2025-06-15';

@@ -3,7 +3,7 @@ import ProfileClient from './ProfileClient';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'My Celestial Profile | AstraNavi',
+  title: 'My Celestial Profile | AstraMitra',
   description: 'Manage your birth coordinates to ensure your cosmic readings are always perfectly aligned.',
 };
 

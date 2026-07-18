@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 
     if (format === 'download') {
       headers['Content-Disposition'] =
-        'attachment; filename="astra_navi_data_export.json"';
+        'attachment; filename="astra_mitra_data_export.json"';
     }
 
     return NextResponse.json(data, { headers });

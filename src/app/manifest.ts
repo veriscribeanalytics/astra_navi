@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'AstraNavi — Vedic AI Astrology',
-    short_name: 'AstraNavi',
+    name: 'AstraMitra — Vedic AI Astrology',
+    short_name: 'AstraMitra',
     description: 'Bridging ancient Vedic wisdom with modern AI precision.',
     start_url: '/',
     display: 'standalone',

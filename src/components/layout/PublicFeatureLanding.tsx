@@ -243,7 +243,7 @@ const PublicFeatureLanding: React.FC<PublicFeatureLandingProps> = ({
                         <div className="lg:col-span-4 space-y-5">
                             <div>
                                 <p className="text-[10px] text-secondary uppercase tracking-[0.2em] font-bold mb-2">What You Get</p>
-                                <h2 className="text-xl sm:text-2xl font-headline font-bold text-primary">Why Users Trust AstraNavi</h2>
+                                <h2 className="text-xl sm:text-2xl font-headline font-bold text-primary">Why Users Trust AstraMitra</h2>
                             </div>
                             <div className="space-y-3">
                                 {benefits.map((benefit, idx) => (

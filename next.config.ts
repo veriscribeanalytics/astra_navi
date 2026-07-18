@@ -31,7 +31,7 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 /**
- * AstraNavi Next.js Configuration
+ * AstraMitra Next.js Configuration
  * Optimized for production and security.
  */
 const nextConfig: NextConfig = {

@@ -112,7 +112,7 @@ export default function HowItWorksSection() {
           <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-secondary font-body">Process</span>
         </div>
         <h2 className="font-headline text-3xl sm:text-4xl font-bold text-primary leading-tight">
-          How <span className="text-secondary italic">AstraNavi</span> Works
+          How <span className="text-secondary italic">AstraMitra</span> Works
         </h2>
         <p className="text-sm sm:text-base text-on-surface-variant/80 mt-3 font-body">
           Get started in minutes with our streamlined 3-step cosmic path.

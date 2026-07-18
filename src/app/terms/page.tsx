@@ -28,7 +28,7 @@ export default function TermsPage() {
         {/* Intro */}
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Welcome to Astra Navi, operated by <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). These Terms & Conditions govern your access to and use of our website, mobile application, AI chat services, and premium astrological offerings (collectively, the &quot;Service&quot;).
+            Welcome to Astra Mitra, operated by <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). These Terms & Conditions govern your access to and use of our website, mobile application, AI chat services, and premium astrological offerings (collectively, the &quot;Service&quot;).
           </p>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             By registering for an account or using any part of the Service, you represent that you are at least 18 years of age and agree to be bound by these Terms. If you do not agree to these terms, please do not use the Service.
@@ -41,7 +41,7 @@ export default function TermsPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">1. Astrological Guidance Disclaimer (Important)</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            Astra Navi provides astrological computations, AI-driven cosmic consulting, daily horoscopes, and divisional readings based on historical Vedic principles. By using this service, you acknowledge and agree that:
+            Astra Mitra provides astrological computations, AI-driven cosmic consulting, daily horoscopes, and divisional readings based on historical Vedic principles. By using this service, you acknowledge and agree that:
           </p>
           <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
             <li>Astrological readings, guidance, and AI chat consultation are intended solely for <strong>entertainment, guidance, and self-reflection purposes</strong>.</li>
@@ -54,7 +54,7 @@ export default function TermsPage() {
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-headline font-bold text-secondary">2. Account Responsibilities & Age Limit</h2>
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
-            To unlock the full features of Astra Navi, you must create a secure user account. You agree to:
+            To unlock the full features of Astra Mitra, you must create a secure user account. You agree to:
           </p>
           <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-primary/70">
             <li>Be at least <strong>18 years of age</strong>. We enforce an age validation filter during signup in compliance with privacy regulations.</li>

@@ -97,12 +97,15 @@ function BondRing({ score, color }: { score: number; color: string }) {
 
 function SectionShell({
     title,
+    subtitle,
     icon,
     right,
     children,
     emphasis = 'medium',
 }: {
     title: string;
+    /** Plain-language question this section answers, e.g. "How are we today?". */
+    subtitle?: string;
     icon?: React.ReactNode;
     right?: React.ReactNode;
     children: React.ReactNode;
@@ -120,10 +123,17 @@ function SectionShell({
         <section className={`rounded-[28px] border ${ring} ${pad}`}>
             {title && (
                 <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="flex items-center gap-2.5 font-headline font-bold text-foreground" style={{ fontSize: 20 }}>
-                        {icon && <span className="text-secondary">{icon}</span>}
-                        {title}
-                    </h2>
+                    <div className="flex items-start gap-2.5">
+                        {icon && <span className="mt-0.5 text-secondary">{icon}</span>}
+                        <div className="min-w-0">
+                            <h2 className="font-headline font-bold text-foreground leading-tight" style={{ fontSize: 20 }}>
+                                {title}
+                            </h2>
+                            {subtitle && (
+                                <p className="mt-0.5 text-[14px] text-foreground/55">{subtitle}</p>
+                            )}
+                        </div>
+                    </div>
                     {right}
                 </header>
             )}
@@ -141,15 +151,6 @@ function GuidanceTile({ label, value, icon }: { label: string; value: string; ic
         <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 flex flex-col gap-1.5">
             <span className="text-[13px] font-bold uppercase tracking-wider text-foreground/55 flex items-center gap-1.5">{icon}{label}</span>
             <p className="text-[15px] leading-relaxed text-foreground/85">{value}</p>
-        </div>
-    );
-}
-
-function ChipPill({ chip }: { chip: { label: string; value: string } }) {
-    return (
-        <div className="flex-1 min-w-[120px] rounded-2xl border border-secondary/20 bg-secondary/[0.07] px-4 py-3 flex flex-col gap-0.5">
-            <span className="text-[13px] font-bold uppercase tracking-wider text-secondary/80">{chip.label}</span>
-            <span className="text-[16px] font-headline font-bold text-foreground leading-tight">{chip.value}</span>
         </div>
     );
 }
@@ -223,17 +224,18 @@ function HeroBondCard({
     paywall: PaywallData | null;
     t: (k: string) => string;
 }) {
-    const accent = familyDashboardBandHex(data.bond.band_key);
+    const accent = familyDashboardBandHex(data.bond?.band_key);
 
-    const pairLeft = data.user;
-    const pairRight = data.member;
+    const pairLeft = data.user ?? { name: '', sign: '' };
+    const pairRight = data.member ?? { name: '', relationship_type: '', sign: '' };
 
-    const guidance = data.guidance;
+    const guidance = data.guidance ?? { summary: '' };
     const hasProGuidance = !!(guidance.best_for || guidance.avoid || guidance.approach);
 
     return (
         <SectionShell
-            title={t('familyDashboard.yourBondToday') || 'Your Bond Today'}
+            title={t('familyDashboard.yourBondToday') || 'Today\'s Relationship'}
+            subtitle={data.sections?.today || t('familyDashboard.yourBondTodayQ') || 'How are we today?'}
             icon={<Heart className="w-5 h-5" />}
             emphasis="hero"
             right={
@@ -271,38 +273,32 @@ function HeroBondCard({
 
                     {/* Panchang line */}
                     <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-foreground/55">
-                        <span className="inline-flex items-center gap-1"><Moon className="h-3.5 w-3.5" />{data.meta.panchanga.tithi}</span>
-                        <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5" />{data.meta.panchanga.nakshatra}</span>
-                        <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{data.meta.panchanga.vaara}</span>
+                        <span className="inline-flex items-center gap-1"><Moon className="h-3.5 w-3.5" />{data.meta?.panchanga?.tithi ?? '—'}</span>
+                        <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5" />{data.meta?.panchanga?.nakshatra ?? '—'}</span>
+                        <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{data.meta?.panchanga?.vaara ?? '—'}</span>
                     </div>
                     <p className="text-[13px] text-foreground/45 italic">
-                        {data.meta.location_basis === 'birth'
+                        {data.meta?.location_basis === 'birth'
                             ? (t('familyDashboard.locationBirth') || 'based on your birth location')
                             : (t('familyDashboard.locationFixed') || 'based on a default location')}
                     </p>
                 </div>
 
-                {/* RIGHT ~70% — guidance headline + chips + best/avoid/approach */}
+                {/* RIGHT ~70% — today message headline + guidance card grid */}
                 <div className="flex flex-col gap-5">
-                    {/* Main guidance headline (free teaser is just the summary) */}
-                    <div className="rounded-2xl border border-secondary/20 bg-secondary/[0.06] p-5 flex items-start gap-3">
-                        <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
-                        <p className="font-headline font-bold text-foreground leading-snug" style={{ fontSize: 22 }}>{guidance.summary}</p>
+                    {/* Today's Advice — plain-language label so users know this is "what to do" */}
+                    <div>
+                        <div className="mb-2 flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-secondary" />
+                            <span className="text-[14px] font-bold uppercase tracking-wider text-foreground/65">{t('familyDashboard.adviceTitle') || 'Today\'s Advice'}</span>
+                            <span className="text-[13px] text-foreground/45">{data.sections?.advice || t('familyDashboard.adviceQ') || 'What should I do today?'}</span>
+                        </div>
+                        {/* Short band-keyed headline — already localized server-side. */}
+                        <div className="rounded-2xl border border-secondary/20 bg-secondary/[0.06] p-5 flex items-start gap-3">
+                            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+                            <p className="font-headline font-bold text-foreground leading-snug" style={{ fontSize: 22 }}>{data.today_message}</p>
+                        </div>
                     </div>
-
-                    {/* Chips row (Pro+). Free → compact locked teaser inside the hero. */}
-                    {data.chips && data.chips.length > 0 ? (
-                        <div className="flex flex-wrap gap-3">
-                            {data.chips.map((chip) => <ChipPill key={chip.key} chip={chip} />)}
-                        </div>
-                    ) : paywall ? (
-                        <div className="rounded-2xl border border-dashed border-secondary/30 bg-secondary/[0.04] p-4 flex items-center justify-between gap-3">
-                            <p className="text-[15px] text-foreground/65 flex-1">{t('familyDashboard.chipsUnlock') || 'Unlock bond theme, communication & shared mood with Pro.'}</p>
-                            <Link href={`/plans?feature=full_daily_horoscope`} className="shrink-0 inline-flex items-center gap-1 rounded-xl border border-secondary/40 bg-secondary/10 px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider text-secondary hover:bg-secondary/20">
-                                <Lock className="h-3.5 w-3.5" />{t('paywall.viewPlans') || 'View Plans'}
-                            </Link>
-                        </div>
-                    ) : null}
 
                     {/* Best For / Avoid / Approach (Pro+). Free → single locked teaser. */}
                     {hasProGuidance ? (
@@ -412,6 +408,12 @@ function AreasSection({
     const full = data.relationship_areas;
     const summary = data.areas_summary;
 
+    // Backend contract says these are always present, but real payloads can be
+    // partial when a fallback/cache returns the wrong shape. Render nothing here
+    // rather than crashing on missing keys; BondDashboardBody will surface a
+    // degraded state if the whole payload is unusable.
+    if (!summary?.strongest || !summary?.needs_care || !summary?.stable) return null;
+
     // "Most Balanced" duplicates "Strongest" when the same area is both highest
     // and closest to 60 — in that case drop the third chip so we don't show the
     // same area twice. Never invent a different area; just use fewer chips.
@@ -429,7 +431,8 @@ function AreasSection({
 
     return (
         <SectionShell
-            title={t('familyDashboard.areasTitle') || 'Relationship Areas at a Glance'}
+            title={t('familyDashboard.areasTitle') || 'Relationship Insights'}
+            subtitle={data.sections?.insights || t('familyDashboard.areasQ') || 'What\'s strong and what needs attention?'}
             icon={<Activity className="w-5 h-5" />}
             emphasis="medium"
         >
@@ -454,7 +457,7 @@ function AreasSection({
                 })}
             </div>
 
-            {full ? (
+            {full && FAMILY_DASHBOARD_AREA_KEYS.every((k) => full[k]) ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {FAMILY_DASHBOARD_AREA_KEYS.map((key) => (
                         <AreaCard key={key} areaKey={key} area={full[key]} t={t} />
@@ -501,11 +504,13 @@ function WeeklyBondSection({
     t: (k: string) => string;
     locale: string;
 }) {
-    const chartHex = weekly ? familyDashboardBandHex(weekly.days[0]?.band_key as FamilyDashboardBandKey | undefined) : '#E5A33A';
+    const chartHex = weekly?.days?.[0]?.band_key
+        ? familyDashboardBandHex(weekly.days[0].band_key as FamilyDashboardBandKey)
+        : '#E5A33A';
 
     // "Stable week" reassurance when variation is very low.
     const stableMsg = useMemo(() => {
-        if (!weekly || weekly.days.length < 2) return '';
+        if (!weekly?.days || weekly.days.length < 2) return '';
         const scores = weekly.days.map((d) => d.score);
         const span = Math.max(...scores) - Math.min(...scores);
         if (span > 8) return '';
@@ -533,7 +538,8 @@ function WeeklyBondSection({
 
     return (
         <SectionShell
-            title={t('familyDashboard.weeklyTitle') || 'Your Bond This Week'}
+            title={t('familyDashboard.weeklyTitle') || 'Weekly Outlook'}
+            subtitle={weekly?.sections?.weekly || t('familyDashboard.weeklyQ') || 'What can I expect this week?'}
             icon={<Calendar className="w-5 h-5" />}
             emphasis="medium"
             right={rangeLabel ? (
@@ -544,13 +550,13 @@ function WeeklyBondSection({
                 <Skeleton height={320} />
             ) : degraded ? (
                 <p className="text-[15px] text-foreground/55 py-8 text-center">{t('familyDashboard.degradedBody') || 'Transit calculation is temporarily unavailable. Please try again later.'}</p>
-            ) : weekly ? (
+            ) : weekly && weekly.days && weekly.summary ? (
                 <div className="space-y-5">
                     <BondWeeklyChart data={weekly} colorHex={chartHex} stable={stableMsg} locale={locale} />
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <SummaryStat label={t('familyDashboard.weeklyBest') || 'Best Day'} value={weekly.summary.best_day} icon={<TrendingUp className="w-4 h-4 text-emerald-400" />} />
-                        <SummaryStat label={t('familyDashboard.weeklyWorst') || 'Toughest Day'} value={weekly.summary.worst_day} icon={<TrendingDown className="w-4 h-4 text-orange-400" />} />
-                        <SummaryStat label={t('familyDashboard.weeklyAverage') || 'Average'} value={String(weekly.summary.average_score)} icon={<Activity className="w-4 h-4 text-foreground/55" />} />
+                        <SummaryStat label={t('familyDashboard.weeklyBest') || 'Best Day'} value={weekly.summary.best_day ?? '—'} icon={<TrendingUp className="w-4 h-4 text-emerald-400" />} />
+                        <SummaryStat label={t('familyDashboard.weeklyWorst') || 'Toughest Day'} value={weekly.summary.worst_day ?? '—'} icon={<TrendingDown className="w-4 h-4 text-orange-400" />} />
+                        <SummaryStat label={t('familyDashboard.weeklyAverage') || 'Average'} value={typeof weekly.summary.average_score === 'number' ? String(weekly.summary.average_score) : '—'} icon={<Activity className="w-4 h-4 text-foreground/55" />} />
                         <SummaryStat label={t('familyDashboard.weeklyTrend') || 'Trend'} value={weekly.summary.trend || '—'} icon={trendIcon(weekly.summary.trend)} />
                     </div>
                     {weekly.summary.best_day_note ? (
@@ -655,7 +661,7 @@ export default function BondDashboardBody({ member }: { member: FamilyMember }) 
             const chatId = result.data.chat.id;
             const prefill = result.data.starter.prefill;
             try {
-                sessionStorage.setItem('astranavi_family_prefill', JSON.stringify({ chatId, prefill }));
+                sessionStorage.setItem('astramitra_family_prefill', JSON.stringify({ chatId, prefill }));
             } catch { /* sessionStorage unavailable — non-fatal */ }
             router.push(`/chat?id=${encodeURIComponent(chatId)}`);
         } catch {
@@ -673,6 +679,11 @@ export default function BondDashboardBody({ member }: { member: FamilyMember }) 
         return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     }, [data, locale]);
 
+    // Some responses arrive as HTTP 200 but are structurally incomplete (missing
+    // guidance, bond, meta, etc.). Treat them as degraded rather than letting nested
+    // components throw on required free-teaser fields.
+    const dataIsUsable = !!data && !!data.bond && !!data.guidance && !!data.user && !!data.member && !!data.areas_summary && !!data.meta;
+
     return (
         // Capped width so the dashboard doesn't stretch across a wide monitor;
         // leaves the rest of the family detail view untouched.
@@ -687,7 +698,7 @@ export default function BondDashboardBody({ member }: { member: FamilyMember }) 
 
             {sharingRequired ? (
                 <SharingRequiredState t={t} />
-            ) : degraded && !data ? (
+            ) : (degraded || !dataIsUsable) && !data ? (
                 <DegradedState onRetry={refetch} t={t} />
             ) : isLoading && !data ? (
                 <SkeletonBlockSet />
@@ -695,9 +706,9 @@ export default function BondDashboardBody({ member }: { member: FamilyMember }) 
                 <div className="rounded-[28px] border border-red-500/25 bg-red-500/[0.06] p-5 text-[15px] text-red-400 flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5" />{error}
                 </div>
-            ) : data ? (
+            ) : dataIsUsable ? (
                 <>
-                    {/* HERO — combines bond + guidance + chips + connection windows */}
+                    {/* HERO — combines bond + today_message + guidance + connection windows */}
                     <HeroBondCard data={data} paywall={paywall} t={t} />
 
                     {/* Relationship Areas (3×2 grid) */}

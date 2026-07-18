@@ -62,7 +62,7 @@ const loadRazorpayScript = (): Promise<boolean> => {
 };
 
 /**
- * Real payment provider integration for Razorpay in Astra Navi.
+ * Real payment provider integration for Razorpay in Astra Mitra.
  * Integrates with /api/payments/create-order and /api/payments/verify endpoints.
  */
 export class RazorpayCheckoutHandler implements CheckoutHandler {
@@ -152,7 +152,7 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
       key: orderData.key_id,
       amount: orderData.amount,
       currency: orderData.currency,
-      name: 'Astra Navi',
+      name: 'Astra Mitra',
       description: (orderData.product_name as string | undefined) || product.nameEn,
       order_id: orderData.order_id,
       prefill: {
@@ -161,7 +161,7 @@ export class RazorpayCheckoutHandler implements CheckoutHandler {
         contact: this.user?.phoneNumber || '',
       },
       theme: {
-        color: '#c8880a', // Astra Navi secondary gold accent
+        color: '#c8880a', // Astra Mitra secondary gold accent
       },
       handler: async (response: {
         razorpay_order_id: string;

@@ -82,7 +82,7 @@ export default function OurServices() {
           Comprehensive Vedic <span className="text-secondary italic">Services</span>
         </h2>
         <p className="text-sm sm:text-base text-on-surface-variant/80 mt-3 font-body">
-          AstraNavi integrates ancient wisdom with modern technology to deliver complete cosmic clarity.
+          AstraMitra integrates ancient wisdom with modern technology to deliver complete cosmic clarity.
         </p>
       </div>
 

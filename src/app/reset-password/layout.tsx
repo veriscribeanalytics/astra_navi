@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Reset Password | AstraNavi',
-  description: 'Set a new password for your AstraNavi account.',
+  title: 'Reset Password | AstraMitra',
+  description: 'Set a new password for your AstraMitra account.',
 };
 
 export default function ResetPasswordLayout({ children }: { children: React.ReactNode }) {

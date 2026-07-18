@@ -50,7 +50,7 @@ export default function ForecastActionPanel({
 }: ForecastActionPanelProps) {
   const handleChatPrompt = (prompt: string) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('astranavi_pending_message', prompt);
+      localStorage.setItem('astramitra_pending_message', prompt);
     }
   };
 

@@ -66,7 +66,7 @@ export const DEFAULT_CONSENT_PREFERENCES: ConsentPreference[] = [
     category: 'analytics',
     name: 'Analytics',
     description:
-      'Help us understand how Astra Navi is used so we can improve accuracy, performance, and your Vedic astrology experience.',
+      'Help us understand how Astra Mitra is used so we can improve accuracy, performance, and your Vedic astrology experience.',
     required: false,
     enabled: false,
   },
@@ -84,7 +84,7 @@ export const DEFAULT_CONSENT_PREFERENCES: ConsentPreference[] = [
 export const PRIVACY_POLICY_VERSION = '2.0.0';
 
 /** LocalStorage key for persisting cookie consent preferences. */
-export const COOKIE_CONSENT_KEY = 'astra_navi_cookie_consent';
+export const COOKIE_CONSENT_KEY = 'astra_mitra_cookie_consent';
 
 /** LocalStorage key for the consent session ID (anonymous, pre-auth). */
-export const CONSENT_SESSION_KEY = 'astra_navi_consent_session';
+export const CONSENT_SESSION_KEY = 'astra_mitra_consent_session';

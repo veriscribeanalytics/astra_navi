@@ -26,7 +26,7 @@ export default function LogoutPage() {
       <div className="w-full max-w-md flex flex-col">
         <AuthHeader
           title="Sign Out"
-          subtitle="Are you sure you want to sign out of AstraNavi?"
+          subtitle="Are you sure you want to sign out of AstraMitra?"
         />
 
         <div className="p-4 sm:p-6 pt-0">

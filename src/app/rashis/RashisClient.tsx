@@ -595,7 +595,7 @@ export default function RashisClient() {
                                                         href={`/login?callbackUrl=${encodeURIComponent('/rashis?sign=' + selectedRashi.id)}`}
                                                         className="px-8 py-3 rounded-full bg-secondary text-background text-sm font-bold hover:bg-secondary/90 transition-all shadow-lg hover:shadow-secondary/20"
                                                     >
-                                                        Login to AstraNavi
+                                                        Login to AstraMitra
                                                     </Link>
                                                 </div>
                                             )}

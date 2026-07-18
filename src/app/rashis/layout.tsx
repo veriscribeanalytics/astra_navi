@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Vedic Zodiac Signs (Rashis) | AstraNavi',
+  title: 'Vedic Zodiac Signs (Rashis) | AstraMitra',
   description: 'Explore the 12 Vedic moon signs. Understand your psychological traits, strengths, and karmic tendencies according to Jyotish Shastra.',
 };
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from './useTranslation';
 import { LOCALE_BY_LANGUAGE, LANGUAGE_CODE_TO_NAME } from '@/locales';
 
-const VOICE_STORAGE_KEY = 'astranavi_tts_voice';
+const VOICE_STORAGE_KEY = 'astramitra_tts_voice';
 
 let cachedVoicesPromise: Promise<SpeechSynthesisVoice[]> | null = null;
 

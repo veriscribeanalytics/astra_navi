@@ -66,4 +66,4 @@ export const RASHIS: RashiAsset[] = [
 ];
 
 /** Session cookie shared by all tabs — intro plays once per browser session. */
-export const INTRO_SEEN_KEY = 'astranavi_intro_seen_v3';
+export const INTRO_SEEN_KEY = 'astramitra_intro_seen_v3';

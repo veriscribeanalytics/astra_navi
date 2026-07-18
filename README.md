@@ -1,4 +1,4 @@
-# AstraNavi - AI-Powered Vedic Astrology Platform
+# AstraMitra - AI-Powered Vedic Astrology Platform
 
 Your personal Jyotish is one tap away. Get instant Vedic insights, personalized Kundli generation, and cosmic guidance powered by AI trained on 5,000+ years of Vedic wisdom.
 
@@ -23,7 +23,7 @@ Your personal Jyotish is one tap away. Get instant Vedic insights, personalized 
 ```bash
 # Clone the repository
 git clone <repo-url>
-cd astranavi-frontend
+cd astramitra-frontend
 
 # Install dependencies
 npm install
@@ -59,7 +59,7 @@ src/
 
 ## Design System
 
-AstraNavi uses a premium, cosmic-inspired design system with:
+AstraMitra uses a premium, cosmic-inspired design system with:
 
 - **Color Palette**: Deep purples, warm golds, and ivory tones
 - **Typography**: Playfair Display (headlines) + DM Sans (body)
@@ -157,7 +157,7 @@ For issues, questions, or feedback, please contact the development team.
 
 ---
 
-**AstraNavi** - Decode Your Destiny with AI & Vedic Wisdom
+**AstraMitra** - Decode Your Destiny with AI & Vedic Wisdom
 
 
 ## Key Utilities

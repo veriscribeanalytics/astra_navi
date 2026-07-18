@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Community | AstraNavi",
+  title: "Community | AstraMitra",
   description:
-    "Join the AstraNavi community — connect with fellow astrology enthusiasts, share insights, and explore Vedic wisdom together.",
+    "Join the AstraMitra community — connect with fellow astrology enthusiasts, share insights, and explore Vedic wisdom together.",
   openGraph: {
-    title: "Community | AstraNavi",
+    title: "Community | AstraMitra",
     description:
-      "Join the AstraNavi community — connect with fellow astrology enthusiasts, share insights, and explore Vedic wisdom together.",
+      "Join the AstraMitra community — connect with fellow astrology enthusiasts, share insights, and explore Vedic wisdom together.",
   },
 };
 

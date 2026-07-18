@@ -161,7 +161,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
           if (d > now) return t('auth.register.validation.dobFuture');
           // 18+ age gate (DPDP children's-data rule)
           const eighteenAgo = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate());
-          if (d > eighteenAgo) return t('login.mustBe18') || 'You must be 18 or older to use Astra Navi.';
+          if (d > eighteenAgo) return t('login.mustBe18') || 'You must be 18 or older to use Astra Mitra.';
         }
         if (data.tob && !/^\d{2}:\d{2}$/.test(data.tob)) return t('auth.register.validation.tobFormat');
         if (data.pob && data.pob.length < 2) return t('auth.register.validation.pobLength');
@@ -749,7 +749,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = ({ onSubmit, disabled = false,
             </p>
           )}
           <p className="text-[9px] text-primary/25 leading-relaxed text-center max-w-[280px] mx-auto mt-2">
-            When you sign in with Google, Astra Navi receives your name and email address.
+            When you sign in with Google, Astra Mitra receives your name and email address.
             See our{' '}
             <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary/50 hover:text-secondary underline underline-offset-2 transition-colors">
               Privacy Policy

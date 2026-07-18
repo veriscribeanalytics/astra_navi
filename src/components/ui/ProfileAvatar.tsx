@@ -33,7 +33,11 @@ export default function ProfileAvatar({
     defaultInitial = 'U',
 }: ProfileAvatarProps) {
     const { user, refreshProfile } = useAuth();
-    const url = user?.profileImageUrl || null;
+    // Display order (docs §4): persisted signed GCS URL → Google OAuth picture
+    // (user.image) → initials. Keep profileImageUrl first so a stale/deleted
+    // signed URL 403s to onError and degrades to the Google picture rather than
+    // shadowing it. user.image is a long-lived public Google URL.
+    const url = user?.profileImageUrl || user?.image || null;
     const [failedUrl, setFailedUrl] = useState<string | null>(null);
     // Re-signing is only attempted once per mount so a genuinely-missing image
     // (deleted object, not just an expired signature) can't loop forever.

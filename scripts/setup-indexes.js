@@ -8,7 +8,7 @@ const { MongoClient } = require('mongodb');
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/astra-navi-database';
 
 async function setupDatabase() {
-    console.log('🚀 Setting up AstraNavi Database Optimization...\n');
+    console.log('🚀 Setting up AstraMitra Database Optimization...\n');
 
     let client;
     

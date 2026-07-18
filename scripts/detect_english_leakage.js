@@ -12,7 +12,7 @@ const TARGETS = ['hi', 'ta', 'te', 'kn', 'bn', 'mr', 'gu', 'ml', 'pa', 'ko'];
 // Latin words that are OK to leave in any locale. Compared case-insensitively.
 const ALLOW_LOWER = new Set([
   // Brands & product
-  'navi', 'astranavi', 'astra', 'ai', 'bphs',
+  'navi', 'astramitra', 'astra', 'ai', 'bphs',
   'google', 'razorpay', 'app', 'store', 'play', 'apple', 'facebook',
   // Tech acronyms / file types
   'json', 'pdf', 'txt', 'api', 'url', 'ok', 'dst', 'utc', 'sms', 'otp',

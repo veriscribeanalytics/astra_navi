@@ -20,7 +20,7 @@ import {
 /**
  * Support / Help Center
  *
- * The everyday help hub for AstraNavi users — distinct from the DPDP
+ * The everyday help hub for AstraMitra users — distinct from the DPDP
  * grievance mechanism at /privacy/grievance (which handles legal data
  * complaints). This page provides:
  *   1. Quick contact details
@@ -147,7 +147,7 @@ const FAQ_GROUPS: FaqGroup[] = [
             },
             {
                 q: 'What is a connection vs. a member?',
-                a: 'A member is a profile you create and manage (for example, a child or relative). A connection is another AstraNavi user you link with by invitation — you each keep control of your own account.',
+                a: 'A member is a profile you create and manage (for example, a child or relative). A connection is another AstraMitra user you link with by invitation — you each keep control of your own account.',
             },
             {
                 q: 'An invite or connection is not working.',

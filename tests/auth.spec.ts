@@ -24,7 +24,7 @@ test.describe('Login Page', () => {
     // already have consented.
     await page.addInitScript(() => {
       window.localStorage.setItem(
-        'astra_navi_cookie_consent',
+        'astra_mitra_cookie_consent',
         JSON.stringify({ preferences: [{ category: 'essential', enabled: true, required: true }], consentedAt: new Date().toISOString(), consentedVersion: '2.0.0' })
       );
     });
@@ -184,13 +184,13 @@ test.describe('Logout Flow', () => {
     await signOutBtn.click();
 
     // ConfirmDialog opens. Scope to the logout dialog by its accessible name
-    // (title "Sign out of AstraNavi?") — a global CookieConsentBanner
+    // (title "Sign out of AstraMitra?") — a global CookieConsentBanner
     // (role="dialog", aria-label "Cookie consent") can also be present on a
     // fresh session after its delay, which would otherwise cause a strict-mode
     // violation on a bare getByRole('dialog').
-    const dialog = page.getByRole('dialog', { name: /Sign out of AstraNavi/i });
+    const dialog = page.getByRole('dialog', { name: /Sign out of AstraMitra/i });
     await expect(dialog).toBeVisible({ timeout: 3000 });
-    await expect(dialog.getByText(/Sign out of AstraNavi/i)).toBeVisible();
+    await expect(dialog.getByText(/Sign out of AstraMitra/i)).toBeVisible();
 
     // Dismiss with Cancel
     await dialog.getByRole('button', { name: /Cancel/i }).click();
@@ -223,7 +223,7 @@ test.describe('Mobile Auth Layout', () => {
     // already have consented).
     await page.addInitScript(() => {
       window.localStorage.setItem(
-        'astra_navi_cookie_consent',
+        'astra_mitra_cookie_consent',
         JSON.stringify({ preferences: [{ category: 'essential', enabled: true, required: true }], consentedAt: new Date().toISOString(), consentedVersion: '2.0.0' })
       );
     });

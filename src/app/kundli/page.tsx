@@ -25,7 +25,7 @@ function KundliContent() {
             <PublicFeatureLanding 
                 title="Janam Kundli — Your Complete Vedic Birth Chart"
                 subtitle="Free Kundli • Instant Result"
-                description="AstraNavi uses precise astronomical data to calculate your divisional charts, planetary strengths, and Dasha timelines. Understand your karmic blueprint in seconds."
+                description="AstraMitra uses precise astronomical data to calculate your divisional charts, planetary strengths, and Dasha timelines. Understand your karmic blueprint in seconds."
                 hook="The positions of the Grahas at the moment of your birth encode the trajectory of your entire life. Your Kundli is the master key to understanding your Dharma, relationships, and career timing."
                 icon={<BookOpen className="w-4 h-4" />}
                 ctaLabel="Generate My Kundli"

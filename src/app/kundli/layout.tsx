@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Janam Kundli | AstraNavi',
+  title: 'Janam Kundli | AstraMitra',
   description: 'Generate your free, precise Vedic birth chart with 16 Varga charts, Dasha timelines, and Shadbala analysis.',
 };
 

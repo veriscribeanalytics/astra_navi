@@ -85,7 +85,7 @@ export default function PrivacySettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `astra_navi_data_export_${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `astra_mitra_data_export_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

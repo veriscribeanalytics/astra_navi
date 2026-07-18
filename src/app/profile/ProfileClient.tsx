@@ -307,7 +307,7 @@ export default function ProfileSettingsPage() {
                     const ageCode = (data.detail?.code ?? data.code);
                     if (response.status === 403 && ageCode === 'underage_registration_blocked') {
                         const msg = data.detail?.error ?? data.error
-                            ?? t('login.mustBe18') ?? 'You must be 18 or older to use Astra Navi.';
+                            ?? t('login.mustBe18') ?? 'You must be 18 or older to use Astra Mitra.';
                         setErrors((prev) => ({ ...prev, dob: msg }));
                         setTouched((prev) => ({ ...prev, dob: true }));
                         showLoading("", 0);
@@ -914,7 +914,7 @@ export default function ProfileSettingsPage() {
                         {/* DPDP Consent Reaffirmation */}
                         <div className={`border-t border-outline-variant/12 ${isOnboarding ? 'pt-3' : 'pt-4'}`}>
                           <p className="text-[10px] sm:text-xs text-primary/50 leading-relaxed mb-2">
-                            By saving, you reaffirm your consent for Astra Navi to process your personal data — including birth details — for Vedic astrological computations, AI-powered readings, and personalized insights as described in our{' '}
+                            By saving, you reaffirm your consent for Astra Mitra to process your personal data — including birth details — for Vedic astrological computations, AI-powered readings, and personalized insights as described in our{' '}
                             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline font-bold">
                               Privacy Policy
                             </a>

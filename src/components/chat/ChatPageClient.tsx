@@ -85,7 +85,7 @@ const ChatPageClient: React.FC = () => {
     // Family "ask" handoff: read the stashed prefill (keyed to chatId) BEFORE the
     // ?id early-return so it survives the redirect into the pre-seeded thread.
     try {
-      const stash = sessionStorage.getItem('astranavi_family_prefill');
+      const stash = sessionStorage.getItem('astramitra_family_prefill');
       if (stash) {
         const parsed = JSON.parse(stash) as { chatId?: string; prefill?: string } | null;
         if (parsed && typeof parsed.prefill === 'string' && parsed.prefill.trim()) {
@@ -93,7 +93,7 @@ const ChatPageClient: React.FC = () => {
             setFamilyPrefill(parsed.prefill.trim());
           }
         }
-        sessionStorage.removeItem('astranavi_family_prefill');
+        sessionStorage.removeItem('astramitra_family_prefill');
       }
     } catch {
       /* sessionStorage unavailable / corrupt — non-fatal; chat still opens */
@@ -104,9 +104,9 @@ const ChatPageClient: React.FC = () => {
       return;
     }
 
-    const pendingMsg = localStorage.getItem('astranavi_pending_message');
+    const pendingMsg = localStorage.getItem('astramitra_pending_message');
     if (pendingMsg && pendingMsg.trim()) {
-      localStorage.removeItem('astranavi_pending_message');
+      localStorage.removeItem('astramitra_pending_message');
       createNewChat(pendingMsg);
     }
   }, [user, isLoggedIn, searchParams, createNewChat, selectChat, enableGuestMode, router, isLoading, setSelectedAvatarId]);

@@ -37,7 +37,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message = "Loading your
           <div className="relative z-10 w-12 h-12 rounded-full overflow-hidden border border-secondary/30 bg-surface p-1.5">
             <Image
               src="/icons/logo.jpeg"
-              alt="Astra Navi"
+              alt="Astra Mitra"
               width={48}
               height={48}
               style={{ width: "auto", height: "auto" }}

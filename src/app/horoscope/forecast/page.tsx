@@ -23,7 +23,7 @@ function ForecastContent() {
         title="Your Personal Vedic Forecast"
         subtitle="Weekly • Monthly • Yearly outlook"
         description="See how your Dasha periods and current transits shape your career, relationships, health, and finances — visualized as a 7-day, monthly, and full-year forecast personal to your chart."
-        hook="In Jyotish, time itself is a planet. Mahadasha and Antardasha periods govern the chapters of your life, while transiting Grahas color each day, week, and month. AstraNavi distills these cycles into a forecast you can actually act on."
+        hook="In Jyotish, time itself is a planet. Mahadasha and Antardasha periods govern the chapters of your life, while transiting Grahas color each day, week, and month. AstraMitra distills these cycles into a forecast you can actually act on."
         icon={<TrendingUp className="w-4 h-4" />}
         ctaLabel="Sign in to See Your Forecast"
         callbackUrl="/horoscope/forecast"

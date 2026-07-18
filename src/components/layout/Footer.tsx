@@ -29,7 +29,7 @@ const Footer = () => {
             <div className="relative z-[2] px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-[1760px] 2xl:max-w-[2100px] 3xl:max-w-[2400px] mx-auto">
                 <div className="col-span-2 md:col-span-1 space-y-3 sm:space-y-4">
-                    <div className="font-headline text-xl sm:text-2xl text-primary font-bold">Astra Navi</div>
+                    <div className="font-headline text-xl sm:text-2xl text-primary font-bold">Astra Mitra</div>
                     <p className="text-xs text-primary/60 font-medium leading-relaxed max-w-[240px]">
                         {t('footer.tagline')}
                     </p>
@@ -92,7 +92,7 @@ const Footer = () => {
                     className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-body font-bold"
                     style={{ color: 'color-mix(in srgb, var(--secondary) 50%, transparent)' }}
                 >
-                    © {currentYear} Astra Navi. {t('footer.copyright')}
+                    © {currentYear} Astra Mitra. {t('footer.copyright')}
                 </p>
             </div>
             </div>

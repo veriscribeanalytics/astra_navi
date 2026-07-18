@@ -1,7 +1,7 @@
 /**
  * Age utilities for DPDP Act 2023 §9 compliance.
  *
- * Astra Navi is an adults-only (18+) service. Minors' personal data (birth
+ * Astra Mitra is an adults-only (18+) service. Minors' personal data (birth
  * details) must not enter the system without verifiable parental consent, which
  * we do not implement — so instead we block under-18 data entirely at every
  * point a date of birth is captured (signup, profile, family, compatibility).

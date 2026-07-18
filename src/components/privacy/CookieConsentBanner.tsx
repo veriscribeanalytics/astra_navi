@@ -84,10 +84,10 @@ const CookieConsentBanner: React.FC = () => {
                 </h2>
                 <p className="text-xs xl:text-sm text-primary/70 leading-snug xl:leading-relaxed max-w-2xl">
                   <span className="xl:hidden">
-                    We use essential cookies now. Optional cookies help personalize and improve Astra Navi.
+                    We use essential cookies now. Optional cookies help personalize and improve Astra Mitra.
                   </span>
                   <span className="hidden xl:inline">
-                    Astra Navi uses cookies and similar technologies to provide a
+                    Astra Mitra uses cookies and similar technologies to provide a
                     secure, personalized Vedic astrology experience. With your
                     consent, we use functional cookies for preferences and
                     optional cookies to improve our service. Your data is

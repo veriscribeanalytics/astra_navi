@@ -12,7 +12,7 @@ const LOCALES_DIR = path.join(__dirname, '..', 'src', 'locales');
 const TARGET_LOCALES = ['hi', 'ta', 'te', 'kn', 'bn', 'mr', 'gu', 'ml', 'pa', 'ko'];
 
 const ALLOWLIST = new Set([
-  'Navi', 'AI Navi', 'AstraNavi', 'Astra', 'Vedic AI', 'AI', 'Google',
+  'Navi', 'AI Navi', 'AstraMitra', 'Astra', 'Vedic AI', 'AI', 'Google',
   'JSON', 'TXT', 'PDF', 'API', 'URL', 'OK',
   '100%', '75+', '45–74', '< 45', '85%',
   'Pratipada', 'Siddha',

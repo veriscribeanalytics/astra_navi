@@ -624,7 +624,7 @@ export default function LifeAreasClient() {
     }
     setSelectedAvatarId(activeAvatar.avatarId);
     localStorage.setItem(
-      "astranavi_pending_message",
+      "astramitra_pending_message",
       question
     );
     router.push("/chat");

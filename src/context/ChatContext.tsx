@@ -12,14 +12,14 @@ import { PaywallData } from '@/types/paywall';
 import type { ChatPageContextSource } from '@/lib/schemas';
 import type { ChatAvatar } from '@/types/avatar';
 
-const AVATAR_STORAGE_KEY = 'astranavi_selected_avatar';
+const AVATAR_STORAGE_KEY = 'astramitra_selected_avatar';
 const DEFAULT_AVATAR_ID = 'navi';
 const VALID_IDS = ['navi', 'career_mentor', 'relationship_guide', 'spiritual_guide', 'astro_sage', 'finance_mentor'];
 
 const readStoredAvatar = (): string => {
   if (typeof window === 'undefined') return DEFAULT_AVATAR_ID;
   try {
-    const v = localStorage.getItem('astranavi_selected_avatar');
+    const v = localStorage.getItem('astramitra_selected_avatar');
     return v && VALID_IDS.includes(v) ? v : DEFAULT_AVATAR_ID;
   } catch {
     return DEFAULT_AVATAR_ID;
@@ -206,7 +206,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedAvatarIdState(avatarId);
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('astranavi_selected_avatar', avatarId);
+        localStorage.setItem('astramitra_selected_avatar', avatarId);
       } catch {}
     }
   }, []);
@@ -239,7 +239,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const now = new Date().toISOString();
     const guestChat: Chat = {
       id: 'guest-session',
-      userEmail: 'guest@astranavi.com',
+      userEmail: 'guest@astramitra.com',
       title: 'Guest Preview',
       messages: [{
         id: 'welcome',

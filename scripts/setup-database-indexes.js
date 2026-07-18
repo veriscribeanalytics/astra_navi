@@ -12,7 +12,7 @@
 // Connect to database
 const db = connect('mongodb://localhost:27017/astra-navi-database');
 
-print('🚀 Setting up database indexes for AstraNavi...\n');
+print('🚀 Setting up database indexes for AstraMitra...\n');
 
 // ============================================
 // 1. USERS COLLECTION

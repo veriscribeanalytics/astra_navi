@@ -3,7 +3,7 @@ import PlansClient from './PlansClient';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Premium Plans | AstraNavi',
+  title: 'Premium Plans | AstraMitra',
   description: 'Unlock deeper astrological insights, premium features, and Navi credits with our Vedic AI plans.',
 };
 

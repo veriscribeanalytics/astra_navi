@@ -9,7 +9,7 @@ import { ArrowLeft, ExternalLink, Database, Shield, Brain, CreditCard, Server } 
  * Subprocessors & Third-Party Data Processors
  *
  * DPDP Act 2023 compliance — public disclosure of all third-party
- * vendors that process personal data on behalf of Astra Navi.
+ * vendors that process personal data on behalf of Astra Mitra.
  *
  * Required by: DPDP Rules 2025, Rule 3 (notice) & Rule 6 (safeguards)
  */
@@ -119,7 +119,7 @@ export default function SubprocessorsPage() {
         <div className="space-y-3">
           <p className="text-sm sm:text-base text-primary/80 leading-relaxed">
             In compliance with India&apos;s <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong>{' '}
-            and DPDP Rules, 2025, Astra Navi is committed to transparency about how and where your
+            and DPDP Rules, 2025, Astra Mitra is committed to transparency about how and where your
             personal data is processed. This page lists all third-party vendors (subprocessors) that
             process personal data on behalf of <strong>Veriscribe Analytics & AI Pvt. Ltd.</strong>.
           </p>

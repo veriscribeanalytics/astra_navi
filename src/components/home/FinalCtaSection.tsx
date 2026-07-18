@@ -27,7 +27,7 @@ export default function FinalCtaSection() {
         {/* Headline */}
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-bold text-primary mb-6 max-w-2xl mx-auto leading-[1.1]">
           Start with your birth chart.<br />
-          <span className="text-secondary italic">Let AstraNavi explain the rest.</span>
+          <span className="text-secondary italic">Let AstraMitra explain the rest.</span>
         </h2>
 
         {/* Short Text */}
@@ -64,7 +64,7 @@ export default function FinalCtaSection() {
           <div className="w-full h-full pt-3">
             <LandingImage
               src="/images/dashboard-mobile.png"
-              alt="AstraNavi CTA Dashboard"
+              alt="AstraMitra CTA Dashboard"
               placeholderName="Dashboard UI"
               aspectRatio="aspect-[1170/2532]"
               type="mobile"

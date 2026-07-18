@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Vedic Astrology Blog | AstraNavi",
+  title: "Vedic Astrology Blog | AstraMitra",
   description:
     "Explore in-depth articles on Vedic astrology — houses, planets, nakshatras, yogas, and remedies. Ancient wisdom explained with modern clarity.",
   openGraph: {
-    title: "Vedic Astrology Blog | AstraNavi",
+    title: "Vedic Astrology Blog | AstraMitra",
     description:
       "Explore in-depth articles on Vedic astrology — houses, planets, nakshatras, yogas, and remedies. Ancient wisdom explained with modern clarity.",
   },

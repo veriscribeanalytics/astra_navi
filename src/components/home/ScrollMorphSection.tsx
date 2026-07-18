@@ -238,9 +238,9 @@ export default function ScrollMorphSection() {
     }
 
     if (urlTextRef.current) {
-      let url = 'astranavi.com/dashboard';
-      if (p > 0.50) url = 'astranavi.com/kundli';
-      if (p > 0.70) url = 'astranavi.com/forecast';
+      let url = 'astramitra.com/dashboard';
+      if (p > 0.50) url = 'astramitra.com/kundli';
+      if (p > 0.70) url = 'astramitra.com/forecast';
       urlTextRef.current.textContent = url;
     }
 
@@ -344,7 +344,7 @@ export default function ScrollMorphSection() {
           <div className="space-y-3">
             <span className="text-[11px] font-bold text-secondary uppercase tracking-[0.2em] font-body">Section 04 — Kundli Chart</span>
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-primary">Your birth chart, made readable.</h2>
-            <p className="text-sm sm:text-base text-on-surface-variant/80 leading-relaxed font-body">AstraNavi turns your Kundli into clear chart context, planetary strengths, houses, and personal insights.</p>
+            <p className="text-sm sm:text-base text-on-surface-variant/80 leading-relaxed font-body">AstraMitra turns your Kundli into clear chart context, planetary strengths, houses, and personal insights.</p>
           </div>
           <ul className="space-y-3 font-body">
             {['Full Vedic Janam Kundli / Lagna Chart rendering', 'Comprehensive planetary powers (Shadbala calculations)', 'Varga (Divisional) charts including Navamsha (D9) & Dashamsha (D10)', 'Explanations of houses, signs, and planetary placements', 'Clear insights into your core identity and element distribution'].map((b, i) => (
@@ -407,7 +407,7 @@ export default function ScrollMorphSection() {
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/40" />
           </div>
           <div ref={urlTextRef} className="text-[9px] font-mono text-on-surface-variant/40 bg-surface-variant/20 px-4 py-0.5 rounded-md border border-outline-variant/10">
-            astranavi.com/dashboard
+            astramitra.com/dashboard
           </div>
           <div className="w-10" />
         </div>
@@ -419,11 +419,11 @@ export default function ScrollMorphSection() {
             insets and opacity/scale/filter transitions. next/image `fill` would
             re-apply conflicting positioning and wrap the element, so keep <img>. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={dashShotRef} src="/images/dashboard-desktop.png" alt="AstraNavi Desktop Dashboard" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-center bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.1) contrast(1.06)' }} />
+        <img ref={dashShotRef} src="/images/dashboard-desktop.png" alt="AstraMitra Desktop Dashboard" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-center bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.1) contrast(1.06)' }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={kundliShotRef} src="/images/kundli-desktop.png" alt="AstraNavi Kundli Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
+        <img ref={kundliShotRef} src="/images/kundli-desktop.png" alt="AstraMitra Kundli Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={forecastShotRef} src="/images/forecast-desktop.png" alt="AstraNavi Forecast Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
+        <img ref={forecastShotRef} src="/images/forecast-desktop.png" alt="AstraMitra Forecast Desktop" className="absolute left-0 right-0 bottom-0 top-[34px] w-full h-[calc(100%-34px)] object-cover object-top bg-[#0b0619]" style={{ opacity: 0, willChange: 'opacity, transform', filter: 'brightness(1.08) contrast(1.05)' }} />
       </div>
     </section>
   );
@@ -437,7 +437,7 @@ function HeroPhonePreview() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/dashboard-mobile.png"
-        alt="AstraNavi mobile dashboard"
+        alt="AstraMitra mobile dashboard"
         className="absolute inset-0 h-full w-full object-cover"
         style={{
           filter: 'brightness(1.22) contrast(1.1) saturate(1.08)',
@@ -460,7 +460,7 @@ function RearPhonePreview() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/kundli-mobile.png"
-        alt="AstraNavi Kundli preview"
+        alt="AstraMitra Kundli preview"
         className="absolute inset-0 h-full w-full object-cover"
         style={{
           filter: 'brightness(0.92) contrast(1.04) saturate(0.95)',

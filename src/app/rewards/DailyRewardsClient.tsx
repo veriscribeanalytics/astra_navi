@@ -271,7 +271,7 @@ const DailyRewardsClient: React.FC = () => {
             <PublicFeatureLanding
                 title="Daily Rewards — Free Credits, Every Day"
                 subtitle="Claim daily • Grow your streak • Unlock the Day 7 bonus"
-                description="Open AstraNavi each day and claim free credits to spend on charts, forecasts and conversations with Navi. Consecutive days build your streak and unlock bigger rewards — with a mega bonus on Day 7."
+                description="Open AstraMitra each day and claim free credits to spend on charts, forecasts and conversations with Navi. Consecutive days build your streak and unlock bigger rewards — with a mega bonus on Day 7."
                 hook="In Jyotish, devotion is daily. A small, steady ritual — returning each dawn — compounds into something far greater than any single grand gesture. Your streak is that discipline, made visible."
                 icon={<Gift className="h-4 w-4" />}
                 ctaLabel="Start Claiming"
