@@ -9,6 +9,9 @@ declare module 'next-auth' {
       error?: string;
       /** OAuth-only onboarding hint set at sign-in; live profile fetch is the source of truth thereafter. */
       profileComplete?: boolean;
+      /** Admin role hint threaded from the backend `is_admin` claim/field.
+       *  Gates the `/admin/*` routes. Falsey when absent (non-admin users). */
+      isAdmin?: boolean;
     } & Omit<DefaultSession['user'], 'email'>;
   }
 
@@ -32,5 +35,6 @@ declare module 'next-auth/jwt' {
     phoneNumber?: string | null;
     error?: string;
     profileComplete?: boolean;
+    isAdmin?: boolean;
   }
 }

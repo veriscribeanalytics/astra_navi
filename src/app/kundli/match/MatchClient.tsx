@@ -24,6 +24,7 @@ import MatchScoreRing from '@/components/match/MatchScoreRing';
 import KootCard from '@/components/match/KootCard';
 import MangalDoshaPanel from '@/components/match/MangalDoshaPanel';
 import AdditionalDoshas from '@/components/match/AdditionalDoshas';
+import { MarkdownText } from '@/utils/markdown';
 
 interface PersonDetails {
   name: string;
@@ -76,6 +77,10 @@ interface MatchResult {
     label: string;
   };
   summary: string;
+  /** Optional LLM upgrade, gated by `?narrative=true` (Pro). Markdown. */
+  ai_narrative?: string;
+  /** Plain one-liner recommendation (unchanged, not markdown). */
+  recommendation?: string;
   mangal_dosha: {
     person1: MangalDoshaDetail;
     person2: MangalDoshaDetail;
@@ -140,6 +145,8 @@ type BackendMatchResult = {
   ashtakoot?: MatchResult['ashtakoot'];
   tier?: MatchResult['tier'];
   summary?: string;
+  ai_narrative?: string;
+  recommendation?: string;
   mangal_dosha?: {
     person1?: BackendPersonDosha;
     person2?: BackendPersonDosha;
@@ -207,6 +214,8 @@ function normalizeMatchResult(raw: BackendMatchResult | null | undefined): Match
     ashtakoot: raw?.ashtakoot || { total_score: 0, koots: [] },
     tier: raw?.tier || { tier: '', color: '', emoji: '', label: '' },
     summary: raw?.summary || '',
+    ai_narrative: raw?.ai_narrative || undefined,
+    recommendation: raw?.recommendation || undefined,
     mangal_dosha: {
       person1: buildPersonDosha(md.person1, groom),
       person2: buildPersonDosha(md.person2, bride),
@@ -959,7 +968,7 @@ export default function MatchClient() {
                         {matchResult.ashtakoot?.total_score || 0}/36 points.
                       </h2>
                       <p className="text-foreground/60 leading-relaxed font-body text-sm sm:text-base">
-                        {buildHumanSummary(matchResult.ashtakoot?.koots || []) || matchResult.summary}
+                        {matchResult.recommendation || buildHumanSummary(matchResult.ashtakoot?.koots || []) || ''}
                       </p>
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-2 sm:gap-3 pt-1">
                         <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface border border-outline-variant/15">
@@ -993,6 +1002,42 @@ export default function MatchClient() {
                       </div>
                     </div>
                   </div>
+
+                  {/* ── Match Summary (markdown) + optional AI narrative (Pro) ── */}
+                  {(matchResult.ai_narrative || matchResult.summary) && (
+                    <div className="rounded-[28px] border border-outline-variant/15 bg-surface/55 p-5 sm:p-6">
+                      {matchResult.ai_narrative && (
+                        <div className="mb-5 rounded-2xl border border-secondary/25 bg-gradient-to-br from-secondary/[0.08] to-transparent p-5">
+                          <div className="mb-2 flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-secondary" />
+                            <span className="text-xs font-bold uppercase tracking-widest text-secondary">AI Narrative</span>
+                          </div>
+                          <MarkdownText
+                            content={matchResult.ai_narrative}
+                            h2Class="text-lg font-headline font-bold text-foreground mt-4 first:mt-0"
+                            h3Class="text-sm font-bold uppercase tracking-wider text-foreground/70 mt-4 mb-1.5"
+                            pClass="text-[15px] leading-relaxed text-foreground/85"
+                          />
+                        </div>
+                      )}
+                      {matchResult.summary && (
+                        <>
+                          {!matchResult.ai_narrative && (
+                            <div className="mb-2 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                              <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/60">Match Summary</h3>
+                            </div>
+                          )}
+                          <MarkdownText
+                            content={matchResult.summary}
+                            h2Class="text-lg font-headline font-bold text-foreground mt-4 first:mt-0"
+                            h3Class="text-sm font-bold uppercase tracking-wider text-foreground/70 mt-4 mb-1.5"
+                            pClass="text-[14px] leading-relaxed text-foreground/70"
+                          />
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {/* ── Quick Summary: Strengths vs Needs Attention ── */}
                   {(() => {

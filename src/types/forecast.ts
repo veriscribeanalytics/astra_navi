@@ -1,6 +1,8 @@
 // Shared forecast types for weekly / monthly / yearly responses.
 // Mirrors the backend contract documented in docs/FORECAST_FRONTEND_NOTES.md.
 
+import type { AreaExplanation } from './horoscope';
+
 export type ForecastPeriod = "weekly" | "monthly" | "yearly";
 
 export type ForecastTone =
@@ -56,6 +58,10 @@ export interface WeeklyDay {
     alerts?: ForecastAlert[];
     transits?: ForecastTransits;
     dominant_planet?: string;
+    /** Per-day rating explanation block (same shape as areas_text.<area>.explanation).
+     *  Present on personalized forecast day entries once regenerated against
+     *  cache version >= 18. */
+    explanation?: AreaExplanation;
 }
 
 export interface WeeklyForecastResponse extends BaseForecastResponse {
@@ -79,6 +85,7 @@ export interface MonthlyDay {
     text?: string;
     alerts?: ForecastAlert[];
     transits?: ForecastTransits;
+    explanation?: AreaExplanation;
 }
 
 export interface MonthlyForecastResponse extends BaseForecastResponse {

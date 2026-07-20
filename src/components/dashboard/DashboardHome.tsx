@@ -35,6 +35,7 @@ import { usePaywallContext } from "@/context/PaywallContext";
 import { useChat } from "@/context/ChatContext";
 import PaywallCard from "@/components/paywall/PaywallCard";
 import LockedPreview from "@/components/paywall/LockedPreview";
+import ExplanationBlock from "@/components/ui/ExplanationBlock";
 import type { PaywallFeatureKey, PaywallData } from "@/types/paywall";
 import { useDailyHoroscope, useTranslation, useTransitsToday } from "@/hooks";
 import { useGreeting } from "@/hooks/useGreeting";
@@ -49,7 +50,7 @@ import type { ForecastDay } from "@/components/dashboard/MiniChart";
 // import Particles from "@/components/ui/Particles";
 import { catmullRomToBezier, catmullRomArea } from "@/utils/chartCurve";
 import { todayISO } from "@/utils/forecastError";
-import type { HoroscopeData } from "@/types/horoscope";
+import type { HoroscopeData, AreaExplanation } from "@/types/horoscope";
 import DailyHoroscopeCardSkeleton from "@/components/dashboard/DailyHoroscopeCardSkeleton";
 import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
 import {
@@ -1338,6 +1339,15 @@ export default function DashboardHome() {
   const activeAreaTone = useMemo(() => {
     if (activeArea === "general") return "neutral";
     return horoscope?.areas_text?.[activeArea as keyof typeof horoscope.areas_text]?.tone || "neutral";
+  }, [horoscope, activeArea]);
+
+  const activeAreaExplanation = useMemo(() => {
+    if (activeArea === "general") {
+      const legacy = horoscope as unknown as { areas_text?: Record<string, { explanation?: AreaExplanation }> };
+      return legacy?.areas_text?.["general"]?.explanation ?? null;
+    }
+    const expl = horoscope?.areas_text?.[activeArea as keyof NonNullable<typeof horoscope.areas_text>]?.explanation;
+    return expl ?? null;
   }, [horoscope, activeArea]);
 
   const activeAreaAction = useMemo(() => getAreaAction(horoscope, activeArea), [horoscope, activeArea]);
@@ -2731,6 +2741,17 @@ export default function DashboardHome() {
               </p>
 
               <div className="space-y-4 text-left">
+                {/* Discrete rating explanation (Why / Positives / Challenges / Precautions / Recommendations / Summary) */}
+                {activeAreaExplanation && (
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.16em] mb-2" style={{ color: activeAreaHex }}>
+                      {t('horoscope.explanation.title') !== 'horoscope.explanation.title' ? t('horoscope.explanation.title') : 'Why This Rating'}
+                    </h3>
+                    <div className="rounded-2xl border border-white/10 bg-surface-variant/[0.02] p-4">
+                      <ExplanationBlock explanation={activeAreaExplanation} colorHex={activeAreaHex} />
+                    </div>
+                  </div>
+                )}
                 {activeArea === "general" ? (
                   <div className="space-y-4">
                     {/* Personal Focus Points */}

@@ -20,6 +20,7 @@ import { TrendingUp, AlertTriangle, RotateCw, X, ChevronLeft, ChevronRight, Spar
 import { motion, AnimatePresence } from 'motion/react';
 import { resolveTone } from '@/utils/forecastTones';
 import type { WeeklyForecastResponse, MonthlyForecastResponse, YearlyForecastResponse, ForecastAlert, ForecastTransits } from '@/types/forecast';
+import type { AreaExplanation } from '@/types/horoscope';
 import { todayISO, currentMonthISO } from '@/utils/forecastError';
 
 type TimeRange = '7d' | 'monthly' | 'yearly';
@@ -82,6 +83,7 @@ interface ForecastDetailData {
   lucky_color?: string;
   lucky_number?: number;
   weekday?: string;
+  explanation?: AreaExplanation;
 }
 
 type CacheEntry =
@@ -382,6 +384,7 @@ export default function ForecastPage() {
           lucky_number: day.lucky_number,
           dominant_planet_meaning: day.dominant_planet_meaning,
           weekday: day.weekday,
+          explanation: day.explanation,
         });
       }
     } else if (range === 'monthly' && activeMonthly?.days) {
@@ -394,6 +397,7 @@ export default function ForecastPage() {
           dominant_planet: undefined,
           alerts: day.alerts,
           transits: day.transits,
+          explanation: day.explanation,
         });
       }
     }
@@ -522,6 +526,7 @@ export default function ForecastPage() {
         lucky_number: day.lucky_number,
         dominant_planet_meaning: day.dominant_planet_meaning,
         weekday: day.weekday,
+        explanation: day.explanation,
       };
     }
     if (range === 'monthly' && activeMonthly?.days && selectedDay) {
@@ -534,6 +539,7 @@ export default function ForecastPage() {
         dominant_planet: undefined,
         alerts: day.alerts as (string | { simple: string; technical?: string })[] | undefined,
         transits: day.transits as Record<string, { sign: string; house_from_lagna?: number }> | undefined,
+        explanation: day.explanation,
       };
     }
     if (range === 'yearly' && activeYearly?.months && selectedMonth) {

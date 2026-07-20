@@ -288,6 +288,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Routing hint for the landing page: Google/OAuth can't collect
             // birth details, so a fresh OAuth user is almost always incomplete.
             profileComplete: data.profileComplete === true,
+            // Admin role from the backend `is_admin` field (if present).
+            isAdmin: data.user?.is_admin === true || data.is_admin === true,
           };
         } catch (error) {
           console.error('[Auth] Google OAuth exchange error:', error instanceof Error ? error.message : error);
@@ -305,6 +307,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           accessToken: user.accessToken as string,
           refreshToken: user.refreshToken as string,
           accessTokenExpires: user.accessTokenExpires as number,
+          isAdmin: (user as { isAdmin?: boolean }).isAdmin === true,
         };
       }
 
@@ -379,6 +382,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           phoneNumber?: string | null;
           error?: string;
           profileComplete?: boolean;
+          isAdmin?: boolean;
         };
         u.id = token.id;
         u.email = token.email ?? null;
@@ -388,6 +392,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (typeof token.profileComplete === 'boolean') {
           session.user.profileComplete = token.profileComplete;
         }
+        // Admin role hint (falsey when absent → non-admin). The live profile
+        // fetch in AuthContext is the source of truth and may override this.
+        session.user.isAdmin = token.isAdmin === true;
       }
       return session;
     },

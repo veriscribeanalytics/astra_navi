@@ -514,7 +514,16 @@
     "todaysHighlightMsg": "Your {label} score is at an impressive {score}%",
     "7DayTrajectory": "7-Day Trajectory",
     "locationRequired": "Exact Birth Location Required",
-    "updateLocation": "Confirm Birth Location"
+    "updateLocation": "Confirm Birth Location",
+    "explanation": {
+      "title": "Why This Rating",
+      "why": "Why",
+      "positives": "Positives",
+      "challenges": "Challenges",
+      "precautions": "Precautions",
+      "recommendations": "Recommendations",
+      "summary": "Summary"
+    }
   },
   "login": {
     "inscribeIdentity": "Inscribe Identity",
@@ -1694,6 +1703,23 @@
     "filterUnread": "Unread",
     "loadError": "Couldn't load notifications. Please try again.",
     "retry": "Retry"
+  },
+  "fcm": {
+    "title": "Daily Reminders",
+    "subtitle": "Opt in to a gentle morning and evening nudge. Off by default.",
+    "loading": "Loading…",
+    "morning": "Morning reminder",
+    "evening": "Evening reminder",
+    "timezone": "Timezone",
+    "useMyTz": "Use my timezone",
+    "tzInvalid": "Enter a valid IANA timezone (e.g. Asia/Kolkata).",
+    "tzHint": "Reminders fire in your local day. Times are 24h (HH:MM).",
+    "save": "Save",
+    "saveSuccess": "Reminder preferences saved.",
+    "saveFailed": "Could not save preferences.",
+    "test": "Send test push",
+    "testSent": "Test push sent. Check your device.",
+    "testFailed": "Could not send test push."
   },
   "match": {
     "mangal": {

@@ -7,6 +7,7 @@ import { useTranslation } from '@/hooks';
 import { useNotificationFeed } from '@/hooks/useNotifications';
 import { useNotificationContext } from '@/context/NotificationContext';
 import NotificationItem from '@/components/notifications/NotificationItem';
+import FcmPreferencesPanel from '@/components/notifications/FcmPreferencesPanel';
 import { deepLinkFor, type AppNotification } from '@/types/notifications';
 
 const NotificationsClient: React.FC = () => {
@@ -84,6 +85,9 @@ const NotificationsClient: React.FC = () => {
                         </button>
                     ))}
                 </div>
+
+                {/* FCM daily-reminder preferences (opt-in) */}
+                <FcmPreferencesPanel />
 
                 {/* List */}
                 <div className="max-h-[70vh] overflow-y-auto -mx-1.5 px-1.5" onScroll={handleScroll}>

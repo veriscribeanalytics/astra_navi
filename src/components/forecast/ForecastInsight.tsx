@@ -3,6 +3,8 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks';
+import ExplanationBlock from '@/components/ui/ExplanationBlock';
+import type { AreaExplanation } from '@/types/horoscope';
 
 interface InsightData {
   month?: string;
@@ -17,6 +19,8 @@ interface InsightData {
   lucky_number?: number;
   dominant_planet_meaning?: string;
   weekday?: string;
+  /** Per-day rating explanation block (same shape as areas_text.<area>.explanation). */
+  explanation?: AreaExplanation;
 }
 
 const SubHeader = ({ label, color }: { label: string; color: string }) => (
@@ -176,6 +180,14 @@ export default function ForecastInsight({ data, colorHex, isWide = false }: { da
         <div className="flex flex-col gap-6">
           {leftColumnContent}
           {rightColumnContent}
+        </div>
+      )}
+
+      {/* Discrete rating explanation (Why / Positives / Challenges / Precautions / Recommendations / Summary) */}
+      {data.explanation && (
+        <div>
+          <SubHeader label={t('horoscope.explanation.title') !== 'horoscope.explanation.title' ? t('horoscope.explanation.title') : 'Why This Rating'} color={colorHex} />
+          <ExplanationBlock explanation={data.explanation} colorHex={colorHex} />
         </div>
       )}
     </div>

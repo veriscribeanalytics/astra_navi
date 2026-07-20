@@ -1,3 +1,24 @@
+export interface AreaExplanation {
+  why: string;
+  positives: string[];
+  challenges: string[];
+  precautions: string[];
+  recommendations: string[];
+  summary: string;
+}
+
+export interface AreaText {
+  insight: string;
+  tone: string;
+  action?: string;
+  personalization_applied?: boolean;
+  personal_notes?: string[];
+  /** Discrete per-life-area rating explanation block. Always present once the
+   *  payload is regenerated against cache version >= 18; lists degrade to []
+   *  and strings to "" when translation coverage is missing. */
+  explanation?: AreaExplanation;
+}
+
 export interface HoroscopeData {
   user?: { sign: string; name: string };
   meta?: {
@@ -42,12 +63,12 @@ export interface HoroscopeData {
     retrograde?: string[];
   };
   areas_text?: {
-    career: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
-    love: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
-    health: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
-    finance: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
-    general?: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
-    spiritual?: { insight: string; tone: string; action?: string; personalization_applied?: boolean; personal_notes?: string[] };
+    career: AreaText;
+    love: AreaText;
+    health: AreaText;
+    finance: AreaText;
+    general?: AreaText;
+    spiritual?: AreaText;
   };
   alerts?: {
     primary: { technical: string; simple: string; type: string; importance: string };

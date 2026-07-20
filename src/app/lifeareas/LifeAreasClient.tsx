@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { usePaywallContext } from '@/context/PaywallContext';
 import PaywallCard from '@/components/paywall/PaywallCard';
 import LockedPreview from '@/components/paywall/LockedPreview';
+import ExplanationBlock from '@/components/ui/ExplanationBlock';
 import type { PaywallData } from '@/types/paywall';
 import { useDailyHoroscope, useTranslation } from '@/hooks';
 import { clientFetch } from '@/lib/apiClient';
@@ -14,7 +15,7 @@ import { AREA_LIST, AREA_THEMES, ForecastArea } from '@/data/areaThemes';
 import { getAreaPhaseMain, TEXT_COLORS, BRAND_GOLD } from '@/data/lifeAreaColors';
 import { catmullRomToBezier, catmullRomArea } from '@/utils/chartCurve';
 import { todayISO } from '@/utils/forecastError';
-import type { HoroscopeData } from '@/types/horoscope';
+import type { HoroscopeData, AreaExplanation } from '@/types/horoscope';
 import type { ForecastDay } from '@/components/dashboard/MiniChart';
 import { useChat } from '@/context/ChatContext';
 import { AnimatePresence } from 'motion/react';
@@ -477,6 +478,15 @@ export default function LifeAreasClient() {
 
   const activeAreaAction = useMemo(() => getAreaAction(horoscope, activeArea), [horoscope, activeArea]);
 
+  const activeAreaExplanation = useMemo(() => {
+    if (activeArea === "general") {
+      const legacy = horoscope as unknown as { areas_text?: Record<string, { explanation?: AreaExplanation }> };
+      return legacy?.areas_text?.["general"]?.explanation ?? null;
+    }
+    const expl = horoscope?.areas_text?.[activeArea as keyof NonNullable<HoroscopeData["areas_text"]>]?.explanation;
+    return expl ?? null;
+  }, [horoscope, activeArea]);
+
   const activeAreaNotes = useMemo(() => {
     if (activeArea === "general") {
       return horoscope?.current_state?.derived_from || [];
@@ -786,6 +796,16 @@ export default function LifeAreasClient() {
                   <p className="text-[15px] text-foreground/40 italic">
                     Select a life area above to view cosmic insights.
                   </p>
+                )}
+
+                {/* Discrete rating explanation (Why / Positives / Challenges / Precautions / Recommendations / Summary) */}
+                {!isLocked && activeAreaExplanation && (
+                  <div className="pt-1">
+                    <h4 className="text-[12px] font-black uppercase tracking-[0.15em] mb-3" style={{ color: activeAreaHex }}>
+                      {t('horoscope.explanation.title') !== 'horoscope.explanation.title' ? t('horoscope.explanation.title') : 'Why This Rating'}
+                    </h4>
+                    <ExplanationBlock explanation={activeAreaExplanation} colorHex={activeAreaHex} />
+                  </div>
                 )}
 
                 {/* Why Score is High/Low & Personalized Notes rendered Inline */}

@@ -41,6 +41,8 @@ export interface User {
     language?: string | null;
     username?: string | null;
     discoverable?: boolean | null;
+    /** Admin role from the backend `is_admin` field. Gates `/admin/*`. */
+    isAdmin?: boolean | null;
     preferences?: {
         horoscope?: boolean;
         notifications?: boolean;
@@ -54,6 +56,8 @@ interface AuthContextType {
     user: User | null;
     profileComplete: boolean;
     profileFetched: boolean;
+    /** Admin role hint (threaded from the backend `is_admin` field). Gates `/admin/*`. */
+    isAdmin: boolean;
     /** OAuth sign-in hint: true when NextAuth flagged the freshly-authenticated
      *  user as having an incomplete profile (e.g. Google, which can't supply
      *  birth details). Lets the landing page route to onboarding immediately. */
@@ -80,6 +84,7 @@ interface SessionUser {
     image?: string | null;
     error?: string;
     profileComplete?: boolean;
+    isAdmin?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -92,6 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
     const [profileComplete, setProfileComplete] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [profileFetched, setProfileFetched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState<string | undefined>(undefined);
@@ -242,6 +248,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setProfileComplete(false);
                 }
 
+                // Admin role hint from the JWT. The live profile fetch below is
+                // the source of truth and may override this.
+                setIsAdmin(sessionUser.isAdmin === true);
+
                 // Sync full profile from DB if we haven't fetched it yet this session
                 if (!profileFetched && !fetchInProgressRef.current) {
                     fetchInProgressRef.current = true;
@@ -262,6 +272,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                     const merged = { ...prev, ...normalizedUser };
                                     return JSON.stringify(prev) === JSON.stringify(merged) ? prev : merged;
                                 });
+
+                                // Admin role from the backend `is_admin` field
+                                // (accepts camelCase or snake_case — the profile
+                                // endpoint may return either). Source of truth.
+                                const adminFlag =
+                                    (normalizedUser as { isAdmin?: boolean | null }).isAdmin === true ||
+                                    (data.user as { is_admin?: boolean | null }).is_admin === true;
+                                setIsAdmin(adminFlag);
 
                                 // Sync frontend language from backend profile.
                                 // If the profile has a different language than the current
@@ -299,6 +317,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (status === 'unauthenticated') {
             setUser(null);
             setProfileComplete(false);
+            setIsAdmin(false);
             setProfileFetched(false);
             fetchInProgressRef.current = false;
             signOutInitiatedRef.current = false;
@@ -363,6 +382,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const normalizedUser = normalizeProfileUser(data.user);
                 setUser(prev => prev ? { ...prev, ...normalizedUser } : normalizedUser);
                 setProfileComplete(resolveProfileComplete(data.profileComplete, normalizedUser));
+                const adminFlag =
+                    (normalizedUser as { isAdmin?: boolean | null }).isAdmin === true ||
+                    (data.user as { is_admin?: boolean | null }).is_admin === true;
+                setIsAdmin(adminFlag);
             }
         } catch (err) {
             console.error('[AuthContext] refreshProfile failed:', err);
@@ -392,6 +415,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user: effectiveUser,
             profileComplete,
             profileFetched,
+            isAdmin,
             needsOnboardingHint,
             login,
             logout, 
