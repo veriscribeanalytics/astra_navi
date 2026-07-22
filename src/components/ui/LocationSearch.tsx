@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
+import { createPortal } from 'react-dom';
 import { MapPin, X, Check, Clock } from 'lucide-react';
 
 export interface LocationResult {
@@ -54,7 +55,9 @@ export default function LocationSearch({
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const listboxId = 'birth-location-results';
+    const anchorRef = useRef<HTMLDivElement>(null);
+    const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+    const listboxId = `${useId()}-location-results`;
 
     // Sync external value changes
     useEffect(() => {
@@ -64,6 +67,32 @@ export default function LocationSearch({
     useEffect(() => {
         setSelected(confirmedLocation || null);
     }, [confirmedLocation]);
+
+    // Position the portaled dropdown relative to the input anchor
+    const updateDropdownPos = useCallback(() => {
+        if (!anchorRef.current || !showDropdown) return;
+        const rect = anchorRef.current.getBoundingClientRect();
+        setDropdownPos({
+            top: rect.bottom + window.scrollY + 8,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+        });
+    }, [showDropdown]);
+
+    useEffect(() => {
+        if (showDropdown) {
+            updateDropdownPos();
+            const handleScroll = () => updateDropdownPos();
+            const handleResize = () => updateDropdownPos();
+            window.addEventListener('scroll', handleScroll, true);
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('scroll', handleScroll, true);
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+        return undefined;
+    }, [showDropdown, updateDropdownPos]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -160,14 +189,21 @@ export default function LocationSearch({
                 <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-secondary/70">
                     <MapPin className="w-4 h-4" />
                 </div>
+                {/* Invisible anchor used to measure the input's viewport position for the portaled dropdown. */}
+                <div ref={anchorRef} className="absolute inset-0 pointer-events-none" aria-hidden="true" />
+
                 <input
                     ref={inputRef}
                     type="text"
                     value={query}
                     onChange={handleInputChange}
                     onFocus={() => {
-                        if (results.length > 0) setShowDropdown(true);
-                        else if (query.trim().length >= 2 && !selected) searchLocations(query);
+                        if (results.length > 0) {
+                            setShowDropdown(true);
+                            // updateDropdownPos will run on the next effect tick via showDropdown change
+                        } else if (query.trim().length >= 2 && !selected) {
+                            searchLocations(query);
+                        }
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
@@ -200,40 +236,48 @@ export default function LocationSearch({
                     </div>
                 )}
 
-                {/* Dropdown */}
-                {showDropdown && results.length > 0 && (
-                    <div
-                        id={listboxId}
-                        role="listbox"
-                        className="absolute z-50 top-full mt-2 w-full bg-surface border border-outline-variant/30 rounded-[16px] sm:rounded-[20px] shadow-lg overflow-hidden max-h-[240px] overflow-y-auto"
-                    >
-                        {results.map((loc, idx) => (
-                            <button
-                                key={`${loc.name}-${loc.lat}-${loc.lon}`}
-                                type="button"
-                                onClick={() => handleSelect(loc)}
-                                onMouseEnter={() => setHighlightIdx(idx)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                                    idx === highlightIdx
-                                        ? 'bg-secondary/10 text-foreground'
-                                        : 'text-foreground/80 hover:bg-secondary/5'
-                                } ${idx === results.length - 1 ? '' : 'border-b border-outline-variant/10'}`}
-                            >
-                                <MapPin className="w-4 h-4 text-secondary shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold truncate">{loc.name}</p>
-                                    <p className="text-[10px] text-foreground/40 flex items-center gap-2">
-                                        <span>{loc.lat.toFixed(2)}°, {loc.lon.toFixed(2)}°</span>
-                                        <Clock className="w-3 h-3" />
-                                        <span>{loc.timezone}</span>
-                                    </p>
-                                </div>
-                                {selected?.name === loc.name && (
-                                    <Check className="w-4 h-4 text-secondary shrink-0" />
-                                )}
-                            </button>
-                        ))}
-                    </div>
+                {/* Dropdown — portaled to body to escape ancestor overflow/rounded clipping. */}
+                {showDropdown && results.length > 0 && dropdownPos && typeof window !== 'undefined' && (
+                    createPortal(
+                        <div
+                            id={listboxId}
+                            role="listbox"
+                            className="fixed z-[9999] bg-surface border border-outline-variant/30 rounded-[16px] sm:rounded-[20px] shadow-lg max-h-[240px] overflow-y-auto"
+                            style={{
+                                top: dropdownPos.top,
+                                left: dropdownPos.left,
+                                width: dropdownPos.width,
+                            }}
+                        >
+                            {results.map((loc, idx) => (
+                                <button
+                                    key={`${loc.name}-${loc.lat}-${loc.lon}`}
+                                    type="button"
+                                    onClick={() => handleSelect(loc)}
+                                    onMouseEnter={() => setHighlightIdx(idx)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                                        idx === highlightIdx
+                                            ? 'bg-secondary/10 text-foreground'
+                                            : 'text-foreground/80 hover:bg-secondary/5'
+                                    } ${idx === results.length - 1 ? '' : 'border-b border-outline-variant/10'}`}
+                                >
+                                    <MapPin className="w-4 h-4 text-secondary shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-bold truncate">{loc.name}</p>
+                                        <p className="text-[10px] text-foreground/40 flex items-center gap-2">
+                                            <span>{loc.lat.toFixed(2)}°, {loc.lon.toFixed(2)}°</span>
+                                            <Clock className="w-3 h-3" />
+                                            <span>{loc.timezone}</span>
+                                        </p>
+                                    </div>
+                                    {selected?.name === loc.name && (
+                                        <Check className="w-4 h-4 text-secondary shrink-0" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>,
+                        document.body
+                    )
                 )}
             </div>
 
