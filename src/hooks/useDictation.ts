@@ -160,7 +160,7 @@ export function useDictation(): DictationMode {
   // every platform including iOS), with browser speechSynthesis as a fallback
   // when the network/synthesis fails.
   useEffect(() => {
-    const speakViaBrowser = async (clean: string, detectedLangCode: string) => {
+    const speakViaBrowser = async (clean: string, detectedLangCode: string, explicitLang?: string | null) => {
       if (!isSpeechSupported()) { setIsSpeaking(false); return; }
       clearTtsTimers();
       window.speechSynthesis.cancel();
@@ -169,7 +169,7 @@ export function useDictation(): DictationMode {
       if (!availableVoices.length) {
         availableVoices = await loadSpeechVoices();
       }
-      const { voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI);
+      const { voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI, explicitLang);
       utterance.lang = detectedLangCode;
       if (voice) utterance.voice = voice;
       utterance.rate = 0.95;
@@ -197,8 +197,10 @@ export function useDictation(): DictationMode {
       const clean = cleanTextForSpeech(textToSpeak);
       if (!clean) return;
       // Detect the spoken language from the reply's own script (e.g. a Hindi
-      // reply while the UI is English) to pick the right voice locale.
-      const { langCode: detectedLangCode } = resolveLangAndVoiceForText(clean, langCode, voices, selectedVoiceURI);
+      // reply while the UI is English) to pick the right voice locale. Prefer the
+      // backend's per-reply `lang` hint when present — it distinguishes Hinglish
+      // (Latin script) from English, which script detection cannot.
+      const { langCode: detectedLangCode } = resolveLangAndVoiceForText(clean, langCode, voices, selectedVoiceURI, msg.lang);
 
       // Stop anything currently playing on either engine.
       if (cloudTtsHandleRef.current) { cloudTtsHandleRef.current.stop(); cloudTtsHandleRef.current = null; }
@@ -211,7 +213,7 @@ export function useDictation(): DictationMode {
         onEnd: () => setIsSpeaking(false),
         onError: () => {
           cloudTtsHandleRef.current = null;
-          void speakViaBrowser(clean, detectedLangCode);
+          void speakViaBrowser(clean, detectedLangCode, msg.lang);
         },
       });
     };

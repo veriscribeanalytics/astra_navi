@@ -260,7 +260,7 @@ export function useConversationMode(): ConversationMode {
           availableVoices = await loadSpeechVoices();
         }
         if (phaseRef.current !== 'speaking') return;
-        const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI);
+        const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(clean, langCode, availableVoices, selectedVoiceURI, msg.lang);
         const utterance = new SpeechSynthesisUtterance(clean);
         utterance.lang = detectedLangCode;
         if (voice) utterance.voice = voice;
@@ -277,7 +277,7 @@ export function useConversationMode(): ConversationMode {
         window.speechSynthesis.speak(utterance);
       };
 
-      const { langCode: detectedLangCode } = resolveLangAndVoiceForText(clean, langCode, voices, selectedVoiceURI);
+      const { langCode: detectedLangCode } = resolveLangAndVoiceForText(clean, langCode, voices, selectedVoiceURI, msg.lang);
       cloudTtsHandleRef.current = speakViaCloud(clean, detectedLangCode, {
         onEnd: () => { cloudTtsHandleRef.current = null; finish(); },
         onError: () => { cloudTtsHandleRef.current = null; void speakViaBrowser(); },

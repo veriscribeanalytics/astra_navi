@@ -85,6 +85,12 @@ export interface ChatMessage {
   reflections?: { round: number; grounded?: boolean; complete?: boolean; missing?: string[]; confidence?: number }[];
   agentRounds?: number;
   toolTrajectory?: { name: string; args?: Record<string, unknown>; ok?: boolean; error?: string | null; ms?: number }[];
+  /** Backend-inferred script of this AI reply, for TTS voice routing — `"hi"` for
+   *  Devanagari or Hinglish, otherwise the user's resolved language (`"en"`,
+   *  `"ta"`, ...). Varies turn by turn; sent to /api/voice/tts instead of the
+   *  profile language so Hinglish (Latin-script) replies pick the Hindi voice.
+   *  Absent on old/historical messages → speak falls back to script detection. */
+  lang?: string;
   createdAt: string;
 }
 
@@ -545,6 +551,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     reflections: Array.isArray(data.reflections) ? data.reflections : m.reflections,
                     agentRounds: typeof data.agentRounds === 'number' ? data.agentRounds : m.agentRounds,
                     toolTrajectory: Array.isArray(data.toolTrajectory) ? data.toolTrajectory : m.toolTrajectory,
+                    lang: typeof data.lang === 'string' && data.lang ? data.lang : m.lang,
                     errorCode: errorCode ?? m.errorCode,
                     error: errorCode ? true : m.error,
                     errorMessage: errorCode ? (() => {
@@ -599,7 +606,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const local = localById.get(m.id) ?? localByText.get(`${m.type}\u0000${m.text}`);
                 return local?.clientId && local.clientId !== m.clientId ? { ...m, clientId: local.clientId } : m;
               };
-              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.toolLoopExceeded !== undefined || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory)) {
+              if (backendAiMsg && (localAiMsg.suggestedQuestions || localAiMsg.topic || localAiMsg.intent || localAiMsg.answerStyle || localAiMsg.creditsRemaining !== undefined || localAiMsg.finishReason || localAiMsg.retryUsed !== undefined || localAiMsg.qualityRewriteUsed !== undefined || localAiMsg.quality || localAiMsg.summaryIncluded !== undefined || localAiMsg.persona || localAiMsg.errorCode || localAiMsg.contextUsed !== undefined || localAiMsg.contextSource || localAiMsg.contextChars !== undefined || localAiMsg.avatarId || localAiMsg.avatarName || localAiMsg.avatarTitle || localAiMsg.avatarCreditCost !== undefined || localAiMsg.opener || localAiMsg.toolLoopExceeded !== undefined || localAiMsg.agentic !== undefined || localAiMsg.planSteps || localAiMsg.reflections || localAiMsg.agentRounds !== undefined || localAiMsg.toolTrajectory || localAiMsg.lang)) {
                 const merged = backendChat.messages.map(m => {
                   const aligned = mergeLocal(m);
                   if (m.id === backendAiMsg.id) {
@@ -631,6 +638,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       reflections: localAiMsg.reflections ?? aligned.reflections,
                       agentRounds: localAiMsg.agentRounds ?? aligned.agentRounds,
                       toolTrajectory: localAiMsg.toolTrajectory ?? aligned.toolTrajectory,
+                      lang: localAiMsg.lang ?? aligned.lang,
                     };
                   }
                   return aligned;
@@ -824,6 +832,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           reflections: Array.isArray(metadata.reflections) ? metadata.reflections : m.reflections,
           agentRounds: typeof metadata.agentRounds === 'number' ? metadata.agentRounds : m.agentRounds,
           toolTrajectory: Array.isArray(metadata.toolTrajectory) ? metadata.toolTrajectory : m.toolTrajectory,
+          lang: typeof metadata.lang === 'string' && metadata.lang ? metadata.lang : m.lang,
         } : m),
       } : null);
       if (typeof metadata.creditsRemaining === 'number') {
