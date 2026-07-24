@@ -514,7 +514,7 @@ const ChatMessages: React.FC = () => {
             return;
           }
           const cleanText = cleanTextForSpeech(text);
-          const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(cleanText, langCode, voices, selectedVoiceURI);
+          const { langCode: detectedLangCode, voice } = resolveLangAndVoiceForText(cleanText, langCode, voices, selectedVoiceURI, msg.lang);
 
           // Browser fallback for when cloud TTS (backend MP3) is unreachable.
           const speakViaBrowser = () => {

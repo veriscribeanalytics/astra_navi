@@ -113,14 +113,34 @@ export function detectLangFromText(text: string, fallbackLangCode: string): stri
  * selected voice is honored only when it matches the detected language; a
  * mismatched selection (e.g. a Hindi voice chosen for English text) is ignored
  * so the text is pronounced correctly.
+ *
+ * `explicitLang`, when provided, overrides script detection: it is the
+ * backend's per-reply script hint (`"hi"` for Devanagari or Hinglish, otherwise
+ * the user's resolved language). Without it, a Hinglish (Latin-script) reply
+ * looks like English to script detection and gets the wrong voice — so callers
+ * that have the reply's authoritative `lang` should pass it here. Absent or
+ * empty (old/historical messages) → falls back to script detection as before.
+ *
+ * The hint is normally a short code (`"hi"`, `"en"`) mapped via
+ * LOCALE_BY_LANGUAGE, but a full BCP-47 locale (`"en-IN"`) is also accepted
+ * as-is — the TTS contract forecasts Hinglish possibly switching to an `en-IN`
+ * voice, and tolerating a full locale here means that switch can't silently
+ * fall through to the profile locale (which would pick the wrong voice).
  */
 export function resolveLangAndVoiceForText(
   text: string,
   fallbackLangCode: string,
   voices: SpeechSynthesisVoice[],
-  selectedVoiceURI: string | null
+  selectedVoiceURI: string | null,
+  explicitLang?: string | null
 ): { langCode: string; voice: SpeechSynthesisVoice | null } {
-  const detectedLangCode = detectLangFromText(text, fallbackLangCode);
+  const explicitLangCode = explicitLang
+    ? (() => {
+        const lower = explicitLang.toLowerCase();
+        return LOCALE_BY_LANGUAGE[lower] || (lower.includes('-') ? explicitLang : fallbackLangCode);
+      })()
+    : null;
+  const detectedLangCode = explicitLangCode ?? detectLangFromText(text, fallbackLangCode);
   const prefix = detectedLangCode.toLowerCase().split('-')[0];
   if (selectedVoiceURI) {
     const explicit = voices.find((v) => v.voiceURI === selectedVoiceURI);
