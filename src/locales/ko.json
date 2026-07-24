@@ -1776,7 +1776,11 @@
       "email_signin_error": "이메일 주소를 확인하세요",
       "session_required": "이 페이지에 접근하려면 로그인하세요",
       "session_expired_error": "세션이 만료되었습니다. 다시 로그인하세요",
-      "signin_error": "오류가 발생했습니다. 다시 시도해 주세요"
+      "signin_error": "오류가 발생했습니다. 다시 시도해 주세요",
+      "account_deleted": "계정이 삭제되었습니다. 다시 로그인하려면 아래에서 복구하세요.",
+      "no_pending_deletion": "이 계정에 대한 삭제 요청을 찾을 수 없습니다.",
+      "auth_required": "계속하려면 로그인하세요.",
+      "deletion_already_requested": "이 계정에 대한 삭제 요청이 이미 있습니다."
     },
     "resetPassword": {
       "title": "새 비밀번호 생성",
@@ -1861,6 +1865,14 @@
       "codeSentTo": "인증 코드를 보냈습니다",
       "invalidEmail": "올바른 이메일 주소를 입력해 주세요.",
       "invalidOtp": "6자리 코드를 입력하세요."
+    },
+    "restore": {
+      "title": "계정 복구",
+      "subtitle": "계정이 삭제되었습니다 — 다시 가져오세요",
+      "explainer": "계정이 삭제되었습니다. 비밀번호를 입력해 계정을 복구하고 다시 로그인하세요. 삭제 후 30일까지 복구할 수 있습니다.",
+      "submit": "내 계정 복구",
+      "backToSignIn": "로그인으로 돌아가기",
+      "successToast": "계정이 복구되었습니다! 로그인 중…"
     }
   },
   "home": {
@@ -2225,14 +2237,16 @@
       "sessionManagementDescription": "현재 계정이 로그인되어 있는 다른 모든 기기에서 로그아웃합니다. 이 기기는 로그인 상태를 유지합니다.",
       "logoutAllButton": "다른 모든 기기에서 로그아웃",
       "dangerZoneTitle": "위험 영역",
-      "dangerZoneDescription": "계정 및 모든 관련 데이터를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.",
+      "dangerZoneDescription": "계정과 모든 관련 데이터를 영구 삭제하도록 요청하세요. 삭제에는 48시간의 냉각 기간이 있으며, 이후 계정은 30일간 복구할 수 있습니다.",
       "deleteAccountButton": "계정 삭제",
       "deleteAccountModal": {
         "title": "계정 삭제",
-        "description": "이 작업은 영구적이며 모든 출생 정보, 생성된 운세 및 선호도를 안전하게 삭제합니다. 진행하려면 암호로 확인하십시오.",
+        "description": "이 작업은 계정과 모든 데이터가 영구적으로 지워지기 전 48시간의 냉각 기간을 시작합니다. 계속하려면 비밀번호로 확인하세요.",
         "passwordPlaceholder": "암호를 입력하여 확인",
         "cancelButton": "취소",
-        "confirmButton": "영구 삭제"
+        "confirmButton": "삭제 요청",
+        "coolingOffNote": "다음 48시간 동안 계정은 완전히 활성 상태로 유지되며 한 번의 탭으로 취소할 수 있습니다.",
+        "restoreNote": "48시간 후, 이메일 링크 또는 이메일 + 비밀번호를 사용해 계정을 30일간 복구할 수 있습니다."
       },
       "logoutConfirmDialog": {
         "title": "모든 기기에서 로그아웃하시겠습니까?",
@@ -2243,12 +2257,27 @@
       "errors": {
         "passwordMinLength": "새 암호는 최소 10자 이상이어야 합니다.",
         "passwordMismatch": "새 암호가 일치하지 않습니다.",
-        "passwordRequired": "삭제를 확인하려면 암호를 입력하십시오."
+        "passwordRequired": "삭제를 확인하려면 암호를 입력하십시오.",
+        "deleteFailed": "삭제 요청을 처리할 수 없었습니다. 나중에 다시 시도하세요.",
+        "cancelFailed": "삭제 요청을 취소할 수 없었습니다. 나중에 다시 시도하세요."
       },
       "messages": {
         "passwordChanged": "암호가 성공적으로 변경되었습니다. 모든 기기에서 로그아웃됩니다.",
         "logoutAllSuccess": "다른 모든 기기에서 성공적으로 로그아웃되었습니다.",
-        "accountDeleted": "계정이 성공적으로 삭제되었습니다. 안녕히 가세요."
+        "accountDeleted": "계정이 성공적으로 삭제되었습니다. 안녕히 가세요.",
+        "deletionRequested": "삭제 요청이 제출되었습니다. 다음 48시간 동안 취소할 수 있습니다.",
+        "deletionCancelled": "삭제가 취소되었습니다. 계정이 삭제되지 않습니다."
+      },
+      "timing": {
+        "firstWindow": "0–48시간: 계정이 완전히 활성 상태로 유지됩니다. 언제든 한 번의 탭으로 취소할 수 있습니다 — 비밀번호 불필요.",
+        "restoreWindow": "48시간 후: 계정이 비활성화됩니다. 이메일 링크 또는 이메일 + 비밀번호로 30일간 복구할 수 있습니다.",
+        "permanent": "30일 후: 영구 삭제됩니다. 복구할 수 없습니다."
+      },
+      "pending": {
+        "title": "삭제 예약됨",
+        "description": "계정 삭제가 예약되었습니다. 48시간의 냉각 기간 동안 완전히 활성 상태로 유지되며, 이후 30일간 복구할 수 있습니다.",
+        "emailNotSent": "복구 이메일을 보낼 수 없었습니다. 액세스를 잃으시면 계정을 복구하려면 지원팀에 문의하세요.",
+        "cancelButton": "삭제 취소"
       }
     },
     "discovery": {

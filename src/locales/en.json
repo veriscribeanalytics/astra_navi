@@ -1884,7 +1884,19 @@
       "email_signin_error": "Check your email address.",
       "session_required": "Please sign in to access this page.",
       "session_expired_error": "Your session has expired. Please sign in again.",
-      "signin_error": "An error occurred. Please try again."
+      "signin_error": "An error occurred. Please try again.",
+      "account_deleted": "Your account has been deleted. Restore it below to log in again.",
+      "no_pending_deletion": "No deletion request found for this account.",
+      "auth_required": "Please sign in to continue.",
+      "deletion_already_requested": "A deletion request already exists for this account."
+    },
+    "restore": {
+      "title": "Restore Account",
+      "subtitle": "Your account was deleted — bring it back",
+      "explainer": "Your account has been deleted. Enter your password to restore it and log back in. You can restore for up to 30 days after deletion.",
+      "submit": "Restore my account",
+      "backToSignIn": "Back to sign in",
+      "successToast": "Account restored! Signing you in…"
     },
     "resetPassword": {
       "title": "Create New Password",
@@ -2355,14 +2367,27 @@
       "sessionManagementDescription": "Log out from all other devices where your account is currently signed in. This device will remain logged in.",
       "logoutAllButton": "Log Out All Other Devices",
       "dangerZoneTitle": "Danger Zone",
-      "dangerZoneDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "dangerZoneDescription": "Request permanent deletion of your account and all associated data. Deletion has a 48-hour cooling-off period, after which your account can be restored for 30 days.",
       "deleteAccountButton": "Delete Account",
+      "timing": {
+        "firstWindow": "0–48h: account stays fully active. Cancel anytime with one tap — no password needed.",
+        "restoreWindow": "After 48h: account deactivated. Restorable for 30 days via email link or email + password.",
+        "permanent": "After 30 days: permanently deleted. Cannot be restored."
+      },
       "deleteAccountModal": {
         "title": "Delete Account",
-        "description": "This action is permanent and will securely erase all your birth details, generated horoscopes, and preferences. Please confirm with your password to proceed.",
+        "description": "This will start a 48-hour cooling-off period before your account and all its data are permanently erased. Please confirm with your password to proceed.",
+        "coolingOffNote": "For the next 48 hours your account stays fully active and you can cancel with one tap.",
+        "restoreNote": "After 48 hours, your account can be restored for up to 30 days using the email link or email + password.",
         "passwordPlaceholder": "Enter your password to confirm",
         "cancelButton": "Cancel",
-        "confirmButton": "Delete Forever"
+        "confirmButton": "Request Deletion"
+      },
+      "pending": {
+        "title": "Deletion scheduled",
+        "description": "Your account deletion has been scheduled. It stays fully active during the 48-hour cooling-off period, after which it can be restored for 30 days.",
+        "emailNotSent": "We couldn't send the restore email. If you lose access, please contact support to restore your account.",
+        "cancelButton": "Cancel Deletion"
       },
       "logoutConfirmDialog": {
         "title": "Log Out All Devices?",
@@ -2373,12 +2398,15 @@
       "errors": {
         "passwordMinLength": "New password must be at least 10 characters.",
         "passwordMismatch": "New passwords do not match.",
-        "passwordRequired": "Please enter your password to confirm deletion."
+        "passwordRequired": "Please enter your password to confirm deletion.",
+        "deleteFailed": "We couldn't process the deletion request. Please try again later.",
+        "cancelFailed": "We couldn't cancel the deletion request. Please try again later."
       },
       "messages": {
         "passwordChanged": "Password changed successfully. You will be logged out of all devices.",
         "logoutAllSuccess": "Successfully logged out from all other devices.",
-        "accountDeleted": "Account successfully deleted. Goodbye."
+        "deletionRequested": "Deletion request submitted. You can cancel it for the next 48 hours.",
+        "deletionCancelled": "Deletion cancelled. Your account will not be deleted."
       }
     },
     "basicInfo": {

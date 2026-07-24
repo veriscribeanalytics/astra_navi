@@ -17,6 +17,18 @@ interface SignInFormProps {
   disabledReason?: string;
   onForgotPassword: () => void;
   onActionClick?: (action: string) => void;
+  /**
+   * "login" (default) renders the normal sign-in form. "restore" repurposes the
+   * same email + password fields to revive a soft-deleted account: the submit
+   * button reads "Restore my account", the forgot-password link is hidden
+   * (a deleted account can't reset), and the email field is locked to the value
+   * the user just tried to sign in with.
+   */
+  variant?: 'login' | 'restore';
+  /** When variant === 'restore', the email field is read-only and pre-filled. */
+  lockedEmail?: string;
+  /** In restore mode, a secondary control to abandon the flow and sign in fresh. */
+  onBackToSignIn?: () => void;
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({
@@ -25,9 +37,13 @@ const SignInForm: React.FC<SignInFormProps> = ({
   disabledReason,
   onForgotPassword,
   onActionClick,
+  variant = 'login',
+  lockedEmail,
+  onBackToSignIn,
 }) => {
   const { t } = useTranslation();
-  const [email, setEmail] = useState('');
+  const isRestore = variant === 'restore';
+  const [email, setEmail] = useState(lockedEmail ?? '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,6 +105,12 @@ const SignInForm: React.FC<SignInFormProps> = ({
         />
       )}
 
+      {isRestore && (
+        <p className="text-[12px] leading-relaxed text-on-surface-variant/80 -mb-1">
+          {t('auth.restore.explainer')}
+        </p>
+      )}
+
       {/* Email */}
       <div className="space-y-2.5">
         <label className="auth-label">
@@ -110,6 +132,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
             autoComplete="email"
             required
             disabled={disabled || isSubmitting}
+            readOnly={isRestore}
             aria-invalid={fieldErrors.email ? 'true' : 'false'}
             aria-describedby={fieldErrors.email ? 'email-error' : undefined}
             className={inputCls(!!fieldErrors.email)}
@@ -161,16 +184,19 @@ const SignInForm: React.FC<SignInFormProps> = ({
         )}
       </div>
 
-      {/* Forgot password */}
-      <div className="flex justify-end -mt-2.5">
-        <button
-          type="button"
-          onClick={onForgotPassword}
-          className="text-[13px] font-medium text-secondary hover:opacity-80 transition-opacity focus:outline-none focus-visible:underline"
-        >
-          {t('auth.signIn.forgotPassword')}
-        </button>
-      </div>
+      {/* Forgot password — hidden in restore mode (a deleted account can't
+          reset its password) */}
+      {!isRestore && (
+        <div className="flex justify-end -mt-2.5">
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            className="text-[13px] font-medium text-secondary hover:opacity-80 transition-opacity focus:outline-none focus-visible:underline"
+          >
+            {t('auth.signIn.forgotPassword')}
+          </button>
+        </div>
+      )}
 
       {/* Submit — bright gold gradient */}
       <button
@@ -185,11 +211,25 @@ const SignInForm: React.FC<SignInFormProps> = ({
           </svg>
         ) : (
           <>
-            {disabled ? (disabledReason || t('auth.signIn.submit')) : t('auth.signIn.submit')}
+            {disabled
+              ? (disabledReason || t('auth.signIn.submit'))
+              : isRestore ? t('auth.restore.submit') : t('auth.signIn.submit')}
             {!disabled && <ArrowRight size={22} strokeWidth={2.5} className="3xl:w-7 3xl:h-7" />}
           </>
         )}
       </button>
+
+      {/* In restore mode, offer an escape hatch back to the normal sign-in
+          form (e.g. the user realized this isn't their deleted account). */}
+      {isRestore && onBackToSignIn && (
+        <button
+          type="button"
+          onClick={onBackToSignIn}
+          className="w-full text-[12px] font-medium text-on-surface-variant/70 hover:text-secondary transition-colors focus:outline-none focus-visible:underline"
+        >
+          {t('auth.restore.backToSignIn')}
+        </button>
+      )}
     </form>
   );
 };

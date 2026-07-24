@@ -33,6 +33,14 @@ const LoginContent = () => {
   const [lockedRemaining, setLockedRemaining] = useState<number>(0);
   const recoveryStartedRef = useRef(false);
 
+  // Restore-account flow (Path 2). When a login is attempted for a
+  // soft-deleted account, the backend returns `403 account_deleted`; we pivot
+  // the form into a restore variant that reuses the email + password fields to
+  // call cancel-deletion, then re-run the normal login. `restoreEmail` pins the
+  // read-only email field to whatever the user just tried to sign in with.
+  const [restoreMode, setRestoreMode] = useState(false);
+  const [restoreEmail, setRestoreEmail] = useState('');
+
   // Handle Lockout Countdown
   useEffect(() => {
     if (!lockedUntil) return;
@@ -175,6 +183,14 @@ const LoginContent = () => {
           setLockedUntil(lockoutEnd);
           setLockedRemaining(seconds);
         }
+        // A login attempt for a soft-deleted account → pivot to the restore
+        // flow. The backend already told us the email is valid (it looked the
+        // account up and found deleted_at set), so pin the restore form's
+        // read-only email field to it and surface an explanatory banner.
+        if (parsedError.code === 'account_deleted') {
+          setRestoreMode(true);
+          setRestoreEmail(formData.email);
+        }
         return { parsedError };
       }
 
@@ -206,6 +222,47 @@ const LoginContent = () => {
         router.push(getCallbackUrl());
       }, 1500);
 
+    } catch (err: unknown) {
+      return { parsedError: parseAuthError(err) };
+    }
+  };
+
+  // --- Restore account handler (Path 2) ---
+  // Reuses the sign-in email + password fields. Calls the cancel-deletion BFF
+  // route (Mode A: no session, email + password). On `restored: true` the
+  // backend does NOT return a session — it clears deleted_at and revokes old
+  // tokens — so we immediately re-run the normal login flow, which now
+  // succeeds instead of returning 403. Errors route through the same
+  // parsedError/lockout plumbing as a normal login (incorrect_password →
+  // password field; account_locked → countdown).
+  const handleRestoreAccount = async (formData: { email: string; password: string }) => {
+    try {
+      const res = await fetchWithTimeout('/api/auth/account/cancel-deletion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
+
+      const data = await res.json();
+      const parsedError = parseAuthError(data);
+
+      if (!res.ok) {
+        if (
+          parsedError.code === 'account_locked' ||
+          parsedError.code === 'rate_limited'
+        ) {
+          const seconds = parsedError.retryAfterSeconds || 15 * 60;
+          setLockedUntil(Date.now() + seconds * 1000);
+          setLockedRemaining(seconds);
+        }
+        return { parsedError };
+      }
+
+      // Restored successfully — drop the restore UI and re-run the normal
+      // login flow immediately. /api/login will now return 200 + a nonce.
+      setRestoreMode(false);
+      success(t('auth.restore.successToast'));
+      return await handleSignIn({ email: formData.email, password: formData.password });
     } catch (err: unknown) {
       return { parsedError: parseAuthError(err) };
     }
@@ -477,10 +534,14 @@ const LoginContent = () => {
               {/* Header */}
               <div className="px-2 sm:px-4 pb-7 shrink-0 text-center">
                 <h2 className="text-[26px] sm:text-[28px] 3xl:text-[40px] font-headline font-bold text-primary mb-2">
-                  {isRegister ? t('login.stepAccount') : t('login.signIn')}
+                  {isRegister
+                    ? t('login.stepAccount')
+                    : restoreMode ? t('auth.restore.title') : t('login.signIn')}
                 </h2>
                 <p className="text-[13px] sm:text-sm text-on-surface-variant/50 font-medium">
-                  {isRegister ? t('login.joinCelestialJourney') : t('login.welcomeBack')}
+                  {isRegister
+                    ? t('login.joinCelestialJourney')
+                    : restoreMode ? t('auth.restore.subtitle') : t('login.welcomeBack')}
                 </p>
               </div>
 
@@ -488,22 +549,33 @@ const LoginContent = () => {
                 {!isRegister ? (
                   <>
                     <SignInForm
-                      onSubmit={handleSignIn}
+                      onSubmit={restoreMode ? handleRestoreAccount : handleSignIn}
                       disabled={!!lockedUntil}
                       disabledReason={lockedDisplay}
                       onForgotPassword={() => router.push('/forgot-password')}
                       onActionClick={handleActionClick}
+                      variant={restoreMode ? 'restore' : 'login'}
+                      lockedEmail={restoreMode ? restoreEmail : undefined}
+                      onBackToSignIn={restoreMode ? () => {
+                        setRestoreMode(false);
+                      } : undefined}
                     />
 
-                    {/* Social sign-in */}
-                    <div className="auth-divider">
-                      <span className="auth-divider-text">
-                        {t('auth.method.orContinueWith')}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      <GoogleSignInButton callbackUrl={getCallbackUrl()} onError={(m) => showError(m)} />
-                    </div>
+                    {/* Social sign-in — hidden in restore mode. A deleted
+                        account can only be revived via email + password (Mode A);
+                        Google OAuth can't supply a password to re-confirm. */}
+                    {!restoreMode && (
+                      <>
+                        <div className="auth-divider">
+                          <span className="auth-divider-text">
+                            {t('auth.method.orContinueWith')}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          <GoogleSignInButton callbackUrl={getCallbackUrl()} onError={(m) => showError(m)} />
+                        </div>
+                      </>
+                    )}
                   </>
                 ) : (
                   <RegisterFlow
@@ -513,7 +585,9 @@ const LoginContent = () => {
                   />
                 )}
 
-                {/* Account toggle — inside card */}
+                {/* Account toggle — inside card. Hidden in restore mode (the
+                    back-to-sign-in affordance lives inside the form itself). */}
+                {!restoreMode && (
                 <div className="text-center pt-6">
                   <p className="auth-footer-link">
                     {isRegister ? (
@@ -531,6 +605,7 @@ const LoginContent = () => {
                     )}
                   </p>
                 </div>
+                )}
               </AuthFormCard>
 
               {/* Secure connection — below card (registration only) */}
